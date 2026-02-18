@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 07 February, 2026
+.. Last updated on: 18 February, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -118,6 +118,9 @@ Thus began my journey into teaching.
 Although my approach to mentoring has changed and evolved over the past few
 years, adapting to the needs of my environment, my students/mentees, the time,
 and my position, when asked for any help.
+
+.. raw:: html
+    :file: ./assets/html/currently-teaching.html
 
 .. _lets-connect:
 

@@ -2737,7 +2737,7 @@ a[data-tooltip].show-tooltip::after {
     }
 }
 
-.blinking-block {
+.blinking-cursor {
     display: inline-block;
     width: 0.15ch;
     height: 1em;
@@ -2745,6 +2745,7 @@ a[data-tooltip].show-tooltip::after {
     border-radius: 500px;
     animation: cursor-blink 1.5s infinite;
     vertical-align: middle;
+    margin-left: 0.15ch;
 }
 
 .marker {
