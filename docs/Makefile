@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 22 February, 2025
-# Last updated on: 21 December, 2025
+# Last updated on: 15 February, 2026
 #
 # This Makefile provides a comprehensive set of commands (targets) for building
 # and testing my website.
@@ -107,7 +107,7 @@ start: ## Rebuild HTML files, start a development web server and serve.
 
 stop: ## Stop the development web server.
 	@printf "$(COLOUR_RED)[CLOSE]$(COLOUR_RESET) Stopping development server... "
-	@ps -ef | grep "$(HTTP_SERVER)" | grep $(PORT) | grep -v grep | grep -v xargs | grep -v awk | grep -v make | awk '{print $$2}' | xargs -r kill && \
+	@lsof -i :$(PORT) | tail -n +2 | awk '{print $$2}' | xargs -r kill && \
 		printf "$(COLOUR_GREEN)OK!$(COLOUR_RESET)\n" || \
 		(printf "$(COLOUR_RED)FAILED!$(COLOUR_RESET)\n" && exit 1)
 
