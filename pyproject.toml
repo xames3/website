@@ -148,6 +148,7 @@ ignore = [
   "PT006",    # Wrong type passed to first argument of `pytest.mark.parametrize`
   "PT007",    # Wrong values type in `pytest.mark.parametrize`
   "S101",     # Use of assert detected
+  "S311",     # Pseudo-random generators are not suitable for cryptography
   "SLF001",   # Private member accessed
   "T201",     # Print found
   "TID252",   # Relative imports are not allowed
