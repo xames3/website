@@ -7,6 +7,8 @@
 .. role:: python(code)
     :language: python3
 
+.. |bb| replace:: :html:`<span class="blinking-block"></span>`
+
 .. |br| replace:: :html:`<br/>`
 .. |tab| replace:: :html:`&emsp;`
 .. |dash| replace:: :html:`&mdash;`
