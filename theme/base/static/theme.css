@@ -145,6 +145,10 @@ html.theme-transition *::after {
     will-change: background-color, color, fill, stroke, box-shadow, text-decoration-color;
 }
 
+[type="search"] {
+    outline: none !important;
+}
+
 .font-sans {
     font-family: var(--font-sans);
 }
@@ -558,7 +562,7 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
     width: 100%;
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
-    background-color: hsl(var(--background));
+    background-color: hsl(var(--light-accent));
     color: hsl(var(--foreground));
     font-size: 0.8rem;
     font-family: var(--font-mono);
@@ -610,7 +614,7 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
     height: 2rem;
     border: 1px solid hsl(var(--border));
     border-radius: 500px;
-    background: hsl(var(--background));
+    background: hsl(var(--light-accent));
     overflow: hidden;
     transition: width var(--duration-normal) var(--ease-in-out), border-color var(--duration-fast) var(--ease-in-out);
 }
@@ -628,14 +632,13 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
 .site-header__search .site-search__submit {
     width: 2rem;
     height: 2rem;
-    background: transparent;
+    background-color: hsl(var(--light-accent));
     color: hsl(var(--foreground));
 }
 
 .site-header__search .site-search.is-open,
 .site-header__search .site-search:focus-within {
     width: 10rem;
-    border-color: hsl(var(--accent));
 }
 
 .site-header__search .site-search.is-open .site-search__input,
@@ -649,6 +652,7 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
 .site-header__search .site-search:focus-within .site-search__submit {
     color: hsl(var(--accent-foreground));
     border: none;
+    outline: none;
 }
 
 
@@ -1649,6 +1653,7 @@ html[data-theme="dark"] .site-header__theme-toggle-icon--dark {
     border: 1px solid hsl(var(--border)) !important;
     border-radius: 500px;
     color: hsl(var(--foreground));
+    background-color: hsl(var(--light-accent));
     transition: color var(--duration-normal) var(--ease-in-out);
     position: relative;
     width: 2rem;

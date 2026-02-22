@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 August, 2025
-.. Last updated on: 07 February, 2026
+.. Last updated on: 18 February, 2026
 
 :og:title: A week into Docker
 :og:description: Begineer's guide to Docker and containerisation
@@ -91,8 +91,8 @@ server in the cloud.
 
 .. rubric:: But what did Docker do?
 .. rubric::
-    Docker was introduced in 2013 and has evolved since then. It solved the
-    classic "it works on my machine" problem.
+    Docker was introduced in 2013 and solved the classic :underline:`"it works
+    on my machine"` problem.
     :class: subtitle-text
 
 .. figure:: https://i.imgur.com/csI4fZe.png
