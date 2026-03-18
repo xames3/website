@@ -4,7 +4,7 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 15 January, 2026
+Last updated on: 17 March, 2026
 
 This module defines a custom `author` directive for this sphinx theme.
 The directive allows embedding details directly within the document.
@@ -84,21 +84,23 @@ class directive(rst.Directive):
         - `name`: The author's GitHub username.
         - `avatar`: A URL to the author's avatar image.
         - `github`: Link to the author's GitHub profile.
-        - `timestamp`: An optional timestamp indicating when the
-          document was last updated.
 
     .. versionchanged:: 19.10.2025
 
         The options `author`, `email`, and `github` are now optional
         and can default to project's details specified in `conf.py`.
+
+    .. deprecated:: 17.03.2026
+
+        The `timestamp` option is now deprecated as it's not being
+        rendered.
     """
 
     has_content = False
     option_spec = {  # noqa: RUF012
         "name": rst.directives.unchanged,
         "github": rst.directives.unchanged,
-        "avatar": rst.directives.unchanged_required,
-        "timestamp": rst.directives.unchanged_required,
+        "avatar": rst.directives.uri,
     }
 
     def run(self) -> list[nodes.Node]:

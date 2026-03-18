@@ -18,42 +18,37 @@ from random import uniform
 import docutils.nodes as nodes
 
 
-def underline_svg(color: str) -> str:
-    """Generate an SVG path to mimic a rough underline.
-
-    Each call produces two slightly different wobbly strokes so that
-    no two underlines look exactly the same, mimicking a hand-drawn
-    pencil line.
-    """
-    mid = 3.0
+def underline_svg(color: str) -> tuple[str, str]:
+    """Fake two SVG strokes for a double-pass hand-drawn underline."""
     segments = 7
     step = 500 / segments
 
-    def stroke_path() -> str:
-        """Generate random paths."""
-        pts = [f"M{uniform(1.5, 2.5):.1f} {uniform(mid - 0.8, mid + 0.8):.1f}"]
-        for idx in range(1, segments):
-            cx = step * idx - uniform(0, step * 0.4)
-            cy = uniform(mid - 1.5, mid + 1.5)
-            x = step * idx + uniform(-2, 2)
-            y = uniform(mid - 1.0, mid + 1.0)
-            pts.append(f"Q{cx:.1f} {cy:.1f} {x:.1f} {y:.1f}")
-        pts.append(
-            f"L{uniform(497, 499):.1f} {uniform(mid - 0.8, mid + 0.8):.1f}"
+    def stroke(start: float, stop: float) -> str:
+        """Generate a wobbly path between two y anchors."""
+        points = [f"M{uniform(1.5, 2.5):.1f} {start + uniform(-0.4, 0.4):.1f}"]
+        for index in range(1, segments):
+            mid = start + (stop - start) * index / segments
+            midx = step * index - uniform(0, step * 0.4)
+            midy = mid + uniform(-1.2, 1.2)
+            x = step * index + uniform(-2, 2)
+            y = mid + uniform(-0.8, 0.8)
+            points.append(f"Q{midx:.1f} {midy:.1f} {x:.1f} {y:.1f}")
+        points.append(
+            f"L{uniform(497, 499):.1f} {stop + uniform(-0.4, 0.4):.1f}"
         )
-        return " ".join(pts)
+        return " ".join(points)
 
-    path1 = stroke_path()
-    path2 = stroke_path()
-    return (
-        "<svg xmlns='http://www.w3.org/2000/svg'"
-        " viewBox='0 0 500 6' preserveAspectRatio='none'>"
-        f"<path d='{path1}' fill='none' stroke='{color}'"
-        " stroke-width='3' stroke-linecap='round'/>"
-        f"<path d='{path2}' fill='none' stroke='{color}'"
-        " stroke-width='3.25' stroke-linecap='round'/>"
-        "</svg>"
-    )
+    def make_svg(start: float, stop: float) -> str:
+        path = stroke(start, stop)
+        return (
+            "<svg xmlns='http://www.w3.org/2000/svg'"
+            " viewBox='0 0 500 8' preserveAspectRatio='none'>"
+            f"<path d='{path}' fill='none' stroke='{color}'"
+            " stroke-width='2.5' stroke-linecap='round'/>"
+            "</svg>"
+        )
+
+    return make_svg(5.5, 2.5), make_svg(2.5, 5.5)
 
 
 def stylise(
@@ -283,10 +278,13 @@ def underline(
     else:
         element = text
         color = "#FF9800"
-    svg = underline_svg(color).replace("#", "%23")
+    ltr, rtl = underline_svg(color)
+    ltr = ltr.replace("#", "%23")
+    rtl = rtl.replace("#", "%23")
     raw = (
         '<span class="pencil" '
-        f'style="background-image: url(&quot;data:image/svg+xml,{svg}&quot;);"'
+        f'style="--ul-fwd: url(&quot;data:image/svg+xml,{ltr}&quot;); '
+        f'--ul-ret: url(&quot;data:image/svg+xml,{rtl}&quot;);"'
         f">{element}</span>"
     )
     return [nodes.raw(text=raw, format="html")], []
