@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 09 February, 2026
+.. Last updated on: 18 March, 2026
 
 :og:title: FAQs
 :og:description: Frequently Asked Questions about me and this website
@@ -8,6 +8,7 @@
 :prompt: Do you've any question for me?
 :promptdesc: Feel free to ask me about things that you're curious about.
 :submitbtn: Send in your question
+:faicon: user-question
 
 .. _miscellany-faq:
 
@@ -19,7 +20,6 @@
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :github: https://github.com/xames3
-    :timestamp: 30 October, 2025
 
 One of the best parts of sharing and writing these articles is the chats that
 follow. I've had loads of interesting chats in person and a few over email, and

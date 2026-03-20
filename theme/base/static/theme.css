@@ -2768,6 +2768,7 @@ a[data-tooltip].show-tooltip::after {
     border-radius: 0.2em;
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
+    color: var(--marker-color);
     background-size: 0% 100%;
     background-repeat: no-repeat;
     background-image: linear-gradient(

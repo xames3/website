@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 18 April, 2025
-.. Last updated on: 09 February, 2026
+.. Last updated on: 17 March, 2026
 
 :og:title: PyTorch... but much slower
 :og:description: PyTorch taught me how to build while SlowTorch taught me how
@@ -27,7 +27,6 @@
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :github: https://github.com/xames3
-    :timestamp: 15 August, 2025
 
 You know, you get this kick after finishing a project? That was exactly me in
 January of 2025, reflecting on `xsNumPy`_. I had spent weeks understanding and

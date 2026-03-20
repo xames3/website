@@ -4,6 +4,9 @@
 .. role:: bash(code)
     :language: bash
 
+.. role:: c(code)
+    :language: c
+
 .. role:: python(code)
     :language: python3
 

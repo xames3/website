@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 18 February, 2026
+.. Last updated on: 18 March, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -10,6 +10,7 @@
 :promptdesc: I'd genuinely love to hear your suggestions and takes, or even a
     recommendation for a great film!!
 :submitbtn: Share your thoughts
+:faicon: paper-plane
 
 .. _home-page:
 
@@ -25,23 +26,20 @@ Akshay Mestry
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :github: https://github.com/xames3
-    :timestamp: 08 August, 2025
 
 -------------------------------------------------------------------------------
 About me.
 -------------------------------------------------------------------------------
 
-Hi, I'm Akshay, an educator, engineer, and currently a CS Adjunct Faculty at
+Hi, I'm Akshay, an educator, engineer, and currently a CS Adjunct at
 `National Louis University`_. Before getting into academia, I worked at
-consulting firms, corporate product companies, and a startup. This small corner
+consulting firms, corporate product companies, and startups. This small corner
 on the internet is my space to explore and share my experiences in software
 engineering through storytelling.
 
 I currently live in Chicago. I got my Master's in AI from `DePaul University`_
 in 2025. I also have a special interest in natural language processing and
 reinforcement learning.
-
-I'm learning `Rust`_ this year.
 
 .. _open-source:
 
