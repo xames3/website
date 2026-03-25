@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 August, 2025
-.. Last updated on: 07 February, 2026
+.. Last updated on: 21 March, 2026
 
 :og:title: A week into Docker
 :og:description: Begineer's guide to Docker and containerisation
@@ -11,6 +11,7 @@
     like Docker? Or if you're new to this, what's the one thing you're hoping
     it'll solve for you?
 :submitbtn: Let me know
+:faicon: envelopes
 
 .. _explained-a-week-into-docker:
 
@@ -21,13 +22,12 @@
 .. rst-class:: lead
 
     How a week of using Docker transformed the way I manage my local
-    development environments and why should you care.
+    development environments and why I think it was worth a look.
 
 .. author::
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :github: https://github.com/xames3
-    :timestamp: 30 August, 2025
 
 .. role:: console(code)
     :language: console
@@ -91,8 +91,8 @@ server in the cloud.
 
 .. rubric:: But what did Docker do?
 .. rubric::
-    Docker was introduced in 2013 and has evolved since then. It solved the
-    classic "it works on my machine" problem.
+    Docker was introduced in 2013 and solved the classic **"it works on my
+    machine"** problem.
     :class: subtitle-text
 
 .. figure:: https://i.imgur.com/csI4fZe.png
@@ -115,6 +115,8 @@ for now.
    your local machine, or you can push your own images to Docker Hub to share
    them with others.
 
+.. rubric:: :fab:`bolt far` Crafting environment, instant isolation
+    :class: pre-title-text
 .. rubric:: Magic of Docker Engine.
 
 When I first started using Docker, I'll be honest, I really didn't understand
@@ -132,6 +134,9 @@ Well, when I ran the :console:`$ docker run` command, it was Docker Engine that
 was creating an isolated environment to run my experiments within it.
 
 These environments are what we call **containers**.
+
+.. rubric:: :fab:`truck-fast far` From ships to shipping
+    :class: pre-title-text
 
 .. _idea-behind-containers:
 
@@ -264,6 +269,8 @@ I wondered where I had been getting all these containers from in the first
 place. I knew I was pulling these **containers\*** from the internet, but I had
 no idea from where.
 
+.. rubric:: :fab:`puzzle-piece far` Putting it together
+    :class: pre-title-text
 .. rubric:: That's when I discovered Docker Hub.
 .. rubric::
     Docker Hub is a cloud-based registry service where you can find and share
@@ -329,13 +336,18 @@ In the next chapter, I'll share my experiences of running my first container
 and how it changed the way I started working on my local machine.
 
 .. _Docker: https://www.docker.com/
-.. _containers: https://en.wikipedia.org/wiki/Container_(virtualization)
+.. _containers: https://en.wikipedia.org/wiki/Container_(virtualization)/
 .. _Docker Engine: https://docs.docker.com/engine/
 .. _Docker Hub: https://hub.docker.com/
-.. _Malcolm McLean: https://en.wikipedia.org/wiki/Malcom_McLean
-.. _Virtual machine: https://www.vmware.com/topics/virtual-machine
-.. _Hypervisor: https://en.wikipedia.org/wiki/Hypervisor
+.. _Malcolm McLean: https://en.wikipedia.org/wiki/Malcom_McLean/
+.. _Virtual machine: https://www.vmware.com/topics/virtual-machine/
+.. _Hypervisor: https://en.wikipedia.org/wiki/Hypervisor/
 .. _Parallels: https://www.parallels.com/
 .. _VirtualBox: https://www.virtualbox.org/
 .. _LXC: https://linuxcontainers.org/
 .. _OpenVZ: https://openvz.org/
+
+.. toctree::
+    :hidden:
+
+    month-into-docker

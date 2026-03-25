@@ -1,11 +1,19 @@
+.. role:: strike
+    :class: strikethrough
+
 .. role:: html(raw)
     :format: html
 
 .. role:: bash(code)
     :language: bash
 
+.. role:: c(code)
+    :language: c
+
 .. role:: python(code)
     :language: python3
+
+.. |bb| replace:: :html:`<span class="blinking-cursor"></span>`
 
 .. |br| replace:: :html:`<br/>`
 .. |tab| replace:: :html:`&emsp;`

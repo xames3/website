@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 24 February, 2025
-.. Last updated on: 09 February, 2026
+.. Last updated on: 20 March, 2026
 
 :og:title: Guiding stars
 :og:description: Expressing heartfelt gratitude to the heros who shaped my
@@ -26,7 +26,6 @@
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :github: https://github.com/xames3
-    :timestamp: 18 August, 2025
 
 In everyone's life, there are always points where you pause and look back. You
 not only reflect on your achievements and/or mistakes, but also the people
@@ -193,8 +192,8 @@ me of my responsibilities. Besides :ref:`Young <young-song>`, you were the only
 other friend who came to my graduation and celebrated till the end. For that,
 I'm very grateful.
 
-I know I give you hard time, Fatemeh, but I just have one thing to say...
-Wowwwwwwww
+I know I give you hard time, Fatemeh, but I just have two things to say...
+Wowwwwwwww and A-Aye!
 
 .. _john-komarnicki:
 
@@ -202,9 +201,10 @@ Wowwwwwwww
 John Komarnicki
 -------------------------------------------------------------------------------
 
-`John`_ is the *"MC"* of `Chicago Code and Coffee`_, a monthly tech-networking
-event and perhaps the largest one of all in Chicago. I first met you at one of
-these events (June 2024) during a particularly difficult time in my life.
+`John`_ is the organiser of `Chicago Code and Coffee`_, a monthly
+tech-networking event and perhaps the largest one of all in Chicago. I first
+met you at one of these events (June 2024) during a particularly difficult time
+in my life.
 
 I was looking for a distraction of sorts, and it turned out to be exactly what
 I needed: a supportive community that you and your team had fostered with care.

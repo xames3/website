@@ -15,13 +15,6 @@ const DROPDOWN_CLOSE_DELAY_MS = 140;
 const DESKTOP_BREAKPOINT_PX = 1024;
 const YOUTUBE_FETCH_TIMEOUT_MS = 8000;
 
-/**
- * Parse a CSS duration variable into milliseconds.
- *
- * @param {string} cssVar  - Custom-property name, e.g. `--duration-normal`.
- * @param {number} fallback - Value returned when the property is missing.
- * @returns {number} Duration in milliseconds.
- */
 function getDurationMs(cssVar = '--duration-normal', fallback = 500) {
     try {
         const raw = getComputedStyle(document.documentElement)
@@ -34,16 +27,8 @@ function getDurationMs(cssVar = '--duration-normal', fallback = 500) {
     } catch { return fallback; }
 }
 
-// Expose on window so Alpine.js inline expressions can reach it.
 window.simpleGetDurationMs = getDurationMs;
 
-/**
- * Apply a theme mode with a smooth colour transition.
- *
- * @param {string} mode    - `'dark'`, `'light'`, or `'system'`.
- * @param {number} [maxWait] - Safety-timeout before the transition class
- *   is forcefully removed.
- */
 function applyTheme(mode, maxWait) {
     const root = document.documentElement;
     const dur = getDurationMs('--duration-normal', 500);
@@ -73,7 +58,6 @@ function applyTheme(mode, maxWait) {
     });
 }
 
-// Expose on window so Alpine.js inline expressions can reach it.
 window.simpleApplyTheme = applyTheme;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -709,3 +693,20 @@ function formatNumber(num) {
 
 Cal('init', 'quick-chat', { origin: 'https://app.cal.com' });
 Cal.ns['quick-chat']('ui', { hideEventTypeDetails: false, layout: 'month_view' });
+
+(function () {
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.1 }
+    );
+    document.querySelectorAll('.marker, .pencil').forEach((el) => {
+        observer.observe(el);
+    });
+})();

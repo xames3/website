@@ -17,6 +17,10 @@
     --sd-gutter-y: 0.5rem;
 }
 
+.sd-row pre {
+    margin-top: 0;
+}
+
 .sd-card {
     border-radius: var(--radius);
     border: 1px solid hsl(var(--border));
@@ -367,4 +371,28 @@ nav a svg .sd-material-icon {
         flex-direction: column;
         padding-bottom: 1rem;
     }
+}
+@media (min-width: 769px) {
+    .auto-padding .sd-row-cols-lg-2 > *:nth-child(odd) {
+        padding-right: 1rem !important;
+    }
+
+    .auto-padding .sd-row-cols-lg-2 > *:nth-child(even) {
+        padding-left: 1rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .auto-padding .sd-row-cols-lg-2 > *:nth-child(odd),
+    .auto-padding .sd-row-cols-lg-2 > *:nth-child(even) {
+        margin: 0.5rem 0 !important;
+    }
+}
+
+.kind-text {
+    opacity: 0.75;
+}
+
+.kind-text .highlighted {
+    opacity: 1;
 }

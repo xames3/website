@@ -4,7 +4,7 @@ Akshay's Corner Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 14 February, 2026
+Last updated on: 04 March, 2026
 
 This file contains the configuration settings for building my static
 website using Sphinx, a popular Python documentation tool. Sphinx is a
@@ -177,6 +177,9 @@ intersphinx_mapping: dict[str, tuple[str, None]] = {
     "python": ("https://docs.python.org/3/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
     "torch": ("https://pytorch.org/docs/stable/", None),
+}
+extlinks: dict[str, tuple[str, str | None]] = {
+    "c-ref": ("https://en.cppreference.com/w/c/language/%s", "%s"),
 }
 
 ogp_site_name: str = project

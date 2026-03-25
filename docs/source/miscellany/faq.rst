@@ -1,13 +1,14 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 09 February, 2026
+.. Last updated on: 22 March, 2026
 
 :og:title: FAQs
 :og:description: Frequently Asked Questions about me and this website
 :og:type: article
-:prompt: Do you've any question for me?
-:promptdesc: Feel free to ask me about things that you're curious about.
-:submitbtn: Send in your question
+:prompt: Do you've any questions for me?
+:promptdesc: Feel free to ask anything you're curious about.
+:submitbtn: Send in your questions
+:faicon: user-question
 
 .. _miscellany-faq:
 
@@ -19,7 +20,12 @@
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :github: https://github.com/xames3
-    :timestamp: 30 October, 2025
+
+.. seealso::
+
+    I add any new questions every few weeks and update older responses if
+    anything has changed since my last reply. If your question isn't listed
+    here it'll probably be added in the next few weeks.
 
 One of the best parts of sharing and writing these articles is the chats that
 follow. I've had loads of interesting chats in person and a few over email, and
@@ -129,9 +135,9 @@ Frequently asked questions
         :class: date-text
 
     I'm a huge `Christopher Nolan`_ fan, and I :fas:`heart mrl-0 red` his
-    films. I tend to watch a lot of films, so it is difficult to say, what's my
+    films. I tend to watch a lot of films, so it's difficult to say, what's my
     favourite. But, my go-to movie is `Interstellar`_. I absolutely love the
-    music compositions by `Hans Zimmer`_. It is truly a masterpiece!!
+    music compositions by `Hans Zimmer`_. It's truly a masterpiece!!
 
     As far as my favourite TV show, I've a few. My go-to would be obviously,
     `Family Guy`_. But, if I were to recommend a TV show to anyone, I'd
@@ -162,8 +168,8 @@ Frequently asked questions
 
     My custom extensions are as follows:
 
-    - **author.** This renders author details like name, about, email, GitHub,
-      LinkedIn, and a timestamp of article
+    - **author.** This renders author details like name, :strike:`about`,
+      :strike:`email`, GitHub, :strike:`LinkedIn, and a timestamp of article`
     - **picture.** Show colour-scheme aware images on the website
     - **repository.** Renders a small widget to show information about the
       GitHub repository. The details include stars and fork counts
