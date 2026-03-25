@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 18 March, 2026
+.. Last updated on: 24 March, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -10,7 +10,7 @@
 :promptdesc: I'd genuinely love to hear your suggestions and takes, or even a
     recommendation for a great film!!
 :submitbtn: Share your thoughts
-:faicon: paper-plane
+:faicon: comments
 
 .. _home-page:
 
@@ -28,7 +28,7 @@ Akshay Mestry
     :github: https://github.com/xames3
 
 -------------------------------------------------------------------------------
-About me.
+A little about me.
 -------------------------------------------------------------------------------
 
 Hi, I'm Akshay, an educator, engineer, and currently a CS Adjunct at
@@ -41,10 +41,13 @@ I currently live in Chicago. I got my Master's in AI from `DePaul University`_
 in 2025. I also have a special interest in natural language processing and
 reinforcement learning.
 
+.. rubric:: :fab:`compass-drafting far` Build. Share. Repeat.
+    :class: pre-title-text
+
 .. _open-source:
 
 -------------------------------------------------------------------------------
-Open source.
+Love for open source.
 -------------------------------------------------------------------------------
 
 I :fas:`heart mrl-0 red` Open source!!
@@ -87,10 +90,13 @@ workings of some frameworks.
 It wouldn't be possible if I hadn't explored this; in doing so, I realised I
 had a passion for teaching.
 
+.. rubric:: :fab:`handshake far` From mistakes to mentorship
+    :class: pre-title-text
+
 .. _teaching-philosophy:
 
 -------------------------------------------------------------------------------
-Teaching philosophy.
+My teaching philosophy.
 -------------------------------------------------------------------------------
 
 I believe that "true" mastery of something comes from sharing learnings from
@@ -120,10 +126,13 @@ and my position, when asked for any help.
 .. raw:: html
     :file: ./assets/html/currently-teaching.html
 
+.. rubric:: :fab:`paper-plane far` Tell me your story
+    :class: pre-title-text
+
 .. _lets-connect:
 
 -------------------------------------------------------------------------------
-Let's connect.
+No socials, but let's connect.
 -------------------------------------------------------------------------------
 
 I'm not on any social media besides `LinkedIn`_, but I'm always open to having

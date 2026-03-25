@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 August, 2025
-.. Last updated on: 18 March, 2026
+.. Last updated on: 21 March, 2026
 
 :og:title: A week into Docker
 :og:description: Begineer's guide to Docker and containerisation
@@ -115,6 +115,8 @@ for now.
    your local machine, or you can push your own images to Docker Hub to share
    them with others.
 
+.. rubric:: :fab:`bolt far` Crafting environment, instant isolation
+    :class: pre-title-text
 .. rubric:: Magic of Docker Engine.
 
 When I first started using Docker, I'll be honest, I really didn't understand
@@ -132,6 +134,9 @@ Well, when I ran the :console:`$ docker run` command, it was Docker Engine that
 was creating an isolated environment to run my experiments within it.
 
 These environments are what we call **containers**.
+
+.. rubric:: :fab:`truck-fast far` From ships to shipping
+    :class: pre-title-text
 
 .. _idea-behind-containers:
 
@@ -264,6 +269,8 @@ I wondered where I had been getting all these containers from in the first
 place. I knew I was pulling these **containers\*** from the internet, but I had
 no idea from where.
 
+.. rubric:: :fab:`puzzle-piece far` Putting it together
+    :class: pre-title-text
 .. rubric:: That's when I discovered Docker Hub.
 .. rubric::
     Docker Hub is a cloud-based registry service where you can find and share

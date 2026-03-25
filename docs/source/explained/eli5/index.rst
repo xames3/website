@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 November, 2025
-.. Last updated on: 20 March, 2026
+.. Last updated on: 24 March, 2026
 
 :og:title: Explain Like I'm 5
 :og:description: Not exactly short, but simple answers to tricky technical
@@ -42,7 +42,7 @@ I'm starting this new series as an experiment for myself, to see how much I've
 learnt over the years by relating theoretical or invisible concepts to our
 practical, tangible world.
 
-.. rubric:: Making it click!!
+.. rubric:: Making the concepts click!!
 .. rubric::
     In my experience as an engineer and a professor, the biggest hurdle isn't
     the code itself, it's the **need to imagine** a complex, invisible process.

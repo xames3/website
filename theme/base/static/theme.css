@@ -1098,7 +1098,9 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
 }
 
 .site-feedback-shell__title::before,
-#content h2::before {
+#content h2::before,
+#content .pre-title-text:has(+ section > h2)::before,
+#content section > .pre-title-text:last-child::before {
     content: "";
     display: block;
     width: calc(100% + 11rem);
@@ -2488,6 +2490,18 @@ a[data-tooltip].show-tooltip::after {
     font-size: 0.9rem;
     color: hsl(var(--muted-foreground));
     cursor: pointer;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    background-color: hsl(var(--code-background));
+}
+
+.sd-card .site-github-repository {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none;
+    background-color: transparent;
 }
 
 .sd-card-text+.site-github-repository {
@@ -2576,15 +2590,37 @@ a[data-tooltip].show-tooltip::after {
     width: 90%;
 }
 
-.mini-caption-text {
+.pre-title-text {
     color: hsl(var(--muted-foreground));
     font-size: 0.95rem !important;
     font-weight: 400 !important;
-    margin-top: 4.5rem !important;
     line-height: 1.5rem !important;
     letter-spacing: initial !important;
-    width: 90%;
-    position: absolute;
+    padding-bottom: 0.7rem !important;
+}
+
+.pre-title-text + .rubric {
+    margin-top: 0 !important;
+}
+
+#content .pre-title-text + section > h2,
+#content section:has(> .pre-title-text:last-child) + section > h2 {
+    margin-top: 0 !important;
+}
+
+#content .pre-title-text + section > h2::before,
+#content section:has(> .pre-title-text:last-child) + section > h2::before {
+    display: none !important;
+}
+
+#content .pre-title-text:has(+ section > h2),
+#content section > .pre-title-text:last-child {
+    margin-top: 3rem !important;
+}
+
+#content .pre-title-text:has(+ section > h2)::before,
+#content section > .pre-title-text:last-child::before {
+    border-top: 1px solid hsl(var(--border));
 }
 
 .date-text {
@@ -3033,7 +3069,9 @@ a[data-tooltip].show-tooltip::after {
     }
 
     .site-feedback-shell__title::before,
-    #content h2::before {
+    #content h2::before,
+    #content .pre-title-text:has(+ section > h2)::before,
+    #content section > .pre-title-text:last-child::before {
         width: calc(100% + 2rem);
         margin-inline: -1rem;
     }

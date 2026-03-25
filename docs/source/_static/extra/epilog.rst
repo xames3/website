@@ -1,3 +1,6 @@
+.. role:: strike
+    :class: strikethrough
+
 .. role:: html(raw)
     :format: html
 
