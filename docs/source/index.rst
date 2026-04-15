@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 24 March, 2026
+.. Last updated on: 13 April, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -31,7 +31,7 @@ Akshay Mestry
 A little about me.
 -------------------------------------------------------------------------------
 
-Hi, I'm Akshay, an educator, engineer, and currently a CS Adjunct at
+Hi, I'm Akshay, an educator, engineer, and currently an Assistant Professor at
 `National Louis University`_. Before getting into academia, I worked at
 consulting firms, corporate product companies, and startups. This small corner
 on the internet is my space to explore and share my experiences in software
@@ -149,12 +149,11 @@ an :email:`email <xa@mes3.dev | Hi Akshay!>`.
 .. _Rust: https://rust-lang.org
 
 .. toctree::
-    :caption: Explained
+    :caption: Academia
     :hidden:
     :titlesonly:
 
-    explained/docker/index
-    explained/eli5/index
+    academia/thoughts-on-teaching
 
 .. toctree::
     :caption: Development
@@ -163,6 +162,14 @@ an :email:`email <xa@mes3.dev | Hi Akshay!>`.
 
     projects/xsnumpy
     projects/slowtorch
+
+.. toctree::
+    :caption: Explained
+    :hidden:
+    :titlesonly:
+
+    explained/docker/index
+    explained/eli5/index
 
 .. toctree::
     :caption: Miscellany
