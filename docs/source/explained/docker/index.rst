@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 August, 2025
-.. Last updated on: 21 March, 2026
+.. Last updated on: 10 April, 2026
 
 :og:title: A week into Docker
 :og:description: Begineer's guide to Docker and containerisation
@@ -115,7 +115,7 @@ for now.
    your local machine, or you can push your own images to Docker Hub to share
    them with others.
 
-.. rubric:: :fab:`bolt far` Crafting environment, instant isolation
+.. rubric:: :fab:`bolt far` Crafting environment = Instant isolation
     :class: pre-title-text
 .. rubric:: Magic of Docker Engine.
 

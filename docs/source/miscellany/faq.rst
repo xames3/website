@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 22 March, 2026
+.. Last updated on: 11 April, 2026
 
 :og:title: FAQs
 :og:description: Frequently Asked Questions about me and this website
@@ -103,8 +103,9 @@ Frequently asked questions
     .. rubric:: Asked on November 16, 2025
         :class: date-text
 
-    I'm an Adjunct at `National Louis University`_'s Undergraduate college in
-    Computer Science & Information Systems (CSIS) Department.
+    I'm an :strike:`Adjunct` Assistant Professor at
+    `National Louis University`_'s Undergraduate college in Computer Science &
+    Information Systems (CSIS) Department.
 
 .. dropdown:: What are your primary interests as IT professional?
     :class-container: site-faq
