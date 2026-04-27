@@ -366,6 +366,19 @@ nav a svg .sd-material-icon {
     padding-bottom: 0;
 }
 
+.right-link-button .sd-card-header {
+    position: absolute;
+    padding-bottom: 1rem;
+}
+
+.right-link-button .sd-card-header + .sd-card-body {
+    padding-top: 3rem;
+}
+
+.right-link-button .sd-card-header > .sd-stretched-link {
+    margin: 4rem 1rem auto !important;
+}
+
 @media (max-width: 1200px) {
     .right-link-button {
         flex-direction: column;

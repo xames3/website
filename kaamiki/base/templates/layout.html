@@ -4,7 +4,7 @@ Base Layout Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 07 February, 2026
+Last updated on: 25 April, 2026
 -->
 {%- set lang_attr = "en" if language == None else (language|replace('_','-')) -%}
 <!DOCTYPE html>
@@ -133,24 +133,23 @@ Last updated on: 07 February, 2026
                                 </main>
                                 {%- if show_previous_next_pages|tobool %}
                                     {%- include "previous_next_pages.html.jinja" %}
-                                {%- endif %}
-                            {%- endblock main %}
-                            {%- block right_sidebar %}{%- endblock right_sidebar %}
+                                {%- endif %}{%- endblock main %}
+                                {%- block right_sidebar %}{%- endblock right_sidebar %}
+                                </div>
                             </div>
+                            {%- block footer %}
+                                {%- include "footer.html.jinja" %}
+                            {%- endblock footer %}
                         </div>
-                        {%- block footer %}
-                            {%- include "footer.html.jinja" %}
-                        {%- endblock footer %}
-                    </div>
-                    {% block scripts %}
-                        {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
-                            <script>
-                                window.addEventListener('load', function() {
-                                    requestAnimationFrame(function() {
-                                        document.documentElement.classList.remove('no-transitions');
+                        {% block scripts %}
+                            {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
+                                <script>
+                                    window.addEventListener('load', function() {
+                                        requestAnimationFrame(function() {
+                                            document.documentElement.classList.remove('no-transitions');
+                                        });
                                     });
-                                });
-                            </script>
-                        {% endblock scripts %}
-                    </body>
-                </html>
+                                </script>
+                            {% endblock scripts %}
+                        </body>
+                    </html>
