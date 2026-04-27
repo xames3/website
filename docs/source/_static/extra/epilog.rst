@@ -14,6 +14,7 @@
     :language: python3
 
 .. |bb| replace:: :html:`<span class="blinking-cursor"></span>`
+.. |recent| replace:: :html:`<span class="recent-post"></span>`
 
 .. |br| replace:: :html:`<br/>`
 .. |tab| replace:: :html:`&emsp;`

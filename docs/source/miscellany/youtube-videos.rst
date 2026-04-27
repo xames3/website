@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 05 September, 2025
-.. Last updated on: 18 March, 2026
+.. Last updated on: 24 April, 2026
 
 :og:title: The best YouTube has to Offer
 :og:description: A curated list of my favourite YouTube videos that I've found
@@ -22,7 +22,7 @@
 .. author::
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :github: https://github.com/xames3
+    :url: https://github.com/xames3
 
 Recently, out of nowhere, I was looking at my phone's screen time stats, and I
 realised that I spend shitload of my time on YouTube. I got into tech in 2017.

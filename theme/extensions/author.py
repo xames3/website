@@ -4,7 +4,7 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 17 March, 2026
+Last updated on: 24 April, 2026
 
 This module defines a custom `author` directive for this sphinx theme.
 The directive allows embedding details directly within the document.
@@ -21,8 +21,7 @@ follows::
         .. author::
             :name: Akshay Mestry
             :avatar: https://example.com/avatar.png
-            :github: https://github.com/xames3
-            :timestamp: 2025-02-22
+            :url: https://github.com/xames3
 
 The above snippet will be processed and rendered according to the
 theme's Jinja2 template, producing a final HTML output.
@@ -39,6 +38,10 @@ theme's Jinja2 template, producing a final HTML output.
 .. deprecated:: 15.01.2026
 
     Removed usage of Email, Bio, and LinkedIn metadata.
+
+.. versionchanged:: 24.04.2026
+
+    URL field is now generic and not specific to GitHub.
 """
 
 from __future__ import annotations
@@ -83,7 +86,7 @@ class directive(rst.Directive):
 
         - `name`: The author's GitHub username.
         - `avatar`: A URL to the author's avatar image.
-        - `github`: Link to the author's GitHub profile.
+        - `url`: Link to the author's profile.
 
     .. versionchanged:: 19.10.2025
 
@@ -94,12 +97,16 @@ class directive(rst.Directive):
 
         The `timestamp` option is now deprecated as it's not being
         rendered.
+
+    .. versionchanged:: 24.04.2026
+
+        URL field is now generic and not specific to GitHub.
     """
 
     has_content = False
     option_spec = {  # noqa: RUF012
         "name": rst.directives.unchanged,
-        "github": rst.directives.unchanged,
+        "url": rst.directives.unchanged,
         "avatar": rst.directives.uri,
     }
 

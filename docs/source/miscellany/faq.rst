@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 11 April, 2026
+.. Last updated on: 24 April, 2026
 
 :og:title: FAQs
 :og:description: Frequently Asked Questions about me and this website
@@ -19,7 +19,7 @@
 .. author::
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :github: https://github.com/xames3
+    :url: https://github.com/xames3
 
 .. seealso::
 
