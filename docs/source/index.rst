@@ -1,11 +1,12 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 13 April, 2026
+.. Last updated on: 24 April, 2026
 
 :orphan:
 :og:title: Akshay's Corner
 :og:description: A corner on the internet.
 :og:type: website
+:og:image: https://avatars.githubusercontent.com/u/90549089?v=4
 :prompt: What do you think?
 :promptdesc: I'd genuinely love to hear your suggestions and takes, or even a
     recommendation for a great film!!
@@ -20,12 +21,12 @@ Akshay Mestry
 
 .. rst-class:: lead
 
-    Educator, software engineer and storyteller.
+    Educator, software engineer, and storyteller.
 
 .. author::
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :github: https://github.com/xames3
+    :url: https://github.com/xames3
 
 -------------------------------------------------------------------------------
 A little about me.
@@ -40,6 +41,14 @@ engineering through storytelling.
 I currently live in Chicago. I got my Master's in AI from `DePaul University`_
 in 2025. I also have a special interest in natural language processing and
 reinforcement learning.
+
+.. card:: Thoughts on teaching |recent|
+    :link: academia/thoughts-on-teaching
+    :link-type: doc
+    :link-alt: Read
+    :class-card: right-link-button
+
+    Lessons I didn't plan on teaching, but I re-learnt them along the way.
 
 .. rubric:: :fab:`compass-drafting far` Build. Share. Repeat.
     :class: pre-title-text

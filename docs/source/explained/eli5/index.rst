@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 November, 2025
-.. Last updated on: 24 March, 2026
+.. Last updated on: 24 April, 2026
 
 :og:title: Explain Like I'm 5
 :og:description: Not exactly short, but simple answers to tricky technical
@@ -21,7 +21,7 @@
 .. author::
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :github: https://github.com/xames3
+    :url: https://github.com/xames3
 
 Over the last few years, as I've slowly come to believe that if you really
 understand a concept, now it could be anything from maths to science to even

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 24 February, 2025
-.. Last updated on: 20 March, 2026
+.. Last updated on: 24 April, 2026
 
 :og:title: Guiding stars
 :og:description: Expressing heartfelt gratitude to the heros who shaped my
@@ -25,7 +25,7 @@
 .. author::
     :name: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :github: https://github.com/xames3
+    :url: https://github.com/xames3
 
 In everyone's life, there are always points where you pause and look back. You
 not only reflect on your achievements and/or mistakes, but also the people
