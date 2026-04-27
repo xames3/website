@@ -4,7 +4,7 @@ Akshay's Corner Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 04 March, 2026
+Last updated on: 25 April, 2026
 
 This file contains the configuration settings for building my static
 website using Sphinx, a popular Python documentation tool. Sphinx is a
@@ -146,6 +146,7 @@ html_context: dict[str, t.Any] = {
     "show_last_updated_on": True,
     "show_previous_next_pages": True,
     "show_scrolltop": False,
+    "show_searchbox": True,
     "show_sphinx": False,
     "show_toctree": True,
     "sidebar_buttons": {

@@ -1,14 +1,14 @@
 """\
-Akshay's Corner Sphinx Theme
-============================
+Kaamiki Sphinx Theme
+====================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 14 February, 2026
+Last updated on: 26 April, 2026
 
-This module serves as the primary entry point for the Akshay's Corner
-Sphinx Theme. It is responsible for initialising the theme, configuring
-its extensions, and integrating with Sphinx's build process.
+This module serves as the primary entry point for the Kaamiki Sphinx
+Theme. It is responsible for initialising the theme, configuring its
+extensions, and integrating with Sphinx's build process.
 
 This module connects the theme's internal utilities and configurations
 with the Sphinx application lifecycle, ensuring seamless interaction
@@ -71,12 +71,12 @@ from sphinx.util import logging
 from sphinx.util.fileutil import copy_asset
 from sphinx.util.matching import DOTFILES
 
-from theme.extensions import directives
-from theme.extensions import roles
-from theme.extensions.utils import build_finished
-from theme.extensions.utils import ensure_classes_on_nodes
-from theme.extensions.utils import env_before_read_docs
-from theme.extensions.utils import last_updated_date
+from kaamiki.extensions import directives
+from kaamiki.extensions import roles
+from kaamiki.extensions.utils import build_finished
+from kaamiki.extensions.utils import ensure_classes_on_nodes
+from kaamiki.extensions.utils import env_before_read_docs
+from kaamiki.extensions.utils import last_updated_date
 
 if t.TYPE_CHECKING:
     import types
@@ -86,7 +86,7 @@ if t.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-version: str = "14.02.2026"
+version: str = "26.04.2026"
 theme_name: t.Final[str] = "kaamiki"
 theme_path = p.join(p.abspath(p.dirname(__file__)), "base", "templates")
 supported_extensions: t.Sequence[str] = (

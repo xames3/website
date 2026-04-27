@@ -4,7 +4,7 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 24 April, 2026
+Last updated on: 26 April, 2026
 
 This module defines a custom `author` directive for this sphinx theme.
 The directive allows embedding details directly within the document.
