@@ -1,10 +1,10 @@
 """\
-Akshay's Corner Configuration
-=============================
+Akshay Mestry Configuration
+===========================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 25 April, 2026
+Last updated on: 26 April, 2026
 
 This file contains the configuration settings for building my static
 website using Sphinx, a popular Python documentation tool. Sphinx is a
@@ -74,12 +74,12 @@ from datetime import datetime as dt
 
 from markupsafe import Markup
 
-from theme import version as theme_version
+from kaamiki import version as theme_version
 
 if t.TYPE_CHECKING:
     from collections.abc import Sequence
 
-project: t.Final[str] = "Akshay's Corner"
+project: t.Final[str] = "Akshay Mestry"
 author: t.Final[str] = "Akshay Mestry"
 project_copyright: str = f"© 2025-{dt.now().year} {author}."
 source: t.Final[str] = "https://github.com/xames3/website"
