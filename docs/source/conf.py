@@ -1,10 +1,10 @@
 """\
-Akshay's Corner Configuration
-=============================
+Akshay Mestry Configuration
+===========================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 04 March, 2026
+Last updated on: 29 April, 2026
 
 This file contains the configuration settings for building my static
 website using Sphinx, a popular Python documentation tool. Sphinx is a
@@ -74,12 +74,12 @@ from datetime import datetime as dt
 
 from markupsafe import Markup
 
-from theme import version as theme_version
+from kaamiki import version as theme_version
 
 if t.TYPE_CHECKING:
     from collections.abc import Sequence
 
-project: t.Final[str] = "Akshay's Corner"
+project: t.Final[str] = "Akshay Mestry"
 author: t.Final[str] = "Akshay Mestry"
 project_copyright: str = f"© 2025-{dt.now().year} {author}."
 source: t.Final[str] = "https://github.com/xames3/website"
@@ -146,6 +146,7 @@ html_context: dict[str, t.Any] = {
     "show_last_updated_on": True,
     "show_previous_next_pages": True,
     "show_scrolltop": False,
+    "show_searchbox": True,
     "show_sphinx": False,
     "show_toctree": True,
     "sidebar_buttons": {
@@ -176,7 +177,7 @@ intersphinx_mapping: dict[str, tuple[str, None]] = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "python": ("https://docs.python.org/3/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
-    "torch": ("https://pytorch.org/docs/stable/", None),
+    "torch": ("https://docs.pytorch.org/docs/2.11/", None),
 }
 extlinks: dict[str, tuple[str, str | None]] = {
     "c-ref": ("https://en.cppreference.com/w/c/language/%s", "%s"),

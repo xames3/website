@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 01 March, 2025
-.. Last updated on: 24 April, 2026
+.. Last updated on: 29 April, 2026
 
 :og:title: Why write xsNumPy?
 :og:description: Journey of building a lightweight, pure-python implementation
@@ -23,10 +23,9 @@
     How writing a simplified NumPy in pure-Python taught me more about
     numerical computing than using the real thing.
 
-.. author::
-    :name: @xames3
+.. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :url: https://github.com/xames3
+    :target: https://github.com/xames3
 
 I'm a wee bit fuzzy on the exact timelines, but it all started around
 mid-November of 2024. I was still at the uni and in my second-to-last quarter.
@@ -183,10 +182,10 @@ It worked poorly. But it worked!!
     out the complete implementation of **ndarray** on GitHub.
     :class: subtitle-text
 
-.. button-link:: https://github.com/xames3/xsnumpy/blob/main/xsnumpy/_core.py
-    :color: primary
+.. button:: https://github.com/xames3/xsnumpy/blob/main/xsnumpy/_core.py
+    :faicon: fab fa-github
 
-    :fab:`github` See full implementation
+    See full implementation
 
 .. rubric:: Making sense of shapes.
 .. rubric::
@@ -279,7 +278,7 @@ telling myself
     the array. That couldn't be hard, right? All I've to do is print the
     content of my array in a readable format, just like NumPy does
 
-    -- silly me 😭, *2025*
+    -- silly me, *2025*
 
 Little did I know, I was shooting myself in the foot. At its core, a
 :meth:`__repr__ <object.__repr__>` is an object's internal data representation.
@@ -803,4 +802,3 @@ making them, and that learning will travel with me far beyond this code.
 .. |xp.any| replace:: ``any``
 .. _xp.any: https://github.com/xames3/xsnumpy/blob/
     69c302ccdd594f1d8f0c51dbe16346232c39047f/xsnumpy/_numeric.py
-

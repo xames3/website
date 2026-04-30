@@ -4,9 +4,9 @@ Theme Extension Manager
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 02 November, 2025
+Last updated on: 29 April, 2026
 
-This module manages this theme's custom directive and roles.
+This module manages Kaamiki Sphinx Theme's custom directive and roles.
 
 .. deprecated:: 19.10.2025
 
@@ -19,6 +19,7 @@ from __future__ import annotations
 import typing as t
 
 from . import author
+from . import button
 from . import picture
 from . import repository
 from . import thumbnail
@@ -30,6 +31,7 @@ if t.TYPE_CHECKING:
 
 directives: t.Sequence[types.ModuleType] = (
     author,
+    button,
     picture,
     repository,
     thumbnail,

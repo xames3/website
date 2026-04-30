@@ -4,7 +4,7 @@ Header Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 10 February, 2026
+Last updated on: 25 April, 2026
 -->
 <header class="site-header">
     {%- block header_before %}
@@ -54,6 +54,32 @@ Last updated on: 10 February, 2026
                     type="button"
                     @click="showSidebar = true"
                     data-sidebar-toggle>
+                {%- block mobile_website_logo %}
+                    <a href="{{ pathto(master_doc) }}"
+                       class="site-header__logo">
+                        {%- if logo_url %}
+                            <img height="16"
+                                 width="16"
+                                 class="site-header__logo-image site-header__logo-image--single"
+                                 src="{{ logo_url }}"
+                                 alt="Logo" />
+                        {%- endif -%}
+                        {%- if dark_logo and not logo_url %}
+                            <img width="16"
+                                 height="16"
+                                 class="site-header__logo-image site-header__logo-image--dark"
+                                 src="{{ pathto('_static/' + dark_logo, 1) }}"
+                                 alt="Logo" />
+                        {%- endif -%}
+                        {%- if light_logo and not logo_url %}
+                            <img width="16"
+                                 height="16"
+                                 class="site-header__logo-image site-header__logo-image--light"
+                                 src="{{ pathto('_static/' + light_logo, 1) }}"
+                                 alt="Logo" />
+                        {%- endif -%}
+                    </a>
+                {%- endblock mobile_website_logo %}
                 <span class="site-header__title">{{ docstitle }}</span>
                 <span class="sr-only">Toggle navigation menu</span>
             </button>
@@ -83,7 +109,7 @@ Last updated on: 10 February, 2026
                         </nav>
                     {%- endif %}
                 {%- endblock header_buttons %}
-                {%- if hasdoc('search') %}
+                {%- if hasdoc('search') and show_searchbox|tobool %}
                     <div class="site-header__search">{%- include "searchbox.html.jinja" %}</div>
                 {%- endif %}
             </div>

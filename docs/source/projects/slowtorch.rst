@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 18 April, 2025
-.. Last updated on: 24 April, 2026
+.. Last updated on: 29 April, 2026
 
 :og:title: PyTorch... but much slower
 :og:description: PyTorch taught me how to build while SlowTorch taught me how
@@ -23,10 +23,9 @@
     Exploring automatic differentiation and tensor mechanics by hand-crafting a
     slow but pure-Python reimplementation.
 
-.. author::
-    :name: @xames3
+.. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :url: https://github.com/xames3
+    :target: https://github.com/xames3
 
 You know, you get this kick after finishing a project? That was exactly me in
 January of 2025, reflecting on `xsNumPy`_. I had spent weeks understanding and
@@ -112,10 +111,10 @@ operations, gradients, and compute them efficiently.
     implementation details of the :py:class:`tensor <torch.Tensor>` class.
     :class: subtitle-text
 
-.. button-link:: https://docs.pytorch.org/docs/stable/
-    :color: primary
+.. button:: https://docs.pytorch.org/docs/stable/
+    :faicon: far fa-file-lines
 
-    :fas:`file-lines far` Checkout docs
+    Checkout docs
 
 I started off by creating various :py:class:`dtypes <torch.dtype>` like
 ``float64``, ``float32``, ``int64``, etc., alongside a simple
@@ -708,4 +707,3 @@ path is the fastest way to learn.
 .. |storch.optim.SGD| replace:: ``SGD``
 .. _storch.optim.SGD: https://github.com/xames3/slowtorch/blob/main/
     slowtorch/optim/optimiser.py
-

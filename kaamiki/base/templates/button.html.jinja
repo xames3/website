@@ -1,0 +1,19 @@
+<!--
+Button Template
+===============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 29 April, 2026
+Last updated on: 29 April, 2026
+-->
+{% block button %}
+    <p>
+        <a class="sd-sphinx-override sd-btn sd-text-wrap sd-btn-{{ scheme or 'primary' }} reference external"
+           href="{{ url }}"
+           rel="nofollow noopener"
+           target="_blank">
+            <span>
+                <span class="fas {{ faicon or 'far fa-arrow-up-right-from-square' }}"></span>
+            {{ text }}</span></a>
+        </p>
+    {% endblock button %}

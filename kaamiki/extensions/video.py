@@ -4,10 +4,11 @@ Video Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 02 November, 2025
+Last updated on: 29 April, 2026
 
-This module defines a custom `video` directive for this sphinx theme. The
-directive allows embedding a video directly within the document.
+This module defines a custom `video` directive for the Kaamiki Sphinx
+Theme. The directive allows embedding a video directly within the
+document.
 
 The `video` directive is designed to extend reStructuredText (rST)
 capabilities by injecting structured metadata about the content, which
@@ -64,11 +65,14 @@ class directive(rst.Directive):
 
     The directive supports the following options::
 
-        - `autoplay`: Boolean flag to either autoplay the video on load.
+        - `autoplay`: Boolean flag to either autoplay the video on
+          load.
         - `caption`: Video caption.
     """
 
     has_content = True
+    required_arguments = 1
+    final_argument_whitespace = False
     option_spec = {  # noqa: RUF012
         "autoplay": rst.directives.flag,
         "caption": rst.directives.unchanged,
@@ -77,8 +81,8 @@ class directive(rst.Directive):
     def run(self) -> list[nodes.Node]:
         """Parse directive options and create an `video` node.
 
-        This method gathers all options provided by the user (if any) in
-        the `video` directive, constructs a new `node` instance, and
+        This method gathers all options provided by the user (if any)
+        in the `video` directive, constructs a new `node` instance, and
         returns it wrapped in a list.
 
         The returned node is then placed into the document tree at the
@@ -87,8 +91,8 @@ class directive(rst.Directive):
 
         :return: A list containing a single `node` element.
         """
-        self.assert_has_content()
-        self.options["url"] = rst.directives.uri("\n".join(self.content))
+        self.options["url"] = rst.directives.uri(self.arguments.pop().strip())
+        self.options["caption"] = "\n".join(self.content).strip()
         attributes: dict[str, str] = {}
         attributes["text"] = template.render(**self.options)
         attributes["format"] = "html"

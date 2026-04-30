@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April, 2026
-.. Last updated on: 24 April, 2026
+.. Last updated on: 29 April, 2026
 
 :og:title: Thoughts on teaching
 :og:description: Teaching the same courses, but differently every single time!
@@ -21,10 +21,9 @@
 
     Lessons I didn't plan on teaching, but I re-learnt them along the way.
 
-.. author::
-    :name: @xames3
+.. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :url: https://github.com/xames3
+    :target: https://github.com/xames3
 
 A year ago, as of writing this article in April of 2026, I walked into the 4024
 classroom on our Chicago campus. I wasn't sure what kind of teacher I'd be, but

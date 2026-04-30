@@ -11,7 +11,7 @@ authors = [
 description = "Akshay's corner on the internet."
 readme = "README.rst"
 requires-python = ">=3.13"
-keywords = [ "theme", "education", "learning", "sphinx", "python" ]
+keywords = [ "education", "learning", "sphinx", "python", "kaamiki" ]
 license.file = "LICENSE"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -33,14 +33,14 @@ repository = "https://github.com/xames3/website"
 issues = "https://github.com/xames3/website/issues"
 
 [project.entry-points."sphinx.html_themes"]
-kaamiki = "theme"
+kaamiki = "kaamiki"
 
 [tool.setuptools]
-packages = ["theme"]
+packages = ["kaamiki"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = "requirements.txt" }
-version = { attr = "theme.version" }
+version = { attr = "kaamiki.version" }
 
 [tool.djlint]
 profile = "jinja"
@@ -191,7 +191,7 @@ ban-relative-imports = "all"
 case-sensitive = true
 combine-as-imports = true
 force-single-line = true
-known-first-party = ["theme"]
+known-first-party = ["kaamiki"]
 order-by-type = true
 relative-imports-order = "closest-to-furthest"
 required-imports = ["from __future__ import annotations"]
@@ -230,7 +230,7 @@ quote-style = "double"
 skip-magic-trailing-comma = false
 
 [tool.mypy]
-files = [ "theme" ]
+files = [ "kaamiki" ]
 python_version = "3.13"
 check_untyped_defs = true
 disallow_any_generics = true
@@ -314,13 +314,13 @@ deps = [
   "types-requests",
 ]
 commands = [
-  [ "mypy", "theme/", "docs/source/conf.py", "--config-file", "pyproject.toml", "--color-output", "--show-error-codes" ],
+  [ "mypy", "kaamiki/", "docs/source/conf.py", "--config-file", "pyproject.toml", "--color-output", "--show-error-codes" ],
 ]
 
 [tool.tox.env.website]
 description = "Run HTML, CSS, and JS linting with djlint"
 deps = [ "djlint==1.36.4" ]
 commands = [
-  [ "djlint", "theme/base/templates", "docs/source/assets/html", "-e", "html", "--reformat" ],
-  [ "djlint", "theme/base/templates", "-e", "html.jinja", "--reformat" ],
+  [ "djlint", "kaamiki/base/templates", "docs/source/assets/html", "-e", "html", "--reformat" ],
+  [ "djlint", "kaamiki/base/templates", "-e", "html.jinja", "--reformat" ],
 ]

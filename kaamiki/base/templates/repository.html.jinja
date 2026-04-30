@@ -1,0 +1,43 @@
+<!--
+GitHub Repository Template
+==========================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 29 October, 2025
+Last updated on: 29 April, 2026
+-->
+{% block repository %}
+    {% set repo = project.replace("/", "-") %}
+    <div class="site-github-repository">
+        <a href="https://github.com/{{ project }}"
+           target="_blank"
+           class="site-github-repository__name">{{ project }}</a>
+        <div class="site-github-repository__details">
+            <p class="site-github-repository__stars"
+               id="{{ repo }}-star-count">0</p>
+            <p class="site-github-repository__forks"
+               id="{{ repo }}-fork-count">0</p>
+        </div>
+    </div>
+    <script>
+        var apiUrl = `https://api.github.com/repos/{{ project }}`;
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`GitHub API for {{ project }} returned status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                var stars = formatNumber(data.stargazers_count);
+                var forks = formatNumber(data.forks_count);
+                document.getElementById('{{ repo }}-star-count').innerHTML = `<span style="color: hsl(var(--foreground));">${stars}</span>`;
+                document.getElementById('{{ repo }}-fork-count').innerHTML = `<span style="color: hsl(var(--foreground));">${forks}</span>`;
+            })
+            .catch(error => {
+                console.error("Error fetching GitHub data:", error);
+                document.getElementById('{{ repo }}-star-count').style.display = 'none';
+                document.getElementById('{{ repo }}-fork-count').style.display = 'none';
+            });
+    </script>
+{% endblock repository %}
