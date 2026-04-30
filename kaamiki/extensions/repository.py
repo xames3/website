@@ -6,9 +6,9 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October, 2025
 Last updated on: 29 April, 2026
 
-This module defines a custom `repository` directive for this sphinx
-theme. The directive allows embedding GitHub repository details on the
-document.
+This module defines a custom `repository` directive for the Kaamiki
+Sphinx Theme. The directive allows embedding GitHub repository details
+on the document.
 
 The `repository` directive is designed to extend reStructuredText (rST)
 capabilities by injecting structured metadata about the content, which
@@ -19,7 +19,7 @@ follows::
 
     .. code-block:: rst
 
-        .. repository:: xames3/xa
+        .. repository:: xames3/website
 
 The above snippet will be processed and rendered according to the
 theme's Jinja2 template, producing a final HTML output.
@@ -60,8 +60,8 @@ class directive(rst.Directive):
     """Custom `repository` directive for reStructuredText.
 
     This class defines the behavior of the `repository` directive,
-    including how it processes options and content, and how it generates
-    nodes to be inserted into the document tree.
+    including how it processes options and content, and how it
+    generates nodes to be inserted into the document tree.
 
     The directive supports the following options::
 
@@ -81,9 +81,9 @@ class directive(rst.Directive):
     def run(self) -> list[nodes.Node]:
         """Parse directive options and create an `repository` node.
 
-        This method gathers all options provided by the user (if any) in
-        the `repository` directive, constructs a new `node` instance,
-        and returns it wrapped in a list.
+        This method gathers all options provided by the user (if any)
+        in the `repository` directive, constructs a new `node`
+        instance, and returns it wrapped in a list.
 
         The returned node is then placed into the document tree at the
         directive's location. Further processing will convert the node
@@ -117,10 +117,10 @@ def depart(self: HTMLTranslator, node: node) -> None:
     """Handle the exit processing of the `repository` node during HTML
     generation.
 
-    This method is invoked after the node's HTML representation has been
-    fully processed and added to the output. Since the `repository` node
-    does not require any closing actions, the method currently acts as a
-    placeholder.
+    This method is invoked after the node's HTML representation has
+    been fully processed and added to the output. Since the
+    `repository` node does not require any closing actions, the method
+    currently acts as a placeholder.
 
     :param self: The HTML translator instance.
     :param node: The `repository` node being processed.

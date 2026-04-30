@@ -4,10 +4,10 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 17 February, 2026
+Last updated on: 29 April, 2026
 
-This module provides custom roles for this sphinx theme that provides a
-way to add features to the document.
+This module provides custom roles for the Kaamiki Sphinx Theme that
+provides a way to add features to the document.
 """
 
 from __future__ import annotations
@@ -76,8 +76,8 @@ def stylise(
     :param role: The role name used in the source text.
     :param rawtext: The entire markup text representing the role.
     :param text: The text by the user.
-    :param lineno: The line number where the role was encountered in the
-        source text.
+    :param lineno: The line number where the role was encountered in
+        the source text.
     :param inliner: The inliner instance that called the role function.
     :param options: Additional options passed to the role function,
         defaults to `None`.
@@ -137,8 +137,8 @@ def email(
     :param role: The role name used in the source text.
     :param rawtext: The entire markup text representing the role.
     :param text: The text by the user, which becomes the link text.
-    :param lineno: The line number where the role was encountered in the
-        source text.
+    :param lineno: The line number where the role was encountered in
+        the source text.
     :param inliner: The inliner instance that called the role function.
     :param options: Additional options passed to the role function,
         defaults to `None`.
@@ -197,8 +197,8 @@ def mark(
     :param role: The role name used in the source text.
     :param rawtext: The entire markup text representing the role.
     :param text: The text by the user.
-    :param lineno: The line number where the role was encountered in the
-        source text.
+    :param lineno: The line number where the role was encountered in
+        the source text.
     :param inliner: The inliner instance that called the role function.
     :param options: Additional options passed to the role function,
         defaults to `None`.
@@ -254,8 +254,8 @@ def underline(
     :param role: The role name used in the source text.
     :param rawtext: The entire markup text representing the role.
     :param text: The text by the user.
-    :param lineno: The line number where the role was encountered in the
-        source text.
+    :param lineno: The line number where the role was encountered in
+        the source text.
     :param inliner: The inliner instance that called the role function.
     :param options: Additional options passed to the role function,
         defaults to `None`.
