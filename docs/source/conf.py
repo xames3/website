@@ -177,7 +177,7 @@ intersphinx_mapping: dict[str, tuple[str, None]] = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "python": ("https://docs.python.org/3/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
-    "torch": ("https://docs.pytorch.org/docs/stable/", None),
+    "torch": ("https://docs.pytorch.org/docs/2.11/", None),
 }
 extlinks: dict[str, tuple[str, str | None]] = {
     "c-ref": ("https://en.cppreference.com/w/c/language/%s", "%s"),
