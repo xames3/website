@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 August, 2025
-.. Last updated on: 24 April, 2026
+.. Last updated on: 29 April, 2026
 
 :og:title: A week into Docker
 :og:description: Begineer's guide to Docker and containerisation
@@ -24,10 +24,9 @@
     How a week of using Docker transformed the way I manage my local
     development environments and why I think it was worth a look.
 
-.. author::
-    :name: @xames3
+.. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :url: https://github.com/xames3
+    :target: https://github.com/xames3
 
 .. role:: console(code)
     :language: console
@@ -277,10 +276,10 @@ no idea from where.
     **container images**, not containers.
     :class: subtitle-text
 
-.. button-link:: https://hub.docker.com/
-    :color: primary
+.. button:: https://hub.docker.com/
+    :faicon: far fa-book-open
 
-    :fas:`book-open far` Learn more
+    Learn more
 
 But what's an image now? With a bit of research, I found out that a Docker
 image is a lightweight executable package that includes it needs to run the

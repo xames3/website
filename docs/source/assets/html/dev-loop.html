@@ -1,0 +1,186 @@
+<!--
+Developer text loop widget
+===========================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 09 March, 2026
+Last updated on: 17 March, 2026
+-->
+<div class="dev-loop">
+    <p class="dev-loop__sentence">
+        I am teaching&nbsp;<span class="dev-loop__window"
+      aria-live="polite">
+        <span class="dev-loop__sizer"
+              aria-hidden="true">, and I hoped it'd work the next time</span>
+    </span>
+</p>
+</div>
+<style>
+    .dev-loop {
+        margin: calc(92px / 1.5) 0;
+    }
+
+    .dev-loop__sentence {
+        display: inline-flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: -1.66px;
+        line-height: 1.25rem;
+        color: hsl(var(--muted-foreground));
+    }
+
+    .dev-loop__window {
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        vertical-align: bottom;
+        line-height: 1.4em;
+        height: 1.4em;
+    }
+
+    .dev-loop__sizer {
+        display: inline-block;
+        visibility: hidden;
+        pointer-events: none;
+        white-space: nowrap;
+        line-height: 1.4em;
+    }
+
+    .dev-loop__item {
+        position: absolute;
+        top: 0;
+        left: 0;
+        white-space: nowrap;
+        color: hsl(var(--foreground));
+        line-height: 1.4em;
+    }
+
+    .dev-loop__item--exit {
+        animation: dev-loop-exit var(--duration-normal) var(--ease-in-out-quint, cubic-bezier(0.86, 0, 0.07, 1)) forwards;
+    }
+
+    .dev-loop__item--enter {
+        animation: dev-loop-enter var(--duration-slow) var(--ease-out-back, cubic-bezier(0.34, 1.56, 0.64, 1)) forwards;
+    }
+
+    @keyframes dev-loop-exit {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateY(-55%);
+            opacity: 0;
+        }
+    }
+
+    @keyframes dev-loop-enter {
+        from {
+            transform: translateY(60%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dev-loop__sentence {
+            font-size: 1.25rem;
+            letter-spacing: -0.86px;
+            line-height: 1.5;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .dev-loop__item--exit,
+        .dev-loop__item--enter {
+            animation: none;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+<script>
+    (function() {
+        var items = [
+            "AI",
+            "Cloud Computing",
+            "Maths",
+            "System Design",
+        ];
+
+        var win = document.querySelector(".dev-loop__window");
+        var sizer = document.querySelector(".dev-loop__sizer");
+        if (!win || !sizer || items.length < 2) return;
+
+        var HOLD_MS = 2500;
+        var reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        );
+        var index = 0;
+        var current = null;
+        var busy = false;
+
+        function makeItem(text) {
+            var span = document.createElement("span");
+            span.className = "dev-loop__item";
+            span.textContent = text;
+            return span;
+        }
+
+        function next() {
+            if (busy) return;
+            busy = true;
+
+            var nextIndex = (index + 1) % items.length;
+            var nextText = items[nextIndex];
+
+            if (reduceMotion.matches) {
+                sizer.textContent = nextText;
+                if (current) current.textContent = nextText;
+                index = nextIndex;
+                busy = false;
+                setTimeout(next, HOLD_MS);
+                return;
+            }
+
+            sizer.textContent = nextText;
+
+            var incoming = makeItem(nextText);
+            incoming.classList.add("dev-loop__item--enter");
+            win.appendChild(incoming);
+
+            if (current) {
+                var outgoing = current;
+                outgoing.classList.add("dev-loop__item--exit");
+                outgoing.addEventListener("animationend", function() {
+                    outgoing.remove();
+                }, {
+                    once: true
+                });
+            }
+
+            incoming.addEventListener("animationend", function() {
+                incoming.classList.remove("dev-loop__item--enter");
+                current = incoming;
+                index = nextIndex;
+                busy = false;
+                setTimeout(next, HOLD_MS);
+            }, {
+                once: true
+            });
+        }
+
+        current = makeItem(items[0]);
+        win.appendChild(current);
+        setTimeout(next, HOLD_MS);
+    })();
+</script>
