@@ -1,25 +1,29 @@
 """\
-Video Directive
-===============
+Button Directive
+================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 22 February, 2025
+Created on: 29 April, 2026
 Last updated on: 29 April, 2026
 
-This module defines a custom `video` directive for the Kaamiki Sphinx
-Theme. The directive allows embedding a video directly within the
+This module defines a custom `button` directive for the Kaamiki Sphinx
+Theme. The directive allows adding a button directly within the
 document.
 
-The `video` directive is designed to extend reStructuredText (rST)
+The `button` directive is designed to extend reStructuredText (rST)
 capabilities by injecting structured metadata about the content, which
 can be styled or processed further using Jinja2 templates.
 
-The `video` directive can be used in reStructuredText documents as
+The `button` directive can be used in reStructuredText documents as
 follows::
 
     .. code-block:: rst
 
-        .. video:: https://www.w3schools.com/tags/movie.mp4
+        .. button:: https://www.w3schools.com/tags/movie.mp4
+            :faicon: video
+            :scheme: primary
+
+            Watch it here!
 
 The above snippet will be processed and rendered according to the
 theme's Jinja2 template, producing a final HTML output.
@@ -37,13 +41,18 @@ import jinja2
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "video"
+name: t.Final[str] = "button"
 here: str = p.dirname(__file__)
 templates: str = "../base/templates"
-html = p.join(p.abspath(p.join(here, templates)), "video.html.jinja")
+html = p.join(p.abspath(p.join(here, templates)), "button.html.jinja")
 
 with open(html) as f:
     template = jinja2.Template(f.read())
+
+
+def scheme(argument: str) -> str:
+    """Validate scheme choice."""
+    return rst.directives.choice(argument, ("primary", "secondary"))
 
 
 class node(nodes.Element):
@@ -57,32 +66,31 @@ class node(nodes.Element):
 
 
 class directive(rst.Directive):
-    """Custom `video` directive for reStructuredText.
+    """Custom `button` directive for reStructuredText.
 
-    This class defines the behavior of the `video` directive, including
+    This class defines the behavior of the `button` directive, including
     how it processes options and content, and how it generates nodes to
     be inserted into the document tree.
 
     The directive supports the following options::
 
-        - `autoplay`: Boolean flag to either autoplay the video on
-          load.
-        - `caption`: Video caption.
+        - `faicon`: Optional FontAwesome icon
+        - `scheme`: Default colour scheme for the button
     """
 
     has_content = True
     required_arguments = 1
     final_argument_whitespace = False
     option_spec = {  # noqa: RUF012
-        "autoplay": rst.directives.flag,
-        "caption": rst.directives.unchanged,
+        "faicon": rst.directives.unchanged,
+        "scheme": scheme,
     }
 
     def run(self) -> list[nodes.Node]:
-        """Parse directive options and create an `video` node.
+        """Parse directive options and create an `button` node.
 
-        This method gathers all options provided by the user (if any)
-        in the `video` directive, constructs a new `node` instance, and
+        This method gathers all options provided by the user (if any) in
+        the `button` directive, constructs a new `node` instance, and
         returns it wrapped in a list.
 
         The returned node is then placed into the document tree at the
@@ -91,8 +99,9 @@ class directive(rst.Directive):
 
         :return: A list containing a single `node` element.
         """
+        self.assert_has_content()
         self.options["url"] = rst.directives.uri(self.arguments.pop().strip())
-        self.options["caption"] = "\n".join(self.content).strip()
+        self.options["text"] = "\n".join(self.content).strip()
         attributes: dict[str, str] = {}
         attributes["text"] = template.render(**self.options)
         attributes["format"] = "html"
@@ -100,29 +109,29 @@ class directive(rst.Directive):
 
 
 def visit(self: HTMLTranslator, node: node) -> None:
-    """Handle the entry processing of the `video` node during HTML
+    """Handle the entry processing of the `button` node during HTML
     generation.
 
     This method is called when the HTML translator encounters the
-    `video` node in the document tree. It retrieves the relevant
+    `button` node in the document tree. It retrieves the relevant
     attributes from the node (if any) and uses Jinja2 templating to
-    produce the final HTML output. Since the `video` node does not
+    produce the final HTML output. Since the `button` node does not
     require any actions, the method currently acts as a placeholder.
 
     :param self: The HTML translator instance.
-    :param node: The `video` node being processed.
+    :param node: The `button` node being processed.
     """
 
 
 def depart(self: HTMLTranslator, node: node) -> None:
-    """Handle the exit processing of the `video` node during HTML
+    """Handle the exit processing of the `button` node during HTML
     generation.
 
     This method is invoked after the node's HTML representation has been
-    fully processed and added to the output. Since the `video` node
+    fully processed and added to the output. Since the `button` node
     does not require any closing actions, the method currently acts as a
     placeholder.
 
     :param self: The HTML translator instance.
-    :param node: The `video` node being processed.
+    :param node: The `button` node being processed.
     """

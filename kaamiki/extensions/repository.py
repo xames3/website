@@ -4,7 +4,7 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October, 2025
-Last updated on: 02 November, 2025
+Last updated on: 29 April, 2026
 
 This module defines a custom `repository` directive for this sphinx
 theme. The directive allows embedding GitHub repository details on the
@@ -69,7 +69,8 @@ class directive(rst.Directive):
         - `issues`: Boolean flag to show the issue count.
     """
 
-    has_content = True
+    required_arguments = 1
+    final_argument_whitespace = False
     # TODO (xames3): Need to add support for boolean checks for
     # rendering either options or both. Currently, both are shown.
     option_spec = {  # noqa: RUF012
@@ -90,8 +91,7 @@ class directive(rst.Directive):
 
         :return: A list containing a single `node` element.
         """
-        self.assert_has_content()
-        self.options["repo"] = "".join(self.content)
+        self.options["project"] = self.arguments.pop().strip()
         attributes: dict[str, str] = {}
         attributes["text"] = template.render(**self.options)
         attributes["format"] = "html"

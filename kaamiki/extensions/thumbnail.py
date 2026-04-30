@@ -4,11 +4,11 @@ YouTube Thumbnail Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September, 2025
-Last updated on: 02 November, 2025
+Last updated on: 29 April, 2026
 
-This module defines a custom `thumbnail` directive for this sphinx theme.
-The directive allows embedding a YouTube video thumbnail card directly
-within the document.
+This module defines a custom `thumbnail` directive for the Kaamiki
+Sphinx Theme. The directive allows embedding a YouTube video thumbnail
+card directly within the document.
 
 The `thumbnail` directive is designed to extend reStructuredText (rST)
 capabilities by fetching metadata from a YouTube URL and rendering a
@@ -18,8 +18,6 @@ The `thumbnail` directive can be used in reStructuredText documents as
 follows::
 
     .. thumbnail:: https://www.youtube.com/watch?v=dQw4w9WgXcQ
-        :title: Never Gonna Give You Up
-        :channel: Rick Astley
 
 The above snippet will be processed and rendered according to the
 theme's Jinja2 template, producing a final HTML output.
@@ -60,18 +58,19 @@ class directive(rst.Directive):
     """Custom `thumbnail` directive for reStructuredText.
 
     This class defines the behavior of the `thumbnail` directive,
-    including how it processes options and content, and how it generates
-    nodes to be inserted into the document tree.
+    including how it processes options and content, and how it
+    generates nodes to be inserted into the document tree.
     """
 
-    has_content = True
+    required_arguments = 1
+    final_argument_whitespace = False
 
     def run(self) -> list[nodes.Node]:
         """Parse directive options and create an `thumbnail` node.
 
-        This method gathers all options provided by the user (if any) in
-        the `thumbnail` directive, constructs a new `node` instance, and
-        returns it wrapped in a list.
+        This method gathers all options provided by the user (if any)
+        in the `thumbnail` directive, constructs a new `node` instance,
+        and returns it wrapped in a list.
 
         The returned node is then placed into the document tree at the
         directive's location. Further processing will convert the node
@@ -83,15 +82,13 @@ class directive(rst.Directive):
 
             [1] Deprecated using `requests` and `BeautifulSoup` for
                 fetching and parsing YouTube metadata. This approach
-                was unreliable due to frequent changes in YouTube's HTML
-                structure and super long build times.
+                was unreliable due to frequent changes in YouTube's
+                HTML structure and super long build times.
             [2] The directive now uses YouTube's oEmbed endpoint to
                 fetch video metadata in a more stable and efficient
                 manner.
         """
-        self.assert_has_content()
-        src = rst.directives.uri(self.content.pop())
-        vid = src
+        vid = src = rst.directives.uri(self.arguments.pop().strip())
         if "youtu.be/" in src:
             vid = src.rsplit("/", 1)[-1].split("?", 1)[0]
         elif "watch?v=" in src:
@@ -126,10 +123,10 @@ def depart(self: HTMLTranslator, node: node) -> None:
     """Handle the exit processing of the `thumbnail` node during HTML
     generation.
 
-    This method is invoked after the node's HTML representation has been
-    fully processed and added to the output. Since the `thumbnail` node
-    does not require any closing actions, the method currently acts as a
-    placeholder.
+    This method is invoked after the node's HTML representation has
+    been fully processed and added to the output. Since the `thumbnail`
+    node does not require any closing actions, the method currently
+    acts as a placeholder.
 
     :param self: The HTML translator instance.
     :param node: The `thumbnail` node being processed.

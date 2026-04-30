@@ -4,11 +4,11 @@ Picture Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 02 September, 2025
-Last updated on: 02 November, 2025
+Last updated on: 29 April, 2026
 
-This module defines a custom `picture` directive for this sphinx theme.
-The directive allows embedding and rendering images specific to the
-document's current colour mode.
+This module defines a custom `picture` directive for the Kaamiki Sphinx
+Theme. The directive allows embedding and rendering images specific to
+the document's current colour mode.
 
 The `picture` directive is designed to extend reStructuredText (rST)
 capabilities by injecting structured metadata about the content, which

@@ -4,10 +4,11 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 26 April, 2026
+Last updated on: 29 April, 2026
 
-This module defines a custom `author` directive for this sphinx theme.
-The directive allows embedding details directly within the document.
+This module defines a custom `author` directive for the Kaamiki Sphinx
+Theme. The directive allows embedding details directly within the
+document.
 
 The `author` directive is designed to extend reStructuredText (rST)
 capabilities by injecting structured metadata about the content, which
@@ -18,10 +19,9 @@ follows::
 
     .. code-block:: rst
 
-        .. author::
-            :name: Akshay Mestry
+        .. author:: Akshay Mestry
             :avatar: https://example.com/avatar.png
-            :url: https://github.com/xames3
+            :target: https://github.com/xames3
 
 The above snippet will be processed and rendered according to the
 theme's Jinja2 template, producing a final HTML output.
@@ -84,9 +84,8 @@ class directive(rst.Directive):
 
     The directive supports the following options::
 
-        - `name`: The author's GitHub username.
         - `avatar`: A URL to the author's avatar image.
-        - `url`: Link to the author's profile.
+        - `target`: Author's link (profile, portfolio, or mailto etc.).
 
     .. versionchanged:: 19.10.2025
 
@@ -103,11 +102,11 @@ class directive(rst.Directive):
         URL field is now generic and not specific to GitHub.
     """
 
-    has_content = False
+    required_arguments = 1
+    final_argument_whitespace = True
     option_spec = {  # noqa: RUF012
-        "name": rst.directives.unchanged,
-        "url": rst.directives.unchanged,
         "avatar": rst.directives.uri,
+        "target": rst.directives.uri,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -133,6 +132,7 @@ class directive(rst.Directive):
             The `option_spec` will take precedence over the
             `html_context` values.
         """
+        self.options["name"] = self.arguments.pop().strip()
         ctx = self.state.document.settings.env.config.html_context
         self.options.update(ctx)
         element = node("\n".join(self.content), **self.options)

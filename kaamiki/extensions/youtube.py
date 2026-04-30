@@ -4,11 +4,11 @@ YouTube Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 22 December, 2025
+Last updated on: 29 April, 2026
 
-This module defines a custom `youtube` directive for this sphinx theme.
-The directive allows embedding a YouTube video directly within the
-document.
+This module defines a custom `youtube` directive for the Kaamiki Sphinx
+Theme. The directive allows embedding a YouTube video directly within
+the document.
 
 The `youtube` directive is designed to extend reStructuredText (rST)
 capabilities by injecting structured metadata about the content, which
@@ -60,19 +60,22 @@ class node(nodes.Element):
 class directive(rst.Directive):
     """Custom `youtube` directive for reStructuredText.
 
-    This class defines the behavior of the `youtube` directive, including
-    how it processes options and content, and how it generates nodes to
-    be inserted into the document tree.
+    This class defines the behavior of the `youtube` directive,
+    including how it processes options and content, and how it
+    generates nodes to be inserted into the document tree.
 
     The directive supports the following options::
 
-        - `autoplay`: Boolean flag to either autoplay the video on load.
+        - `autoplay`: Boolean flag to either autoplay the video on
+          load.
         - `showcaptions`: Flag to either enable closed captions.
         - `caption`: Video caption.
         - `startfrom`: Start playing the video from certain point.
     """
 
     has_content = True
+    required_arguments = 1
+    final_argument_whitespace = False
     option_spec = {  # noqa: RUF012
         "autoplay": rst.directives.flag,
         "showcaptions": rst.directives.flag,
@@ -87,9 +90,9 @@ class directive(rst.Directive):
     def run(self) -> list[nodes.Node]:
         """Parse directive options and create an `youtube` node.
 
-        This method gathers all options provided by the user (if any) in
-        the `youtube` directive, constructs a new `node` instance, and
-        returns it wrapped in a list.
+        This method gathers all options provided by the user (if any)
+        in the `youtube` directive, constructs a new `node` instance,
+        and returns it wrapped in a list.
 
         The returned node is then placed into the document tree at the
         directive's location. Further processing will convert the node
@@ -97,10 +100,7 @@ class directive(rst.Directive):
 
         :return: A list containing a single `node` element.
         """
-        self.assert_has_content()
-        raw = self.content.pop()
-        src = rst.directives.uri(raw)
-        vid = src
+        vid = src = rst.directives.uri(self.arguments.pop().strip())
         if "youtu.be/" in src:
             vid = src.rsplit("/", 1)[-1].split("?", 1)[0]
         elif "watch?v=" in src:
@@ -122,6 +122,7 @@ class directive(rst.Directive):
             params["controls"] = int(self.options["controls"])
         url = f"{domain}/embed/{vid}?{urlparse.urlencode(params)}"
         self.options["url"] = url
+        self.options["caption"] = "\n".join(self.content).strip()
         attributes: dict[str, str] = {}
         attributes["text"] = template.render(**self.options)
         attributes["format"] = "html"
