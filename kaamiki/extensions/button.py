@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April, 2026
-Last updated on: 29 April, 2026
+Last updated on: 04 May, 2026
 
 This module defines a custom `button` directive for the Kaamiki Sphinx
 Theme. The directive allows adding a button directly within the
@@ -20,7 +20,7 @@ follows::
     .. code-block:: rst
 
         .. button:: https://www.w3schools.com/tags/movie.mp4
-            :faicon: video
+            :fa-icon: video
             :scheme: primary
 
             Watch it here!
@@ -68,13 +68,13 @@ class node(nodes.Element):
 class directive(rst.Directive):
     """Custom `button` directive for reStructuredText.
 
-    This class defines the behavior of the `button` directive, including
+    This class defines the behaviour of the `button` directive, including
     how it processes options and content, and how it generates nodes to
     be inserted into the document tree.
 
     The directive supports the following options::
 
-        - `faicon`: Optional FontAwesome icon
+        - `fa-icon`: Optional FontAwesome icon
         - `scheme`: Default colour scheme for the button
     """
 
@@ -82,7 +82,7 @@ class directive(rst.Directive):
     required_arguments = 1
     final_argument_whitespace = False
     option_spec = {  # noqa: RUF012
-        "faicon": rst.directives.unchanged,
+        "fa-icon": rst.directives.unchanged,
         "scheme": scheme,
     }
 
@@ -101,6 +101,7 @@ class directive(rst.Directive):
         """
         self.assert_has_content()
         self.options["url"] = rst.directives.uri(self.arguments.pop().strip())
+        self.options["faicon"] = self.options.pop("fa-icon")
         self.options["text"] = "\n".join(self.content).strip()
         attributes: dict[str, str] = {}
         attributes["text"] = template.render(**self.options)

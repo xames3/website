@@ -57,7 +57,7 @@ class node(nodes.Element):
 class directive(rst.Directive):
     """Custom `thumbnail` directive for reStructuredText.
 
-    This class defines the behavior of the `thumbnail` directive,
+    This class defines the behaviour of the `thumbnail` directive,
     including how it processes options and content, and how it
     generates nodes to be inserted into the document tree.
     """

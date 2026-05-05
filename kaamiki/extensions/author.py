@@ -78,7 +78,7 @@ class node(nodes.Element):
 class directive(rst.Directive):
     """Custom `author` directive for reStructuredText.
 
-    This class defines the behavior of the `author` directive, including
+    This class defines the behaviour of the `author` directive, including
     how it processes options and content, and how it generates nodes to
     be inserted into the document tree.
 

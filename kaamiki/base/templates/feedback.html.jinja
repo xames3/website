@@ -4,19 +4,25 @@ Feedback Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 19 October, 2025
-Last updated on: 09 February, 2026
+Last updated on: 04 May, 2026
 -->
 {% block feedback %}
     <div class="site-feedback-shell">
         <div class="site-feedback-shell__inner">
-            <p class="site-feedback-shell__title">{{ meta.prompt }}</p>
-            <p class="site-feedback-shell__subtitle">{{ meta.promptdesc }}</p>
+            <p class="site-feedback-shell__title">
+                {{ meta.get("fb:title",
+                                "Feedback") }}
+            </p>
+            <p class="site-feedback-shell__subtitle">
+                {{ meta.get("fb:description",
+                                "Let me know how this can be improved.") }}
+            </p>
         </div>
-    <a href="mailto:{{ project.email }}?subject=Feedback about {{ title|striptags|e }}"
-       class="site-feedback-shell__button"
-       data-index="0"
-       aria-label="{{ fb_submit }}"><span class="far fa-{{ meta.faicon or 'envelope-dot' }}"></span>
-    {{ meta.submitbtn }}
-</a>
-</div>
+        <a href="{{ meta['fb:target'] if meta.get('fb:type') == 'link' else 'mailto:' ~ project.email ~ '?subject=Feedback about ' ~ title|striptags|e }}"
+           class="site-feedback-shell__button"
+           data-index="0">
+            <span class="far fa-{{ meta.get('fb:fa-icon', 'envelope-dot') }}"></span>
+            {{ meta.get('fb:button', 'Submit') }}
+        </a>
+    </div>
 {% endblock feedback %}
