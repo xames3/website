@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 26 August, 2025
-# Last updated on: 15 February, 2026
+# Last updated on: 04 May, 2026
 
 name: Continuous Deployment
 run-name: Started ${{ github.workflow }} (CD) workflow
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
       - name: Setup Python ${{ env.PYTHON_VERSION }}
