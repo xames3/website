@@ -6,12 +6,12 @@
 :og:description: Begineer's guide to Docker and containerisation
 :og:type: article
 :og:image: https://i.imgur.com/TL3wLY8.jpeg
-:prompt: But, I'd love to hear from you
-:promptdesc: What was the moment that made you realise you needed a tool
+:fb:title: But, I'd love to hear from you
+:fb:description: What was the moment that made you realise you needed a tool
     like Docker? Or if you're new to this, what's the one thing you're hoping
     it'll solve for you?
-:submitbtn: Let me know
-:faicon: envelopes
+:fb:button: Let me know
+:fb:fa-icon: envelopes
 
 .. _explained-a-week-into-docker:
 
@@ -277,7 +277,7 @@ no idea from where.
     :class: subtitle-text
 
 .. button:: https://hub.docker.com/
-    :faicon: far fa-book-open
+    :fa-icon: far fa-book-open
 
     Learn more
 

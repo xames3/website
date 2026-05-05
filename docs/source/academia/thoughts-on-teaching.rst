@@ -5,11 +5,11 @@
 :og:title: Thoughts on teaching
 :og:description: Teaching the same courses, but differently every single time!
 :og:type: article
-:prompt: These were my thoughts on teaching. What about you?
-:promptdesc: If you have any new idea or suggestions about teaching, please let
+:fb:title: These were my thoughts on teaching. What about you?
+:fb:description: If you have any new idea or suggestions about teaching, please let
     share. I'm always on the lookout for better ways to teach my student.
-:submitbtn: Share your ways
-:faicon: envelopes
+:fb:button: Share your ways
+:fb:fa-icon: envelopes
 
 .. _academia-thoughts-on-teaching:
 

@@ -6,10 +6,10 @@
 :og:description: An exhaustive guide to moving from "making it work" to
     understanding the plumbing of containerisation
 :og:type: article
-:prompt: This was me, but I'm curious about your story
-:promptdesc: Have you ever accidentally filled your entire hard drive with
+:fb:title: This was me, but I'm curious about your story
+:fb:description: Have you ever accidentally filled your entire hard drive with
     Docker debris? How did you fix it?
-:submitbtn: Share your story
+:fb:button: Share your story
 
 .. _explained-a-month-into-docker:
 

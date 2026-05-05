@@ -7,10 +7,10 @@
     of NumPy's core features
 :og:type: article
 :og:image: https://i.imgur.com/BPxkNzC.jpeg
-:prompt: Have you rebuilt something just to learn?
-:promptdesc: If you've cracked open an industry standard to truly master
+:fb:title: Have you rebuilt something just to learn?
+:fb:description: If you've cracked open an industry standard to truly master
     it, I'd love to hear your experiences.
-:submitbtn: Share your "aha" moment
+:fb:button: Share your "aha" moment
 
 .. _project-building-xsnumpy:
 
@@ -183,7 +183,7 @@ It worked poorly. But it worked!!
     :class: subtitle-text
 
 .. button:: https://github.com/xames3/xsnumpy/blob/main/xsnumpy/_core.py
-    :faicon: fab fa-github
+    :fa-icon: fab fa-github
 
     See full implementation
 

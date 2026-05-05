@@ -1,17 +1,17 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 29 April, 2026
+.. Last updated on: 04 May, 2026
 
 :orphan:
 :og:title: Akshay's Corner
 :og:description: A corner on the internet.
 :og:type: website
 :og:image: https://avatars.githubusercontent.com/u/90549089?v=4
-:prompt: What do you think?
-:promptdesc: I'd genuinely love to hear your suggestions and takes, or even a
-    recommendation for a great film!!
-:submitbtn: Share your thoughts
-:faicon: comments
+:fb:title: What do you think?
+:fb:description: I'd genuinely love to hear your suggestions and takes, or even
+    a recommendation for a great film!!
+:fb:button: Share your thoughts
+:fb:fa-icon: comments
 
 .. _home-page:
 

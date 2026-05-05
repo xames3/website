@@ -6,11 +6,11 @@
 :og:description: Expressing heartfelt gratitude to the heros who shaped my
     path in life, learning, and beyond...
 :og:type: article
-:prompt: What are the guiding stars in your life?
-:promptdesc: We all have mentors and friends who guide us. Reading this,
+:fb:title: What are the guiding stars in your life?
+:fb:description: We all have mentors and friends who guide us. Reading this,
     did anyone come to your mind? I'd be honoured to hear about them.
-:submitbtn: Share your reflections
-:faicon: sparkles
+:fb:button: Share your reflections
+:fb:fa-icon: sparkles
 
 .. _miscellany-guiding-stars:
 
