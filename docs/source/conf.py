@@ -4,7 +4,7 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 04 May, 2026
+Last updated on: 29 April, 2026
 
 This file contains the configuration settings for building my static
 website using Sphinx, a popular Python documentation tool. Sphinx is a
