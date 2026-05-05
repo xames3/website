@@ -4,7 +4,7 @@ Theme Extension Manager
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 29 April, 2026
+Last updated on: 04 May, 2026
 
 This module manages Kaamiki Sphinx Theme's custom directive and roles.
 

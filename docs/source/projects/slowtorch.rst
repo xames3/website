@@ -7,10 +7,10 @@
     it's built!!
 :og:type: article
 :og:image: https://i.imgur.com/HLTLqVl.jpeg
-:prompt: Is slow learning the "key"?
-:promptdesc: I wrote SlowTorch to truly understand the magic behind
+:fb:title: Is slow learning the "key"?
+:fb:description: I wrote SlowTorch to truly understand the magic behind
     PyTorch. Have you done anything similar?
-:submitbtn: Tell me your story
+:fb:button: Tell me your story
 
 .. _project-pytorch-but-much-slower:
 
@@ -112,7 +112,7 @@ operations, gradients, and compute them efficiently.
     :class: subtitle-text
 
 .. button:: https://docs.pytorch.org/docs/stable/
-    :faicon: far fa-file-lines
+    :fa-icon: far fa-file-lines
 
     Checkout docs
 

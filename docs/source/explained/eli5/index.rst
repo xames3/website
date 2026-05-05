@@ -6,11 +6,11 @@
 :og:description: Not exactly short, but simple answers to tricky technical
     concepts and questions
 :og:type: article
-:prompt: I'm curious to know what you think of this idea
-:promptdesc: If you think you've better examples to share, feel free to send it
+:fb:title: I'm curious to know what you think of this idea
+:fb:description: If you think you've better examples to share, feel free to send it
     my way. I'm always looking for more ideas and suggestions.
-:submitbtn: Share your story
-:faicon: envelope-open
+:fb:button: Share your story
+:fb:fa-icon: envelope-open
 
 .. _explained-explain-like-im-five:
 

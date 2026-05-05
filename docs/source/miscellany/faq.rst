@@ -5,10 +5,10 @@
 :og:title: FAQs
 :og:description: Frequently Asked Questions about me and this website
 :og:type: article
-:prompt: Do you've any questions for me?
-:promptdesc: Feel free to ask anything you're curious about.
-:submitbtn: Send in your questions
-:faicon: user-question
+:fb:title: Do you've any questions for me?
+:fb:description: Feel free to ask anything you're curious about.
+:fb:button: Send in your questions
+:fb:fa-icon: user-question
 
 .. _miscellany-faq:
 

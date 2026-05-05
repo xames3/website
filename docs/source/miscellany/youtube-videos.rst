@@ -7,11 +7,11 @@
     over the years: good, bad, and weird!!
 :og:type: article
 :og:image: https://i.imgur.com/RLsdjyG.jpeg
-:prompt: Got a cracking video recommendation?
-:promptdesc: Did you enjoy any of them? Or better yet, do you have a
+:fb:title: Got a cracking video recommendation?
+:fb:description: Did you enjoy any of them? Or better yet, do you have a
     must-see video I should add to my list?
-:submitbtn: Send a recommendation
-:faicon: thumbs-up
+:fb:button: Send a recommendation
+:fb:fa-icon: thumbs-up
 
 .. _miscellany-best-of-youtube:
 
