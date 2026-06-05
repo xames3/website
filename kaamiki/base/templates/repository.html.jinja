@@ -4,7 +4,7 @@ GitHub Repository Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October, 2025
-Last updated on: 29 April, 2026
+Last updated on: 30 May, 2026
 -->
 {% block repository %}
     {% set repo = project.replace("/", "-") %}
@@ -31,8 +31,8 @@ Last updated on: 29 April, 2026
             .then(data => {
                 var stars = formatNumber(data.stargazers_count);
                 var forks = formatNumber(data.forks_count);
-                document.getElementById('{{ repo }}-star-count').innerHTML = `<span style="color: hsl(var(--foreground));">${stars}</span>`;
-                document.getElementById('{{ repo }}-fork-count').innerHTML = `<span style="color: hsl(var(--foreground));">${forks}</span>`;
+                document.getElementById('{{ repo }}-star-count').innerHTML = `<span style="color: hsl(var(--km-color-fg));">${stars}</span>`;
+                document.getElementById('{{ repo }}-fork-count').innerHTML = `<span style="color: hsl(var(--km-color-fg));">${forks}</span>`;
             })
             .catch(error => {
                 console.error("Error fetching GitHub data:", error);
