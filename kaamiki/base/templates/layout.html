@@ -14,8 +14,7 @@ Last updated on: 30 May, 2026
       x-data="{darkMode: localStorage.getItem('darkMode') ?? 'dark'}"
       x-init="if (!localStorage.getItem('darkMode')) { localStorage.setItem('darkMode', darkMode); } const applyTheme = window.simpleApplyTheme ?? ((val, oldVal) => { const root = document.documentElement; const prev = oldVal || (val === 'dark' ? 'light' : 'dark'); if (prev !== val && root.getAttribute('data-theme') === val) { root.setAttribute('data-theme', prev); } root.classList.add('theme-transition'); void root.offsetWidth; root.setAttribute('data-theme', val); setTimeout(() => root.classList.remove('theme-transition'), 700); }); $watch('darkMode', (val, oldVal) => { applyTheme(val, oldVal); localStorage.setItem('darkMode', val); });"
       class="scroll-smooth"
-      :class="{'dark': darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)}"
->
+      :class="{'dark': darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)}">
     <head>
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0" />
@@ -65,14 +64,22 @@ Last updated on: 30 May, 2026
         {%- set _favicon_180_url = pathto('_static/' + favicons.size_180, 1) %}
         {%- set _favicon_svg_url = pathto('_static/' + favicons.size_svg, 1) %}
         {%- if favicon_url or favicon %}
-            <link rel="icon" type="image/png" href="{{ _favicon_96_url }}" sizes="96x96" />
-            <link rel="icon" type="image/svg+xml" href="{{ _favicon_svg_url }}" />
-            <link rel="shortcut icon" href="{{ _favicon_ico_url }}" />
-            <link rel="apple-touch-icon" sizes="180x180" href="{{
-            _favicon_180_url }}" />
-            <meta name="apple-mobile-web-app-title" content="{{
-            title|striptags|e if title else docstitle }}" />
-            <link rel="manifest" href="{{ _favicon_manifest_url }}" />
+            <link rel="icon"
+                  type="image/png"
+                  href="{{ _favicon_96_url }}"
+                  sizes="96x96" />
+            <link rel="icon"
+                  type="image/svg+xml"
+                  href="{{ _favicon_svg_url }}" />
+            <link rel="shortcut icon"
+                  href="{{ _favicon_ico_url }}" />
+            <link rel="apple-touch-icon"
+                  sizes="180x180"
+                  href="{{ _favicon_180_url }}" />
+            <meta name="apple-mobile-web-app-title"
+                  content="{{ title|striptags|e if title else docstitle }}" />
+            <link rel="manifest"
+                  href="{{ _favicon_manifest_url }}" />
         {%- endif %}
         {%- block linktags %}
             {%- if hasdoc('search') %}

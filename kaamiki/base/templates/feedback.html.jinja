@@ -21,7 +21,7 @@ Last updated on: 04 May, 2026
         <a href="{{ meta['fb:target'] if meta.get('fb:type') == 'link' else 'mailto:' ~ project.email ~ '?subject=Feedback about ' ~ title|striptags|e }}"
            class="site-feedback-shell__button"
            data-index="0">
-            <span class="far fa-{{ meta.get('fb:fa-icon', 'envelope-dot') }}"></span>
+            <span class="fas {{ meta.get('fb:fa-icon', 'fa-paper-plane') }}"></span>
             {{ meta.get('fb:button', 'Submit') }}
         </a>
     </div>
