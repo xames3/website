@@ -14,6 +14,7 @@ const DROPDOWN_OPEN_DELAY_MS = 40;
 const DROPDOWN_CLOSE_DELAY_MS = 140;
 const DESKTOP_BREAKPOINT_PX = 1024;
 const YOUTUBE_FETCH_TIMEOUT_MS = 8000;
+const REVEAL_STEP_MS = 90;
 
 function getDurationMs(cssVar = '--km-duration-normal', fallback = 500) {
     try {
@@ -697,5 +698,62 @@ Cal.ns['quick-chat']('ui', { hideEventTypeDetails: false, layout: 'month_view' }
     );
     document.querySelectorAll('.marker, .pencil').forEach((el) => {
         observer.observe(el);
+    });
+})();
+
+(function () {
+    const root = document.documentElement;
+    const assigned = new Set();
+    let delay = 0;
+    function assign(el) {
+        if (!el || assigned.has(el)) return;
+        assigned.add(el);
+        el.classList.add('page-reveal-item');
+        el.style.setProperty('--km-reveal-delay', delay + 'ms');
+        delay += REVEAL_STEP_MS;
+    }
+    function setupReveal() {
+        assign(document.querySelector('.site-header'));
+        assign(document.querySelector('.site-breadcrumbs'));
+        const content = document.getElementById('content');
+        const topSection = content && content.querySelector(':scope > section');
+        if (topSection) {
+            const h1 = topSection.querySelector(':scope > h1');
+            const lead = topSection.querySelector(':scope > .lead');
+            const author = topSection.querySelector(':scope > .site-article');
+            assign(h1);
+            assign(lead);
+            assign(author);
+            for (const child of topSection.children) {
+                if (child.tagName !== 'SECTION') assign(child);
+            }
+            for (const section of topSection.querySelectorAll(':scope > section')) {
+                assign(section);
+            }
+        } else if (content) {
+            assign(content);
+        }
+        assign(document.querySelector('.site-feedback-shell'));
+        assign(document.querySelector('.site-pagination'));
+        assign(document.querySelector('.site-footer'));
+    }
+    function triggerReveal() {
+        requestAnimationFrame(() => {
+            root.classList.remove('no-transitions');
+            root.classList.add('page-loaded');
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupReveal, { once: true });
+    } else {
+        setupReveal();
+    }
+    if (document.readyState === 'complete') {
+        triggerReveal();
+    } else {
+        window.addEventListener('load', triggerReveal, { once: true });
+    }
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) root.classList.add('page-loaded');
     });
 })();
