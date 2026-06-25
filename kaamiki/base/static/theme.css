@@ -696,6 +696,15 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
     margin-top: 6rem;
 }
 
+.site-article__meta::after {
+    border-bottom: 1px solid hsl(var(--km-color-border));
+    content: "";
+    display: block;
+    width: calc(100% + min(11rem, 100vw - 100%));
+    margin-inline: calc(-1 * min(5.5rem, (100vw - 100%) / 2));
+    margin-block: 2rem;
+}
+
 .site-article__meta-group {
     display: flex;
     align-items: center;
@@ -3062,6 +3071,7 @@ a[data-tooltip].show-tooltip::after {
         margin: 1rem auto;
     }
 
+    .site-article__meta::after,
     .site-feedback-shell__title::before,
     #content h2::before,
     #content .pre-title-text:has(+ section > h2)::before,
@@ -3148,6 +3158,19 @@ a[data-tooltip].show-tooltip::after {
 
     .site-faq {
         margin: 1.25rem 0 !important;
+    }
+
+    .site-feedback-shell--split .site-feedback-shell__header--split {
+        display: contents;
+    }
+
+    .site-feedback-shell--split .site-feedback-shell__subtitle {
+        order: 1;
+        margin-bottom: 1rem;
+    }
+
+    .site-feedback-shell--split .site-feedback-shell__button {
+        order: 2;
     }
 }
 
@@ -3281,6 +3304,32 @@ a[data-tooltip].show-tooltip::after {
 
     .site-header__utilities {
         flex-wrap: nowrap;
+    }
+
+    .site-feedback-shell__header--split {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        position: relative;
+        padding-top: 3rem;
+        margin-top: calc(var(--km-layout-section-gap) / 1.5);
+    }
+
+    .site-feedback-shell__header--split::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: calc(-1 * min(5.5rem, (100vw - 100%) / 2));
+        width: calc(100% + min(11rem, 100vw - 100%));
+        border-top: 1px dashed hsl(var(--km-color-border));
+    }
+
+    .site-feedback-shell__header--split .site-feedback-shell__title::before {
+        display: none;
+    }
+
+    .site-feedback-shell__header--split .site-feedback-shell__title {
+        margin-top: 0;
     }
 }
 

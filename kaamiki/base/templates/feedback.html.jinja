@@ -4,25 +4,45 @@ Feedback Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 19 October, 2025
-Last updated on: 04 May, 2026
+Last updated on: 22 June, 2026
 -->
 {% block feedback %}
-    <div class="site-feedback-shell">
-        <div class="site-feedback-shell__inner">
-            <p class="site-feedback-shell__title">
-                {{ meta.get("fb:title",
-                                "Feedback") }}
-            </p>
+    {% set _fb_mode = meta.get('fb:mode', 'default') %}
+    <div class="site-feedback-shell{% if _fb_mode == 'split' %} site-feedback-shell--split{% endif %}">
+        {% if _fb_mode == 'split' %}
+            <div class="site-feedback-shell__header--split">
+                <p class="site-feedback-shell__title">
+                    {{ meta.get("fb:title",
+                                    "Feedback") }}
+                </p>
+                <a href="{{ meta['fb:target'] if meta.get('fb:type') == 'link' else 'mailto:' ~ project.email ~ '?subject=Feedback about ' ~ title|striptags|e }}"
+                   class="site-feedback-shell__button"
+                   data-index="0">
+                    <span class="fas {{ meta.get('fb:fa-icon', 'fa-paper-plane') }}"></span>
+                    {{ meta.get('fb:button', 'Submit') }}
+                </a>
+            </div>
             <p class="site-feedback-shell__subtitle">
                 {{ meta.get("fb:description",
                                 "Let me know how this can be improved.") }}
             </p>
-        </div>
-        <a href="{{ meta['fb:target'] if meta.get('fb:type') == 'link' else 'mailto:' ~ project.email ~ '?subject=Feedback about ' ~ title|striptags|e }}"
-           class="site-feedback-shell__button"
-           data-index="0">
-            <span class="fas {{ meta.get('fb:fa-icon', 'fa-paper-plane') }}"></span>
-            {{ meta.get('fb:button', 'Submit') }}
-        </a>
+        {% else %}
+            <div class="site-feedback-shell__inner">
+                <p class="site-feedback-shell__title">
+                    {{ meta.get("fb:title",
+                                    "Feedback") }}
+                </p>
+                <p class="site-feedback-shell__subtitle">
+                    {{ meta.get("fb:description",
+                                    "Let me know how this can be improved.") }}
+                </p>
+            </div>
+            <a href="{{ meta['fb:target'] if meta.get('fb:type') == 'link' else 'mailto:' ~ project.email ~ '?subject=Feedback about ' ~ title|striptags|e }}"
+               class="site-feedback-shell__button"
+               data-index="0">
+                <span class="fas {{ meta.get('fb:fa-icon', 'fa-paper-plane') }}"></span>
+                {{ meta.get('fb:button', 'Submit') }}
+            </a>
+        {% endif %}
     </div>
 {% endblock feedback %}
