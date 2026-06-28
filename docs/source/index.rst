@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 31 May, 2026
+.. Last updated on: 28 June, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -9,9 +9,9 @@
 :og:image: https://avatars.githubusercontent.com/u/90549089?v=4
 :fb:title: What do you think?
 :fb:description: I'd genuinely love to hear your suggestions and takes, or even
-    a recommendation for a great film!!
-:fb:button: Share your thoughts
-:fb:fa-icon: comments
+    a recommendation for a great film!
+:fb:button: Let's chat
+:fb:mode: split
 
 .. _home-page:
 
@@ -26,12 +26,13 @@ Akshay Mestry
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
+    :background: https://i.imgur.com/JOBRcgT.jpg
+        https://i.imgur.com/gcGHqxi.jpg
+        https://i.imgur.com/weM4qDW.jpg
 
--------------------------------------------------------------------------------
-A little about me.
--------------------------------------------------------------------------------
+Hello hello!
 
-Hi, I'm Akshay, an educator, engineer, and currently an Assistant Professor at
+I'm Akshay, an educator, engineer, and currently an Assistant Professor at
 `National Louis University`_. Before getting into academia, I worked at
 consulting firms, corporate product companies, and startups. This small corner
 on the internet is my space to explore and share my experiences in software
@@ -41,13 +42,33 @@ I currently live in Chicago. I got my Master's in AI from `DePaul University`_
 in 2025. I also have a special interest in natural language processing and
 reinforcement learning.
 
-.. card:: Thoughts on teaching |recent|
-    :link: academia/thoughts-on-teaching
-    :link-type: doc
-    :link-alt: Read
-    :class-card: right-link-button
+.. container:: inline-container
 
-    Lessons I didn't plan on teaching, but I re-learnt them along the way.
+    .. grid:: 2
+
+        .. grid-item::
+
+            .. rubric:: No socials, but let's connect.
+
+        .. grid-item::
+            :columns: auto
+            :class: align-right
+
+            .. grid:: 2
+
+                .. grid-item::
+
+                    .. button:: mailto:xa@mes3.dev
+                        :fa-icon: fa-envelope
+
+                        Send an email
+
+                .. grid-item::
+
+                    .. button:: https://linkedin.com/in/xames3
+                        :scheme: secondary
+
+                        LinkedIn
 
 .. rubric:: :fab:`compass-drafting far` Build and share
     :class: pre-title-text
@@ -58,7 +79,7 @@ reinforcement learning.
 Love for open source.
 -------------------------------------------------------------------------------
 
-I :fas:`heart mrl-0 red` Open source!!
+I :fas:`heart mrl-0 red` Open source!
 
 I accidentally got started on it, and I don't know why; I bloody loved it.
 Doing open source was, and still is, a personal reminder to share my struggles
@@ -125,31 +146,14 @@ can't call yourself an :abbr:`SME (Subject-matter expert)` until you can teach
 a concept to those who barely know anything about it (or very little), and are
 willing to entertain questions at that initial frame of reference.
 
-Thus began my journey into teaching.
-
-Although my approach to mentoring has changed and evolved over the past few
-years, adapting to the needs of my environment, my students/mentees, the time,
-and my position, when asked for any help.
+Thus began my journey into teaching. By the way...
 
 .. raw:: html
     :file: ./assets/html/currently-teaching.html
 
-.. rubric:: :fab:`paper-plane far` Tell me your story
-    :class: pre-title-text
-
-.. _lets-connect:
-
--------------------------------------------------------------------------------
-No socials, but let's connect.
--------------------------------------------------------------------------------
-
-I'm not on any social media besides `LinkedIn`_, but I'm always open to having
-conversations about AI, Teaching, Open source, or just a casual chat about
-life. I'm a huge film nerd and enjoy memes, so feel free to send me your
-recommendations.
-
-If you wish to communicate, please do so by using the below button or sending
-an :email:`email <xa@mes3.dev | Hi Akshay!>`.
+Although my approach to mentoring has changed and evolved over the past few
+years, adapting to the needs of my environment, my students/mentees, the time,
+and my position, when asked for any help.
 
 .. _National Louis University: https://nl.edu/undergraduate-college
 .. _DePaul University: https://depaul.edu
@@ -164,14 +168,6 @@ an :email:`email <xa@mes3.dev | Hi Akshay!>`.
     academia/thoughts-on-teaching
 
 .. toctree::
-    :caption: Development
-    :hidden:
-    :titlesonly:
-
-    projects/xsnumpy
-    projects/slowtorch
-
-.. toctree::
     :caption: Explained
     :hidden:
     :titlesonly:
@@ -180,9 +176,17 @@ an :email:`email <xa@mes3.dev | Hi Akshay!>`.
     explained/eli5/index
 
 .. toctree::
+    :caption: Projects
+    :hidden:
+    :titlesonly:
+
+    projects/xsnumpy
+    projects/slowtorch
+
+.. toctree::
     :caption: Miscellany
     :hidden:
-    :maxdepth: 2
+    :maxdepth: 1
 
     miscellany/guiding-stars
     miscellany/youtube-videos

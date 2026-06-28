@@ -1,17 +1,17 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 05 September, 2025
-.. Last updated on: 29 April, 2026
+.. Last updated on: 28 June, 2026
 
 :og:title: The best YouTube has to Offer
 :og:description: A curated list of my favourite YouTube videos that I've found
-    over the years: good, bad, and weird!!
+    over the years: good, bad, and weird!
 :og:type: article
 :og:image: https://i.imgur.com/RLsdjyG.jpeg
 :fb:title: Got a cracking video recommendation?
 :fb:description: Did you enjoy any of them? Or better yet, do you have a
     must-see video I should add to my list?
 :fb:button: Send a recommendation
-:fb:fa-icon: thumbs-up
+:fb:fa-icon: fa-thumbs-up
 
 .. _miscellany-best-of-youtube:
 

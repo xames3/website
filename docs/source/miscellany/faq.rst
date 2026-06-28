@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 29 April, 2026
+.. Last updated on: 28 June, 2026
 
 :og:title: FAQs
 :og:description: Frequently Asked Questions about me and this website
@@ -8,7 +8,7 @@
 :fb:title: Do you've any questions for me?
 :fb:description: Feel free to ask anything you're curious about.
 :fb:button: Send in your questions
-:fb:fa-icon: user-question
+:fb:fa-icon: far fa-seal-question
 
 .. _miscellany-faq:
 
@@ -28,11 +28,9 @@
 
 One of the best parts of sharing and writing these articles is the chats that
 follow. I've had loads of interesting chats in person and a few over email, and
-I think I've noticed a pattern.
-
-A lot of the same questions pop up; some are esoteric about a topic, while
-others are simple *"why?"* questions. Ever since I transitioned into teaching,
-some of you've also questioned that, too.
+I think I've noticed a pattern. A lot of the same questions pop up; some are
+esoteric about a topic, while others are simple *"why?"* questions. Ever since
+I transitioned into teaching, some of you've also questioned that, too.
 
 While many have asked about my thoughts on the late 2025 job situation. Some
 have even asked why even I built projects like
@@ -40,7 +38,7 @@ have even asked why even I built projects like
 :doc:`SlowTorch <../projects/slowtorch>`, which seem like reinventing the
 wheel.
 
-By the way, all of them are great questions!! Then there are the questions
+By the way, all of them are great questions! Then there are the questions
 about what my favourite films are and what I'm currently watching. So to make
 this easier for everyone, I've put together my answers to your most frequent
 questions.
@@ -123,10 +121,10 @@ Frequently asked questions
     - debugging logs, and spending time on terminal
     - collaborating with other teams and fellow developers
     - building APIs
-    - deployments (not on Fridays, those are f*cking horrible!!)
+    - deployments (not on Fridays, those are f*cking horrible!)
     - maintaining documentations
 
-    brings me joy!!
+    brings me joy!
 
 .. dropdown:: What is your favourite movie/TV show?
     :class-container: site-faq
@@ -137,7 +135,7 @@ Frequently asked questions
     I'm a huge `Christopher Nolan`_ fan, and I :fas:`heart mrl-0 red` his
     films. I tend to watch a lot of films, so it's difficult to say, what's my
     favourite. But, my go-to movie is `Interstellar`_. I absolutely love the
-    music compositions by `Hans Zimmer`_. It's truly a masterpiece!!
+    music compositions by `Hans Zimmer`_. It's truly a masterpiece!
 
     As far as my favourite TV show, I've a few. My go-to would be obviously,
     `Family Guy`_. But, if I were to recommend a TV show to anyone, I'd
@@ -149,7 +147,7 @@ Frequently asked questions
     .. rubric:: Asked on December 12, 2025
         :class: date-text
 
-    Thanks for checking out the source code on GitHub!! I'm no Frontend
+    Thanks for checking out the source code on GitHub! I'm no Frontend
     engineer and have sparse knowledge about modern JS frameworks at best. As
     you may've seen from the source itself, it's built using simple HTML, CSS,
     and vanilla JS (based on answers from StackOverflow).
