@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (totalWords > 0) {
         const minutes = Math.ceil(totalWords / WORDS_PER_MINUTE);
         const rt = document.getElementById('readingTime');
-        if (rt) rt.innerHTML = `<i class='fa-regular fa-stopwatch' style='margin-right: 0.5rem;'></i>${minutes} min read`;
+        if (rt) rt.innerHTML = `<i class='fa-solid fa-hourglass-start' style='margin-right: 0.5rem;'></i>${minutes} min read`;
     }
 });
 
@@ -756,4 +756,51 @@ Cal.ns['quick-chat']('ui', { hideEventTypeDetails: false, layout: 'month_view' }
     window.addEventListener('pageshow', (e) => {
         if (e.persisted) root.classList.add('page-loaded');
     });
+})();
+
+(function () {
+    function initArticleBackground() {
+        const aside = document.querySelector('.site-article[data-background]');
+        if (!aside) return;
+        const urls = aside.getAttribute('data-background').trim().split(/\s+/).filter(Boolean);
+        if (!urls.length) return;
+        const main = document.querySelector('.site-layout__content');
+        if (!main) return;
+        main.style.isolation = 'isolate';
+        const mainRect = main.getBoundingClientRect();
+        const meta = aside.querySelector('.site-article__meta');
+        const metaBottom = (meta || aside).getBoundingClientRect().bottom;
+        const fs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        const borderY = metaBottom - fs * 2;
+        if (urls.length > 1) {
+            for (let i = urls.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [urls[i], urls[j]] = [urls[j], urls[i]];
+            }
+        }
+        const overlay = document.createElement('div');
+        overlay.className = 'site-article__bg';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.style.top = '0';
+        overlay.style.height = `${borderY - mainRect.top}px`;
+        overlay.style.backgroundImage = `url("${urls[0]}")`;
+        main.appendChild(overlay);
+        if (urls.length > 1) {
+            let idx = 0;
+            setInterval(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    idx = (idx + 1) % urls.length;
+                    overlay.style.backgroundImage = `url("${urls[idx]}")`;
+                    overlay.style.opacity = '';
+                }, 800);
+            }, 6000);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initArticleBackground, { once: true });
+    } else {
+        initArticleBackground();
+    }
 })();
