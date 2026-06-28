@@ -110,7 +110,6 @@ details.sd-dropdown summary.sd-summary-title svg {
 
 .sd-tab-set>label {
     font-weight: 500;
-    color: hsla(var(--km-color-tab-fg));
     font-size: var(--sd-text-sm);
     letter-spacing: .05em;
     border-bottom: 0;

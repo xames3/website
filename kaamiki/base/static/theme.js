@@ -15,6 +15,8 @@ const DROPDOWN_CLOSE_DELAY_MS = 140;
 const DESKTOP_BREAKPOINT_PX = 1024;
 const YOUTUBE_FETCH_TIMEOUT_MS = 8000;
 const REVEAL_STEP_MS = 90;
+const ARTICLE_BG_FADE_MS = 600;
+const ARTICLE_BG_INTERVAL_MS = 7000;
 
 function getDurationMs(cssVar = '--km-duration-normal', fallback = 500) {
     try {
@@ -784,7 +786,15 @@ Cal.ns['quick-chat']('ui', { hideEventTypeDetails: false, layout: 'month_view' }
         overlay.style.top = '0';
         overlay.style.height = `${borderY - mainRect.top}px`;
         overlay.style.backgroundImage = `url("${urls[0]}")`;
+        overlay.style.opacity = '0';
+        if (urls.length === 1) {
+            overlay.style.animationIterationCount = '1';
+            overlay.style.animationFillMode = 'forwards';
+        }
         main.appendChild(overlay);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            overlay.style.opacity = '';
+        }));
         if (urls.length > 1) {
             let idx = 0;
             setInterval(() => {
@@ -792,9 +802,14 @@ Cal.ns['quick-chat']('ui', { hideEventTypeDetails: false, layout: 'month_view' }
                 setTimeout(() => {
                     idx = (idx + 1) % urls.length;
                     overlay.style.backgroundImage = `url("${urls[idx]}")`;
-                    overlay.style.opacity = '';
-                }, 800);
-            }, 6000);
+                    overlay.style.animationName = 'none';
+                    void overlay.offsetWidth;
+                    overlay.style.animationName = '';
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        overlay.style.opacity = '';
+                    }));
+                }, ARTICLE_BG_FADE_MS + 50);
+            }, ARTICLE_BG_INTERVAL_MS);
         }
     }
 

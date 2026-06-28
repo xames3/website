@@ -721,6 +721,11 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
     font-weight: 500;
 }
 
+@keyframes article-bg-zoom {
+    0% { transform: scale(0.9); }
+    100%       { transform: scale(1); }
+}
+
 .site-article__bg {
     position: absolute;
     left: 0;
@@ -730,7 +735,11 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
     background-repeat: no-repeat;
     z-index: -1;
     pointer-events: none;
-    transition: opacity var(--km-duration-slow) var(--km-ease-smooth);
+    clip-path: inset(0);
+    transform-origin: center center;
+    will-change: transform, opacity;
+    animation: article-bg-zoom calc(8 * var(--km-duration-slow)) ease-in-out infinite;
+    transition: opacity var(--km-duration-slow) ease-in-out;
     opacity: 0.2;
     filter: grayscale(1);
     mask-image:
@@ -741,6 +750,12 @@ html[data-theme="dark"] .site-sidebar__brand-image--light {
         linear-gradient(to right, transparent 0%, hsl(var(--km-color-bg)) 20%, hsl(var(--km-color-bg)) 80%, transparent 100%),
         linear-gradient(to bottom, transparent 0%, hsl(var(--km-color-bg)) 40%, hsl(var(--km-color-bg)) 60%, transparent 100%);
     -webkit-mask-composite: destination-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-article__bg {
+        animation: none;
+    }
 }
 
 .site-media {
@@ -2194,14 +2209,8 @@ i {
 }
 
 .badge {
-    border-radius: 0.25rem;
-    font-size: 0.7rem;
-    padding: 0.1rem 0.2rem;
-    margin-left: 0.25rem;
-    font-family: var(--km-font-mono);
-    text-transform: uppercase;
-    border: 1px solid hsl(var(--km-color-fg));
-    vertical-align: bottom;
+    margin-left: 0.25em;
+    color: hsl(var(--km-color-yellow));
 }
 
 li .badge {
@@ -2232,21 +2241,12 @@ li .badge {
     }
 }
 
-;
-
-.popular {
-    background-color: hsl(var(--km-color-muted-bg));
-    color: hsl(var(--km-color-fg));
-}
-
 .beta {
-    background-color: hsl(353, 96%, 90%);
-    color: hsl(347, 77%, 50%);
+    color: hsl(var(--km-color-red));
 }
 
 .new {
-    background-color: hsl(141, 79%, 85%);
-    color: hsl(142, 76%, 36%);
+    color: hsl(var(--km-color-green));
 }
 
 .highlight pre {
