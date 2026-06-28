@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 04 May, 2026
+.. Last updated on: 31 May, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -49,7 +49,7 @@ reinforcement learning.
 
     Lessons I didn't plan on teaching, but I re-learnt them along the way.
 
-.. rubric:: :fab:`compass-drafting far` Build. Share. Repeat.
+.. rubric:: :fab:`compass-drafting far` Build and share
     :class: pre-title-text
 
 .. _open-source:

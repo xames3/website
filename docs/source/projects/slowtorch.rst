@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 18 April, 2025
-.. Last updated on: 29 April, 2026
+.. Last updated on: 27 May, 2026
 
 :og:title: PyTorch... but much slower
 :og:description: PyTorch taught me how to build while SlowTorch taught me how
@@ -32,7 +32,7 @@ January of 2025, reflecting on `xsNumPy`_. I had spent weeks understanding and
 learning arrays, memory buffers, and `broadcasting`_. As mentioned in
 :doc:`that story <./xsnumpy>`, it was indeed a trip for me.
 
-.. card:: :fas:`at far` Why write xsNumPy?
+.. card:: Why write xsNumPy?
     :link: xsnumpy
     :link-type: doc
     :link-alt: Read

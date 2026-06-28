@@ -4,7 +4,7 @@ Base Layout Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 25 April, 2026
+Last updated on: 15 June, 2026
 -->
 {%- set lang_attr = "en" if language == None else (language|replace('_','-')) -%}
 <!DOCTYPE html>
@@ -12,10 +12,9 @@ Last updated on: 25 April, 2026
       {% if sphinx_version_tuple>= (7, 2) %}data-content_root="{{ content_root }}"{% endif %}
       :data-theme="darkMode"
       x-data="{darkMode: localStorage.getItem('darkMode') ?? 'dark'}"
-      x-init="if (!localStorage.getItem('darkMode')) { localStorage.setItem('darkMode', darkMode); } const applyTheme = window.simpleApplyTheme ?? ((val) => { document.documentElement.classList.add('theme-transition'); requestAnimationFrame(() => { document.documentElement.setAttribute('data-theme', val); setTimeout(() => document.documentElement.classList.remove('theme-transition'), 700); }); }); $watch('darkMode', val => { applyTheme(val); localStorage.setItem('darkMode', val); });"
+      x-init="if (!localStorage.getItem('darkMode')) { localStorage.setItem('darkMode', darkMode); } const applyTheme = window.simpleApplyTheme ?? ((val, oldVal) => { const root = document.documentElement; const prev = oldVal || (val === 'dark' ? 'light' : 'dark'); if (prev !== val && root.getAttribute('data-theme') === val) { root.setAttribute('data-theme', prev); } root.classList.add('theme-transition'); void root.offsetWidth; root.setAttribute('data-theme', val); setTimeout(() => root.classList.remove('theme-transition'), 700); }); $watch('darkMode', (val, oldVal) => { applyTheme(val, oldVal); localStorage.setItem('darkMode', val); });"
       class="scroll-smooth"
-      :class="{'dark': darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)}"
-      x-effect="document.documentElement.setAttribute('data-theme', darkMode)">
+      :class="{'dark': darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)}">
     <head>
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0" />
@@ -60,26 +59,27 @@ Last updated on: 25 April, 2026
             {%- endif %}
         {%- endfor %}
         {%- set _favicon_ico_url = favicon_url | default(pathto('_static/' + (favicon or ""), 1)) %}
-        {%- set _favicon_16_url = pathto('_static/' + favicons.size_16, 1) %}
-        {%- set _favicon_32_url = pathto('_static/' + favicons.size_32, 1) %}
-        {%- set _favicon_180_url = pathto('_static/' + favicons.size_180, 1) %}
         {%- set _favicon_manifest_url = pathto('_static/' + favicons.manifest, 1) %}
+        {%- set _favicon_96_url = pathto('_static/' + favicons.size_96, 1) %}
+        {%- set _favicon_180_url = pathto('_static/' + favicons.size_180, 1) %}
+        {%- set _favicon_svg_url = pathto('_static/' + favicons.size_svg, 1) %}
         {%- if favicon_url or favicon %}
             <link rel="icon"
+                  type="image/png"
+                  href="{{ _favicon_96_url }}"
+                  sizes="96x96" />
+            <link rel="icon"
+                  type="image/svg+xml"
+                  href="{{ _favicon_svg_url }}" />
+            <link rel="shortcut icon"
                   href="{{ _favicon_ico_url }}" />
-            <link rel="icon"
-                  type="image/png"
-                  sizes="16x16"
-                  href="{{ _favicon_16_url }}">
-            <link rel="icon"
-                  type="image/png"
-                  sizes="32x32"
-                  href="{{ _favicon_32_url }}">
             <link rel="apple-touch-icon"
                   sizes="180x180"
-                  href="{{ _favicon_180_url }}">
+                  href="{{ _favicon_180_url }}" />
+            <meta name="apple-mobile-web-app-title"
+                  content="{{ title|striptags|e if title else docstitle }}" />
             <link rel="manifest"
-                  href="{{ _favicon_manifest_url }}">
+                  href="{{ _favicon_manifest_url }}" />
         {%- endif %}
         {%- block linktags %}
             {%- if hasdoc('search') %}

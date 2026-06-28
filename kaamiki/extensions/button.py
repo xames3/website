@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April, 2026
-Last updated on: 04 May, 2026
+Last updated on: 12 June, 2026
 
 This module defines a custom `button` directive for the Kaamiki Sphinx
 Theme. The directive allows adding a button directly within the
@@ -101,7 +101,7 @@ class directive(rst.Directive):
         """
         self.assert_has_content()
         self.options["url"] = rst.directives.uri(self.arguments.pop().strip())
-        self.options["faicon"] = self.options.pop("fa-icon")
+        self.options["faicon"] = self.options.pop("fa-icon", None)
         self.options["text"] = "\n".join(self.content).strip()
         attributes: dict[str, str] = {}
         attributes["text"] = template.render(**self.options)

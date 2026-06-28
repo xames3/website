@@ -1,11 +1,8 @@
 :root {
-    --foreground: 0 0% 9%;
-    --background: 0 0% 100%;
     --obj-foreground: 210.71 55.46% 55.1%;
     --import-foreground: 355.52 72.5% 47.06%;
     --comment-foreground: 212.98 96.61% 34.71%;
     --function-foreground: 260.93 53.09% 47.65%;
-    --highlight: 209.55 100% 94%;
     --syntax-comment: 212 10% 58%;
     --syntax-error: 357 94% 63%;
     --syntax-keyword: 9 100% 73%;
@@ -23,20 +20,17 @@
     --syntax-output: 212 10% 58%;
     --syntax-highlight-accent: 210 100% 64%;
     --lineno-padding: 5px;
-    --highlight-bar-offset: 1rem;
-    --highlight-bar-stop: 16.81%;
-    --highlight-bar-height: 20px;
-    --highlight-bar-height-mobile: 17px;
+    --km-code-bar-offset: 1rem;
+    --km-code-bar-stop: 16.81%;
+    --km-code-bar-height: 20px;
+    --km-code-bar-height-mobile: 17px;
 }
 
 html[data-theme="dark"] {
-    --foreground: 0 0% 93%;
-    --background: 0 0% 4%;
     --obj-foreground: 208.4 100.8% 73.79%;
     --import-foreground: 3.83 100% 72.35%;
     --comment-foreground: 207.33 100% 82.35%;
     --function-foreground: 268.97 100% 82.94%;
-    --highlight: 211.25 97.96% 19.22%;
     --syntax-comment: 212 10% 58%;
     --syntax-error: 357 92% 63%;
     --syntax-keyword: 9 100% 73%;
@@ -74,12 +68,12 @@ span.linenos {
 
 td.linenos .special,
 span.linenos.special {
-    color: hsl(var(--foreground));
-    background-color: hsl(var(--background));
+    color: hsl(var(--km-color-fg));
+    background-color: hsl(var(--km-color-bg));
 }
 
 .highlight {
-    background: hsl(var(--background));
+    background: hsl(var(--km-color-bg));
 }
 
 .highlight pre {
@@ -87,19 +81,19 @@ span.linenos.special {
 }
 
 .highlight .hll {
-    background-color: hsl(var(--highlight));
+    background-color: hsl(var(--km-color-highlight));
     position: relative;
     display: block;
-    width: calc(100% + var(--highlight-bar-offset));
+    width: calc(100% + var(--km-code-bar-offset));
 }
 
 .highlight .hll::before {
     content: " ";
     position: absolute;
-    left: calc(var(--highlight-bar-offset) * -1);
-    width: var(--highlight-bar-offset);
-    height: var(--highlight-bar-height);
-    background: linear-gradient(to right, hsl(var(--syntax-highlight-accent)), hsl(var(--syntax-highlight-accent)) var(--highlight-bar-stop), hsl(var(--highlight)) var(--highlight-bar-stop));
+    left: calc(var(--km-code-bar-offset) * -1);
+    width: var(--km-code-bar-offset);
+    height: var(--km-code-bar-height);
+    background: linear-gradient(to right, hsl(var(--syntax-highlight-accent)), hsl(var(--syntax-highlight-accent)) var(--km-code-bar-stop), hsl(var(--km-color-highlight)) var(--km-code-bar-stop));
 }
 
 .highlight .c,
@@ -131,7 +125,7 @@ span.linenos.special {
 .highlight .na,
 .highlight .nx,
 .highlight .bp {
-    color: hsl(var(--foreground));
+    color: hsl(var(--km-color-fg));
 }
 
 .highlight .k,
@@ -201,23 +195,23 @@ span.linenos.special {
 }
 
 .highlight .ge {
-    color: hsl(var(--foreground));
+    color: hsl(var(--km-color-fg));
     font-style: italic;
 }
 
 .highlight .ges {
-    color: hsl(var(--foreground));
+    color: hsl(var(--km-color-fg));
     font-weight: 500;
     font-style: italic;
 }
 
 .highlight .gs {
-    color: hsl(var(--foreground));
+    color: hsl(var(--km-color-fg));
     font-weight: 500;
 }
 
 .highlight .g-Underline {
-    color: hsl(var(--foreground));
+    color: hsl(var(--km-color-fg));
     text-decoration: underline;
 }
 
@@ -258,7 +252,7 @@ span.linenos.special {
 }
 
 .highlight .nn {
-    color: hsl(var(--foreground));
+    color: hsl(var(--km-color-fg));
     font-weight: 500;
 }
 
@@ -275,7 +269,7 @@ span.linenos.special {
     }
 
     .highlight .hll::before {
-        height: var(--highlight-bar-height-mobile);
+        height: var(--km-code-bar-height-mobile);
         top: 0;
     }
 }

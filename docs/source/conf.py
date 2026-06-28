@@ -4,7 +4,7 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 29 April, 2026
+Last updated on: 30 May, 2026
 
 This file contains the configuration settings for building my static
 website using Sphinx, a popular Python documentation tool. Sphinx is a
@@ -119,9 +119,9 @@ html_context: dict[str, t.Any] = {
     },
     "favicons": {
         "manifest": "favicons/site.webmanifest",
-        "size_16": "favicons/favicon-16x16.png",
-        "size_32": "favicons/favicon-32x32.png",
+        "size_96": "favicons/favicon-96x96.png",
         "size_180": "favicons/apple-touch-icon.png",
+        "size_svg": "favicons/favicon.svg",
     },
     "header_buttons": {
         "Check my availability": {
@@ -142,6 +142,7 @@ html_context: dict[str, t.Any] = {
     },
     "secondary_toctree_title": "On this page",
     "show_breadcrumbs": True,
+    "show_colour_modes": False,
     "show_feedback": True,
     "show_last_updated_on": True,
     "show_previous_next_pages": True,

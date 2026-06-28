@@ -4,7 +4,7 @@ Footer Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 15 February, 2026
+Last updated on: 30 May, 2026
 -->
 <footer class="site-footer container">
     {%- block footer_before %}{%- endblock footer_before %}
@@ -45,12 +45,14 @@ Last updated on: 15 February, 2026
        target="_blank">CC BY 4.0</a>.&nbsp;
 </p>
 </div>
-<button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'"
-        aria-label="Colour theme switcher"
-        type="button">
-    <i class="{{ fa_icons.dark_mode }} site-header__theme-toggle-icon site-header__theme-toggle-icon--dark"></i>
-    <i class="{{ fa_icons.light_mode }} site-header__theme-toggle-icon site-header__theme-toggle-icon--light"></i>
-</button>
+{%- if show_colour_modes -%}
+    <button @click="darkMode = darkMode === 'light' ? 'dark' : 'light'"
+            aria-label="Colour theme switcher"
+            type="button">
+        <i class="{{ fa_icons.dark_mode }} site-header__theme-toggle-icon site-header__theme-toggle-icon--dark"></i>
+        <i class="{{ fa_icons.light_mode }} site-header__theme-toggle-icon site-header__theme-toggle-icon--light"></i>
+    </button>
+{%- endif -%}
 </div>
 {%- block footer_after %}{%- endblock footer_after %}
 </footer>

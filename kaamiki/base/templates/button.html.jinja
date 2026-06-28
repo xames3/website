@@ -13,7 +13,9 @@ Last updated on: 29 April, 2026
            rel="nofollow noopener"
            target="_blank">
             <span>
-                <span class="fas {{ faicon or 'far fa-arrow-up-right-from-square' }}"></span>
+                <span class="fas {{ faicon }}"
+                      style="{% if not faicon %}display: none;
+                             {% endif %}"></span>
             {{ text }}</span></a>
         </p>
     {% endblock button %}
