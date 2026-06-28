@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 22 February, 2025
-# Last updated on: 15 February, 2026
+# Last updated on: 24 June, 2026
 #
 # This Makefile provides a comprehensive set of commands (targets) for building
 # and testing my website.
@@ -72,13 +72,13 @@ help: ## Show this help and list available targets.
 	@echo "$(COLOUR_DIM)Read complete documentation at: https://github.com/xames3/website.$(COLOUR_RESET)"
 
 clean: ## Remove build artifacts and temporary directories.
-	@printf "$(COLOUR_YELLOW)[CLEAN]$(COLOUR_RESET) Removing $(OUTPUT_DIR) directory... "
+	@printf "$(COLOUR_ORANGE)[CLEAN]$(COLOUR_RESET) Removing $(OUTPUT_DIR) directory... "
 	@rm -rf $(OUTPUT_DIR) && \
 		printf "$(COLOUR_GREEN)OK!$(COLOUR_RESET)\n" || \
 		(printf "$(COLOUR_RED)FAILED!$(COLOUR_RESET)\n" && exit 1)
 
 check: ## Perform linting checks and report issues, if any.
-	@printf "$(COLOUR_ORANGE)[CHECK]$(COLOUR_RESET) Running linter... "
+	@printf "$(COLOUR_CYAN)[CHECK]$(COLOUR_RESET) Running linter... "
 	@$(SPHINX_LINT) $(SPHINX_LINT_FLAGS) $(SOURCE_DIR) >/dev/null && \
 		printf "$(COLOUR_GREEN)OK!$(COLOUR_RESET)\n" || \
 		(printf "$(COLOUR_RED)FAILED!$(COLOUR_RESET)\n" && exit 1)
@@ -103,6 +103,7 @@ serve: ## Start a development web server, if not running already and serve.
 
 start: ## Rebuild HTML files, start a development web server and serve.
 	@$(MAKE) rebuild --no-print-directory
+	@$(MAKE) stop --no-print-directory >/dev/null
 	@$(MAKE) serve --no-print-directory
 
 stop: ## Stop the development web server.

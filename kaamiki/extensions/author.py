@@ -4,7 +4,7 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 29 April, 2026
+Last updated on: 27 June, 2026
 
 This module defines a custom `author` directive for the Kaamiki Sphinx
 Theme. The directive allows embedding details directly within the
@@ -42,6 +42,11 @@ theme's Jinja2 template, producing a final HTML output.
 .. versionchanged:: 24.04.2026
 
     URL field is now generic and not specific to GitHub.
+
+.. versionadded:: 27.06.2026
+
+    Directive now supports optional background(s) which fades through
+    the title/author section.
 """
 
 from __future__ import annotations
@@ -78,9 +83,9 @@ class node(nodes.Element):
 class directive(rst.Directive):
     """Custom `author` directive for reStructuredText.
 
-    This class defines the behaviour of the `author` directive, including
-    how it processes options and content, and how it generates nodes to
-    be inserted into the document tree.
+    This class defines the behaviour of the `author` directive,
+    including how it processes options and content, and how it generates
+    nodes to be inserted into the document tree.
 
     The directive supports the following options::
 
@@ -100,6 +105,11 @@ class directive(rst.Directive):
     .. versionchanged:: 24.04.2026
 
         URL field is now generic and not specific to GitHub.
+
+    .. versionadded:: 27.06.2026
+
+        Directive now supports optional background(s) which fades
+        through the title/author section.
     """
 
     required_arguments = 1
@@ -107,6 +117,7 @@ class directive(rst.Directive):
     option_spec = {  # noqa: RUF012
         "avatar": rst.directives.uri,
         "target": rst.directives.uri,
+        "background": rst.directives.unchanged,
     }
 
     def run(self) -> list[nodes.Node]:

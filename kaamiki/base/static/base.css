@@ -358,49 +358,33 @@ video {
 }
 
 :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 215 20.2% 65.1%;
-    --radius: 0.5rem
+    --km-color-bg: 0 0% 100%;
+    --km-color-fg: 222.2 47.4% 11.2%;
+    --km-color-muted-bg: 210 40% 96.1%;
+    --km-color-muted-fg: 215.4 16.3% 46.9%;
+    --km-color-border: 214.3 31.8% 91.4%;
+    --km-color-input: var(--km-color-border);
+    --km-color-primary: 222.2 47.4% 11.2%;
+    --km-color-primary-fg: 210 40% 98%;
+    --km-color-accent-bg: 210 40% 96.1%;
+    --km-color-accent-fg: 222.2 47.4% 11.2%;
+    --km-color-ring: 215 20.2% 65.1%;
+    --km-radius-normal: 0.5rem
 }
 
 .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 215 20.2% 65.1%;
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 1.2%;
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 216 34% 17%;
-    --radius: 0.5rem
+    --km-color-bg: 224 71% 4%;
+    --km-color-fg: 213 31% 91%;
+    --km-color-muted-bg: 223 47% 11%;
+    --km-color-muted-fg: 215.4 16.3% 56.9%;
+    --km-color-accent-bg: 216 34% 17%;
+    --km-color-accent-fg: 210 40% 98%;
+    --km-color-border: 216 34% 17%;
+    --km-color-input: var(--km-color-border);
+    --km-color-primary: 210 40% 98%;
+    --km-color-primary-fg: 222.2 47.4% 1.2%;
+    --km-color-ring: 216 34% 17%;
+    --km-radius-normal: 0.5rem
 }
 
 .container {
@@ -422,7 +406,7 @@ video {
 }
 
 #content hr {
-    border-color: hsl(var(--border));
+    border-color: hsl(var(--km-color-border));
     margin-bottom: 1rem;
     margin-top: 1rem
 }
@@ -443,7 +427,7 @@ video {
 
 #content h2 {
     border-bottom-width: 1px;
-    border-color: hsl(var(--border));
+    border-color: hsl(var(--km-color-border));
     font-size: 1.875rem;
     font-weight: 600;
     line-height: 2.25rem;
@@ -480,7 +464,7 @@ video {
 }
 
 #content section>p.lead {
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--km-color-muted-fg));
     font-size: 1.125rem;
     line-height: 1.75rem
 }
@@ -490,13 +474,13 @@ video {
 }
 
 #content a.viewcode-back {
-    color: hsl(var(--muted-foreground)) !important;
+    color: hsl(var(--km-color-muted-fg)) !important;
     position: absolute;
     right: 0
 }
 
 #content a:not(.toc-backref) {
-    color: hsl(var(--primary));
+    color: hsl(var(--km-color-primary));
     font-weight: 500;
     text-decoration-line: underline;
     text-decoration-thickness: from-font;
@@ -584,7 +568,7 @@ video {
 }
 
 #content figcaption {
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--km-color-muted-fg));
     font-size: .875rem;
     line-height: 1.25rem;
     margin-bottom: 3rem
@@ -616,14 +600,14 @@ table {
 }
 
 table caption {
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--km-color-muted-fg));
     margin-bottom: 1.5rem;
     text-align: left
 }
 
 table thead {
     border-bottom-width: 1px;
-    border-color: hsl(var(--border))
+    border-color: hsl(var(--km-color-border))
 }
 
 table th {
@@ -643,7 +627,7 @@ table th:is(.dark *) {
 
 table tbody tr {
     border-bottom-width: 1px;
-    border-color: hsl(var(--border))
+    border-color: hsl(var(--km-color-border))
 }
 
 table tbody td {
@@ -671,11 +655,11 @@ table tbody td:first-child {
 }
 
 .admonition {
-    background-color: hsl(var(--background));
-    border-color: hsl(var(--border));
-    border-radius: var(--radius);
+    background-color: hsl(var(--km-color-bg));
+    border-color: hsl(var(--km-color-border));
+    border-radius: var(--km-radius-normal);
     border-width: 1px;
-    color: hsl(var(--foreground));
+    color: hsl(var(--km-color-fg));
     font-size: .875rem;
     line-height: 1.25rem;
     margin-bottom: 1.5rem;
@@ -878,8 +862,8 @@ div.deprecated .versionmodified:is(.dark *) {
 }
 
 .literal-block-wrapper {
-    border-color: hsl(var(--border));
-    border-radius: var(--radius);
+    border-color: hsl(var(--km-color-border));
+    border-radius: var(--km-radius-normal);
     border-width: 1px;
     margin-left: 0;
     margin-right: 0;
@@ -897,10 +881,10 @@ div.deprecated .versionmodified:is(.dark *) {
 
 .literal-block-wrapper .code-block-caption {
     border-bottom-width: 1px;
-    border-color: hsl(var(--border));
-    border-top-left-radius: var(--radius);
-    border-top-right-radius: var(--radius);
-    color: hsl(var(--muted-foreground));
+    border-color: hsl(var(--km-color-border));
+    border-top-left-radius: var(--km-radius-normal);
+    border-top-right-radius: var(--km-radius-normal);
+    color: hsl(var(--km-color-muted-fg));
     font-size: .875rem;
     letter-spacing: .025em;
     line-height: 1.25rem;
@@ -908,7 +892,7 @@ div.deprecated .versionmodified:is(.dark *) {
 }
 
 code {
-    background-color: hsl(var(--muted));
+    background-color: hsl(var(--km-color-muted-bg));
     border-radius: .25rem;
     font-family: JetBrains\ Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
     font-size: .875rem;
@@ -920,7 +904,7 @@ code {
 
 code .ge,
 code em {
-    color: hsl(var(--accent-foreground));
+    color: hsl(var(--km-color-accent-fg));
     font-weight: 700;
     letter-spacing: .025em
 }
@@ -930,8 +914,8 @@ code em {
 }
 
 pre {
-    border-color: hsl(var(--border));
-    border-radius: var(--radius);
+    border-color: hsl(var(--km-color-border));
+    border-radius: var(--km-radius-normal);
     border-width: 1px;
     font-size: .875rem;
     line-height: 1.25rem;
@@ -942,7 +926,7 @@ pre {
 }
 
 pre[data-theme=dark] {
-    background-color: hsl(var(--background))
+    background-color: hsl(var(--km-color-bg))
 }
 
 pre[data-theme=light] {
@@ -986,7 +970,7 @@ pre code [id^=line-] mark {
 }
 
 pre code [id^=line-] mark {
-    background-color: hsl(var(--muted));
+    background-color: hsl(var(--km-color-muted-bg));
     color: inherit;
     --tw-shadow: 2px 0 currentColor inset;
     --tw-shadow-colored: inset 2px 0 var(--tw-shadow-color);
@@ -1084,16 +1068,16 @@ pre span.linenos {
 
 .guilabel,
 .menuselection {
-    border-color: hsl(var(--border));
-    border-radius: calc(var(--radius) - 4px);
+    border-color: hsl(var(--km-color-border));
+    border-radius: calc(var(--km-radius-normal) - 4px);
     border-width: 1px;
-    color: hsl(var(--accent-foreground));
+    color: hsl(var(--km-color-accent-fg));
     font-weight: 500;
     padding: 1px .5rem
 }
 
 #content kbd:not(.compound) {
-    background-color: hsl(var(--muted));
+    background-color: hsl(var(--km-color-muted-bg));
     border-radius: .25rem;
     border-width: 1px;
     font-size: .875rem;
@@ -1104,7 +1088,7 @@ pre span.linenos {
 }
 
 .sig {
-    border-color: hsl(var(--border));
+    border-color: hsl(var(--km-color-border));
     border-top-width: 1px;
     font-family: JetBrains\ Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
     font-weight: 700;
@@ -1113,11 +1097,11 @@ pre span.linenos {
 }
 
 .sig-name {
-    color: hsl(var(--accent-foreground))
+    color: hsl(var(--km-color-accent-fg))
 }
 
 em.property {
-    color: hsl(var(--muted-foreground))
+    color: hsl(var(--km-color-muted-fg))
 }
 
 .option .sig-prename {
@@ -1125,7 +1109,7 @@ em.property {
 }
 
 .viewcode-link {
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--km-color-muted-fg));
     float: right
 }
 
@@ -1161,15 +1145,15 @@ dt .classifier:before {
     text-shadow: none;
     text-transform: none;
     word-wrap: break-word;
-    background-color: hsl(var(--muted));
-    border-radius: calc(var(--radius) - 4px);
+    background-color: hsl(var(--km-color-muted-bg));
+    border-radius: calc(var(--km-radius-normal) - 4px);
     content: attr(data-tooltip);
     display: none;
     pointer-events: none;
     position: absolute;
     white-space: pre;
     --tw-bg-opacity: 0.75;
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--km-color-muted-fg));
     font-family: ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
     font-size: .75rem;
     font-weight: 400;
@@ -1215,7 +1199,7 @@ dt .classifier:before {
 .headerlink>* {
     visibility: hidden;
     fill: currentColor;
-    color: hsl(var(--muted-foreground))
+    color: hsl(var(--km-color-muted-fg))
 }
 
 .headerlink:focus>* {
@@ -1231,7 +1215,7 @@ dt .classifier:before {
 }
 
 #left-sidebar .caption {
-    border-radius: calc(var(--radius) - 2px);
+    border-radius: calc(var(--km-radius-normal) - 2px);
     font-size: .875rem;
     font-weight: 600;
     line-height: 1.25rem;
@@ -1293,7 +1277,7 @@ dt .classifier:before {
 #left-sidebar a {
     align-items: center;
     border-color: transparent;
-    border-radius: calc(var(--radius) - 2px);
+    border-radius: calc(var(--km-radius-normal) - 2px);
     border-width: 1px;
     display: flex;
     padding: .375rem .5rem;
@@ -1310,11 +1294,11 @@ dt .classifier:before {
 
 #left-sidebar a>button {
     border-radius: .25rem;
-    color: hsl(var(--muted-foreground))
+    color: hsl(var(--km-color-muted-fg))
 }
 
 #left-sidebar a>button:hover {
-    background-color: hsl(var(--primary)/.1)
+    background-color: hsl(var(--km-color-primary)/.1)
 }
 
 #left-sidebar a>button>svg {
@@ -1326,10 +1310,10 @@ dt .classifier:before {
 }
 
 #left-sidebar a.current {
-    background-color: hsl(var(--accent));
-    border-color: hsl(var(--border));
+    background-color: hsl(var(--km-color-accent-bg));
+    border-color: hsl(var(--km-color-border));
     border-width: 1px;
-    color: hsl(var(--accent-foreground));
+    color: hsl(var(--km-color-accent-fg));
     font-weight: 500
 }
 
@@ -1371,7 +1355,7 @@ dt .classifier:before {
 
 .contents ul li a.reference,
 .toctree-wrapper ul li a.reference {
-    color: hsl(var(--muted-foreground)) !important;
+    color: hsl(var(--km-color-muted-fg)) !important;
     display: inline-block;
     font-weight: 400 !important;
     text-decoration-line: none !important;
@@ -1382,7 +1366,7 @@ dt .classifier:before {
 
 .contents ul li a.reference:hover,
 .toctree-wrapper ul li a.reference:hover {
-    color: hsl(var(--foreground))
+    color: hsl(var(--km-color-fg))
 }
 
 .contents ul li ul,
@@ -1396,7 +1380,7 @@ dt .classifier:before {
 }
 
 #search-results .search-summary {
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--km-color-muted-fg));
     font-size: 1.25rem;
     line-height: 1.75rem;
     margin-top: 1.5rem
@@ -1408,21 +1392,21 @@ dt .classifier:before {
 }
 
 #search-results ul.search .context {
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--km-color-muted-fg));
     font-size: .875rem;
     line-height: 1.25rem;
     margin-top: .5rem
 }
 
 .highlighted {
-    background-color: hsl(var(--accent));
+    background-color: hsl(var(--km-color-accent-bg));
     text-decoration-line: underline;
     text-decoration-thickness: 2px
 }
 
 .highlight-link {
-    border-color: hsl(var(--border));
-    border-radius: var(--radius);
+    border-color: hsl(var(--km-color-border));
+    border-radius: var(--km-radius-normal);
     border-width: 1px;
     font-size: .875rem;
     line-height: 1.25rem;
@@ -1433,7 +1417,7 @@ dt .classifier:before {
 }
 
 .highlight-link:hover {
-    background-color: hsl(var(--accent))
+    background-color: hsl(var(--km-color-accent-bg))
 }
 
 @media (min-width:1024px) {
@@ -1453,15 +1437,15 @@ dt .classifier:before {
     text-shadow: none;
     text-transform: none;
     word-wrap: break-word;
-    background-color: hsl(var(--muted));
-    border-radius: calc(var(--radius) - 4px);
+    background-color: hsl(var(--km-color-muted-bg));
+    border-radius: calc(var(--km-radius-normal) - 4px);
     content: attr(data-tooltip);
     display: none;
     pointer-events: none;
     position: absolute;
     white-space: pre;
     --tw-bg-opacity: 0.75;
-    color: hsl(var(--muted-foreground));
+    color: hsl(var(--km-color-muted-fg));
     font-family: ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
     font-size: .75rem;
     font-weight: 400;
@@ -2036,11 +2020,11 @@ dt .classifier:before {
 }
 
 .rounded-md {
-    border-radius: calc(var(--radius) - 2px)
+    border-radius: calc(var(--km-radius-normal) - 2px)
 }
 
 .rounded-sm {
-    border-radius: calc(var(--radius) - 4px)
+    border-radius: calc(var(--km-radius-normal) - 4px)
 }
 
 .border {
@@ -2060,23 +2044,23 @@ dt .classifier:before {
 }
 
 .border-border {
-    border-color: hsl(var(--border))
+    border-color: hsl(var(--km-color-border))
 }
 
 .border-input {
-    border-color: hsl(var(--input))
+    border-color: hsl(var(--km-color-input))
 }
 
 .bg-background {
-    background-color: hsl(var(--background))
+    background-color: hsl(var(--km-color-bg))
 }
 
 .bg-background\/80 {
-    background-color: hsl(var(--background)/.8)
+    background-color: hsl(var(--km-color-bg)/.8)
 }
 
 .bg-background\/95 {
-    background-color: hsl(var(--background)/.95)
+    background-color: hsl(var(--km-color-bg)/.95)
 }
 
 .bg-gray-700 {
@@ -2085,7 +2069,7 @@ dt .classifier:before {
 }
 
 .bg-muted {
-    background-color: hsl(var(--muted))
+    background-color: hsl(var(--km-color-muted-bg))
 }
 
 .bg-transparent {
@@ -2199,15 +2183,15 @@ dt .classifier:before {
 }
 
 .text-foreground {
-    color: hsl(var(--foreground))
+    color: hsl(var(--km-color-fg))
 }
 
 .text-foreground\/60 {
-    color: hsl(var(--foreground)/.6)
+    color: hsl(var(--km-color-fg)/.6)
 }
 
 .text-muted-foreground {
-    color: hsl(var(--muted-foreground))
+    color: hsl(var(--km-color-muted-fg))
 }
 
 .text-red-700 {
@@ -2256,7 +2240,7 @@ dt .classifier:before {
 }
 
 .ring-offset-background {
-    --tw-ring-offset-color: hsl(var(--background))
+    --tw-ring-offset-color: hsl(var(--km-color-bg))
 }
 
 .backdrop-blur {
@@ -2316,7 +2300,7 @@ dt .classifier:before {
 }
 
 .hover\:bg-accent:hover {
-    background-color: hsl(var(--accent))
+    background-color: hsl(var(--km-color-accent-bg))
 }
 
 .hover\:bg-gray-950:hover {
@@ -2325,7 +2309,7 @@ dt .classifier:before {
 }
 
 .hover\:bg-muted:hover {
-    background-color: hsl(var(--muted))
+    background-color: hsl(var(--km-color-muted-bg))
 }
 
 .hover\:bg-transparent:hover {
@@ -2333,23 +2317,23 @@ dt .classifier:before {
 }
 
 .hover\:text-accent-foreground:hover {
-    color: hsl(var(--accent-foreground))
+    color: hsl(var(--km-color-accent-fg))
 }
 
 .hover\:text-foreground:hover {
-    color: hsl(var(--foreground))
+    color: hsl(var(--km-color-fg))
 }
 
 .hover\:text-foreground\/80:hover {
-    color: hsl(var(--foreground)/.8)
+    color: hsl(var(--km-color-fg)/.8)
 }
 
 .hover\:placeholder-accent-foreground:hover::-moz-placeholder {
-    color: hsl(var(--accent-foreground))
+    color: hsl(var(--km-color-accent-fg))
 }
 
 .hover\:placeholder-accent-foreground:hover::placeholder {
-    color: hsl(var(--accent-foreground))
+    color: hsl(var(--km-color-accent-fg))
 }
 
 .hover\:opacity-100:hover {
@@ -2362,7 +2346,7 @@ dt .classifier:before {
 }
 
 .focus\:bg-accent:focus {
-    background-color: hsl(var(--accent))
+    background-color: hsl(var(--km-color-accent-bg))
 }
 
 .focus\:bg-gray-950:focus {
@@ -2371,7 +2355,7 @@ dt .classifier:before {
 }
 
 .focus\:text-accent-foreground:focus {
-    color: hsl(var(--accent-foreground))
+    color: hsl(var(--km-color-accent-fg))
 }
 
 .focus\:opacity-100:focus {
@@ -2394,7 +2378,7 @@ dt .classifier:before {
 }
 
 .focus-visible\:ring-ring:focus-visible {
-    --tw-ring-color: hsl(var(--ring))
+    --tw-ring-color: hsl(var(--km-color-ring))
 }
 
 .focus-visible\:ring-offset-2:focus-visible {
@@ -2410,11 +2394,11 @@ dt .classifier:before {
 }
 
 .group:hover .group-hover\:bg-accent {
-    background-color: hsl(var(--accent))
+    background-color: hsl(var(--km-color-accent-bg))
 }
 
 .group:hover .group-hover\:text-accent-foreground {
-    color: hsl(var(--accent-foreground))
+    color: hsl(var(--km-color-accent-fg))
 }
 
 .dark\:block:is(.dark *) {

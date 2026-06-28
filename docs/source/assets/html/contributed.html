@@ -4,7 +4,7 @@ Previously contributed at widget
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 01 October, 2025
-Last updated on: 09 February, 2026
+Last updated on: 27 May, 2026
 -->
 <div class="contributed-at__container">
     <p class="contributed-at__title">Contributed at</p>
@@ -15,34 +15,34 @@ Last updated on: 09 February, 2026
         <ul class="contributed-at-scroller__list">
             <li class="contributed-at-scroller__item"
                 id="accenture-logo"
-                style="--organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/1/1c/Accenture_logo.svg')">
+                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/1/1c/Accenture_logo.svg')">
                 <span class="sr-only">Accenture</span>
             </li>
             <li class="contributed-at-scroller__item"
-                style="--organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/9/97/OpenAI_logo_2025.svg')">
+                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/9/97/OpenAI_logo_2025.svg')">
                 <span class="sr-only">OpenAI</span>
             </li>
             <li class="contributed-at-scroller__item"
-                style="--organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/7/75/Django_logo.svg');
+                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/7/75/Django_logo.svg');
                        inline-size: 7rem">
                 <span class="sr-only">Django</span>
             </li>
             <li class="contributed-at-scroller__item"
                 id="nlu-logo"
-                style="--organisation-logo: url('https://cdn.bfldr.com/C2SBP1PQ/at/mwnmb327vvh924grs7tj/RGB_NLU_Logo_1C_ALLWhite.png?format=png&crop=3697%2C1485%2Cx252%2Cy101')">
+                style="--km-organisation-logo: url('https://cdn.bfldr.com/C2SBP1PQ/at/mwnmb327vvh924grs7tj/RGB_NLU_Logo_1C_ALLWhite.png?format=png&crop=3697%2C1485%2Cx252%2Cy101')">
                 <span class="sr-only">National Louis University</span>
             </li>
             <li class="contributed-at-scroller__item"
-                style="--organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg')">
+                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg')">
                 <span class="sr-only">Microsoft</span>
             </li>
             <li class="contributed-at-scroller__item"
-                style="--organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg');
+                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg');
                        inline-size: 4rem">
                 <span class="sr-only">AWS Boto3</span>
             </li>
             <li class="contributed-at-scroller__item"
-                style="--organisation-logo: url('https://cdn.worldvectorlogo.com/logos/tensoriot-1.svg')">
+                style="--km-organisation-logo: url('https://cdn.worldvectorlogo.com/logos/tensoriot-1.svg')">
                 <span class="sr-only">TensorIoT</span>
             </li>
         </ul>
@@ -54,11 +54,11 @@ Last updated on: 09 February, 2026
     }
 
     .contributed-at-scroller {
-        --contributed-at-scroll-base-duration: 30s;
-        --contributed-at-gap: 3.5rem;
-        --contributed-at-loop-distance: 50%;
-        --organisation-logo-size: 10rem;
-        --organisation-logo-height: 3.5rem;
+        --km-contributed-at-scroll-base-duration: 30s;
+        --km-contributed-at-gap: 3.5rem;
+        --km-contributed-at-loop-distance: 50%;
+        --km-organisation-logo-size: 10rem;
+        --km-organisation-logo-height: 3.5rem;
         max-width: min(100%, 720px);
         margin-inline: auto;
     }
@@ -70,15 +70,15 @@ Last updated on: 09 February, 2026
         text-align: center;
         margin-bottom: 1rem;
         font-weight: 500;
-        color: hsl(var(--muted-foreground));
+        color: hsl(var(--km-color-muted-fg));
     }
 
     .contributed-at-scroller[data-speed="fast"] {
-        --contributed-at-scroll-duration: var(--contributed-at-scroll-base-duration);
+        --km-contributed-at-scroll-duration: var(--km-contributed-at-scroll-base-duration);
     }
 
     .contributed-at-scroller[data-speed="slow"] {
-        --contributed-at-scroll-duration: calc(1.5 * var(--contributed-at-scroll-base-duration));
+        --km-contributed-at-scroll-duration: calc(1.5 * var(--km-contributed-at-scroll-base-duration));
     }
 
     .contributed-at-scroller[data-animated="true"] {
@@ -90,7 +90,7 @@ Last updated on: 09 February, 2026
     .contributed-at-scroller__list {
         display: flex;
         align-items: center;
-        gap: var(--contributed-at-gap);
+        gap: var(--km-contributed-at-gap);
         margin: 0;
         padding: 0;
         list-style: none;
@@ -100,7 +100,7 @@ Last updated on: 09 February, 2026
     .contributed-at-scroller[data-animated="true"] .contributed-at-scroller__list {
         width: max-content;
         flex-wrap: nowrap;
-        animation: contributed-at-scroll var(--contributed-at-scroll-duration) linear infinite;
+        animation: contributed-at-scroll var(--km-contributed-at-scroll-duration) linear infinite;
         animation-play-state: running;
     }
 
@@ -115,8 +115,8 @@ Last updated on: 09 February, 2026
         justify-content: center;
         margin-top: 0 !important;
         flex: 0 0 auto;
-        inline-size: var(--organisation-logo-size);
-        min-block-size: calc(var(--organisation-logo-height) + 1rem);
+        inline-size: var(--km-organisation-logo-size);
+        min-block-size: calc(var(--km-organisation-logo-height) + 1rem);
         box-sizing: border-box;
     }
 
@@ -134,10 +134,10 @@ Last updated on: 09 February, 2026
         content: "";
         display: block;
         inline-size: 100%;
-        block-size: var(--organisation-logo-height);
-        background-color: hsl(var(--foreground));
-        mask: var(--organisation-logo) center / contain no-repeat;
-        -webkit-mask: var(--organisation-logo) center / contain no-repeat;
+        block-size: var(--km-organisation-logo-height);
+        background-color: hsl(var(--km-color-fg));
+        mask: var(--km-organisation-logo) center / contain no-repeat;
+        -webkit-mask: var(--km-organisation-logo) center / contain no-repeat;
     }
 
     .sr-only {
@@ -158,7 +158,7 @@ Last updated on: 09 February, 2026
 
     @keyframes contributed-at-scroll {
         to {
-            transform: translateX(calc(-1 * var(--contributed-at-loop-distance, 50%)));
+            transform: translateX(calc(-1 * var(--km-contributed-at-loop-distance, 50%)));
         }
     }
 
@@ -190,7 +190,7 @@ Last updated on: 09 February, 2026
                 const totalWidth = list.scrollWidth;
                 if (!totalWidth) return;
                 const loopDistance = totalWidth / 2;
-                list.style.setProperty('--contributed-at-loop-distance', `${loopDistance}px`);
+                list.style.setProperty('--km-contributed-at-loop-distance', `${loopDistance}px`);
             }
 
             function bindResizeListener() {
@@ -234,7 +234,7 @@ Last updated on: 09 February, 2026
             reduceMotionQuery.addEventListener('change', (event) => {
                 if (event.matches) {
                     scroller.dataset.animated = 'false';
-                    list.style.removeProperty('--contributed-at-loop-distance');
+                    list.style.removeProperty('--km-contributed-at-loop-distance');
                 } else {
                     initialise();
                 }
