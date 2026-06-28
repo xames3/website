@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 August, 2025
-.. Last updated on: 29 April, 2026
+.. Last updated on: 28 June, 2026
 
 :og:title: A week into Docker
 :og:description: Begineer's guide to Docker and containerisation
@@ -11,7 +11,7 @@
     like Docker? Or if you're new to this, what's the one thing you're hoping
     it'll solve for you?
 :fb:button: Let me know
-:fb:fa-icon: envelopes
+:fb:mode: split
 
 .. _explained-a-week-into-docker:
 
@@ -124,6 +124,18 @@ what was going on. Almost every tutorial I watched started with using the
 auto-magically, I'm dropped in an isolated environment where I can run my code
 or do whatever I want without messing up my local machine.
 
+.. code-block:: console
+
+    $ docker run python:3.8 python -c "print('Hello from inside a container')"
+    Unable to find image 'python:3.8' locally
+    3.8: Pulling from library/python
+    001c52e26ad5: Pull complete
+    d9d4b9b6e964: Pull complete
+    2068746827ec: Pull complete
+    Digest: sha256:cba7af3b9b9183b3f46de79c9d3f4b89a71bf3...
+    Status: Downloaded newer image for python:3.8
+    Hello from inside a container!
+
 But as I started using it more, I realised that there's a lot more to it, and
 Docker Engine is doing some really fancy stuff behind the scenes. Remember how
 I mentioned my machine was getting messy with all the different versions of
@@ -131,6 +143,13 @@ Python and other dependencies?
 
 Well, when I ran the :console:`$ docker run` command, it was Docker Engine that
 was creating an isolated environment to run my experiments within it.
+
+.. code-block:: console
+
+    $ docker run python:3.8 python -V
+    Python 3.8.20
+    $ docker run python:3.9 python -V
+    Python 3.9.21
 
 These environments are what we call **containers**.
 
@@ -204,7 +223,7 @@ using `Parallels`_ or running Linux on your Windows using `VirtualBox`_.
 Since a VM runs just like a regular application, it needs its resources like
 CPU, memory, storage, and processing power. It's thorough, but it's also heavy.
 
-Very heavy... I mean, you're running multiple bloody OSs at the same time!!
+Very heavy... I mean, you're running multiple bloody OSs at the same time!
 
 Containers, on the other hand, share the host OS' resources (kernel) and run as
 isolated processes (not technically) in the user space on the host OS. In
@@ -268,18 +287,30 @@ I wondered where I had been getting all these containers from in the first
 place. I knew I was pulling these **containers\*** from the internet, but I had
 no idea from where.
 
-.. rubric:: :fab:`puzzle-piece far` Putting it together
-    :class: pre-title-text
-.. rubric:: That's when I discovered Docker Hub.
-.. rubric::
-    Docker Hub is a cloud-based registry service where you can find and share
-    **container images**, not containers.
+.. container:: inline-container
+
+    .. grid:: 2
+
+        .. grid-item::
+            :columns: auto
+
+            .. rubric:: That's when I discovered Docker Hub.
+
+        .. grid-item::
+            :columns: auto
+            :class: align-right
+
+            .. grid:: 2
+
+                .. grid-item::
+
+                    .. button:: https://hub.docker.com/
+
+                        Learn more
+
+.. rubric:: `Docker Hub`_ is a cloud-based registry service where you can find
+    and share **container images**, not containers.
     :class: subtitle-text
-
-.. button:: https://hub.docker.com/
-    :fa-icon: far fa-book-open
-
-    Learn more
 
 But what's an image now? With a bit of research, I found out that a Docker
 image is a lightweight executable package that includes it needs to run the

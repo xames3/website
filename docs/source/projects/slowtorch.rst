@@ -1,16 +1,17 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 18 April, 2025
-.. Last updated on: 27 May, 2026
+.. Last updated on: 23 June, 2026
 
 :og:title: PyTorch... but much slower
 :og:description: PyTorch taught me how to build while SlowTorch taught me how
-    it's built!!
+    it's built!
 :og:type: article
 :og:image: https://i.imgur.com/HLTLqVl.jpeg
 :fb:title: Is slow learning the "key"?
 :fb:description: I wrote SlowTorch to truly understand the magic behind
     PyTorch. Have you done anything similar?
 :fb:button: Tell me your story
+:fb:mode: split
 
 .. _project-pytorch-but-much-slower:
 
@@ -64,7 +65,7 @@ It became super clear that the most valuable insights came from the process of
 building it and not the results. Sure, the results were important, but this
 reminded me that sometimes, the journey is more important than the destination.
 
-xsNumPy taught me that **slowness can be a gift**!!
+xsNumPy taught me that **slowness can be a gift**!
 
 Much like my approach to xsNumPy, I wanted to take my time with SlowTorch too.
 I wanted to build it slowly, understanding each component and appreciating the
@@ -105,7 +106,7 @@ PyTorch's. I needed to implement a way to save the node and operation history
 for autodiff, which was a new concept for me. I also had to learn how to track
 operations, gradients, and compute them efficiently.
 
-.. rubric:: Read the f*cking docs!!
+.. rubric:: Read the f*cking docs!
 .. rubric::
     PyTorch documentation were super duper helpful in understanding the various
     implementation details of the :py:class:`tensor <torch.Tensor>` class.

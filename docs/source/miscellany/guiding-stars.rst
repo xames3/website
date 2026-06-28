@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 24 February, 2025
-.. Last updated on: 29 April, 2026
+.. Last updated on: 28 June, 2026
 
 :og:title: Guiding stars
 :og:description: Expressing heartfelt gratitude to the heros who shaped my
@@ -10,7 +10,7 @@
 :fb:description: We all have mentors and friends who guide us. Reading this,
     did anyone come to your mind? I'd be honoured to hear about them.
 :fb:button: Share your reflections
-:fb:fa-icon: sparkles
+:fb:fa-icon: fa-sparkles
 
 .. _miscellany-guiding-stars:
 
@@ -25,6 +25,8 @@
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
+    :background: https://i.imgur.com/Gn1b6Cs.jpeg
+        https://i.imgur.com/CRsFJlJ.jpg
 
 In everyone's life, there are always points where you pause and look back. You
 not only reflect on your achievements and/or mistakes, but also the people
@@ -65,7 +67,7 @@ me during my highs and lows and helped shape my character.
 
 My mum's always with me, in my moments of doubt, to celebrating my successes
 (big and small); she has always been present and keeping me grounded. And to
-this strength, I'm and I'll always be eternally grateful!!
+this strength, I'm and I'll always be eternally grateful!
 
 .. _charlotte-parks:
 
@@ -147,7 +149,7 @@ but you were perhaps the most important of them all. I can't thank you enough
 for all the opportunities you've given me at NLU and for still believing in
 me, Dr Tovar.
 
-And for that, I'm deeply grateful!!
+And for that, I'm deeply grateful!
 
 .. _cameron-riddell:
 
@@ -166,7 +168,7 @@ data. Whenever I see a chart or someone asks me for my *"opinion"* on how to
 visualise it, I always think of you and your teachings; often sharing your
 videos and resources with them.
 
-Cheers for being such a **"legend"**, mate!!
+Cheers for being such a **"legend"**, mate!
 
 .. _fatemeh-taghvaei:
 
@@ -314,7 +316,7 @@ You've guided me through career decisions and supported me during difficult
 times. Your presence was always reassuring, whether through a message or a
 spontaneous invitation for a walk. I'd never forget that.
 
-I'm genuinely grateful to have found a mentor in you!!
+I'm genuinely grateful to have found a mentor in you!
 
 .. _young-song:
 

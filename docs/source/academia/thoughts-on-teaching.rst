@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April, 2026
-.. Last updated on: 29 April, 2026
+.. Last updated on: 27 June, 2026
 
 :og:title: Thoughts on teaching
 :og:description: Teaching the same courses, but differently every single time!
@@ -9,7 +9,6 @@
 :fb:description: If you have any new idea or suggestions about teaching, please let
     share. I'm always on the lookout for better ways to teach my student.
 :fb:button: Share your ways
-:fb:fa-icon: envelopes
 
 .. _academia-thoughts-on-teaching:
 
@@ -24,6 +23,7 @@
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
+    :background: https://i.imgur.com/83ZcICa.jpg
 
 A year ago, as of writing this article in April of 2026, I walked into the 4024
 classroom on our Chicago campus. I wasn't sure what kind of teacher I'd be, but
@@ -47,7 +47,7 @@ css-computer-science-info-systems/200/css-225>`_
 undergraduate-and-graduate-catalog/course-descriptions/
 css-computer-science-info-systems/400/css-401>`_
 classes over and over again. It's quite funny in hindsight. I taught the
-same course the whole year, yet somehow, never the same twice!! I think every
+same course the whole year, yet somehow, never the same twice! I think every
 section gave me a new learning experience.
 
 .. note::
@@ -64,7 +64,7 @@ lectures were conducted exactly as planned, and sometimes they were simply
 "strange"?!
 
 And somewhere in that strange unpredictability, I found the part I enjoyed the
-most my students!!
+most my students!
 
 .. rubric:: :fab:`backward-fast far` Looking back
     :class: pre-title-text
@@ -80,13 +80,13 @@ Students who made it memorable.
     class in the best way possible.
     :class: subtitle-text
 
-Some students brought in their questions Ooh, those questions?!
+Some students brought in their questions. Ooh, those questions?!
 
 Questions ranged from unrealistic assignment extensions or the topics covered
 to sometimes unexpectedly personal. Like I said, every quarter was different,
 yet every single time, someone would ask what I would do in their place, as if
 I had everything figured out. I never knew how to respond to some of those
-"what-if" scenarios, and I still don't!!
+"what-if" scenarios, and I still don't!
 
 The questions weren't super hypothetical or anything. They were simple and
 grounded, which I sometimes felt like I should've also asked myself when I was
@@ -104,7 +104,7 @@ it today's topic or sharing my past anecdotes and experiences, and I was
 leaving with answers to some of my personal questions and side-quests.
 
 It really felt like I was teaching and preparing myself through the means of my
-students, and that's what made them all very special!! I started seeing a
+students, and that's what made them all very special! I started seeing a
 younger, more cocky version of me, and my friends in them. Over time, I started
 picking up new things and new perspectives. Things like new games I've never
 heard of, music I wouldn't have found on my own, hobbies like baking that
@@ -128,7 +128,7 @@ way than I expected last year at this very moment. I'm seeing my whole year
 being shaped by so many people like my students, other faculty, staff members,
 and some friends I made along the way. It's shaped by those small moments,
 shared laughter, curiosities, growth, stories, gossips, and loads of new
-memories!!
+memories!
 
 I'm super-duper grateful to all my students for making me a much better teacher
 than I started last year. I'm especially grateful to

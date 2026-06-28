@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 01 March, 2025
-.. Last updated on: 29 April, 2026
+.. Last updated on: 23 June, 2026
 
 :og:title: Why write xsNumPy?
 :og:description: Journey of building a lightweight, pure-python implementation
@@ -123,7 +123,7 @@ It felt like opening Pandora's box; I wasn't ready. After a few days of
 head-scratching, I managed to create a primitive, albeit minimal, working
 version using Python's built-in :py:mod:`ctypes` module.
 
-It worked poorly. But it worked!!
+It worked poorly. But it worked!
 
 .. code-block:: python
     :caption: :fas:`file far` `xsnumpy/_core.py`_
@@ -362,7 +362,7 @@ failed almost immediately for higher-dimensional vectors.
 
 What if I added a scalar to a matrix, or a ``(3,)`` array to a ``(3, 3)``
 matrix? Could I add a :py:class:`float` to an :py:class:`int`? Each of those
-experiments brought new challenges, and I was absolutely frustrated!!
+experiments brought new challenges, and I was absolutely frustrated!
 
 That's when I realised I wasn't just adding or multiplying numbers, but
 learning and simultaneously recreating NumPy's broadcasting rules.
