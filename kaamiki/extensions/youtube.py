@@ -4,7 +4,7 @@ YouTube Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 29 April, 2026
+Last updated on: 28 June, 2026
 
 This module defines a custom `youtube` directive for the Kaamiki Sphinx
 Theme. The directive allows embedding a YouTube video directly within
@@ -61,7 +61,7 @@ class directive(rst.Directive):
     """Custom `youtube` directive for reStructuredText.
 
     This class defines the behaviour of the `youtube` directive,
-    including how it processes options and content, and how it
+    including how it processes options and content and how it
     generates nodes to be inserted into the document tree.
 
     The directive supports the following options::

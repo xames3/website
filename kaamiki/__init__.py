@@ -4,18 +4,18 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 26 April, 2026
+Last updated on: 28 June, 2026
 
 This module serves as the primary entry point for the Kaamiki Sphinx
 Theme. It is responsible for initialising the theme, configuring its
-extensions, and integrating with Sphinx's build process.
+extensions and integrating with Sphinx's build process.
 
 This module connects the theme's internal utilities and configurations
 with the Sphinx application lifecycle, ensuring seamless interaction
 between theme components and the final HTML output.
 
 This theme  is registered through the `setup()` function, which
-configures the theme, maps user-configurable options, and binds event
+configures the theme, maps user-configurable options and binds event
 hooks for post-processing and dynamic content handling.
 
 .. versionadded:: 21.2.2025

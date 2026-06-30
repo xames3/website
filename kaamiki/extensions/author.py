@@ -4,7 +4,7 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 27 June, 2026
+Last updated on: 28 June, 2026
 
 This module defines a custom `author` directive for the Kaamiki Sphinx
 Theme. The directive allows embedding details directly within the
@@ -28,7 +28,7 @@ theme's Jinja2 template, producing a final HTML output.
 
 .. versionchanged:: 19.10.2025
 
-    The options `author`, `email`, and `github` are now optional and can
+    The options `author`, `email` and `github` are now optional and can
     default to project's details specified in `conf.py`.
 
 .. deprecated:: 19.10.2025
@@ -37,7 +37,7 @@ theme's Jinja2 template, producing a final HTML output.
 
 .. deprecated:: 15.01.2026
 
-    Removed usage of Email, Bio, and LinkedIn metadata.
+    Removed usage of Email, Bio and LinkedIn metadata.
 
 .. versionchanged:: 24.04.2026
 
@@ -84,7 +84,7 @@ class directive(rst.Directive):
     """Custom `author` directive for reStructuredText.
 
     This class defines the behaviour of the `author` directive,
-    including how it processes options and content, and how it generates
+    including how it processes options and content and how it generates
     nodes to be inserted into the document tree.
 
     The directive supports the following options::
@@ -94,7 +94,7 @@ class directive(rst.Directive):
 
     .. versionchanged:: 19.10.2025
 
-        The options `author`, `email`, and `github` are now optional
+        The options `author`, `email` and `github` are now optional
         and can default to project's details specified in `conf.py`.
 
     .. deprecated:: 17.03.2026
@@ -124,7 +124,7 @@ class directive(rst.Directive):
         """Parse directive options and create an `author` node.
 
         This method gathers all options provided by the user (if any) in
-        the `author` directive, constructs a new `node` instance, and
+        the `author` directive, constructs a new `node` instance and
         returns it wrapped in a list.
 
         The returned node is then placed into the document tree at the

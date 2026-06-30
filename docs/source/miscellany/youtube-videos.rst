@@ -4,7 +4,7 @@
 
 :og:title: The best YouTube has to Offer
 :og:description: A curated list of my favourite YouTube videos that I've found
-    over the years: good, bad, and weird!
+    over the years: good, bad and weird!
 :og:type: article
 :og:image: https://i.imgur.com/RLsdjyG.jpeg
 :fb:title: Got a cracking video recommendation?
@@ -23,10 +23,10 @@
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
 
-Recently, out of nowhere, I was looking at my phone's screen time stats, and I
+Recently, out of nowhere, I was looking at my phone's screen time stats and I
 realised that I spend shitload of my time on YouTube. I got into tech in 2017.
 Since then, it has been my go-to platform for learning new things, staying
-updated with tech trends, and unwinding with some light-hearted or weird
+updated with tech trends and unwinding with some light-hearted or weird
 content.
 
 Over the years, I curated a personal playlist of videos that have either taught
@@ -55,11 +55,11 @@ Technology.
 
 .. rubric::
     This section features some of my go-to videos and channels related to
-    **programming**, **science**, and **technology**.
+    **programming**, **science** and **technology**.
     :class: subtitle-text
 
 Here, the videos are related to programming tutorials, tips and tricks, tech
-talks, education, concepts of computer science, and more.
+talks, education, concepts of computer science and more.
 
 .. dropdown:: These are some videos that I often watch whenever I want to
     learn something new or just want to refresh my knowledge on a particular
@@ -600,7 +600,7 @@ talks, education, concepts of computer science, and more.
         .. tab-item:: :fas:`flask far` Science & Education
 
             Here, the videos are related to general science concepts, physics,
-            mathematics, space, and more. I've always been fascinated by
+            mathematics, space and more. I've always been fascinated by
             science and love learning how some things just work. These videos
             have been a great way for me to explore and understand various
             scientific phenomena or sometimes just marvel how amazing
@@ -795,7 +795,7 @@ Comic Relief.
 
 After hours of staring at code, sometimes all you need is a good, hearty laugh.
 I'm not saying these are the funniest videos out there, but they sure do the
-trick for me. Some are downright silly, some are clever, and some are just
+trick for me. Some are downright silly, some are clever and some are just
 plain weird and cringe.
 
 .. dropdown:: Some of my favourite funny videos that I watch and have come
@@ -807,7 +807,7 @@ plain weird and cringe.
 
             An ever-growing collection of some of my favourite light-hearted
             comedy videos that I've found over the years. These videos are a
-            mix of stand-up comedy, sketches, parodies, and of course, Family
+            mix of stand-up comedy, sketches, parodies and of course, Family
             Guy. They never fail to make me laugh and cringe.
 
             .. grid:: 3
@@ -939,7 +939,7 @@ plain weird and cringe.
             you tilt your head and think, "how did I even get here?". This is
             a collection of those "gems".
 
-            These videos are a mix of surreal comedy, absurdist sketches, and
+            These videos are a mix of surreal comedy, absurdist sketches and
             just plain weird stuff. They never fail to cease to amuse.
 
             .. grid:: 3
@@ -1094,12 +1094,12 @@ magical.
 
 .. rubric::
     We've all been there. It's late, you should be sleeping, but you've
-    stumbled upon a video that leads to another, and another.
+    stumbled upon a video that leads to another and another.
     :class: subtitle-text
 
 This section is a tribute to those late-night YouTube journeys. It's a random,
-eclectic mix of fascinating documentaries, unsolved mysteries, and
-thought-provoking explorations, and `VSauce`_ that are perfect for when your
+eclectic mix of fascinating documentaries, unsolved mysteries and
+thought-provoking explorations and `VSauce`_ that are perfect for when your
 curiosity gets the better of your sleep schedule.
 
 .. dropdown:: Some of my favourite late-night bored out of your mind videos

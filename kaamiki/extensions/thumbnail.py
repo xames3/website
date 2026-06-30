@@ -4,7 +4,7 @@ YouTube Thumbnail Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September, 2025
-Last updated on: 29 April, 2026
+Last updated on: 28 June, 2026
 
 This module defines a custom `thumbnail` directive for the Kaamiki
 Sphinx Theme. The directive allows embedding a YouTube video thumbnail
@@ -58,7 +58,7 @@ class directive(rst.Directive):
     """Custom `thumbnail` directive for reStructuredText.
 
     This class defines the behaviour of the `thumbnail` directive,
-    including how it processes options and content, and how it
+    including how it processes options and content and how it
     generates nodes to be inserted into the document tree.
     """
 

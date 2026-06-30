@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April, 2026
-.. Last updated on: 27 June, 2026
+.. Last updated on: 28 June, 2026
 
 :og:title: Thoughts on teaching
 :og:description: Teaching the same courses, but differently every single time!
@@ -59,8 +59,8 @@ The content (more of less) stayed the same. I mean, how often do you expect a
 programming language curriculum to change? But the classes were yet different.
 Every quarter, the pacing was different, the questions were different, the
 amount of time spent on some topics was different, the assignments were
-different, and the examples used and shared were different. Some days, the
-lectures were conducted exactly as planned, and sometimes they were simply
+different and the examples used and shared were different. Some days, the
+lectures were conducted exactly as planned and sometimes they were simply
 "strange"?!
 
 And somewhere in that strange unpredictability, I found the part I enjoyed the
@@ -76,7 +76,7 @@ Students who made it memorable.
 -------------------------------------------------------------------------------
 
 .. rubric:: They brought their **humour**, their **hobbies**, their **side
-    comments**, and some of their perfectly timed jokes that derailed the whole
+    comments** and some of their perfectly timed jokes that derailed the whole
     class in the best way possible.
     :class: subtitle-text
 
@@ -86,7 +86,7 @@ Questions ranged from unrealistic assignment extensions or the topics covered
 to sometimes unexpectedly personal. Like I said, every quarter was different,
 yet every single time, someone would ask what I would do in their place, as if
 I had everything figured out. I never knew how to respond to some of those
-"what-if" scenarios, and I still don't!
+"what-if" scenarios and I still don't!
 
 The questions weren't super hypothetical or anything. They were simple and
 grounded, which I sometimes felt like I should've also asked myself when I was
@@ -100,12 +100,12 @@ Learning beyond the syllabus.
 -------------------------------------------------------------------------------
 
 I started entering the classrooms with an intention of teaching something, be
-it today's topic or sharing my past anecdotes and experiences, and I was
+it today's topic or sharing my past anecdotes and experiences and I was
 leaving with answers to some of my personal questions and side-quests.
 
 It really felt like I was teaching and preparing myself through the means of my
-students, and that's what made them all very special! I started seeing a
-younger, more cocky version of me, and my friends in them. Over time, I started
+students and that's what made them all very special! I started seeing a
+younger, more cocky version of me and my friends in them. Over time, I started
 picking up new things and new perspectives. Things like new games I've never
 heard of, music I wouldn't have found on my own, hobbies like baking that
 reminded me of how much there is to learn outside my comfort zone.
@@ -114,7 +114,7 @@ The learning and teaching happened in both directions. Every time I learned
 something new, I felt like I was able to teach and explain things more
 effectively from both my successes and failures.
 
-.. rubric:: :fab:`seedling far` Growth, gratitude, and moments
+.. rubric:: :fab:`seedling far` Growth, gratitude and moments
     :class: pre-title-text
 
 .. _a-year-shaped-by-people:
@@ -127,13 +127,13 @@ Again, looking back, I'm seeing my lectures and classrooms in a much different
 way than I expected last year at this very moment. I'm seeing my whole year
 being shaped by so many people like my students, other faculty, staff members,
 and some friends I made along the way. It's shaped by those small moments,
-shared laughter, curiosities, growth, stories, gossips, and loads of new
+shared laughter, curiosities, growth, stories, gossips and loads of new
 memories!
 
 I'm super-duper grateful to all my students for making me a much better teacher
 than I started last year. I'm especially grateful to
 :ref:`Charlotte <charlotte-parks>`, who first saw something in me I hadn't
-fully seen in myself, and planted the very idea that I could even teach at all.
+fully seen in myself and planted the very idea that I could even teach at all.
 
 This year-rounding reflection wouldn't be complete without mentioning my actual
 mentors, :ref:`Dr Tovar <antonio-tovar>` and Dr Robyn. Both, Dr Tovar and
@@ -148,7 +148,7 @@ kind and grateful to all the people who made you who you are.
 
 .. epigraph::
 
-    Always remember these words: Work hard, study well, and eat and sleep
+    Always remember these words: Work hard, study well and eat and sleep
     plenty! That is the Turtle Hermit way!
 
     -- Master Roshi, *Dragon Ball Super, 2017*

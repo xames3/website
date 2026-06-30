@@ -27,7 +27,7 @@
     here it'll probably be added in the next few weeks.
 
 One of the best parts of sharing and writing these articles is the chats that
-follow. I've had loads of interesting chats in person and a few over email, and
+follow. I've had loads of interesting chats in person and a few over email and
 I think I've noticed a pattern. A lot of the same questions pop up; some are
 esoteric about a topic, while others are simple *"why?"* questions. Ever since
 I transitioned into teaching, some of you've also questioned that, too.
@@ -52,7 +52,7 @@ to speak...
 Frequently asked questions
 -------------------------------------------------------------------------------
 
-.. dropdown:: What the f*ck is XAMES3, and why you use it everywhere? |pop|
+.. dropdown:: What the f*ck is XAMES3 and why you use it everywhere? |pop|
     :class-container: site-faq
 
     .. rubric:: Asked on November 02, 2025
@@ -118,7 +118,7 @@ Frequently asked questions
     - understanding user or customer requirements
     - working with tools or accesses available at my disposal
     - reading and experimenting with documentations
-    - debugging logs, and spending time on terminal
+    - debugging logs and spending time on terminal
     - collaborating with other teams and fellow developers
     - building APIs
     - deployments (not on Fridays, those are f*cking horrible!)
@@ -132,7 +132,7 @@ Frequently asked questions
     .. rubric:: Asked on December 02, 2025
         :class: date-text
 
-    I'm a huge `Christopher Nolan`_ fan, and I :fas:`heart mrl-0 red` his
+    I'm a huge `Christopher Nolan`_ fan and I :fas:`heart mrl-0 red` his
     films. I tend to watch a lot of films, so it's difficult to say, what's my
     favourite. But, my go-to movie is `Interstellar`_. I absolutely love the
     music compositions by `Hans Zimmer`_. It's truly a masterpiece!
@@ -167,7 +167,7 @@ Frequently asked questions
     My custom extensions are as follows:
 
     - **author.** This renders author details like name, :strike:`about`,
-      :strike:`email`, GitHub, :strike:`LinkedIn, and a timestamp of article`
+      :strike:`email`, GitHub, :strike:`LinkedIn and a timestamp of article`
     - **picture.** Show colour-scheme aware images on the website
     - **repository.** Renders a small widget to show information about the
       GitHub repository. The details include stars and fork counts

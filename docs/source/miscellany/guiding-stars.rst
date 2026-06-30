@@ -4,7 +4,7 @@
 
 :og:title: Guiding stars
 :og:description: Expressing heartfelt gratitude to the heros who shaped my
-    path in life, learning, and beyond...
+    path in life, learning and beyond...
 :og:type: article
 :fb:title: What are the guiding stars in your life?
 :fb:description: We all have mentors and friends who guide us. Reading this,
@@ -33,7 +33,7 @@ not only reflect on your achievements and/or mistakes, but also the people
 who've played a role in those moments in time.
 
 This article is that moment, where I'm looking back and paying tribute to those
-people or my "guiding stars", whose wisdom, encouragement, belief, and
+people or my "guiding stars", whose wisdom, encouragement, belief and
 friendship have been a solid foundation of my growth as a teacher/mentor and a
 lifelong learner. Each person mentioned here :abbr:`DOA (dead or alive)` has
 left a significant mark on me.
@@ -80,11 +80,11 @@ pretty strong in my life. I still remember you encouraging me to question
 things deeply and to pursue understanding beyond the surface.
 
 Now, it doesn't make any sense to say it all, but your belief in my ability to
-teach and explain things planted the seed of this very platform, and
+teach and explain things planted the seed of this very platform and
 surprisingly... I still feel like we're chatting.
 
-I know it's weird, and I totally get it. But if you were to be here today,
-you'd be very proud of me. I know you always wanted me to teach, and now look
+I know it's weird and I totally get it. But if you were to be here today,
+you'd be very proud of me. I know you always wanted me to teach and now look
 where I am. Every time I get into my *"teaching"* mode, I see your spirit
 reminding me of our last chat...
 
@@ -103,7 +103,7 @@ reminding me of our last chat...
     :class: subtitle-text
 
 And so, my life or this journey has always been shaped and tweaked by an
-extraordinary cast of mentors, friends, coworkers, supporters, and even
+extraordinary cast of mentors, friends, coworkers, supporters and even
 strangers, each playing an essential role in the stories I share.
 
 Everything you read here, whether it be project ideas or teaching inspiration,
@@ -132,7 +132,7 @@ Antonio Tovar
 `Dr Tovar`_, I first met you at `National Louis University <https://nl.edu>`_
 in 2024, during the `NASA Open Science`_ workshop. You were co-leading that
 cohort and generously offered me the opportunity to intern under your guidance
-at NASA. You've always been kind, supportive, a father figure, and a teacher
+at NASA. You've always been kind, supportive, a father figure and a teacher
 ready with valuable advice and encouragement.
 
 .. figure:: https://i.imgur.com/H4LzSiU.jpeg
@@ -141,7 +141,7 @@ ready with valuable advice and encouragement.
     :figclass: zoom grayscale
 
     Dr Tovar (left) with my students, `Huzaifa Quaid`_ (left-centre),
-    `Ishrak Rahman`_ (centre), `Orkhan Guliyev`_ (right-centre), and
+    `Ishrak Rahman`_ (centre), `Orkhan Guliyev`_ (right-centre) and
     `Sezim Mamatova`_ (right) at NASA Open Science 2025 after presentations.
 
 There were a lot of people who helped me on my journey to becoming a teacher,
@@ -207,7 +207,7 @@ tech-networking event and perhaps the largest one of all in Chicago. I first
 met you at one of these events (June 2024) during a particularly difficult time
 in my life.
 
-I was looking for a distraction of sorts, and it turned out to be exactly what
+I was looking for a distraction of sorts and it turned out to be exactly what
 I needed: a supportive community that you and your team had fostered with care.
 As time passed, the community has grown significantly. I became a volunteer,
 and more people have found opportunities through your work.
@@ -226,7 +226,7 @@ will get no strikes.
 Judy Cazares
 -------------------------------------------------------------------------------
 
-I first met `Judy`_ at `ChiPy`_ in 2024, and you were among the first to
+I first met `Judy`_ at `ChiPy`_ in 2024 and you were among the first to
 welcome me. Since then, we've been great friends. Your kindness and support
 have always been appreciated. I've always valued your willingness to listen and
 offer thoughtful, grounded advice.
@@ -272,7 +272,7 @@ genuine admiration for your steady commitment to hard work.
 
     Sameer and I, June 2025 at our graduation ceremony
 
-What I don't usually say, and perhaps I should more often, is how much I admire
+What I don't usually say and perhaps I should more often, is how much I admire
 your steady, **no-bullshit** approach to hard work and study. While I often
 pride myself on being a mentor or a bit of a teacher now and then, there have
 been moments where I've felt more like a student, learning a lesson or two from
@@ -326,7 +326,7 @@ Young Song
 
 `Young`_, our friendship began in my second quarter at the uni, where we both
 took a class on Discrete Structures. From the outset, your curiosity and
-support stood out, and I'm truly grateful for the friendship we've built since
+support stood out and I'm truly grateful for the friendship we've built since
 then.
 
 .. figure:: https://i.imgur.com/weM4qDW.jpeg
@@ -336,7 +336,7 @@ then.
     Young attending and celebrating our graduation ceremony, June 2025
 
 One memory that remains vivid is my graduation day. My mum wasn't able to
-attend, nor anyone else, and it could've been a lonely milestone. Yet you were
+attend, nor anyone else and it could've been a lonely milestone. Yet you were
 there for :ref:`Sameer <sameer-g-mathad>` and me, arriving early (as usual) and
 staying through the entire ceremony, from the first moments at seven in the
 morning until the celebrations ended late in the afternoon. You brought us

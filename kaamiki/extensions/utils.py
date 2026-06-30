@@ -4,20 +4,20 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 14 January, 2026
+Last updated on: 28 June, 2026
 
 This module defines a collection of utility functions used for
 customising this sphinx theme. These utilities focus on enhancing the
 post-processing of the generated HTML output, as well as providing
-additional support for interactive elements, theme options, and other
+additional support for interactive elements, theme options and other
 dynamic behaviours.
 
 The functionality provided includes handling collapsible table of
-contents (ToC), removal of unnecessary elements, and custom event
+contents (ToC), removal of unnecessary elements and custom event
 handling for theme-specific features.
 
 The goal of this module is to ensure that this theme produces clean,
-efficient, and interactive HTML documentation by leveraging Sphinx's
+efficient and interactive HTML documentation by leveraging Sphinx's
 internal APIs and dynamic JavaScript bindings.
 
 .. deprecated:: 19.10.2025
@@ -120,7 +120,7 @@ def remove_empty_toctree_divs(tree: bs4.BeautifulSoup) -> None:
     and redundant elements in the final HTML output.
 
     This function scans the HTML tree, identifies empty toctree divs
-    (those containing only whitespace or line breaks), and removes them
+    (those containing only whitespace or line breaks) and removes them
     to maintain a clean and optimised document structure.
 
     :param tree: Parsed HTML tree representing the document structure.
@@ -185,11 +185,11 @@ def postprocess(html: str, app: Sphinx) -> None:
 
     This function reads an HTML file, parses it into a BeautifulSoup
     tree, applies various transformations such as adding collapsible
-    navigation, cleaning up empty elements, and removing comments, and
+    navigation, cleaning up empty elements and removing comments and
     finally writes the modified content back to the file.
 
     Post-processing ensures that the generated HTML is not only
-    functional but also clean, optimised, and dynamic according to the
+    functional but also clean, optimised and dynamic according to the
     user's configuration options.
 
     :param html: Path to the HTML file to be post-processed.
@@ -214,7 +214,7 @@ def env_before_read_docs(
     """Track the list of documents modified during the Sphinx build.
 
     This function captures the list of document names that have been
-    added, updated, or deleted, and stores them in the Sphinx
+    added, updated, or deleted and stores them in the Sphinx
     environment for later use. This ensures that post-processing only
     affects pages that have actually changed, optimising the build
     process by avoiding unnecessary rework.
@@ -304,10 +304,10 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
     final modifications to the output files.
 
     This function is triggered after the build process is completed. It
-    checks if there are any errors, and if the builder is set to produce
+    checks if there are any errors and if the builder is set to produce
     `HTML` or `dirhtml` output. It then applies final transformations
     to the list of modified documents stored in the environment, such as
-    collapsible navigation, and comment removal.
+    collapsible navigation and comment removal.
 
     :param app: Sphinx application object.
     :param exc: Any exception raised during the build process, or None

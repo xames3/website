@@ -4,7 +4,7 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October, 2025
-Last updated on: 29 April, 2026
+Last updated on: 28 June, 2026
 
 This module defines a custom `repository` directive for the Kaamiki
 Sphinx Theme. The directive allows embedding GitHub repository details
@@ -60,7 +60,7 @@ class directive(rst.Directive):
     """Custom `repository` directive for reStructuredText.
 
     This class defines the behaviour of the `repository` directive,
-    including how it processes options and content, and how it
+    including how it processes options and content and how it
     generates nodes to be inserted into the document tree.
 
     The directive supports the following options::
@@ -83,7 +83,7 @@ class directive(rst.Directive):
 
         This method gathers all options provided by the user (if any)
         in the `repository` directive, constructs a new `node`
-        instance, and returns it wrapped in a list.
+        instance and returns it wrapped in a list.
 
         The returned node is then placed into the document tree at the
         directive's location. Further processing will convert the node
