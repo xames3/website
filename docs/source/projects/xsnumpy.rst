@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 01 March, 2025
-.. Last updated on: 23 June, 2026
+.. Last updated on: 28 June, 2026
 
 :og:title: Why write xsNumPy?
 :og:description: Journey of building a lightweight, pure-python implementation
@@ -32,7 +32,7 @@ mid-November of 2024. I was still at the uni and in my second-to-last quarter.
 I was working on an assignment that required me to use
 `NumPy`_.
 
-I multiplied some matrices; NumPy did its thing, as it always does, and made
+I multiplied some matrices; NumPy did its thing, as it always does and made
 all the computations look super easy. But, under this "simplicity", a few
 questions began to gnaw at me.
 
@@ -84,7 +84,7 @@ this properly, I needed discipline and some rules to follow.
     - Every line of code and every solution had to come from my own
       understanding and experimentation.
     - Pure Python only. No external dependencies, just the standard library.
-    - It should be clean, maintainable, statically typed, and well-documented
+    - It should be clean, maintainable, statically typed and well-documented
       code that mirrors NumPy's public APIs, aiming to be a drop-in replacement
       where sensible.
 
@@ -108,7 +108,7 @@ implementing my own |xp.ndarray|_ data structure.
     :class: unusual-one seealso
 
     If you're new to arrays, think of them as egg cartons, each slot holds an
-    egg, and the shape of the carton tells you how many eggs you've got.
+    egg and the shape of the carton tells you how many eggs you've got.
 
     Where your hand moves from one slot to the next are the strides; the type
     of eggs is the dtype; the carton itself is the buffer or the actual
@@ -116,7 +116,7 @@ implementing my own |xp.ndarray|_ data structure.
 
 Now, by this point in time, I had a basic understanding of arrays and how they
 worked. But, as I looked deeper and deeper, I discovered heaps of concepts,
-including `memory allocation`_, `shape`_ calculations, `strides`_, and various
+including `memory allocation`_, `shape`_ calculations, `strides`_ and various
 optimisation techniques for data storage.
 
 It felt like opening Pandora's box; I wasn't ready. After a few days of
@@ -221,7 +221,7 @@ dynamically fetch whatever data type I fancied.
 
 Right, on to the ``buffer``. If no ``buffer`` was provided, the array was
 initialised without an external memory buffer. In this case, the ``offset``
-must be zero, and the ``strides`` must be :py:obj:`None`. The constructor would
+must be zero and the ``strides`` must be :py:obj:`None`. The constructor would
 then calculate the `strides`_, which, put simply, are just the number of bytes
 between consecutive elements in memory.
 
@@ -238,7 +238,7 @@ between consecutive elements in memory.
 
 But what if a buffer was provided?
 
-Well, then it got trickier. It used the base buffer, and the strides were
+Well, then it got trickier. It used the base buffer and the strides were
 either given directly or calculated.
 
 .. code-block:: python
@@ -256,7 +256,7 @@ either given directly or calculated.
         self._strides = tuple(strides)
 
 Finally, calculating the total ``buffer`` size. This was worked out using the
-strides, shape, and the size. The ``buffer`` itself was a type derived from
+strides, shape and the size. The ``buffer`` itself was a type derived from
 the data type and its size. Depending on whether a buffer was passed or not,
 the constructor handled it accordingly, either creating a new buffer or using
 the existing one.
@@ -282,7 +282,7 @@ telling myself
 
 Little did I know, I was shooting myself in the foot. At its core, a
 :meth:`__repr__ <object.__repr__>` is an object's internal data representation.
-I started with something simple, and it worked for scalars and 1D arrays.
+I started with something simple and it worked for scalars and 1D arrays.
 
 .. code-block:: python
     :linenos:
@@ -292,7 +292,7 @@ I started with something simple, and it worked for scalars and 1D arrays.
 
 Feeling quite pleased and a bit cocky, I tried a 2D array, but it unexpectedly
 printed everything as a flat list. I realised I hadn't accounted for the rows
-and columns. No problem, I updated the code, and it worked.
+and columns. No problem, I updated the code and it worked.
 
 .. code-block:: python
     :linenos:
@@ -328,10 +328,10 @@ And so, I realised, printing a NumPy array from scratch was a rabbit hole.
 
 After wrestling with the "simple" things, I naively believed the hardest part
 was behind me. I was excited for the fun stuff: element-wise arithmetic,
-`broadcasting`_, transposing, and other random functions. However, I didn't
+`broadcasting`_, transposing and other random functions. However, I didn't
 realise my journey was about to get even more challenging.
 
-Basic arithmetic operations like addition, subtraction, and scalar
+Basic arithmetic operations like addition, subtraction and scalar
 multiplication seemed straightforward. I figured I could just iterate through
 my flattened data and perform operations element-wise.
 
@@ -362,7 +362,7 @@ failed almost immediately for higher-dimensional vectors.
 
 What if I added a scalar to a matrix, or a ``(3,)`` array to a ``(3, 3)``
 matrix? Could I add a :py:class:`float` to an :py:class:`int`? Each of those
-experiments brought new challenges, and I was absolutely frustrated!
+experiments brought new challenges and I was absolutely frustrated!
 
 That's when I realised I wasn't just adding or multiplying numbers, but
 learning and simultaneously recreating NumPy's broadcasting rules.
@@ -410,13 +410,13 @@ intuitive and weird edge cases. With each iteration, every commit I made, I
 explored even more ways to optimise it, reducing redundant calculations.
 
 Every bug, every unexpected result, every failure, every new piece of answer
-and advice that I received on Stack Overflow, and every small achievement
+and advice that I received on Stack Overflow and every small achievement
 taught me something new about NumPy. As time passed, xsNumPy evolved into more
 than just a project and a scrappy experiment.
 
 It became a weird, obsessive mentality. A belief that the best way to learn is
 by rolling up your sleeves, taking things apart, trying to understand the
-problem, and putting it back together, piece by piece.
+problem and putting it back together, piece by piece.
 
 .. _so-what-can-xsnumpy-do:
 
@@ -436,7 +436,7 @@ does quite well.
     .. tab-item:: :fas:`empty-set far` Creations
 
         xsNumPy provides familiar ways to create arrays. These creation
-        routines are consistent, predictable, and designed to slot neatly into
+        routines are consistent, predictable and designed to slot neatly into
         later operations.
 
         - ``array()``
@@ -458,10 +458,10 @@ does quite well.
               >>> xp.array([1, 0, 2], dtype=xp.bool)
               array([True, False, True])
 
-        - ``zeros()``, ``ones()``, and ``full()``
+        - ``zeros()``, ``ones()`` and ``full()``
 
-          xsNumPy support |xp.zeros|_, |xp.ones|_, and |xp.full|_ functions for
-          repeatable initialisation of arrays filled with, zeros, ones, and any
+          xsNumPy support |xp.zeros|_, |xp.ones|_ and |xp.full|_ functions for
+          repeatable initialisation of arrays filled with, zeros, ones and any
           ``fill_value`` respectively.
 
           .. code-block:: python
@@ -513,7 +513,7 @@ does quite well.
 
         - **Broadcasting arithmetic**
 
-          xsNumPy matches shapes, stretches smaller arrays, and makes sure the
+          xsNumPy matches shapes, stretches smaller arrays and makes sure the
           output shape followed NumPy's exact logic. Just like NumPy, these
           operations are broadcasted.
 
@@ -713,12 +713,12 @@ does quite well.
 .. rubric:: Sharing notes with the community.
 .. rubric::
     I gave a talk at `ChiPy`_ titled **"xsNumPy: Curiosity to Code"**, walking
-    through the decisions, the missteps, and the insights that stayed with me.
+    through the decisions, the missteps and the insights that stayed with me.
     :class: subtitle-text
 
 .. youtube:: https://www.youtube.com/watch?v=QIhyix3oEns
     :caption: The presentation covered the technical challenges, mathematical
-        discoveries, and most importantly, the mindset shift from viewing
+        discoveries and most importantly, the mindset shift from viewing
         libraries as opaque entities to understanding them as collections of
         elegant algorithms waiting to be explored.
 
@@ -738,7 +738,7 @@ the best teaching and learning experience.
 
 I intend to work on this project in small, respectful steps whenever I get
 time. However, the larger work is already done. I re-learnt the essentials by
-making them, and that learning will travel with me far beyond this code.
+making them and that learning will travel with me far beyond this code.
 
 .. _NumPy: https://numpy.org
 .. _Generalised Matrix Multiplication (GEMM): https://docs.nvidia.com/

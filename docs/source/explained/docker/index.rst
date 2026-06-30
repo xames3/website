@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 August, 2025
-.. Last updated on: 28 June, 2026
+.. Last updated on: 29 June, 2026
 
 :og:title: A week into Docker
 :og:description: Begineer's guide to Docker and containerisation
@@ -35,14 +35,14 @@ This is my story from September 2020, roughly five years ago, as of writing
 this article. It was in the middle of the pandemic. I was switching jobs. I
 knew I would get a new machine from my next employer, but I had no idea when.
 
-The pandemic was still at its peak, and I had to make the most of what I had.
+The pandemic was still at its peak and I had to make the most of what I had.
 With how things were going, I knew I wouldn't get a new machine anytime soon,
 so I had to improvise and make my work machine last me a while longer.
 
-As some of you know, I love writing code. It's what I do for the most part, and
+As some of you know, I love writing code. It's what I do for the most part and
 during lockdown, I wrote a lot. I tried to keep myself busy with work and other
-side projects, and while doing that, I got my machine messy really quick. I had
-multiple versions of Python, Rust, various dependencies, configs, tools, and
+side projects and while doing that, I got my machine messy really quick. I had
+multiple versions of Python, Rust, various dependencies, configs, tools and
 frameworks that I won't be using after my "experimentation" phase.
 
 I knew `Docker`_ was a thing, but I never really got around to using it. I
@@ -58,7 +58,7 @@ So, I decided to give it a try.
 In this first chapter, I want to walk you through my initial experience with
 this whole containerisation business and explain the basic ideas that finally
 made sense to me. In future articles, I'll dive into the practical side of
-things, like how to write a Dockerfile, manage containers, and use it in your
+things, like how to write a Dockerfile, manage containers and use it in your
 own projects.
 
 .. _docker-enters-the-chat:
@@ -68,17 +68,17 @@ Docker enters the chat.
 -------------------------------------------------------------------------------
 
 Learning and exploring Docker wasn't initially on my bingo list, but I'm glad I
-did. Since then, it has made my "dodgy" projects super-duper manageable, and my
+did. Since then, it has made my "dodgy" projects super-duper manageable and my
 local machine still thanks me for it. I don't want to get too technical or
 nerdy right now, but I want to make are we're on the same page.
 
-Docker is a **platform** that allows you to develop, ship, and run code inside
+Docker is a **platform** that allows you to develop, ship and run code inside
 :ref:`containers <idea-behind-containers>`.
 
 .. note::
 
     Docker is not the only containerisation platform, but it's perhaps the most
-    popular one, and that's why people synonymously use the term Docker to
+    popular one and that's why people synonymously use the term Docker to
     refer to containers in general. But in reality, they are not the same
     thing.
 
@@ -99,7 +99,7 @@ server in the cloud.
     :figclass: zoom grayscale
 
 In the spirit of keeping things simple, I'd say there are two main ideas around
-Docker: `Docker Engine`_ and `Docker Hub`_, and let's just stick with these two
+Docker: `Docker Engine`_ and `Docker Hub`_ and let's just stick with these two
 for now.
 
 1. **Docker Engine.** This is the core part of Docker that runs on your
@@ -120,7 +120,7 @@ for now.
 
 When I first started using Docker, I'll be honest, I really didn't understand
 what was going on. Almost every tutorial I watched started with using the
-:console:`$ docker run` command. I knew that I could type it out, and
+:console:`$ docker run` command. I knew that I could type it out and
 auto-magically, I'm dropped in an isolated environment where I can run my code
 or do whatever I want without messing up my local machine.
 
@@ -136,7 +136,7 @@ or do whatever I want without messing up my local machine.
     Status: Downloaded newer image for python:3.8
     Hello from inside a container!
 
-But as I started using it more, I realised that there's a lot more to it, and
+But as I started using it more, I realised that there's a lot more to it and
 Docker Engine is doing some really fancy stuff behind the scenes. Remember how
 I mentioned my machine was getting messy with all the different versions of
 Python and other dependencies?
@@ -213,15 +213,15 @@ top of your existing OS using something called a `Hypervisor`_.
 .. note::
 
     This is **not** dual-booting, where you have two OSs installed on your
-    machine, and you choose which one to boot into.
+    machine and you choose which one to boot into.
 
-In a VM, you have your actual OS (host) running, and inside it, you have
+In a VM, you have your actual OS (host) running and inside it, you have
 another OS (guest) running as a separate entity. VMs run like a regular
 application on your local machine. It's like running Windows on your Mac
 using `Parallels`_ or running Linux on your Windows using `VirtualBox`_.
 
 Since a VM runs just like a regular application, it needs its resources like
-CPU, memory, storage, and processing power. It's thorough, but it's also heavy.
+CPU, memory, storage and processing power. It's thorough, but it's also heavy.
 
 Very heavy... I mean, you're running multiple bloody OSs at the same time!
 
@@ -314,7 +314,7 @@ no idea from where.
 
 But what's an image now? With a bit of research, I found out that a Docker
 image is a lightweight executable package that includes it needs to run the
-code, including the runtime, libraries, environment variables, and
+code, including the runtime, libraries, environment variables and
 configuration files.
 
 Wait, that sounds a lot like a container to me... But not quite.
@@ -335,7 +335,7 @@ images from Docker Hub to run containers on your local machine, or you can push
 your own images to Docker Hub to share them with others.
 
 Docker Hub has loads of pre-built images for various applications and services,
-like databases, web servers, programming languages, and more. This makes it
+like databases, web servers, programming languages and more. This makes it
 easy to get started with Docker and quickly set up your development
 environment.
 
@@ -376,8 +376,3 @@ and how it changed the way I started working on my local machine.
 .. _VirtualBox: https://www.virtualbox.org/
 .. _LXC: https://linuxcontainers.org/
 .. _OpenVZ: https://openvz.org/
-
-.. toctree::
-    :hidden:
-
-    month-into-docker

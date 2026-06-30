@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April, 2026
-Last updated on: 12 June, 2026
+Last updated on: 28 June, 2026
 
 This module defines a custom `button` directive for the Kaamiki Sphinx
 Theme. The directive allows adding a button directly within the
@@ -69,7 +69,7 @@ class directive(rst.Directive):
     """Custom `button` directive for reStructuredText.
 
     This class defines the behaviour of the `button` directive, including
-    how it processes options and content, and how it generates nodes to
+    how it processes options and content and how it generates nodes to
     be inserted into the document tree.
 
     The directive supports the following options::
@@ -90,7 +90,7 @@ class directive(rst.Directive):
         """Parse directive options and create an `button` node.
 
         This method gathers all options provided by the user (if any) in
-        the `button` directive, constructs a new `node` instance, and
+        the `button` directive, constructs a new `node` instance and
         returns it wrapped in a list.
 
         The returned node is then placed into the document tree at the

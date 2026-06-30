@@ -30,7 +30,7 @@
 
 You know, you get this kick after finishing a project? That was exactly me in
 January of 2025, reflecting on `xsNumPy`_. I had spent weeks understanding and
-learning arrays, memory buffers, and `broadcasting`_. As mentioned in
+learning arrays, memory buffers and `broadcasting`_. As mentioned in
 :doc:`that story <./xsnumpy>`, it was indeed a trip for me.
 
 .. card:: Why write xsNumPy?
@@ -78,7 +78,7 @@ complexity of the system. I had the same three rules.
     - Every line of code and every solution had to come from my own
       understanding and experimentation.
     - Pure Python only. No external dependencies, just the standard library.
-    - It should be clean, maintainable, statically typed, and well-documented
+    - It should be clean, maintainable, statically typed and well-documented
       code that mirrors PyTorch's public APIs, aiming to be a drop-in
       replacement where sensible.
 
@@ -104,7 +104,7 @@ with xsNumPy, as :ref:`discussed here <writing-my-first-array>`.
 But this time, I had to add a few more things to make my tensor work like
 PyTorch's. I needed to implement a way to save the node and operation history
 for autodiff, which was a new concept for me. I also had to learn how to track
-operations, gradients, and compute them efficiently.
+operations, gradients and compute them efficiently.
 
 .. rubric:: Read the f*cking docs!
 .. rubric::
@@ -125,7 +125,7 @@ But my devices were just strings, like "cpu" or "gpu", with no actual
 hardware acceleration. The :meth:`__repr__ <object.__repr__>` method was pretty
 similar to what I had in xsNumPy, but I had to add a few more details to
 reflect the tensor's properties like :py:attr:`shape <torch.Tensor.shape>`,
-:py:attr:`device <torch.Tensor.device>`, :py:class:`dtype <torch.dtype>`, and
+:py:attr:`device <torch.Tensor.device>`, :py:class:`dtype <torch.dtype>` and
 whether it :py:attr:`requires gradients <torch.Tensor.requires_grad>` or not.
 
 .. seealso::
@@ -154,28 +154,28 @@ does it truly mean for a tensor to change based on its history? How does it
 know the appropriate path when asked to reverse its operations?
 
 To be super duper honest, my initial attempts were a complete mess. I attempted
-to meticulously track every operation, parent, and child tensor, resulting in a
+to meticulously track every operation, parent and child tensor, resulting in a
 code resembling a family tree. But Andrej's video made me realise that I was
-overcomplicating things, and I reworked my implementation slowly.
+overcomplicating things and I reworked my implementation slowly.
 
 .. admonition:: :fas:`sparkles` Inspiration
     :class: unusual-one danger
 
     `Andrej Karpathy`_ had explained this concept in much detail in his video,
     where he builds `micrograd`_, a simple autograd engine, from scratch. This
-    video is perhaps the best introduction and explanation, and the only thing
-    you need to know about how autograd works, and it helped me a ton in
+    video is perhaps the best introduction and explanation and the only thing
+    you need to know about how autograd works and it helped me a ton in
     understanding the core concepts.
 
 .. youtube:: https://www.youtube.com/watch?v=VMj-3S1tku0
 
 By rewatching the video multiple times, I realised that each operation could be
-represented as a node, and each node could carry a cheeky function which would
+represented as a node and each node could carry a cheeky function which would
 know how to compute its own gradient. The "real" breakthrough happened when I
 stopped thinking of the graph as a static structure and started seeing it as a
 living, breathing thing, growing with every operation.
 
-So, I created a ``Node`` class that represented each operation, and each tensor
+So, I created a ``Node`` class that represented each operation and each tensor
 would have a reference to its parent nodes. This way, I could traverse the
 graph and compute gradients in a more structured way.
 
@@ -211,7 +211,7 @@ graph and compute gradients in a more structured way.
 
 Every tensor (node) carried a ``grad_fn`` node in the computation graph. When
 you call ``backward``, the tensor does not just look at itself; it traces its
-lineage, visiting every ancestor, and calls their gradient functions in reverse
+lineage, visiting every ancestor and calls their gradient functions in reverse
 order. It is a wee bit like walking back through your own footsteps after a
 long hike, pausing at each fork to remember which way you came.
 
@@ -239,7 +239,7 @@ Building the building blocks.
 -------------------------------------------------------------------------------
 
 Once my tensor with autodiff support was in place, I started on the neural
-networks. PyTorch's :py:mod:`torch.nn` module is a marvel of abstractions, and
+networks. PyTorch's :py:mod:`torch.nn` module is a marvel of abstractions and
 I wanted to recreate it from scratch. I began by defining `Module`_, a base
 class that could hold parameters and submodules.
 
@@ -248,7 +248,7 @@ saving and loading weights, switching between training and evaluation modes,
 and handling parameter updates.
 
 I was pacing through my development. Things were much clearer now. As more time
-passed, I implemented many things. The layers, activations, losses, and
+passed, I implemented many things. The layers, activations, losses and
 transforms were all implemented in their functional forms initially and later
 wrapped around classes much like PyTorch.
 
@@ -382,7 +382,7 @@ wrapped around classes much like PyTorch.
     .. tab-item:: :fas:`chart-line-down far` Losses
 
         `Loss functions`_ were implemented as functions that took two tensors,
-        ``input`` and ``target``, and returned a new tensor representing the
+        ``input`` and ``target`` and returned a new tensor representing the
         calculated loss (forward pass). Each loss function also had a backward
         pass that computed the gradient with respect to the input and target
         tensors.
@@ -554,7 +554,7 @@ wrapped around classes much like PyTorch.
 Recreating neural networks from first principles reminded me of learning to
 ride a bicycle without training wheels. I fell off a ton. But each time I
 got back on, I understood a little more. I was, in a way, backpropagating my
-mistakes, learning from them, and adjusting my gradients.
+mistakes, learning from them and adjusting my gradients.
 
 .. rubric:: Joy of manual optimisation.
 .. rubric::
@@ -567,7 +567,7 @@ optimiser, which presented another challenge. I implemented a simple optimiser,
 manually updating its parameters step by step.
 
 Once I was happy with my optimiser, I wrote a basic |storch.optim.Optimiser|
-class that took a list of parameters and a learning rate, and it had a
+class that took a list of parameters and a learning rate and it had a
 :python:`.step()` method that updated the parameters based on their gradients.
 
 .. code-block:: python
@@ -586,9 +586,9 @@ class that took a list of parameters and a learning rate, and it had a
                     continue
                 param -= self.lr * param.grad
 
-It was slow and clunky, but I could see every calculation, update, and mistake.
+It was slow and clunky, but I could see every calculation, update and mistake.
 I had to understand how each parameter was updated, how the learning rate
-(:math:`\mu`) affected the updates, and how momentum (:math:`\mu`) could help
+(:math:`\mu`) affected the updates and how momentum (:math:`\mu`) could help
 smooth out the learning process.
 
 With time, I learnt techniques that improved the training process. Finally, I
@@ -609,11 +609,11 @@ Embracing slowness as a virtue.
 
 As more time passed while building SlowTorch, I realised the hardest part
 wasn't the code or maths, but the mindset. I knew I couldn't compete with
-PyTorch's raw speed, so I had to let go of my desire for speed, elegance, and
+PyTorch's raw speed, so I had to let go of my desire for speed, elegance and
 perfection, which I had always strived for as a Software Engineer.
 
-Instead, I embraced the slowness, curiosity, and experimentation of a child.
-Every bug I encountered was a lesson, and every unexpected result was an
+Instead, I embraced the slowness, curiosity and experimentation of a child.
+Every bug I encountered was a lesson and every unexpected result was an
 opportunity to recuperate and learn. I quite often found myself talking to my
 code, asking it questions, coaxing it to reveal its secrets.
 

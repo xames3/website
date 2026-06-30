@@ -33,7 +33,7 @@ five-year old**. I've said it before, I live by this old quote:
 
     -- Dr Richard Feynman
 
-But for me, that teaching needs to be practical, relatable, and, honestly, to
+But for me, that teaching needs to be practical, relatable and, honestly, to
 have a bit of a laugh sometimes. And this corner is where I'll be sharing my
 take on some of those concepts that can sometimes seem a bit daunting.
 
@@ -74,7 +74,7 @@ clicks!
 The big idea.
 -------------------------------------------------------------------------------
 
-Each page here will focus on a single concept, and I'll explain it simply,
+Each page here will focus on a single concept and I'll explain it simply,
 using practical examples that we encounter every day. For me, the best examples
 are always the ones you can see and feel.
 

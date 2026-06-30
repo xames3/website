@@ -21,7 +21,7 @@ Akshay Mestry
 
 .. rst-class:: lead
 
-    Educator, software engineer, and storyteller.
+    Educator, software engineer and storyteller.
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
@@ -32,9 +32,9 @@ Akshay Mestry
 
 Hello hello!
 
-I'm Akshay, an educator, engineer, and currently an Assistant Professor at
+I'm Akshay, an educator, engineer and currently an Assistant Professor at
 `National Louis University`_. Before getting into academia, I worked at
-consulting firms, corporate product companies, and startups. This small corner
+consulting firms, corporate product companies and startups. This small corner
 on the internet is my space to explore and share my experiences in software
 engineering through storytelling.
 
@@ -81,8 +81,8 @@ Love for open source.
 
 I :fas:`heart mrl-0 red` Open source!
 
-I accidentally got started on it, and I don't know why; I bloody loved it.
-Doing open source was, and still is, a personal reminder to share my struggles
+I accidentally got started on it and I don't know why; I bloody loved it.
+Doing open source was and still is, a personal reminder to share my struggles
 and achievements/learnings with everyone and invite collaboration across
 various disciplines.
 
@@ -113,7 +113,7 @@ reflect on both my technical depth and my knowledge gaps.
         An experimental re-implementation of a few NumPy features in Python.
 
 Beyond these, I've had the opportunity to speak at a few tech meetups and
-conferences, sharing insights on my projects, my thoughts on AI, and the inner
+conferences, sharing insights on my projects, my thoughts on AI and the inner
 workings of some frameworks.
 
 It wouldn't be possible if I hadn't explored this; in doing so, I realised I
@@ -143,7 +143,7 @@ Early in my software engineering career, I came across a quote:
 
 And I absolutely fell in love with this idea. Soon, I realised you really
 can't call yourself an :abbr:`SME (Subject-matter expert)` until you can teach
-a concept to those who barely know anything about it (or very little), and are
+a concept to those who barely know anything about it (or very little) and are
 willing to entertain questions at that initial frame of reference.
 
 Thus began my journey into teaching. By the way...

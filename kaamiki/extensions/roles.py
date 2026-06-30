@@ -89,7 +89,7 @@ def stylise(
     :raises: None, but will report an error message if the input format
         is invalid.
     """
-    # NOTE(xames3): The parameters `role`, `options`, and `content` are
+    # NOTE(xames3): The parameters `role`, `options` and `content` are
     # currently unused but are included to match the expected signature
     # for a Sphinx role function.
     role = role or ""
@@ -150,7 +150,7 @@ def email(
     :raises: None, but will report an error message if the input format
         is invalid.
     """
-    # NOTE(xames3): The parameters `role`, `options`, and `content` are
+    # NOTE(xames3): The parameters `role`, `options` and `content` are
     # currently unused but are included to match the expected signature
     # for a Sphinx role function.
     role = role or ""
@@ -208,9 +208,10 @@ def mark(
         representing the highlighted text and a list of system messages
         generated during processing (typically empty if no errors).
     """
-    # NOTE(xames3): The parameters `role`, `rawtext`, `options`, `lineno`,
-    # `inliner`, and `content` are currently unused but are included to match
-    # the expected signature for a Sphinx role function.
+    # NOTE(xames3): The parameters `role`, `rawtext`, `options`,
+    # `lineno`, `inliner` and `content` are currently unused but are
+    # included to match the expected signature for a Sphinx role
+    # function.
     role = rawtext or role or ""
     lineno = lineno or inliner
     options = options or {}
@@ -265,9 +266,10 @@ def underline(
         representing the underlined text and a list of system messages
         generated during processing (typically empty if no errors).
     """
-    # NOTE(xames3): The parameters `role`, `rawtext`, `options`, `lineno`,
-    # `inliner`, and `content` are currently unused but are included to match
-    # the expected signature for a Sphinx role function.
+    # NOTE(xames3): The parameters `role`, `rawtext`, `options`,
+    # `lineno`, `inliner` and `content` are currently unused but are
+    # included to match the expected signature for a Sphinx role
+    # function.
     role = rawtext or role or ""
     lineno = lineno or inliner
     options = options or {}
