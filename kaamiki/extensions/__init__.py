@@ -22,6 +22,7 @@ from . import author
 from . import button
 from . import picture
 from . import repository
+from . import slopcode
 from . import thumbnail
 from . import video
 from . import youtube
@@ -34,6 +35,7 @@ directives: t.Sequence[types.ModuleType] = (
     button,
     picture,
     repository,
+    slopcode,
     thumbnail,
     video,
     youtube,
