@@ -142,3 +142,8 @@ venv/
 archive/*
 linting.html
 *.bak
+
+# Azure Functions secrets (slopcode backend) -- connection strings
+# live in here, must never be committed. azure/slopcode/local.settings.json.example
+# is the committed template; this only ignores the real, filled-in file.
+azure/
