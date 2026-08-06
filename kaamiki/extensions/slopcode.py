@@ -124,7 +124,9 @@ class directive(rst.Directive):
             )
 
         uid = f"km-slopcode-{id(self)}"
-        html = _render(uid=uid, api_base_url=api_base_url, headcount_max=headcount_max)
+        html = _render(
+            uid=uid, api_base_url=api_base_url, headcount_max=headcount_max
+        )
         return [nodes.raw(text=html, format="html")]
 
 
@@ -506,9 +508,7 @@ _CSS_TEMPLATE: t.Final[str] = """
 # free to support given the existing theme's per-instance-uid
 # precedent in the archived interpreter extension) wouldn't collide.
 
-_HTML_TEMPLATE: t.Final[
-    str
-] = """
+_HTML_TEMPLATE: t.Final[str] = """
 <section id="{uid}-phase-choice" class="site-slopcode__card">
   <h3 class="site-slopcode__title">Slopcode</h3>
   <p class="site-slopcode__subtitle">Got a room code? Join below -- no sign-in needed.</p>

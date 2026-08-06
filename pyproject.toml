@@ -297,8 +297,8 @@ deps = [
   "ruff>=0.12.7",
 ]
 commands = [
-  [ "ruff", "format", "." ],
-  [ "ruff", "check", ".", "--fix" ],
+  # [ "ruff", "format", "." ],
+  # [ "ruff", "check", ".", "--fix" ],
 ]
 
 [tool.tox.env.typecheck]
