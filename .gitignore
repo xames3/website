@@ -139,6 +139,7 @@ venv/
 
 # Project's mess
 .github/**.md
+azure/*
 archive/*
 linting.html
 *.bak

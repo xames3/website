@@ -166,6 +166,7 @@ and my position, when asked for any help.
     :titlesonly:
 
     academia/thoughts-on-teaching
+    miscellany/slopcode
 
 .. toctree::
     :caption: Explained
