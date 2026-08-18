@@ -23,6 +23,7 @@ from . import button
 from . import iframe
 from . import picture
 from . import repository
+from . import slopcode
 from . import thumbnail
 from . import video
 from . import youtube
@@ -36,6 +37,7 @@ directives: t.Sequence[types.ModuleType] = (
     iframe,
     picture,
     repository,
+    slopcode,
     thumbnail,
     video,
     youtube,
