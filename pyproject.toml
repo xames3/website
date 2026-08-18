@@ -321,6 +321,6 @@ commands = [
 description = "Run HTML, CSS, and JS linting with djlint"
 deps = [ "djlint==1.36.4" ]
 commands = [
-  [ "djlint", "kaamiki/base/templates", "docs/source/assets/html", "-e", "html", "--reformat" ],
-  [ "djlint", "kaamiki/base/templates", "-e", "html.jinja", "--reformat" ],
+  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/assets/html", "-e", "html", "--reformat" ],
+  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "-e", "html.jinja", "--reformat" ],
 ]
