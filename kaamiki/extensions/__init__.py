@@ -4,7 +4,7 @@ Theme Extension Manager
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 04 May, 2026
+Last updated on: 12 August, 2026
 
 This module manages Kaamiki Sphinx Theme's custom directive and roles.
 
@@ -20,9 +20,9 @@ import typing as t
 
 from . import author
 from . import button
+from . import iframe
 from . import picture
 from . import repository
-from . import slopcode
 from . import thumbnail
 from . import video
 from . import youtube
@@ -33,9 +33,9 @@ if t.TYPE_CHECKING:
 directives: t.Sequence[types.ModuleType] = (
     author,
     button,
+    iframe,
     picture,
     repository,
-    slopcode,
     thumbnail,
     video,
     youtube,
