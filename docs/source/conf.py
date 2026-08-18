@@ -4,7 +4,7 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 28 June, 2026
+Last updated on: 12 August, 2026
 
 This file contains the configuration settings for building my static
 website using Sphinx, a popular Python documentation tool. Sphinx is a
@@ -150,15 +150,6 @@ html_context: dict[str, t.Any] = {
     "show_searchbox": True,
     "show_sphinx": False,
     "show_toctree": True,
-    # Base URL of the deployed slopcode Azure Functions backend, read
-    # by the `slopcode` directive (kaamiki/extensions/slopcode.py).
-    # Update this after running azure/slopcode/provision.sh -- it
-    # prints the real Function App URL at the end, and again any time
-    # azure/slopcode/teardown.sh + provision.sh are re-run, since a
-    # fresh run generates a new random Function App name.
-    "slopcode_api_base_url": (
-        "https://func-slopcode-294281165.azurewebsites.net/api"
-    ),
     "sidebar_buttons": {
         "Check my availability": {
             "link": "#",
