@@ -1,8 +1,8 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 August, 2026
-.. Last updated on: 18 August, 2026
+.. Last updated on: 27 August, 2026
 
-:og:title: Is this AI?
+:og:title: Peter, Is this AI?
 :og:description: A completely scientific* investigation into whether (real)
     humans can actually tell AI writing from human writing.
 :og:type: article
@@ -13,19 +13,25 @@
 .. _academia-is-this-ai:
 
 ===============================================================================
-:fas:`robot far` Is this AI?
+:fas:`robot far` Peter, Is this AI?
 ===============================================================================
 
 .. rst-class:: lead
 
-    People think they can tell AI writing from human writing, they're probably
+    Peter thinks he can tell AI writing from human writing. Peter's probably
     wrong.
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
-    :background: https://m.media-amazon.com/images/M/MV5BMzFiYjI5YWItNjUwOC00MzllLWIwODItMGE0ZWNhODJkOTA0XkEyXkFqcGc@._V1_.jpg
-        https://static.wikia.nocookie.net/familyguyfanon/images/0/04/Clash_for_Mayors.jpg
+    :background: https://i.imgur.com/HGSCUsN.jpg
+        https://i.imgur.com/ebNwjPp.jpg
+
+In the Summer quarter of 2026, I taught `Practical Applications in AI`_, an
+introductory AI class to some my non-CS and CS students. As of writing this
+article in August of 2026, I thought I did a really good job at it. What stood
+out the most is I didn't teach anything new or something that the students
+didn't already know.
 
 This is a small live experiment: gather a few people, everyone pastes in a
 chunk of text, and then everyone votes on whether each piece was written by a
@@ -37,6 +43,9 @@ human or by an AI, with their optional reasons.
     :local-api-base-url: http://localhost:7071/api
     :local-dev: false
     :expected-headcount-max: 20
-    :file: ../assets/html/is-this-ai.html
-    :css: css/is-this-ai.css
-    :js: js/is-this-ai.js
+    :file: ../assets/html/peter-is-this-ai.html
+    :css: css/peter-is-this-ai.css
+    :js: js/peter-is-this-ai.js
+
+
+.. _Practical Applications in AI: https://nl.smartcatalogiq.com/en/current/undergraduate-and-graduate-catalog/course-descriptions/css-computer-science-info-systems/200/css-230

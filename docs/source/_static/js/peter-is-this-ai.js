@@ -4,7 +4,7 @@ Peter, Is this AI?  widget behaviour
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 August, 2026
-Last updated on: 18 August, 2026
+Last updated on: 27 August, 2026
 */
 (function() {
     const SIGNALR_CLIENT_CDN_URL = 'https://cdn.jsdelivr.net/npm/@microsoft/signalr@8.0.7/dist/browser/signalr.min.js';
@@ -25,8 +25,8 @@ Last updated on: 18 August, 2026
     }
 
     function createMockBackend() {
-        const FAKE_NAMES = ['QuietOtter', 'AmberFalcon', 'SlyPanda', 'BriskHeron', 'LuckyLynx', 'MellowSparrow', 'BoldBadger', 'EagerWeasel', 'FuzzyIbis', 'CalmMarmot'];
-        const ROOMS_STORAGE_KEY = 'is-this-ai-mock-rooms';
+        const CHARACTERS = ['Peter', 'Lois', 'Chris', 'Stewie', 'Meg', 'Brian', 'Joe', 'Quagmire', 'Cleveland', 'Tom', 'Tricia', 'Bonnie', 'Mort', 'Carter', 'Babs', 'Consuela', 'Mr. Herbert', 'Bruce', 'Adam', 'God'];
+        const ROOMS_STORAGE_KEY = 'peter-is-this-ai-mock-rooms';
         const DEFAULT_ROOM_CODE = 'ABCDE';
         let listeners = {};
 
@@ -258,7 +258,7 @@ Last updated on: 18 August, 2026
 
             async joinRoom(roomCode, body) {
                 const participantId = 'guest-' + randomToken();
-                const displayName = (body.displayName || '').trim() || FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
+                const displayName = (body.displayName || '').trim() || CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
                 withRoom(roomCode, (rooms, room) => {
                     if (!room) throw new Error('Room not found.');
                     if (room.phase !== 'lobby') throw new Error('This room has already started.');
@@ -430,7 +430,7 @@ Last updated on: 18 August, 2026
             ? (root.dataset.localApiBaseUrl || 'http://localhost:7071/api')
             : (root.dataset.apiBaseUrl || '');
         const HEADCOUNT_MAX = Number(root.dataset.headcountMax || 20);
-        const STORAGE_KEY = 'is-this-ai-session-' + UID;
+        const STORAGE_KEY = 'peter-is-this-ai-session-' + UID;
         const $ = (id) => document.getElementById(UID + '-' + id);
         const mock = USE_MOCK_BACKEND ? createMockBackend() : null;
 
@@ -451,7 +451,7 @@ Last updated on: 18 August, 2026
         function showPhase(phase) {
             ['choice', 'lobby', 'submission', 'voting', 'results'].forEach((p) => {
                 const el = $('phase-' + p);
-                if (el) el.classList.toggle('site-is-this-ai--hidden', p !== phase);
+                if (el) el.classList.toggle('site-peter-is-this-ai--hidden', p !== phase);
             });
             setManualResyncVisibility(phase);
         }
@@ -466,14 +466,14 @@ Last updated on: 18 August, 2026
             if (!button) return;
             const inSession = Boolean(roomCode && sessionToken);
             button.classList.toggle(
-                'site-is-this-ai--hidden',
+                'site-peter-is-this-ai--hidden',
                 !inSession || phase === 'choice',
             );
         }
 
         function resetHostChoiceFields() {
-            $('host-login-fields').classList.remove('site-is-this-ai--hidden');
-            $('host-create-fields').classList.add('site-is-this-ai--hidden');
+            $('host-login-fields').classList.remove('site-peter-is-this-ai--hidden');
+            $('host-create-fields').classList.add('site-peter-is-this-ai--hidden');
             $('login-error').textContent = '';
             $('choice-host-error').textContent = '';
         }
@@ -563,8 +563,8 @@ Last updated on: 18 August, 2026
                     }),
                 });
                 hostToken = result.hostToken;
-                $('host-login-fields').classList.add('site-is-this-ai--hidden');
-                $('host-create-fields').classList.remove('site-is-this-ai--hidden');
+                $('host-login-fields').classList.add('site-peter-is-this-ai--hidden');
+                $('host-create-fields').classList.remove('site-peter-is-this-ai--hidden');
             } catch (err) {
                 $('login-error').textContent = err.message;
             }
@@ -649,7 +649,7 @@ Last updated on: 18 August, 2026
         function renderParticipants(participants, expectedHeadcount) {
             const list = $('lobby-participants');
             list.innerHTML = '';
-            list.classList.toggle('site-is-this-ai__avatar-stack--host', isHost);
+            list.classList.toggle('site-peter-is-this-ai__avatar-stack--host', isHost);
             const ordered = [
                 ...participants.filter((p) => p.participantId === participantId),
                 ...participants.filter((p) => p.participantId !== participantId),
@@ -659,8 +659,8 @@ Last updated on: 18 August, 2026
             visible.forEach((p, index) => {
                 const isMe = p.participantId === participantId;
                 const li = document.createElement('li');
-                let className = 'site-is-this-ai__avatar';
-                if (isMe) className += ' site-is-this-ai__avatar--you';
+                let className = 'site-peter-is-this-ai__avatar';
+                if (isMe) className += ' site-peter-is-this-ai__avatar--you';
                 li.className = className;
                 li.style.backgroundColor = avatarColorFor(p.participantId);
                 li.style.zIndex = String(visible.length - index);
@@ -670,14 +670,14 @@ Last updated on: 18 August, 2026
             });
             if (overflowCount > 0) {
                 const li = document.createElement('li');
-                li.className = 'site-is-this-ai__avatar site-is-this-ai__avatar--overflow';
+                li.className = 'site-peter-is-this-ai__avatar site-peter-is-this-ai__avatar--overflow';
                 li.style.zIndex = '0';
                 li.textContent = '+' + overflowCount;
                 li.title = overflowCount + ' more';
                 list.appendChild(li);
             }
             $('lobby-count').textContent = participants.length + ' of ' + expectedHeadcount + ' joined for ' + roomCode;
-            $('lobby-host-panel').classList.toggle('site-is-this-ai--hidden', !isHost);
+            $('lobby-host-panel').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
         }
 
         $('lobby-start-submission').addEventListener('click', async () => {
@@ -718,10 +718,10 @@ Last updated on: 18 August, 2026
         function renderSubmissionNav() {
             const nav = $('submission-nav');
             if (mySubmissions.length < 2) {
-                nav.classList.add('site-is-this-ai--hidden');
+                nav.classList.add('site-peter-is-this-ai--hidden');
                 return;
             }
-            nav.classList.remove('site-is-this-ai--hidden');
+            nav.classList.remove('site-peter-is-this-ai--hidden');
             const total = mySubmissions.length + 1;
             $('submission-nav-label').textContent = (mySubmissionCursor + 1) + ' of ' + total;
             $('submission-nav-prev').disabled = mySubmissionCursor === 0;
@@ -812,9 +812,9 @@ Last updated on: 18 August, 2026
 
         function enterSubmissionPhase() {
             showPhase('submission');
-            $('submission-host-panel').classList.toggle('site-is-this-ai--hidden', !isHost);
-            $('submission-host-count').classList.toggle('site-is-this-ai--hidden', !isHost);
-            $('submission-status').classList.toggle('site-is-this-ai--hidden', isHost);
+            $('submission-host-panel').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
+            $('submission-host-count').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
+            $('submission-status').classList.toggle('site-peter-is-this-ai--hidden', isHost);
         }
 
         const SWIPE_THRESHOLD = 100;
@@ -829,11 +829,11 @@ Last updated on: 18 August, 2026
 
         function buildSwipeCard(content, stackLevel) {
             const card = document.createElement('div');
-            card.className = 'site-is-this-ai__swipe-card site-is-this-ai__swipe-card--fresh';
+            card.className = 'site-peter-is-this-ai__swipe-card site-peter-is-this-ai__swipe-card--fresh';
             if (stackLevel === 0) {
-                card.classList.add('site-is-this-ai__swipe-card--top');
+                card.classList.add('site-peter-is-this-ai__swipe-card--top');
             } else {
-                card.classList.add('site-is-this-ai__swipe-card--stack-' + stackLevel);
+                card.classList.add('site-peter-is-this-ai__swipe-card--stack-' + stackLevel);
             }
             card.textContent = content;
             return card;
@@ -841,7 +841,7 @@ Last updated on: 18 August, 2026
 
         function releaseFreshCard(card) {
             void card.getBoundingClientRect();
-            card.classList.remove('site-is-this-ai__swipe-card--fresh');
+            card.classList.remove('site-peter-is-this-ai__swipe-card--fresh');
         }
 
         function renderCardStack(deck, contents, attachTopSwipe) {
@@ -880,7 +880,7 @@ Last updated on: 18 August, 2026
                 const restRect = card.getBoundingClientRect();
                 restLeft = restRect.left;
                 restRight = restRect.right;
-                card.classList.add('site-is-this-ai__swipe-card--dragging');
+                card.classList.add('site-peter-is-this-ai__swipe-card--dragging');
                 card.setPointerCapture(event.pointerId);
             }
 
@@ -901,12 +901,12 @@ Last updated on: 18 August, 2026
             function onPointerUp() {
                 if (!dragging) return;
                 dragging = false;
-                card.classList.remove('site-is-this-ai__swipe-card--dragging');
+                card.classList.remove('site-peter-is-this-ai__swipe-card--dragging');
                 if (hintAi) hintAi.style.opacity = '0';
                 if (hintHuman) hintHuman.style.opacity = '0';
                 if (Math.abs(rawDx) >= SWIPE_THRESHOLD) {
                     const direction = rawDx > 0 ? 'right' : 'left';
-                    const flyClass = rawDx > 0 ? 'site-is-this-ai__swipe-card--fly-right' : 'site-is-this-ai__swipe-card--fly-left';
+                    const flyClass = rawDx > 0 ? 'site-peter-is-this-ai__swipe-card--fly-right' : 'site-peter-is-this-ai__swipe-card--fly-left';
                     card.classList.add(flyClass);
                     card.style.transform = '';
                     const consumed = options.onSwipe(direction, card);
@@ -947,7 +947,7 @@ Last updated on: 18 August, 2026
                 renderVotingItem(next);
             } catch (err) {
                 $('voting-error').textContent = err.message;
-                card.classList.remove('site-is-this-ai__swipe-card--fly-left', 'site-is-this-ai__swipe-card--fly-right');
+                card.classList.remove('site-peter-is-this-ai__swipe-card--fly-left', 'site-peter-is-this-ai__swipe-card--fly-right');
             } finally {
                 swipeVoting = false;
             }
@@ -955,8 +955,8 @@ Last updated on: 18 August, 2026
 
         function attachVotingSwipe(card) {
             const deck = $('voting-deck');
-            const hintAi = deck.querySelector('.site-is-this-ai__swipe-hint--ai');
-            const hintHuman = deck.querySelector('.site-is-this-ai__swipe-hint--human');
+            const hintAi = deck.querySelector('.site-peter-is-this-ai__swipe-hint--ai');
+            const hintHuman = deck.querySelector('.site-peter-is-this-ai__swipe-hint--human');
             attachSwipeGesture(card, deck, {
                 hintAi,
                 hintHuman,
@@ -969,24 +969,24 @@ Last updated on: 18 August, 2026
         }
 
         function renderVotingItem(data) {
-            $('voting-host-panel').classList.toggle('site-is-this-ai--hidden', !isHost);
+            $('voting-host-panel').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
             if (data.done) {
-                $('voting-active').classList.add('site-is-this-ai--hidden');
-                $('voting-waiting').classList.remove('site-is-this-ai--hidden');
+                $('voting-active').classList.add('site-peter-is-this-ai--hidden');
+                $('voting-waiting').classList.remove('site-peter-is-this-ai--hidden');
                 return;
             }
-            $('voting-active').classList.remove('site-is-this-ai--hidden');
-            $('voting-waiting').classList.add('site-is-this-ai--hidden');
+            $('voting-active').classList.remove('site-peter-is-this-ai--hidden');
+            $('voting-waiting').classList.add('site-peter-is-this-ai--hidden');
             $('voting-error').textContent = '';
 
             const deck = $('voting-deck');
-            deck.querySelectorAll('.site-is-this-ai__swipe-card').forEach((card) => card.remove());
+            deck.querySelectorAll('.site-peter-is-this-ai__swipe-card').forEach((card) => card.remove());
             const stack = [data.content, ...(data.upcoming || [])];
             renderCardStack(deck, stack, attachVotingSwipe);
         }
 
         async function loadResults() {
-            $('results-host-panel').classList.toggle('site-is-this-ai--hidden', !isHost);
+            $('results-host-panel').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
             try {
                 const result = await api('/rooms/' + roomCode + '/results', {
                     headers: {
@@ -1026,18 +1026,18 @@ Last updated on: 18 August, 2026
 
         function renderResultsItem() {
             const deck = $('results-deck');
-            deck.querySelectorAll('.site-is-this-ai__swipe-card').forEach((card) => card.remove());
+            deck.querySelectorAll('.site-peter-is-this-ai__swipe-card').forEach((card) => card.remove());
             if (!resultsItems.length) {
-                $('results-tally').classList.add('site-is-this-ai--hidden');
+                $('results-tally').classList.add('site-peter-is-this-ai--hidden');
                 deck.appendChild(buildSwipeCard('No submissions.', 0));
                 return;
             }
             if (resultsDismissed) {
-                $('results-tally').classList.add('site-is-this-ai--hidden');
+                $('results-tally').classList.add('site-peter-is-this-ai--hidden');
                 const img = document.createElement('img');
                 img.src = RESULTS_END_IMAGES[Math.floor(Math.random() * RESULTS_END_IMAGES.length)];
                 img.alt = "That's everyone -- tap to see results again.";
-                img.className = 'site-is-this-ai__results-end-image';
+                img.className = 'site-peter-is-this-ai__results-end-image';
                 img.addEventListener('click', () => {
                     resultsDismissed = false;
                     resultsIndex = resultsItems.length - 1;
@@ -1046,7 +1046,7 @@ Last updated on: 18 August, 2026
                 deck.appendChild(img);
                 return;
             }
-            $('results-tally').classList.remove('site-is-this-ai--hidden');
+            $('results-tally').classList.remove('site-peter-is-this-ai--hidden');
             const item = resultsItems[resultsIndex];
             const total = item.aiVotes + item.humanVotes;
             const aiPercent = total ? (item.aiVotes / total) * 100 : 50;
@@ -1116,7 +1116,7 @@ Last updated on: 18 August, 2026
             });
             connection.on('VoteTallyUpdated', (data) => {
                 $('voting-tally').textContent = data.votedCount + ' of ' + data.totalParticipants + ' voted on that item';
-                $('voting-tally').classList.toggle('site-is-this-ai--hidden', !isHost);
+                $('voting-tally').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
             });
             connection.on('ResultsReady', () => loadResults());
             connection.on('RoomStopped', () => {
@@ -1236,7 +1236,7 @@ Last updated on: 18 August, 2026
     }
 
     function bootIsThisAI() {
-        document.querySelectorAll('.site-is-this-ai[data-is-this-ai="true"]').forEach(initIsThisAI);
+        document.querySelectorAll('.site-peter-is-this-ai[data-peter-is-this-ai="true"]').forEach(initIsThisAI);
     }
 
     if (document.readyState === 'loading') {

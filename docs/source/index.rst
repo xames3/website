@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 12 August, 2026
+.. Last updated on: 27 August, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -166,7 +166,7 @@ and my position, when asked for any help.
     :titlesonly:
 
     academia/thoughts-on-teaching
-    academia/is-this-ai
+    academia/peter-is-this-ai
 
 .. toctree::
     :caption: Explained
