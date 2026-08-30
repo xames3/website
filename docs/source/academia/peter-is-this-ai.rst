@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 August, 2026
-.. Last updated on: 27 August, 2026
+.. Last updated on: 29 August, 2026
 
 :og:title: Peter, Is this AI?
 :og:description: A completely scientific* investigation into whether (real)
@@ -28,14 +28,10 @@
         https://i.imgur.com/ebNwjPp.jpg
 
 In the Summer quarter of 2026, I taught `Practical Applications in AI`_, an
-introductory AI class to some my non-CS and CS students. As of writing this
+introductory AI class to some of my non-CS and CS students. As of writing this
 article in August of 2026, I thought I did a really good job at it. What stood
 out the most is I didn't teach anything new or something that the students
 didn't already know.
-
-This is a small live experiment: gather a few people, everyone pastes in a
-chunk of text, and then everyone votes on whether each piece was written by a
-human or by an AI, with their optional reasons.
 
 .. iframe::
     :uid: km-css230
@@ -43,9 +39,9 @@ human or by an AI, with their optional reasons.
     :local-api-base-url: http://localhost:7071/api
     :local-dev: false
     :expected-headcount-max: 20
+    :auto-start-delay-seconds: 5
     :file: ../assets/html/peter-is-this-ai.html
     :css: css/peter-is-this-ai.css
     :js: js/peter-is-this-ai.js
-
 
 .. _Practical Applications in AI: https://nl.smartcatalogiq.com/en/current/undergraduate-and-graduate-catalog/course-descriptions/css-computer-science-info-systems/200/css-230
