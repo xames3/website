@@ -4,7 +4,7 @@ Peter, Is this AI?  widget styles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 August, 2026
-Last updated on: 27 August, 2026
+Last updated on: 29 August, 2026
 */
 
 .site-peter-is-this-ai {
@@ -37,15 +37,16 @@ Last updated on: 27 August, 2026
 
 .site-peter-is-this-ai__title {
     font-size: 1.15rem;
-    font-weight: 600;
+    font-weight: 60;
     margin: 0 0 1rem 0;
     color: hsl(var(--km-color-fg-strong));
 }
 
-.site-peter-is-this-ai__subtitle {
+.site-peter-is-this-ai .site-peter-is-this-ai__subtitle {
     font-size: 0.9rem;
     color: hsl(var(--km-color-fg) / 0.7);
-    margin: -0.5rem 0 1rem 0;
+    margin-top: -0.5rem !important;
+    margin-bottom: 1rem;
 }
 
 .site-peter-is-this-ai__tab-layout {
@@ -94,7 +95,7 @@ Last updated on: 27 August, 2026
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .site-peter-is-this-ai__field--stacked {
@@ -107,6 +108,12 @@ Last updated on: 27 August, 2026
 
 .site-peter-is-this-ai__input {
     border-radius: var(--km-radius-round, 0.75rem) !important;
+}
+
+html[data-theme="dark"] .site-peter-is-this-ai__input[type=number]::-webkit-inner-spin-button,
+html[data-theme="dark"] .site-peter-is-this-ai__input[type=number]::-webkit-outer-spin-button {
+    filter: invert(1);
+    opacity: 1;
 }
 
 .site-peter-is-this-ai__input,
@@ -126,6 +133,7 @@ Last updated on: 27 August, 2026
 }
 
 .site-peter-is-this-ai__textarea {
+    display: block;
     min-height: 140px;
     resize: vertical;
     border-radius: 1.5rem;
@@ -133,61 +141,159 @@ Last updated on: 27 August, 2026
 }
 
 .site-peter-is-this-ai__composer {
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid hsl(var(--km-color-border));
+    border-radius: 1.5rem;
+    background-color: hsl(var(--km-color-input, var(--km-color-bg)));
+    padding: 0.5rem;
+    gap: 0.25rem;
+}
+
+.site-peter-is-this-ai__composer:focus-within {
+    outline: 2px solid hsl(var(--km-color-accent-bg));
 }
 
 .site-peter-is-this-ai__textarea--composer {
     width: 100%;
+    min-height: 90px;
     max-height: 400px;
-    padding-top: 1rem;
-    padding-bottom: 3.5rem;
+    padding: 0.5rem 0.5rem 0;
+    border: none;
+    background: transparent;
     resize: none;
     overflow-y: auto;
 }
 
-.site-peter-is-this-ai__composer-status {
+.site-peter-is-this-ai__textarea--composer:focus-visible {
+    outline: none;
+}
+
+.site-peter-is-this-ai__composer-image-preview {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 90px;
+    max-height: 400px;
+    padding: 0.5rem 0.5rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: flex-start;
+    gap: 0.5rem;
+    overflow-y: auto;
+}
+
+.site-peter-is-this-ai__composer-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+}
+
+.site-peter-is-this-ai__composer-image-chip {
+    position: relative;
+    flex: 0 0 auto;
+    width: 4rem;
+    height: 4rem;
+}
+
+.site-peter-is-this-ai__composer-image-chip-thumb {
     position: absolute;
-    left: 1rem;
-    bottom: 1.15rem;
-    margin: 0;
+}
+
+.site-peter-is-this-ai__composer-image-chip-thumb img {
+    display: block;
+    width: 4rem;
+    height: 4rem;
+    margin: 0rem !important;
+    object-fit: cover;
+}
+
+.site-peter-is-this-ai__composer-image-chip-remove {
+    position: absolute;
+    right: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    padding: 0;
+    opacity: 0.8;
+    border-radius: 50%;
+    background-color: hsl(var(--km-color-muted-fg));
+    color: hsl(var(--km-color-bg));
+    font-size: 0.65rem;
+    cursor: pointer;
+}
+
+.site-peter-is-this-ai__composer--drag-over .site-peter-is-this-ai__textarea--composer,
+.site-peter-is-this-ai__composer--drag-over .site-peter-is-this-ai__composer-image-preview {
+    outline: 2px dashed hsl(var(--km-color-accent-bg));
+    outline-offset: -2px;
+}
+
+.site-peter-is-this-ai__composer-status {
+    margin: 0 0 0.5rem;
     font-size: 0.8rem;
     color: hsl(var(--km-color-fg) / 0.6);
-    pointer-events: none;
+}
+
+.site-peter-is-this-ai__composer-status:empty {
+    display: none;
 }
 
 .site-peter-is-this-ai__composer-nav {
-    position: absolute;
-    right: calc(0.5rem + 2.25rem + 0.5rem);
-    bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 0.35rem;
+    margin-left: auto;
 }
 
 .site-peter-is-this-ai__composer-nav-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: 50%;
     border: none;
     background-color: hsl(var(--km-color-muted-bg, var(--km-color-bg)));
-    color: hsl(var(--km-color-fg));
-    font-size: 0.75rem;
+    color: hsl(var(--km-color-muted-fg));
+    font-size: 1.15rem;
     cursor: pointer;
     transition-property: opacity, transform;
     transition-timing-function: var(--km-ease-smooth, ease);
     transition-duration: var(--km-duration-fast, 120ms);
 }
 
+.site-peter-is-this-ai__composer-nav .site-peter-is-this-ai__composer-nav-btn {
+    font-size: 0.95rem;
+}
+
 .site-peter-is-this-ai__composer-nav-btn:hover {
     opacity: 0.8;
+    background-color: hsl(var(--km-color-accent-bg));
 }
 
 .site-peter-is-this-ai__composer-nav-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.site-peter-is-this-ai__composer-nav-btn--host {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.9rem;
+    color: hsl(var(--km-color-fg));
+    border: 3px solid hsl(var(--km-color-code-bg));
+    border-radius: var(--km-radius-round);
+    outline: 1px solid hsl(var(--km-color-border));
+    background: hsl(var(--km-color-accent-bg));
+}
+
+.site-peter-is-this-ai__composer-nav-btn--host:hover {
+    opacity: 1;
+    background-color: hsl(var(--km-color-accent-bg));
 }
 
 .site-peter-is-this-ai__composer-nav-label {
@@ -197,9 +303,7 @@ Last updated on: 27 August, 2026
 }
 
 .site-peter-is-this-ai__composer-submit {
-    position: absolute;
-    right: 0.5rem;
-    bottom: 1rem;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -295,6 +399,13 @@ Last updated on: 27 August, 2026
     margin-bottom: 1.75rem;
 }
 
+.site-peter-is-this-ai__lobby-participants-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
 .site-peter-is-this-ai__avatar-stack {
     list-style: none;
     margin: 0 !important;
@@ -302,10 +413,6 @@ Last updated on: 27 August, 2026
     display: flex;
     flex-direction: row;
     align-items: center;
-}
-
-.site-peter-is-this-ai__avatar-stack--host {
-    margin-bottom: 2.25rem !important;
 }
 
 .site-peter-is-this-ai__avatar {
@@ -324,6 +431,9 @@ Last updated on: 27 August, 2026
     margin-left: -0.8rem !important;
     margin-top: 0 !important;
     position: relative;
+    background-color: hsl(var(--km-color-muted-fg, var(--km-color-fg)));
+    background-size: cover;
+    background-position: center;
     box-shadow: 0 0 0 2px hsl(var(--km-color-bg));
     transition: transform var(--km-duration-fast, 120ms) var(--km-ease-smooth, ease);
 }
@@ -348,17 +458,25 @@ Last updated on: 27 August, 2026
 }
 
 .site-peter-is-this-ai__host-panel {
-    /* margin-top: 1.25rem;
-    padding-top: 1.25rem; */
+    padding-top: 1.25rem;
     display: flex;
+    align-items: center;
     gap: 0.5rem;
 }
+
+.site-peter-is-this-ai__host-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 
 .site-peter-is-this-ai__swipe-deck {
     position: relative;
     height: 420px;
     margin: 3rem 0;
     touch-action: pan-y;
+    overscroll-behavior: contain;
 }
 
 .site-peter-is-this-ai__swipe-card {
@@ -375,6 +493,9 @@ Last updated on: 27 August, 2026
     line-height: 1.6;
     overflow-y: auto;
     cursor: grab;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -388,6 +509,23 @@ Last updated on: 27 August, 2026
     cursor: grabbing;
 }
 
+.site-peter-is-this-ai__swipe-card--image {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.site-peter-is-this-ai__swipe-card--image img {
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+    object-fit: contain;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
 .site-peter-is-this-ai__swipe-card--dragging,
 .site-peter-is-this-ai__swipe-card--fresh {
     transition: none;
@@ -396,13 +534,23 @@ Last updated on: 27 August, 2026
 .site-peter-is-this-ai__swipe-card--stack-1 {
     transform: translate(0.9rem, 0.6rem) rotate(-6deg) scale(0.96);
     z-index: 1;
-    opacity: 0.6;
+    opacity: 1;
+    background-color: hsl(0, 0%, 98%);
 }
 
 .site-peter-is-this-ai__swipe-card--stack-2 {
     transform: translate(-1.4rem, 1.2rem) rotate(8deg) scale(0.93);
     z-index: 0;
-    opacity: 0.35;
+    opacity: 1;
+    background-color: hsl(0, 0%, 100%);
+}
+
+html[data-theme="dark"] .site-peter-is-this-ai__swipe-card--stack-1 {
+    background-color: hsl(0, 0%, 2%);
+}
+
+html[data-theme="dark"] .site-peter-is-this-ai__swipe-card--stack-2 {
+    background-color: hsl(0, 0%, 0%);
 }
 
 .site-peter-is-this-ai__swipe-card--top {
@@ -475,6 +623,45 @@ Last updated on: 27 August, 2026
     margin: 1rem 0;
 }
 
+.site-peter-is-this-ai__vote-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: -1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.site-peter-is-this-ai__vote-buttons .site-peter-is-this-ai__button--ai {
+    border-color: hsl(var(--km-color-red, 0 70% 55%) / 0.35);
+}
+
+.site-peter-is-this-ai__vote-buttons .site-peter-is-this-ai__button--ai:hover {
+    background-color: hsl(var(--km-color-red, 0 70% 55%) / 0.12);
+    color: hsl(var(--km-color-red, 0 70% 55%));
+    border-color: hsl(var(--km-color-red, 0 70% 55%) / 0.6);
+}
+
+.site-peter-is-this-ai__vote-buttons .site-peter-is-this-ai__button--human {
+    border-color: hsl(var(--km-color-green, 140 55% 45%) / 0.35);
+}
+
+.site-peter-is-this-ai__vote-buttons .site-peter-is-this-ai__button--human:hover {
+    background-color: hsl(var(--km-color-green, 140 55% 45%) / 0.12);
+    color: hsl(var(--km-color-green, 140 55% 45%));
+    border-color: hsl(var(--km-color-green, 140 55% 45%) / 0.6);
+}
+
+.site-peter-is-this-ai__lobby-countdown {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: hsl(var(--km-color-primary));
+    margin: -1.25rem 0 1.75rem;
+}
+
+.site-peter-is-this-ai__lobby-countdown:empty {
+    display: none;
+}
+
 .site-peter-is-this-ai__swipe-deck--results {
     margin-bottom: 5rem;
 }
@@ -537,4 +724,3 @@ Last updated on: 27 August, 2026
     background-color: hsl(var(--km-color-green, 140 55% 45%) / 0.12);
     color: hsl(var(--km-color-green, 140 55% 45%));
 }
-
