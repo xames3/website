@@ -1,8 +1,8 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 August, 2026
-.. Last updated on: 29 August, 2026
+.. Last updated on: 30 August, 2026
 
-:og:title: Peter, Is this AI?
+:og:title: Wish It. Want It. Do It.
 :og:description: A completely scientific* investigation into whether (real)
     humans can actually tell AI writing from human writing.
 :og:type: article
@@ -10,22 +10,28 @@
 :fb:description: Make your guess. Tell me why.
 :fb:button: Let me know!
 
-.. _academia-is-this-ai:
+.. _academia-wish-it-want-it-do-it:
 
 ===============================================================================
-:fas:`robot far` Peter, Is this AI?
+:fas:`face-smile-upside-down far` Wish It. Want It. Do It.
 ===============================================================================
 
 .. rst-class:: lead
 
-    Peter thinks he can tell AI writing from human writing. Peter's probably
-    wrong.
+    Brian thinks he's a better writer with his slop. Brian's probably wrong.
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
-    :background: https://i.imgur.com/HGSCUsN.jpg
-        https://i.imgur.com/ebNwjPp.jpg
+    :background: https://i.imgur.com/4DPIuql.jpeg
+        https://i.imgur.com/AXpvqNk.png
+        https://i.imgur.com/js9Nji5.jpeg
+        https://i.imgur.com/qbS1T1O.jpeg
+
+.. warning::
+
+    This article is unfinished and will change in the future. I'm just making
+    this available so that I've something to experiment when I teach my class.
 
 In the Summer quarter of 2026, I taught `Practical Applications in AI`_, an
 introductory AI class to some of my non-CS and CS students. As of writing this
@@ -40,8 +46,8 @@ didn't already know.
     :local-dev: false
     :expected-headcount-max: 20
     :auto-start-delay-seconds: 5
-    :file: ../assets/html/peter-is-this-ai.html
-    :css: css/peter-is-this-ai.css
-    :js: js/peter-is-this-ai.js
+    :file: ../assets/html/wish-it-want-it-do-it.html
+    :css: css/wish-it-want-it-do-it.css
+    :js: js/wish-it-want-it-do-it.js
 
 .. _Practical Applications in AI: https://nl.smartcatalogiq.com/en/current/undergraduate-and-graduate-catalog/course-descriptions/css-computer-science-info-systems/200/css-230
