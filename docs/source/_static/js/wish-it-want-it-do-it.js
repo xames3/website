@@ -1,10 +1,10 @@
 /*
-Peter, Is this AI?  widget behaviour
-=====================================
+Wish It. Want It. Do It. widget behaviour
+=========================================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 August, 2026
-Last updated on: 29 August, 2026
+Last updated on: 30 August, 2026
 */
 
 // Note. This file is entirely vibe-coded using Claude Code.
@@ -26,12 +26,12 @@ Last updated on: 29 August, 2026
     }
 
     const CHARACTER_AVATARS = {
-        'Adam': 'https://i.imgur.com/72NLPni.png',
+        'Adam': 'https://i.imgur.com/dkDNA8Q.png',
         'Babs': 'https://i.imgur.com/72NLPni.png',
-        'Bonnie': 'https://i.imgur.com/72NLPni.png',
+        'Bonnie': 'https://i.imgur.com/qz3zcPG.png',
         'Brian': 'https://i.imgur.com/UQTRSMN.png',
         'Bruce': 'https://i.imgur.com/p9n83Dy.png',
-        'Carter': 'https://i.imgur.com/oVk6Uqg.png',
+        'Carter': 'https://i.imgur.com/tqoou5t.png',
         'Chris': 'https://i.imgur.com/oVk6Uqg.png',
         'Cleveland': 'https://i.imgur.com/Jj8L6aL.png',
         'Consuela': 'https://i.imgur.com/Rs42UQn.png',
@@ -41,11 +41,11 @@ Last updated on: 29 August, 2026
         'Joe': 'https://i.imgur.com/XNnNPMK.png',
         'Lois': 'https://i.imgur.com/ebwwb1u.png',
         'Meg': 'https://i.imgur.com/Y2yCFnQ.png',
-        'Mort': 'https://i.imgur.com/Y2yCFnQ.png',
+        'Mort': 'https://i.imgur.com/NdjLJBo.png',
         'Peter': 'https://i.imgur.com/iUDCTZR.png',
         'Quagmire': 'https://i.imgur.com/BZXVyFv.png',
         'Stewie': 'https://i.imgur.com/ngyn7Es.png',
-        'Tom': 'https://i.imgur.com/ngyn7Es.png',
+        'Tom': 'https://i.imgur.com/jVPKW6Z.png',
     };
     const CHARACTER_AVATAR_LIST = Object.values(CHARACTER_AVATARS);
 
@@ -60,8 +60,8 @@ Last updated on: 29 August, 2026
 
     function ensureSignalRLoaded() {
         if (window.signalR) return Promise.resolve();
-        if (window.__isThisAISignalRPromise) return window.__isThisAISignalRPromise;
-        window.__isThisAISignalRPromise = new Promise((resolve, reject) => {
+        if (window.__wishItWantItDoItSignalRPromise) return window.__wishItWantItDoItSignalRPromise;
+        window.__wishItWantItDoItSignalRPromise = new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = SIGNALR_CLIENT_CDN_URL;
             script.async = true;
@@ -70,7 +70,7 @@ Last updated on: 29 August, 2026
             script.onerror = () => reject(new Error('Failed to load SignalR client.'));
             document.head.appendChild(script);
         });
-        return window.__isThisAISignalRPromise;
+        return window.__wishItWantItDoItSignalRPromise;
     }
 
     function createMockBackend() {
@@ -96,7 +96,7 @@ Last updated on: 29 August, 2026
             'Stewie',
             'Tom',
         ];
-        const ROOMS_STORAGE_KEY = 'peter-is-this-ai-mock-rooms';
+        const ROOMS_STORAGE_KEY = 'wish-it-want-it-do-it-mock-rooms';
         const DEFAULT_ROOM_CODE = 'ABCDE';
         let listeners = {};
 
@@ -321,7 +321,7 @@ Last updated on: 29 August, 2026
 
         const api = {
             async login(body) {
-                if (body.username === 'demo' && body.password === 'demo') {
+                if (body.username === 'god' && body.password === 'god') {
                     return {
                         ok: true,
                         hostToken: randomToken()
@@ -579,8 +579,8 @@ Last updated on: 29 August, 2026
             const parsed = Number(root.dataset.autoStartDelaySeconds);
             return Number.isFinite(parsed) && parsed >= 0 ? parsed : 5;
         })();
-        const STORAGE_KEY = 'peter-is-this-ai-session-' + UID;
-        const CREATED_HERE_KEY = 'peter-is-this-ai-created-here-' + UID;
+        const STORAGE_KEY = 'wish-it-want-it-do-it-session-' + UID;
+        const CREATED_HERE_KEY = 'wish-it-want-it-do-it-created-here-' + UID;
         const $ = (id) => document.getElementById(UID + '-' + id);
         const mock = USE_MOCK_BACKEND ? createMockBackend() : null;
 
@@ -607,7 +607,7 @@ Last updated on: 29 August, 2026
         function showPhase(phase) {
             ['choice', 'lobby', 'submission', 'voting', 'results'].forEach((p) => {
                 const el = $('phase-' + p);
-                if (el) el.classList.toggle('site-peter-is-this-ai--hidden', p !== phase);
+                if (el) el.classList.toggle('site-wish-it-want-it-do-it--hidden', p !== phase);
             });
             if (phase !== 'lobby') clearAutoStartCountdown();
         }
@@ -661,8 +661,8 @@ Last updated on: 29 August, 2026
         }
 
         function resetHostChoiceFields() {
-            $('host-login-fields').classList.remove('site-peter-is-this-ai--hidden');
-            $('host-create-fields').classList.add('site-peter-is-this-ai--hidden');
+            $('host-login-fields').classList.remove('site-wish-it-want-it-do-it--hidden');
+            $('host-create-fields').classList.add('site-wish-it-want-it-do-it--hidden');
             $('login-error').textContent = '';
             $('choice-host-error').textContent = '';
         }
@@ -764,8 +764,8 @@ Last updated on: 29 August, 2026
                     }),
                 });
                 hostToken = result.hostToken;
-                $('host-login-fields').classList.add('site-peter-is-this-ai--hidden');
-                $('host-create-fields').classList.remove('site-peter-is-this-ai--hidden');
+                $('host-login-fields').classList.add('site-wish-it-want-it-do-it--hidden');
+                $('host-create-fields').classList.remove('site-wish-it-want-it-do-it--hidden');
             } catch (err) {
                 $('login-error').textContent = err.message;
             }
@@ -856,8 +856,8 @@ Last updated on: 29 August, 2026
             visible.forEach((p, index) => {
                 const isMe = p.participantId === participantId;
                 const li = document.createElement('li');
-                let className = 'site-peter-is-this-ai__avatar';
-                if (isMe) className += ' site-peter-is-this-ai__avatar--you';
+                let className = 'site-wish-it-want-it-do-it__avatar';
+                if (isMe) className += ' site-wish-it-want-it-do-it__avatar--you';
                 li.className = className;
                 li.style.backgroundImage = 'url(' + avatarImageFor(p.displayName) + ')';
                 li.style.zIndex = String(visible.length - index);
@@ -866,14 +866,14 @@ Last updated on: 29 August, 2026
             });
             if (overflowCount > 0) {
                 const li = document.createElement('li');
-                li.className = 'site-peter-is-this-ai__avatar site-peter-is-this-ai__avatar--overflow';
+                li.className = 'site-wish-it-want-it-do-it__avatar site-wish-it-want-it-do-it__avatar--overflow';
                 li.style.zIndex = '0';
                 li.textContent = '+' + overflowCount;
                 li.title = overflowCount + ' more';
                 list.appendChild(li);
             }
             $('lobby-count').textContent = participants.length + ' of ' + expectedHeadcount + ' joined for ' + roomCode;
-            $('lobby-host-actions').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
+            $('lobby-host-actions').classList.toggle('site-wish-it-want-it-do-it--hidden', !isHost);
         }
 
         $('lobby-start-submission').addEventListener('click', (event) => withButtonBusy(event.currentTarget, async () => {
@@ -930,23 +930,23 @@ Last updated on: 29 August, 2026
             const textarea = $('submission-textarea');
             preview.innerHTML = '';
             if (composerImages.length === 0) {
-                preview.classList.add('site-peter-is-this-ai--hidden');
-                textarea.classList.remove('site-peter-is-this-ai--hidden');
+                preview.classList.add('site-wish-it-want-it-do-it--hidden');
+                textarea.classList.remove('site-wish-it-want-it-do-it--hidden');
                 updateSubmitEnabled();
                 return;
             }
-            preview.classList.remove('site-peter-is-this-ai--hidden');
-            textarea.classList.add('site-peter-is-this-ai--hidden');
+            preview.classList.remove('site-wish-it-want-it-do-it--hidden');
+            textarea.classList.add('site-wish-it-want-it-do-it--hidden');
             composerImages.forEach((dataUri, index) => {
                 const chip = document.createElement('div');
-                chip.className = 'site-peter-is-this-ai__composer-image-chip';
+                chip.className = 'site-wish-it-want-it-do-it__composer-image-chip';
                 // The blurred image is rendered slightly larger than this
                 // wrapper and clipped to it, so the wrapper's crisp corners
                 // define the chip's shape (blur is a whole-element effect,
                 // so blurring the <img> directly would soften its edges
                 // too, not just its content).
                 const thumb = document.createElement('div');
-                thumb.className = 'site-peter-is-this-ai__composer-image-chip-thumb';
+                thumb.className = 'site-wish-it-want-it-do-it__composer-image-chip-thumb';
                 const img = document.createElement('img');
                 img.src = dataUri;
                 img.alt = 'Attached image';
@@ -955,7 +955,7 @@ Last updated on: 29 August, 2026
                 chip.appendChild(thumb);
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
-                removeBtn.className = 'site-peter-is-this-ai__composer-image-chip-remove';
+                removeBtn.className = 'site-wish-it-want-it-do-it__composer-image-chip-remove';
                 removeBtn.setAttribute('aria-label', 'Remove image');
                 removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 removeBtn.addEventListener('click', () => {
@@ -1059,14 +1059,14 @@ Last updated on: 29 August, 2026
         const submissionComposerEl = $('submission-composer');
         submissionComposerEl.addEventListener('dragover', (event) => {
             event.preventDefault();
-            submissionComposerEl.classList.add('site-peter-is-this-ai__composer--drag-over');
+            submissionComposerEl.classList.add('site-wish-it-want-it-do-it__composer--drag-over');
         });
         submissionComposerEl.addEventListener('dragleave', () => {
-            submissionComposerEl.classList.remove('site-peter-is-this-ai__composer--drag-over');
+            submissionComposerEl.classList.remove('site-wish-it-want-it-do-it__composer--drag-over');
         });
         submissionComposerEl.addEventListener('drop', (event) => {
             event.preventDefault();
-            submissionComposerEl.classList.remove('site-peter-is-this-ai__composer--drag-over');
+            submissionComposerEl.classList.remove('site-wish-it-want-it-do-it__composer--drag-over');
             handleImageFiles(event.dataTransfer.files);
         });
 
@@ -1079,10 +1079,10 @@ Last updated on: 29 August, 2026
             // auto-jumping past it) is the behavior. Hiding this at exactly
             // 1 submission left that slot completely unreachable.
             if (mySubmissions.length < 1) {
-                nav.classList.add('site-peter-is-this-ai--hidden');
+                nav.classList.add('site-wish-it-want-it-do-it--hidden');
                 return;
             }
-            nav.classList.remove('site-peter-is-this-ai--hidden');
+            nav.classList.remove('site-wish-it-want-it-do-it--hidden');
             const total = mySubmissions.length + 1;
             $('submission-nav-label').textContent = (mySubmissionCursor + 1) + ' of ' + total;
             $('submission-nav-prev').disabled = mySubmissionCursor === 0;
@@ -1098,7 +1098,7 @@ Last updated on: 29 August, 2026
                 setComposerImages([]);
                 $('submission-textarea').value = current ? current.content : '';
             }
-            $('submission-status').textContent = current ? 'Submitted. You can keep editing until the host starts voting.' : '';
+            $('submission-status').textContent = current ? 'Submitted. You can keep editing until The God starts voting.' : '';
             renderSubmissionNav();
             updateSubmitEnabled();
         }
@@ -1190,7 +1190,7 @@ Last updated on: 29 August, 2026
                     // the list, so stay right where we are instead of
                     // jumping anywhere.
                     renderSubmissionNav();
-                    $('submission-status').textContent = 'Submitted. You can keep editing until the host starts voting.';
+                    $('submission-status').textContent = 'Submitted. You can keep editing until The God starts voting.';
                 } else if (composerImages.length > 0) {
                     // Land on the last image actually just added, so the
                     // user sees confirmation of what they uploaded instead
@@ -1203,7 +1203,7 @@ Last updated on: 29 August, 2026
                 } else {
                     mySubmissionCursor = mySubmissions.length;
                     loadSubmissionAtCursor();
-                    $('submission-status').textContent = 'Submitted! You can make another submission, or edit a previous one until the host starts voting.';
+                    $('submission-status').textContent = 'Submitted! You can make another submission, or edit a previous one until The God starts voting.';
                 }
             } catch (err) {
                 $('submission-error').textContent = err.message;
@@ -1263,9 +1263,9 @@ Last updated on: 29 August, 2026
 
         function enterSubmissionPhase() {
             showPhase('submission');
-            $('submission-host-actions').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
-            $('submission-host-count').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
-            $('submission-status').classList.toggle('site-peter-is-this-ai--hidden', isHost);
+            $('submission-host-actions').classList.toggle('site-wish-it-want-it-do-it--hidden', !isHost);
+            $('submission-host-count').classList.toggle('site-wish-it-want-it-do-it--hidden', !isHost);
+            $('submission-status').classList.toggle('site-wish-it-want-it-do-it--hidden', isHost);
             updateSubmitEnabled();
         }
 
@@ -1281,14 +1281,14 @@ Last updated on: 29 August, 2026
 
         function buildSwipeCard(content, stackLevel) {
             const card = document.createElement('div');
-            card.className = 'site-peter-is-this-ai__swipe-card site-peter-is-this-ai__swipe-card--fresh';
+            card.className = 'site-wish-it-want-it-do-it__swipe-card site-wish-it-want-it-do-it__swipe-card--fresh';
             if (stackLevel === 0) {
-                card.classList.add('site-peter-is-this-ai__swipe-card--top');
+                card.classList.add('site-wish-it-want-it-do-it__swipe-card--top');
             } else {
-                card.classList.add('site-peter-is-this-ai__swipe-card--stack-' + stackLevel);
+                card.classList.add('site-wish-it-want-it-do-it__swipe-card--stack-' + stackLevel);
             }
             if (isImageContent(content)) {
-                card.classList.add('site-peter-is-this-ai__swipe-card--image');
+                card.classList.add('site-wish-it-want-it-do-it__swipe-card--image');
                 const img = document.createElement('img');
                 img.src = content;
                 img.alt = 'Submitted image';
@@ -1302,7 +1302,7 @@ Last updated on: 29 August, 2026
 
         function releaseFreshCard(card) {
             void card.getBoundingClientRect();
-            card.classList.remove('site-peter-is-this-ai__swipe-card--fresh');
+            card.classList.remove('site-wish-it-want-it-do-it__swipe-card--fresh');
         }
 
         function renderCardStack(deck, contents, attachTopSwipe) {
@@ -1341,7 +1341,7 @@ Last updated on: 29 August, 2026
                 const restRect = card.getBoundingClientRect();
                 restLeft = restRect.left;
                 restRight = restRect.right;
-                card.classList.add('site-peter-is-this-ai__swipe-card--dragging');
+                card.classList.add('site-wish-it-want-it-do-it__swipe-card--dragging');
                 card.setPointerCapture(event.pointerId);
             }
 
@@ -1362,12 +1362,12 @@ Last updated on: 29 August, 2026
             function onPointerUp() {
                 if (!dragging) return;
                 dragging = false;
-                card.classList.remove('site-peter-is-this-ai__swipe-card--dragging');
+                card.classList.remove('site-wish-it-want-it-do-it__swipe-card--dragging');
                 if (hintAi) hintAi.style.opacity = '0';
                 if (hintHuman) hintHuman.style.opacity = '0';
                 if (Math.abs(rawDx) >= SWIPE_THRESHOLD) {
                     const direction = rawDx > 0 ? 'right' : 'left';
-                    const flyClass = rawDx > 0 ? 'site-peter-is-this-ai__swipe-card--fly-right' : 'site-peter-is-this-ai__swipe-card--fly-left';
+                    const flyClass = rawDx > 0 ? 'site-wish-it-want-it-do-it__swipe-card--fly-right' : 'site-wish-it-want-it-do-it__swipe-card--fly-left';
                     card.classList.add(flyClass);
                     card.style.transform = '';
                     const consumed = options.onSwipe(direction, card);
@@ -1407,7 +1407,7 @@ Last updated on: 29 August, 2026
                 renderVotingItem(next);
             } catch (err) {
                 $('voting-error').textContent = err.message;
-                card.classList.remove('site-peter-is-this-ai__swipe-card--fly-left', 'site-peter-is-this-ai__swipe-card--fly-right');
+                card.classList.remove('site-wish-it-want-it-do-it__swipe-card--fly-left', 'site-wish-it-want-it-do-it__swipe-card--fly-right');
             } finally {
                 swipeVoting = false;
             }
@@ -1415,8 +1415,8 @@ Last updated on: 29 August, 2026
 
         function attachVotingSwipe(card) {
             const deck = $('voting-deck');
-            const hintAi = deck.querySelector('.site-peter-is-this-ai__swipe-hint--ai');
-            const hintHuman = deck.querySelector('.site-peter-is-this-ai__swipe-hint--human');
+            const hintAi = deck.querySelector('.site-wish-it-want-it-do-it__swipe-hint--ai');
+            const hintHuman = deck.querySelector('.site-wish-it-want-it-do-it__swipe-hint--human');
             attachSwipeGesture(card, deck, {
                 hintAi,
                 hintHuman,
@@ -1431,9 +1431,9 @@ Last updated on: 29 August, 2026
         function voteFromButton(verdict) {
             if (swipeVoting) return;
             const deck = $('voting-deck');
-            const card = deck.querySelector('.site-peter-is-this-ai__swipe-card--top') || deck.querySelector('.site-peter-is-this-ai__swipe-card');
+            const card = deck.querySelector('.site-wish-it-want-it-do-it__swipe-card--top') || deck.querySelector('.site-wish-it-want-it-do-it__swipe-card');
             if (!card) return;
-            const flyClass = verdict === 'human' ? 'site-peter-is-this-ai__swipe-card--fly-right' : 'site-peter-is-this-ai__swipe-card--fly-left';
+            const flyClass = verdict === 'human' ? 'site-wish-it-want-it-do-it__swipe-card--fly-right' : 'site-wish-it-want-it-do-it__swipe-card--fly-left';
             card.classList.add(flyClass);
             castVoteAndAdvance(verdict, card);
         }
@@ -1442,24 +1442,24 @@ Last updated on: 29 August, 2026
         $('voting-vote-human').addEventListener('click', () => voteFromButton('human'));
 
         function renderVotingItem(data) {
-            $('voting-host-actions').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
+            $('voting-host-actions').classList.toggle('site-wish-it-want-it-do-it--hidden', !isHost);
             if (data.done) {
-                $('voting-active').classList.add('site-peter-is-this-ai--hidden');
-                $('voting-waiting').classList.remove('site-peter-is-this-ai--hidden');
+                $('voting-active').classList.add('site-wish-it-want-it-do-it--hidden');
+                $('voting-waiting').classList.remove('site-wish-it-want-it-do-it--hidden');
                 return;
             }
-            $('voting-active').classList.remove('site-peter-is-this-ai--hidden');
-            $('voting-waiting').classList.add('site-peter-is-this-ai--hidden');
+            $('voting-active').classList.remove('site-wish-it-want-it-do-it--hidden');
+            $('voting-waiting').classList.add('site-wish-it-want-it-do-it--hidden');
             $('voting-error').textContent = '';
 
             const deck = $('voting-deck');
-            deck.querySelectorAll('.site-peter-is-this-ai__swipe-card').forEach((card) => card.remove());
+            deck.querySelectorAll('.site-wish-it-want-it-do-it__swipe-card').forEach((card) => card.remove());
             const stack = [data.content, ...(data.upcoming || [])];
             renderCardStack(deck, stack, attachVotingSwipe);
         }
 
         async function loadResults() {
-            $('results-host-actions').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
+            $('results-host-actions').classList.toggle('site-wish-it-want-it-do-it--hidden', !isHost);
             try {
                 const result = await api('/rooms/' + roomCode + '/results', {
                     headers: {
@@ -1499,18 +1499,18 @@ Last updated on: 29 August, 2026
 
         function renderResultsItem() {
             const deck = $('results-deck');
-            deck.querySelectorAll('.site-peter-is-this-ai__swipe-card').forEach((card) => card.remove());
+            deck.querySelectorAll('.site-wish-it-want-it-do-it__swipe-card').forEach((card) => card.remove());
             if (!resultsItems.length) {
-                $('results-tally').classList.add('site-peter-is-this-ai--hidden');
+                $('results-tally').classList.add('site-wish-it-want-it-do-it--hidden');
                 deck.appendChild(buildSwipeCard('No submissions.', 0));
                 return;
             }
             if (resultsDismissed) {
-                $('results-tally').classList.add('site-peter-is-this-ai--hidden');
+                $('results-tally').classList.add('site-wish-it-want-it-do-it--hidden');
                 const img = document.createElement('img');
                 img.src = RESULTS_END_IMAGES[Math.floor(Math.random() * RESULTS_END_IMAGES.length)];
                 img.alt = "That's everyone -- tap to see results again.";
-                img.className = 'site-peter-is-this-ai__results-end-image';
+                img.className = 'site-wish-it-want-it-do-it__results-end-image';
                 img.addEventListener('click', () => {
                     resultsDismissed = false;
                     resultsIndex = resultsItems.length - 1;
@@ -1519,7 +1519,7 @@ Last updated on: 29 August, 2026
                 deck.appendChild(img);
                 return;
             }
-            $('results-tally').classList.remove('site-peter-is-this-ai--hidden');
+            $('results-tally').classList.remove('site-wish-it-want-it-do-it--hidden');
             const item = resultsItems[resultsIndex];
             const total = item.aiVotes + item.humanVotes;
             const aiPercent = total ? (item.aiVotes / total) * 100 : 50;
@@ -1617,7 +1617,7 @@ Last updated on: 29 August, 2026
             });
             connection.on('VoteTallyUpdated', (data) => {
                 $('voting-tally').textContent = data.votedCount + ' of ' + data.totalParticipants + ' voted on that item';
-                $('voting-tally').classList.toggle('site-peter-is-this-ai--hidden', !isHost);
+                $('voting-tally').classList.toggle('site-wish-it-want-it-do-it--hidden', !isHost);
             });
             connection.on('ResultsReady', () => loadResults());
             connection.on('RoomStopped', () => {
@@ -1721,7 +1721,7 @@ Last updated on: 29 August, 2026
             if (!isHost || !roomCode || !sessionToken) return;
             // `localStorage` is shared across every tab/window of this browser
             // profile, so a second window opened on the same origin silently
-            // inherits the host session too. Only the tab that actually
+            // inherits The God session too. Only the tab that actually
             // created the room should be able to end it on close -- otherwise
             // closing what looks like a harmless duplicate window stops the
             // game for everyone.
@@ -1768,7 +1768,7 @@ Last updated on: 29 August, 2026
     }
 
     function bootIsThisAI() {
-        document.querySelectorAll('.site-peter-is-this-ai[data-peter-is-this-ai="true"]').forEach(initIsThisAI);
+        document.querySelectorAll('.site-wish-it-want-it-do-it[data-wish-it-want-it-do-it="true"]').forEach(initIsThisAI);
     }
 
     if (document.readyState === 'loading') {
