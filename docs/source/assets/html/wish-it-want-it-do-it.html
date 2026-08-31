@@ -1,21 +1,22 @@
 <!--
-Peter, Is this AI?  widget
-==========================
+Wish It. Want It. Do It. widget
+===============================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 August, 2026
-Last updated on: 27 August, 2026
+Last updated on: 30 August, 2026
 -->
-<div class="site-peter-is-this-ai"
+<div class="site-wish-it-want-it-do-it"
      id="{{ uid }}"
-     data-peter-is-this-ai="true"
+     data-wish-it-want-it-do-it="true"
      data-api-base-url="{{ api-base-url }}"
      data-local-api-base-url="{{ local-api-base-url|default('http://localhost:7071/api') }}"
      data-local-dev="{{ local-dev|default('false') }}"
      data-local-dev-real-backend="{{ local-dev-real-backend|default('false') }}"
-     data-headcount-max="{{ expected-headcount-max }}">
+     data-headcount-max="{{ expected-headcount-max }}"
+     data-auto-start-delay-seconds="{{ auto-start-delay-seconds }}">
     <section id="{{ uid }}-phase-choice"
-             class="site-peter-is-this-ai__card site-peter-is-this-ai__card--choice">
+             class="site-wish-it-want-it-do-it__card site-wish-it-want-it-do-it__card--choice">
         <div class="sd-tab-set docutils">
             <input checked="checked"
                    id="{{ uid }}-choice-tab-join"
@@ -26,18 +27,14 @@ Last updated on: 27 August, 2026
                 <span class="fas fa-users far"></span> Participants
             </label>
             <div class="sd-tab-content docutils">
-                <div class="site-peter-is-this-ai__tab-layout">
-                    <div class="site-peter-is-this-ai__tab-copy">
-                        <p class="pre-title-text rubric"
-                           style="margin-top: 0 !important">
-                            <span class="fab fa-alien-8bit far"></span> AI → Actual Imposter
-                        </p>
-                        <p class="site-peter-is-this-ai__tab-title">Who's an AI Among Us</p>
+                <div class="site-wish-it-want-it-do-it__tab-layout">
+                    <div class="site-wish-it-want-it-do-it__tab-copy">
+                        <p class="site-wish-it-want-it-do-it__tab-title">Finding Brian!</p>
                         <p class="subtitle-text">Join with a room code.</p>
                     </div>
-                    <div class="site-peter-is-this-ai__tab-form">
-                        <div class="site-peter-is-this-ai__field">
-                            <input class="site-peter-is-this-ai__input site-search__input"
+                    <div class="site-wish-it-want-it-do-it__tab-form">
+                        <div class="site-wish-it-want-it-do-it__field">
+                            <input class="site-wish-it-want-it-do-it__input site-search__input"
                                    id="{{ uid }}-choice-room-code"
                                    type="text"
                                    maxlength="5"
@@ -46,10 +43,10 @@ Last updated on: 27 August, 2026
                         </div>
                         <div style="display: flex;
                                     flex-direction: column">
-                            <button class="site-peter-is-this-ai__button"
+                            <button class="site-wish-it-want-it-do-it__button"
                                     id="{{ uid }}-choice-join"
                                     type="button">Join room</button>
-                            <p class="site-peter-is-this-ai__error"
+                            <p class="site-wish-it-want-it-do-it__error"
                                id="{{ uid }}-choice-join-error"></p>
                         </div>
                     </div>
@@ -63,54 +60,50 @@ Last updated on: 27 August, 2026
                 <span class="fas fa-user far"></span> Host
             </label>
             <div class="sd-tab-content docutils">
-                <div class="site-peter-is-this-ai__tab-layout">
-                    <div class="site-peter-is-this-ai__tab-copy">
-                        <p class="pre-title-text rubric"
-                           style="margin-top: 0 !important">
-                            <span class="fab fa-alien-8bit far"></span> AI → Actual Imposter
-                        </p>
-                        <p class="site-peter-is-this-ai__tab-title">Who's an AI Among Us</p>
+                <div class="site-wish-it-want-it-do-it__tab-layout">
+                    <div class="site-wish-it-want-it-do-it__tab-copy">
+                        <p class="site-wish-it-want-it-do-it__tab-title">Finding Brian!</p>
                         <p class="subtitle-text">Sign in to host your own room.</p>
                     </div>
-                    <div class="site-peter-is-this-ai__tab-form">
+                    <div class="site-wish-it-want-it-do-it__tab-form">
                         <div id="{{ uid }}-host-login-fields">
-                            <div class="site-peter-is-this-ai__field">
-                                <input class="site-peter-is-this-ai__input site-search__input"
+                            <div class="site-wish-it-want-it-do-it__field">
+                                <input class="site-wish-it-want-it-do-it__input site-search__input"
                                        id="{{ uid }}-login-username"
                                        type="text"
                                        autocomplete="username"
                                        placeholder="Username"
                                        aria-label="Username">
                             </div>
-                            <div class="site-peter-is-this-ai__field">
-                                <input class="site-peter-is-this-ai__input site-search__input"
+                            <div class="site-wish-it-want-it-do-it__field">
+                                <input class="site-wish-it-want-it-do-it__input site-search__input"
                                        id="{{ uid }}-login-password"
                                        type="password"
                                        autocomplete="current-password"
                                        placeholder="Password"
                                        aria-label="Password">
                             </div>
-                            <div class="site-peter-is-this-ai__action-row">
-                                <button class="site-peter-is-this-ai__button"
+                            <div class="site-wish-it-want-it-do-it__action-row">
+                                <button class="site-wish-it-want-it-do-it__button"
                                         id="{{ uid }}-login-submit"
                                         type="button">Sign in</button>
-                                <p class="site-peter-is-this-ai__error site-peter-is-this-ai__error--inline"
+                                <p class="site-wish-it-want-it-do-it__error site-wish-it-want-it-do-it__error--inline"
                                    id="{{ uid }}-login-error"></p>
                             </div>
                         </div>
-                        <div class="site-peter-is-this-ai__field site-peter-is-this-ai__field--stacked site-peter-is-this-ai--hidden"
+                        <div class="site-wish-it-want-it-do-it__field site-wish-it-want-it-do-it__field--stacked site-wish-it-want-it-do-it--hidden"
                              id="{{ uid }}-host-create-fields">
-                            <input class="site-peter-is-this-ai__input site-search__input"
+                            <input class="site-wish-it-want-it-do-it__input site-search__input"
                                    id="{{ uid }}-choice-headcount"
                                    type="number"
                                    min="2"
                                    value="3"
                                    placeholder="Expected number of participants"
                                    aria-label="Expected number of participants">
-                            <button class="site-peter-is-this-ai__button"
+                            <button class="site-wish-it-want-it-do-it__button"
                                     id="{{ uid }}-choice-create"
                                     type="button">Create a room</button>
-                            <p class="site-peter-is-this-ai__error"
+                            <p class="site-wish-it-want-it-do-it__error"
                                id="{{ uid }}-choice-host-error"></p>
                         </div>
                     </div>
@@ -119,164 +112,225 @@ Last updated on: 27 August, 2026
         </div>
     </section>
     <section id="{{ uid }}-phase-lobby"
-             class="site-peter-is-this-ai__card site-peter-is-this-ai--hidden">
+             class="site-wish-it-want-it-do-it__card site-wish-it-want-it-do-it--hidden">
         <p class="pre-title-text rubric">
             <span class="fab fa-loader far"></span> It's fun when many participate.
         </p>
         <section>
-            <h2 class="site-peter-is-this-ai__title">Let's wait for others to join.</h2>
-            <p class="site-peter-is-this-ai__lobby-count"
+            <h2 class="site-wish-it-want-it-do-it__title">
+                Let's wait for others to join.
+            </h2>
+            <p class="site-wish-it-want-it-do-it__lobby-count"
                id="{{ uid }}-lobby-count"></p>
-            <ul class="site-peter-is-this-ai__avatar-stack"
-                id="{{ uid }}-lobby-participants">
-            </ul>
-            <div class="site-peter-is-this-ai__host-panel site-peter-is-this-ai--hidden"
+            <div class="site-wish-it-want-it-do-it__lobby-participants-row"
+                 id="{{ uid }}-lobby-participants-row">
+                <ul class="site-wish-it-want-it-do-it__avatar-stack"
+                    id="{{ uid }}-lobby-participants">
+                </ul>
+            </div>
+            <p class="site-wish-it-want-it-do-it__lobby-countdown"
+               id="{{ uid }}-lobby-countdown"></p>
+            <div class="site-wish-it-want-it-do-it__host-panel"
                  id="{{ uid }}-lobby-host-panel">
-                <button class="site-peter-is-this-ai__button"
-                        id="{{ uid }}-lobby-start-submission"
-                        type="button">Start submissions</button>
-                <button class="site-peter-is-this-ai__button site-peter-is-this-ai__button--secondary"
-                        id="{{ uid }}-lobby-stop-session"
-                        type="button">Stop</button>
+                <div class="site-wish-it-want-it-do-it__host-panel-actions site-wish-it-want-it-do-it--hidden"
+                     id="{{ uid }}-lobby-host-actions">
+                    <button class="site-wish-it-want-it-do-it__button"
+                            id="{{ uid }}-lobby-start-submission"
+                            type="button">Start</button>
+                    <button class="site-wish-it-want-it-do-it__button site-wish-it-want-it-do-it__button--secondary"
+                            id="{{ uid }}-lobby-stop-session"
+                            type="button">Stop</button>
+                </div>
             </div>
         </section>
     </section>
     <section id="{{ uid }}-phase-submission"
-             class="site-peter-is-this-ai__card site-peter-is-this-ai--hidden">
+             class="site-wish-it-want-it-do-it__card site-wish-it-want-it-do-it--hidden">
         <p class="pre-title-text rubric">
-            <span class="fas fa-align-left far"></span> Type. Edit. Paste.
+            <span class="fas fa-align-left far"></span> Type, Paste or Upload.
         </p>
         <section>
-            <h2 class="site-peter-is-this-ai__title">
-                Enter your <i style="color: hsl(var(--km-color-yellow))"><s> slop  </s></i> text.
+            <h2 class="site-wish-it-want-it-do-it__title">
+                Add your <i style="color: hsl(var(--km-color-yellow))"><s> slop  </s></i> text or
+                image.
             </h2>
-            <p class="site-peter-is-this-ai__subtitle">
+            <p class="site-wish-it-want-it-do-it__subtitle">
                 Nobody else can see this until voting starts. You can keep editing and
                 resubmitting until the host starts voting.
             </p>
-            <div class="site-peter-is-this-ai__field">
-                <div class="site-peter-is-this-ai__composer">
-                    <textarea class="site-peter-is-this-ai__textarea site-peter-is-this-ai__textarea--composer"
+            <p class="site-wish-it-want-it-do-it__composer-status site-wish-it-want-it-do-it--hidden"
+               id="{{ uid }}-submission-host-count"></p>
+            <div class="site-wish-it-want-it-do-it__field">
+                <div class="site-wish-it-want-it-do-it__composer"
+                     id="{{ uid }}-submission-composer">
+                    <textarea class="site-wish-it-want-it-do-it__textarea site-wish-it-want-it-do-it__textarea--composer"
                               id="{{ uid }}-submission-textarea"
-                              placeholder="Paste or type your content here..."></textarea>
-                    <p class="site-peter-is-this-ai__composer-status site-peter-is-this-ai--hidden"
-                       id="{{ uid }}-submission-host-count"></p>
-                    <div class="site-peter-is-this-ai__composer-nav site-peter-is-this-ai--hidden"
-                         id="{{ uid }}-submission-nav">
-                        <button class="site-peter-is-this-ai__composer-nav-btn"
-                                id="{{ uid }}-submission-nav-prev"
+                              placeholder="Paste or type here, or drop an image..."></textarea>
+                    <div class="site-wish-it-want-it-do-it__composer-image-preview site-wish-it-want-it-do-it--hidden"
+                         id="{{ uid }}-submission-image-preview"></div>
+                    <input type="file"
+                           accept="image/*"
+                           multiple
+                           class="site-wish-it-want-it-do-it--hidden"
+                           id="{{ uid }}-submission-image-input">
+                    <div class="site-wish-it-want-it-do-it__composer-controls">
+                        <button class="site-wish-it-want-it-do-it__composer-nav-btn"
+                                id="{{ uid }}-submission-attach-image"
                                 type="button"
-                                aria-label="Previous submission">
-                            <i class="fa-solid fa-chevron-left"></i>
+                                aria-label="Attach an image">
+                            <i class="fa-regular fa-plus"></i>
                         </button>
-                        <span class="site-peter-is-this-ai__composer-nav-label"
-                              id="{{ uid }}-submission-nav-label"></span>
-                        <button class="site-peter-is-this-ai__composer-nav-btn"
-                                id="{{ uid }}-submission-nav-next"
+                        <div class="site-wish-it-want-it-do-it__composer-nav site-wish-it-want-it-do-it--hidden"
+                             id="{{ uid }}-submission-nav">
+                            <button class="site-wish-it-want-it-do-it__composer-nav-btn"
+                                    id="{{ uid }}-submission-nav-prev"
+                                    type="button"
+                                    aria-label="Previous submission">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <span class="site-wish-it-want-it-do-it__composer-nav-label"
+                                  id="{{ uid }}-submission-nav-label"></span>
+                            <button class="site-wish-it-want-it-do-it__composer-nav-btn"
+                                    id="{{ uid }}-submission-nav-next"
+                                    type="button"
+                                    aria-label="Next submission">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <button class="site-wish-it-want-it-do-it__composer-submit"
+                                id="{{ uid }}-submission-submit"
                                 type="button"
-                                aria-label="Next submission">
-                            <i class="fa-solid fa-chevron-right"></i>
+                                aria-label="Submit">
+                            <i class="fa-solid fa-arrow-up"></i>
                         </button>
                     </div>
-                    <button class="site-peter-is-this-ai__composer-submit"
-                            id="{{ uid }}-submission-submit"
-                            type="button"
-                            aria-label="Submit">
-                        <i class="fa-solid fa-arrow-up"></i>
-                    </button>
                 </div>
             </div>
-            <p class="site-peter-is-this-ai__submission-status"
+            <p class="site-wish-it-want-it-do-it__submission-status"
                id="{{ uid }}-submission-status"></p>
-            <p class="site-peter-is-this-ai__error"
+            <p class="site-wish-it-want-it-do-it__error"
                id="{{ uid }}-submission-error"></p>
-            <div class="site-peter-is-this-ai__host-panel site-peter-is-this-ai--hidden"
+            <div class="site-wish-it-want-it-do-it__host-panel"
                  id="{{ uid }}-submission-host-panel">
-                <button class="site-peter-is-this-ai__button"
-                        id="{{ uid }}-submission-start-voting"
-                        type="button">Allow voting</button>
-                <button class="site-peter-is-this-ai__button site-peter-is-this-ai__button--secondary"
-                        id="{{ uid }}-submission-stop-session"
-                        type="button">Stop</button>
+                <div class="site-wish-it-want-it-do-it__host-panel-actions site-wish-it-want-it-do-it--hidden"
+                     id="{{ uid }}-submission-host-actions">
+                    <button class="site-wish-it-want-it-do-it__composer-nav-btn site-wish-it-want-it-do-it__composer-nav-btn--host"
+                            id="{{ uid }}-submission-go-back"
+                            type="button"
+                            aria-label="Back to lobby">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button class="site-wish-it-want-it-do-it__button"
+                            id="{{ uid }}-submission-start-voting"
+                            type="button">Allow</button>
+                    <button class="site-wish-it-want-it-do-it__button site-wish-it-want-it-do-it__button--secondary"
+                            id="{{ uid }}-submission-stop-session"
+                            type="button">Stop</button>
+                </div>
             </div>
         </section>
     </section>
     <section id="{{ uid }}-phase-voting"
-             class="site-peter-is-this-ai__card site-peter-is-this-ai--hidden">
+             class="site-wish-it-want-it-do-it__card site-wish-it-want-it-do-it--hidden">
         <p class="pre-title-text rubric">
             <span class="fas fa-shuffle far"></span> Guess wisely.
         </p>
         <section>
-            <h2 class="site-peter-is-this-ai__title">Let's vote.</h2>
-            <p class="site-peter-is-this-ai__swipe-instructions">
+            <h2 class="site-wish-it-want-it-do-it__title">Let's vote.</h2>
+            <p class="site-wish-it-want-it-do-it__swipe-instructions">
                 Swipe right for human, left for AI
             </p>
             <div id="{{ uid }}-voting-active">
-                <div class="site-peter-is-this-ai__swipe-deck"
+                <div class="site-wish-it-want-it-do-it__swipe-deck"
                      id="{{ uid }}-voting-deck">
-                    <div class="site-peter-is-this-ai__swipe-hint site-peter-is-this-ai__swipe-hint--ai">
+                    <div class="site-wish-it-want-it-do-it__swipe-hint site-wish-it-want-it-do-it__swipe-hint--ai">
                         AI
                     </div>
-                    <div class="site-peter-is-this-ai__swipe-hint site-peter-is-this-ai__swipe-hint--human">
+                    <div class="site-wish-it-want-it-do-it__swipe-hint site-wish-it-want-it-do-it__swipe-hint--human">
                         HUMAN
                     </div>
                 </div>
-                <p class="site-peter-is-this-ai__error"
+                <div class="site-wish-it-want-it-do-it__vote-buttons">
+                    <button class="site-wish-it-want-it-do-it__button site-wish-it-want-it-do-it__button--secondary site-wish-it-want-it-do-it__button--ai"
+                            id="{{ uid }}-voting-vote-ai"
+                            type="button"
+                            aria-label="Vote AI">
+                        <i class="fas fa-robot far"></i> AI
+                    </button>
+                    <button class="site-wish-it-want-it-do-it__button site-wish-it-want-it-do-it__button--secondary site-wish-it-want-it-do-it__button--human"
+                            id="{{ uid }}-voting-vote-human"
+                            type="button"
+                            aria-label="Vote human">
+                        <i class="fas fa-user far"></i> Human
+                    </button>
+                </div>
+                <p class="site-wish-it-want-it-do-it__error"
                    id="{{ uid }}-voting-error"></p>
             </div>
             <div id="{{ uid }}-voting-waiting"
-                 class="site-peter-is-this-ai--hidden">
+                 class="site-wish-it-want-it-do-it--hidden">
                 <p style="margin-top: 1rem">
                     You're done voting. Waiting for everyone else to finish...
                 </p>
             </div>
-            <p class="site-peter-is-this-ai__voting-tally"
+            <p class="site-wish-it-want-it-do-it__voting-tally"
                id="{{ uid }}-voting-tally"></p>
-            <div class="site-peter-is-this-ai__host-panel site-peter-is-this-ai--hidden"
+            <div class="site-wish-it-want-it-do-it__host-panel"
                  id="{{ uid }}-voting-host-panel">
-                <button class="site-peter-is-this-ai__button"
-                        id="{{ uid }}-voting-stop-session"
-                        type="button">End</button>
+                <div class="site-wish-it-want-it-do-it__host-panel-actions site-wish-it-want-it-do-it--hidden"
+                     id="{{ uid }}-voting-host-actions">
+                    <button class="site-wish-it-want-it-do-it__composer-nav-btn site-wish-it-want-it-do-it__composer-nav-btn--host"
+                            id="{{ uid }}-voting-go-back"
+                            type="button"
+                            aria-label="Back to submissions">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button class="site-wish-it-want-it-do-it__button"
+                            id="{{ uid }}-voting-stop-session"
+                            type="button">End</button>
+                </div>
             </div>
         </section>
     </section>
     <section id="{{ uid }}-phase-results"
-             class="site-peter-is-this-ai__card site-peter-is-this-ai--hidden">
+             class="site-wish-it-want-it-do-it__card site-wish-it-want-it-do-it--hidden">
         <p class="pre-title-text rubric">
             <span class="fas fa-trophy far"></span> Results.
         </p>
         <section>
-            <h2 class="site-peter-is-this-ai__title">The verdict is in.</h2>
-            <div class="site-peter-is-this-ai__swipe-deck site-peter-is-this-ai__swipe-deck--results"
+            <h2 class="site-wish-it-want-it-do-it__title">The verdict is in.</h2>
+            <div class="site-wish-it-want-it-do-it__swipe-deck site-wish-it-want-it-do-it__swipe-deck--results"
                  id="{{ uid }}-results-deck"></div>
-            <div class="site-peter-is-this-ai__results-tally"
+            <div class="site-wish-it-want-it-do-it__results-tally"
                  id="{{ uid }}-results-tally">
-                <div class="site-peter-is-this-ai__results-tally-bar">
-                    <div class="site-peter-is-this-ai__results-tally-bar-fill site-peter-is-this-ai__results-tally-bar-fill--ai"
+                <div class="site-wish-it-want-it-do-it__results-tally-bar">
+                    <div class="site-wish-it-want-it-do-it__results-tally-bar-fill site-wish-it-want-it-do-it__results-tally-bar-fill--ai"
                          id="{{ uid }}-results-tally-bar-ai"></div>
-                    <div class="site-peter-is-this-ai__results-tally-bar-fill site-peter-is-this-ai__results-tally-bar-fill--human"
+                    <div class="site-wish-it-want-it-do-it__results-tally-bar-fill site-wish-it-want-it-do-it__results-tally-bar-fill--human"
                          id="{{ uid }}-results-tally-bar-human"></div>
                 </div>
-                <div class="site-peter-is-this-ai__results-tally-pills">
-                    <span class="site-peter-is-this-ai__results-tally-pill site-peter-is-this-ai__results-tally-pill--ai">
+                <div class="site-wish-it-want-it-do-it__results-tally-pills">
+                    <span class="site-wish-it-want-it-do-it__results-tally-pill site-wish-it-want-it-do-it__results-tally-pill--ai">
                         <i class="fas fa-robot far"></i>
                         AI <b id="{{ uid }}-results-tally-ai-count">0</b>
                     </span>
-                    <span class="site-peter-is-this-ai__results-tally-pill site-peter-is-this-ai__results-tally-pill--human">
+                    <span class="site-wish-it-want-it-do-it__results-tally-pill site-wish-it-want-it-do-it__results-tally-pill--human">
                         <i class="fas fa-user far"></i>
                         Human <b id="{{ uid }}-results-tally-human-count">0</b>
                     </span>
                 </div>
             </div>
-            <div class="site-peter-is-this-ai__host-panel site-peter-is-this-ai--hidden"
+            <div class="site-wish-it-want-it-do-it__host-panel"
                  id="{{ uid }}-results-host-panel">
-                <button class="site-peter-is-this-ai__button"
-                        id="{{ uid }}-restart-session"
-                        type="button">End session for everyone</button>
+                <div class="site-wish-it-want-it-do-it__host-panel-actions site-wish-it-want-it-do-it--hidden"
+                     id="{{ uid }}-results-host-actions">
+                    <button class="site-wish-it-want-it-do-it__button"
+                            id="{{ uid }}-restart-session"
+                            type="button">End session for everyone</button>
+                </div>
             </div>
         </section>
     </section>
-    <p class="site-peter-is-this-ai__error"
+    <p class="site-wish-it-want-it-do-it__error"
        id="{{ uid }}-connection-status"></p>
-    <!-- <button class="site-peter-is-this-ai__button" id="{{ uid }}-manual-resync" type="button">Refresh</button> -->
 </div>
