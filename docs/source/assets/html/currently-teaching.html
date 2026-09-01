@@ -4,7 +4,7 @@ Currently teaching courses widget
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 16 February, 2026
-Last updated on: 29 August, 2026
+Last updated on: 31 August, 2026
 -->
 <div class="currently-teaching">
     <p class="currently-teaching__text">
@@ -38,26 +38,16 @@ Last updated on: 29 August, 2026
         }
     }
 </style>
+<!-- djlint:off -->
 <script>
     (function() {
-        var courses = [
-            "Programming",
-            "Cloud Computing",
-            "Data Analysis",
-            "Applications of AI",
-            "Introduction to CS",
-        ];
+        var courses = {{ courses }}
         var element = document.getElementById("course");
-        if (!element || !courses.length) return;
-
-        var TYPING_SPEED = 120;
-        var DELETING_SPEED = 80;
-        var PAUSE_AFTER_TYPING = 2000;
-        var PAUSE_AFTER_DELETING = 1000;
-
         var courseIndex = 0;
         var charIndex = 0;
         var isDeleting = false;
+
+        if (!element || !courses.length) return;
 
         function tick() {
             var current = courses[courseIndex];
@@ -74,23 +64,24 @@ Last updated on: 29 August, 2026
                             "currently-teaching__course--idle"
                         );
                         tick();
-                    }, PAUSE_AFTER_TYPING);
+                    }, {{ pause-after-typing }});
                     return;
                 }
-                setTimeout(tick, TYPING_SPEED);
+                setTimeout(tick, {{ typing-speed }});
             } else {
                 charIndex--;
                 element.textContent = current.substring(0, charIndex);
                 if (charIndex === 0) {
                     isDeleting = false;
                     courseIndex = (courseIndex + 1) % courses.length;
-                    setTimeout(tick, PAUSE_AFTER_DELETING);
+                    setTimeout(tick, {{ pause-after-deleting }});
                     return;
                 }
-                setTimeout(tick, DELETING_SPEED);
+                setTimeout(tick, {{ deleting-speed }});
             }
         }
 
         tick();
     })();
 </script>
+<!-- djlint:on -->

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 August, 2026
-.. Last updated on: 30 August, 2026
+.. Last updated on: 31 August, 2026
 
 :og:title: Wish It. Want It. Do It.
 :og:description: A completely scientific* investigation into whether (real)
@@ -39,15 +39,12 @@ article in August of 2026, I thought I did a really good job at it. What stood
 out the most is I didn't teach anything new or something that the students
 didn't already know.
 
-.. iframe::
-    :uid: km-css230
-    :api-base-url: https://func-slopcode-294281165.azurewebsites.net/api
-    :local-api-base-url: http://localhost:7071/api
-    :local-dev: false
-    :expected-headcount-max: 20
-    :auto-start-delay-seconds: 5
-    :file: ../assets/html/wish-it-want-it-do-it.html
+.. embed:: ../assets/html/wish-it-want-it-do-it.html
     :css: css/wish-it-want-it-do-it.css
     :js: js/wish-it-want-it-do-it.js
+    :uid: km-css230
+    :api-base-url: https://func-slopcode-294281165.azurewebsites.net/api
+    :expected-headcount-max: 20
+    :auto-start-delay-seconds: 5
 
 .. _Practical Applications in AI: https://nl.smartcatalogiq.com/en/current/undergraduate-and-graduate-catalog/course-descriptions/css-computer-science-info-systems/200/css-230
