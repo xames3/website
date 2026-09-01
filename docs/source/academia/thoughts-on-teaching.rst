@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April, 2026
-.. Last updated on: 28 June, 2026
+.. Last updated on: 30 August, 2026
 
 :og:title: Thoughts on teaching
 :og:description: Teaching the same courses, but differently every single time!
@@ -135,7 +135,7 @@ than I started last year. I'm especially grateful to
 :ref:`Charlotte <charlotte-parks>`, who first saw something in me I hadn't
 fully seen in myself and planted the very idea that I could even teach at all.
 
-This year-rounding reflection wouldn't be complete without mentioning my actual
+I can't possibly wrap up this yearly reflection without mentioning of my actual
 mentors, :ref:`Dr Tovar <antonio-tovar>` and Dr Robyn. Both, Dr Tovar and
 Dr Robyn presented me with loads of wonderful opportunities and the rest of the
 CSIS department who supported me through all. I've so many moments and lessons
@@ -143,8 +143,8 @@ to share, but for now I'll end my yearly rewind here.
 
 .. rubric:: So to conclude.
 
-To all my students, learn from my and your mistakes and to my future self, be
-kind and grateful to all the people who made you who you are.
+To all my students, learn from my and your mistakes as there are many. To my
+future self, be kind and grateful to all the people who made you who you are.
 
 .. epigraph::
 

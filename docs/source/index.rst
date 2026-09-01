@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 12 August, 2026
+.. Last updated on: 31 August, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -34,9 +34,9 @@ Hello hello!
 
 I'm Akshay, an educator, engineer and currently an Assistant Professor at
 `National Louis University`_. Before getting into academia, I worked at
-consulting firms, corporate product companies and startups. This small corner
-on the internet is my space to explore and share my experiences in software
-engineering through storytelling.
+consulting firms, corporate product companies and startups. This cheeky corner
+of the internet is where I dump all that: the wins, the mistakes, and
+everything messy in between, one story at a time.
 
 I currently live in Chicago. I got my Master's in AI from `DePaul University`_
 in 2025. I also have a special interest in natural language processing and
@@ -90,8 +90,9 @@ Fortunately, this naive belief in sharing has led me to contribute to and work
 at some amazing research labs and projects under the guidance of some
 super-duper talented people in the industry.
 
-.. raw:: html
-    :file: ./assets/html/contributed.html
+.. embed:: ./assets/html/contributed.html
+    :data-speed: slow
+    :data-direction: left
 
 In these labs, I worked on a different kinds of projects, from building
 performant machine learning models to eventually crafting numerical computing
@@ -112,9 +113,9 @@ reflect on both my technical depth and my knowledge gaps.
 
         An experimental re-implementation of a few NumPy features in Python.
 
-Beyond these, I've had the opportunity to speak at a few tech meetups and
-conferences, sharing insights on my projects, my thoughts on AI and the inner
-workings of some frameworks.
+Beyond these, I've also ended up speaking at a few tech meetups and
+conferences, rambling about my projects, my half-baked (somewhat condemning)
+thoughts on AI and how some frameworks actually work under the hood.
 
 It wouldn't be possible if I hadn't explored this; in doing so, I realised I
 had a passion for teaching.
@@ -129,9 +130,10 @@ My teaching philosophy.
 -------------------------------------------------------------------------------
 
 I believe that "true" mastery of something comes from sharing learnings from
-mistakes and past experiences. Whether it's breaking down complex machine
-learning algorithms or explaining the nuances of software design patterns, I
-find joy in making these technical ideas relatable and easy to grasp.
+mistakes and past experiences. I love taking something dense, be it some hi-fi
+machine learning algorithm or some software design pattern nobody can be
+arsed to explain properly and making it click for someone who's never
+touched it before.
 
 Early in my software engineering career, I came across a quote:
 
@@ -141,19 +143,29 @@ Early in my software engineering career, I came across a quote:
 
     -- Dr Richard Feynman
 
-And I absolutely fell in love with this idea. Soon, I realised you really
-can't call yourself an :abbr:`SME (Subject-matter expert)` until you can teach
-a concept to those who barely know anything about it (or very little) and are
-willing to entertain questions at that initial frame of reference.
+And I absolutely fell in love with this idea. Soon, I realised you can't
+really call yourself an :abbr:`SME (Subject-matter expert)` until you can
+teach a concept to someone who knows next to bugger all about it, and still
+put up with their questions without getting cocky about how much you know.
 
 Thus began my journey into teaching. By the way...
 
-.. raw:: html
-    :file: ./assets/html/currently-teaching.html
+.. embed:: ./assets/html/currently-teaching.html
+    :courses: [
+        "Programming",
+        "Cloud Computing",
+        "Data Analysis",
+        "Introduction to CS",
+        "Applications of AI"
+    ]
+    :typing-speed: 120
+    :deleting-speed: 80
+    :pause-after-typing: 2000
+    :pause-after-deleting: 1000
 
-Although my approach to mentoring has changed and evolved over the past few
-years, adapting to the needs of my environment, my students/mentees, the time,
-and my position, when asked for any help.
+My approach to mentoring's changed loads over the years, mind. It shifts
+depending on who's actually in front of me, what they need, and, if I'm being
+honest, what kind of mood I'm in that day when they come asking for help.
 
 .. _National Louis University: https://nl.edu/undergraduate-college
 .. _DePaul University: https://depaul.edu
@@ -166,7 +178,7 @@ and my position, when asked for any help.
     :titlesonly:
 
     academia/thoughts-on-teaching
-    academia/is-this-ai
+    academia/wish-it-want-it-do-it
 
 .. toctree::
     :caption: Explained

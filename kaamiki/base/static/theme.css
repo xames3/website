@@ -340,7 +340,7 @@ samp {
     left: 0;
     height: 100svh;
     width: var(--km-layout-sidebar, 280px);
-    max-width: 85vw;
+    max-width: 75vw;
     background-color: hsl(var(--km-color-bg));
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     transform: translateX(-100%);
@@ -2678,6 +2678,10 @@ a[data-tooltip].show-tooltip::after {
     margin-left: 0.5rem !important;
 }
 
+.fal {
+    font: var(--fa-font-light);
+}
+
 .far {
     font: var(--fa-font-regular);
 }
@@ -2932,6 +2936,7 @@ a[data-tooltip].show-tooltip::after {
 
     .site-sidebar--visible {
         animation: site-sidebar-bounce-in calc(var(--km-duration-normal) * 1.15) var(--km-ease-spring);
+        border-right: 1px solid hsl(var(--km-color-border));
         animation-fill-mode: forwards;
         width: 100%;
     }

@@ -235,7 +235,7 @@ python_version = "3.13"
 check_untyped_defs = true
 disallow_any_generics = true
 disallow_incomplete_defs = true
-disallow_subclassing_any = true
+disallow_subclassing_any = false  # docutils/Sphinx base classes are untyped
 disallow_untyped_calls = true
 disallow_untyped_decorators = true
 disallow_untyped_defs = true
@@ -257,25 +257,12 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
-disable_error_code = [
-  "arg-type",
-  "assignment",
-  "attr-defined",
-  "call-overload",
-  "index",
-  "method-assign",
-  "misc",
-  "name-defined",
-  "no-any-return",
-  "operator",
-  "override",
-  "union-attr",
-]
 
 [tool.tox]
 requires = [ "tox>=4.11" ]
 env_list = [
   "py313",
+  "py314",
   "website",
   "lint",
   "format",
@@ -297,8 +284,8 @@ deps = [
   "ruff>=0.12.7",
 ]
 commands = [
-  # [ "ruff", "format", "." ],
-  # [ "ruff", "check", ".", "--fix" ],
+  [ "ruff", "format", "." ],
+  [ "ruff", "check", ".", "--fix" ],
 ]
 
 [tool.tox.env.typecheck]
@@ -308,7 +295,6 @@ deps = [
   "typing-extensions>=4.5.0",
   "docutils-stubs",
   "mypy-extensions",
-  "types-beautifulsoup4",
   "types-docutils",
   "typing_extensions",
   "types-requests",
