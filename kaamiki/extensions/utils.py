@@ -4,7 +4,7 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 28 June, 2026
+Last updated on: 31 August, 2026
 
 This module defines a collection of utility functions used for
 customising this sphinx theme. These utilities focus on enhancing the
@@ -24,6 +24,18 @@ internal APIs and dynamic JavaScript bindings.
 
     Use of `website_options` in favour of `html_context`. This removes
     the need of `register_website_options` function.
+
+.. versionchanged:: 31.8.2026
+
+    [1] `ensure_classes_on_nodes` was annotated and called for the
+        wrong Sphinx event; fixed to match `doctree-resolved`'s actual
+        signature and to use `findall()` instead of the removed
+        `.traverse()` call.
+    [2] Fixed a `datetime.timezone.utc` typo (`dt` is the `datetime`
+        class, not the module) in `last_updated_date`.
+    [3] `make_toc_collapsible` and `remove_empty_toctree_divs` no
+        longer assume a tag's `class` attribute or a div's sole child
+        are always list/text types.
 """
 
 from __future__ import annotations
@@ -31,17 +43,21 @@ from __future__ import annotations
 import re
 import shlex
 import typing as t
+from datetime import UTC
 from datetime import datetime as dt
 from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import check_output as co
 
 import bs4
+from bs4.element import AttributeValueList
+from bs4.element import NavigableString
 from docutils import nodes
 from sphinx.util.display import status_iterator
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
+    from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.environment import BuildEnvironment
 
 LAST_UPDATED_RE: re.Pattern[str] = re.compile(
@@ -51,7 +67,7 @@ LAST_UPDATED_RE: re.Pattern[str] = re.compile(
 
 def findall(
     node: nodes.Node,
-    element: type[nodes.reference | nodes.bullet_list],
+    element: type[nodes.Element],
 ) -> t.Any:
     """Recursively search through the given docutils node to find all
     instances of a specified element type.
@@ -67,6 +83,11 @@ def findall(
         or bullet lists.
     :return: An iterable containing all matching elements found within
         the given node.
+
+    .. versionchanged:: 31.8.2026
+
+        Broadened `element` from `reference | bullet_list` to
+        `nodes.Element`, so callers can search for any node type.
     """
     findall = "findall" if hasattr(node, "findall") else "traverse"
     return getattr(node, findall)(element)
@@ -80,6 +101,11 @@ def make_toc_collapsible(tree: bs4.BeautifulSoup) -> None:
     pseudo element. No Alpine attributes or inline SVGs are injected.
 
     :param tree: Parsed HTML tree to mutate.
+
+    .. versionchanged:: 31.8.2026
+
+        No longer assumes an existing `class` attribute is a list; a
+        plain string (a valid bs4 representation) is now handled too.
     """
     for link in tree.select("#left-sidebar a"):
         children = link.find_next_sibling("ul")
@@ -95,9 +121,9 @@ def make_toc_collapsible(tree: bs4.BeautifulSoup) -> None:
             or "current" in (link.get("class") or [])
             or bool(children.select(".current"))
         )
-        parent["class"] = list(
-            set((parent.get("class") or []) + ["has-children"])
-        )
+        raw: str | AttributeValueList | list[str] = parent.get("class") or []
+        classes: list[str] = raw.split() if isinstance(raw, str) else list(raw)
+        parent["class"] = AttributeValueList({*classes, "has-children"})
         if current:
             parent["aria-expanded"] = "true"
         else:
@@ -124,9 +150,17 @@ def remove_empty_toctree_divs(tree: bs4.BeautifulSoup) -> None:
     to maintain a clean and optimised document structure.
 
     :param tree: Parsed HTML tree representing the document structure.
+
+    .. versionchanged:: 31.8.2026
+
+        Only calls `.strip()` on the div's sole child when it's a
+        `NavigableString`, instead of assuming it always is one.
     """
     for div in tree.select("div.toctree-wrapper"):
-        if len(div.contents) == 1 and not div.contents[0].strip():
+        if len(div.contents) != 1:
+            continue
+        content = div.contents[0]
+        if isinstance(content, NavigableString) and not content.strip():
             div.decompose()
 
 
@@ -179,7 +213,7 @@ def open_links_in_new_tab(tree: bs4.BeautifulSoup) -> None:
         link["target"] = "_blank"
 
 
-def postprocess(html: str, app: Sphinx) -> None:
+def postprocess(html: str) -> None:
     """Perform post-processing on an HTML document after the Sphinx
     build.
 
@@ -193,10 +227,12 @@ def postprocess(html: str, app: Sphinx) -> None:
     user's configuration options.
 
     :param html: Path to the HTML file to be post-processed.
-    :param app: The Sphinx application instance, used to access the
-        current build's options and environment.
+
+    .. versionchanged:: 31.8.2026
+
+        Dropped the unused `app` parameter, instead of keeping it and
+        reassigning it to itself just to appease the linter.
     """
-    app = app or None  # Just to satisfy type checkers
     with open(html, encoding="utf-8") as f:
         tree = bs4.BeautifulSoup(f, "html.parser")
     open_links_in_new_tab(tree)
@@ -222,24 +258,36 @@ def env_before_read_docs(
     :param app: The Sphinx application instance.
     :param _: The current build environment (unused).
     :param docnames: A list of document names that were modified.
+
+    .. versionchanged:: 31.8.2026
+
+        Stores `theme_htmls` via `setattr()` rather than a direct
+        attribute assignment, since `BuildEnvironment` doesn't declare
+        it statically.
     """
-    app.env.theme_htmls = docnames
+    setattr(app.env, "theme_htmls", docnames)  # noqa: B010
 
 
 def ensure_classes_on_nodes(
-    app: Sphinx, doctree: BuildEnvironment, docnames: list[str]
+    _app: Sphinx, doctree: nodes.document, _docname: str
 ) -> None:
     """Make sure classes are handled properly on node-tree.
 
     This patched function fixes the breaking code in sphinx's internal
     structure when the nodes with no classes are not handled properly.
 
-    :param app: The Sphinx application instance (unused).
-    :param doctree: The current build environment.
-    :param docname: List of document names that are modified (unused).
+    :param _app: The Sphinx application instance (unused).
+    :param doctree: The resolved doctree for the document.
+    :param _docname: The name of the document (unused).
+
+    .. versionchanged:: 31.8.2026
+
+        Was annotated and called for a different Sphinx event; fixed
+        to match `doctree-resolved`'s actual `(app, doctree, docname)`
+        signature and to use `findall()` instead of the removed
+        `.traverse()` call.
     """
-    app = app or docnames  # Just to satisfy type checkers
-    for node in doctree.traverse(nodes.Element):
+    for node in findall(doctree, nodes.Element):
         node.setdefault("classes", [])
 
 
@@ -257,6 +305,12 @@ def last_updated_date(app: Sphinx, docname: str, source: list[str]) -> None:
     :param docname: The name of the document being processed.
     :param source: The source content of the document as a list of
         strings.
+
+    .. versionchanged:: 31.8.2026
+
+        Fixed a `dt.timezone.utc` typo: `dt` is the `datetime` class
+        (aliased from `datetime.datetime`), which has no `timezone`
+        attribute; now uses `datetime.UTC` directly.
     """
     metadata = app.env.metadata.setdefault(docname, {})
     if metadata.get("last_updated"):
@@ -291,7 +345,7 @@ def last_updated_date(app: Sphinx, docname: str, source: list[str]) -> None:
     if not on:
         timestamp = src.stat().st_mtime
         try:
-            tz = dt.now().astimezone().tzinfo or dt.timezone.utc
+            tz = dt.now().astimezone().tzinfo or UTC
             on = dt.fromtimestamp(timestamp, tz=tz).strftime("%b %d, %Y")
         except FileNotFoundError:
             on = ""
@@ -327,10 +381,18 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
     :param app: The Sphinx application instance.
     :param exc: An exception raised during the build process, or `None`
         if the build was successful.
+
+    .. versionchanged:: 31.8.2026
+
+        Reads `theme_htmls` via `getattr()` and narrows `app.builder`
+        to `StandaloneHTMLBuilder` with `t.cast()`, since neither is
+        declared on the general `BuildEnvironment`/`Builder` types.
     """
     if exc or app.builder.name not in {"html", "dirhtml"}:
         return
-    htmls = [app.builder.get_outfilename(html) for html in app.env.theme_htmls]
+    builder = t.cast("StandaloneHTMLBuilder", app.builder)
+    htmls = getattr(app.env, "theme_htmls", [])
+    htmls = [str(builder.get_outfilename(html)) for html in htmls]
     if not htmls:
         return
     for html in status_iterator(
@@ -340,4 +402,4 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
         len(htmls),
         app.verbosity,
     ):
-        postprocess(html, app)
+        postprocess(html)

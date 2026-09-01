@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 28 June, 2026
+Last updated on: 31 August, 2026
 
 This module serves as the primary entry point for the Kaamiki Sphinx
 Theme. It is responsible for initialising the theme, configuring its
@@ -55,6 +55,15 @@ hooks for post-processing and dynamic content handling.
 
     [1] This theme now has a name, `Kaamiki`.
     [2] Officially dropped support for `DocSearch`.
+
+.. versionchanged:: 31.8.2026
+
+    [1] Replaced the `iframe` directive with a more general `embed`
+        directive, capable of inline content or an external HTML
+        fragment, selected by its argument rather than a `:file:`
+        option.
+    [2] `mypy` now runs fully strict across the theme, with the
+        underlying type errors it surfaced fixed rather than silenced.
 """
 
 from __future__ import annotations
@@ -86,7 +95,7 @@ if t.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-version: str = "26.04.2026"
+version: str = "31.08.2026"
 theme_name: t.Final[str] = "kaamiki"
 theme_path = p.join(p.abspath(p.dirname(__file__)), "base", "templates")
 supported_extensions: t.Sequence[str] = (
@@ -126,7 +135,9 @@ def copy_theme_static_files(
     )
 
 
-StandaloneHTMLBuilder.copy_theme_static_files = copy_theme_static_files
+StandaloneHTMLBuilder.copy_theme_static_files = (  # type: ignore[method-assign]
+    copy_theme_static_files
+)
 
 
 def fix(module: types.ModuleType) -> type[nodes.Element]:
