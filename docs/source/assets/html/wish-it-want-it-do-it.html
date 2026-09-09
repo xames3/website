@@ -4,17 +4,13 @@ Wish It. Want It. Do It. widget
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 August, 2026
-Last updated on: 30 August, 2026
+Last updated on: 02 September, 2026
 -->
 <div class="site-wish-it-want-it-do-it"
      id="{{ uid }}"
      data-wish-it-want-it-do-it="true"
-     data-api-base-url="{{ api-base-url }}"
-     data-local-api-base-url="{{ local-api-base-url|default('http://localhost:7071/api') }}"
-     data-local-dev="{{ local-dev|default('false') }}"
-     data-local-dev-real-backend="{{ local-dev-real-backend|default('false') }}"
-     data-headcount-max="{{ expected-headcount-max }}"
-     data-auto-start-delay-seconds="{{ auto-start-delay-seconds }}">
+     data-api-base-url="{{ link }}"
+     data-headcount-max="{{ expected-headcount-max }}">
     <section id="{{ uid }}-phase-choice"
              class="site-wish-it-want-it-do-it__card site-wish-it-want-it-do-it__card--choice">
         <div class="sd-tab-set docutils">
@@ -38,6 +34,9 @@ Last updated on: 30 August, 2026
                                    id="{{ uid }}-choice-room-code"
                                    type="text"
                                    maxlength="5"
+                                   autocomplete="off"
+                                   autocapitalize="characters"
+                                   spellcheck="false"
                                    placeholder="Room code"
                                    aria-label="Room code">
                         </div>
@@ -46,8 +45,10 @@ Last updated on: 30 August, 2026
                             <button class="site-wish-it-want-it-do-it__button"
                                     id="{{ uid }}-choice-join"
                                     type="button">Join room</button>
-                            <p class="site-wish-it-want-it-do-it__error"
-                               id="{{ uid }}-choice-join-error"></p>
+                            <div class="site-wish-it-want-it-do-it__notice-slot site-wish-it-want-it-do-it--hidden"
+                                 id="{{ uid }}-choice-join-error"
+                                 role="alert"
+                                 aria-live="assertive"></div>
                         </div>
                     </div>
                 </div>
@@ -87,24 +88,29 @@ Last updated on: 30 August, 2026
                                 <button class="site-wish-it-want-it-do-it__button"
                                         id="{{ uid }}-login-submit"
                                         type="button">Sign in</button>
-                                <p class="site-wish-it-want-it-do-it__error site-wish-it-want-it-do-it__error--inline"
-                                   id="{{ uid }}-login-error"></p>
                             </div>
+                            <div class="site-wish-it-want-it-do-it__notice-slot site-wish-it-want-it-do-it--hidden"
+                                 id="{{ uid }}-login-error"
+                                 role="alert"
+                                 aria-live="assertive"></div>
                         </div>
                         <div class="site-wish-it-want-it-do-it__field site-wish-it-want-it-do-it__field--stacked site-wish-it-want-it-do-it--hidden"
                              id="{{ uid }}-host-create-fields">
                             <input class="site-wish-it-want-it-do-it__input site-search__input"
                                    id="{{ uid }}-choice-headcount"
                                    type="number"
-                                   min="2"
+                                   min="1"
+                                   max="{{ expected-headcount-max }}"
                                    value="3"
                                    placeholder="Expected number of participants"
                                    aria-label="Expected number of participants">
                             <button class="site-wish-it-want-it-do-it__button"
                                     id="{{ uid }}-choice-create"
                                     type="button">Create a room</button>
-                            <p class="site-wish-it-want-it-do-it__error"
-                               id="{{ uid }}-choice-host-error"></p>
+                            <div class="site-wish-it-want-it-do-it__notice-slot site-wish-it-want-it-do-it--hidden"
+                                 id="{{ uid }}-choice-host-error"
+                                 role="alert"
+                                 aria-live="assertive"></div>
                         </div>
                     </div>
                 </div>
@@ -121,19 +127,25 @@ Last updated on: 30 August, 2026
                 Let's wait for others to join.
             </h2>
             <p class="site-wish-it-want-it-do-it__lobby-count"
-               id="{{ uid }}-lobby-count"></p>
+               id="{{ uid }}-lobby-count"
+               aria-live="polite"></p>
             <div class="site-wish-it-want-it-do-it__lobby-participants-row"
                  id="{{ uid }}-lobby-participants-row">
                 <ul class="site-wish-it-want-it-do-it__avatar-stack"
                     id="{{ uid }}-lobby-participants">
                 </ul>
             </div>
-            <p class="site-wish-it-want-it-do-it__lobby-countdown"
-               id="{{ uid }}-lobby-countdown"></p>
+            <p class="site-wish-it-want-it-do-it__lobby-status"
+               id="{{ uid }}-lobby-status"
+               aria-live="polite"></p>
             <div class="site-wish-it-want-it-do-it__host-panel"
                  id="{{ uid }}-lobby-host-panel">
                 <div class="site-wish-it-want-it-do-it__host-panel-actions site-wish-it-want-it-do-it--hidden"
                      id="{{ uid }}-lobby-host-actions">
+                    <button class="site-wish-it-want-it-do-it__button site-wish-it-want-it-do-it__button--secondary"
+                            id="{{ uid }}-lobby-toggle-join"
+                            type="button"
+                            aria-pressed="false">Lock</button>
                     <button class="site-wish-it-want-it-do-it__button"
                             id="{{ uid }}-lobby-start-submission"
                             type="button">Start</button>
@@ -151,7 +163,7 @@ Last updated on: 30 August, 2026
         </p>
         <section>
             <h2 class="site-wish-it-want-it-do-it__title">
-                Add your <i style="color: hsl(var(--km-color-yellow))"><s> slop  </s></i> text or
+                Add your <i style="color: hsl(var(--km-color-yellow))"><s> slop  </s></i> text or
                 image.
             </h2>
             <p class="site-wish-it-want-it-do-it__subtitle">
@@ -159,7 +171,8 @@ Last updated on: 30 August, 2026
                 resubmitting until the host starts voting.
             </p>
             <p class="site-wish-it-want-it-do-it__composer-status site-wish-it-want-it-do-it--hidden"
-               id="{{ uid }}-submission-host-count"></p>
+               id="{{ uid }}-submission-host-count"
+               aria-live="polite"></p>
             <div class="site-wish-it-want-it-do-it__field">
                 <div class="site-wish-it-want-it-do-it__composer"
                      id="{{ uid }}-submission-composer">
@@ -207,9 +220,12 @@ Last updated on: 30 August, 2026
                 </div>
             </div>
             <p class="site-wish-it-want-it-do-it__submission-status"
-               id="{{ uid }}-submission-status"></p>
-            <p class="site-wish-it-want-it-do-it__error"
-               id="{{ uid }}-submission-error"></p>
+               id="{{ uid }}-submission-status"
+               aria-live="polite"></p>
+            <div class="site-wish-it-want-it-do-it__notice-slot site-wish-it-want-it-do-it--hidden"
+                 id="{{ uid }}-submission-error"
+                 role="alert"
+                 aria-live="assertive"></div>
             <div class="site-wish-it-want-it-do-it__host-panel"
                  id="{{ uid }}-submission-host-panel">
                 <div class="site-wish-it-want-it-do-it__host-panel-actions site-wish-it-want-it-do-it--hidden"
@@ -222,7 +238,7 @@ Last updated on: 30 August, 2026
                     </button>
                     <button class="site-wish-it-want-it-do-it__button"
                             id="{{ uid }}-submission-start-voting"
-                            type="button">Allow</button>
+                            type="button">Vote</button>
                     <button class="site-wish-it-want-it-do-it__button site-wish-it-want-it-do-it__button--secondary"
                             id="{{ uid }}-submission-stop-session"
                             type="button">Stop</button>
@@ -264,17 +280,20 @@ Last updated on: 30 August, 2026
                         <i class="fas fa-user far"></i> Human
                     </button>
                 </div>
-                <p class="site-wish-it-want-it-do-it__error"
-                   id="{{ uid }}-voting-error"></p>
+                <div class="site-wish-it-want-it-do-it__notice-slot site-wish-it-want-it-do-it--hidden"
+                     id="{{ uid }}-voting-error"
+                     role="alert"
+                     aria-live="assertive"></div>
             </div>
             <div id="{{ uid }}-voting-waiting"
                  class="site-wish-it-want-it-do-it--hidden">
                 <p style="margin-top: 1rem">
-                    You're done voting. Waiting for everyone else to finish...
+                    You're done voting. Hang tight until The God shows the results.
                 </p>
             </div>
-            <p class="site-wish-it-want-it-do-it__voting-tally"
-               id="{{ uid }}-voting-tally"></p>
+            <p class="site-wish-it-want-it-do-it__voting-progress site-wish-it-want-it-do-it--hidden"
+               id="{{ uid }}-voting-progress"
+               aria-live="polite"></p>
             <div class="site-wish-it-want-it-do-it__host-panel"
                  id="{{ uid }}-voting-host-panel">
                 <div class="site-wish-it-want-it-do-it__host-panel-actions site-wish-it-want-it-do-it--hidden"
@@ -286,8 +305,11 @@ Last updated on: 30 August, 2026
                         <i class="fa-solid fa-arrow-left"></i>
                     </button>
                     <button class="site-wish-it-want-it-do-it__button"
+                            id="{{ uid }}-voting-show-results"
+                            type="button">Results</button>
+                    <button class="site-wish-it-want-it-do-it__button site-wish-it-want-it-do-it__button--secondary"
                             id="{{ uid }}-voting-stop-session"
-                            type="button">End</button>
+                            type="button">Stop</button>
                 </div>
             </div>
         </section>
@@ -324,13 +346,24 @@ Last updated on: 30 August, 2026
                  id="{{ uid }}-results-host-panel">
                 <div class="site-wish-it-want-it-do-it__host-panel-actions site-wish-it-want-it-do-it--hidden"
                      id="{{ uid }}-results-host-actions">
+                    <button class="site-wish-it-want-it-do-it__composer-nav-btn site-wish-it-want-it-do-it__composer-nav-btn--host"
+                            id="{{ uid }}-results-go-back"
+                            type="button"
+                            aria-label="Back to voting">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
                     <button class="site-wish-it-want-it-do-it__button"
                             id="{{ uid }}-restart-session"
-                            type="button">End session for everyone</button>
+                            type="button">End session</button>
                 </div>
             </div>
         </section>
     </section>
-    <p class="site-wish-it-want-it-do-it__error"
-       id="{{ uid }}-connection-status"></p>
+    <div class="site-wish-it-want-it-do-it__notice-slot site-wish-it-want-it-do-it--hidden"
+         id="{{ uid }}-connection-status"
+         role="status"
+         aria-live="polite"></div>
+    <button class="site-wish-it-want-it-do-it__leave-link site-wish-it-want-it-do-it--hidden"
+            id="{{ uid }}-leave-session"
+            type="button">Not you? Leave and start over</button>
 </div>
