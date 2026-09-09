@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 August, 2026
-.. Last updated on: 31 August, 2026
+.. Last updated on: 02 September, 2026
 
 :og:title: Wish It. Want It. Do It.
 :og:description: A completely scientific* investigation into whether (real)
@@ -43,8 +43,7 @@ didn't already know.
     :css: css/wish-it-want-it-do-it.css
     :js: js/wish-it-want-it-do-it.js
     :uid: km-css230
-    :api-base-url: https://func-slopcode-294281165.azurewebsites.net/api
+    :link: https://func-wish-it-want-it-do-it-2459828906.azurewebsites.net/api
     :expected-headcount-max: 20
-    :auto-start-delay-seconds: 5
 
 .. _Practical Applications in AI: https://nl.smartcatalogiq.com/en/current/undergraduate-and-graduate-catalog/course-descriptions/css-computer-science-info-systems/200/css-230
