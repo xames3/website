@@ -17,6 +17,11 @@ const YOUTUBE_FETCH_TIMEOUT_MS = 8000;
 const REVEAL_STEP_MS = 90;
 const ARTICLE_BG_FADE_MS = 600;
 const ARTICLE_BG_INTERVAL_MS = 7000;
+const REPOSITORY_FETCH_TIMEOUT_MS = 8000;
+const TICKER_RADIX = 10;
+const TICKER_MAX_LAPS = 4;
+const TICKER_BASE_MS = 1900;
+const TICKER_COLUMN_STEP_MS = 280;
 
 function getDurationMs(cssVar = '--km-duration-normal', fallback = 500) {
     try {
@@ -365,6 +370,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 })();
 
+(function () {
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    function boot() {
+        const figures = document.querySelectorAll(
+            '#content figure.zoom, #content figure.fuzzy-blur');
+        if (!figures.length) return;
+
+        for (const figure of figures) {
+            figure.addEventListener('click', (event) => {
+                if (event.target.closest('a')) return;
+                const wasRevealed = figure.classList.contains('is-revealed');
+                for (const other of figures) other.classList.remove('is-revealed');
+                if (!wasRevealed) figure.classList.add('is-revealed');
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            if (event.target.closest('#content figure.zoom, #content figure.fuzzy-blur')) return;
+            for (const figure of figures) figure.classList.remove('is-revealed');
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+})();
+
 function initLeftSidebarAccordion() {
     const sidebars = document.querySelectorAll('.site-sidebar--primary');
     if (!sidebars.length) return;
@@ -655,6 +690,106 @@ function formatNumber(num) {
     if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
     return num;
 }
+
+(function () {
+    const REEL_EASING = 'cubic-bezier(0.25, 1, 0.5, 1)';
+
+    function prefersReducedMotion() {
+        return !!(window.matchMedia
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+
+    function buildColumn(digit, columnIndex) {
+        const laps = Math.min(1 + columnIndex, TICKER_MAX_LAPS);
+        const stops = laps * TICKER_RADIX + digit;
+        const column = document.createElement('span');
+        column.className = 'site-github-repository__digit';
+        const reel = document.createElement('span');
+        reel.className = 'site-github-repository__reel';
+        for (let i = 0; i <= stops; i++) {
+            const cell = document.createElement('span');
+            cell.className = 'site-github-repository__cell';
+            cell.textContent = String(i % TICKER_RADIX);
+            reel.appendChild(cell);
+        }
+        column.appendChild(reel);
+        return {
+            column,
+            reel,
+            shift: `translateY(-${(stops / (stops + 1)) * 100}%)`,
+            duration: TICKER_BASE_MS + columnIndex * TICKER_COLUMN_STEP_MS,
+        };
+    }
+
+    function renderTicker(field, value) {
+        const ticker = document.createElement('span');
+        ticker.className = 'site-github-repository__ticker';
+        const columns = [];
+
+        for (const char of String(value)) {
+            const digit = char >= '0' && char <= '9' ? Number(char) : null;
+            if (digit === null) {
+                const symbol = document.createElement('span');
+                symbol.className = 'site-github-repository__symbol';
+                symbol.textContent = char;
+                ticker.appendChild(symbol);
+                continue;
+            }
+            const built = buildColumn(digit, columns.length);
+            ticker.appendChild(built.column);
+            columns.push(built);
+        }
+
+        field.replaceChildren(ticker);
+
+        const reduced = prefersReducedMotion();
+        for (const { reel, shift, duration } of columns) {
+            if (reduced || typeof reel.animate !== 'function') {
+                reel.style.transform = shift;
+                continue;
+            }
+            reel.animate(
+                [{ transform: 'translateY(0%)' }, { transform: shift }],
+                { duration, easing: REEL_EASING, fill: 'forwards' }
+            );
+        }
+    }
+
+    async function loadRepository(widget) {
+        const project = widget.getAttribute('data-repository');
+        const fields = widget.querySelectorAll('[data-repository-count]');
+        if (!project || !fields.length) return;
+
+        let data = {};
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), REPOSITORY_FETCH_TIMEOUT_MS);
+        try {
+            const res = await fetch(
+                `https://api.github.com/repos/${project}`, { signal: ctrl.signal });
+            if (res.ok) data = await res.json();
+        } catch {
+        } finally {
+            clearTimeout(timer);
+        }
+
+        fields.forEach((field) => {
+            const raw = Number(data[field.getAttribute('data-repository-count')]);
+            const count = Number.isFinite(raw) ? Math.max(0, Math.trunc(raw)) : 0;
+            renderTicker(field, formatNumber(count));
+        });
+    }
+
+    function boot() {
+        const widgets = document.querySelectorAll('.site-github-repository[data-repository]');
+        for (const widget of widgets) loadRepository(widget);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+})();
 
 (function (C, A, L) {
     let p = function (a, ar) { a.q.push(ar); };

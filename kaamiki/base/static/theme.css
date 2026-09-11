@@ -16,7 +16,7 @@
     --km-color-surface: 0 0% 94%;
     --km-color-url: 210.84 100% 41.96%;
     --km-radius-round: 500px;
-    --km-radius-normal: 0.75rem;
+    --km-radius-normal: 1.15rem;
     --km-color-code-bg: 0 0% 100%;
     --km-color-code-border: 0 0% 83.92%;
     --km-color-highlight: 209.55 100% 94%;
@@ -65,13 +65,13 @@ html[data-theme="dark"] {
     --km-color-primary: var(--km-color-fg);
     --km-color-accent-fg: var(--km-color-fg);
     --km-color-accent-bg: 0 0% 9%;
-    --km-color-muted-bg: 0 0% 12%;
-    --km-color-border: 0 0% 12%;
-    --km-color-input: var(--km-color-border);
+    --km-color-muted-bg: 0 0% 19%;
+    --km-color-border: var(--km-color-muted-bg);
+    --km-color-input: var(--km-color-muted-bg);
     --km-color-surface: 0 0% 8%;
     --km-color-url: 210.61 100% 61.18%;
     --km-color-code-bg: 0 0% 4%;
-    --km-color-code-border: 0 0% 12%;
+    --km-color-code-border: var(--km-color-muted-bg);
     --km-color-highlight: 211.25 97.96% 19.22%;
     --km-admonition-danger-bg: 0 54.44% 12.95%;
     --km-admonition-danger-fg: 5.6 76.17% 55.94%;
@@ -1226,9 +1226,15 @@ table.docutils caption {
     transition: transform var(--km-duration-slow) var(--km-ease-swift);
 }
 
-#content figure.zoom:hover .zoom-scale,
-#content figure.zoom:focus-within .zoom-scale {
+#content figure.zoom.is-revealed .zoom-scale {
     transform: scale(1.06);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    #content figure.zoom:hover .zoom-scale,
+    #content figure.zoom:focus-within .zoom-scale {
+        transform: scale(1.06);
+    }
 }
 
 #content figcaption {
@@ -2523,6 +2529,38 @@ a[data-tooltip].show-tooltip::after {
     color: hsl(var(--km-color-green));
 }
 
+.site-github-repository__stars,
+.site-github-repository__forks {
+    display: flex;
+    align-items: center;
+}
+
+.site-github-repository__ticker {
+    display: inline-flex;
+    align-items: center;
+    color: hsl(var(--km-color-fg));
+    font-variant-numeric: tabular-nums;
+}
+
+.site-github-repository__digit {
+    display: block;
+    height: 1.25em;
+    overflow: hidden;
+}
+
+.site-github-repository__reel {
+    display: block;
+    will-change: transform;
+}
+
+.site-github-repository__cell,
+.site-github-repository__symbol {
+    display: block;
+    height: 1.25em;
+    line-height: 1.25em;
+    text-align: center;
+}
+
 .site-faq {
     margin: 2rem 0 !important;
     color: hsl(var(--km-color-muted-fg)) !important;
@@ -2648,6 +2686,34 @@ a[data-tooltip].show-tooltip::after {
 
 .grayscale:hover {
     filter: grayscale(0%);
+}
+
+.fuzzy-blur {
+    --km-fuzzy-radius: 4px;
+    --km-fuzzy-overscan: 1.06;
+}
+
+#content figure.fuzzy-blur .zoom-inner {
+    overflow: hidden;
+    border-radius: var(--km-radius-normal);
+}
+
+#content figure.fuzzy-blur .zoom-scale img {
+    border-radius: 0;
+    transform: scale(var(--km-fuzzy-overscan));
+    filter: blur(var(--km-fuzzy-radius));
+    transition: filter var(--km-duration-slow) var(--km-ease-swift);
+}
+
+#content figure.fuzzy-blur.is-revealed .zoom-scale img {
+    filter: blur(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    #content figure.fuzzy-blur:hover .zoom-scale img,
+    #content figure.fuzzy-blur:focus-within .zoom-scale img {
+        filter: blur(0);
+    }
 }
 
 .mrl-0 {
