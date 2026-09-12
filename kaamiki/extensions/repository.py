@@ -4,7 +4,7 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October, 2025
-Last updated on: 10 September, 2026
+Last updated on: 28 June, 2026
 
 This module defines a custom `repository` directive for the Kaamiki
 Sphinx Theme. The directive allows embedding GitHub repository details
@@ -23,47 +23,37 @@ follows::
 
 The above snippet will be processed and rendered according to the
 theme's Jinja2 template, producing a final HTML output.
-
-.. versionadded:: 10.9.2026
-
-    `:stars:` and `:forks:` gate their counters. Naming one shows only
-    that one, naming neither shows both. They were accepted but ignored
-    before, and `:issues:` never had a counter to point at.
-
-.. versionchanged:: 10.9.2026
-
-    Rendering goes through `utils.render`, one shared Jinja environment
-    for the whole theme with autoescaping switched on. The old per-
-    module templates had escaping off, so a project name carrying an
-    `&`, a `<` or a stray quote quietly emitted broken markup.
-
-.. deprecated:: 10.9.2026
-
-    [1] The module-level `here`, `templates` and `html` path fiddling
-        has moved out to `utils`, along with the `jinja2` import. Every
-        directive was opening its own template at import time and
-        building a bare `jinja2.Template` off it, which is a daft thing
-        to do seven times over. `template` is now just the filename.
-    [2] The `:issues:` option is gone. The widget renders stars and
-        forks, so an issues flag pointed at a counter that was never in
-        the template.
-    [3] Dropped the `node` class and the `visit`/`depart` pair. This
-        directive hands back a `nodes.raw` and never goes anywhere near
-        a translator, so all three were dead weight that only existed to
-        keep the registration loop happy.
 """
 
 from __future__ import annotations
 
+import os.path as p
 import typing as t
 
 import docutils.nodes as nodes
+import jinja2
 from docutils.parsers import rst
 
-from kaamiki.extensions.utils import render
+if t.TYPE_CHECKING:
+    from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "repository"
-template: t.Final[str] = "repository.html.jinja"
+here: str = p.dirname(__file__)
+templates: str = "../base/templates"
+html = p.join(p.abspath(p.join(here, templates)), "repository.html.jinja")
+
+with open(html) as f:
+    template = jinja2.Template(f.read())
+
+
+class node(nodes.Element):
+    """Class to represent a custom node in the document tree.
+
+    This class extends the `nodes.Element` from `docutils`, serving as
+    the container for the parsed information. The node will ultimately
+    be transformed into HTML or other output formats by the relevant
+    Sphinx translators.
+    """
 
 
 class directive(rst.Directive):
@@ -75,18 +65,17 @@ class directive(rst.Directive):
 
     The directive supports the following options::
 
-        - `stars`: Show the stargazer count.
-        - `forks`: Show the fork count.
-
-    Both counts are shown when neither flag is given, which is what
-    the directive did before either flag meant anything.
+        - `stars`: Boolean flag to show stars.
+        - `issues`: Boolean flag to show the issue count.
     """
 
     required_arguments = 1
     final_argument_whitespace = False
+    # TODO (xames3): Need to add support for boolean checks for
+    # rendering either options or both. Currently, both are shown.
     option_spec = {  # noqa: RUF012
         "stars": rst.directives.flag,
-        "forks": rst.directives.flag,
+        "issues": rst.directives.flag,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -101,21 +90,38 @@ class directive(rst.Directive):
         into HTML or other formats.
 
         :return: A list containing a single `node` element.
-
-        .. versionchanged:: 10.9.2026
-
-            [1] Renders through `utils.render`, so the project name is
-                escaped on its way into the template.
-            [2] `:stars:` and `:forks:` now actually gate their
-                counters. Naming a flag shows only that one; naming
-                neither shows both, as before.
         """
-        stars = "stars" in self.options
-        forks = "forks" in self.options
         self.options["project"] = self.arguments.pop().strip()
-        self.options["stars"] = stars or not forks
-        self.options["forks"] = forks or not stars
         attributes: dict[str, str] = {}
-        attributes["text"] = render(template, **self.options)
+        attributes["text"] = template.render(**self.options)
         attributes["format"] = "html"
         return [nodes.raw(**attributes)]
+
+
+def visit(self: HTMLTranslator, node: node) -> None:
+    """Handle the entry processing of the `repository` node during HTML
+    generation.
+
+    This method is called when the HTML translator encounters the
+    `repository` node in the document tree. It retrieves the relevant
+    attributes from the node (if any) and uses Jinja2 templating to
+    produce the final HTML output. Since the `repository` node does not
+    require any actions, the method currently acts as a placeholder.
+
+    :param self: The HTML translator instance.
+    :param node: The `repository` node being processed.
+    """
+
+
+def depart(self: HTMLTranslator, node: node) -> None:
+    """Handle the exit processing of the `repository` node during HTML
+    generation.
+
+    This method is invoked after the node's HTML representation has
+    been fully processed and added to the output. Since the
+    `repository` node does not require any closing actions, the method
+    currently acts as a placeholder.
+
+    :param self: The HTML translator instance.
+    :param node: The `repository` node being processed.
+    """

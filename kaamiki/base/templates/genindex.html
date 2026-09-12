@@ -4,34 +4,38 @@ Index Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 12 September, 2026
+Last updated on: 21 December, 2025
 -->
 {%- extends "layout.html" -%}
-{%- set title = _("Index") -%}
-{%- macro indexentries(firstname, links) -%}
+{% set title = _("Index") %}
+{% macro indexentries(firstname, links) %}
     {%- if links -%}
         <a href="{{ links[0][1] }}">
-            {%- if links[0][0] %}<strong>{{ firstname|e }}</strong>
-        {% else %}
+            {%- if links[0][0] %}<strong>
+            {% endif -%}
             {{ firstname|e }}
-        {% endif -%}
-    </a>
-    {%- for ismain, link in links[1:] -%}
-        , <a href="{{ link }}">
-        {%- if ismain %}<strong>[{{ loop.index }}]</strong>
-    {% else %}
-        [{{ loop.index }}]
+        {%- if links[0][0] %}</strong>
     {% endif -%}
 </a>
-{%- endfor -%}
-{%- else -%}
+{%- for ismain, link in links[1:] -%}
+    , <a href="{{ link }}">
+    {% if ismain %}
+        <strong>
+        {% endif -%}
+        [{{ loop.index }}]
+    {%- if ismain %}</strong>
+{% endif -%}
+</a>
+{%- endfor %}
+{%- else %}
 {{ firstname|e }}
-{%- endif -%}
-{%- endmacro -%}
+{%- endif %}
+{% endmacro %}
 {%- block body %}
-    <div class="site-page site-page--wide">
-        {%- block body_before %}{%- endblock body_before %}
-            {%- if show_breadcrumbs|tobool %}
+    {%- set only_main_nav = sidebars == ["sidebar_main_nav_links.html.jinja"] %}
+    <div class="site-page{% if not only_main_nav and sidebars|length > 0 %} site-page--wide{% endif %}">
+        {%- block body_before %}{%- endblock body_before -%}
+            {%- if theme_show_breadcrumbs|tobool %}
                 {%- include "breadcrumbs.html.jinja" %}
             {%- endif %}
             <div id="content"
@@ -44,44 +48,49 @@ Last updated on: 12 September, 2026
                              aria-labelledby="{{ key }}">
                         <h2 id="{{ key }}"
                             class="site-genindex__heading">{{ key }}</h2>
-                        <div class="site-genindex__columns">
-                            {%- for column in entries|slice_index(2) if column %}
-                                <ul class="site-genindex__list">
-                                    {%- for entryname, (links, subitems, _) in column %}
-                                        <li class="site-genindex__item">
-                                            {{ indexentries(entryname, links) }}
-                                            {%- if subitems %}
-                                                <ul class="site-genindex__list site-genindex__list--nested">
-                                                    {%- for subentryname, subentrylinks in subitems %}
-                                                        <li class="site-genindex__item">
-                                                            {{ indexentries(subentryname, subentrylinks) }}
-                                                        </li>
-                                                    {%- endfor %}
-                                                </ul>
-                                            {%- endif -%}
-                                        </li>
-                                    {%- endfor %}
-                                </ul>
-                            {%- endfor %}
-                        </div>
+                        <table class="site-genindex__table">
+                            <tr>
+                                {%- for column in entries|slice_index(2) if column %}
+                                    <td class="site-genindex__column">
+                                        <ul class="site-genindex__list">
+                                            {%- for entryname, (links, subitems, _) in column %}
+                                                <li class="site-genindex__item">
+                                                    {{ indexentries(entryname, links) }}
+                                                    {%- if subitems %}
+                                                        <ul class="site-genindex__sublist">
+                                                            {%- for subentryname, subentrylinks in subitems %}
+                                                                <li class="site-genindex__subitem">
+                                                                    {{ indexentries(subentryname, subentrylinks) }}
+                                                                </li>
+                                                            {%- endfor %}
+                                                        </ul>
+                                                    {%- endif -%}
+                                                </li>
+                                            {%- endfor %}
+                                        </ul>
+                                    </td>
+                                {%- endfor %}
+                            </tr>
+                        </table>
                     </section>
-                {%- endfor %}
+                {% endfor %}
             </div>
-            {%- block body_after %}{%- endblock body_after %}
+            {%- if theme_show_prev_next|tobool %}
+                {%- include "previous_next_pages.html.jinja" %}
+            {%- endif %}
+            {%- block body_after %}{%- endblock body_after -%}
             </div>
         {%- endblock body %}
-        {%- block right_sidebar %}
-            {%- if genindexentries %}
-                <aside id="right-sidebar"
-                       class="site-layout__sidebar site-sidebar site-sidebar--secondary site-sidebar--alpha">
-                    <p class="site-sidebar__title">{{ _("Jump to letter") }}</p>
-                    <nav class="site-sidebar__alphabet"
-                         aria-label="{{ _('Index shortcuts') }}">
-                        {%- for key, dummy in genindexentries %}
-                            <a class="site-sidebar__alphabet-link"
-                               href="#{{ key }}">{{ key }}</a>
-                        {%- endfor %}
-                    </nav>
-                </aside>
-            {%- endif %}
-        {%- endblock right_sidebar %}
+        {%- block on_page_toc %}
+            <aside id="right-sidebar"
+                   class="site-layout__sidebar site-sidebar site-sidebar--secondary site-sidebar--alpha">
+                <p class="site-sidebar__title">{{ _("Jump to letter") }}</p>
+                <nav class="site-sidebar__alphabet"
+                     aria-label="{{ _('Index shortcuts') }}">
+                    {% for key, dummy in genindexentries -%}
+                        <a class="site-sidebar__alphabet-link"
+                           href="#{{ key }}">{{ key }}</a>
+                    {%- endfor %}
+                </nav>
+            </aside>
+        {%- endblock on_page_toc %}

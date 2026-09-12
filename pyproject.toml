@@ -8,7 +8,7 @@ dynamic = [ "dependencies", "version" ]
 authors = [
     { name = "Akshay Mestry", email = "xa@mes3.dev" }
 ]
-description = "Sphinx theme and extension utility for Akshay's corner."
+description = "Akshay's corner on the internet."
 readme = "README.rst"
 requires-python = ">=3.13"
 keywords = [ "education", "learning", "sphinx", "python", "kaamiki" ]
@@ -279,12 +279,13 @@ commands = [
 ]
 
 [tool.tox.env.format]
-description = "Check code formatting with ruff"
+description = "Run code formatting with ruff"
 deps = [
   "ruff>=0.12.7",
 ]
 commands = [
-  [ "ruff", "format", ".", "--check" ],
+  [ "ruff", "format", "." ],
+  [ "ruff", "check", ".", "--fix" ],
 ]
 
 [tool.tox.env.typecheck]

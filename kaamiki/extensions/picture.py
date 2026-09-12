@@ -4,7 +4,7 @@ Picture Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 02 September, 2025
-Last updated on: 11 September, 2026
+Last updated on: 29 April, 2026
 
 This module defines a custom `picture` directive for the Kaamiki Sphinx
 Theme. The directive allows embedding and rendering images specific to
@@ -31,36 +31,6 @@ theme's Jinja2 template, producing a final HTML output.
 
     Simplified the directive to render images according to the theme's
     colour scheme using the `img` tag instead of fancy Javascript.
-
-.. versionadded:: 10.9.2026
-
-    [1] The image's real pixel size is read off the file header by
-        `utils.measure` and emitted as `width`/`height`. The browser can
-        hold the space open before the image lands, which is what stops
-        the page shuffling about as you scroll.
-
-.. versionchanged:: 10.9.2026
-
-    [1] Rendering goes through `utils.render`, one shared Jinja
-        environment for the whole theme with autoescaping switched on.
-        The old per-module templates had escaping off, so a caption or
-        an alt text carrying an `&`, a `<` or a stray quote quietly
-        emitted broken markup.
-    [2] A bad `:align:` raises a proper directive error instead of
-        tripping an `assert`. The assert vanished entirely under `python
-        -O` and, when it did fire, gave you a traceback rather than a
-        build error pointing at the offending line.
-
-.. deprecated:: 10.9.2026
-
-    [1] The module-level `here`, `templates` and `html` path fiddling
-        has moved out to `utils`, along with the `jinja2` import. Every
-        directive was opening its own template at import time and
-        building a bare `jinja2.Template` off it, which is a daft thing
-        to do seven times over. `template` is now just the filename.
-    [2] Dropped the empty `depart`. It existed only because `add_node`
-        wants a pair; the theme falls back to the shared no-op in
-        `utils` when a directive doesn't define one.
 """
 
 from __future__ import annotations
@@ -71,17 +41,20 @@ import shutil
 import typing as t
 
 import docutils.nodes as nodes
+import jinja2
 from docutils.parsers import rst
 from docutils.parsers.rst.directives import images
-
-from kaamiki.extensions.utils import measure
-from kaamiki.extensions.utils import render
 
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "picture"
-template: t.Final[str] = "picture.html.jinja"
+here: str = p.dirname(__file__)
+templates: str = "../base/templates"
+html = p.join(p.abspath(p.join(here, templates)), "picture.html.jinja")
+
+with open(html) as f:
+    template = jinja2.Template(f.read())
 
 
 class node(nodes.Element):
@@ -140,18 +113,6 @@ class directive(images.Figure):
         'light' and 'dark' suffixes to create the final image paths.
 
         :return: A list containing a single `node` element.
-
-        .. versionchanged:: 10.9.2026
-
-            [1] Renders through `utils.render`, so the caption and the
-                alt text are escaped on their way into the template.
-            [2] Measures the chosen image with `utils.measure` and
-                passes its `width`/`height` through, so the browser
-                holds the space open before the image lands.
-            [3] A bad `:align:` raises a directive error rather than
-                tripping an `assert`, which vanished under `python -O`
-                and gave a traceback instead of a located error.
-
         """
         env = self.state.document.settings.env
         depth = env.docname.count("/")
@@ -191,11 +152,9 @@ class directive(images.Figure):
         prefix = "../" * depth if depth else ""
         klass = self.options.get("class", "")
         align = self.options.get("align", "default")
-        if align not in allowed:
-            raise self.error(
-                f"Invalid :align: {align!r}. Choose from {', '.join(allowed)}"
-            )
-        size = measure(light) or measure(dark)
+        assert align in allowed, (
+            f"Available align options are {', '.join(allowed)}"
+        )
         attributes = {
             "light": f"{prefix}_images/{p.basename(light)}",
             "dark": f"{prefix}_images/{p.basename(dark)}",
@@ -203,8 +162,6 @@ class directive(images.Figure):
             "align": align,
             "figclass": self.options.get("figclass", klass),
             "caption": "\n".join(self.content) if self.content else "",
-            "width": size[0] if size else "",
-            "height": size[1] if size else "",
         }
         element = node("", **attributes)
         return [element]
@@ -223,4 +180,18 @@ def visit(self: HTMLTranslator, node: node) -> None:
         nodes into HTML.
     :param node: The `picture` node containing parsed attributes.
     """
-    self.body.append(render(template, **node.attributes))
+    self.body.append(template.render(**node.attributes))
+
+
+def depart(self: HTMLTranslator, node: node) -> None:
+    """Handle the exit processing of the `picture` node during HTML
+    generation.
+
+    This method is invoked after the node's HTML representation has been
+    fully processed and added to the output. Since the `picture` node
+    does not require any closing actions, the method currently acts as a
+    placeholder.
+
+    :param self: The HTML translator instance.
+    :param node: The `picture` node being processed.
+    """

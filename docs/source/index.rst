@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 11 September, 2026
+.. Last updated on: 31 August, 2026
 
 :orphan:
 :og:title: Akshay's Corner
@@ -30,7 +30,7 @@ Akshay Mestry
         https://i.imgur.com/gcGHqxi.jpg
         https://i.imgur.com/weM4qDW.jpg
 
-Hello, hello!!
+Hello hello!
 
 I'm Akshay, an educator, engineer and currently an Assistant Professor at
 `National Louis University`_. Before getting into academia, I worked at
@@ -148,7 +148,7 @@ really call yourself an :abbr:`SME (Subject-matter expert)` until you can
 teach a concept to someone who knows next to bugger all about it, and still
 put up with their questions without getting cocky about how much you know.
 
-Thus began my journey into teaching. So far, I've taught...
+Thus began my journey into teaching. By the way...
 
 .. embed:: ./assets/html/currently-teaching.html
     :courses: [
@@ -158,7 +158,6 @@ Thus began my journey into teaching. So far, I've taught...
         "Introduction to CS",
         "Applications of AI"
     ]
-    :prefix-text:
     :typing-speed: 120
     :deleting-speed: 80
     :pause-after-typing: 2000

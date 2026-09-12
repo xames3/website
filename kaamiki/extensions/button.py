@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April, 2026
-Last updated on: 10 September, 2026
+Last updated on: 28 June, 2026
 
 This module defines a custom `button` directive for the Kaamiki Sphinx
 Theme. The directive allows adding a button directly within the
@@ -27,43 +27,42 @@ follows::
 
 The above snippet will be processed and rendered according to the
 theme's Jinja2 template, producing a final HTML output.
-
-.. versionchanged:: 10.9.2026
-
-    Rendering goes through `utils.render`, one shared Jinja environment
-    for the whole theme with autoescaping switched on. The old per-
-    module templates had escaping off, so a label carrying an `&`, a `<`
-    or a stray quote quietly emitted broken markup.
-
-.. deprecated:: 10.9.2026
-
-    [1] The module-level `here`, `templates` and `html` path fiddling
-        has moved out to `utils`, along with the `jinja2` import. Every
-        directive was opening its own template at import time and
-        building a bare `jinja2.Template` off it, which is a daft thing
-        to do seven times over. `template` is now just the filename.
-    [2] Dropped the `node` class and the `visit`/`depart` pair. This
-        directive hands back a `nodes.raw` and never goes anywhere near
-        a translator, so all three were dead weight that only existed to
-        keep the registration loop happy.
 """
 
 from __future__ import annotations
 
+import os.path as p
 import typing as t
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
+import jinja2
 
-from kaamiki.extensions.utils import render
+if t.TYPE_CHECKING:
+    from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "button"
-template: t.Final[str] = "button.html.jinja"
+here: str = p.dirname(__file__)
+templates: str = "../base/templates"
+html = p.join(p.abspath(p.join(here, templates)), "button.html.jinja")
+
+with open(html) as f:
+    template = jinja2.Template(f.read())
 
 
 def scheme(argument: str) -> str:
     """Validate scheme choice."""
     return rst.directives.choice(argument, ("primary", "secondary"))
+
+
+class node(nodes.Element):
+    """Class to represent a custom node in the document tree.
+
+    This class extends the `nodes.Element` from `docutils`, serving as
+    the container for the parsed information. The node will ultimately
+    be transformed into HTML or other output formats by the relevant
+    Sphinx translators.
+    """
 
 
 class directive(rst.Directive):
@@ -99,19 +98,41 @@ class directive(rst.Directive):
         into HTML or other formats.
 
         :return: A list containing a single `node` element.
-
-        .. versionchanged:: 10.9.2026
-
-            Renders through `utils.render`, so the label is escaped on
-            its way into the template instead of being dropped into the
-            markup as-is.
-
         """
         self.assert_has_content()
         self.options["url"] = rst.directives.uri(self.arguments.pop().strip())
         self.options["faicon"] = self.options.pop("fa-icon", None)
         self.options["text"] = "\n".join(self.content).strip()
         attributes: dict[str, str] = {}
-        attributes["text"] = render(template, **self.options)
+        attributes["text"] = template.render(**self.options)
         attributes["format"] = "html"
         return [nodes.raw(**attributes)]
+
+
+def visit(self: HTMLTranslator, node: node) -> None:
+    """Handle the entry processing of the `button` node during HTML
+    generation.
+
+    This method is called when the HTML translator encounters the
+    `button` node in the document tree. It retrieves the relevant
+    attributes from the node (if any) and uses Jinja2 templating to
+    produce the final HTML output. Since the `button` node does not
+    require any actions, the method currently acts as a placeholder.
+
+    :param self: The HTML translator instance.
+    :param node: The `button` node being processed.
+    """
+
+
+def depart(self: HTMLTranslator, node: node) -> None:
+    """Handle the exit processing of the `button` node during HTML
+    generation.
+
+    This method is invoked after the node's HTML representation has been
+    fully processed and added to the output. Since the `button` node
+    does not require any closing actions, the method currently acts as a
+    placeholder.
+
+    :param self: The HTML translator instance.
+    :param node: The `button` node being processed.
+    """

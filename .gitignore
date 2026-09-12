@@ -139,6 +139,7 @@ venv/
 
 # Project's mess
 .github/**.md
-.python-version
+azure/*
 archive/*
+linting.html
 *.bak
