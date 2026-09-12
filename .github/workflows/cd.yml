@@ -39,7 +39,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install documentation dependencies
