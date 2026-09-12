@@ -4,7 +4,7 @@ Author Details Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 27 June, 2026
+Last updated on: 12 September, 2026
 -->
 {% block author %}
     <aside class="site-article"
@@ -14,14 +14,14 @@ Last updated on: 27 June, 2026
            rel="noopener noreferrer"
            id="author"
            class="site-article__profile"
-           aria-label="Check out {{ name|d(project.author) |safe }}">
+           aria-label="Check out {{ name|d(project.author) }}">
             <img class="site-article__avatar"
                  src="{{ avatar }}"
                  width="20"
                  height="20"
                  loading="lazy"
                  alt="">
-            <p class="site-article__name">{{ name|d(project.author) |safe }}</p>
+            <p class="site-article__name">{{ name|d(project.author) }}</p>
         </a>
         <div class="site-article__meta">
             <div class="site-article__meta-group">

@@ -1,4 +1,5 @@
 :root {
+    --km-shadow-none: 0 0 #0000;
     --sd-color-warning: hsl(48.47, 100%, 50%);
     --sd-color-tabs-label-active: hsl(var(--km-color-fg));
     --sd-color-tabs-underline-active: hsl(var(--km-color-accent-fg));
@@ -189,9 +190,9 @@ details.sd-dropdown.is-animating .sd-summary-content {
 }
 
 .sd-shadow-sm {
-    --tw-shadow: 0 0 #0000 !important;
-    --tw-shadow-colored: 0 0 #0000 !important;
-    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
+    --tw-shadow: var(--km-shadow-none) !important;
+    --tw-shadow-colored: var(--km-shadow-none) !important;
+    box-shadow: var(--tw-ring-offset-shadow, var(--km-shadow-none)), var(--tw-ring-shadow, var(--km-shadow-none)), var(--tw-shadow) !important;
 }
 
 .fas,
@@ -406,6 +407,7 @@ nav a svg .sd-material-icon {
     }
 }
 
+/* iPad view */
 @media (max-width: 768px) {
 
     .auto-padding .sd-row-cols-lg-2>*:nth-child(odd),

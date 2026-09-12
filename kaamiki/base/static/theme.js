@@ -13,6 +13,7 @@ const DROPDOWN_PX_FACTOR = 0.9;
 const FETCH_TIMEOUT_MS = 8000;
 const ARTICLE_BG_FADE_MS = 600;
 const ARTICLE_BG_INTERVAL_MS = 7000;
+const CAL_ORIGIN = 'https://app.cal.com';
 const TICKER_RADIX = 10;
 const TICKER_MAX_LAPS = 4;
 const TICKER_EASING = 'cubic-bezier(0.25, 1, 0.5, 1)';
@@ -635,49 +636,6 @@ function initDropdowns() {
     });
 }
 
-function initTocScrollspy() {
-    const toc = document.querySelector('.site-sidebar--secondary');
-    if (!toc) return;
-
-    const linkByTarget = new Map();
-    toc.querySelectorAll('a[href^="#"]').forEach((link) => {
-        const id = decodeURIComponent((link.getAttribute('href') || '').slice(1));
-        const target = id && document.getElementById(id);
-        if (target) linkByTarget.set(target, link);
-    });
-    if (!linkByTarget.size) return;
-
-    const targets = Array.from(linkByTarget.keys());
-    let active = null;
-    const setActive = (target) => {
-        const link = target && linkByTarget.get(target);
-        if (!link || link === active) return;
-        active?.classList.remove('toc-active');
-        link.classList.add('toc-active');
-        active = link;
-    };
-
-    const update = rafThrottle(() => {
-        const threshold = getHeaderOffsetPx() + 1;
-        let current = targets[0];
-        for (const target of targets) {
-            if (target.getBoundingClientRect().top > threshold) break;
-            current = target;
-        }
-        setActive(current);
-    });
-
-    onScroll(update);
-    window.addEventListener('resize', update, { passive: true });
-    toc.addEventListener('click', (event) => {
-        const link = event.target.closest('a[href^="#"]');
-        if (!link) return;
-        active?.classList.remove('toc-active');
-        link.classList.add('toc-active');
-        active = link;
-    });
-}
-
 function enrichYouTubeCard(card) {
     const id = card.getAttribute('data-youtube-id');
     if (!id || card.dataset.youtubeEnriched === '1') return;
@@ -914,10 +872,19 @@ function initArticleBackground() {
     };
 }(window, 'https://app.cal.com/embed/embed.js', 'init'));
 
-Cal('init', 'quick-chat', { origin: 'https://app.cal.com' });
-Cal.ns['quick-chat']('ui', { hideEventTypeDetails: false, layout: 'month_view' });
+function initCalNamespaces() {
+    const seen = new Set();
+    document.querySelectorAll('[data-cal-namespace]').forEach((el) => {
+        const ns = el.getAttribute('data-cal-namespace');
+        if (!ns || seen.has(ns)) return;
+        seen.add(ns);
+        Cal('init', ns, { origin: CAL_ORIGIN });
+        Cal.ns[ns]('ui', { hideEventTypeDetails: false, layout: 'month_view' });
+    });
+}
 
 ready(() => {
+    initCalNamespaces();
     initReadingTime();
     initHeaderSearch();
     initAnchorScrolling();
@@ -928,7 +895,6 @@ ready(() => {
     initSidebarAccordion();
     initHeaderNavDropdowns();
     initDropdowns();
-    initTocScrollspy();
     initYouTubeCards();
     initRepositoryWidgets();
     initInkReveal();

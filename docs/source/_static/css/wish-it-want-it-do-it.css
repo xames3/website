@@ -1,3 +1,11 @@
+/*
+Wish it. Want it. Do it. widget styles
+======================================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 12 August, 2026
+Last updated on: 12 September, 2026
+*/
 .site-wish-it-want-it-do-it {
     max-width: var(--km-layout-container, 861px);
     margin: 2rem auto 0;
@@ -77,6 +85,7 @@
     padding: 0.5rem 0.25rem;
 }
 
+/* iPad view */
 @media (max-width: 900px) {
     .site-wish-it-want-it-do-it__tab-layout {
         grid-template-columns: 1fr;

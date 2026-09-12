@@ -754,17 +754,9 @@ html[data-theme="dark"] .site-footer__theme-toggle-icon--dark {
     display: none;
     padding-top: 2rem;
 
-    & .site-sidebar__toc {
-        margin-top: 0;
-    }
-
-    & a:is(:hover, :focus-visible, .toc-active) {
+    & a:is(:hover, :focus-visible) {
         color: hsl(var(--km-color-fg-strong));
         text-decoration: none;
-    }
-
-    & a.toc-active {
-        font-weight: 500;
     }
 }
 
@@ -1743,84 +1735,6 @@ html[data-theme="dark"] .site-search-page__fallback {
     font-weight: 500;
 }
 
-.site-article__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-    margin-top: 6rem;
-}
-
-.site-article__meta-group {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-
-.site-article__copy {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    text-decoration: none;
-    color: hsl(var(--km-color-fg));
-    font-weight: 500;
-}
-
-.site-article__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-    margin-top: 6rem;
-}
-
-.site-article__meta-group {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-
-.site-article__copy {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    text-decoration: none;
-    color: hsl(var(--km-color-fg));
-    font-weight: 500;
-}
-
-.site-article__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-    margin-top: 6rem;
-}
-
-.site-article__meta-group {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-
-.site-article__copy {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    text-decoration: none;
-    color: hsl(var(--km-color-fg));
-    font-weight: 500;
-}
-
 @keyframes article-bg-zoom {
     from {
         transform: scale(0.9);
@@ -2565,6 +2479,7 @@ a[data-tooltip] {
     margin-inline: 0 !important;
 }
 
+/* iPad view */
 @media (width < 768px) {
     html {
         font-size: 1rem;
@@ -2795,9 +2710,6 @@ a[data-tooltip] {
     .scbs-carousel-control-next-icon {
         margin-top: 0.7rem;
     }
-}
-
-@media (width < 768px) {
 
     .site-header__search,
     .site-header__icon-list {
@@ -2809,6 +2721,7 @@ a[data-tooltip] {
     }
 }
 
+/* iPhone view */
 @media (width < 641px) {
     .site-header__utilities {
         justify-content: flex-end;

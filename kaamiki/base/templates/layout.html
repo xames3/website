@@ -4,7 +4,7 @@ Base Layout Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 10 September, 2026
+Last updated on: 12 September, 2026
 -->
 {%- set lang_attr = "en" if language == None else (language|replace('_','-')) -%}
 <!DOCTYPE html>
@@ -94,12 +94,11 @@ Last updated on: 10 September, 2026
             <title>{{ title|striptags|e if title else docstitle }}</title>
         {%- endblock htmltitle %}
         {%- block thirdparty %}
-            <link rel="preconnect"
-                  href="https://cdn.jsdelivr.net"
-                  crossorigin />
-            <script src="https://kit.fontawesome.com/8bcdaaff4d.js"
-                    crossorigin="anonymous"
-                    defer></script>
+            {%- if fontawesome_kit %}
+                <script src="{{ fontawesome_kit }}"
+                        crossorigin="anonymous"
+                        defer></script>
+            {%- endif %}
         {%- endblock thirdparty %}
         {%- for css in css_files %}
             {%- if css|attr("filename") %}
@@ -191,19 +190,15 @@ Last updated on: 10 September, 2026
                                     {%- include "previous_next_pages.html.jinja" %}
                                 {%- endif %}
                             {%- endblock main %}
-                            {%- block right_sidebar %}
-                                {%- if show_secondary_toctree|tobool %}
-                                    {%- include "right_sidebar.html.jinja" %}
-                                {%- endif %}
-                            {%- endblock right_sidebar %}
+                            {%- block right_sidebar %}{%- endblock right_sidebar %}
+                            </div>
                         </div>
+                        {%- block footer %}
+                            {%- include "footer.html.jinja" %}
+                        {%- endblock footer %}
                     </div>
-                    {%- block footer %}
-                        {%- include "footer.html.jinja" %}
-                    {%- endblock footer %}
-                </div>
-                {%- block scripts %}
-                    {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
-                    {%- endblock scripts %}
-                </body>
-            </html>
+                    {%- block scripts %}
+                        {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
+                        {%- endblock scripts %}
+                    </body>
+                </html>
