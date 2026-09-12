@@ -4,24 +4,23 @@ Previous and Next Page Buttons Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 24 April, 2026
+Last updated on: 10 September, 2026
 -->
-<nav class="site-pagination"
-     aria-label="Pagination">
-    {%- if prev %}
-        <a href="{{ prev.link|e }}"
-           class="site-pagination__link site-pagination__link--prev">
-            <i class="{{ fa_icons.previous_button }}"
-               aria-hidden="true"></i>
-            <span class="sr-only">{{ _("Previous page") }}</span>
-        </a>
-    {%- endif %}
-    {%- if next %}
-        <a href="{{ next.link|e }}"
-           class="site-pagination__link site-pagination__link--next">
-            <i class="{{ fa_icons.next_button }}"
-               aria-hidden="true"></i>
-            <span class="sr-only">{{ _("Next page") }}</span>
-        </a>
-    {%- endif %}
-</nav>
+{%- if prev or next %}
+    <nav class="site-pagination"
+         aria-label="{{ _('Pagination') }}">
+        {%- for page, modifier, icon, label in [
+            (prev, 'prev', fa_icons.previous_button, _('Previous page')),
+            (next, 'next', fa_icons.next_button, _('Next page'))
+            ] %}
+            {%- if page %}
+                <a href="{{ page.link|e }}"
+                   class="site-pagination__link site-pagination__link--{{ modifier }}">
+                    <i class="{{ icon }}"
+                       aria-hidden="true"></i>
+                    <span class="sr-only">{{ label }}</span>
+                </a>
+            {%- endif %}
+        {%- endfor %}
+    </nav>
+{%- endif %}

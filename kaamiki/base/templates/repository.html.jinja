@@ -7,15 +7,21 @@ Created on: 29 October, 2025
 Last updated on: 10 September, 2026
 -->
 {% block repository %}
-    <div class="site-github-repository" data-repository="{{ project }}">
+    <div class="site-github-repository"
+         data-repository="{{ project }}">
         <a href="https://github.com/{{ project }}"
            target="_blank"
+           rel="noopener nofollow"
            class="site-github-repository__name">{{ project }}</a>
         <div class="site-github-repository__details">
-            <p class="site-github-repository__stars"
-               data-repository-count="stargazers_count">0</p>
-            <p class="site-github-repository__forks"
-               data-repository-count="forks_count">0</p>
+            {% if stars %}
+                <p class="site-github-repository__stars"
+                   data-repository-count="stargazers_count">0</p>
+            {% endif %}
+            {% if forks %}
+                <p class="site-github-repository__forks"
+                   data-repository-count="forks_count">0</p>
+            {% endif %}
         </div>
     </div>
 {% endblock repository %}

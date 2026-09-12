@@ -4,7 +4,7 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 28 June, 2026
+Last updated on: 10 September, 2026
 
 This module defines a custom `author` directive for the Kaamiki Sphinx
 Theme. The directive allows embedding details directly within the
@@ -47,27 +47,41 @@ theme's Jinja2 template, producing a final HTML output.
 
     Directive now supports optional background(s) which fades through
     the title/author section.
+
+.. versionchanged:: 10.9.2026
+
+    Rendering goes through `utils.render`, one shared Jinja environment
+    for the whole theme with autoescaping switched on. The old per-
+    module templates had escaping off, so a name or an avatar URL
+    carrying an `&`, a `<` or a stray quote quietly emitted broken
+    markup.
+
+.. deprecated:: 10.9.2026
+
+    [1] The module-level `here`, `templates` and `html` path fiddling
+        has moved out to `utils`, along with the `jinja2` import. Every
+        directive was opening its own template at import time and
+        building a bare `jinja2.Template` off it, which is a daft thing
+        to do seven times over. `template` is now just the filename.
+    [2] Dropped the empty `depart`. It existed only because `add_node`
+        wants a pair; the theme falls back to the shared no-op in
+        `utils` when a directive doesn't define one.
 """
 
 from __future__ import annotations
 
-import os.path as p
 import typing as t
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
-import jinja2
+
+from kaamiki.extensions.utils import render
 
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "author"
-here: str = p.dirname(__file__)
-templates: str = "../base/templates"
-html = p.join(p.abspath(p.join(here, templates)), "author.html.jinja")
-
-with open(html) as f:
-    template = jinja2.Template(f.read())
+template: t.Final[str] = "author.html.jinja"
 
 
 class node(nodes.Element):
@@ -94,8 +108,8 @@ class directive(rst.Directive):
 
     .. versionchanged:: 19.10.2025
 
-        The options `author`, `email` and `github` are now optional
-        and can default to project's details specified in `conf.py`.
+        The options `author`, `email` and `github` are now optional and
+        can default to project's details specified in `conf.py`.
 
     .. deprecated:: 17.03.2026
 
@@ -135,8 +149,8 @@ class directive(rst.Directive):
 
         .. versionchanged:: 19.10.2025
 
-            Added support for default context variables picked from
-            the `html_context` object in `conf.py`.
+            Added support for default context variables picked from the
+            `html_context` object in `conf.py`.
 
         .. note::
 
@@ -164,18 +178,4 @@ def visit(self: HTMLTranslator, node: node) -> None:
     :param node: The `author` node containing parsed attributes.
 
     """
-    self.body.append(template.render(**node.attributes))
-
-
-def depart(self: HTMLTranslator, node: node) -> None:
-    """Handle the exit processing of the `author` node during HTML
-    generation.
-
-    This method is invoked after the node's HTML representation has been
-    fully processed and added to the output. Since the `author` node
-    does not require any closing actions, the method currently acts as a
-    placeholder.
-
-    :param self: The HTML translator instance.
-    :param node: The `author` node being processed.
-    """
+    self.body.append(render(template, **node.attributes))

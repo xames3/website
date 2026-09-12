@@ -4,7 +4,7 @@ Embed Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 11 August, 2026
-Last updated on: 31 August, 2026
+Last updated on: 10 September, 2026
 
 This module defines a custom `embed` directive for the Kaamiki Sphinx
 Theme. The directive allows including/embedding an HTML page (embed) or
@@ -48,6 +48,13 @@ directive, via Sphinx's `html-page-context` event::
     [3] Options may now span multiple lines, so a single `:option:`
         value (an array, a long string) can be written across several
         indented lines instead of one.
+
+.. deprecated:: 10.9.2026
+
+    Dropped the `node` class and the `visit`/`depart` pair. This
+    directive hands back a `nodes.raw` and never goes anywhere near a
+    translator, so all three were dead weight that only existed to keep
+    the registration loop happy.
 """
 
 from __future__ import annotations
@@ -63,23 +70,12 @@ import docutils.parsers.rst as rst
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
-    from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "embed"
 pattern: t.Pattern[str] = re.compile(
     r"^[ \t]*:([\w-]+):[ \t]*(.*?)(?=^[ \t]*:[\w-]+:|\Z)",
     re.MULTILINE | re.DOTALL,
 )
-
-
-class node(nodes.Element):
-    """Class to represent a custom node in the document tree.
-
-    This class extends the `nodes.Element` from `docutils`, serving as
-    the container for the parsed information. The node will ultimately
-    be transformed into HTML or other output formats by the relevant
-    Sphinx translators.
-    """
 
 
 class directive(rst.Directive):
@@ -175,35 +171,6 @@ class directive(rst.Directive):
         return [nodes.raw(**attributes)]
 
 
-def visit(self: HTMLTranslator, node: node) -> None:
-    """Handle the entry processing of the `embed` node during HTML
-    generation.
-
-    This method is called when the HTML translator encounters the
-    `embed` node in the document tree. It retrieves the relevant
-    attributes from the node (if any) and uses Jinja2 templating to
-    produce the final HTML output. Since the `embed` node does not
-    require any actions, the method currently acts as a placeholder.
-
-    :param self: The HTML translator instance.
-    :param node: The `embed` node being processed.
-    """
-
-
-def depart(self: HTMLTranslator, node: node) -> None:
-    """Handle the exit processing of the `embed` node during HTML
-    generation.
-
-    This method is invoked after the node's HTML representation has been
-    fully processed and added to the output. Since the `embed` node
-    does not require any closing actions, the method currently acts as a
-    placeholder.
-
-    :param self: The HTML translator instance.
-    :param node: The `embed` node being processed.
-    """
-
-
 def html_page_context(
     app: Sphinx,
     pagename: str,
@@ -226,8 +193,8 @@ def html_page_context(
 
     .. versionchanged:: 31.8.2026
 
-        The unused parameters are now prefixed with `_` instead of
-        being OR'd into `app`, which corrupted `app`'s type for the
+        The unused parameters are now prefixed with `_` instead of being
+        OR'd into `app`, which corrupted `app`'s type for the
         `app.env`/`app.add_css_file()` uses right below.
     """
     assets = getattr(app.env, "embed_assets", {})

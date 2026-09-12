@@ -4,8 +4,9 @@ Header Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 25 April, 2026
+Last updated on: 11 September, 2026
 -->
+{%- from "logo.html.jinja" import site_logo with context -%}
 <header class="site-header">
     {%- block header_before %}
     {% endblock header_before -%}
@@ -15,27 +16,7 @@ Last updated on: 25 April, 2026
                 {%- block website_logo %}
                     <a href="{{ pathto(master_doc) }}"
                        class="site-header__logo">
-                        {%- if logo_url %}
-                            <img height="16"
-                                 width="16"
-                                 class="site-header__logo-image site-header__logo-image--single"
-                                 src="{{ logo_url }}"
-                                 alt="Logo" />
-                        {%- endif -%}
-                        {%- if dark_logo and not logo_url %}
-                            <img width="16"
-                                 height="16"
-                                 class="site-header__logo-image site-header__logo-image--dark"
-                                 src="{{ pathto('_static/' + dark_logo, 1) }}"
-                                 alt="Logo" />
-                        {%- endif -%}
-                        {%- if light_logo and not logo_url %}
-                            <img width="16"
-                                 height="16"
-                                 class="site-header__logo-image site-header__logo-image--light"
-                                 src="{{ pathto('_static/' + light_logo, 1) }}"
-                                 alt="Logo" />
-                        {%- endif -%}
+                        {{- site_logo() -}}
                         <span class="site-header__title">{{ docstitle }}</span>
                     </a>
                 {%- endblock website_logo %}
@@ -49,68 +30,50 @@ Last updated on: 25 April, 2026
                 </div>
             </nav>
         {%- endif %}
-        {%- block mobile_menu %}
-            <button class="site-header__menu-toggle"
-                    type="button"
-                    @click="showSidebar = true"
-                    data-sidebar-toggle>
-                {%- block mobile_website_logo %}
-                    <a href="{{ pathto(master_doc) }}"
-                       class="site-header__logo">
-                        {%- if logo_url %}
-                            <img height="16"
-                                 width="16"
-                                 class="site-header__logo-image site-header__logo-image--single"
-                                 src="{{ logo_url }}"
-                                 alt="Logo" />
-                        {%- endif -%}
-                        {%- if dark_logo and not logo_url %}
-                            <img width="16"
-                                 height="16"
-                                 class="site-header__logo-image site-header__logo-image--dark"
-                                 src="{{ pathto('_static/' + dark_logo, 1) }}"
-                                 alt="Logo" />
-                        {%- endif -%}
-                        {%- if light_logo and not logo_url %}
-                            <img width="16"
-                                 height="16"
-                                 class="site-header__logo-image site-header__logo-image--light"
-                                 src="{{ pathto('_static/' + light_logo, 1) }}"
-                                 alt="Logo" />
-                        {%- endif -%}
-                    </a>
-                {%- endblock mobile_website_logo %}
-                <span class="site-header__title">{{ docstitle }}</span>
-                <span class="sr-only">Toggle navigation menu</span>
-            </button>
-        {%- endblock mobile_menu %}
         {%- block header_right %}
             <div class="site-header__utilities">
+                {%- block mobile_menu %}
+                    {%- if sidebars|length > 0 %}
+                        <button class="site-header__menu-toggle"
+                                type="button"
+                                aria-controls="left-sidebar"
+                                :aria-expanded="showSidebar ? 'true' : 'false'"
+                                @click="showSidebar = !showSidebar">
+                            <i class="fa-regular fa-arrow-right-to-line"
+                               aria-hidden="true"></i>
+                            <span class="sr-only">{{ _("Toggle navigation menu") }}</span>
+                        </button>
+                    {%- endif %}
+                {%- endblock mobile_menu %}
                 {%- block header_buttons %}
                     {%- if header_buttons|tobool %}
                         <nav class="site-header__icon-list"
-                             aria-label="External links">
+                             aria-label="{{ _('External links') }}">
                             {%- for text, url in header_buttons.items() %}
                                 {%- if url is mapping %}
                                     <a href="{{ url.link }}"
                                        title="{{ text }}"
                                        rel="noopener nofollow"
-                                       target="{{ '' if url.link == '#' else '_blank' }}"
+                                       {% if url.link != '#' %}target="_blank"{% endif %}
                                        class="site-header__icon-link"
                                        {{ url.extras if url.extras else '' }}>
-                                        {% if url.icon %}
+                                        {%- if url.icon %}
                                             {{ url.icon }}
-                                        {% else %}
+                                        {%- else %}
                                             <span>{{ text }}</span>
-                                        {% endif %}
+                                        {%- endif %}
                                     </a>
-                                {% endif %}
+                                {%- endif %}
                             {%- endfor %}
                         </nav>
                     {%- endif %}
                 {%- endblock header_buttons %}
                 {%- if hasdoc('search') and show_searchbox|tobool %}
-                    <div class="site-header__search">{%- include "searchbox.html.jinja" %}</div>
+                    <div class="site-header__search">
+                        {%- with search_variant = "header" %}
+                            {%- include "searchbox.html.jinja" %}
+                        {%- endwith %}
+                    </div>
                 {%- endif %}
             </div>
         {%- endblock header_right %}

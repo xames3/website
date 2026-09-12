@@ -138,8 +138,7 @@ details.sd-dropdown .sd-summary-chevron-right::before {
     margin-right: 0;
     margin-left: 0.5rem;
     transform: rotateZ(0deg) !important;
-    transition: transform var(--km-duration-normal) var(--km-ease-snap);
-    will-change: transform;
+    transition: transform var(--km-duration-fast) var(--km-ease-smooth);
 }
 
 details .sd-tab-content .sd-card-text {
@@ -181,16 +180,12 @@ div.sd-summary-content.sd-card-body {
     padding: 2rem 0;
 }
 
-details.sd-dropdown:not([open])>.sd-summary-content {
-    transform: translateY(-2rem);
-    transform-origin: top;
-    opacity: 0;
-}
-
 details.sd-dropdown .sd-summary-content {
     display: block;
-    transform: translateY(0);
-    transition: transform var(--km-duration-normal) var(--km-ease-snap), opacity var(--km-duration-normal) cubic-bezier(0, 0.48, 0, 1);
+}
+
+details.sd-dropdown.is-animating .sd-summary-content {
+    overflow: hidden;
 }
 
 .sd-shadow-sm {

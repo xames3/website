@@ -1,6 +1,6 @@
 [theme]
 inherit = "basic"
-stylesheets = [ "theme.css" ]
+stylesheets = [  ]
 pygments_style = { default = "default" }
 
 [options]

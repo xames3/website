@@ -4,7 +4,7 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 31 August, 2026
+Last updated on: 11 September, 2026
 
 This module defines a collection of utility functions used for
 customising this sphinx theme. These utilities focus on enhancing the
@@ -27,48 +27,206 @@ internal APIs and dynamic JavaScript bindings.
 
 .. versionchanged:: 31.8.2026
 
-    [1] `ensure_classes_on_nodes` was annotated and called for the
-        wrong Sphinx event; fixed to match `doctree-resolved`'s actual
+    [1] `ensure_classes_on_nodes` was annotated and called for the wrong
+        Sphinx event; fixed to match `doctree-resolved`'s actual
         signature and to use `findall()` instead of the removed
         `.traverse()` call.
     [2] Fixed a `datetime.timezone.utc` typo (`dt` is the `datetime`
         class, not the module) in `last_updated_date`.
-    [3] `make_toc_collapsible` and `remove_empty_toctree_divs` no
-        longer assume a tag's `class` attribute or a div's sole child
-        are always list/text types.
+    [3] `make_toc_collapsible` and `remove_empty_toctree_divs` no longer
+        assume a tag's `class` attribute or a div's sole child are
+        always list/text types.
+
+.. versionadded:: 10.9.2026
+
+    [1] `render` gives every directive one shared, autoescaping Jinja
+        environment rooted at the theme's template directory. Each
+        directive previously opened its own template at import time
+        and built a bare `jinja2.Template`, which left autoescaping
+        off entirely.
+    [2] `measure` reads an image's intrinsic size straight from the
+        file header (PNG, GIF, WEBP and JPEG), so the theme can emit
+        `width`/`height` without pulling in an imaging dependency.
+    [3] `summarise` and `social_metadata` work out the Open Graph and
+        Twitter card values from the doctree and `html_context`.
+        Between them they replace `sphinxext-opengraph`, which
+        dragged `matplotlib` in purely to draw social cards. A page's
+        own `:og:title:`, `:og:description:`, `:og:type:` and
+        `:og:image:` are read straight off the docinfo, keys and all,
+        since that is how docutils hands them over. Anything a page
+        leaves unset falls back to `html_context`, then to the page's
+        own opening paragraph.
+    [4] `plain` flattens rendered HTML down to bare text, so a page
+        title carrying an icon role doesn't leak escaped `<span>`
+        soup into a `<meta>` tag.
+    [5] `depart` is the shared no-op that any directive writing its
+        whole widget during `visit` can borrow, instead of each one
+        carrying an empty function to satisfy `add_node`.
+
+.. versionchanged:: 10.9.2026
+
+    [1] `last_updated_date` no longer wraps the source path in
+        `shlex.quote` before handing it to `git log`. The command is run
+        as an argument list rather than through a shell, so the quoting
+        only corrupted paths that contained a space.
+    [2] `findall` is generic over the element type instead of returning
+        `t.Any`, which had been switching type checking off at the one
+        place the doctree is walked. Tightening it turned up `summarise`
+        walking a parent chain the stubs believed could never end.
 """
 
 from __future__ import annotations
 
 import re
-import shlex
+import struct
 import typing as t
 from datetime import UTC
 from datetime import datetime as dt
+from html import unescape
 from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import check_output as co
 
 import bs4
+import jinja2
 from bs4.element import AttributeValueList
 from bs4.element import NavigableString
 from docutils import nodes
 from sphinx.util.display import status_iterator
 
 if t.TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from sphinx.application import Sphinx
     from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.environment import BuildEnvironment
+    from sphinx.writers.html import HTMLTranslator
 
+TEMPLATES: Path = Path(__file__).resolve().parent.parent / "base" / "templates"
 LAST_UPDATED_RE: re.Pattern[str] = re.compile(
     r"^\.\.\s+Last updated on:\s*(.+)$", re.IGNORECASE
 )
+TAG_RE: re.Pattern[str] = re.compile(r"</?[A-Za-z][^<>]*>")
+SOCIAL_SKIP: tuple[type, ...] = (
+    nodes.Admonition,
+    nodes.figure,
+    nodes.literal_block,
+    nodes.table,
+    nodes.topic,
+)
+JPEG_SIZE_MARKERS: frozenset[int] = frozenset(
+    {
+        0xC0,
+        0xC1,
+        0xC2,
+        0xC3,
+        0xC5,
+        0xC6,
+        0xC7,
+        0xC9,
+        0xCA,
+        0xCB,
+        0xCD,
+        0xCE,
+        0xCF,
+    }
+)
+
+environment: jinja2.Environment = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(TEMPLATES),
+    autoescape=True,
+    trim_blocks=True,
+    lstrip_blocks=True,
+    keep_trailing_newline=False,
+)
 
 
-def findall(
+def render(template: str, /, **context: t.Any) -> str:
+    """Render one of the theme's directive templates.
+
+    Directives previously each opened their own template file at import
+    time and built a bare `jinja2.Template`, which left autoescaping
+    off - so a caption or title containing `&`, `<` or a quote emitted
+    broken markup. They now share one autoescaping environment with a
+    loader rooted at the theme's template directory.
+
+    :param template: Template filename, relative to `base/templates`.
+    :param context: Values made available to the template.
+    :return: The rendered HTML.
+
+    .. versionadded:: 10.9.2026
+    """
+    return environment.get_template(template).render(**context)
+
+
+def depart(self: HTMLTranslator, node: nodes.Element) -> None:
+    """Close a node that has nothing to close.
+
+    `add_node` insists on a visit/depart pair, but a directive that
+    writes its whole widget in one go during `visit` has nothing left
+    to do on the way out. Every one of those used to carry its own
+    empty function purely to satisfy the signature; they share this
+    one now.
+
+    :param self: The HTML translator instance (unused).
+    :param node: The node being departed (unused).
+
+    .. versionadded:: 10.9.2026
+    """
+
+
+def measure(path: str) -> tuple[int, int] | None:
+    """Read an image's intrinsic pixel size from its header.
+
+    Only the leading bytes are read, so this stays cheap and avoids
+    pulling in an imaging dependency. Supplying `width`/`height` lets
+    the browser reserve space before the image arrives, which is what
+    stops the page reflowing as images load.
+
+    :param path: Filesystem path to the image.
+    :return: A `(width, height)` pair, or `None` when the format is not
+        recognised or the header is unreadable.
+
+    .. versionadded:: 10.9.2026
+    """
+    try:
+        with open(path, "rb") as fd:
+            head = fd.read(32)
+            if head[:8] == b"\x89PNG\r\n\x1a\n" and head[12:16] == b"IHDR":
+                w, h = struct.unpack(">II", head[16:24])
+                return int(w), int(h)
+            if head[:6] in {b"GIF87a", b"GIF89a"}:
+                w, h = struct.unpack("<HH", head[6:10])
+                return int(w), int(h)
+            if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+                fd.seek(0)
+                blob = fd.read(30)
+                if blob[12:16] == b"VP8X":
+                    w = int.from_bytes(blob[24:27], "little") + 1
+                    h = int.from_bytes(blob[27:30], "little") + 1
+                    return w, h
+                return None
+            if head[:2] == b"\xff\xd8":
+                fd.seek(2)
+                while True:
+                    marker = fd.read(2)
+                    if len(marker) < 2 or marker[0] != 0xFF:
+                        return None
+                    if marker[1] in JPEG_SIZE_MARKERS:
+                        fd.read(3)
+                        h, w = struct.unpack(">HH", fd.read(4))
+                        return int(w), int(h)
+                    size = struct.unpack(">H", fd.read(2))[0]
+                    fd.seek(size - 2, 1)
+    except (OSError, struct.error):
+        return None
+    return None
+
+
+def findall[T: nodes.Element](
     node: nodes.Node,
-    element: type[nodes.Element],
-) -> t.Any:
+    element: type[T],
+) -> Iterator[T]:
     """Recursively search through the given docutils node to find all
     instances of a specified element type.
 
@@ -81,16 +239,23 @@ def findall(
         performed.
     :param element: The type of node element to find, such as references
         or bullet lists.
-    :return: An iterable containing all matching elements found within
-        the given node.
+    :return: An iterator over every matching element found within the
+        given node.
 
     .. versionchanged:: 31.8.2026
 
         Broadened `element` from `reference | bullet_list` to
         `nodes.Element`, so callers can search for any node type.
+
+    .. versionchanged:: 10.9.2026
+
+        Generic over the element type rather than returning `t.Any`, so
+        a caller walking for `nodes.paragraph` gets paragraphs back
+        instead of switching type checking off for the whole loop.
+        `docutils` is untyped, so the cast marks that boundary.
     """
-    findall = "findall" if hasattr(node, "findall") else "traverse"
-    return getattr(node, findall)(element)
+    method = "findall" if hasattr(node, "findall") else "traverse"
+    return t.cast("Iterator[T]", getattr(node, method)(element))
 
 
 def make_toc_collapsible(tree: bs4.BeautifulSoup) -> None:
@@ -244,6 +409,109 @@ def postprocess(html: str) -> None:
         f.write(str(tree))
 
 
+def plain(text: str) -> str:
+    """Flatten a snippet of rendered HTML down to bare text.
+
+    A page title reaches the context already rendered, so a heading
+    carrying an icon role arrives as markup. Shoving that straight
+    into a `<meta>` tag leaks escaped `<span>` soup into every
+    scraper's preview, which is not a great look.
+
+    Only things that actually look like a tag are stripped, so a
+    description reading "when x < 5 and y > 0" keeps its middle
+    rather than having it swallowed whole.
+
+    :param text: Rendered HTML, or plain text.
+    :return: The text with tags removed, entities resolved and
+        whitespace collapsed onto a single line.
+
+    .. versionadded:: 10.9.2026
+    """
+    return " ".join(unescape(TAG_RE.sub("", text)).split())
+
+
+def summarise(doctree: nodes.document | None, limit: int) -> str:
+    """Build a plain-text summary from a document's first paragraph.
+
+    Walks the resolved doctree for the first body paragraph that is not
+    part of a figure, admonition, table or code block, flattens it to
+    text and truncates it on a word boundary.
+
+    :param doctree: The resolved doctree, or `None` for generated pages.
+    :param limit: Maximum length of the returned summary.
+    :return: A single-line summary, or an empty string when the page has
+        no usable prose.
+    """
+    if doctree is None:
+        return ""
+    for paragraph in findall(doctree, nodes.paragraph):
+        parent: nodes.Element | None = paragraph.parent
+        while parent is not None and not isinstance(parent, SOCIAL_SKIP):
+            parent = parent.parent
+        if parent is not None:
+            continue
+        text = " ".join(paragraph.astext().split())
+        if len(text) < 40:
+            continue
+        if len(text) <= limit:
+            return text
+        return text[:limit].rsplit(" ", 1)[0].rstrip(",;:.") + "\u2026"
+    return ""
+
+
+def social_metadata(
+    app: Sphinx,
+    _pagename: str,
+    _templatename: str,
+    context: dict[str, t.Any],
+    doctree: nodes.document | None,
+) -> None:
+    """Expose Open Graph and Twitter card values to the page context.
+
+    Replaces `sphinxext-opengraph`, which pulled in `matplotlib` purely
+    to render social cards. Everything here is derived from the doctree
+    and `html_context`, so the build stays dependency-free.
+
+    Each value prefers the page's own `:og:*` field, then the
+    theme-wide default in `html_context`, then whatever can be
+    salvaged from the page itself. The docinfo keys keep their `og:`
+    prefix, so they are looked up under that name and not the bare
+    one.
+
+    :param app: The Sphinx application instance.
+    :param context: The page's rendering context, updated in place.
+    :param doctree: The resolved doctree, or `None` for generated pages.
+
+    .. versionadded:: 10.9.2026
+    """
+    options = app.config.html_context.get("open_graph") or {}
+    if options.get("enable") is False:
+        return
+    meta: dict[str, str] = context.get("meta") or {}
+    limit = int(options.get("description_length", 200))
+    title = meta.get("og:title") or plain(
+        context.get("title") or context.get("docstitle") or ""
+    )
+    description = (
+        meta.get("og:description")
+        or options.get("description", "")
+        or summarise(doctree, limit)
+    )
+    image = meta.get("og:image") or options.get("image", "")
+    context["social"] = {
+        "title": plain(title),
+        "description": plain(description),
+        "image": image,
+        "image_alt": meta.get("og:image:alt") or options.get("image_alt", ""),
+        "site_name": options.get("site_name") or context.get("docstitle", ""),
+        "type": meta.get("og:type") or options.get("type", "website"),
+        "locale": meta.get("og:locale") or options.get("locale", ""),
+        "card": meta.get("og:card")
+        or options.get("card", "summary_large_image"),
+        "site": options.get("twitter_site", ""),
+    }
+
+
 def env_before_read_docs(
     app: Sphinx, _: BuildEnvironment, docnames: list[str]
 ) -> None:
@@ -282,8 +550,8 @@ def ensure_classes_on_nodes(
 
     .. versionchanged:: 31.8.2026
 
-        Was annotated and called for a different Sphinx event; fixed
-        to match `doctree-resolved`'s actual `(app, doctree, docname)`
+        Was annotated and called for a different Sphinx event; fixed to
+        match `doctree-resolved`'s actual `(app, doctree, docname)`
         signature and to use `findall()` instead of the removed
         `.traverse()` call.
     """
@@ -337,7 +605,7 @@ def last_updated_date(app: Sphinx, docname: str, source: list[str]) -> None:
             "--date=format:%B %d, %Y",
             "-n1",
             "--",
-            shlex.quote(str(src)),
+            str(src),
         ]
         on = co(cmd, cwd=app.confdir).decode().strip()  # noqa: S603
     except (CalledProcessError, FileNotFoundError):
@@ -384,8 +652,8 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
 
     .. versionchanged:: 31.8.2026
 
-        Reads `theme_htmls` via `getattr()` and narrows `app.builder`
-        to `StandaloneHTMLBuilder` with `t.cast()`, since neither is
+        Reads `theme_htmls` via `getattr()` and narrows `app.builder` to
+        `StandaloneHTMLBuilder` with `t.cast()`, since neither is
         declared on the general `BuildEnvironment`/`Builder` types.
     """
     if exc or app.builder.name not in {"html", "dirhtml"}:

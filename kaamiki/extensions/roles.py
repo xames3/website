@@ -4,10 +4,18 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 29 April, 2026
+Last updated on: 11 September, 2026
 
 This module provides custom roles for the Kaamiki Sphinx Theme that
 provides a way to add features to the document.
+
+.. deprecated:: 10.9.2026
+
+    `underline_svg` is now `_underline_svg`. The theme registers every
+    public function in here as a role, so the helper was being handed to
+    docutils as a `:underline_svg:` role that rendered nothing you would
+    ever want. Anything in this module that isn't a role takes a leading
+    underscore now.
 """
 
 from __future__ import annotations
@@ -18,7 +26,7 @@ from random import uniform
 import docutils.nodes as nodes
 
 
-def underline_svg(color: str) -> tuple[str, str]:
+def _underline_svg(color: str) -> tuple[str, str]:
     """Fake two SVG strokes for a double-pass hand-drawn underline."""
     segments = 7
     step = 500 / segments
@@ -280,7 +288,7 @@ def underline(
     else:
         element = text
         color = "#FF9800"
-    ltr, rtl = underline_svg(color)
+    ltr, rtl = _underline_svg(color)
     ltr = ltr.replace("#", "%23")
     rtl = rtl.replace("#", "%23")
     raw = (

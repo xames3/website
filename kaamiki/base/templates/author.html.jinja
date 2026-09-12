@@ -17,7 +17,10 @@ Last updated on: 27 June, 2026
            aria-label="Check out {{ name|d(project.author) |safe }}">
             <img class="site-article__avatar"
                  src="{{ avatar }}"
-                 alt="{{ name|d(project.author) }}'s photo">
+                 width="20"
+                 height="20"
+                 loading="lazy"
+                 alt="">
             <p class="site-article__name">{{ name|d(project.author) |safe }}</p>
         </a>
         <div class="site-article__meta">

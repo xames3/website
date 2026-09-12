@@ -4,14 +4,19 @@ Right Sidebar Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 21 December, 2025
+Last updated on: 10 September, 2026
 -->
-<aside id="right-sidebar"
-       class="site-layout__sidebar site-sidebar site-sidebar--secondary">
-    {%- block toc_before %}{%- endblock -%}
-        {% if meta and not (meta.hiderightsidebar|tobool == true) and toc.strip() %}
-            <p class="site-sidebar__title">{{ secondary_toctree_title }}</p>
-            {{ toc }}
-        {% endif %}
-        {%- block toc_after %}{%- endblock -%}
-        </aside>
+{%- if toc is defined and toc and toc.strip() and not (meta and meta.hiderightsidebar|tobool) %}
+    <aside id="right-sidebar"
+           class="site-layout__sidebar site-sidebar site-sidebar--secondary">
+        {%- block toc_before %}{%- endblock toc_before %}
+            <p class="site-sidebar__title">
+                {{ secondary_toctree_title|default(_('On this page') , true) }}
+            </p>
+            <nav class="site-sidebar__toc"
+                 aria-label="{{ secondary_toctree_title|default(_('On this page') , true) }}">
+                {{ toc }}
+            </nav>
+            {%- block toc_after %}{%- endblock toc_after %}
+            </aside>
+        {%- endif %}

@@ -8,7 +8,7 @@ dynamic = [ "dependencies", "version" ]
 authors = [
     { name = "Akshay Mestry", email = "xa@mes3.dev" }
 ]
-description = "Akshay's corner on the internet."
+description = "Sphinx theme and extension utility for Akshay's corner."
 readme = "README.rst"
 requires-python = ">=3.13"
 keywords = [ "education", "learning", "sphinx", "python", "kaamiki" ]

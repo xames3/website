@@ -4,52 +4,103 @@ Base Layout Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 15 June, 2026
+Last updated on: 10 September, 2026
 -->
 {%- set lang_attr = "en" if language == None else (language|replace('_','-')) -%}
 <!DOCTYPE html>
 <html lang="{{ lang_attr }}"
-      {% if sphinx_version_tuple>= (7, 2) %}data-content_root="{{ content_root }}"{% endif %}
-      :data-theme="darkMode"
-      x-data="{darkMode: localStorage.getItem('darkMode') ?? 'dark'}"
-      x-init="if (!localStorage.getItem('darkMode')) { localStorage.setItem('darkMode', darkMode); } const applyTheme = window.simpleApplyTheme ?? ((val, oldVal) => { const root = document.documentElement; const prev = oldVal || (val === 'dark' ? 'light' : 'dark'); if (prev !== val && root.getAttribute('data-theme') === val) { root.setAttribute('data-theme', prev); } root.classList.add('theme-transition'); void root.offsetWidth; root.setAttribute('data-theme', val); setTimeout(() => root.classList.remove('theme-transition'), 700); }); $watch('darkMode', (val, oldVal) => { applyTheme(val, oldVal); localStorage.setItem('darkMode', val); });"
+      {% if sphinx_version_tuple >= (7, 2) %}data-content_root="{{ content_root }}"{% endif %}
       class="scroll-smooth"
-      :class="{'dark': darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)}">
+      x-data="{ darkMode: localStorage.getItem('darkMode') ?? 'dark' }"
+      x-init="localStorage.setItem('darkMode', darkMode); $watch('darkMode', (value) => { localStorage.setItem('darkMode', value); window.simpleApplyTheme?.(value); })">
     <head>
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0" />
         <meta charset="utf-8" />
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1" />
         <meta name="theme-color"
               media="(prefers-color-scheme: light)"
               content="white" />
         <meta name="theme-color"
               media="(prefers-color-scheme: dark)"
               content="black" />
-        {{ metatags }}
         <script>
-            document.documentElement.classList.add('no-transitions');
-            const userPreference = localStorage.getItem('darkMode');
-            const mode = userPreference || 'dark';
-            document.documentElement.setAttribute('data-theme', mode);
-            if (mode === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-            if (!userPreference) {
-                localStorage.setItem('darkMode', mode)
-            }
+            (function() {
+                var root = document.documentElement;
+                var mode = localStorage.getItem('darkMode') || 'dark';
+                root.classList.add('no-transitions');
+                root.setAttribute('data-theme', mode);
+                root.classList.toggle('dark', mode === 'dark');
+                localStorage.setItem('darkMode', mode);
+
+                function reveal() {
+                    requestAnimationFrame(function() {
+                        root.classList.remove('no-transitions');
+                        root.classList.add('page-loaded');
+                    });
+                }
+                if (document.readyState === 'complete') reveal();
+                else window.addEventListener('load', reveal, {
+                    once: true
+                });
+                window.addEventListener('pageshow', function(e) {
+                    if (e.persisted) root.classList.add('page-loaded');
+                });
+            })();
         </script>
+        {{ metatags }}
+        {%- block social %}
+            {%- if social %}
+                {%- if social.description %}
+                    <meta name="description"
+                          content="{{ social.description|e }}" />
+                {% endif %}
+                <meta property="og:title"
+                      content="{{ social.title|e }}" />
+                <meta property="og:type"
+                      content="{{ social.type|e }}" />
+                {%- if social.site_name %}
+                    <meta property="og:site_name"
+                          content="{{ social.site_name|e }}" />
+                {% endif %}
+                {%- if pageurl %}
+                    <meta property="og:url"
+                          content="{{ pageurl|e }}" />
+                {% endif %}
+                {%- if social.description %}
+                    <meta property="og:description"
+                          content="{{ social.description|e }}" />
+                {% endif %}
+                {%- if social.locale %}
+                    <meta property="og:locale"
+                          content="{{ social.locale|e }}" />
+                {% endif %}
+                {%- if social.image %}
+                    <meta property="og:image"
+                          content="{{ social.image|e }}" />
+                    {%- if social.image_alt %}
+                        <meta property="og:image:alt"
+                              content="{{ social.image_alt|e }}" />
+                    {% endif %}
+                {%- endif %}
+                <meta name="twitter:card"
+                      content="{{ social.card|e if social.image else 'summary' }}" />
+                {%- if social.site %}
+                    <meta name="twitter:site"
+                          content="{{ social.site|e }}" />
+                {% endif %}
+            {%- endif %}
+        {%- endblock social %}
         {%- block htmltitle %}
             <title>{{ title|striptags|e if title else docstitle }}</title>
-            <meta property="og:title"
-                  content="{{ title|striptags|e if title else docstitle }}" />
-            <script src="https://kit.fontawesome.com/8bcdaaff4d.js"
-                    crossorigin="anonymous"></script>
-            <script data-goatcounter="https://xa.goatcounter.com/count"
-                    async
-                    src="//gc.zgo.at/count.js"></script>
         {%- endblock htmltitle %}
+        {%- block thirdparty %}
+            <link rel="preconnect"
+                  href="https://cdn.jsdelivr.net"
+                  crossorigin />
+            <script src="https://kit.fontawesome.com/8bcdaaff4d.js"
+                    crossorigin="anonymous"
+                    defer></script>
+        {%- endblock thirdparty %}
         {%- for css in css_files %}
             {%- if css|attr("filename") %}
                 {{ css_tag(css) }}
@@ -59,29 +110,29 @@ Last updated on: 15 June, 2026
             {%- endif %}
         {%- endfor %}
         {%- set _favicon_ico_url = favicon_url | default(pathto('_static/' + (favicon or ""), 1)) %}
-        {%- set _favicon_manifest_url = pathto('_static/' + favicons.manifest, 1) %}
-        {%- set _favicon_96_url = pathto('_static/' + favicons.size_96, 1) %}
-        {%- set _favicon_180_url = pathto('_static/' + favicons.size_180, 1) %}
-        {%- set _favicon_svg_url = pathto('_static/' + favicons.size_svg, 1) %}
         {%- if favicon_url or favicon %}
             <link rel="icon"
                   type="image/png"
-                  href="{{ _favicon_96_url }}"
+                  href="{{ pathto('_static/' + favicons.size_96, 1) }}"
                   sizes="96x96" />
             <link rel="icon"
                   type="image/svg+xml"
-                  href="{{ _favicon_svg_url }}" />
+                  href="{{ pathto('_static/' + favicons.size_svg, 1) }}" />
             <link rel="shortcut icon"
                   href="{{ _favicon_ico_url }}" />
             <link rel="apple-touch-icon"
                   sizes="180x180"
-                  href="{{ _favicon_180_url }}" />
+                  href="{{ pathto('_static/' + favicons.size_180, 1) }}" />
             <meta name="apple-mobile-web-app-title"
                   content="{{ title|striptags|e if title else docstitle }}" />
             <link rel="manifest"
-                  href="{{ _favicon_manifest_url }}" />
+                  href="{{ pathto('_static/' + favicons.manifest, 1) }}" />
         {%- endif %}
         {%- block linktags %}
+            {%- if pageurl %}
+                <link rel="canonical"
+                      href="{{ pageurl|e }}" />
+            {%- endif %}
             {%- if hasdoc('search') %}
                 <link rel="search"
                       title="{{ _('Search') }}"
@@ -105,15 +156,20 @@ Last updated on: 15 June, 2026
         {%- endblock linktags %}
         {%- block extrahead %}{%- endblock extrahead %}
         </head>
-        <body x-data="{ showSidebar: false, showScrollTop: false, lastScroll: 0 }"
-              class="site-body"
-              :class="{ 'site-body--locked': showSidebar, 'site-body--sidebar-open': showSidebar }"
-              @scroll.window="const y=pageYOffset; const docH=document.documentElement.scrollHeight; const nearBottom=(y+innerHeight)>= (docH-200); const down=y>lastScroll; showScrollTop = down && (y>200 || nearBottom); lastScroll = y < 0 ? 0 : y;">
+        <body class="site-body" x-data="{ showSidebar: false
+            {% if show_scrolltop|tobool %}
+                , showScrollTop: false, lastScroll: 0
+            {% endif %}
+            }" :class="{ 'site-body--locked': showSidebar }" @keydown.escape.window="showSidebar = false" @resize.window="if (window.innerWidth >= 1024) showSidebar = false"
+            {% if show_scrolltop|tobool %}
+                @scroll.window.passive="const y = window.scrollY; const nearBottom = (y + innerHeight) >= (document.documentElement.scrollHeight - 200); showScrollTop = y > lastScroll && (y > 200 || nearBottom); lastScroll = Math.max(0, y);"
+            {% endif %}
+            >
             {%- if sidebars|length > 0 %}
                 <div x-cloak
                      x-show="showSidebar"
                      class="site-sidebar__backdrop"
-                     @click.self="showSidebar = false"></div>
+                     @click="showSidebar = false"></div>
             {%- endif %}
             <div id="page"
                  class="site-shell">
@@ -129,27 +185,25 @@ Last updated on: 15 June, 2026
                         {%- endblock left_sidebar %}
                         {%- block main %}
                             <main class="site-layout__content">
-                                {%- block body %}{%- endblock %}
+                                {%- block body %}{%- endblock body %}
                                 </main>
                                 {%- if show_previous_next_pages|tobool %}
                                     {%- include "previous_next_pages.html.jinja" %}
-                                {%- endif %}{%- endblock main %}
-                                {%- block right_sidebar %}{%- endblock right_sidebar %}
-                                </div>
-                            </div>
-                            {%- block footer %}
-                                {%- include "footer.html.jinja" %}
-                            {%- endblock footer %}
+                                {%- endif %}
+                            {%- endblock main %}
+                            {%- block right_sidebar %}
+                                {%- if show_secondary_toctree|tobool %}
+                                    {%- include "right_sidebar.html.jinja" %}
+                                {%- endif %}
+                            {%- endblock right_sidebar %}
                         </div>
-                        {% block scripts %}
-                            {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
-                                <script>
-                                    window.addEventListener('load', function() {
-                                        requestAnimationFrame(function() {
-                                            document.documentElement.classList.remove('no-transitions');
-                                        });
-                                    });
-                                </script>
-                            {% endblock scripts %}
-                        </body>
-                    </html>
+                    </div>
+                    {%- block footer %}
+                        {%- include "footer.html.jinja" %}
+                    {%- endblock footer %}
+                </div>
+                {%- block scripts %}
+                    {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
+                    {%- endblock scripts %}
+                </body>
+            </html>
