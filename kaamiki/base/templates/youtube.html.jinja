@@ -10,9 +10,10 @@ Last updated on: 21 December, 2025
     <figure class="site-media site-media--youtube">
         <div class="site-media__frame site-media__frame--ratio">
             <iframe class="site-media__iframe"
-                    src="{{ url }}&controls=1&modestbranding=1&color=white"
-                    title="YouTube"
-                    frameborder="0"
+                    src="{{ url }}&amp;color=white"
+                    title="{{ caption|default('YouTube video', true) |striptags|e }}"
+                    loading="lazy"
+                    referrerpolicy="strict-origin-when-cross-origin"
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowfullscreen></iframe>
         </div>

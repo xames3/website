@@ -1,0 +1,32 @@
+<!--
+Logo Macro
+==========
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 10 September, 2026
+Last updated on: 10 September, 2026
+-->
+{%- macro site_logo() -%}
+    {%- if logo_url -%}
+        <img class="site-logo site-logo--single"
+             src="{{ logo_url }}"
+             alt=""
+             width="16"
+             height="16" />
+    {%- else -%}
+        {%- if theme_dark_logo %}
+            <img class="site-logo site-logo--dark"
+                 src="{{ pathto('_static/' + theme_dark_logo, 1) }}"
+                 alt=""
+                 width="16"
+                 height="16" />
+        {%- endif -%}
+        {%- if theme_light_logo %}
+            <img class="site-logo site-logo--light"
+                 src="{{ pathto('_static/' + theme_light_logo, 1) }}"
+                 alt=""
+                 width="16"
+                 height="16" />
+        {%- endif -%}
+    {%- endif -%}
+{%- endmacro -%}

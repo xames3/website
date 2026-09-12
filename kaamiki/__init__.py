@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 31 August, 2026
+Last updated on: 12 September, 2026
 
 This module serves as the primary entry point for the Kaamiki Sphinx
 Theme. It is responsible for initialising the theme, configuring its
@@ -24,15 +24,15 @@ hooks for post-processing and dynamic content handling.
 
 .. versionadded:: 2.3.2025
 
-    [1] Override styles for `sphinx_design` extension by using a
-        custom CSS.
+    [1] Override styles for `sphinx_design` extension by using a custom
+        CSS.
     [2] Override styles for `sphinx_docsearch` extension by using a
         custom CSS (deprecated, removed in February 2026).
 
 .. versionchanged:: 27.8.2025
 
-    [1] Added support for `tagged` directive to overlay clickable
-        face tags on images.
+    [1] Added support for `tagged` directive to overlay clickable face
+        tags on images.
     [2] Added native support for injecting `last_updated` date just
         above the footer.
 
@@ -51,6 +51,7 @@ hooks for post-processing and dynamic content handling.
         instead of `base`, like before. This allows to make the
         development simple and easy to follow by keeping the templates
         (html/jinja2 templates) separate then the styling components.
+
 .. versionchanged:: 14.2.2026
 
     [1] This theme now has a name, `Kaamiki`.
@@ -64,6 +65,79 @@ hooks for post-processing and dynamic content handling.
         option.
     [2] `mypy` now runs fully strict across the theme, with the
         underlying type errors it surfaced fixed rather than silenced.
+
+.. versionadded:: 10.9.2026
+
+    [1] Open Graph and Twitter metadata is worked out from the doctree
+        by `social_metadata` and emitted by the layout template. A
+        page's own `:og:title:`, `:og:description:`, `:og:type:` and
+        `:og:image:` fields win. Without a description of its own a page
+        falls back to its lead, then to the default in `html_context`,
+        then to its opening paragraph.
+    [2] The `picture` directive emits the image's real `width` and
+        `height`, read off the file header, so the page stops shuffling
+        about as images land.
+    [3] A `fontawesome_kit` key. The kit URL was hardcoded in the
+        layout, so every site using this theme loaded my kit off my
+        quota. Leave it unset and no kit script is emitted.
+
+.. versionchanged:: 10.9.2026
+
+    [1] Stylesheets are registered here in an explicit cascade order
+        instead of being `@import`-ed from `theme.css`, so the browser
+        fetches them in parallel rather than walking a waterfall.
+        `theme.toml` no longer declares one of its own.
+    [2] Every directive renders through `utils.render`, one shared Jinja
+        environment with autoescaping on. Each one used to open its own
+        template at import time and build a bare `jinja2.Template` with
+        escaping off, so any caption, title or label carrying an `&`, a
+        `<` or a stray quote quietly emitted broken markup.
+    [3] Roles are registered by skipping anything whose name starts with
+        an underscore, rather than handing docutils every function in
+        the module.
+    [4] Renamed `geist.css` to `font.css`. It has always carried both
+        Geist Sans and Geist Mono, so naming it after one typeface was
+        never quite right.
+    [5] The logo markup lives in a `logo.html.jinja` macro shared by the
+        header and the left sidebar instead of being written out twice.
+        It still honours `html_logo` first and falls back to the
+        `dark_logo`/`light_logo` theme options, both of which stay unset
+        on my own site.
+    [6] The stylesheets carry no explanatory comments any more, only the
+        device-view markers. The widget styles reference the `--km-
+        color-*` tokens directly rather than repeating a raw fallback
+        triplet at every use.
+    [7] The cal.com embed initialises whatever namespaces it finds on
+        the page instead of one hardcoded name, so a site with no
+        booking buttons never pulls the embed script and nobody else's
+        theme pings my calendar.
+    [8] The `preconnect` to jsdelivr is gone. MathJax was the only thing
+        using it and it only loads on pages carrying maths.
+
+.. deprecated:: 10.9.2026
+
+    [1] Dropped `sphinxext-opengraph`, which dragged `matplotlib` in
+        purely to draw social cards.
+    [2] Only the directives that emit a real node get a translator pair
+        now. The rest hand back a `nodes.raw` and never reach
+        `visit`/`depart`, so their placeholders were deleted rather than
+        registered and never called.
+    [3] The dark blocks in `code.css` were re-stating fifteen tokens
+        with values identical to their light counterparts. They are
+        gone; only the five that genuinely differ remain.
+    [4] Three rules in `theme.css` were sitting there four times over,
+        byte for byte. Kept one of each.
+    [5] `env-before-read-docs` is no longer connected, since the post-
+        processing no longer works off the re-read list.
+    [6] The "On this page" secondary toctree is gone entirely, along
+        with `right_sidebar.html.jinja`, the scrollspy that lit up its
+        links, the `.toc-active` styling and the
+        `secondary_toctree_title` option. It reserved a grid column and
+        painted nothing, on every width, and nothing had ever rendered
+        it in the first place. `layout.html` keeps an empty
+        `right_sidebar` block so `genindex` can still hang its "Jump to
+        letter" rail there, which is what the remaining `.site-sidebar--
+        secondary` styling is for.
 """
 
 from __future__ import annotations
@@ -83,9 +157,10 @@ from sphinx.util.matching import DOTFILES
 from kaamiki.extensions import directives
 from kaamiki.extensions import roles
 from kaamiki.extensions.utils import build_finished
+from kaamiki.extensions.utils import depart
 from kaamiki.extensions.utils import ensure_classes_on_nodes
-from kaamiki.extensions.utils import env_before_read_docs
 from kaamiki.extensions.utils import last_updated_date
+from kaamiki.extensions.utils import social_metadata
 
 if t.TYPE_CHECKING:
     import types
@@ -95,13 +170,24 @@ if t.TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-version: str = "31.08.2026"
+version: str = "10.09.2026"
 theme_name: t.Final[str] = "kaamiki"
 theme_path = p.join(p.abspath(p.dirname(__file__)), "base", "templates")
 supported_extensions: t.Sequence[str] = (
     "sphinx_carousel.carousel",
     "sphinx_design",
-    "sphinxext.opengraph",
+)
+
+# Explicit cascade order. Sphinx gives `pygments.css` and any theme.toml
+# stylesheet priority 200, so registering these here - rather than
+# `@import`-ing them from theme.css - keeps the layering deliberate and
+# lets the browser fetch them in parallel instead of in a waterfall.
+stylesheets: t.Sequence[tuple[str, int]] = (
+    ("font.css", 400),
+    ("base.css", 500),
+    ("code.css", 600),
+    ("theme.css", 700),
+    ("sphinx-design.css", 900),
 )
 
 unmodified = StandaloneHTMLBuilder.copy_theme_static_files
@@ -166,14 +252,15 @@ def setup(app: Sphinx) -> dict[str, str | bool]:
     theme with the Sphinx application. It performs the following tasks::
 
         [1] Registers the theme's supported extensions.
-        [2] Maps standard Sphinx configuration options to the theme's
-            internal structure.
-        [3] Adds JavaScript and CSS assets to the HTML build.
-        [4] Registers custom roles and directives to extend Sphinx's
-            default capabilities.
-        [5] Binds event hooks for pre-build and post-build processes,
-            enabling dynamic content transformations such as collapsible
-            toctrees.
+        [2] Registers the stylesheets in an explicit cascade order,
+            plus the theme's scripts.
+        [3] Registers every public function in `roles` as a role,
+            skipping the underscore-prefixed helpers.
+        [4] Registers each directive, giving a translator pair only to
+            the ones that emit a real node and letting a directive
+            hook in extra nodes of its own through `register`.
+        [5] Binds the event hooks for social metadata, last-updated
+            stamps and the post-build HTML pass.
 
     :param app: The Sphinx application instance.
     :return: A dictionary indicating the theme's version and its
@@ -188,21 +275,45 @@ def setup(app: Sphinx) -> dict[str, str | bool]:
 
         Overridding CSS files now have slightly higher priority than
         before. It was 900 earlier, now it's 800.
+
+    .. versionchanged:: 10.9.2026
+
+        [1] Stylesheets come from the `stylesheets` table rather than a
+            lone `add_css_file` call, so their order is stated once and
+            `theme.toml` declares none of its own.
+        [2] Roles are filtered by name instead of being registered
+            wholesale, which had been exporting a drawing helper as a
+            role.
+        [3] A directive only gets `add_node` when it defines one, and a
+            directive with nothing to write on the way out borrows the
+            shared no-op `depart` from `utils` rather than carrying an
+            empty one of its own.
+        [4] A directive may expose a `register` hook to add nodes the
+            loop knows nothing about.
+        [5] Connects `social_metadata`, which replaces the dropped
+            `sphinxext-opengraph`.
     """
     for extension in supported_extensions:
         app.setup_extension(extension)
     app.add_html_theme(theme_name, theme_path)
-    app.add_css_file("sphinx-design.css", priority=800)
+    for stylesheet, priority in stylesheets:
+        app.add_css_file(stylesheet, priority=priority)
     app.add_js_file("base.js", loading_method="defer")
     app.add_js_file("theme.js", loading_method="defer")
-    for role in inspect.getmembers(roles, inspect.isfunction):
-        rst.roles.register_local_role(*role)
+    for key, value in inspect.getmembers(roles, inspect.isfunction):
+        if not key.startswith("_"):
+            rst.roles.register_local_role(key, value)
     for directive in directives:
-        app.add_node(fix(directive), html=(directive.visit, directive.depart))
+        if hasattr(directive, "node"):
+            node = fix(directive)
+            leave = getattr(directive, "depart", depart)
+            app.add_node(node, html=(directive.visit, leave))
         app.add_directive(directive.name, directive.directive)
+        if hasattr(directive, "register"):
+            directive.register(app)
         if hasattr(directive, "html_page_context"):
             app.connect("html-page-context", directive.html_page_context)
-    app.connect("env-before-read-docs", env_before_read_docs)
+    app.connect("html-page-context", social_metadata)
     app.connect("source-read", last_updated_date)
     app.connect("doctree-resolved", ensure_classes_on_nodes)
     app.connect("build-finished", build_finished)

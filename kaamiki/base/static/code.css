@@ -8,16 +8,16 @@
     --syntax-keyword: 9 100% 73%;
     --syntax-deleted-fg: 10 100% 80%;
     --syntax-deleted-bg: 0 100% 15%;
-    --syntax-generic-error: 10 100% 80%;
+    --syntax-generic-error: var(--syntax-deleted-fg);
     --syntax-inserted-fg: 131 65% 58%;
     --syntax-inserted-bg: 140 74% 19%;
-    --syntax-prompt: 9 100% 73%;
-    --syntax-traceback: 9 100% 73%;
+    --syntax-prompt: var(--syntax-keyword);
+    --syntax-traceback: var(--syntax-keyword);
     --syntax-class: 27 84% 55%;
     --syntax-entity: 30 100% 67%;
     --syntax-tag: 131 74% 71%;
     --syntax-whitespace: 213 12% 46%;
-    --syntax-output: 212 10% 58%;
+    --syntax-output: var(--syntax-comment);
     --syntax-highlight-accent: 210 100% 64%;
     --lineno-padding: 5px;
     --km-code-bar-offset: 1rem;
@@ -31,22 +31,7 @@ html[data-theme="dark"] {
     --import-foreground: 3.83 100% 72.35%;
     --comment-foreground: 207.33 100% 82.35%;
     --function-foreground: 268.97 100% 82.94%;
-    --syntax-comment: 212 10% 58%;
     --syntax-error: 357 92% 63%;
-    --syntax-keyword: 9 100% 73%;
-    --syntax-deleted-fg: 10 100% 80%;
-    --syntax-deleted-bg: 0 100% 15%;
-    --syntax-generic-error: 10 100% 80%;
-    --syntax-inserted-fg: 131 65% 58%;
-    --syntax-inserted-bg: 140 74% 19%;
-    --syntax-prompt: 9 100% 73%;
-    --syntax-traceback: 9 100% 73%;
-    --syntax-class: 27 84% 55%;
-    --syntax-entity: 30 100% 67%;
-    --syntax-tag: 131 74% 71%;
-    --syntax-whitespace: 213 12% 46%;
-    --syntax-output: 212 10% 58%;
-    --syntax-highlight-accent: 210 100% 64%;
 }
 
 pre {

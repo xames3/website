@@ -7,9 +7,7 @@ Created on: 21 February, 2025
 Last updated on: 09 February, 2026
 -->
 <nav aria-label="{{ _('breadcrumbs') }}"
-     class="site-breadcrumbs"
-     style="{%- if pagename == master_doc %}gap: 0;
-            {%- endif %}">
+     class="site-breadcrumbs{% if pagename == master_doc %} site-breadcrumbs--root{% endif %}">
     <a class="site-breadcrumbs__link site-breadcrumbs__link--home"
        href="{{ pathto(master_doc) }}">
         <i class="{{ fa_icons.breadcrumb_home }}"

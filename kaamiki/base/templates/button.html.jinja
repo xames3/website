@@ -13,9 +13,7 @@ Last updated on: 29 April, 2026
            rel="nofollow noopener"
            target="_blank">
             <span>
-                <span class="fas {{ faicon }}"
-                      style="{% if not faicon %}display: none;
-                             {% endif %}"></span>
-            {{ text }}</span></a>
-        </p>
-    {% endblock button %}
+                {%- if faicon %}<span class="fas {{ faicon }}"></span>{% endif %}
+        {{- text }}</span></a>
+    </p>
+{% endblock button %}

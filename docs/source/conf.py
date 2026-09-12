@@ -4,7 +4,7 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 30 August, 2026
+Last updated on: 12 September, 2026
 
 This file contains the configuration settings for building my static
 website using Sphinx, a popular Python documentation tool. Sphinx is a
@@ -65,6 +65,35 @@ be using it as teaching and learning platform.
         options instead of custom `website_options`.
     [2] The theme now heavily relies on using `html_context` for passing
         elements through it making them accessible for all pages.
+
+.. versionadded:: 10.9.2026
+
+    [1] Open Graph and Twitter card values are configured through the
+        `open_graph` key in `html_context` and emitted by the theme's
+        `social_metadata` hook. Per-page overrides still come from the
+        `:og:*` field list at the top of each document, and a page with
+        no `:og:description:` falls back to its lead before anything set
+        here.
+    [2] `fontawesome_kit` carries the kit URL, which used to be
+        hardcoded in the theme's layout.
+
+.. versionchanged:: 10.9.2026
+
+    [1] The availability button wears a calendar icon rather than a
+        video one, since it opens a scheduling page and not a call.
+    [2] The cal.com button attributes had no space between `data-cal-
+        link` and `data-cal-namespace`. It only ever looked right
+        because BeautifulSoup re-normalised the markup on the way out.
+
+
+.. deprecated:: 10.9.2026
+
+    [1] Dropped the `sphinxext-opengraph` extension and its `ogp_*`
+        settings. It pulled `matplotlib` in purely to render social
+        cards, which is a heavy dependency for something the theme can
+        derive from the doctree itself.
+    [2] `secondary_toctree_title` is gone with the "On this page" rail
+        it labelled.
 """
 
 from __future__ import annotations
@@ -117,6 +146,7 @@ html_context: dict[str, t.Any] = {
         "next_button": "fa-solid fa-arrow-right",
         "previous_button": "fa-solid fa-arrow-left",
     },
+    "fontawesome_kit": "https://kit.fontawesome.com/8bcdaaff4d.js",
     "favicons": {
         "manifest": "favicons/site.webmanifest",
         "size_96": "favicons/favicon-96x96.png",
@@ -126,13 +156,21 @@ html_context: dict[str, t.Any] = {
     "header_buttons": {
         "Check my availability": {
             "link": "#",
-            "icon": Markup('<i class="far fa-video"></i>'),
+            "icon": Markup('<i class="far fa-calendar"></i>'),
             "extras": Markup(
-                'data-cal-link="xames3/quick-chat"'
+                'data-cal-link="xames3/quick-chat" '
                 'data-cal-namespace="quick-chat" '
                 'data-cal-config=\'{"layout":"month_view"}\''
             ),
         },
+    },
+    "open_graph": {
+        "image": "https://avatars.githubusercontent.com/u/90549089?v=4",
+        "image_alt": author,
+        "site_name": author,
+        "type": "website",
+        "locale": "en_GB",
+        "card": "summary",
     },
     "open_links_in_new_tab": True,
     "project": {
@@ -140,7 +178,6 @@ html_context: dict[str, t.Any] = {
         "source": source,
         "email": email,
     },
-    "secondary_toctree_title": "On this page",
     "show_breadcrumbs": True,
     "show_colour_modes": False,
     "show_feedback": True,
@@ -153,9 +190,9 @@ html_context: dict[str, t.Any] = {
     "sidebar_buttons": {
         "Check my availability": {
             "link": "#",
-            "icon": Markup('<i class="far fa-video"></i>'),
+            "icon": Markup('<i class="far fa-calendar"></i>'),
             "extras": Markup(
-                'data-cal-link="xames3/quick-chat"'
+                'data-cal-link="xames3/quick-chat" '
                 'data-cal-namespace="quick-chat" '
                 'data-cal-config=\'{"layout":"month_view"}\''
             ),
@@ -183,15 +220,6 @@ intersphinx_mapping: dict[str, tuple[str, None]] = {
 extlinks: dict[str, tuple[str, str | None]] = {
     "c-ref": ("https://en.cppreference.com/w/c/language/%s", "%s"),
 }
-
-ogp_site_name: str = project
-ogp_site_url: t.Final[str] = html_baseurl
-ogp_social_cards: dict[str, str | bool] = {
-    "site_url": html_baseurl,
-    "enable": True,
-}
-ogp_type: t.Final[str] = "website"
-ogp_enable_meta_description: bool = True
 
 copybutton_exclude: str = ".linenos, .gp, .go"
 copybutton_line_continuation_character: str = "\\"

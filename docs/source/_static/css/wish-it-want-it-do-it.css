@@ -4,9 +4,8 @@ Wish it. Want it. Do it. widget styles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 August, 2026
-Last updated on: 03 September, 2026
+Last updated on: 12 September, 2026
 */
-
 .site-wish-it-want-it-do-it {
     max-width: var(--km-layout-container, 861px);
     margin: 2rem auto 0;
@@ -86,6 +85,7 @@ Last updated on: 03 September, 2026
     padding: 0.5rem 0.25rem;
 }
 
+/* iPad view */
 @media (max-width: 900px) {
     .site-wish-it-want-it-do-it__tab-layout {
         grid-template-columns: 1fr;
@@ -122,7 +122,7 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__input[type=number]::-webkit
     background-color: hsl(var(--km-color-input, var(--km-color-bg)));
     border: 1px solid hsl(var(--km-color-border));
     border-radius: var(--km-radius-normal, 0.75rem);
-    padding: 0.6rem 0.75rem;
+    padding: 0.5rem 1rem !important;
     color: hsl(var(--km-color-fg));
     font-family: inherit;
     font-size: 0.95rem;
@@ -130,7 +130,7 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__input[type=number]::-webkit
 
 .site-wish-it-want-it-do-it__input:focus-visible,
 .site-wish-it-want-it-do-it__textarea:focus-visible {
-    outline: 2px solid hsl(var(--km-color-accent-bg));
+    outline: none;
 }
 
 .site-wish-it-want-it-do-it__textarea {
@@ -382,6 +382,7 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__input[type=number]::-webkit
 
 .site-wish-it-want-it-do-it .admonition.site-wish-it-want-it-do-it__notice {
     max-width: 100%;
+    margin: 1rem auto !important;
 }
 
 .site-wish-it-want-it-do-it .admonition.site-wish-it-want-it-do-it__notice::before,
@@ -407,7 +408,7 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__input[type=number]::-webkit
 }
 
 .site-wish-it-want-it-do-it__submission-status {
-    color: hsl(var(--km-color-green, 140 55% 45%));
+    color: hsl(var(--km-color-green));
     font-size: 0.85rem;
     margin-top: 0 !important;
 }
@@ -482,11 +483,11 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__input[type=number]::-webkit
 }
 
 .site-wish-it-want-it-do-it__avatar--host {
-    box-shadow: 0 0 0 2px hsl(var(--km-color-yellow, 45 93% 47%));
+    box-shadow: 0 0 0 2px hsl(var(--km-color-yellow));
 }
 
 .site-wish-it-want-it-do-it__avatar--host.site-wish-it-want-it-do-it__avatar--you {
-    box-shadow: 0 0 0 2px hsl(var(--km-color-primary)), 0 0 0 4px hsl(var(--km-color-yellow, 45 93% 47%));
+    box-shadow: 0 0 0 2px hsl(var(--km-color-primary)), 0 0 0 4px hsl(var(--km-color-yellow));
 }
 
 .site-wish-it-want-it-do-it__host-panel {
@@ -501,7 +502,6 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__input[type=number]::-webkit
     align-items: center;
     gap: 0.5rem;
 }
-
 
 .site-wish-it-want-it-do-it__swipe-deck {
     position: relative;
@@ -629,13 +629,13 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__swipe-card--stack-2 {
 
 .site-wish-it-want-it-do-it__swipe-hint--ai {
     left: 1.5rem;
-    color: hsl(var(--km-color-red, 0 70% 55%));
+    color: hsl(var(--km-color-red));
     transform: rotate(-12deg);
 }
 
 .site-wish-it-want-it-do-it__swipe-hint--human {
     right: 1.5rem;
-    color: hsl(var(--km-color-green, 140 55% 45%));
+    color: hsl(var(--km-color-green));
     transform: rotate(12deg);
 }
 
@@ -668,23 +668,23 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__swipe-card--stack-2 {
 }
 
 .site-wish-it-want-it-do-it__vote-buttons .site-wish-it-want-it-do-it__button--ai {
-    border-color: hsl(var(--km-color-red, 0 70% 55%) / 0.35);
+    border-color: hsl(var(--km-color-red) / 0.35);
 }
 
 .site-wish-it-want-it-do-it__vote-buttons .site-wish-it-want-it-do-it__button--ai:hover {
-    background-color: hsl(var(--km-color-red, 0 70% 55%) / 0.12);
-    color: hsl(var(--km-color-red, 0 70% 55%));
-    border-color: hsl(var(--km-color-red, 0 70% 55%) / 0.6);
+    background-color: hsl(var(--km-color-red) / 0.12);
+    color: hsl(var(--km-color-red));
+    border-color: hsl(var(--km-color-red) / 0.6);
 }
 
 .site-wish-it-want-it-do-it__vote-buttons .site-wish-it-want-it-do-it__button--human {
-    border-color: hsl(var(--km-color-green, 140 55% 45%) / 0.35);
+    border-color: hsl(var(--km-color-green) / 0.35);
 }
 
 .site-wish-it-want-it-do-it__vote-buttons .site-wish-it-want-it-do-it__button--human:hover {
-    background-color: hsl(var(--km-color-green, 140 55% 45%) / 0.12);
-    color: hsl(var(--km-color-green, 140 55% 45%));
-    border-color: hsl(var(--km-color-green, 140 55% 45%) / 0.6);
+    background-color: hsl(var(--km-color-green) / 0.12);
+    color: hsl(var(--km-color-green));
+    border-color: hsl(var(--km-color-green) / 0.6);
 }
 
 .site-wish-it-want-it-do-it__lobby-status {
@@ -721,11 +721,11 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__swipe-card--stack-2 {
 }
 
 .site-wish-it-want-it-do-it__results-tally-bar-fill--ai {
-    background-color: hsl(var(--km-color-red, 0 70% 55%));
+    background-color: hsl(var(--km-color-red));
 }
 
 .site-wish-it-want-it-do-it__results-tally-bar-fill--human {
-    background-color: hsl(var(--km-color-green, 140 55% 45%));
+    background-color: hsl(var(--km-color-green));
 }
 
 .site-wish-it-want-it-do-it__results-tally-pills {
@@ -750,11 +750,11 @@ html[data-theme="dark"] .site-wish-it-want-it-do-it__swipe-card--stack-2 {
 }
 
 .site-wish-it-want-it-do-it__results-tally-pill--ai {
-    background-color: hsl(var(--km-color-red, 0 70% 55%) / 0.12);
-    color: hsl(var(--km-color-red, 0 70% 55%));
+    background-color: hsl(var(--km-color-red) / 0.12);
+    color: hsl(var(--km-color-red));
 }
 
 .site-wish-it-want-it-do-it__results-tally-pill--human {
-    background-color: hsl(var(--km-color-green, 140 55% 45%) / 0.12);
-    color: hsl(var(--km-color-green, 140 55% 45%));
+    background-color: hsl(var(--km-color-green) / 0.12);
+    color: hsl(var(--km-color-green));
 }

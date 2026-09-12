@@ -1,9 +1,7 @@
 bs4
-matplotlib
 sphinx
 sphinx-carousel
 sphinx-copybutton
 sphinx-design
 sphinx-lint
-sphinxext-opengraph
-urllib3==2.7.0
+urllib3>=2.7.0

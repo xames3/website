@@ -4,18 +4,17 @@ Currently teaching courses widget
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 16 February, 2026
-Last updated on: 31 August, 2026
+Last updated on: 11 September, 2026
 -->
 <div class="currently-teaching">
     <p class="currently-teaching__text">
-        I've taught&nbsp;<span class="currently-teaching__course"
+        {{ prefix-text }}<span class="currently-teaching__course"
       id="course"></span><span class="blinking-cursor"></span>
     </p>
 </div>
 <style>
     .currently-teaching {
-        margin: calc(92px / 1.5) 1rem;
-        text-align: center;
+        margin: calc(92px / 1.5) 0;
     }
 
     .currently-teaching__text {
