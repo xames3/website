@@ -279,13 +279,12 @@ commands = [
 ]
 
 [tool.tox.env.format]
-description = "Run code formatting with ruff"
+description = "Check code formatting with ruff"
 deps = [
   "ruff>=0.12.7",
 ]
 commands = [
-  [ "ruff", "format", "." ],
-  [ "ruff", "check", ".", "--fix" ],
+  [ "ruff", "format", ".", "--check" ],
 ]
 
 [tool.tox.env.typecheck]

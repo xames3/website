@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 11 September, 2026
+Last updated on: 12 September, 2026
 
 This module serves as the primary entry point for the Kaamiki Sphinx
 Theme. It is responsible for initialising the theme, configuring its
@@ -71,14 +71,15 @@ hooks for post-processing and dynamic content handling.
     [1] Open Graph and Twitter metadata is worked out from the doctree
         by `social_metadata` and emitted by the layout template. A
         page's own `:og:title:`, `:og:description:`, `:og:type:` and
-        `:og:image:` fields win, then the defaults in `html_context`,
-        then the page's opening paragraph.
+        `:og:image:` fields win. Without a description of its own a page
+        falls back to its lead, then to the default in `html_context`,
+        then to its opening paragraph.
     [2] The `picture` directive emits the image's real `width` and
         `height`, read off the file header, so the page stops shuffling
         about as images land.
-    [3] A `show_secondary_toctree` gate, so the secondary toctree is a
-        choice rather than something that turns up whenever a page
-        happens to have one.
+    [3] A `fontawesome_kit` key. The kit URL was hardcoded in the
+        layout, so every site using this theme loaded my kit off my
+        quota. Leave it unset and no kit script is emitted.
 
 .. versionchanged:: 10.9.2026
 
@@ -102,6 +103,16 @@ hooks for post-processing and dynamic content handling.
         It still honours `html_logo` first and falls back to the
         `dark_logo`/`light_logo` theme options, both of which stay unset
         on my own site.
+    [6] The stylesheets carry no explanatory comments any more, only the
+        device-view markers. The widget styles reference the `--km-
+        color-*` tokens directly rather than repeating a raw fallback
+        triplet at every use.
+    [7] The cal.com embed initialises whatever namespaces it finds on
+        the page instead of one hardcoded name, so a site with no
+        booking buttons never pulls the embed script and nobody else's
+        theme pings my calendar.
+    [8] The `preconnect` to jsdelivr is gone. MathJax was the only thing
+        using it and it only loads on pages carrying maths.
 
 .. deprecated:: 10.9.2026
 
@@ -114,6 +125,19 @@ hooks for post-processing and dynamic content handling.
     [3] The dark blocks in `code.css` were re-stating fifteen tokens
         with values identical to their light counterparts. They are
         gone; only the five that genuinely differ remain.
+    [4] Three rules in `theme.css` were sitting there four times over,
+        byte for byte. Kept one of each.
+    [5] `env-before-read-docs` is no longer connected, since the post-
+        processing no longer works off the re-read list.
+    [6] The "On this page" secondary toctree is gone entirely, along
+        with `right_sidebar.html.jinja`, the scrollspy that lit up its
+        links, the `.toc-active` styling and the
+        `secondary_toctree_title` option. It reserved a grid column and
+        painted nothing, on every width, and nothing had ever rendered
+        it in the first place. `layout.html` keeps an empty
+        `right_sidebar` block so `genindex` can still hang its "Jump to
+        letter" rail there, which is what the remaining `.site-sidebar--
+        secondary` styling is for.
 """
 
 from __future__ import annotations
@@ -135,7 +159,6 @@ from kaamiki.extensions import roles
 from kaamiki.extensions.utils import build_finished
 from kaamiki.extensions.utils import depart
 from kaamiki.extensions.utils import ensure_classes_on_nodes
-from kaamiki.extensions.utils import env_before_read_docs
 from kaamiki.extensions.utils import last_updated_date
 from kaamiki.extensions.utils import social_metadata
 
@@ -290,7 +313,6 @@ def setup(app: Sphinx) -> dict[str, str | bool]:
             directive.register(app)
         if hasattr(directive, "html_page_context"):
             app.connect("html-page-context", directive.html_page_context)
-    app.connect("env-before-read-docs", env_before_read_docs)
     app.connect("html-page-context", social_metadata)
     app.connect("source-read", last_updated_date)
     app.connect("doctree-resolved", ensure_classes_on_nodes)

@@ -4,7 +4,7 @@ Embed Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 11 August, 2026
-Last updated on: 10 September, 2026
+Last updated on: 12 September, 2026
 
 This module defines a custom `embed` directive for the Kaamiki Sphinx
 Theme. The directive allows including/embedding an HTML page (embed) or
@@ -49,6 +49,16 @@ directive, via Sphinx's `html-page-context` event::
         value (an array, a long string) can be written across several
         indented lines instead of one.
 
+.. versionadded:: 10.9.2026
+
+    `substitute` fills a fragment's placeholders with escaping picked
+    for where each one sits. A value going into an attribute gets its
+    quotes and brackets escaped; one going into a `<script>` is JSON-
+    encoded, with `<`, `>` and `&` written as escape sequences so a
+    value can't close the block it lives in. Before this the
+    substitution was a plain string replace, which meant a fragment was
+    only ever as safe as the options handed to it.
+
 .. deprecated:: 10.9.2026
 
     Dropped the `node` class and the `visit`/`depart` pair. This
@@ -61,9 +71,11 @@ from __future__ import annotations
 
 import ast
 import contextlib
+import json
 import os.path as p
 import re
 import typing as t
+from html import escape
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
@@ -76,6 +88,71 @@ pattern: t.Pattern[str] = re.compile(
     r"^[ \t]*:([\w-]+):[ \t]*(.*?)(?=^[ \t]*:[\w-]+:|\Z)",
     re.MULTILINE | re.DOTALL,
 )
+
+
+SCRIPTISH: t.Pattern[str] = re.compile(
+    r"<(script|style)\b[^>]*>.*?</\1>", re.DOTALL | re.IGNORECASE
+)
+PLACEHOLDER: t.Pattern[str] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
+ESCAPES: dict[str, str] = {
+    "<": "\\u003c",
+    ">": "\\u003e",
+    "&": "\\u0026",
+    "\u2028": "\\u2028",
+    "\u2029": "\\u2029",
+}
+
+
+def substitute(source: str, values: dict[str, t.Any]) -> str:
+    """Fill a fragment's placeholders, escaping for where each sits.
+
+    A fragment mixes markup and script, and the two want opposite
+    things. A value dropped into an attribute has to have its quotes
+    and angle brackets escaped or it closes the attribute early; the
+    same treatment inside a `<script>` turns a perfectly good array
+    into `[&quot;a&quot;]` and breaks the page. So the source is split
+    on its script and style blocks and each side gets what it needs,
+    HTML escaping out here, JSON in there.
+
+    :param source: The fragment, placeholders and all.
+    :param values: Directive options, keyed as they are written in the
+        rST. A placeholder may spell them with underscores instead of
+        hyphens.
+    :return: The fragment with every known placeholder filled in.
+        Anything unrecognised is left alone.
+
+    .. versionadded:: 12.9.2026
+    """
+
+    def swap(*, scripting: bool) -> t.Callable[[t.Match[str]], str]:
+        def fill(match: t.Match[str]) -> str:
+            key = match.group(1)
+            if key not in values:
+                key = key.replace("_", "-")
+            if key not in values:
+                return match.group(0)
+            value = values[key]
+            if scripting:
+                encoded = json.dumps(value, default=str)
+                for char, point in ESCAPES.items():
+                    encoded = encoded.replace(char, point)
+                return encoded
+            return escape(str(value), quote=True)
+
+        return fill
+
+    out: list[str] = []
+    cursor = 0
+    for block in SCRIPTISH.finditer(source):
+        out.append(
+            PLACEHOLDER.sub(
+                swap(scripting=False), source[cursor : block.start()]
+            )
+        )
+        out.append(PLACEHOLDER.sub(swap(scripting=True), block.group(0)))
+        cursor = block.end()
+    out.append(PLACEHOLDER.sub(swap(scripting=False), source[cursor:]))
+    return "".join(out)
 
 
 class directive(rst.Directive):
@@ -138,19 +215,12 @@ class directive(rst.Directive):
             encoding = self.options.get("encoding", "utf-8")
             with open(file, encoding=encoding) as fd:
                 source = fd.read()
-        values: dict[str, str] = {}
-        for key, value in self.options.items():
-            if key in {"encoding", "css", "js"}:
-                continue
-            values[key] = str(value)
-        rendered = source
-        for key, value in values.items():
-            rendered = rendered.replace(f"{{{{ {key} }}}}", value)
-            rendered = rendered.replace(f"{{{{{key}}}}}", value)
-            normalised = key.replace("-", "_")
-            if normalised != key:
-                rendered = rendered.replace(f"{{{{ {normalised} }}}}", value)
-                rendered = rendered.replace(f"{{{{{normalised}}}}}", value)
+        values = {
+            key: value
+            for key, value in self.options.items()
+            if key not in {"encoding", "css", "js"}
+        }
+        rendered = substitute(source, values)
         env = self.state.document.settings.env
         docname = env.docname
         assets = env.embed_assets = getattr(env, "embed_assets", {})
@@ -174,9 +244,9 @@ class directive(rst.Directive):
 def html_page_context(
     app: Sphinx,
     pagename: str,
-    _templatename: str,
-    _context: dict[str, t.Any],
-    _doctree: nodes.document | None,
+    templatename: str,
+    context: dict[str, t.Any],
+    doctree: nodes.document | None,
 ) -> None:
     """Attach an `embed` embed's `:css:`/`:js:` assets to its page.
 
@@ -186,9 +256,9 @@ def html_page_context(
 
     :param app: The Sphinx application instance.
     :param pagename: The name of the page currently being rendered.
-    :param _templatename: The template used for the page (unused).
-    :param _context: The Jinja2 rendering context (unused).
-    :param _doctree: The doctree for the page, or `None` for pages
+    :param templatename: The template used for the page (unused).
+    :param context: The Jinja2 rendering context (unused).
+    :param doctree: The doctree for the page, or `None` for pages
         without one (unused).
 
     .. versionchanged:: 31.8.2026

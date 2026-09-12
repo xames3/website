@@ -4,7 +4,7 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 11 September, 2026
+Last updated on: 12 September, 2026
 
 This module defines a collection of utility functions used for
 customising this sphinx theme. These utilities focus on enhancing the
@@ -41,27 +41,34 @@ internal APIs and dynamic JavaScript bindings.
 
     [1] `render` gives every directive one shared, autoescaping Jinja
         environment rooted at the theme's template directory. Each
-        directive previously opened its own template at import time
-        and built a bare `jinja2.Template`, which left autoescaping
-        off entirely.
-    [2] `measure` reads an image's intrinsic size straight from the
-        file header (PNG, GIF, WEBP and JPEG), so the theme can emit
+        directive previously opened its own template at import time and
+        built a bare `jinja2.Template`, which left autoescaping off
+        entirely.
+    [2] `measure` reads an image's intrinsic size straight from the file
+        header (PNG, GIF, WEBP and JPEG), so the theme can emit
         `width`/`height` without pulling in an imaging dependency.
     [3] `summarise` and `social_metadata` work out the Open Graph and
-        Twitter card values from the doctree and `html_context`.
-        Between them they replace `sphinxext-opengraph`, which
-        dragged `matplotlib` in purely to draw social cards. A page's
-        own `:og:title:`, `:og:description:`, `:og:type:` and
-        `:og:image:` are read straight off the docinfo, keys and all,
-        since that is how docutils hands them over. Anything a page
-        leaves unset falls back to `html_context`, then to the page's
-        own opening paragraph.
+        Twitter card values from the doctree and `html_context`. Between
+        them they replace `sphinxext-opengraph`, which dragged
+        `matplotlib` in purely to draw social cards. A page's own
+        `:og:title:`, `:og:description:`, `:og:type:` and `:og:image:`
+        are read straight off the docinfo, keys and all, since that is
+        how docutils hands them over. Anything a page leaves unset falls
+        back to `html_context`, then to the page's own opening
+        paragraph.
     [4] `plain` flattens rendered HTML down to bare text, so a page
-        title carrying an icon role doesn't leak escaped `<span>`
-        soup into a `<meta>` tag.
+        title carrying an icon role doesn't leak escaped `<span>` soup
+        into a `<meta>` tag.
     [5] `depart` is the shared no-op that any directive writing its
         whole widget during `visit` can borrow, instead of each one
         carrying an empty function to satisfy `add_node`.
+    [6] `standfirst` pulls the page's lead, and `social_metadata`
+        reaches for it before falling back any further. It is the line
+        written to sit under the title and say what the page is about,
+        which is the job a social description does, so guessing from the
+        prose below it was always the worse answer.
+    [7] `buried` and `clip` are the two bits `standfirst` and
+        `summarise` both wanted, pulled out rather than written twice.
 
 .. versionchanged:: 10.9.2026
 
@@ -73,6 +80,28 @@ internal APIs and dynamic JavaScript bindings.
         `t.Any`, which had been switching type checking off at the one
         place the doctree is walked. Tightening it turned up `summarise`
         walking a parent chain the stubs believed could never end.
+    [3] `build_finished` post-processes every HTML file in the output
+        directory rather than only the documents Sphinx re-read. A
+        template or stylesheet change makes Sphinx re-write pages
+        without re-reading them, so the old list came back empty and an
+        incremental build quietly shipped pages with none of the
+        transforms applied, external links included. It also means the
+        generated pages get the same treatment as the rest.
+    [4] `make_toc_collapsible` skips a branch that already has its
+        toggle. It used to insert one unconditionally, so running twice
+        over the same file stacked up duplicate buttons.
+    [5] The description falls back in a definite order now: the page's
+        own `:og:description:`, then its lead, then the theme-wide
+        default in `html_context`, and only then the opening paragraph.
+        The opening paragraph is a guess, so it sits second from last,
+        ahead of nothing at all.
+
+.. deprecated:: 10.9.2026
+
+    `env_before_read_docs` and the `theme_htmls` list it kept are gone.
+    They only existed to narrow post-processing to re-read documents,
+    which is the very thing that made an incremental build differ from
+    a fresh one.
 """
 
 from __future__ import annotations
@@ -98,8 +127,6 @@ if t.TYPE_CHECKING:
     from collections.abc import Iterator
 
     from sphinx.application import Sphinx
-    from sphinx.builders.html import StandaloneHTMLBuilder
-    from sphinx.environment import BuildEnvironment
     from sphinx.writers.html import HTMLTranslator
 
 TEMPLATES: Path = Path(__file__).resolve().parent.parent / "base" / "templates"
@@ -293,6 +320,8 @@ def make_toc_collapsible(tree: bs4.BeautifulSoup) -> None:
             parent["aria-expanded"] = "true"
         else:
             parent["aria-expanded"] = "false"
+        if link.find_next_sibling("button", class_="nav-toggle"):
+            continue
         button = tree.new_tag("button", type="button")
         button["class"] = "nav-toggle"
         button["aria-controls"] = children["id"]
@@ -430,39 +459,100 @@ def plain(text: str) -> str:
     return " ".join(unescape(TAG_RE.sub("", text)).split())
 
 
-def summarise(doctree: nodes.document | None, limit: int) -> str:
-    """Build a plain-text summary from a document's first paragraph.
+def clip(text: str, limit: int) -> str:
+    """Cut a line down to length on a word boundary.
 
-    Walks the resolved doctree for the first body paragraph that is not
-    part of a figure, admonition, table or code block, flattens it to
-    text and truncates it on a word boundary.
+    :param text: The line to shorten.
+    :param limit: Longest the result may be, ellipsis aside.
+    :return: The text, trimmed and closed with an ellipsis when it
+        had to be cut.
 
-    :param doctree: The resolved doctree, or `None` for generated pages.
-    :param limit: Maximum length of the returned summary.
-    :return: A single-line summary, or an empty string when the page has
-        no usable prose.
+    .. versionadded:: 10.9.2026
+    """
+    if len(text) <= limit:
+        return text
+    return text[:limit].rsplit(" ", 1)[0].rstrip(",;:.") + "\u2026"
+
+
+def buried(paragraph: nodes.Element) -> bool:
+    """Say whether a paragraph is sitting inside furniture.
+
+    A line lifted out of a figure caption, an admonition, a table or a
+    code block reads as a non-sequitur once it is on its own in a
+    search result, so those are passed over.
+
+    :param paragraph: The paragraph to place.
+    :return: `True` when it has one of those for an ancestor.
+
+    .. versionadded:: 10.9.2026
+    """
+    parent: nodes.Element | None = paragraph.parent
+    while parent is not None and not isinstance(parent, SOCIAL_SKIP):
+        parent = parent.parent
+    return parent is not None
+
+
+def standfirst(doctree: nodes.document | None, limit: int) -> str:
+    """Pull the page's lead, the line written to sit under the title.
+
+    It is already a one-line answer to "what is this page", which is
+    exactly what a social description wants, so it beats anything
+    guessed from the prose below it.
+
+    :param doctree: The resolved doctree, or `None` for generated
+        pages.
+    :param limit: Longest the result may be.
+    :return: The lead, or an empty string when the page hasn't got
+        one.
+
+    .. versionadded:: 10.9.2026
     """
     if doctree is None:
         return ""
     for paragraph in findall(doctree, nodes.paragraph):
-        parent: nodes.Element | None = paragraph.parent
-        while parent is not None and not isinstance(parent, SOCIAL_SKIP):
-            parent = parent.parent
-        if parent is not None:
+        if "lead" not in (paragraph.get("classes") or []):
+            continue
+        if buried(paragraph):
             continue
         text = " ".join(paragraph.astext().split())
-        if len(text) < 40:
+        if text:
+            return clip(text, limit)
+    return ""
+
+
+def summarise(doctree: nodes.document | None, limit: int) -> str:
+    """Fall back to a page's opening paragraph.
+
+    The last thing tried before giving up, and only reached when the
+    page sets no description of its own, has no lead, and the theme
+    carries no default either.
+
+    :param doctree: The resolved doctree, or `None` for generated
+        pages.
+    :param limit: Longest the result may be.
+    :return: A single-line summary, or an empty string when the page
+        has no usable prose.
+
+    .. versionchanged:: 10.9.2026
+
+        Only returns the opening paragraph now. The lead moved out to
+        `standfirst` so the theme-wide default can sit between the two.
+    """
+    if doctree is None:
+        return ""
+    for paragraph in findall(doctree, nodes.paragraph):
+        if buried(paragraph):
             continue
-        if len(text) <= limit:
-            return text
-        return text[:limit].rsplit(" ", 1)[0].rstrip(",;:.") + "\u2026"
+        text = " ".join(paragraph.astext().split())
+        if len(text) >= 40:
+            return clip(text, limit)
     return ""
 
 
 def social_metadata(
     app: Sphinx,
-    _pagename: str,
-    _templatename: str,
+    pagename: str,
+    templatename: str,
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
@@ -494,6 +584,7 @@ def social_metadata(
     )
     description = (
         meta.get("og:description")
+        or standfirst(doctree, limit)
         or options.get("description", "")
         or summarise(doctree, limit)
     )
@@ -512,41 +603,17 @@ def social_metadata(
     }
 
 
-def env_before_read_docs(
-    app: Sphinx, _: BuildEnvironment, docnames: list[str]
-) -> None:
-    """Track the list of documents modified during the Sphinx build.
-
-    This function captures the list of document names that have been
-    added, updated, or deleted and stores them in the Sphinx
-    environment for later use. This ensures that post-processing only
-    affects pages that have actually changed, optimising the build
-    process by avoiding unnecessary rework.
-
-    :param app: The Sphinx application instance.
-    :param _: The current build environment (unused).
-    :param docnames: A list of document names that were modified.
-
-    .. versionchanged:: 31.8.2026
-
-        Stores `theme_htmls` via `setattr()` rather than a direct
-        attribute assignment, since `BuildEnvironment` doesn't declare
-        it statically.
-    """
-    setattr(app.env, "theme_htmls", docnames)  # noqa: B010
-
-
 def ensure_classes_on_nodes(
-    _app: Sphinx, doctree: nodes.document, _docname: str
+    app: Sphinx, doctree: nodes.document, docname: str
 ) -> None:
     """Make sure classes are handled properly on node-tree.
 
     This patched function fixes the breaking code in sphinx's internal
     structure when the nodes with no classes are not handled properly.
 
-    :param _app: The Sphinx application instance (unused).
+    :param app: The Sphinx application instance (unused).
     :param doctree: The resolved doctree for the document.
-    :param _docname: The name of the document (unused).
+    :param docname: The name of the document (unused).
 
     .. versionchanged:: 31.8.2026
 
@@ -658,9 +725,7 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
     """
     if exc or app.builder.name not in {"html", "dirhtml"}:
         return
-    builder = t.cast("StandaloneHTMLBuilder", app.builder)
-    htmls = getattr(app.env, "theme_htmls", [])
-    htmls = [str(builder.get_outfilename(html)) for html in htmls]
+    htmls = sorted(str(_) for _ in Path(app.outdir).rglob("*.html"))
     if not htmls:
         return
     for html in status_iterator(
