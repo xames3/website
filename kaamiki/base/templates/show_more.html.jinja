@@ -1,0 +1,21 @@
+<!--
+Show More Template
+==================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 12 September, 2026
+Last updated on: 12 September, 2026
+-->
+<div class="site-page__more"
+     data-show-more>
+    <button class="site-page__more-button"
+            type="button"
+            aria-controls="content"
+            aria-expanded="false"
+            data-label-more="{{ _('Show more') }}"
+            data-label-less="{{ _('Show less') }}">
+        <span class="site-page__more-label">{{ _('Show more') }}</span>
+        <i class="{{ fa_icons.show_more }} site-page__more-icon"
+           aria-hidden="true"></i>
+    </button>
+</div>
