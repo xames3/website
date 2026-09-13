@@ -4,65 +4,55 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 10 September, 2026
+Last updated on: 12 September, 2026
 
-This module defines a custom `author` directive for the Kaamiki Sphinx
-Theme. The directive allows embedding details directly within the
-document.
+An `author` directive that renders the byline under a page title::
 
-The `author` directive is designed to extend reStructuredText (rST)
-capabilities by injecting structured metadata about the content, which
-can be styled or processed further using Jinja2 templates.
+    .. author:: Akshay Mestry
+       :avatar: https://example.com/avatar.png
+       :target: https://github.com/xames3
 
-The `author` directive can be used in reStructuredText documents as
-follows::
-
-    .. code-block:: rst
-
-        .. author:: Akshay Mestry
-            :avatar: https://example.com/avatar.png
-            :target: https://github.com/xames3
-
-The above snippet will be processed and rendered according to the
-theme's Jinja2 template, producing a final HTML output.
+The name is the argument. Anything left out falls back to the
+`project` entry in `html_context`. The widget comes from
+`author.html.jinja` and carries the page's reading time.
 
 .. versionchanged:: 19.10.2025
 
-    The options `author`, `email` and `github` are now optional and can
-    default to project's details specified in `conf.py`.
+    The author details are optional and fall back to the project
+    details in `conf.py`.
 
 .. deprecated:: 19.10.2025
 
-    Removed the custom subject header in favour of page title.
+    Removed the custom subject header in favour of the page title.
 
 .. deprecated:: 15.01.2026
 
-    Removed usage of Email, Bio and LinkedIn metadata.
+    Removed the email, bio and LinkedIn metadata.
 
 .. versionchanged:: 24.04.2026
 
-    URL field is now generic and not specific to GitHub.
+    The URL field is generic rather than GitHub-specific.
 
 .. versionadded:: 27.06.2026
 
-    Directive now supports optional background(s) which fades through
-    the title/author section.
+    Optional background images, which fade through behind the title.
 
 .. versionchanged:: 10.9.2026
 
-    Rendering goes through `utils.render`, one shared Jinja environment
-    for the whole theme with autoescaping switched on. The old per-
-    module templates had escaping off, so a name or an avatar URL
-    carrying an `&`, a `<` or a stray quote quietly emitted broken
-    markup.
+    [1] Rendering goes through `utils.render`, which has autoescaping
+        on. The per-module templates it replaced had it off, so a name
+        or avatar URL carrying an `&`, a `<` or a stray quote emitted
+        broken markup.
+    [2] The reading time is worked out at write time and rendered with
+        the widget. It was counted in the browser before, so the same
+        page had two counts that did not always agree.
+    [3] `trail` returns the avatar, target and background URLs beside
+        the node, where `linkcheck` can see them.
 
 .. deprecated:: 10.9.2026
 
-    [1] The module-level `here`, `templates` and `html` path fiddling
-        has moved out to `utils`, along with the `jinja2` import. Every
-        directive was opening its own template at import time and
-        building a bare `jinja2.Template` off it, which is a daft thing
-        to do seven times over. `template` is now just the filename.
+    [1] The module-level path fiddling has moved to `utils`, along with
+        the `jinja2` import. `template` is now just the filename.
     [2] Dropped the empty `depart`. It existed only because `add_node`
         wants a pair; the theme falls back to the shared no-op in
         `utils` when a directive doesn't define one.
@@ -75,7 +65,9 @@ import typing as t
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
+from kaamiki.extensions.utils import reading_time
 from kaamiki.extensions.utils import render
+from kaamiki.extensions.utils import trail
 
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
@@ -85,45 +77,22 @@ template: t.Final[str] = "author.html.jinja"
 
 
 class node(nodes.Element):
-    """Class to represent a custom node in the document tree.
-
-    This class extends the `nodes.Element` from `docutils`, serving as
-    the container for the parsed information. The node will ultimately
-    be transformed into HTML or other output formats by the relevant
-    Sphinx translators.
-    """
+    """The parsed directive, waiting for `visit` to write it out."""
 
 
 class directive(rst.Directive):
-    """Custom `author` directive for reStructuredText.
+    """The `author` directive.
 
-    This class defines the behaviour of the `author` directive,
-    including how it processes options and content and how it generates
-    nodes to be inserted into the document tree.
+    Options::
 
-    The directive supports the following options::
-
-        - `avatar`: A URL to the author's avatar image.
-        - `target`: Author's link (profile, portfolio, or mailto etc.).
-
-    .. versionchanged:: 19.10.2025
-
-        The options `author`, `email` and `github` are now optional and
-        can default to project's details specified in `conf.py`.
+        - `avatar`: URL of the author's picture.
+        - `target`: Where the name links to, a profile or a mailto.
+        - `background`: One or more image URLs to fade through behind
+          the title.
 
     .. deprecated:: 17.03.2026
 
-        The `timestamp` option is now deprecated as it's not being
-        rendered.
-
-    .. versionchanged:: 24.04.2026
-
-        URL field is now generic and not specific to GitHub.
-
-    .. versionadded:: 27.06.2026
-
-        Directive now supports optional background(s) which fades
-        through the title/author section.
+        The `timestamp` option is gone; nothing rendered it.
     """
 
     required_arguments = 1
@@ -135,47 +104,36 @@ class directive(rst.Directive):
     }
 
     def run(self) -> list[nodes.Node]:
-        """Parse directive options and create an `author` node.
+        """Collect the options and return the node.
 
-        This method gathers all options provided by the user (if any) in
-        the `author` directive, constructs a new `node` instance and
-        returns it wrapped in a list.
+        `html_context` is merged in behind the directive's own options,
+        so a value written in the rST wins over the one in `conf.py`.
 
-        The returned node is then placed into the document tree at the
-        directive's location. Further processing will convert the node
-        into HTML or other formats.
-
-        :return: A list containing a single `node` element.
+        :return: The node, followed by the `raw` nodes `trail` returns
+            for the link checker.
 
         .. versionchanged:: 19.10.2025
 
-            Added support for default context variables picked from the
-            `html_context` object in `conf.py`.
-
-        .. note::
-
-            The `option_spec` will take precedence over the
-            `html_context` values.
+            Values not given fall back to `html_context`.
         """
         self.options["name"] = self.arguments.pop().strip()
         ctx = self.state.document.settings.env.config.html_context
         self.options.update(ctx)
         element = node("\n".join(self.content), **self.options)
-        return [element]
+        return [element, *trail(self.options)]
 
 
 def visit(self: HTMLTranslator, node: node) -> None:
-    """Handle the entry processing of the `author` node during HTML
-    generation.
+    """Write the widget out when the HTML writer reaches the node.
 
-    This method is called when the HTML translator encounters the
-    `author` node in the document tree. It retrieves the relevant
-    attributes from the node (if any) and uses Jinja2 templating to
-    produce the final HTML output.
+    :param self: The HTML translator, whose body this appends to.
+    :param node: The `author` node and its attributes.
 
-    :param self: The HTML translator instance responsible for rendering
-        nodes into HTML.
-    :param node: The `author` node containing parsed attributes.
+    .. versionchanged:: 10.9.2026
 
+        The reading time is worked out here rather than in the browser,
+        so the page has one count instead of two.
     """
-    self.body.append(render(template, **node.attributes))
+    attributes = dict(node.attributes)
+    attributes["minutes"] = max(1, reading_time(node.document))
+    self.body.append(render(template, **attributes))

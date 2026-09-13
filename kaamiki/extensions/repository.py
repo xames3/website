@@ -4,25 +4,15 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October, 2025
-Last updated on: 10 September, 2026
+Last updated on: 12 September, 2026
 
-This module defines a custom `repository` directive for the Kaamiki
-Sphinx Theme. The directive allows embedding GitHub repository details
-on the document.
+A `repository` directive that renders a GitHub project as a card::
 
-The `repository` directive is designed to extend reStructuredText (rST)
-capabilities by injecting structured metadata about the content, which
-can be styled or processed further using Jinja2 templates.
+    .. repository:: xames3/website
+       :stars:
 
-The `repository` directive can be used in reStructuredText documents as
-follows::
-
-    .. code-block:: rst
-
-        .. repository:: xames3/website
-
-The above snippet will be processed and rendered according to the
-theme's Jinja2 template, producing a final HTML output.
+The card comes from `repository.html.jinja`. The counts themselves are
+fetched by `theme.js` when the card scrolls into view.
 
 .. versionadded:: 10.9.2026
 
@@ -32,25 +22,21 @@ theme's Jinja2 template, producing a final HTML output.
 
 .. versionchanged:: 10.9.2026
 
-    Rendering goes through `utils.render`, one shared Jinja environment
-    for the whole theme with autoescaping switched on. The old per-
-    module templates had escaping off, so a project name carrying an
-    `&`, a `<` or a stray quote quietly emitted broken markup.
+    Rendering goes through `utils.render`, which has autoescaping on.
+    The per-module templates it replaced had it off, so a project name
+    carrying an `&`, a `<` or a stray quote emitted broken markup.
 
 .. deprecated:: 10.9.2026
 
-    [1] The module-level `here`, `templates` and `html` path fiddling
-        has moved out to `utils`, along with the `jinja2` import. Every
-        directive was opening its own template at import time and
-        building a bare `jinja2.Template` off it, which is a daft thing
-        to do seven times over. `template` is now just the filename.
+    [1] The module-level path fiddling has moved to `utils`, along with
+        the `jinja2` import. `template` is now just the filename.
     [2] The `:issues:` option is gone. The widget renders stars and
-        forks, so an issues flag pointed at a counter that was never in
-        the template.
+        forks, so an issues flag pointed at a counter the template
+        never had.
     [3] Dropped the `node` class and the `visit`/`depart` pair. This
-        directive hands back a `nodes.raw` and never goes anywhere near
-        a translator, so all three were dead weight that only existed to
-        keep the registration loop happy.
+        directive hands back a `nodes.raw` and never reaches a
+        translator, so all three only existed to keep the registration
+        loop happy.
 """
 
 from __future__ import annotations
@@ -67,19 +53,15 @@ template: t.Final[str] = "repository.html.jinja"
 
 
 class directive(rst.Directive):
-    """Custom `repository` directive for reStructuredText.
+    """The `repository` directive.
 
-    This class defines the behaviour of the `repository` directive,
-    including how it processes options and content and how it
-    generates nodes to be inserted into the document tree.
-
-    The directive supports the following options::
+    Options::
 
         - `stars`: Show the stargazer count.
         - `forks`: Show the fork count.
 
-    Both counts are shown when neither flag is given, which is what
-    the directive did before either flag meant anything.
+    Naming neither shows both, which is what the directive did before
+    either flag meant anything.
     """
 
     required_arguments = 1
@@ -90,17 +72,9 @@ class directive(rst.Directive):
     }
 
     def run(self) -> list[nodes.Node]:
-        """Parse directive options and create an `repository` node.
+        """Render the card and return it as a raw node.
 
-        This method gathers all options provided by the user (if any)
-        in the `repository` directive, constructs a new `node`
-        instance and returns it wrapped in a list.
-
-        The returned node is then placed into the document tree at the
-        directive's location. Further processing will convert the node
-        into HTML or other formats.
-
-        :return: A list containing a single `node` element.
+        :return: A list holding the one `raw` node.
 
         .. versionchanged:: 10.9.2026
 
@@ -109,6 +83,9 @@ class directive(rst.Directive):
             [2] `:stars:` and `:forks:` now actually gate their
                 counters. Naming a flag shows only that one; naming
                 neither shows both, as before.
+            [3] The `raw` node carries the repository URL as its
+                `source`, which is where `linkcheck` looks. Every
+                widget was being skipped by the link checker.
         """
         stars = "stars" in self.options
         forks = "forks" in self.options
@@ -116,6 +93,7 @@ class directive(rst.Directive):
         self.options["stars"] = stars or not forks
         self.options["forks"] = forks or not stars
         attributes: dict[str, str] = {}
+        attributes["source"] = f"https://github.com/{self.options['project']}"
         attributes["text"] = render(template, **self.options)
         attributes["format"] = "html"
         return [nodes.raw(**attributes)]

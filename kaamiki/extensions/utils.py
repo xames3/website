@@ -6,121 +6,107 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
 Last updated on: 12 September, 2026
 
-This module defines a collection of utility functions used for
-customising this sphinx theme. These utilities focus on enhancing the
-post-processing of the generated HTML output, as well as providing
-additional support for interactive elements, theme options and other
-dynamic behaviours.
-
-The functionality provided includes handling collapsible table of
-contents (ToC), removal of unnecessary elements and custom event
-handling for theme-specific features.
-
-The goal of this module is to ensure that this theme produces clean,
-efficient and interactive HTML documentation by leveraging Sphinx's
-internal APIs and dynamic JavaScript bindings.
+The theme's shared helpers. They fall into four groups: rendering a
+directive's template, reading things off the doctree (a lead, a
+description, a reading time), filling in the page context, and the
+post-build pass over the written HTML.
 
 .. deprecated:: 19.10.2025
 
-    Use of `website_options` in favour of `html_context`. This removes
-    the need of `register_website_options` function.
+    `website_options` in favour of `html_context`, which removes the
+    need for `register_website_options`.
 
 .. versionchanged:: 31.8.2026
 
-    [1] `ensure_classes_on_nodes` was annotated and called for the wrong
-        Sphinx event; fixed to match `doctree-resolved`'s actual
-        signature and to use `findall()` instead of the removed
-        `.traverse()` call.
-    [2] Fixed a `datetime.timezone.utc` typo (`dt` is the `datetime`
-        class, not the module) in `last_updated_date`.
-    [3] `make_toc_collapsible` and `remove_empty_toctree_divs` no longer
-        assume a tag's `class` attribute or a div's sole child are
-        always list/text types.
+    [1] `ensure_classes_on_nodes` was annotated and connected for the
+        wrong event; it matches `doctree-resolved` now and uses
+        `findall()` rather than the removed `.traverse()`.
+    [2] Fixed a `dt.timezone.utc` typo in `last_updated_date`. `dt` is
+        the class, not the module.
 
 .. versionadded:: 10.9.2026
 
-    [1] `render` gives every directive one shared, autoescaping Jinja
-        environment rooted at the theme's template directory. Each
-        directive previously opened its own template at import time and
-        built a bare `jinja2.Template`, which left autoescaping off
-        entirely.
-    [2] `measure` reads an image's intrinsic size straight from the file
-        header (PNG, GIF, WEBP and JPEG), so the theme can emit
-        `width`/`height` without pulling in an imaging dependency.
-    [3] `summarise` and `social_metadata` work out the Open Graph and
-        Twitter card values from the doctree and `html_context`. Between
-        them they replace `sphinxext-opengraph`, which dragged
-        `matplotlib` in purely to draw social cards. A page's own
-        `:og:title:`, `:og:description:`, `:og:type:` and `:og:image:`
-        are read straight off the docinfo, keys and all, since that is
-        how docutils hands them over. Anything a page leaves unset falls
-        back to `html_context`, then to the page's own opening
-        paragraph.
-    [4] `plain` flattens rendered HTML down to bare text, so a page
-        title carrying an icon role doesn't leak escaped `<span>` soup
-        into a `<meta>` tag.
-    [5] `depart` is the shared no-op that any directive writing its
-        whole widget during `visit` can borrow, instead of each one
-        carrying an empty function to satisfy `add_node`.
-    [6] `standfirst` pulls the page's lead, and `social_metadata`
-        reaches for it before falling back any further. It is the line
-        written to sit under the title and say what the page is about,
-        which is the job a social description does, so guessing from the
-        prose below it was always the worse answer.
-    [7] `buried` and `clip` are the two bits `standfirst` and
-        `summarise` both wanted, pulled out rather than written twice.
+    [1] `render` gives every directive one shared Jinja environment
+        with autoescaping on. Each one used to build a bare
+        `jinja2.Template` at import time, which left escaping off.
+    [2] `measure` reads an image's size off the file header, for PNG,
+        GIF, WEBP and JPEG, so the theme can write `width`/`height`
+        without an imaging dependency.
+    [3] `social_metadata` works the Open Graph and Twitter values out
+        of the doctree and `html_context`, replacing
+        `sphinxext-opengraph` and the `matplotlib` it dragged in. A
+        page's own `:og:*` fields win.
+    [4] `plain` flattens rendered HTML to bare text, so a title
+        carrying an icon role does not leak `<span>` soup into a
+        `<meta>` tag.
+    [5] `depart` is the shared no-op for a directive that writes its
+        whole widget during `visit`.
+    [6] `standfirst` pulls the page's lead, which `social_metadata`
+        prefers to anything guessed from the prose below it.
+    [7] `buried` and `clip` are the bits `standfirst` and `summarise`
+        both wanted, pulled out rather than written twice.
+    [8] `wordcount` and `reading_time` put a number of minutes on a
+        page. Paragraphs count towards it; code, tables, figures and
+        admonitions do not. `reading_length` passes that to the
+        template with the answer to whether the page folds up.
+    [9] `context_defaults` merges the theme's icons and project
+        details into `html_context`, so a site that sets neither gets
+        defaults rather than a failed build.
+    [10] `trail` hands the link checker the URLs a directive keeps in
+         its options. Sphinx reads URIs off `reference`, `image` and
+         `raw` nodes alone, so an avatar or background went unchecked.
+    [11] `not_found` writes the theme's 404 page to the top of the
+         output tree, under `show_404`. `root_urls` rewrites its URLs
+         to start at the site root, since the page is served under
+         whatever address was asked for and not under its own.
 
 .. versionchanged:: 10.9.2026
 
-    [1] `last_updated_date` no longer wraps the source path in
-        `shlex.quote` before handing it to `git log`. The command is run
-        as an argument list rather than through a shell, so the quoting
-        only corrupted paths that contained a space.
-    [2] `findall` is generic over the element type instead of returning
-        `t.Any`, which had been switching type checking off at the one
-        place the doctree is walked. Tightening it turned up `summarise`
-        walking a parent chain the stubs believed could never end.
+    [1] `last_updated_date` no longer wraps the path in `shlex.quote`
+        for `git log`. The command runs as an argument list, not
+        through a shell, so the quoting only corrupted paths with a
+        space in them.
+    [2] `findall` is generic over the element type rather than
+        returning `t.Any`, which had been switching type checking off
+        at the one place the doctree is walked.
     [3] `build_finished` post-processes every HTML file in the output
-        directory rather than only the documents Sphinx re-read. A
-        template or stylesheet change makes Sphinx re-write pages
-        without re-reading them, so the old list came back empty and an
-        incremental build quietly shipped pages with none of the
-        transforms applied, external links included. It also means the
-        generated pages get the same treatment as the rest.
-    [4] `make_toc_collapsible` skips a branch that already has its
-        toggle. It used to insert one unconditionally, so running twice
-        over the same file stacked up duplicate buttons.
-    [5] The description falls back in a definite order now: the page's
-        own `:og:description:`, then its lead, then the theme-wide
-        default in `html_context`, and only then the opening paragraph.
-        The opening paragraph is a guess, so it sits second from last,
-        ahead of nothing at all.
+        directory, not only the documents Sphinx re-read. A template
+        or stylesheet change rewrites pages without re-reading them, so
+        that list came back empty and an incremental build shipped
+        pages with none of the transforms applied.
+    [5] The description falls back in a stated order: the page's own
+        `:og:description:`, then its lead, then the default in
+        `html_context`, then its opening paragraph.
+    [6] `SOCIAL_SKIP` is now `FURNITURE`, since the reading-time count
+        uses the same list.
 
 .. deprecated:: 10.9.2026
 
     `env_before_read_docs` and the `theme_htmls` list it kept are gone.
-    They only existed to narrow post-processing to re-read documents,
-    which is the very thing that made an incremental build differ from
-    a fresh one.
+    They narrowed post-processing to re-read documents, which is what
+    made an incremental build differ from a fresh one.
 """
 
 from __future__ import annotations
 
+import posixpath
 import re
 import struct
 import typing as t
 from datetime import UTC
 from datetime import datetime as dt
 from html import unescape
+from math import ceil
 from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import check_output as co
+from urllib.parse import urlsplit
 
 import bs4
 import jinja2
-from bs4.element import AttributeValueList
 from bs4.element import NavigableString
 from docutils import nodes
+from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util.display import status_iterator
 
 if t.TYPE_CHECKING:
@@ -134,13 +120,41 @@ LAST_UPDATED_RE: re.Pattern[str] = re.compile(
     r"^\.\.\s+Last updated on:\s*(.+)$", re.IGNORECASE
 )
 TAG_RE: re.Pattern[str] = re.compile(r"</?[A-Za-z][^<>]*>")
-SOCIAL_SKIP: tuple[type, ...] = (
+FURNITURE: tuple[type, ...] = (
     nodes.Admonition,
     nodes.figure,
     nodes.literal_block,
     nodes.table,
     nodes.topic,
 )
+WORDS_PER_MINUTE: t.Final[int] = 225
+SHOW_MORE_AFTER: t.Final[int] = 5
+NOT_FOUND: t.Final[str] = "404"
+ROOTED_ATTRIBUTES: t.Final[tuple[str, ...]] = (
+    "action",
+    "data-content_root",
+    "href",
+    "src",
+)
+ROOTED_SKIP: t.Final[tuple[str, ...]] = ("#", "/", "data:", "mailto:", "tel:")
+PROJECT: t.Final[dict[str, str]] = {
+    "author": "",
+    "email": "",
+    "source": "#",
+}
+ICONS: t.Final[dict[str, str]] = {
+    "breadcrumb_home": "fa-solid fa-house",
+    "breadcrumb_separator_child": "fa-solid fa-angle-right",
+    "breadcrumb_separator_parent": "fa-solid fa-angles-right",
+    "copy_url": "fa-solid fa-link",
+    "dark_mode": "fa-solid fa-moon",
+    "light_mode": "fa-solid fa-sun",
+    "next_button": "fa-solid fa-arrow-right",
+    "previous_button": "fa-solid fa-arrow-left",
+    "reading_time": "fa-regular fa-clock",
+    "show_more": "fa-solid fa-chevron-down",
+}
+LINKCHECK_OPTIONS: tuple[str, ...] = ("avatar", "background", "target")
 JPEG_SIZE_MARKERS: frozenset[int] = frozenset(
     {
         0xC0,
@@ -171,11 +185,8 @@ environment: jinja2.Environment = jinja2.Environment(
 def render(template: str, /, **context: t.Any) -> str:
     """Render one of the theme's directive templates.
 
-    Directives previously each opened their own template file at import
-    time and built a bare `jinja2.Template`, which left autoescaping
-    off - so a caption or title containing `&`, `<` or a quote emitted
-    broken markup. They now share one autoescaping environment with a
-    loader rooted at the theme's template directory.
+    Every directive shares this one environment, which has autoescaping
+    on and a loader rooted at the theme's template directory.
 
     :param template: Template filename, relative to `base/templates`.
     :param context: Values made available to the template.
@@ -189,11 +200,9 @@ def render(template: str, /, **context: t.Any) -> str:
 def depart(self: HTMLTranslator, node: nodes.Element) -> None:
     """Close a node that has nothing to close.
 
-    `add_node` insists on a visit/depart pair, but a directive that
-    writes its whole widget in one go during `visit` has nothing left
-    to do on the way out. Every one of those used to carry its own
-    empty function purely to satisfy the signature; they share this
-    one now.
+    `add_node` wants a visit/depart pair, but a directive that writes
+    its whole widget during `visit` has nothing left to do. They share
+    this instead of each carrying an empty function.
 
     :param self: The HTML translator instance (unused).
     :param node: The node being departed (unused).
@@ -203,12 +212,11 @@ def depart(self: HTMLTranslator, node: nodes.Element) -> None:
 
 
 def measure(path: str) -> tuple[int, int] | None:
-    """Read an image's intrinsic pixel size from its header.
+    """Read an image's size from its header.
 
-    Only the leading bytes are read, so this stays cheap and avoids
-    pulling in an imaging dependency. Supplying `width`/`height` lets
-    the browser reserve space before the image arrives, which is what
-    stops the page reflowing as images load.
+    Only the leading bytes are read, so this is cheap and needs no
+    imaging dependency. Writing `width`/`height` out lets the browser
+    hold the space open before the image lands.
 
     :param path: Filesystem path to the image.
     :return: A `(width, height)` pair, or `None` when the format is not
@@ -254,100 +262,71 @@ def findall[T: nodes.Element](
     node: nodes.Node,
     element: type[T],
 ) -> Iterator[T]:
-    """Recursively search through the given docutils node to find all
-    instances of a specified element type.
+    """Walk a doctree for every node of one type.
 
-    This function abstracts the traversal method, ensuring
-    compatibility across different versions of docutils. Depending on
-    the version, it will either use the `findall` method or the older
-    `traverse` method.
+    Older docutils spells this `traverse`, so the method is looked up
+    by name rather than called directly.
 
-    :param node: The starting node from which the search will be
-        performed.
-    :param element: The type of node element to find, such as references
-        or bullet lists.
-    :return: An iterator over every matching element found within the
-        given node.
+    :param node: Where to start looking.
+    :param element: The node type to look for.
+    :return: Every match, in document order.
 
     .. versionchanged:: 31.8.2026
 
-        Broadened `element` from `reference | bullet_list` to
-        `nodes.Element`, so callers can search for any node type.
+        Takes any `nodes.Element`, not just references and bullet
+        lists.
 
     .. versionchanged:: 10.9.2026
 
-        Generic over the element type rather than returning `t.Any`, so
-        a caller walking for `nodes.paragraph` gets paragraphs back
-        instead of switching type checking off for the whole loop.
+        Generic over the element type rather than returning `t.Any`,
+        which had been switching type checking off for the whole loop.
         `docutils` is untyped, so the cast marks that boundary.
     """
     method = "findall" if hasattr(node, "findall") else "traverse"
     return t.cast("Iterator[T]", getattr(node, method)(element))
 
 
-def make_toc_collapsible(tree: bs4.BeautifulSoup) -> None:
-    """Enhance the left sidebar's ToC with collapsible branches.
+def trail(options: dict[str, t.Any]) -> list[nodes.Node]:
+    """Give `linkcheck` the URLs a directive keeps in its options.
 
-    This attaches an adjacent toggle button after links that have a
-    following ``ul``. The button uses theme CSS for a down chevron via a
-    pseudo element. No Alpine attributes or inline SVGs are injected.
+    Sphinx reads URIs off `reference`, `image` and `raw` nodes, the
+    last through its `source` attribute. A directive returning an
+    element of its own keeps its URLs in plain attributes, which the
+    collector never looks at.
 
-    :param tree: Parsed HTML tree to mutate.
+    An empty `raw` node per URL, returned beside the element, carries
+    `source` for the collector and writes nothing to any output.
 
-    .. versionchanged:: 31.8.2026
+    :param options: The directive's options, as written in the rST.
+    :return: One empty `raw` node per URL found, ready to sit beside
+        the directive's own node.
 
-        No longer assumes an existing `class` attribute is a list; a
-        plain string (a valid bs4 representation) is now handled too.
+    .. versionadded:: 10.9.2026
     """
-    for link in tree.select("#left-sidebar a"):
-        children = link.find_next_sibling("ul")
-        if not children:
+    found: list[nodes.Node] = []
+    for option in LINKCHECK_OPTIONS:
+        value = options.get(option)
+        if not isinstance(value, str):
             continue
-        parent = link.parent
-        if not parent or parent.name != "li":
-            continue
-        if not children.get("id"):
-            children["id"] = f"nav-branch-{abs(hash(str(children))) % (10**8)}"
-        current = (
-            "current" in (parent.get("class") or [])
-            or "current" in (link.get("class") or [])
-            or bool(children.select(".current"))
-        )
-        raw: str | AttributeValueList | list[str] = parent.get("class") or []
-        classes: list[str] = raw.split() if isinstance(raw, str) else list(raw)
-        parent["class"] = AttributeValueList({*classes, "has-children"})
-        if current:
-            parent["aria-expanded"] = "true"
-        else:
-            parent["aria-expanded"] = "false"
-        if link.find_next_sibling("button", class_="nav-toggle"):
-            continue
-        button = tree.new_tag("button", type="button")
-        button["class"] = "nav-toggle"
-        button["aria-controls"] = children["id"]
-        sr = tree.new_tag("span", attrs={"class": "sr-only"})
-        sr.string = "Toggle section"
-        button.append(sr)
-        link.insert_after(button)
+        found += [
+            nodes.raw("", "", format="html", source=uri)
+            for uri in value.split()
+            if "://" in uri
+        ]
+    return found
 
 
 def remove_empty_toctree_divs(tree: bs4.BeautifulSoup) -> None:
-    """Remove empty `toctree-wrapper` divs from the HTML tree.
+    """Drop the wrapper a hidden toctree leaves behind.
 
-    In Sphinx, `toctree-wrapper` divs may be generated even when no
-    visible content is present, such as when a toctree is marked as
-    `:hidden:`. These empty containers result in unnecessary whitespace
-    and redundant elements in the final HTML output.
+    Sphinx writes a `toctree-wrapper` div even for a `:hidden:`
+    toctree, which paints nothing and leaves a gap.
 
-    This function scans the HTML tree, identifies empty toctree divs
-    (those containing only whitespace or line breaks) and removes them
-    to maintain a clean and optimised document structure.
-
-    :param tree: Parsed HTML tree representing the document structure.
+    :param tree: Parsed HTML tree, edited in place.
 
     .. versionchanged:: 31.8.2026
 
-        Only calls `.strip()` on the div's sole child when it's a
+        Only calls `.strip()` on the div's sole child when it is a
         `NavigableString`, instead of assuming it always is one.
     """
     for div in tree.select("div.toctree-wrapper"):
@@ -359,28 +338,20 @@ def remove_empty_toctree_divs(tree: bs4.BeautifulSoup) -> None:
 
 
 def remove_comments(tree: bs4.BeautifulSoup) -> None:
-    """Strip all HTML comments from the parsed HTML tree.
+    """Strip the HTML comments out of a page.
 
-    HTML comments (enclosed in `<!-- -->`) are often used during
-    development for debugging or documentation purposes but are not
-    needed in the final output. This function iterates through the HTML
-    tree and removes all comment nodes, resulting in a cleaner, more
-    efficient HTML file.
+    The templates carry header comments the reader has no use for.
 
-    :param tree: Parsed HTML tree representing the document structure.
+    :param tree: Parsed HTML tree, edited in place.
     """
     for comment in tree.find_all(string=lambda c: isinstance(c, bs4.Comment)):
         comment.extract()
 
 
 def add_copy_to_headerlinks(tree: bs4.BeautifulSoup) -> None:
-    """Add "copy to clipboard" functionality to header links.
+    """Make a heading's anchor copy its own URL when clicked.
 
-    This function enhances all anchor tags with the `headerlink` class
-    by binding a JavaScript event handler that copies the link's URL to
-    the clipboard when clicked.
-
-    :param tree: Parsed HTML tree representing the document structure.
+    :param tree: Parsed HTML tree, edited in place.
     """
     for link in tree.select("a.headerlink"):
         link["@click.prevent"] = (
@@ -391,16 +362,12 @@ def add_copy_to_headerlinks(tree: bs4.BeautifulSoup) -> None:
 
 
 def open_links_in_new_tab(tree: bs4.BeautifulSoup) -> None:
-    """Ensure external links open in a new tab with proper security
-    attributes.
+    """Open external links in a new tab.
 
-    This function modifies all anchor tags marked with the class
-    `reference external`, adding `rel="nofollow noopener"` attributes.
-    These attributes prevent potential security risks such as reverse
-    tabnabbing by ensuring that new tabs cannot manipulate the referring
-    page.
+    `rel="nofollow noopener"` goes on with the target, so the new tab
+    cannot reach back at the page that opened it.
 
-    :param tree: Parsed HTML tree representing the document structure.
+    :param tree: Parsed HTML tree, edited in place.
     """
     for link in tree("a", class_="reference external"):
         link["rel"] = "nofollow noopener"
@@ -408,30 +375,19 @@ def open_links_in_new_tab(tree: bs4.BeautifulSoup) -> None:
 
 
 def postprocess(html: str) -> None:
-    """Perform post-processing on an HTML document after the Sphinx
-    build.
+    """Run every transform over one written page.
 
-    This function reads an HTML file, parses it into a BeautifulSoup
-    tree, applies various transformations such as adding collapsible
-    navigation, cleaning up empty elements and removing comments and
-    finally writes the modified content back to the file.
-
-    Post-processing ensures that the generated HTML is not only
-    functional but also clean, optimised and dynamic according to the
-    user's configuration options.
-
-    :param html: Path to the HTML file to be post-processed.
+    :param html: Path to the HTML file, rewritten in place.
 
     .. versionchanged:: 31.8.2026
 
-        Dropped the unused `app` parameter, instead of keeping it and
-        reassigning it to itself just to appease the linter.
+        Dropped the unused `app` parameter rather than reassigning it
+        to itself to appease the linter.
     """
     with open(html, encoding="utf-8") as f:
         tree = bs4.BeautifulSoup(f, "html.parser")
     open_links_in_new_tab(tree)
     add_copy_to_headerlinks(tree)
-    make_toc_collapsible(tree)
     remove_empty_toctree_divs(tree)
     remove_comments(tree)
     with open(html, "w", encoding="utf-8") as f:
@@ -439,16 +395,14 @@ def postprocess(html: str) -> None:
 
 
 def plain(text: str) -> str:
-    """Flatten a snippet of rendered HTML down to bare text.
+    """Flatten rendered HTML down to bare text.
 
     A page title reaches the context already rendered, so a heading
-    carrying an icon role arrives as markup. Shoving that straight
-    into a `<meta>` tag leaks escaped `<span>` soup into every
-    scraper's preview, which is not a great look.
+    carrying an icon role arrives as markup, and that would put
+    escaped `<span>` soup in a `<meta>` tag.
 
-    Only things that actually look like a tag are stripped, so a
-    description reading "when x < 5 and y > 0" keeps its middle
-    rather than having it swallowed whole.
+    Only things that look like a tag are stripped, so a description
+    reading "when x < 5 and y > 0" keeps its middle.
 
     :param text: Rendered HTML, or plain text.
     :return: The text with tags removed, entities resolved and
@@ -477,9 +431,8 @@ def clip(text: str, limit: int) -> str:
 def buried(paragraph: nodes.Element) -> bool:
     """Say whether a paragraph is sitting inside furniture.
 
-    A line lifted out of a figure caption, an admonition, a table or a
-    code block reads as a non-sequitur once it is on its own in a
-    search result, so those are passed over.
+    A line lifted out of a caption, an admonition, a table or a code
+    block reads as a non-sequitur on its own, so those are passed over.
 
     :param paragraph: The paragraph to place.
     :return: `True` when it has one of those for an ancestor.
@@ -487,17 +440,16 @@ def buried(paragraph: nodes.Element) -> bool:
     .. versionadded:: 10.9.2026
     """
     parent: nodes.Element | None = paragraph.parent
-    while parent is not None and not isinstance(parent, SOCIAL_SKIP):
+    while parent is not None and not isinstance(parent, FURNITURE):
         parent = parent.parent
     return parent is not None
 
 
 def standfirst(doctree: nodes.document | None, limit: int) -> str:
-    """Pull the page's lead, the line written to sit under the title.
+    """Pull the page's lead, the line that sits under the title.
 
-    It is already a one-line answer to "what is this page", which is
-    exactly what a social description wants, so it beats anything
-    guessed from the prose below it.
+    It already answers "what is this page" in one line, which is what
+    a social description wants.
 
     :param doctree: The resolved doctree, or `None` for generated
         pages.
@@ -523,9 +475,8 @@ def standfirst(doctree: nodes.document | None, limit: int) -> str:
 def summarise(doctree: nodes.document | None, limit: int) -> str:
     """Fall back to a page's opening paragraph.
 
-    The last thing tried before giving up, and only reached when the
-    page sets no description of its own, has no lead, and the theme
-    carries no default either.
+    Only reached when the page sets no description of its own, has no
+    lead, and the theme carries no default either.
 
     :param doctree: The resolved doctree, or `None` for generated
         pages.
@@ -556,21 +507,19 @@ def social_metadata(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Expose Open Graph and Twitter card values to the page context.
+    """Work out the Open Graph and Twitter values for a page.
 
-    Replaces `sphinxext-opengraph`, which pulled in `matplotlib` purely
-    to render social cards. Everything here is derived from the doctree
-    and `html_context`, so the build stays dependency-free.
-
-    Each value prefers the page's own `:og:*` field, then the
-    theme-wide default in `html_context`, then whatever can be
-    salvaged from the page itself. The docinfo keys keep their `og:`
-    prefix, so they are looked up under that name and not the bare
-    one.
+    Each one prefers the page's own `:og:*` field, then the default in
+    `html_context`, then whatever can be salvaged from the page. The
+    docinfo keys keep their `og:` prefix, so they are looked up under
+    that name and not the bare one.
 
     :param app: The Sphinx application instance.
+    :param pagename: The page being rendered (unused).
+    :param templatename: The template rendering it (unused).
     :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree, or `None` for generated pages.
+    :param doctree: The resolved doctree, or `None` for generated
+        pages.
 
     .. versionadded:: 10.9.2026
     """
@@ -603,49 +552,139 @@ def social_metadata(
     }
 
 
+def context_defaults(app: Sphinx) -> None:
+    """Fill in the `html_context` keys the templates expect.
+
+    Templates read `fa_icons` and `project` straight off the context,
+    so a site that sets neither fails the build with an
+    `UndefinedError`. The `default` filter does not help, since the
+    attribute is looked up before the filter runs. Merging defaults
+    here means a site names only what it wants changed.
+
+    This runs on `builder-inited` rather than `config-inited`. A theme
+    reached through `html_theme` alone is set up while the builder is
+    being built, by which time `config-inited` has gone.
+
+    :param app: The Sphinx application instance.
+
+    .. versionadded:: 10.9.2026
+    """
+    context: dict[str, t.Any] = app.config.html_context
+    icons: dict[str, str] = dict(ICONS)
+    icons.update(context.get("fa_icons") or {})
+    context["fa_icons"] = icons
+    project: dict[str, str] = dict(PROJECT)
+    project["author"] = app.config.author
+    project.update(context.get("project") or {})
+    context["project"] = project
+
+
+def wordcount(doctree: nodes.document | None) -> int:
+    """Count the words in a page's prose.
+
+    Paragraphs are counted. The ones inside code blocks, tables,
+    figures and admonitions are skipped, which is the list `buried`
+    already keeps out of a social description.
+
+    :param doctree: The resolved doctree, or `None` for generated
+        pages.
+    :return: The number of words counted.
+
+    .. versionadded:: 10.9.2026
+    """
+    if doctree is None:
+        return 0
+    return sum(
+        len(paragraph.astext().split())
+        for paragraph in findall(doctree, nodes.paragraph)
+        if not buried(paragraph)
+    )
+
+
+def reading_time(doctree: nodes.document | None) -> int:
+    """Work out roughly how long a page takes to read.
+
+    Code is left out of the count, so a page that is mostly listings
+    comes out shorter than its length suggests.
+
+    :param doctree: The resolved doctree, or `None` for generated
+        pages.
+    :return: Minutes, rounded up.
+
+    .. versionadded:: 10.9.2026
+    """
+    return ceil(wordcount(doctree) / WORDS_PER_MINUTE)
+
+
+def reading_length(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: dict[str, t.Any],
+    doctree: nodes.document | None,
+) -> None:
+    """Decide whether a page is long enough to fold up.
+
+    `show_show_more` in `html_context` is the site-wide switch. This
+    replaces it in the page context with the answer for this page:
+    true only when the page runs to `show_more_after` minutes or more,
+    and false everywhere when the switch is off.
+
+    :param app: The Sphinx application instance.
+    :param pagename: The name of the page being rendered (unused).
+    :param templatename: The template rendering it (unused).
+    :param context: The page's rendering context, updated in place.
+    :param doctree: The resolved doctree, or `None` for generated
+        pages.
+
+    .. versionadded:: 10.9.2026
+    """
+    options = app.config.html_context
+    minutes = reading_time(doctree)
+    after = int(options.get("show_more_after", SHOW_MORE_AFTER))
+    context["reading_time"] = minutes
+    context["show_show_more"] = (
+        bool(options.get("show_show_more", True)) and minutes >= after
+    )
+
+
 def ensure_classes_on_nodes(
     app: Sphinx, doctree: nodes.document, docname: str
 ) -> None:
-    """Make sure classes are handled properly on node-tree.
+    """Give every node a `classes` list.
 
-    This patched function fixes the breaking code in sphinx's internal
-    structure when the nodes with no classes are not handled properly.
+    Parts of Sphinx assume the attribute is there and fall over on a
+    node that never got one.
 
     :param app: The Sphinx application instance (unused).
-    :param doctree: The resolved doctree for the document.
-    :param docname: The name of the document (unused).
+    :param doctree: The resolved doctree, edited in place.
+    :param docname: The document's name (unused).
 
     .. versionchanged:: 31.8.2026
 
-        Was annotated and called for a different Sphinx event; fixed to
-        match `doctree-resolved`'s actual `(app, doctree, docname)`
-        signature and to use `findall()` instead of the removed
-        `.traverse()` call.
+        Was annotated and connected for a different event. It matches
+        `doctree-resolved` now and uses `findall()` rather than the
+        removed `.traverse()`.
     """
     for node in findall(doctree, nodes.Element):
         node.setdefault("classes", [])
 
 
 def last_updated_date(app: Sphinx, docname: str, source: list[str]) -> None:
-    """Inject the last updated date into the document's metadata.
+    """Work out when a page was last updated.
 
-    This function checks if the `last_updated` metadata is already set
-    for the given document. If not, it attempts to extract the last
-    updated date from a special comment in the document source. If no
-    such comment is found, it falls back to using the last commit date
-    from Git. If the document is not tracked by Git, it uses the file's
-    last modified timestamp.
+    A `.. Last updated on:` comment in the source wins. Failing that,
+    the date of the file's last commit, and failing that, the file's
+    own timestamp.
 
     :param app: The Sphinx application instance.
-    :param docname: The name of the document being processed.
-    :param source: The source content of the document as a list of
-        strings.
+    :param docname: The document being read.
+    :param source: The document's source, as docutils hands it over.
 
     .. versionchanged:: 31.8.2026
 
-        Fixed a `dt.timezone.utc` typo: `dt` is the `datetime` class
-        (aliased from `datetime.datetime`), which has no `timezone`
-        attribute; now uses `datetime.UTC` directly.
+        Fixed a `dt.timezone.utc` typo. `dt` is the class, not the
+        module, so this uses `datetime.UTC` directly.
     """
     metadata = app.env.metadata.setdefault(docname, {})
     if metadata.get("last_updated"):
@@ -688,43 +727,100 @@ def last_updated_date(app: Sphinx, docname: str, source: list[str]) -> None:
         metadata["last_updated"] = on
 
 
-def build_finished(app: Sphinx, exc: Exception | None) -> None:
-    """Post-processes HTML documents after the Sphinx build, applying
-    final modifications to the output files.
+def root_urls(tree: bs4.BeautifulSoup, base: str, root: str) -> None:
+    """Rewrite a page's relative URLs to start at the site root.
 
-    This function is triggered after the build process is completed. It
-    checks if there are any errors and if the builder is set to produce
-    `HTML` or `dirhtml` output. It then applies final transformations
-    to the list of modified documents stored in the environment, such as
-    collapsible navigation and comment removal.
+    A page served for somebody else's address cannot use relative URLs,
+    since the browser resolves them against the address that was asked
+    for. Each one is resolved against where the page would have lived,
+    then written out from the root of the site.
 
-    :param app: Sphinx application object.
-    :param exc: Any exception raised during the build process, or None
-        if no exceptions occurred.
+    :param tree: Parsed HTML tree, edited in place.
+    :param base: The directory the page was rendered as being in.
+    :param root: The path the site is served under, with its slashes.
 
-    Execute post-processing steps after the Sphinx build is complete.
+    .. versionadded:: 10.9.2026
+    """
+    for tag in tree.find_all(True):
+        for attribute in ROOTED_ATTRIBUTES:
+            url = tag.get(attribute)
+            if not isinstance(url, str) or not url:
+                continue
+            if url.startswith(ROOTED_SKIP) or "://" in url:
+                continue
+            url, _, fragment = url.partition("#")
+            path = posixpath.normpath(posixpath.join("/", base, url))
+            if url.endswith("/") and not path.endswith("/"):
+                path += "/"
+            path = root.rstrip("/") + path
+            tag[attribute] = f"{path}#{fragment}" if fragment else path
 
-    Once the Sphinx build process concludes — and if no errors occurred
-    — this function processes each modified HTML file by applying the
-    necessary transformations (collapsible ToCs, link adjustments,
-    etc.). Only HTML or directory-style HTML (`dirhtml`) builds are
-    considered.
 
-    If an exception occurs during the build, post-processing is skipped
-    to avoid further complications.
+def not_found(app: Sphinx) -> None:
+    """Write the theme's 404 page to the top of the output tree.
+
+    A host serves `404.html` for a path it cannot find, so the file has
+    to sit at the root under that exact name. `html_additional_pages`
+    cannot put it there, since `dirhtml` would write it as
+    `404/index.html`, so the page is rendered here and its URLs rooted
+    afterwards.
+
+    `pageurl` is cleared, since the page stands in for whatever
+    address was asked for and has no canonical URL of its own.
+
+    Set `show_404` to `False` in `html_context` to skip it.
 
     :param app: The Sphinx application instance.
-    :param exc: An exception raised during the build process, or `None`
-        if the build was successful.
 
-    .. versionchanged:: 31.8.2026
+    .. versionadded:: 10.9.2026
+    """
+    builder = app.builder
+    if not isinstance(builder, StandaloneHTMLBuilder):
+        return
+    if not app.config.html_context.get("show_404", True):
+        return
+    if getattr(builder, "globalcontext", None) is None:
+        return
+    page = Path(app.outdir, f"{NOT_FOUND}.html")
+    builder.handle_page(
+        NOT_FOUND,
+        {
+            "pageurl": None,
+            "show_breadcrumbs": False,
+            "show_feedback": False,
+            "show_last_updated_on": False,
+            "show_previous_next_pages": False,
+            "show_scrolltop": False,
+            "show_show_more": False,
+        },
+        f"{NOT_FOUND}.html",
+        outfilename=page,
+    )
+    base = posixpath.dirname(builder.get_target_uri(NOT_FOUND))
+    root = urlsplit(app.config.html_baseurl).path or "/"
+    with open(page, encoding="utf-8") as f:
+        tree = bs4.BeautifulSoup(f, "html.parser")
+    root_urls(tree, base, root)
+    page.write_text(str(tree), encoding="utf-8")
 
-        Reads `theme_htmls` via `getattr()` and narrows `app.builder` to
-        `StandaloneHTMLBuilder` with `t.cast()`, since neither is
-        declared on the general `BuildEnvironment`/`Builder` types.
+
+def build_finished(app: Sphinx, exc: Exception | None) -> None:
+    """Write the 404 page and post-process every page.
+
+    Only for the HTML builders, and only when the build worked. The 404
+    page goes out first so it is post-processed along with the rest.
+
+    :param app: The Sphinx application instance.
+    :param exc: Whatever went wrong during the build, or `None`.
+
+    .. versionchanged:: 10.9.2026
+
+        Writes the theme's 404 page through `not_found` before the
+        post-processing pass.
     """
     if exc or app.builder.name not in {"html", "dirhtml"}:
         return
+    not_found(app)
     htmls = sorted(str(_) for _ in Path(app.outdir).rglob("*.html"))
     if not htmls:
         return
