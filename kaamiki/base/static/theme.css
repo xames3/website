@@ -2248,6 +2248,11 @@ li .badge {
     color: hsl(var(--km-color-red));
 }
 
+.blue,
+.blue>p {
+    color: hsl(var(--km-color-blue));
+}
+
 .strikethrough {
     text-decoration: line-through;
     text-decoration-thickness: 1px;

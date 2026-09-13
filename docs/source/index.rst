@@ -8,8 +8,8 @@
 :og:type: website
 :og:image: https://avatars.githubusercontent.com/u/90549089?v=4
 :fb:title: So, what do you think?
-:fb:description: I'd love to hear your suggestions and takes, or even a
-    recommendation for a great film!
+:fb:description: I'd love to hear your suggestions or even a recommendation for
+    a great film!!
 :fb:button: Let's chat
 :fb:mode: split
 
@@ -118,9 +118,6 @@ thoughts on AI and how some frameworks actually work under the hood.
 
 It wouldn't be possible if I hadn't explored this; in doing so, I realised I
 had a passion for teaching.
-
-.. rubric:: :fab:`handshake far` From mistakes to mentorship
-    :class: pre-title-text
 
 .. _teaching-philosophy:
 
