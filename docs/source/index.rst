@@ -1,15 +1,15 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 11 September, 2026
+.. Last updated on: 13 September, 2026
 
 :orphan:
-:og:title: Akshay's Corner
-:og:description: A corner on the internet.
+:og:title: Akshay Mestry
+:og:description: Akshay's corner on the internet.
 :og:type: website
 :og:image: https://avatars.githubusercontent.com/u/90549089?v=4
-:fb:title: What do you think?
-:fb:description: I'd genuinely love to hear your suggestions and takes, or even
-    a recommendation for a great film!
+:fb:title: So, what do you think?
+:fb:description: I'd love to hear your suggestions and takes, or even a
+    recommendation for a great film!
 :fb:button: Let's chat
 :fb:mode: split
 
@@ -59,7 +59,6 @@ reinforcement learning.
                 .. grid-item::
 
                     .. button:: mailto:xa@mes3.dev
-                        :fa-icon: fa-envelope
 
                         Send an email
 
@@ -168,8 +167,8 @@ My approach to mentoring's changed loads over the years, mind. It shifts
 depending on who's actually in front of me, what they need, and, if I'm being
 honest, what kind of mood I'm in that day when they come asking for help.
 
-.. _National Louis University: https://nl.edu/undergraduate-college
-.. _DePaul University: https://depaul.edu
+.. _National Louis University: https://nl.edu/undergraduate-college/
+.. _DePaul University: https://www.depaul.edu
 .. _LinkedIn: https://linkedin.com/in/xames3
 .. _Rust: https://rust-lang.org
 

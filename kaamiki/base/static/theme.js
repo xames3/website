@@ -1,4 +1,3 @@
-const WORDS_PER_MINUTE = 225;
 const SCROLL_DURATION_MIN_MS = 300;
 const SCROLL_DURATION_MAX_MS = 1800;
 const ANCHOR_SCROLL_PX_FACTOR = 0.6;
@@ -7,6 +6,10 @@ const HEADER_OFFSET_DEFAULT_PX = 40;
 const ANCHOR_EXTRA_OFFSET_DEFAULT_PX = 12;
 const HEADER_BORDER_SCROLL_THRESHOLD = 250;
 const HASH_SETTLE_MS = 2600;
+const CLAMP_SLACK_PX = 48;
+const CLAMP_SETTLE_MS = 60;
+const CLAMP_GAP_PX = 32;
+const CLAMP_MIN_PX = 320;
 const DROPDOWN_OPEN_DELAY_MS = 40;
 const DROPDOWN_CLOSE_DELAY_MS = 140;
 const DROPDOWN_PX_FACTOR = 0.9;
@@ -74,13 +77,8 @@ function getDurationMs(cssVar = '--km-duration-normal', fallback = 500) {
 window.simpleGetDurationMs = getDurationMs;
 
 const TIMING = {
-    hover: () => getDurationMs('--km-duration-hover', 150),
-    fast: () => getDurationMs('--km-duration-fast', 250),
-    drawer: () => getDurationMs('--km-duration-drawer', 460),
-    theme: () => getDurationMs('--km-duration-theme', 520),
     dropdownMin: () => getDurationMs('--km-duration-dropdown-min', 340),
     dropdownMax: () => getDurationMs('--km-duration-dropdown-max', 760),
-    normal: () => getDurationMs('--km-duration-normal', 750),
     revealStep: () => getDurationMs('--km-reveal-step', 90),
     scrollMin: () => getDurationMs('--km-scroll-min', 450),
     scrollMax: () => getDurationMs('--km-scroll-max', 900),
@@ -177,32 +175,118 @@ function applyTheme(mode) {
 
 window.simpleApplyTheme = applyTheme;
 
-const EXCLUDED_FROM_WORD_COUNT = 'pre, code, figure, figcaption, .literal-block-wrapper, '
-    + '.highlight, .code-block-caption, .math, .sidebar, .site-sidebar, .sphinxsidebar, '
-    + '.admonition, nav, header, footer';
+function initShowMore() {
+    const page = document.querySelector('.site-page--clamped');
+    if (!page) return;
+    const content = page.querySelector('.site-page__content');
+    const shell = page.querySelector('[data-show-more]');
+    const button = shell?.querySelector('.site-page__more-button');
+    const label = button?.querySelector('.site-page__more-label');
+    if (!content || !shell || !button) return;
+    if (getComputedStyle(shell).display === 'none') {
+        page.classList.remove('site-page--clamped');
+        return;
+    }
 
-function initReadingTime() {
-    const target = document.getElementById('readingTime');
-    if (!target) return;
-    const content = document.getElementById('content')
-        || document.querySelector('[role="main"]');
-    if (!content) return;
+    let expanded = false;
+    let timer = 0;
 
-    const words = Array.from(content.querySelectorAll('p')).reduce((total, paragraph) => {
-        if (paragraph.closest(EXCLUDED_FROM_WORD_COUNT)) return total;
-        const clone = paragraph.cloneNode(true);
-        clone.querySelectorAll('code, pre, kbd, samp, .linenos, .copybtn, .headerlink, svg, i.fa, .fa')
-            .forEach((node) => node.remove());
-        const text = (clone.textContent || '').replace(/\s+/g, ' ').trim();
-        if (text.length < 20) return total;
-        return total + text.split(/\s+/).filter((token) => /[\p{L}\p{N}]/u.test(token)).length;
-    }, 0);
+    const tail = () => button.getBoundingClientRect().height + CLAMP_GAP_PX;
 
-    if (!words) return;
-    const icon = document.createElement('i');
-    icon.className = 'fa-solid fa-hourglass-start site-article__reading-time-icon';
-    icon.setAttribute('aria-hidden', 'true');
-    target.replaceChildren(icon, ` ${Math.ceil(words / WORDS_PER_MINUTE)} min read`);
+    const fit = () => {
+        const top = window.scrollY + content.getBoundingClientRect().top;
+        const viewport = window.visualViewport?.height || window.innerHeight;
+        const room = Math.max(CLAMP_MIN_PX, viewport - top - tail());
+        page.style.setProperty('--km-show-more-clamp', `${Math.round(room)}px`);
+    };
+
+    const settle = (next) => {
+        window.clearTimeout(timer);
+        page.classList.remove('site-page--clamping');
+        page.classList.toggle('site-page--clamped', !next);
+        content.style.maxHeight = '';
+    };
+
+    const measure = () => {
+        content.style.maxHeight = '';
+        page.classList.add('site-page--clamped');
+        const collapsed = content.getBoundingClientRect().height;
+        page.classList.remove('site-page--clamped');
+        const full = content.getBoundingClientRect().height;
+        return { collapsed, full };
+    };
+
+    fit();
+    const { collapsed: first, full: whole } = measure();
+    settle(false);
+    if (whole - first < CLAMP_SLACK_PX) {
+        page.classList.remove('site-page--clamped');
+        shell.remove();
+        return;
+    }
+
+    const keepInView = (collapsed) => {
+        const top = window.scrollY + content.getBoundingClientRect().top;
+        const viewport = window.visualViewport?.height || window.innerHeight;
+        const targetY = Math.max(0, top + collapsed + tail() - viewport);
+        if (window.scrollY <= targetY) return;
+        smoothScrollTo(targetY, TIMING.scrollMin());
+    };
+
+    const toggle = (next, animate = true) => {
+        if (next === expanded) return;
+        expanded = next;
+        button.setAttribute('aria-expanded', next ? 'true' : 'false');
+        if (label) {
+            label.textContent = next
+                ? button.dataset.labelLess
+                : button.dataset.labelMore;
+        }
+
+        const start = content.getBoundingClientRect().height;
+        const { collapsed, full } = measure();
+        if (!next) keepInView(collapsed);
+        if (!animate || prefersReducedMotion()) {
+            settle(next);
+            return;
+        }
+
+        page.classList.toggle('site-page--clamped', !next);
+        page.classList.add('site-page--clamping');
+        content.style.maxHeight = `${start}px`;
+        void content.offsetHeight;
+        content.style.maxHeight = `${next ? full : collapsed}px`;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(
+            () => settle(next),
+            getDurationMs('--km-duration-clamp', 420) + CLAMP_SETTLE_MS,
+        );
+    };
+
+    const holds = (href) => {
+        if (!href.startsWith('#') || href.length < 2) return false;
+        let id = href.slice(1);
+        try { id = decodeURIComponent(id); } catch { /* noop */ }
+        const target = document.getElementById(id);
+        return !!target && target !== content && content.contains(target);
+    };
+
+    button.addEventListener('click', () => toggle(!expanded));
+
+    document.addEventListener('click', (event) => {
+        if (expanded) return;
+        const link = event.target.closest?.('a[href]');
+        if (!link || !holds(link.getAttribute('href') || '')) return;
+        toggle(true, false);
+    }, true);
+
+    window.addEventListener('hashchange', () => {
+        if (!expanded && holds(location.hash)) toggle(true, false);
+    });
+
+    window.addEventListener('resize', rafThrottle(fit), { passive: true });
+
+    if (holds(location.hash)) toggle(true, false);
 }
 
 function initHeaderSearch() {
@@ -455,86 +539,6 @@ function initTouchReveal() {
         figures.forEach((node) => node.classList.remove('is-revealed'));
         if (shouldReveal) figure.classList.add('is-revealed');
     });
-}
-
-function initSidebarAccordion() {
-    const sidebar = document.querySelector('.site-sidebar--primary');
-    if (!sidebar) return;
-
-    let uid = 0;
-    const setExpanded = (item, expanded) => item.setAttribute('aria-expanded', String(expanded));
-    const collapseOthers = (except) => {
-        sidebar.querySelectorAll('li.has-children[aria-expanded="true"]').forEach((other) => {
-            if (other !== except) setExpanded(other, false);
-        });
-    };
-    const toggle = (item) => {
-        if (item.getAttribute('aria-expanded') === 'true') {
-            setExpanded(item, false);
-            return;
-        }
-        collapseOthers(item);
-        setExpanded(item, true);
-    };
-
-    sidebar.querySelectorAll('li').forEach((item) => {
-        const childList = item.querySelector(':scope > ul');
-        const anchor = item.querySelector(':scope > a, :scope > p > a');
-        if (!childList || !anchor) return;
-
-        childList.removeAttribute('hidden');
-        childList.style.removeProperty('display');
-        item.classList.add('has-children');
-        childList.id = childList.id || `nav-branch-${++uid}`;
-
-        const button = item.querySelector(':scope > button.nav-toggle, :scope > a > button.nav-toggle');
-        button?.setAttribute('aria-controls', childList.id);
-
-        const isCurrent = item.classList.contains('current')
-            || anchor.classList.contains('current')
-            || !!item.querySelector(':scope > ul .current');
-        setExpanded(item, false);
-        if (isCurrent) requestAnimationFrame(() => setExpanded(item, true));
-
-        anchor.addEventListener('click', (event) => {
-            const href = anchor.getAttribute('href') || '';
-            if (href && !href.startsWith('#')) {
-                if (isModifiedClick(event)) return;
-                collapseOthers(item);
-                setExpanded(item, true);
-                return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            toggle(item);
-        });
-
-        anchor.addEventListener('keydown', (event) => {
-            if (event.key === 'ArrowRight') {
-                event.preventDefault();
-                collapseOthers(item);
-                setExpanded(item, true);
-            } else if (event.key === 'ArrowLeft') {
-                event.preventDefault();
-                setExpanded(item, false);
-            }
-        });
-    });
-
-    sidebar.addEventListener('click', (event) => {
-        const button = event.target.closest('button.nav-toggle');
-        const item = button?.closest('li.has-children');
-        if (!item) return;
-        event.preventDefault();
-        event.stopPropagation();
-        toggle(item);
-    });
-
-    const expanded = sidebar.querySelectorAll('li.has-children[aria-expanded="true"]');
-    if (expanded.length <= 1) return;
-    const keep = Array.from(expanded).find((item) => item.querySelector(':scope .current'))
-        || expanded[0];
-    collapseOthers(keep);
 }
 
 function initHeaderNavDropdowns() {
@@ -885,14 +889,13 @@ function initCalNamespaces() {
 
 ready(() => {
     initCalNamespaces();
-    initReadingTime();
+    initShowMore();
     initHeaderSearch();
     initAnchorScrolling();
     initCopyUrl();
     initHeaderBorder();
     initImageZoom();
     initTouchReveal();
-    initSidebarAccordion();
     initHeaderNavDropdowns();
     initDropdowns();
     initYouTubeCards();

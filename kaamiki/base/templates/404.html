@@ -1,0 +1,35 @@
+<!--
+Not Found Page Template
+=======================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 12 September, 2026
+Last updated on: 12 September, 2026
+-->
+{%- extends "layout.html" -%}
+{%- set title = _("Page not found") -%}
+{%- block extrahead %}
+    <meta name="robots"
+          content="noindex, follow" />
+{%- endblock extrahead %}
+{%- block body %}
+    <div class="site-page">
+        <div id="content"
+             role="main"
+             class="site-page__content site-notfound">
+            <p class="site-notfound__code">404</p>
+            <h1 class="site-notfound__title">{{ _("Oops... Page not found!") }}</h1>
+            <p class="site-notfound__message">
+                {%- trans -%}
+                Nothing lives at this address. The page may have moved or the link that brought you here may be wrong.
+            {%- endtrans -%}
+        </p>
+        <p class="site-notfound__actions">
+            <a class="sd-sphinx-override sd-btn sd-text-wrap sd-btn-primary"
+               href="{{ pathto(master_doc) }}">
+                <span>{{ _("Take me home") }}</span>
+            </a>
+        </p>
+    </div>
+</div>
+{%- endblock body %}

@@ -6,7 +6,9 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
 Last updated on: 10 September, 2026
 
-This module manages Kaamiki Sphinx Theme's custom directive and roles.
+The theme's directives live one to a module. `directives` is the list
+`kaamiki.setup()` and `kaamiki.register()` walk to register them; a
+module joins the theme by being imported here and named in it.
 
 .. deprecated:: 19.10.2025
 

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 28 June, 2026
+.. Last updated on: 11 September, 2026
 
 :og:title: FAQs
 :og:description: Frequently Asked Questions about me and this website
@@ -43,8 +43,8 @@ about what my favourite films are and what I'm currently watching. So to make
 this easier for everyone, I've put together my answers to your most frequent
 questions.
 
-This isn't just a list, but it's an extension of my story. Some easter eggs, so
-to speak...
+Think of this less as a list and more as an extension of my story, with a few
+easter eggs thrown in, so to speak...
 
 .. _faq:
 
@@ -100,7 +100,7 @@ Frequently asked questions
     .. rubric:: Asked on November 16, 2025
         :class: date-text
 
-    I'm an :strike:`Adjunct` Assistant Professor at
+    I'm an :strike:`Adjunct` :strike:`Assistant` Adjunct Professor at
     `National Louis University`_'s Undergraduate college in Computer Science &
     Information Systems (CSIS) Department.
 
@@ -182,7 +182,7 @@ Frequently asked questions
     website, I'm using vanilla CSS and JS.
 
 .. _gramogram: https://en.wikipedia.org/wiki/Gramogram
-.. _National Louis University: https://nl.edu/undergraduate-college
+.. _National Louis University: https://nl.edu/undergraduate-college/
 .. _Christopher Nolan: https://www.imdb.com/name/nm0634240
 .. _Interstellar: https://en.wikipedia.org/wiki/Interstellar_(film)
 .. _Hans Zimmer: https://en.wikipedia.org/wiki/Hans_Zimmer

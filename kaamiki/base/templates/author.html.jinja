@@ -25,12 +25,14 @@ Last updated on: 12 September, 2026
         </a>
         <div class="site-article__meta">
             <div class="site-article__meta-group">
-                <p id="readingTime"
-                   class="site-article__reading-time"></p>
+                <p class="site-article__reading-time">
+                    <i class="{{ fa_icons.reading_time }} site-article__reading-time-icon"
+                       aria-hidden="true"></i>{{ minutes }} {{ 'min' if minutes == 1 else 'mins' }} read
+                </p>
                 <a class="site-article__copy copy-url"
                    data-tooltip="Copy article URL to clipboard"
                    href="#">
-                    <i class="fa-regular fa-link-simple"
+                    <i class="{{ fa_icons.copy_url }}"
                        aria-hidden="true"></i>
                     <span>Copy</span>
                 </a>

@@ -4,44 +4,33 @@ YouTube Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 10 September, 2026
+Last updated on: 12 September, 2026
 
-This module defines a custom `youtube` directive for the Kaamiki Sphinx
-Theme. The directive allows embedding a YouTube video directly within
-the document.
+A `youtube` directive that embeds a video in the page::
 
-The `youtube` directive is designed to extend reStructuredText (rST)
-capabilities by injecting structured metadata about the content, which
-can be styled or processed further using Jinja2 templates.
+    .. youtube:: https://www.youtube.com/watch?v=PhabJpIPONI
+       :startfrom: 90
+       :privacy:
 
-The `youtube` directive can be used in reStructuredText documents as
-follows::
+       What it is about.
 
-    .. code-block:: rst
-
-        .. youtube:: https://www.youtube.com/watch?v=PhabJpIPONI
-
-The above snippet will be processed and rendered according to the
-theme's Jinja2 template, producing a final HTML output.
+Both URL forms are accepted. The options become query parameters on the
+embed URL, and the player comes from `youtube.html.jinja`.
 
 .. versionchanged:: 10.9.2026
 
-    Rendering goes through `utils.render`, one shared Jinja environment
-    for the whole theme with autoescaping switched on. The old per-
-    module templates had escaping off, so a caption carrying an `&`, a
-    `<` or a stray quote quietly emitted broken markup.
+    Rendering goes through `utils.render`, which has autoescaping on.
+    The per-module templates it replaced had it off, so a caption
+    carrying an `&`, a `<` or a stray quote emitted broken markup.
 
 .. deprecated:: 10.9.2026
 
-    [1] The module-level `here`, `templates` and `html` path fiddling
-        has moved out to `utils`, along with the `jinja2` import. Every
-        directive was opening its own template at import time and
-        building a bare `jinja2.Template` off it, which is a daft thing
-        to do seven times over. `template` is now just the filename.
+    [1] The module-level path fiddling has moved to `utils`, along with
+        the `jinja2` import. `template` is now just the filename.
     [2] Dropped the `node` class and the `visit`/`depart` pair. This
-        directive hands back a `nodes.raw` and never goes anywhere near
-        a translator, so all three were dead weight that only existed to
-        keep the registration loop happy.
+        directive hands back a `nodes.raw` and never reaches a
+        translator, so all three only existed to keep the registration
+        loop happy.
 """
 
 from __future__ import annotations
@@ -59,19 +48,18 @@ template: t.Final[str] = "youtube.html.jinja"
 
 
 class directive(rst.Directive):
-    """Custom `youtube` directive for reStructuredText.
+    """The `youtube` directive.
 
-    This class defines the behaviour of the `youtube` directive,
-    including how it processes options and content and how it
-    generates nodes to be inserted into the document tree.
+    Options::
 
-    The directive supports the following options::
-
-        - `autoplay`: Boolean flag to either autoplay the video on
-          load.
-        - `showcaptions`: Flag to either enable closed captions.
-        - `caption`: Video caption.
-        - `startfrom`: Start playing the video from certain point.
+        - `autoplay`: Play the video as soon as it loads.
+        - `showcaptions`: Turn closed captions on.
+        - `caption`: A line of text under the player.
+        - `startfrom`: Seconds to start playing from.
+        - `privacy`: Embed from `youtube-nocookie.com`.
+        - `modestbranding`: Kept for older pages; always on now.
+        - `controls`: `0` hides the player controls.
+        - `playsinline`: Kept for older pages; always on now.
     """
 
     has_content = True
@@ -89,24 +77,18 @@ class directive(rst.Directive):
     }
 
     def run(self) -> list[nodes.Node]:
-        """Parse directive options and create an `youtube` node.
+        """Build the embed URL and return the player as a raw node.
 
-        This method gathers all options provided by the user (if any)
-        in the `youtube` directive, constructs a new `node` instance,
-        and returns it wrapped in a list.
-
-        The returned node is then placed into the document tree at the
-        directive's location. Further processing will convert the node
-        into HTML or other formats.
-
-        :return: A list containing a single `node` element.
+        :return: A list holding the one `raw` node.
 
         .. versionchanged:: 10.9.2026
 
-            Renders through `utils.render`, so the caption is escaped on
-            its way into the template instead of being dropped into the
-            markup as-is.
-
+            [1] Renders through `utils.render`, so the caption is
+                escaped on its way into the template instead of being
+                dropped into the markup as-is.
+            [2] The `raw` node carries the video URL as its `source`,
+                which is where `linkcheck` looks. Every embed was being
+                skipped by the link checker.
         """
         vid = src = rst.directives.uri(self.arguments.pop().strip())
         if "youtu.be/" in src:
@@ -132,6 +114,7 @@ class directive(rst.Directive):
         self.options["url"] = url
         self.options["caption"] = "\n".join(self.content).strip()
         attributes: dict[str, str] = {}
+        attributes["source"] = src
         attributes["text"] = render(template, **self.options)
         attributes["format"] = "html"
         return [nodes.raw(**attributes)]

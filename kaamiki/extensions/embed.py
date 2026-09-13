@@ -6,65 +6,52 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 11 August, 2026
 Last updated on: 12 September, 2026
 
-This module defines a custom `embed` directive for the Kaamiki Sphinx
-Theme. The directive allows including/embedding an HTML page (embed) or
-an iframe directly within the document.
+An `embed` directive that drops a block of HTML into the page. Written
+inline, the argument is `iframe` and the content is the markup::
 
-The `embed` directive can be used in reStructuredText documents as
-follows::
+    .. embed:: iframe
+       :expected-count: 10
 
-    .. code-block:: rst
+       <iframe
+           src="https://example.com"
+           width="100%"
+           height="400px"
+           data-expected-count="{{ expected-count }}">
+       </iframe>
 
-        .. embed:: iframe
-            :expected-count: 10
+A larger embed is better kept in a file of its own, named as the
+argument instead. Any CSS or JavaScript it needs is named in `:css:`
+and `:js:`, comma-separated, as filenames under `html_static_path`.
+They are attached to the pages that use the directive and to no
+others::
 
-            <iframe
-                src="https://example.com"
-                width="100%"
-                height="400px"
-                data-expected-count="{{ expected-count }}">
-            </iframe>
+    .. embed:: ../assets/html/embed.html
+       :css: embed.css
+       :js: embed.js
 
-To keep large embeds out of the page's own rST source, the directive
-also accepts an external HTML fragment as an (optional) input. That
-fragment may in turn need its own CSS and/or JavaScript. Rather than
-inlining `<style>`/`<script>` tags in the fragment, list the static
-filenames (relative to `html_static_path`) via `:css:` and `:js:`,
-comma-separated. They are only attached to pages that actually use the
-directive, via Sphinx's `html-page-context` event::
-
-    .. code-block:: rst
-
-        .. embed:: ../assets/html/embed.html
-            :css: embed.css
-            :js: embed.js
+Options become placeholders: `{{ expected-count }}` in the HTML is
+replaced by the option's value, escaped for wherever it lands.
 
 .. versionchanged:: 31.8.2026
 
-    [1] Renamed from `iframe` to `embed`, since the directive covers
-        inline content and external HTML fragments, not just iframes.
-    [2] The `:file:` option is gone; the directive's argument is now
-        either `iframe` (inline content) or the fragment's path.
-    [3] Options may now span multiple lines, so a single `:option:`
-        value (an array, a long string) can be written across several
-        indented lines instead of one.
+    [1] Renamed from `iframe`, since the directive covers inline
+        content and external fragments and not just iframes.
+    [2] The `:file:` option is gone. The argument is either `iframe` or
+        the fragment's path.
+    [3] An option's value may span several indented lines.
 
 .. versionadded:: 10.9.2026
 
-    `substitute` fills a fragment's placeholders with escaping picked
-    for where each one sits. A value going into an attribute gets its
-    quotes and brackets escaped; one going into a `<script>` is JSON-
-    encoded, with `<`, `>` and `&` written as escape sequences so a
-    value can't close the block it lives in. Before this the
-    substitution was a plain string replace, which meant a fragment was
-    only ever as safe as the options handed to it.
+    `substitute` escapes each placeholder for where it sits: quotes and
+    brackets for an attribute, JSON for a `<script>`. It was a plain
+    string replace before, so a fragment was only ever as safe as the
+    options handed to it.
 
 .. deprecated:: 10.9.2026
 
     Dropped the `node` class and the `visit`/`depart` pair. This
-    directive hands back a `nodes.raw` and never goes anywhere near a
-    translator, so all three were dead weight that only existed to keep
-    the registration loop happy.
+    directive hands back a `nodes.raw` and never reaches a translator,
+    so all three only existed to keep the registration loop happy.
 """
 
 from __future__ import annotations
@@ -104,15 +91,13 @@ ESCAPES: dict[str, str] = {
 
 
 def substitute(source: str, values: dict[str, t.Any]) -> str:
-    """Fill a fragment's placeholders, escaping for where each sits.
+    """Fill a fragment's placeholders, escaping each for where it sits.
 
-    A fragment mixes markup and script, and the two want opposite
-    things. A value dropped into an attribute has to have its quotes
-    and angle brackets escaped or it closes the attribute early; the
-    same treatment inside a `<script>` turns a perfectly good array
-    into `[&quot;a&quot;]` and breaks the page. So the source is split
-    on its script and style blocks and each side gets what it needs,
-    HTML escaping out here, JSON in there.
+    Markup and script want opposite things. A value in an attribute
+    needs its quotes and brackets escaped or it closes the attribute
+    early; the same treatment inside a `<script>` turns an array into
+    `[&quot;a&quot;]` and breaks the page. The source is split on its
+    script and style blocks, and each side gets what it needs.
 
     :param source: The fragment, placeholders and all.
     :param values: Directive options, keyed as they are written in the
@@ -121,7 +106,7 @@ def substitute(source: str, values: dict[str, t.Any]) -> str:
     :return: The fragment with every known placeholder filled in.
         Anything unrecognised is left alone.
 
-    .. versionadded:: 12.9.2026
+    .. versionadded:: 10.9.2026
     """
 
     def swap(*, scripting: bool) -> t.Callable[[t.Match[str]], str]:
@@ -156,12 +141,11 @@ def substitute(source: str, values: dict[str, t.Any]) -> str:
 
 
 class directive(rst.Directive):
-    """Custom `embed` directive for reStructuredText.
+    """The `embed` directive.
 
-    This class defines the behaviour of the `embed` directive,
-    including
-    how it processes options and content and how it generates nodes to
-    be inserted into the document tree.
+    The argument is either `iframe`, with the markup as content, or the
+    path to an HTML fragment. Every other option is a placeholder
+    value, apart from `encoding`, `css` and `js`.
     """
 
     has_content = True
@@ -169,25 +153,16 @@ class directive(rst.Directive):
     final_argument_whitespace = True
 
     def run(self) -> list[nodes.Node]:
-        """Parse directive options and create an `embed` node.
+        """Read the markup, fill its placeholders and return it.
 
-        This method gathers all options provided by the user (if any)
-        in the `embed` directive, constructs a new `node` instance and
-        returns it wrapped in a list.
-
-        The returned node is then placed into the document tree at the
-        directive's location. Further processing will convert the node
-        into HTML or other formats.
-
-        :return: A list containing a single `node` self.
+        :return: A list holding the one `raw` node.
 
         .. versionchanged:: 31.8.2026
 
-            Replaces the old `:file:` option: the directive's single
-            argument is now either `iframe` (inline content) or the
-            fragment's path. Options are parsed from that same argument
-            with a regex, so a value (an array, say) may now span
-            multiple indented lines instead of just one.
+            The argument is either `iframe` or the fragment's path,
+            replacing the old `:file:` option. Options are read out of
+            that same argument, so a value may span several indented
+            lines.
         """
         argument = self.arguments.pop().strip()
         file, _, options = argument.partition("\n")
@@ -248,24 +223,23 @@ def html_page_context(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Attach an `embed` embed's `:css:`/`:js:` assets to its page.
+    """Attach an embed's `:css:` and `:js:` files to its page.
 
-    Only pages containing an `embed` directive that declared static
-    assets get them attached, keeping unrelated pages free of unused
-    stylesheets and scripts.
+    Only the pages carrying an `embed` that named assets get them, so
+    the rest of the site is free of stylesheets and scripts it does not
+    use.
 
     :param app: The Sphinx application instance.
-    :param pagename: The name of the page currently being rendered.
-    :param templatename: The template used for the page (unused).
-    :param context: The Jinja2 rendering context (unused).
-    :param doctree: The doctree for the page, or `None` for pages
-        without one (unused).
+    :param pagename: The page being rendered.
+    :param templatename: The template rendering it (unused).
+    :param context: The page's rendering context (unused).
+    :param doctree: The resolved doctree, or `None` for generated
+        pages (unused).
 
     .. versionchanged:: 31.8.2026
 
-        The unused parameters are now prefixed with `_` instead of being
-        OR'd into `app`, which corrupted `app`'s type for the
-        `app.env`/`app.add_css_file()` uses right below.
+        The unused parameters are named rather than OR'd into `app`,
+        which corrupted `app`'s type for the uses right below.
     """
     assets = getattr(app.env, "embed_assets", {})
     css_files, js_files = assets.get(pagename, ((), ()))

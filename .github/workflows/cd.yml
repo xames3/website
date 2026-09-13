@@ -19,7 +19,6 @@ on:
 env:
   ARTIFACT_NAME: webpages
   OUTPUT_DIR: docs/build/
-  SOURCE_DIR: docs/source/
   PYTHON_VERSION: "3.13.7"
 
 permissions:
@@ -45,9 +44,9 @@ jobs:
       - name: Install documentation dependencies
         run: python -m pip install -Uq -e .
       - name: Build HTML pages with Sphinx
-        run: sphinx-build --builder dirhtml --fail-on-warning --show-traceback --fresh-env --write-all --quiet $SOURCE_DIR $OUTPUT_DIR
+        run: make --directory docs html
       - name: Upload built documentation as artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.OUTPUT_DIR }}
@@ -65,6 +64,6 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
         with:
           artifact_name: ${{ env.ARTIFACT_NAME }}

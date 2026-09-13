@@ -35,10 +35,10 @@ me something valuable or I've just watched them for no reason.
 .. figure:: https://i.imgur.com/j6ixm8N.jpg
     :alt: Best of YouTube
 
-This page is a collection of those gems. I wanted to share these, so you don't
-have to sift through the endless noise of the algorithm. Whether you're a
-developer, a student, or just someone looking for quality content, I hope you
-find something here that resonates with you.
+This page is a collection of those gems. I wanted to share these so you don't
+have to sift through the endless noise of the algorithm yourself. If even one
+of these ends up in your recommended feed and makes your day slightly less
+shit, I'll call that a win.
 
 .. note::
 
@@ -1098,9 +1098,10 @@ magical.
     :class: subtitle-text
 
 This section is a tribute to those late-night YouTube journeys. It's a random,
-eclectic mix of fascinating documentaries, unsolved mysteries and
-thought-provoking explorations and `VSauce`_ that are perfect for when your
-curiosity gets the better of your sleep schedule.
+mostly pointless mix, documentaries I definitely shouldn't have started at
+3am, unsolved mysteries, and whatever `VSauce`_ video the algorithm decides to
+throw at me, perfect for when your curiosity gets the better of your sleep
+schedule.
 
 .. dropdown:: Some of my favourite late-night bored out of your mind videos
 

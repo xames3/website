@@ -179,9 +179,11 @@ Last updated on: 12 September, 2026
                 {%- endblock header %}
                 <div class="site-shell__main">
                     <div class="site-layout container {% if show_toctree|tobool %}site-layout--nav-in-header{% endif %}">
-                        {%- block left_sidebar %}
-                            {%- include "left_sidebar.html.jinja" %}
-                        {%- endblock left_sidebar %}
+                        {%- block sidebar %}
+                            {%- if sidebars|length > 0 %}
+                                {%- include "sidebar.html.jinja" %}
+                            {%- endif %}
+                        {%- endblock sidebar %}
                         {%- block main %}
                             <main class="site-layout__content">
                                 {%- block body %}{%- endblock body %}
@@ -190,7 +192,7 @@ Last updated on: 12 September, 2026
                                     {%- include "previous_next_pages.html.jinja" %}
                                 {%- endif %}
                             {%- endblock main %}
-                            {%- block right_sidebar %}{%- endblock right_sidebar %}
+                            {%- block aside %}{%- endblock aside %}
                             </div>
                         </div>
                         {%- block footer %}

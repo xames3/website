@@ -70,10 +70,10 @@ Last updated on: 12 September, 2026
             {%- block body_after %}{%- endblock body_after %}
             </div>
         {%- endblock body %}
-        {%- block right_sidebar %}
+        {%- block aside %}
             {%- if genindexentries %}
-                <aside id="right-sidebar"
-                       class="site-layout__sidebar site-sidebar site-sidebar--secondary site-sidebar--alpha">
+                <aside id="index-letters"
+                       class="site-layout__sidebar site-sidebar site-sidebar--alpha">
                     <p class="site-sidebar__title">{{ _("Jump to letter") }}</p>
                     <nav class="site-sidebar__alphabet"
                          aria-label="{{ _('Index shortcuts') }}">
@@ -84,4 +84,4 @@ Last updated on: 12 September, 2026
                     </nav>
                 </aside>
             {%- endif %}
-        {%- endblock right_sidebar %}
+        {%- endblock aside %}

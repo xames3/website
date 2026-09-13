@@ -365,7 +365,6 @@ video {
     --km-color-border: 214.3 31.8% 91.4%;
     --km-color-input: var(--km-color-border);
     --km-color-primary: 222.2 47.4% 11.2%;
-    --km-color-primary-fg: 210 40% 98%;
     --km-color-accent-bg: 210 40% 96.1%;
     --km-color-accent-fg: 222.2 47.4% 11.2%;
     --km-color-ring: 215 20.2% 65.1%;
@@ -382,7 +381,6 @@ video {
     --km-color-border: 216 34% 17%;
     --km-color-input: var(--km-color-border);
     --km-color-primary: 210 40% 98%;
-    --km-color-primary-fg: 222.2 47.4% 1.2%;
     --km-color-ring: 216 34% 17%;
     --km-radius-normal: 0.5rem
 }
@@ -1214,7 +1212,7 @@ dt .classifier:before {
     visibility: visible
 }
 
-#left-sidebar .caption {
+#sidebar .caption {
     border-radius: calc(var(--km-radius-normal) - 2px);
     font-size: .875rem;
     font-weight: 600;
@@ -1223,11 +1221,11 @@ dt .classifier:before {
     padding: 1.5rem .5rem .25rem
 }
 
-#left-sidebar .caption:first-child {
+#sidebar .caption:first-child {
     padding-top: 0
 }
 
-#left-sidebar ul {
+#sidebar ul {
     display: grid;
     font-size: .875rem;
     grid-auto-flow: row;
@@ -1241,12 +1239,12 @@ dt .classifier:before {
 }
 
 @media (prefers-reduced-motion:reduce) {
-    #left-sidebar ul {
+    #sidebar ul {
         transition-property: none
     }
 }
 
-#left-sidebar ul ul {
+#sidebar ul ul {
     margin-left: .75rem;
     opacity: 1;
     padding: .5rem 0 .5rem .75rem;
@@ -1256,7 +1254,7 @@ dt .classifier:before {
     transition-timing-function: cubic-bezier(.4, 0, .2, 1)
 }
 
-#left-sidebar ul ul:before {
+#sidebar ul ul:before {
     bottom: .25rem;
     left: 0;
     position: absolute;
@@ -1268,13 +1266,13 @@ dt .classifier:before {
     content: var(--tw-content)
 }
 
-#left-sidebar ul ul:is(.dark *):before {
+#sidebar ul ul:is(.dark *):before {
     content: var(--tw-content);
     --tw-bg-opacity: 1;
     background-color: rgb(38 38 38/var(--tw-bg-opacity))
 }
 
-#left-sidebar a {
+#sidebar a {
     align-items: center;
     border-color: transparent;
     border-radius: calc(var(--km-radius-normal) - 2px);
@@ -1284,24 +1282,24 @@ dt .classifier:before {
     width: 100%
 }
 
-#left-sidebar a:hover {
+#sidebar a:hover {
     text-decoration-line: underline
 }
 
-#left-sidebar a:focus-visible {
+#sidebar a:focus-visible {
     outline-offset: -1px
 }
 
-#left-sidebar a>button {
+#sidebar a>button {
     border-radius: .25rem;
     color: hsl(var(--km-color-muted-fg))
 }
 
-#left-sidebar a>button:hover {
+#sidebar a>button:hover {
     background-color: hsl(var(--km-color-primary)/.1)
 }
 
-#left-sidebar a>button>svg {
+#sidebar a>button>svg {
     transform: translate3d(var(--tw-translate-x), var(--tw-translate-y), 0) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
     transform-origin: center;
     transition-duration: .15s;
@@ -1309,7 +1307,7 @@ dt .classifier:before {
     transition-timing-function: cubic-bezier(.4, 0, .2, 1)
 }
 
-#left-sidebar a.current {
+#sidebar a.current {
     background-color: hsl(var(--km-color-accent-bg));
     border-color: hsl(var(--km-color-border));
     border-width: 1px;
@@ -1317,11 +1315,11 @@ dt .classifier:before {
     font-weight: 500
 }
 
-#left-sidebar a.expandable {
+#sidebar a.expandable {
     justify-content: space-between
 }
 
-#left-sidebar a.expandable.expanded>button>svg {
+#sidebar a.expandable.expanded>button>svg {
     --tw-rotate: 90deg;
     transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
 }

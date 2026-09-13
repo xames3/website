@@ -6,38 +6,34 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
 Last updated on: 10 September, 2026
 
-This module provides custom roles for the Kaamiki Sphinx Theme that
-provides a way to add features to the document.
+The theme's inline roles: `style`, `email`, `mark` and `underline`.
+Every public function here is registered as a role of the same name,
+so a helper in this module takes a leading underscore.
 
 .. versionadded:: 10.9.2026
 
-    A colour is checked against `COLOUR` before it reaches an attribute.
-    Nothing legitimate in a colour needs a quote or an angle bracket, so
-    anything carrying one is an author mistake and gets reported rather
-    than pasted into the markup.
+    A colour is checked against `COLOUR` before it reaches an
+    attribute. Nothing legitimate in a colour needs a quote or an angle
+    bracket, so anything carrying one is reported rather than pasted
+    into the markup.
 
 .. versionchanged:: 10.9.2026
 
-    [1] Every role escapes its text now. They build HTML with f-strings,
-        so an `&` or a `<` in the content used to land in the output
-        raw, and a quote in a colour could close the `style` attribute
-        and open a new one.
-    [2] `email` no longer reaches for `.traverse()`, which docutils has
-        deprecated and will remove. It uses `utils.findall`, the helper
-        that already exists for exactly this.
-    [3] `email` survives a page with no title and text with no `<`
-        instead of raising `IndexError` or `ValueError` at build time,
-        and its subject is URL-encoded.
+    [1] Every role escapes its text. They build HTML with f-strings, so
+        an `&` or a `<` in the content landed in the output raw, and a
+        quote in a colour could close the `style` attribute and open a
+        new one.
+    [2] `email` uses `utils.findall` rather than the deprecated
+        `.traverse()`.
+    [3] `email` survives a page with no title, and text with no `<`,
+        instead of raising at build time. Its subject is URL-encoded.
 
 .. deprecated:: 10.9.2026
 
-    [1] `underline_svg` is now `_underline_svg`. The theme registers
-        every public function in here as a role, so the helper was being
-        handed to docutils as a `:underline_svg:` role that rendered
-        nothing you would ever want. Anything in this module that isn't
-        a role takes a leading underscore now.
-    [2] `mark` and `underline` no longer shuffle their own parameters
-        about to look used. Both genuinely use `rawtext`, `lineno` and
+    [1] `underline_svg` is now `_underline_svg`. It was being handed to
+        docutils as a role of its own.
+    [2] `mark` and `underline` no longer shuffle their parameters about
+        to look used. Both genuinely use `rawtext`, `lineno` and
         `inliner` now that they can report a bad colour.
 """
 
@@ -63,7 +59,15 @@ COLOUR: re.Pattern[str] = re.compile(r"^[#\w(),.%\s/-]+$")
 def _reject(
     inliner: t.Any, rawtext: str, lineno: int, message: str
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
-    """Report a malformed role and hand docutils a problematic node."""
+    """Report a bad role and hand docutils a problematic node.
+
+    :param inliner: The docutils inliner that called the role.
+    :param rawtext: The whole role, markup and all.
+    :param lineno: The line the role sits on.
+    :param message: What is wrong with it.
+    :return: The problematic node and the message, as docutils wants
+        them.
+    """
     msg = inliner.reporter.error(
         message, nodes.literal_block(rawtext, rawtext), line=lineno
     )
@@ -71,7 +75,11 @@ def _reject(
 
 
 def _underline_svg(color: str) -> tuple[str, str]:
-    """Fake two SVG strokes for a double-pass hand-drawn underline."""
+    """Draw two wobbly strokes for a hand-drawn underline.
+
+    :param color: The stroke colour, already checked.
+    :return: The left-to-right and right-to-left SVGs.
+    """
     segments = 7
     step = 500 / segments
 
@@ -112,34 +120,21 @@ def stylise(
     options: dict[str, t.Any] | None = None,
     content: list[t.Any] | None = None,
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
-    """Apply inline styling to text.
+    """Put CSS on a run of text.
 
-    This function allows for applying a CSS style to a piece of text
-    within reStructuredText using a role syntax. The expected input
-    format is `text <style>`. If the input format is invalid, an error
-    is reported.
+    The text reads `label <css>`::
 
-    Example::
+        Text is normal, but now it is :style:`red <color: red;>`.
 
-        .. code-block:: rst
-
-            Text is normal, but now its in :style:`red <color: red;>`.
-
-    :param role: The role name used in the source text.
-    :param rawtext: The entire markup text representing the role.
-    :param text: The text by the user.
-    :param lineno: The line number where the role was encountered in
-        the source text.
-    :param inliner: The inliner instance that called the role function.
-    :param options: Additional options passed to the role function,
-        defaults to `None`.
-    :param content: Content passed to the role function, defaults
-        to `None`.
-    :return: A tuple of list with a single `nodes.raw` object
-        representing the styled text and a list of system messages
-        generated during processing (typically empty if no errors).
-    :raises: None, but will report an error message if the input format
-        is invalid.
+    :param role: The role name, as written.
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role sits on, for error reporting.
+    :param inliner: The docutils inliner that called this.
+    :param options: Role options, unused.
+    :param content: Role content, unused.
+    :return: One `raw` node, and the error messages if the text does
+        not split on a `<`.
     """
     # NOTE(xames3): The parameters `role`, `options` and `content` are
     # currently unused but are included to match the expected signature
@@ -170,37 +165,23 @@ def email(
     options: dict[str, t.Any] | None = None,
     content: list[t.Any] | None = None,
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
-    """Create a `mailto` link.
+    """Write a `mailto` link.
 
-    This function generates a `mailto` link. By default, it populates
-    the subject with the current page's title, but it can be overridden
-    these defaults directly in the role.
+    The subject is the page title unless the role names one after a
+    pipe::
 
-    Example::
+        Send me an :email:`email <xa@mes3.dev>`.
+        Send me an :email:`email <xa@mes3.dev | Hello hello!!>`.
 
-        .. code-block:: rst
-
-            Send me an :email:`email <xa@mes3.dev>`.
-
-        .. code-block:: rst
-
-            Send me an :email:`email <xa@mes3.dev | Hello hello!!>`
-
-    :param role: The role name used in the source text.
-    :param rawtext: The entire markup text representing the role.
-    :param text: The text by the user, which becomes the link text.
-    :param lineno: The line number where the role was encountered in
-        the source text.
-    :param inliner: The inliner instance that called the role function.
-    :param options: Additional options passed to the role function,
-        defaults to `None`.
-    :param content: Content passed to the role function, defaults
-        to `None`.
-    :return: A tuple of list with a single `nodes.raw` object
-        representing the styled text and a list of system messages
-        generated during processing (typically empty if no errors).
-    :raises: None, but will report an error message if the input format
-        is invalid.
+    :param role: The role name, as written.
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role sits on, for error reporting.
+    :param inliner: The docutils inliner that called this.
+    :param options: Role options, unused.
+    :param content: Role content, unused.
+    :return: One `reference` node, and the error messages if the text
+        does not split on a `<`.
     """
     # NOTE(xames3): The parameters `role`, `options` and `content` are
     # currently unused but are included to match the expected signature
@@ -234,35 +215,22 @@ def mark(
     options: dict[str, t.Any] | None = None,
     content: list[t.Any] | None = None,
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
-    """Apply a marker/highlighter effect to text.
+    """Run a highlighter pen over a run of text.
 
-    This function wraps text in a span with a highlighter-style
-    background that resembles a hand-drawn marker stroke. An optional
-    color can be specified; the default color is yellow.
+    The colour is yellow unless the role names one::
 
-    Example::
+        This is :mark:`important` information.
+        This is :mark:`critical <red>` information.
 
-        .. code-block:: rst
-
-            This is :mark:`important` information.
-
-        .. code-block:: rst
-
-            This is :mark:`critical <red>` information.
-
-    :param role: The role name used in the source text.
-    :param rawtext: The entire markup text representing the role.
-    :param text: The text by the user.
-    :param lineno: The line number where the role was encountered in
-        the source text.
-    :param inliner: The inliner instance that called the role function.
-    :param options: Additional options passed to the role function,
-        defaults to `None`.
-    :param content: Content passed to the role function, defaults
-        to `None`.
-    :return: A tuple of list with a single `nodes.raw` object
-        representing the highlighted text and a list of system messages
-        generated during processing (typically empty if no errors).
+    :param role: The role name, as written.
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role sits on, for error reporting.
+    :param inliner: The docutils inliner that called this.
+    :param options: Role options, unused.
+    :param content: Role content, unused.
+    :return: One `raw` node, and the error messages if the colour looks
+        like markup.
     """
     # NOTE(xames3): `role`, `options` and `content` are unused but are
     # included to match the signature docutils expects of a role.
@@ -291,35 +259,22 @@ def underline(
     options: dict[str, t.Any] | None = None,
     content: list[t.Any] | None = None,
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
-    """Apply a pencil-style underline to text.
+    """Draw a pencil underline beneath a run of text.
 
-    This function wraps text in a span with a hand-drawn pencil-style
-    underline. An optional color can be specified; the default color is
-    orange.
+    The colour is orange unless the role names one::
 
-    Example::
+        This is :underline:`notable` content.
+        This is :underline:`notable <red>` content.
 
-        .. code-block:: rst
-
-            This is :underline:`notable` content.
-
-        .. code-block:: rst
-
-            This is :underline:`notable <red>` content.
-
-    :param role: The role name used in the source text.
-    :param rawtext: The entire markup text representing the role.
-    :param text: The text by the user.
-    :param lineno: The line number where the role was encountered in
-        the source text.
-    :param inliner: The inliner instance that called the role function.
-    :param options: Additional options passed to the role function,
-        defaults to `None`.
-    :param content: Content passed to the role function, defaults
-        to `None`.
-    :return: A tuple of list with a single `nodes.raw` object
-        representing the underlined text and a list of system messages
-        generated during processing (typically empty if no errors).
+    :param role: The role name, as written.
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role sits on, for error reporting.
+    :param inliner: The docutils inliner that called this.
+    :param options: Role options, unused.
+    :param content: Role content, unused.
+    :return: One `raw` node, and the error messages if the colour looks
+        like markup.
     """
     # NOTE(xames3): `role`, `options` and `content` are unused but are
     # included to match the signature docutils expects of a role.

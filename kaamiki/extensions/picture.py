@@ -6,58 +6,45 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 02 September, 2025
 Last updated on: 11 September, 2026
 
-This module defines a custom `picture` directive for the Kaamiki Sphinx
-Theme. The directive allows embedding and rendering images specific to
-the document's current colour mode.
+A `picture` directive that swaps the image with the colour mode::
 
-The `picture` directive is designed to extend reStructuredText (rST)
-capabilities by injecting structured metadata about the content, which
-can be styled or processed further using Jinja2 templates.
+    .. picture::
+       :light: ../assets/docker-internals/light-docker.jpg
+       :dark: ../assets/docker-internals/dark-docker.jpg
+       :alt: Docker Internals
 
-The `picture` directive can be used in reStructuredText documents as
-follows::
-
-    .. code-block:: rst
-
-        .. picture::
-            :light: ../assets/docker-internals/light-docker.jpg
-            :dark: ../assets/docker-internals/dark-docker.jpg
-            :alt: Docker Internals
-
-The above snippet will be processed and rendered according to the
-theme's Jinja2 template, producing a final HTML output.
+Both images are copied into `_images` and written into
+`picture.html.jinja`, which shows one or the other in CSS. The
+directive extends the standard `figure`, so it takes the same
+alignment, caption and class options.
 
 .. versionchanged:: 19.10.2025
 
-    Simplified the directive to render images according to the theme's
-    colour scheme using the `img` tag instead of fancy Javascript.
+    The two images are swapped in CSS by an `img` tag apiece rather
+    than by JavaScript.
 
 .. versionadded:: 10.9.2026
 
-    [1] The image's real pixel size is read off the file header by
-        `utils.measure` and emitted as `width`/`height`. The browser can
-        hold the space open before the image lands, which is what stops
-        the page shuffling about as you scroll.
+    The image's real pixel size is read off the file header by
+    `utils.measure` and written out as `width`/`height`, so the browser
+    holds the space open before the image lands and the page stops
+    shuffling about.
 
 .. versionchanged:: 10.9.2026
 
-    [1] Rendering goes through `utils.render`, one shared Jinja
-        environment for the whole theme with autoescaping switched on.
-        The old per-module templates had escaping off, so a caption or
-        an alt text carrying an `&`, a `<` or a stray quote quietly
+    [1] Rendering goes through `utils.render`, which has autoescaping
+        on. The per-module templates it replaced had it off, so a
+        caption or alt text carrying an `&`, a `<` or a stray quote
         emitted broken markup.
-    [2] A bad `:align:` raises a proper directive error instead of
-        tripping an `assert`. The assert vanished entirely under `python
-        -O` and, when it did fire, gave you a traceback rather than a
-        build error pointing at the offending line.
+    [2] A bad `:align:` raises a directive error instead of tripping an
+        `assert`. The assert vanished under `python -O` and, when it
+        did fire, gave a traceback rather than an error pointing at the
+        line.
 
 .. deprecated:: 10.9.2026
 
-    [1] The module-level `here`, `templates` and `html` path fiddling
-        has moved out to `utils`, along with the `jinja2` import. Every
-        directive was opening its own template at import time and
-        building a bare `jinja2.Template` off it, which is a daft thing
-        to do seven times over. `template` is now just the filename.
+    [1] The module-level path fiddling has moved to `utils`, along with
+        the `jinja2` import. `template` is now just the filename.
     [2] Dropped the empty `depart`. It existed only because `add_node`
         wants a pair; the theme falls back to the shared no-op in
         `utils` when a directive doesn't define one.
@@ -85,38 +72,22 @@ template: t.Final[str] = "picture.html.jinja"
 
 
 class node(nodes.Element):
-    """Class to represent a custom node in the document tree.
-
-    This class extends the `nodes.Element` from `docutils`, serving as
-    the container for the parsed information. The node will ultimately
-    be transformed into HTML or other output formats by the relevant
-    Sphinx translators.
-    """
+    """The parsed directive, waiting for `visit` to write it out."""
 
 
 class directive(images.Figure):
-    """Custom `picture` directive for reStructuredText.
+    """The `picture` directive.
 
-    This class extends the standard `Figure` directive to provide
-    theming-aware images that switch based on the current colour scheme.
-    It inherits all the standard figure functionality while adding
-    theme-specific image handling.
+    Options::
 
-    The directive supports the following options::
-
-        - `light`: Relative path of the image to render in light mode.
-        - `dark`: Relative path of the image to render in dark mode.
-        - `alt`: Alternate text for the image.
-        - `align`: Alignment options for the image, available options
-          are `left`, `center`, `right`, `top`, `middle`, `bottom`.
-        - `figclass`: CSS class name.
-        - `class`: CSS class name.
-
-    .. versionchanged:: 19.10.2025
-
-        Simplified the directive to render images according to the
-        theme's colour scheme using the `img` tag instead of fancy
-        Javascript.
+        - `light`: Path to the image for light mode, relative to the
+          document.
+        - `dark`: Path to the image for dark mode.
+        - `alt`: Alternative text for both.
+        - `align`: `left`, `center`, `right`, `top`, `middle` or
+          `bottom`.
+        - `figclass`: Class for the figure.
+        - `class`: Class for the image.
     """
 
     required_arguments = 0
@@ -130,16 +101,9 @@ class directive(images.Figure):
     }
 
     def run(self) -> list[nodes.Node]:
-        """Parse directive options and create an `picture` node.
+        """Copy both images, measure one and return the node.
 
-        This method processes the image path prefix provided as an
-        argument and combines it with the directive options to create
-        a theming-aware picture element.
-
-        The directive expects a path prefix that will be combined with
-        'light' and 'dark' suffixes to create the final image paths.
-
-        :return: A list containing a single `node` element.
+        :return: A list holding the one `picture` node.
 
         .. versionchanged:: 10.9.2026
 
@@ -151,7 +115,6 @@ class directive(images.Figure):
             [3] A bad `:align:` raises a directive error rather than
                 tripping an `assert`, which vanished under `python -O`
                 and gave a traceback instead of a located error.
-
         """
         env = self.state.document.settings.env
         depth = env.docname.count("/")
@@ -169,8 +132,8 @@ class directive(images.Figure):
         )
 
         def _copy(src: str) -> None:
-            """Copy the source image to the destination if it doesn't
-            already exist or is outdated.
+            """Copy the image into `_images`, unless it is there and
+            no older than the source.
             """
             dest = p.join(images_dir, p.basename(src))
             try:
@@ -211,16 +174,9 @@ class directive(images.Figure):
 
 
 def visit(self: HTMLTranslator, node: node) -> None:
-    """Handle the entry processing of the `picture` node during HTML
-    generation.
+    """Write the figure out when the HTML writer reaches the node.
 
-    This method is called when the HTML translator encounters the
-    `picture` node in the document tree. It retrieves the relevant
-    attributes from the node and uses Jinja2 templating to produce the
-    final HTML output.
-
-    :param self: The HTML translator instance responsible for rendering
-        nodes into HTML.
-    :param node: The `picture` node containing parsed attributes.
+    :param self: The HTML translator, whose body this appends to.
+    :param node: The `picture` node and its attributes.
     """
     self.body.append(render(template, **node.attributes))
