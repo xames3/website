@@ -2292,7 +2292,8 @@ li .badge {
 .blinking-cursor {
     display: inline-block;
     width: 0.15ch;
-    height: 1em;
+    height: 1.15em;
+    margin-bottom: 0.15rem;
     margin-left: 0.15ch;
     vertical-align: middle;
     border-radius: var(--km-radius-round);
