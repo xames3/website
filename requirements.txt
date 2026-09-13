@@ -1,6 +1,5 @@
 bs4
 sphinx
-sphinx-carousel
 sphinx-copybutton
 sphinx-design
 sphinx-lint
