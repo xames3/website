@@ -352,10 +352,6 @@ nav a svg .sd-material-icon {
     border: 1px solid hsl(var(--km-color-border)) !important;
 }
 
-.scbs-carousel {
-    margin-bottom: 4rem;
-}
-
 .sd-cards-carousel {
     gap: 0.35rem;
 }
