@@ -61,7 +61,7 @@ me during my highs and lows and helped shape my character.
 
 .. figure:: https://i.imgur.com/Gn1b6Cs.jpeg
     :alt: Me and Mum celebrating my admission into DePaul University
-    :figclass: zoom grayscale
+    :figclass: zoom grayscale fuzzy-blur
 
     Mum and I, September 2022, celebrating my admission into DePaul University.
 
@@ -138,7 +138,7 @@ ready with valuable advice and encouragement.
 .. figure:: https://i.imgur.com/H4LzSiU.jpeg
     :alt: Dr Tovar with my students at NASA Open Science 2025 Workshop on the
         final day
-    :figclass: zoom grayscale
+    :figclass: zoom grayscale fuzzy-blur
 
     Dr Tovar (left) with my students, `Huzaifa Quaid`_ (left-centre),
     `Ishrak Rahman`_ (centre), `Orkhan Guliyev`_ (right-centre) and
@@ -183,7 +183,7 @@ well-wisher.
 
 .. figure:: https://i.imgur.com/zNiGX0H.jpeg
     :alt: Fatemeh attending my graduation ceremony, alongside Young
-    :figclass: zoom grayscale
+    :figclass: zoom grayscale fuzzy-blur
 
     Fatemeh attending my graduation ceremony alongside Young, June 2025
 
@@ -268,7 +268,7 @@ genuine admiration for your steady commitment to hard work.
 
 .. figure:: https://i.imgur.com/E6bpo9w.jpeg
     :alt: Sameer and I at our graduation ceremony
-    :figclass: zoom grayscale
+    :figclass: zoom grayscale fuzzy-blur
 
     Sameer and I, June 2025 at our graduation ceremony
 
@@ -331,7 +331,7 @@ then.
 
 .. figure:: https://i.imgur.com/weM4qDW.jpeg
     :alt: Young attending our graduation ceremony in June 2025
-    :figclass: zoom grayscale
+    :figclass: zoom grayscale fuzzy-blur
 
     Young attending and celebrating our graduation ceremony, June 2025
 
