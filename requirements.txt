@@ -3,4 +3,4 @@ sphinx
 sphinx-copybutton
 sphinx-design
 sphinx-lint
-urllib3>=2.7.0
+urllib3>=2.8.0
