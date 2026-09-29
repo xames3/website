@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 21 February, 2025
-.. Last updated on: 15 February, 2026
+.. Last updated on: 25 September, 2026
 
 Akshay's Corner (Website + Kaamiki Sphinx Theme)
 ===============================================================================
@@ -31,10 +31,12 @@ please open an issue or submit a pull request on GitHub.
 License
 -------------------------------------------------------------------------------
 
-This project is dual-licensed under:
+This project is dual-licensed:
 
-- `MIT License`_ for source code and the
-- `CC BY 4.0`_ for all the educational content and blog posts.
+- The code, which is the Kaamiki theme and everything that builds the site,
+  is under the `MIT License`_.
+- The content, which is every article, blog post and teaching material, is
+  under `CC BY 4.0`_.
 
 .. _MIT License: https://github.com/xames3/website/blob/main/LICENSE-CODE
 .. _CC BY 4.0: https://github.com/xames3/website/blob/main/LICENSE
