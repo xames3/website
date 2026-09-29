@@ -4,44 +4,44 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 12 September, 2026
+Last updated on: 29 September, 2026
 
 The Sphinx configuration for my website. Sphinx is a documentation
 generator; I use it as a teaching and learning platform instead.
 
-.. versionadded:: 22.2.2025
+.. versionadded:: 2025.2.22
 
     [1] Algolia DocSearch in place of the standard Sphinx search,
         through the `sphinx_docsearch` extension.
 
-.. versionadded:: 1.3.2025
+.. versionadded:: 2025.3.1
 
     [1] A copy button, through `sphinx_copybutton`. The built-in one
         does not work.
 
-.. versionchanged:: 5.3.2025
+.. versionchanged:: 2025.3.5
 
     [1] Custom CSS for the copy button, and a fix for a bug in its
         default element.
 
-.. versionchanged:: 19.4.2025
+.. versionchanged:: 2025.4.19
 
     [1] PyTorch docs through InterSphinx.
 
-.. deprecated:: 8.8.2025
+.. deprecated:: 2025.8.8
 
     [1] The copy button's SVG icon, replaced with a Font Awesome one.
     [2] The `show_sphinx` and `last_updated` options.
 
-.. versionchanged:: 8.8.2025
+.. versionchanged:: 2025.8.8
 
     [1] A shorter `copyright` line.
 
-.. versionadded:: 22.8.2025
+.. versionadded:: 2025.8.22
 
     [1] `sphinx-notfound-page`, for a better 404.
 
-.. versionchanged:: 27.8.2025
+.. versionchanged:: 2025.8.27
 
     [1] `linkcheck` ignores localhost.
     [2] The last updated date sits above the footer, through the
@@ -49,19 +49,19 @@ generator; I use it as a teaching and learning platform instead.
     [3] The "Built with Sphinx" note is on, through `show_sphinx`.
     [4] A sponsor button in the sidebar.
 
-.. versionchanged:: 19.10.2025
+.. versionchanged:: 2025.10.19
 
     [1] The theme uses Sphinx's own theme options rather than the
         custom `website_options`.
     [2] Everything passed to the templates goes through `html_context`.
 
-.. versionadded:: 10.9.2026
+.. versionadded:: 2026.9.10
 
     [1] The Open Graph and Twitter values come from the `open_graph`
         key in `html_context` and are written by the theme. A page's
         own `:og:*` fields win, and one with no `:og:description:`
         falls back to its lead before anything set here.
-    [2] `fontawesome_kit` carries the kit URL, which used to be
+    [2] `fa_kit` carries the kit URL, which used to be
         hardcoded in the theme's layout.
     [3] `show_show_more` folds a long page down to one screenful, with
         a Show more button under the fade. `show_more_after` is how
@@ -76,7 +76,7 @@ generator; I use it as a teaching and learning platform instead.
         which is the file GitHub Pages serves for an address it cannot
         find. Set it to `False` to write nothing.
 
-.. versionchanged:: 10.9.2026
+.. versionchanged:: 2026.9.10
 
     [1] The availability button wears a calendar icon rather than a
         video one, since it opens a scheduling page and not a call.
@@ -120,7 +120,7 @@ generator; I use it as a teaching and learning platform instead.
         `rst_epilog` to the epilog and then complained about every
         substitution in it being defined twice.
 
-.. deprecated:: 10.9.2026
+.. deprecated:: 2026.9.10
 
     [1] Dropped the `sphinxext-opengraph` extension and its `ogp_*`
         settings. It pulled `matplotlib` in purely to render social
@@ -133,6 +133,46 @@ generator; I use it as a teaching and learning platform instead.
         stays.
     [4] `sphinx-notfound-page` is gone. The theme writes the 404 page
         itself, under `show_404`.
+
+.. versionchanged:: 2026.10.5
+
+    [1] `kaamiki` is named in `extensions`, which is how `linkcheck`
+        gets the theme's directives now that importing the theme no
+        longer registers them. The import stays, for `version` alone.
+    [2] `fa_icons` pins the Pro icons the theme's defaults leave to
+        Font Awesome Free: the menu, the search, the heading anchor and
+        the badge beside the title. `fa_style` asks for the regular
+        style in the icons the stylesheets draw.
+    [3] `epilog.rst` is read in as `rst_prolog` rather than
+        `rst_epilog`. Its roles were defined after the text that used
+        them and only worked because an earlier page had registered
+        them first, so a page rebuilt on its own, or read by a parallel
+        worker, printed every `:strike:` and `:python:` as an error.
+    [4] `html_use_index` is off. Nothing on the site has an
+        `.. index::` entry, so the general index was an empty page that
+        every other page pointed at.
+    [5] Each intersphinx inventory falls back to a copy in
+        `.cache/intersphinx`, which `make inventories` fetches with
+        retries. One of the four sites having a bad minute used to fail
+        a deploy, since `--fail-on-warning` counts the missed fetch and
+        every reference it left unresolved.
+    [6] `suppress_warnings` quietens `design.fa-build`. The text, man
+        and LaTeX builders cannot draw a Font Awesome icon, and said so
+        once for every icon on the site.
+
+.. deprecated:: 2026.10.5
+
+    [1] `docutils.conf`, and `html_extra_path` with it. Sphinx highlights
+        code itself, so its one setting changed nothing, and naming it
+        in `html_extra_path` only published it at the site's root.
+    [2] `templates_path`. There has never been a `_templates` directory.
+    [3] Every setting that only repeated a default. `html_context`
+        names what this site does differently from the theme, and
+        nothing else: the icons it pins, the kit, the favicons, the
+        buttons, the Open Graph values and the address feedback goes
+        to. The availability button is written once for the header and
+        the sidebar both. `linkcheck_timeout` goes with them, as 30 is
+        Sphinx's own.
 """
 
 from __future__ import annotations
@@ -142,8 +182,6 @@ from datetime import datetime as dt
 
 from markupsafe import Markup
 
-from kaamiki import version as theme_version
-
 if t.TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -152,9 +190,9 @@ author: t.Final[str] = "Akshay Mestry"
 project_copyright: str = f"© 2025-{dt.now().year} {author}."
 source: t.Final[str] = "https://github.com/xames3/website"
 email: t.Final[str] = "xa@mes3.dev"
-version: str = theme_version
 
 extensions: list[str] = [
+    "kaamiki",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
@@ -162,9 +200,9 @@ extensions: list[str] = [
 ]
 
 gettext_compact: bool = False
-rst_epilog: str = ""
-with open("_static/extra/epilog.rst") as f:
-    rst_epilog += f.read()
+rst_prolog: str = ""
+with open("_static/extra/prolog.rst") as f:
+    rst_prolog += f.read()
 
 nitpicky: bool = True
 exclude_patterns: Sequence[str] = ["_build", "_static"]
@@ -173,20 +211,30 @@ smartquotes: bool = False
 html_theme: t.Final[str] = "kaamiki"
 html_title: str = "amestry"
 html_baseurl: t.Final[str] = "https://xa.mes3.dev/"
+
+availability: t.Final[dict[str, str]] = {
+    "link": "#",
+    "icon": Markup('<i class="far fa-calendar"></i>'),
+    "extras": Markup(
+        'data-cal-link="xames3/quick-chat" '
+        'data-cal-namespace="quick-chat" '
+        'data-cal-config=\'{"layout":"month_view"}\''
+    ),
+}
+
 html_context: dict[str, t.Any] = {
-    "add_copy_to_headerlinks": True,
     "fa_icons": {
         "breadcrumb_home": "fa-regular fa-house",
-        "breadcrumb_separator_child": "fa-solid fa-angle-right",
-        "breadcrumb_separator_parent": "fa-solid fa-angles-right",
         "copy_url": "fa-regular fa-link-simple",
         "dark_mode": "fa-solid fa-moon-star",
         "light_mode": "fa-solid fa-sun-bright",
-        "next_button": "fa-solid fa-arrow-right",
-        "previous_button": "fa-solid fa-arrow-left",
-        "show_more": "fa-solid fa-chevron-down",
+        "menu": "fa-regular fa-arrow-left-to-line",
+        "permalink": "fa-regular fa-link-simple",
+        "search": "fa-regular fa-magnifying-glass",
+        "title_badge": "fa-solid fa-badge-check",
     },
-    "fontawesome_kit": "https://kit.fontawesome.com/8bcdaaff4d.js",
+    "fa_style": "regular",
+    "fa_kit": "https://kit.fontawesome.com/8bcdaaff4d.js",
     "favicons": {
         "manifest": "favicons/site.webmanifest",
         "size_96": "favicons/favicon-96x96.png",
@@ -194,52 +242,21 @@ html_context: dict[str, t.Any] = {
         "size_svg": "favicons/favicon.svg",
     },
     "header_buttons": {
-        "Check my availability": {
-            "link": "#",
-            "icon": Markup('<i class="far fa-calendar"></i>'),
-            "extras": Markup(
-                'data-cal-link="xames3/quick-chat" '
-                'data-cal-namespace="quick-chat" '
-                'data-cal-config=\'{"layout":"month_view"}\''
-            ),
-        },
+        "Check my availability": availability,
     },
     "open_graph": {
         "image": "https://avatars.githubusercontent.com/u/90549089?v=4",
         "image_alt": author,
         "site_name": author,
-        "type": "website",
         "locale": "en_GB",
         "card": "summary",
     },
-    "open_links_in_new_tab": True,
     "project": {
-        "author": author,
         "source": source,
         "email": email,
     },
-    "show_404": True,
-    "show_breadcrumbs": True,
-    "show_colour_modes": False,
-    "show_feedback": True,
-    "show_last_updated_on": True,
-    "show_more_after": 5,
-    "show_previous_next_pages": True,
-    "show_scrolltop": False,
-    "show_searchbox": True,
-    "show_show_more": True,
-    "show_sphinx": False,
-    "show_toctree": True,
     "sidebar_buttons": {
-        "Check my availability": {
-            "link": "#",
-            "icon": Markup('<i class="far fa-calendar"></i>'),
-            "extras": Markup(
-                'data-cal-link="xames3/quick-chat" '
-                'data-cal-namespace="quick-chat" '
-                'data-cal-config=\'{"layout":"month_view"}\''
-            ),
-        },
+        "Check my availability": availability,
         "Sponsor on GitHub": {
             "link": "https://github.com/sponsors/xames3",
             "icon": Markup('<i class="far fa-heart"></i>'),
@@ -248,17 +265,19 @@ html_context: dict[str, t.Any] = {
 }
 html_favicon: t.Final[str] = "_static/favicons/favicon.ico"
 html_static_path: list[str] = ["_static"]
-html_extra_path: list[str] = ["docutils.conf"]
-html_permalinks_icon: t.Final[str] = ""
-html_use_index: bool = True
-templates_path: list[str] = ["_templates"]
+html_use_index: bool = False
 
-intersphinx_mapping: dict[str, tuple[str, None]] = {
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "python": ("https://docs.python.org/3/", None),
-    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
-    "torch": ("https://docs.pytorch.org/docs/2.11/", None),
+inventories: t.Final[dict[str, str]] = {
+    "numpy": "https://numpy.org/doc/stable/",
+    "python": "https://docs.python.org/3/",
+    "sphinx": "https://www.sphinx-doc.org/en/master/",
+    "torch": "https://docs.pytorch.org/docs/2.11/",
 }
+intersphinx_mapping: dict[str, tuple[str, tuple[str | None, str]]] = {
+    name: (url, (None, f"../.cache/intersphinx/{name}.inv"))
+    for name, url in inventories.items()
+}
+suppress_warnings: list[str] = ["design.fa-build"]
 extlinks: dict[str, tuple[str, str | None]] = {
     "c-ref": ("https://en.cppreference.com/w/c/language/%s", "%s"),
 }
@@ -273,7 +292,6 @@ linkcheck_ignore: list[str] = [
     r"https://medium\.com/",
     r"https://stackoverflow\.com/",
 ]
-linkcheck_timeout: int = 30
 linkcheck_retries: int = 2
 linkcheck_workers: int = 10
 linkcheck_report_timeouts_as_broken: bool = True
