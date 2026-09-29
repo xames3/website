@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 11 September, 2026
+.. Last updated on: 15 September, 2026
 
 :og:title: FAQs
 :og:description: Frequently Asked Questions about me and this website
@@ -168,7 +168,6 @@ Frequently asked questions
 
     - **author.** This renders author details like name, :strike:`about`,
       :strike:`email`, GitHub, :strike:`LinkedIn and a timestamp of article`
-    - **picture.** Show colour-scheme aware images on the website
     - **repository.** Renders a small widget to show information about the
       GitHub repository. The details include stars and fork counts
     - **thumbnail.** This links YouTube videos by showing thumbnails
