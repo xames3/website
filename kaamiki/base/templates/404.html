@@ -1,11 +1,11 @@
-<!--
+{#
 Not Found Page Template
 =======================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September, 2026
-Last updated on: 12 September, 2026
--->
+Last updated on: 29 September, 2026
+#}
 {%- extends "layout.html" -%}
 {%- set title = _("Page not found") -%}
 {%- block extrahead %}
@@ -17,11 +17,15 @@ Last updated on: 12 September, 2026
         <div id="content"
              role="main"
              class="site-page__content site-notfound">
-            <p class="site-notfound__code">404</p>
-            <h1 class="site-notfound__title">{{ _("Oops... Page not found!") }}</h1>
+            <p class="site-notfound__code"
+               aria-hidden="true">404</p>
+            <h1 class="site-notfound__title">
+                {{ _("You're lost beyond the
+                                Sirens, mate?!") }}
+            </h1>
             <p class="site-notfound__message">
                 {%- trans -%}
-                Nothing lives at this address. The page may have moved or the link that brought you here may be wrong.
+                The sirens' song brought you this far, but there's nothing here. The page may have moved or your course may have gone astray.
             {%- endtrans -%}
         </p>
         <p class="site-notfound__actions">
@@ -30,6 +34,8 @@ Last updated on: 12 September, 2026
                 <span>{{ _("Take me home") }}</span>
             </a>
         </p>
+        <img src="https://preview.redd.it/imo-this-scene-is-the-peak-of-matt-damons-entire-acting-v0-t10f37ucrleh1.jpeg?auto=webp&s=41a2b0d10dea99be61101b50e6d12f98f7d7e741"
+             alt="You lost it">
     </div>
 </div>
 {%- endblock body %}
