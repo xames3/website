@@ -1,15 +1,14 @@
 <!--
 Currently teaching courses widget
-===================================
+=================================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 16 February, 2026
-Last updated on: 11 September, 2026
+Last updated on: 29 September, 2026
 -->
 <div class="currently-teaching">
     <p class="currently-teaching__text">
-        {{ prefix-text }}<span class="currently-teaching__course"
-      id="course"></span><span class="blinking-cursor"></span>
+        {{ prefix-text }}<span class="currently-teaching__course"></span><span class="blinking-cursor"></span>
     </p>
 </div>
 <style>
@@ -37,16 +36,28 @@ Last updated on: 11 September, 2026
         }
     }
 </style>
-<!-- djlint:off -->
+{# djlint:off #}
 <script>
     (function() {
         var courses = {{ courses }}
-        var element = document.getElementById("course");
+        var box = document.currentScript && document.currentScript.previousElementSibling;
+        while (box && !box.classList.contains("currently-teaching")) box = box.previousElementSibling;
+        var element = box && box.querySelector(".currently-teaching__course");
+        var cursor = box && box.querySelector(".blinking-cursor");
+        var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         var courseIndex = 0;
         var charIndex = 0;
         var isDeleting = false;
 
         if (!element || !courses.length) return;
+
+        if (still) {
+            element.textContent = courses.length > 1
+                ? courses.slice(0, -1).join(", ") + " and " + courses[courses.length - 1]
+                : courses[0];
+            if (cursor) cursor.style.display = "none";
+            return;
+        }
 
         function tick() {
             var current = courses[courseIndex];
@@ -83,4 +94,4 @@ Last updated on: 11 September, 2026
         tick();
     })();
 </script>
-<!-- djlint:on -->
+{# djlint:on #}
