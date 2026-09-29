@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 13 September, 2026
+.. Last updated on: 29 September, 2026
 
 :orphan:
 :og:title: Akshay Mestry
@@ -175,7 +175,6 @@ honest, what kind of mood I'm in that day when they come asking for help.
     :titlesonly:
 
     academia/thoughts-on-teaching
-    academia/wish-it-want-it-do-it
 
 .. toctree::
     :caption: Explained
