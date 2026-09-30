@@ -1,28 +1,28 @@
-<!--
+{#
 Logo Macro
 ==========
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 10 September, 2026
-Last updated on: 10 September, 2026
--->
-{%- macro site_logo() -%}
+Last updated on: 29 September, 2026
+#}
+{%- macro km_logo() -%}
     {%- if logo_url -%}
-        <img class="site-logo site-logo--single"
+        <img class="km-logo km-logo--single"
              src="{{ logo_url }}"
              alt=""
              width="16"
              height="16" />
     {%- else -%}
         {%- if theme_dark_logo %}
-            <img class="site-logo site-logo--dark"
+            <img class="km-logo km-logo--dark"
                  src="{{ pathto('_static/' + theme_dark_logo, 1) }}"
                  alt=""
                  width="16"
                  height="16" />
         {%- endif -%}
         {%- if theme_light_logo %}
-            <img class="site-logo site-logo--light"
+            <img class="km-logo km-logo--light"
                  src="{{ pathto('_static/' + theme_light_logo, 1) }}"
                  alt=""
                  width="16"

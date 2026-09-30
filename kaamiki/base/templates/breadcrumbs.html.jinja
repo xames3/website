@@ -4,27 +4,27 @@ Breadcrumbs Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 21 September, 2026
+Last updated on: 29 September, 2026
 #}
 <nav aria-label="{{ _('breadcrumbs') }}"
-     class="site-breadcrumbs{% if pagename == master_doc %} site-breadcrumbs--root{% endif %}">
-    <a class="site-breadcrumbs__link site-breadcrumbs__link--home"
+     class="km-breadcrumbs{% if pagename == master_doc %} km-breadcrumbs--root{% endif %}">
+    <a class="km-breadcrumbs__link km-breadcrumbs__link--home"
        href="{{ pathto(master_doc) }}"
        aria-label="{{ _('Home') }}">
-        <i class="{{ fa_icons.breadcrumb_home }}"
+        <i class="{{ km_fa_icons.breadcrumb_home }}"
            aria-hidden="true"></i>
     </a>
-    {%- if pagename != master_doc %}<i class="{{ fa_icons.breadcrumb_separator_parent }}"
+    {%- if pagename != master_doc %}<i class="{{ km_fa_icons.breadcrumb_separator_parent }}"
    aria-hidden="true"></i>{%- endif %}
     {%- for parent in parents -%}
-        <a class="site-breadcrumbs__link"
+        <a class="km-breadcrumbs__link"
            href="{{ parent.link|e }}">{{ parent.title }}</a>
-        <i class="{{ fa_icons.breadcrumb_separator_child }}"
+        <i class="{{ km_fa_icons.breadcrumb_separator_child }}"
            aria-hidden="true"></i>
     {%- endfor -%}
     <span aria-current="page"
-          class="site-breadcrumbs__current"
-          id="currentBreadcrumb">
+          class="km-breadcrumbs__current"
+          id="km-currentBreadcrumb">
         {%- if pagename != master_doc %}{{ title }}{%- endif %}
         </span>
     </nav>

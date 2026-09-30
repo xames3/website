@@ -1,59 +1,58 @@
-<!--
+{#
 Footer Template
 ===============
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 10 September, 2026
--->
-<footer class="site-footer container">
-    {%- block footer_before %}{%- endblock footer_before %}
-        <div class="site-footer__inner">
-            <div class="site-footer__content">
+Last updated on: 29 September, 2026
+#}
+<footer class="km-footer km-container">
+    {%- block km_footer_before %}{%- endblock km_footer_before %}
+        <div class="km-footer__inner">
+            <div class="km-footer__content">
                 {%- if show_copyright and copyright|length %}
-                    <p class="site-footer__text">
+                    <p class="km-footer__text">
                         {%- if hasdoc('copyright') -%}
                             {%- trans path=pathto('copyright'), copyright=copyright|e -%}
                             <a href="{{ path }}">Copyright</a> {{ copyright }}
                         {%- endtrans -%}
                     {%- else -%}
-                        {{ copyright }}
+                        {{ copyright|e }}
                     {%- endif -%}
                 </p>
             {%- endif %}
             {%- if last_updated %}
-                <p class="site-footer__text">
+                <p class="km-footer__text">
                     {%- trans last_updated=last_updated|e -%}
                     Last updated {{ last_updated }}.
                 {%- endtrans -%}
             </p>
         {%- endif %}
         {%- if show_sphinx %}
-            <p class="site-footer__text">
-                {%- trans -%}
+            <p class="km-footer__text">
+                {%- trans trimmed -%}
                 Built with <a href="https://www.sphinx-doc.org"
     rel="noreferrer">Sphinx</a>.
             {%- endtrans -%}
         </p>
     {%- endif %}
-    <p class="site-footer__text">
+    <p class="km-footer__text">
         {% trans %}Content licensed under{% endtrans %}
         <a href="https://creativecommons.org/licenses/by/4.0/"
            rel="noopener"
            target="_blank">CC BY 4.0</a>.
     </p>
 </div>
-{%- if show_colour_modes|tobool %}
+{%- if km_show_colour_modes|tobool %}
     <button type="button"
-            class="site-footer__theme-toggle"
-            aria-label="{{ _('Colour theme switcher') }}"
-            @click="darkMode = darkMode === 'light' ? 'dark' : 'light'">
-        <i class="{{ fa_icons.dark_mode }} site-footer__theme-toggle-icon site-footer__theme-toggle-icon--dark"
+            class="km-footer__theme-toggle"
+            aria-label="{{ _('Colour theme switcher') }}">
+        <i class="{{ km_fa_icons.dark_mode }} km-footer__theme-toggle-icon km-footer__theme-toggle-icon--dark"
            aria-hidden="true"></i>
-        <i class="{{ fa_icons.light_mode }} site-footer__theme-toggle-icon site-footer__theme-toggle-icon--light"
+        <i class="{{ km_fa_icons.light_mode }} km-footer__theme-toggle-icon km-footer__theme-toggle-icon--light"
            aria-hidden="true"></i>
     </button>
 {%- endif %}
 </div>
-{%- block footer_after %}{%- endblock footer_after %}
+{%- block km_footer_after %}{%- endblock km_footer_after %}
 </footer>

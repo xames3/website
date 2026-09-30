@@ -1,32 +1,29 @@
-<!--
+{#
 Searchbox Template
 ==================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 11 September, 2026
+Last updated on: 29 September, 2026
 
 Rendered twice per page - once in the header for wide viewports and once in
-the navigation drawer for narrow ones - so ids and refs are scoped by
-`search_variant` and only the header copy binds the keyboard shortcut.
--->
-{%- set variant = search_variant | default("header", true) -%}
+the navigation drawer for narrow ones. Only the header copy answers the
+Cmd+K shortcut, Ctrl+K off a Mac, which `theme.js` binds.
+#}
 <form action="{{ pathto('search') }}"
       method="get"
-      class="site-search"
-      {% if variant == "header" %}@keydown.k.window.meta.prevent="$refs.headerSearch?.focus()"{% endif %}>
-    <label class="site-search__label">
-        <span class="sr-only">{{ _("Search") }}</span>
-        <input class="site-search__input"
-               x-ref="{{ variant }}Search"
+      class="km-search">
+    <label class="km-search__label">
+        <span class="sr-only">{{ _('Search') }}</span>
+        <input class="km-search__input"
                type="search"
                name="q"
                autocomplete="on"
-               placeholder="{{ _("Search") }}" />
+               placeholder="{{ _('Search') }}" />
     </label>
-    <button class="site-search__submit"
+    <button class="km-search__submit"
             type="submit">
-        <i class="fa-regular fa-magnifying-glass"
+        <i class="{{ km_fa_icons.search }}"
            aria-hidden="true"></i>
         <span class="sr-only">{{ _("Submit search") }}</span>
     </button>

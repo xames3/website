@@ -1,11 +1,11 @@
-<!--
+{#
 Index Template
 ==============
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 12 September, 2026
--->
+Last updated on: 29 September, 2026
+#}
 {%- extends "layout.html" -%}
 {%- set title = _("Index") -%}
 {%- macro indexentries(firstname, links) -%}
@@ -29,31 +29,31 @@ Last updated on: 12 September, 2026
 {%- endif -%}
 {%- endmacro -%}
 {%- block body %}
-    <div class="site-page site-page--wide">
-        {%- block body_before %}{%- endblock body_before %}
-            {%- if show_breadcrumbs|tobool %}
+    <div class="km-page km-page--wide">
+        {%- block km_body_before %}{%- endblock km_body_before %}
+            {%- if km_show_breadcrumbs|tobool %}
                 {%- include "breadcrumbs.html.jinja" %}
             {%- endif %}
-            <div id="content"
+            <div id="km-content"
                  role="main"
-                 class="site-page__content site-genindex">
+                 class="km-page__content km-genindex">
                 <h1 id="index"
-                    class="site-genindex__title">{{ _("Index") }}</h1>
+                    class="km-genindex__title">{{ _("Index") }}</h1>
                 {%- for key, entries in genindexentries %}
-                    <section class="site-genindex__section"
+                    <section class="km-genindex__section"
                              aria-labelledby="{{ key }}">
                         <h2 id="{{ key }}"
-                            class="site-genindex__heading">{{ key }}</h2>
-                        <div class="site-genindex__columns">
+                            class="km-genindex__heading">{{ key }}</h2>
+                        <div class="km-genindex__columns">
                             {%- for column in entries|slice_index(2) if column %}
-                                <ul class="site-genindex__list">
+                                <ul class="km-genindex__list">
                                     {%- for entryname, (links, subitems, _) in column %}
-                                        <li class="site-genindex__item">
+                                        <li class="km-genindex__item">
                                             {{ indexentries(entryname, links) }}
                                             {%- if subitems %}
-                                                <ul class="site-genindex__list site-genindex__list--nested">
+                                                <ul class="km-genindex__list km-genindex__list--nested">
                                                     {%- for subentryname, subentrylinks in subitems %}
-                                                        <li class="site-genindex__item">
+                                                        <li class="km-genindex__item">
                                                             {{ indexentries(subentryname, subentrylinks) }}
                                                         </li>
                                                     {%- endfor %}
@@ -67,21 +67,21 @@ Last updated on: 12 September, 2026
                     </section>
                 {%- endfor %}
             </div>
-            {%- block body_after %}{%- endblock body_after %}
+            {%- block km_body_after %}{%- endblock km_body_after %}
             </div>
         {%- endblock body %}
-        {%- block aside %}
+        {%- block km_aside %}
             {%- if genindexentries %}
-                <aside id="index-letters"
-                       class="site-layout__sidebar site-sidebar site-sidebar--alpha">
-                    <p class="site-sidebar__title">{{ _("Jump to letter") }}</p>
-                    <nav class="site-sidebar__alphabet"
+                <aside id="km-index-letters"
+                       class="km-layout__sidebar km-sidebar km-sidebar--alpha">
+                    <p class="km-sidebar__title">{{ _("Jump to letter") }}</p>
+                    <nav class="km-sidebar__alphabet"
                          aria-label="{{ _('Index shortcuts') }}">
                         {%- for key, dummy in genindexentries %}
-                            <a class="site-sidebar__alphabet-link"
+                            <a class="km-sidebar__alphabet-link"
                                href="#{{ key }}">{{ key }}</a>
                         {%- endfor %}
                     </nav>
                 </aside>
             {%- endif %}
-        {%- endblock aside %}
+        {%- endblock km_aside %}

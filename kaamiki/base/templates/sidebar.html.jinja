@@ -1,57 +1,57 @@
-<!--
+{#
 Sidebar Template
 ================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 13 September, 2026
--->
-{%- from "logo.html.jinja" import site_logo with context -%}
-<aside id="sidebar"
-       class="site-layout__sidebar site-sidebar site-sidebar--primary"
-       :class="{ 'site-sidebar--visible': showSidebar }">
+Last updated on: 29 September, 2026
+#}
+{%- from "logo.html.jinja" import km_logo with context -%}
+<aside id="km-sidebar"
+       class="km-layout__sidebar km-sidebar km-sidebar--primary">
+    <noscript>
+        <a class="km-sidebar__close"
+           href="#km-content">{{ _("Close menu") }}</a>
+    </noscript>
     <a href="{{ pathto(master_doc) }}"
-       class="site-sidebar__brand">
-        {{- site_logo() -}}
-        <span class="site-sidebar__brand-title">{{ docstitle }}</span>
+       class="km-sidebar__brand">
+        {{- km_logo() -}}
+        <span class="km-sidebar__brand-title">{{ docstitle|e }}{%- if km_fa_icons.title_badge %}<i class="{{ km_fa_icons.title_badge }} km-title-badge"
+   aria-hidden="true"></i>{%- endif %}</span>
     </a>
-    {%- if hasdoc('search') and show_searchbox|tobool %}
-        <div class="site-sidebar__search">
-            {%- with search_variant = "sidebar" %}
-                {%- include "searchbox.html.jinja" %}
-            {%- endwith %}
-        </div>
+    {%- if hasdoc('search') and km_show_searchbox|tobool %}
+        <div class="km-sidebar__search">{%- include "searchbox.html.jinja" %}</div>
     {%- endif %}
-    <div class="site-sidebar__scroll">
-        <div class="site-sidebar__content">
-            <nav class="site-sidebar__toc"
+    <div class="km-sidebar__scroll">
+        <div class="km-sidebar__content">
+            <nav class="km-sidebar__toc"
                  aria-label="{{ _('Table of contents') }}">
-                {%- if show_toctree|tobool %}
+                {%- if km_show_toctree|tobool %}
                     {{ toctree(titles_only=false, collapse=false, includehidden=true) }}
                 {%- else %}
-                    {{ toctree(titles_only=true, collapse=false) }}
+                    {{ toctree(titles_only=true, collapse=false, includehidden=true) }}
                 {%- endif %}
-                {%- if sidebar_buttons|tobool %}
+                {%- if km_sidebar_buttons|tobool %}
                     <p class="caption"
                        role="heading">
                         <span class="caption-text">{{ _("External Links") }}</span>
                     </p>
-                    <ul class="site-sidebar__mobile-list">
-                        {%- for text, url in sidebar_buttons.items() %}
+                    <ul class="km-sidebar__mobile-list">
+                        {%- for text, url in km_sidebar_buttons.items() %}
                             {%- if url is mapping %}
                                 <li>
                                     <a href="{{ url.link }}"
-                                       title="{{ text }}"
+                                       title="{{ text|e }}"
                                        rel="noopener nofollow"
                                        {% if url.link != '#' %}target="_blank"{% endif %}
-                                       class="site-sidebar__mobile-item">
+                                       class="km-sidebar__mobile-item">
                                         {%- if url.icon %}
                                             {{ url.icon }}
                                         {%- else %}
-                                            <i class="fas fa-arrow-up-right-from-square"
+                                            <i class="{{ km_fa_icons.external_link }}"
                                                aria-hidden="true"></i>
                                         {%- endif %}
-                                        <span {{ url.extras if url.extras else '' }}>{{ text }}</span>
+                                        <span {{ url.extras if url.extras else '' }}>{{ text|e }}</span>
                                     </a>
                                 </li>
                             {%- endif %}

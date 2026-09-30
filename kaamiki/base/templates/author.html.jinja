@@ -4,41 +4,41 @@ Author Details Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 28 September, 2026
+Last updated on: 29 September, 2026
 #}
-{% block author %}
-    {%- set who = name|d(project.author) %}
-    <aside class="site-article"
-           {% if background %}data-background="{{ background }}"{% endif %}>
-        <a href="{{ target|d(project.source) }}"
+{% block km_author %}
+    {%- set km_who = km_name|d(km_project.author) %}
+    <aside class="km-article"
+           {% if km_background %}data-km-background="{{ km_background }}"{% endif %}>
+        <a href="{{ km_target|d(km_project.source) }}"
            target="_blank"
            rel="noopener noreferrer"
-           class="site-article__profile"
-           aria-label="{{ _('Check out %(name)s', name=who) }}">
-            {%- if avatar|d(project.avatar) %}
-                <img class="site-article__avatar"
-                     src="{{ avatar|d(project.avatar) }}"
+           class="km-article__profile"
+           aria-label="{{ _('Check out %(name)s', name=km_who) }}">
+            {%- if km_avatar|d(km_project.avatar) %}
+                <img class="km-article__avatar"
+                     src="{{ km_avatar|d(km_project.avatar) }}"
                      width="20"
                      height="20"
                      loading="lazy"
                      alt="">
             {%- endif %}
-            <p class="site-article__name">{{ who }}</p>
+            <p class="km-article__name">{{ km_who }}</p>
         </a>
-        <div class="site-article__meta">
-            <div class="site-article__meta-group">
-                <p class="site-article__reading-time">
-                    <i class="{{ fa_icons.reading_time }} site-article__reading-time-icon"
-                       aria-hidden="true"></i>{{ ngettext('%(num)d min read', '%(num)d mins read', minutes) }}
+        <div class="km-article__meta">
+            <div class="km-article__meta-group">
+                <p class="km-article__reading-time">
+                    <i class="{{ km_fa_icons.reading_time }} km-article__reading-time-icon"
+                       aria-hidden="true"></i>{{ ngettext('%(num)d min read', '%(num)d mins read', km_minutes) }}
                 </p>
                 <button type="button"
-                        class="site-article__copy copy-url"
+                        class="km-article__copy km-copy-url"
                         data-tooltip="{{ _('Copy article URL to clipboard') }}">
-                    <i class="{{ fa_icons.copy_url }}"
+                    <i class="{{ km_fa_icons.copy_url }}"
                        aria-hidden="true"></i>
                     <span>{{ _("Copy") }}</span>
                 </button>
             </div>
         </div>
     </aside>
-{% endblock author %}
+{% endblock km_author %}

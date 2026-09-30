@@ -1,105 +1,150 @@
-<!--
+{#
 Base Layout Template
 ====================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 12 September, 2026
--->
-{%- set lang_attr = "en" if language == None else (language|replace('_','-')) -%}
+Last updated on: 29 September, 2026
+#}
+{%- set km_lang_attr = "en" if language == None else (language|replace('_','-')) -%}
+{%- set km_colour_mode = km_colour_mode|default('dark', true)|lower -%}
+{%- set km_colour_theme = 'light' if km_colour_mode == 'light' else 'dark' -%}
+{%- set km_strings = {"copied": _("Copied!"), "failed": _("Copy failed"), "copy": _("Copy"), "step": _("Step {step} of {steps}, {where}"), "line": _("line {line}"), "lines": _("lines {first}–{last}")} -%}
 <!DOCTYPE html>
-<html lang="{{ lang_attr }}"
-      {% if sphinx_version_tuple >= (7, 2) %}data-content_root="{{ content_root }}"{% endif %}
-      class="scroll-smooth"
-      x-data="{ darkMode: localStorage.getItem('darkMode') ?? 'dark' }"
-      x-init="localStorage.setItem('darkMode', darkMode); $watch('darkMode', (value) => { localStorage.setItem('darkMode', value); window.simpleApplyTheme?.(value); })">
+<html lang="{{ km_lang_attr }}"
+      {% if km_colour_theme == 'dark' %}class="km-dark"{% endif %}
+      data-km-theme="{{ km_colour_theme }}"
+      data-km-colour-mode="{{ km_colour_mode }}"
+      data-content_root="{{ content_root }}"
+      data-km-fa-style="{{ km_fa_style|default('solid') }}"
+      data-km-strings="{{ km_strings|tojson|forceescape }}"
+      {% if km_show_colour_modes|tobool %}data-km-colour-toggle{% endif %}
+      {% if km_add_copy_to_headerlinks|default(true) %}data-km-copy-links{% endif %}>
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1" />
+        {%- if 'name="viewport"' not in metatags %}
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1" />
+        {%- endif %}
         <meta name="theme-color"
-              media="(prefers-color-scheme: light)"
-              content="white" />
-        <meta name="theme-color"
-              media="(prefers-color-scheme: dark)"
-              content="black" />
+              content="{{ '#fafafa' if km_colour_theme == 'light' else '#000000' }}" />
         <script>
             (function() {
                 var root = document.documentElement;
-                var mode = localStorage.getItem('darkMode') || 'dark';
-                root.classList.add('no-transitions');
-                root.setAttribute('data-theme', mode);
-                root.classList.toggle('dark', mode === 'dark');
-                localStorage.setItem('darkMode', mode);
+                var shown = false;
+                root.classList.add('km-js', 'km-page-loading', 'km-no-transitions');
 
                 function reveal() {
+                    if (shown) return;
+                    shown = true;
                     requestAnimationFrame(function() {
-                        root.classList.remove('no-transitions');
-                        root.classList.add('page-loaded');
+                        root.classList.remove('km-page-loading', 'km-no-transitions');
+                        root.classList.add('km-page-loaded');
                     });
                 }
-                if (document.readyState === 'complete') reveal();
-                else window.addEventListener('load', reveal, {
+                if (document.readyState !== 'loading') reveal();
+                else document.addEventListener('DOMContentLoaded', reveal, {
                     once: true
                 });
                 window.addEventListener('pageshow', function(e) {
-                    if (e.persisted) root.classList.add('page-loaded');
+                    if (e.persisted) reveal();
                 });
+
+                var mode = root.getAttribute('data-km-colour-mode') || 'dark';
+                if (root.hasAttribute('data-km-colour-toggle')) {
+                    try {
+                        mode = localStorage.getItem('km:colourMode') || localStorage.getItem('darkMode') || mode;
+                    } catch (e) {}
+                }
+                if (mode === 'system') {
+                    mode = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                mode = mode === 'light' ? 'light' : 'dark';
+                root.setAttribute('data-km-theme', mode);
+                root.classList.toggle('km-dark', mode === 'dark');
+                document.querySelector('meta[name="theme-color"]')
+                    .setAttribute('content', mode === 'dark' ? '#000000' : '#fafafa');
             })();
         </script>
         {{ metatags }}
-        {%- block social %}
-            {%- if social %}
-                {%- if social.description %}
+        {%- if km_author %}
+            <meta name="author"
+                  content="{{ km_author|e }}" />
+        {%- endif %}
+        {%- set km_robots = meta.get('km-pg-robots') if meta else '' %}
+        {%- if km_robots %}
+            <meta name="robots"
+                  content="{{ km_robots|e }}" />
+        {%- endif %}
+        {%- block km_social %}
+            {%- if km_social %}
+                {%- if km_social.description %}
                     <meta name="description"
-                          content="{{ social.description|e }}" />
+                          content="{{ km_social.description|e }}" />
                 {% endif %}
                 <meta property="og:title"
-                      content="{{ social.title|e }}" />
+                      content="{{ km_social.title|e }}" />
                 <meta property="og:type"
-                      content="{{ social.type|e }}" />
-                {%- if social.site_name %}
+                      content="{{ km_social.type|e }}" />
+                {%- if km_social.site_name %}
                     <meta property="og:site_name"
-                          content="{{ social.site_name|e }}" />
+                          content="{{ km_social.site_name|e }}" />
                 {% endif %}
                 {%- if pageurl %}
                     <meta property="og:url"
                           content="{{ pageurl|e }}" />
                 {% endif %}
-                {%- if social.description %}
+                {%- if km_social.description %}
                     <meta property="og:description"
-                          content="{{ social.description|e }}" />
+                          content="{{ km_social.description|e }}" />
                 {% endif %}
-                {%- if social.locale %}
+                {%- if km_social.locale %}
                     <meta property="og:locale"
-                          content="{{ social.locale|e }}" />
+                          content="{{ km_social.locale|e }}" />
                 {% endif %}
-                {%- if social.image %}
+                {%- if km_social.image %}
                     <meta property="og:image"
-                          content="{{ social.image|e }}" />
-                    {%- if social.image_alt %}
+                          content="{{ km_social.image|e }}" />
+                    {%- if km_social.image_alt %}
                         <meta property="og:image:alt"
-                              content="{{ social.image_alt|e }}" />
+                              content="{{ km_social.image_alt|e }}" />
                     {% endif %}
                 {%- endif %}
+                {%- if km_social.type == 'article' %}
+                    {%- if km_social.published %}
+                        <meta property="article:published_time"
+                              content="{{ km_social.published|e }}" />
+                    {%- endif %}
+                    {%- if km_social.modified %}
+                        <meta property="article:modified_time"
+                              content="{{ km_social.modified|e }}" />
+                    {%- endif %}
+                    {%- if km_author %}
+                        <meta property="article:author"
+                              content="{{ km_author|e }}" />
+                    {%- endif %}
+                {%- endif %}
                 <meta name="twitter:card"
-                      content="{{ social.card|e if social.image else 'summary' }}" />
-                {%- if social.site %}
+                      content="{{ km_social.card|e if km_social.image else 'summary' }}" />
+                {%- if km_social.site %}
                     <meta name="twitter:site"
-                          content="{{ social.site|e }}" />
+                          content="{{ km_social.site|e }}" />
                 {% endif %}
             {%- endif %}
-        {%- endblock social %}
+        {%- endblock km_social %}
         {%- block htmltitle %}
-            <title>{{ title|striptags|e if title else docstitle }}</title>
+            <title>{{ title|striptags|e if title else docstitle|e }}</title>
         {%- endblock htmltitle %}
-        {%- block thirdparty %}
-            {%- if fontawesome_kit %}
-                <script src="{{ fontawesome_kit }}"
+        {%- block km_thirdparty %}
+            <link rel="preconnect"
+                  href="https://cdn.jsdelivr.net"
+                  crossorigin />
+            {%- if km_fa_kit %}
+                <script src="{{ km_fa_kit }}"
                         crossorigin="anonymous"
-                        defer></script>
+                        async></script>
             {%- endif %}
-        {%- endblock thirdparty %}
+        {%- endblock km_thirdparty %}
         {%- for css in css_files %}
             {%- if css|attr("filename") %}
                 {{ css_tag(css) }}
@@ -108,24 +153,53 @@ Last updated on: 12 September, 2026
                       href="{{ pathto(css, 1) |e }}" />
             {%- endif %}
         {%- endfor %}
-        {%- set _favicon_ico_url = favicon_url | default(pathto('_static/' + (favicon or ""), 1)) %}
-        {%- if favicon_url or favicon %}
+        {%- block km_icons %}
+            {%- if km_fa_kit %}
+                {%- if km_fa_kit.endswith('.js') %}
+                    <noscript>
+                        <link rel="stylesheet"
+                              href="{{ km_fa_kit[:-3] }}.css"
+                              crossorigin="anonymous" />
+                    </noscript>
+                {%- endif %}
+            {%- elif km_fa_css %}
+                <link rel="stylesheet"
+                      href="{{ km_fa_css }}"
+                      crossorigin="anonymous"
+                      media="print"
+                      onload="this.media='all'" />
+                <noscript>
+                    <link rel="stylesheet"
+                          href="{{ km_fa_css }}"
+                          crossorigin="anonymous" />
+                </noscript>
+            {%- endif %}
+        {%- endblock km_icons %}
+        {%- if km_favicons and km_favicons.size_96 %}
             <link rel="icon"
                   type="image/png"
-                  href="{{ pathto('_static/' + favicons.size_96, 1) }}"
+                  href="{{ pathto('_static/' + km_favicons.size_96, 1) }}"
                   sizes="96x96" />
+        {%- endif %}
+        {%- if km_favicons and km_favicons.size_svg %}
             <link rel="icon"
                   type="image/svg+xml"
-                  href="{{ pathto('_static/' + favicons.size_svg, 1) }}" />
+                  href="{{ pathto('_static/' + km_favicons.size_svg, 1) }}" />
+        {%- endif %}
+        {%- if favicon_url %}
             <link rel="shortcut icon"
-                  href="{{ _favicon_ico_url }}" />
+                  href="{{ favicon_url }}" />
+        {%- endif %}
+        {%- if km_favicons and km_favicons.size_180 %}
             <link rel="apple-touch-icon"
                   sizes="180x180"
-                  href="{{ pathto('_static/' + favicons.size_180, 1) }}" />
+                  href="{{ pathto('_static/' + km_favicons.size_180, 1) }}" />
             <meta name="apple-mobile-web-app-title"
-                  content="{{ title|striptags|e if title else docstitle }}" />
+                  content="{{ docstitle|striptags|e }}" />
+        {%- endif %}
+        {%- if km_favicons and km_favicons.manifest %}
             <link rel="manifest"
-                  href="{{ pathto('_static/' + favicons.manifest, 1) }}" />
+                  href="{{ pathto('_static/' + km_favicons.manifest, 1) }}" />
         {%- endif %}
         {%- block linktags %}
             {%- if pageurl %}
@@ -155,46 +229,42 @@ Last updated on: 12 September, 2026
         {%- endblock linktags %}
         {%- block extrahead %}{%- endblock extrahead %}
         </head>
-        <body class="site-body" x-data="{ showSidebar: false
-            {% if show_scrolltop|tobool %}
-                , showScrollTop: false, lastScroll: 0
-            {% endif %}
-            }" :class="{ 'site-body--locked': showSidebar }" @keydown.escape.window="showSidebar = false" @resize.window="if (window.innerWidth >= 1024) showSidebar = false"
-            {% if show_scrolltop|tobool %}
-                @scroll.window.passive="const y = window.scrollY; const nearBottom = (y + innerHeight) >= (document.documentElement.scrollHeight - 200); showScrollTop = y > lastScroll && (y > 200 || nearBottom); lastScroll = Math.max(0, y);"
-            {% endif %}
-            >
+        <body class="km-body">
             {%- if sidebars|length > 0 %}
-                <div x-cloak
-                     x-show="showSidebar"
-                     class="site-sidebar__backdrop"
-                     @click="showSidebar = false"></div>
+                <div class="km-sidebar__backdrop"
+                     hidden></div>
             {%- endif %}
-            <div id="page"
-                 class="site-shell">
-                <a href="#content"
-                   class="site-shell__skip-link">Skip to content</a>
+            <div id="km-page"
+                 class="km-shell">
+                <a href="#km-content"
+                   class="km-shell__skip-link">{{ _("Skip to content") }}</a>
+                <noscript>
+                    <p class="km-noscript">
+                        {{ _("JavaScript is off, so some parts of this site may not work.") }}
+                    </p>
+                </noscript>
                 {%- block header %}
                     {%- include "header.html.jinja" %}
                 {%- endblock header %}
-                <div class="site-shell__main">
-                    <div class="site-layout container {% if show_toctree|tobool %}site-layout--nav-in-header{% endif %}">
-                        {%- block sidebar %}
+                <div class="km-shell__main">
+                    <div class="km-layout km-container {% if km_show_toctree|tobool %}km-layout--nav-in-header{% endif %}">
+                        {%- block km_sidebar %}
                             {%- if sidebars|length > 0 %}
                                 {%- include "sidebar.html.jinja" %}
                             {%- endif %}
-                        {%- endblock sidebar %}
-                        {%- block main %}
-                            <main class="site-layout__content">
-                                {%- block body %}{%- endblock body %}
-                                </main>
-                                {%- if show_previous_next_pages|tobool %}
+                        {%- endblock km_sidebar %}
+                        {%- block km_main %}
+                            <div class="km-layout__content">{%- block body %}{%- endblock body %}</div>
+                                {%- if km_show_previous_next_pages|tobool %}
                                     {%- include "previous_next_pages.html.jinja" %}
                                 {%- endif %}
-                            {%- endblock main %}
-                            {%- block aside %}{%- endblock aside %}
+                            {%- endblock km_main %}
+                            {%- block km_aside %}{%- endblock km_aside %}
                             </div>
                         </div>
+                        {%- if km_show_scrolltop|tobool %}
+                            {%- include "scrolltop.html.jinja" %}
+                        {%- endif %}
                         {%- block footer %}
                             {%- include "footer.html.jinja" %}
                         {%- endblock footer %}
