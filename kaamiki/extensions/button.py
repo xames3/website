@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April, 2026
-Last updated on: 12 September, 2026
+Last updated on: 29 September, 2026
 
 A `button` directive that renders a link as a button::
 
@@ -15,21 +15,6 @@ A `button` directive that renders a link as a button::
        Watch it here!
 
 The content is the label. The markup comes from `button.html.jinja`.
-
-.. versionchanged:: 10.9.2026
-
-    Rendering goes through `utils.render`, which has autoescaping on.
-    The per-module templates it replaced had it off, so a label
-    carrying an `&`, a `<` or a stray quote emitted broken markup.
-
-.. deprecated:: 10.9.2026
-
-    [1] The module-level path fiddling has moved to `utils`, along with
-        the `jinja2` import. `template` is now just the filename.
-    [2] Dropped the `node` class and the `visit`/`depart` pair. This
-        directive hands back a `nodes.raw` and never reaches a
-        translator, so all three only existed to keep the registration
-        loop happy.
 """
 
 from __future__ import annotations
@@ -39,6 +24,8 @@ import typing as t
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
+from kaamiki.extensions.utils import elsewhere
+from kaamiki.extensions.utils import icon
 from kaamiki.extensions.utils import render
 
 name: t.Final[str] = "button"
@@ -52,10 +39,6 @@ def scheme(argument: str) -> str:
     :param argument: The value written in the rST.
     :return: The value, once it is known to be one of the schemes.
 
-    .. versionchanged:: 10.9.2026
-
-        `docutils` is untyped, so the choice comes back as `Any`. The
-        cast marks that boundary.
     """
     return rst.directives.choice(argument, SCHEMES)
 
@@ -65,7 +48,8 @@ class directive(rst.Directive):
 
     Options::
 
-        - `fa-icon`: A Font Awesome icon name, without its style.
+        - `fa-icon`: A Font Awesome icon, as `video`, `fa-video` or
+          `far fa-video`. One without a style is drawn solid.
         - `scheme`: `primary` or `secondary`.
     """
 
@@ -81,20 +65,15 @@ class directive(rst.Directive):
         """Render the button and return it as a raw node.
 
         :return: A list holding the one `raw` node.
-
-        .. versionchanged:: 10.9.2026
-
-            [1] Renders through `utils.render`, so the label is escaped
-                on its way into the template instead of being dropped
-                into the markup as-is.
-            [2] The `raw` node carries the button's URL as its
-                `source`, which is where `linkcheck` looks. Every
-                button was being skipped by the link checker.
         """
         self.assert_has_content()
+        config = self.state.document.settings.env.config
         self.options["url"] = rst.directives.uri(self.arguments.pop().strip())
-        self.options["faicon"] = self.options.pop("fa-icon", None)
+        self.options["faicon"] = icon(self.options.pop("fa-icon", None))
         self.options["text"] = "\n".join(self.content).strip()
+        self.options["new_tab"] = elsewhere(
+            self.options["url"], config.html_baseurl
+        ) and config.html_context.get("km_open_links_in_new_tab", True)
         attributes: dict[str, str] = {}
         attributes["source"] = self.options["url"]
         attributes["text"] = render(template, **self.options)

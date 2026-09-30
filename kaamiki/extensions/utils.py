@@ -4,110 +4,38 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 12 September, 2026
+Last updated on: 30 September, 2026
 
 The theme's shared helpers. They fall into four groups: rendering a
 directive's template, reading things off the doctree (a lead, a
-description, a reading time), filling in the page context, and the
-post-build pass over the written HTML.
-
-.. deprecated:: 19.10.2025
-
-    `website_options` in favour of `html_context`, which removes the
-    need for `register_website_options`.
-
-.. versionchanged:: 31.8.2026
-
-    [1] `ensure_classes_on_nodes` was annotated and connected for the
-        wrong event; it matches `doctree-resolved` now and uses
-        `findall()` rather than the removed `.traverse()`.
-    [2] Fixed a `dt.timezone.utc` typo in `last_updated_date`. `dt` is
-        the class, not the module.
-
-.. versionadded:: 10.9.2026
-
-    [1] `render` gives every directive one shared Jinja environment
-        with autoescaping on. Each one used to build a bare
-        `jinja2.Template` at import time, which left escaping off.
-    [2] `measure` reads an image's size off the file header, for PNG,
-        GIF, WEBP and JPEG, so the theme can write `width`/`height`
-        without an imaging dependency.
-    [3] `social_metadata` works the Open Graph and Twitter values out
-        of the doctree and `html_context`, replacing
-        `sphinxext-opengraph` and the `matplotlib` it dragged in. A
-        page's own `:og:*` fields win.
-    [4] `plain` flattens rendered HTML to bare text, so a title
-        carrying an icon role does not leak `<span>` soup into a
-        `<meta>` tag.
-    [5] `depart` is the shared no-op for a directive that writes its
-        whole widget during `visit`.
-    [6] `standfirst` pulls the page's lead, which `social_metadata`
-        prefers to anything guessed from the prose below it.
-    [7] `buried` and `clip` are the bits `standfirst` and `summarise`
-        both wanted, pulled out rather than written twice.
-    [8] `wordcount` and `reading_time` put a number of minutes on a
-        page. Paragraphs count towards it; code, tables, figures and
-        admonitions do not. `reading_length` passes that to the
-        template with the answer to whether the page folds up.
-    [9] `context_defaults` merges the theme's icons and project
-        details into `html_context`, so a site that sets neither gets
-        defaults rather than a failed build.
-    [10] `trail` hands the link checker the URLs a directive keeps in
-         its options. Sphinx reads URIs off `reference`, `image` and
-         `raw` nodes alone, so an avatar or background went unchecked.
-    [11] `not_found` writes the theme's 404 page to the top of the
-         output tree, under `show_404`. `root_urls` rewrites its URLs
-         to start at the site root, since the page is served under
-         whatever address was asked for and not under its own.
-
-.. versionchanged:: 10.9.2026
-
-    [1] `last_updated_date` no longer wraps the path in `shlex.quote`
-        for `git log`. The command runs as an argument list, not
-        through a shell, so the quoting only corrupted paths with a
-        space in them.
-    [2] `findall` is generic over the element type rather than
-        returning `t.Any`, which had been switching type checking off
-        at the one place the doctree is walked.
-    [3] `build_finished` post-processes every HTML file in the output
-        directory, not only the documents Sphinx re-read. A template
-        or stylesheet change rewrites pages without re-reading them, so
-        that list came back empty and an incremental build shipped
-        pages with none of the transforms applied.
-    [5] The description falls back in a stated order: the page's own
-        `:og:description:`, then its lead, then the default in
-        `html_context`, then its opening paragraph.
-    [6] `SOCIAL_SKIP` is now `FURNITURE`, since the reading-time count
-        uses the same list.
-
-.. deprecated:: 10.9.2026
-
-    `env_before_read_docs` and the `theme_htmls` list it kept are gone.
-    They narrowed post-processing to re-read documents, which is what
-    made an incremental build differ from a fresh one.
+description, a reading time), filling in the page context, and writing
+the 404 page once the build is done.
 """
 
 from __future__ import annotations
 
+import functools
+import os
+import os.path as p
 import posixpath
 import re
-import struct
 import typing as t
-from datetime import UTC
 from datetime import datetime as dt
+from html import escape
 from html import unescape
 from math import ceil
-from pathlib import Path
+from subprocess import DEVNULL
 from subprocess import CalledProcessError
 from subprocess import check_output as co
+from urllib.parse import parse_qs
+from urllib.parse import quote
 from urllib.parse import urlsplit
 
 import bs4
 import jinja2
-from bs4.element import NavigableString
 from docutils import nodes
 from sphinx.builders.html import StandaloneHTMLBuilder
-from sphinx.util.display import status_iterator
+from sphinx.locale import _
 
 if t.TYPE_CHECKING:
     from collections.abc import Iterator
@@ -115,9 +43,11 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
-TEMPLATES: Path = Path(__file__).resolve().parent.parent / "base" / "templates"
-LAST_UPDATED_RE: re.Pattern[str] = re.compile(
-    r"^\.\.\s+Last updated on:\s*(.+)$", re.IGNORECASE
+TEMPLATES: t.Final[str] = p.join(
+    p.dirname(p.dirname(p.realpath(__file__))), "base", "templates"
+)
+HEADER_RE: re.Pattern[str] = re.compile(
+    r"^\.\.\s+(Author|Created on|Last updated on):\s*(.+)$", re.IGNORECASE
 )
 TAG_RE: re.Pattern[str] = re.compile(r"</?[A-Za-z][^<>]*>")
 FURNITURE: tuple[type, ...] = (
@@ -139,6 +69,7 @@ ROOTED_ATTRIBUTES: t.Final[tuple[str, ...]] = (
 ROOTED_SKIP: t.Final[tuple[str, ...]] = ("#", "/", "data:", "mailto:", "tel:")
 PROJECT: t.Final[dict[str, str]] = {
     "author": "",
+    "avatar": "",
     "email": "",
     "source": "#",
 }
@@ -148,53 +79,138 @@ ICONS: t.Final[dict[str, str]] = {
     "breadcrumb_separator_parent": "fa-solid fa-angles-right",
     "copy_url": "fa-solid fa-link",
     "dark_mode": "fa-solid fa-moon",
+    "external_link": "fa-solid fa-arrow-up-right-from-square",
+    "feedback": "fa-solid fa-paper-plane",
     "light_mode": "fa-solid fa-sun",
+    "menu": "fa-solid fa-bars",
     "next_button": "fa-solid fa-arrow-right",
+    "permalink": "fa-solid fa-link",
     "previous_button": "fa-solid fa-arrow-left",
     "reading_time": "fa-regular fa-clock",
+    "search": "fa-solid fa-magnifying-glass",
     "show_more": "fa-solid fa-chevron-down",
+    "title_badge": "fa-solid fa-circle-check",
 }
-LINKCHECK_OPTIONS: tuple[str, ...] = ("avatar", "background", "target")
-JPEG_SIZE_MARKERS: frozenset[int] = frozenset(
-    {
-        0xC0,
-        0xC1,
-        0xC2,
-        0xC3,
-        0xC5,
-        0xC6,
-        0xC7,
-        0xC9,
-        0xCA,
-        0xCB,
-        0xCD,
-        0xCE,
-        0xCF,
-    }
+FEEDBACK: t.Final[dict[str, t.Any]] = {
+    "title": _("Feedback"),
+    "description": _("Let me know how this can be improved."),
+    "button": _("Submit"),
+}
+SETTINGS: t.Final[tuple[str, ...]] = (
+    "add_copy_to_headerlinks",
+    "colour_mode",
+    "fa_css",
+    "fa_icons",
+    "fa_kit",
+    "fa_style",
+    "favicons",
+    "header_buttons",
+    "open_graph",
+    "open_links_in_new_tab",
+    "project",
+    "show_404",
+    "show_breadcrumbs",
+    "show_colour_modes",
+    "show_feedback",
+    "show_last_updated_on",
+    "show_more_after",
+    "show_previous_next_pages",
+    "show_scrolltop",
+    "show_searchbox",
+    "show_show_more",
+    "show_sitemap",
+    "show_toctree",
+    "sidebar_buttons",
 )
-
+SWITCHES: t.Final[dict[str, bool]] = {
+    "show_breadcrumbs": True,
+    "show_last_updated_on": True,
+    "show_previous_next_pages": True,
+    "show_searchbox": True,
+    "show_toctree": True,
+}
+GENERATED: t.Final[dict[str, t.Any]] = {
+    NOT_FOUND: _(
+        "There is nothing at this address. It may have moved, or it may"
+        " never have been here."
+    ),
+    "genindex": _("Every term indexed on this site, from A to Z."),
+    "search": _("Search every page on this site."),
+}
+TITLES: t.Final[dict[str, t.Any]] = {
+    NOT_FOUND: _("Page not found"),
+    "genindex": _("Index"),
+    "search": _("Search Results"),
+}
+FA_STYLE: t.Final[str] = "solid"
+FA_FREE: t.Final[str] = (
+    "https://ka-f.fontawesome.com/releases/v7.3.1/css/free.min.css"
+)
+YOUTUBE_ID: re.Pattern[str] = re.compile(r"^[\w-]{11}$")
+YOUTUBE_HOSTS: t.Final[frozenset[str]] = frozenset(
+    {"youtube.com", "youtube-nocookie.com", "music.youtube.com"}
+)
+YOUTUBE_PATHS: t.Final[frozenset[str]] = frozenset(
+    {"embed", "live", "shorts", "v"}
+)
+LINKCHECK_OPTIONS: tuple[str, ...] = ("avatar", "background", "target")
+DESIGN_ASSETS: t.Final[frozenset[str]] = frozenset(
+    {"design-tabs.js", "sphinx-design.min.css"}
+)
 environment: jinja2.Environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(TEMPLATES),
     autoescape=True,
     trim_blocks=True,
     lstrip_blocks=True,
     keep_trailing_newline=False,
+    extensions=["jinja2.ext.i18n"],
 )
+environment.install_null_translations(newstyle=True)  # type: ignore[attr-defined]
 
 
 def render(template: str, /, **context: t.Any) -> str:
     """Render one of the theme's directive templates.
 
     Every directive shares this one environment, which has autoescaping
-    on and a loader rooted at the theme's template directory.
+    on. `bridge` points its loader at the builder's own, so a template
+    is looked up the way Sphinx looks up a page's.
+
+    Every value reaches the template under a `km_` name, so a template
+    tells the theme's own names from Sphinx's at a glance, while the
+    options keep the names the rST writes them with.
 
     :param template: Template filename, relative to `base/templates`.
     :param context: Values made available to the template.
     :return: The rendered HTML.
-
-    .. versionadded:: 10.9.2026
     """
-    return environment.get_template(template).render(**context)
+    values = {f"km_{key}": value for key, value in context.items()}
+    return environment.get_template(template).render(**values)
+
+
+def bridge(app: Sphinx) -> None:
+    """Look directive templates up where Sphinx looks its own up.
+
+    The builder's loader searches `templates_path` first, then the
+    theme, then whatever theme it inherits from, so a site or a theme
+    built on this one can replace `author.html.jinja` and the rest the
+    way it would replace `layout.html`. The theme's own directory comes
+    last, for a builder that uses another theme altogether. The
+    environment stays the theme's, so escaping and whitespace handling
+    are what they were. It takes the build's translations too, so `_()`
+    in a directive template reads in the site's `language`.
+
+    :param app: The Sphinx application instance.
+    """
+    environment.install_gettext_translations(app.translator, newstyle=True)  # type: ignore[attr-defined]
+    theme = jinja2.FileSystemLoader(TEMPLATES)
+    templates = getattr(app.builder, "templates", None)
+    if not isinstance(templates, jinja2.BaseLoader):
+        environment.loader = theme
+        return
+    environment.loader = jinja2.ChoiceLoader([templates, theme])
+    sphinx = getattr(templates, "environment", None)
+    for name, value in getattr(sphinx, "filters", {}).items():
+        environment.filters.setdefault(name, value)
 
 
 def depart(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -204,58 +220,22 @@ def depart(self: HTMLTranslator, node: nodes.Element) -> None:
     its whole widget during `visit` has nothing left to do. They share
     this instead of each carrying an empty function.
 
-    :param self: The HTML translator instance (unused).
-    :param node: The node being departed (unused).
-
-    .. versionadded:: 10.9.2026
+    :param self: The HTML translator instance.
+    :param node: The node being departed.
     """
 
 
-def measure(path: str) -> tuple[int, int] | None:
-    """Read an image's size from its header.
+def skip(self: nodes.NodeVisitor, node: nodes.Element) -> None:
+    """Leave a node out of a builder that has no use for it.
 
-    Only the leading bytes are read, so this is cheap and needs no
-    imaging dependency. Writing `width`/`height` out lets the browser
-    hold the space open before the image lands.
+    A byline or a picture is HTML furniture. A PDF, a man page or plain
+    text writes the prose around it and nothing for it.
 
-    :param path: Filesystem path to the image.
-    :return: A `(width, height)` pair, or `None` when the format is not
-        recognised or the header is unreadable.
-
-    .. versionadded:: 10.9.2026
+    :param self: The translator.
+    :param node: The node being skipped.
+    :raises nodes.SkipNode: Always.
     """
-    try:
-        with open(path, "rb") as fd:
-            head = fd.read(32)
-            if head[:8] == b"\x89PNG\r\n\x1a\n" and head[12:16] == b"IHDR":
-                w, h = struct.unpack(">II", head[16:24])
-                return int(w), int(h)
-            if head[:6] in {b"GIF87a", b"GIF89a"}:
-                w, h = struct.unpack("<HH", head[6:10])
-                return int(w), int(h)
-            if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
-                fd.seek(0)
-                blob = fd.read(30)
-                if blob[12:16] == b"VP8X":
-                    w = int.from_bytes(blob[24:27], "little") + 1
-                    h = int.from_bytes(blob[27:30], "little") + 1
-                    return w, h
-                return None
-            if head[:2] == b"\xff\xd8":
-                fd.seek(2)
-                while True:
-                    marker = fd.read(2)
-                    if len(marker) < 2 or marker[0] != 0xFF:
-                        return None
-                    if marker[1] in JPEG_SIZE_MARKERS:
-                        fd.read(3)
-                        h, w = struct.unpack(">HH", fd.read(4))
-                        return int(w), int(h)
-                    size = struct.unpack(">H", fd.read(2))[0]
-                    fd.seek(size - 2, 1)
-    except (OSError, struct.error):
-        return None
-    return None
+    raise nodes.SkipNode
 
 
 def findall[T: nodes.Element](
@@ -264,26 +244,90 @@ def findall[T: nodes.Element](
 ) -> Iterator[T]:
     """Walk a doctree for every node of one type.
 
-    Older docutils spells this `traverse`, so the method is looked up
-    by name rather than called directly.
-
     :param node: Where to start looking.
     :param element: The node type to look for.
     :return: Every match, in document order.
-
-    .. versionchanged:: 31.8.2026
-
-        Takes any `nodes.Element`, not just references and bullet
-        lists.
-
-    .. versionchanged:: 10.9.2026
-
-        Generic over the element type rather than returning `t.Any`,
-        which had been switching type checking off for the whole loop.
-        `docutils` is untyped, so the cast marks that boundary.
     """
-    method = "findall" if hasattr(node, "findall") else "traverse"
-    return t.cast("Iterator[T]", getattr(node, method)(element))
+    return t.cast("Iterator[T]", node.findall(element))
+
+
+def themed(builder: object) -> bool:
+    """Say whether a builder writes its pages with this theme.
+
+    A theme built on this one counts too, since its directories carry
+    this one's templates.
+
+    :param builder: The builder, of any kind.
+    :return: `True` when this theme's templates are among its theme's.
+    """
+    theme = getattr(builder, "theme", None)
+    if theme is None:
+        return False
+    return any(p.realpath(_) == TEMPLATES for _ in theme.get_theme_dirs())
+
+
+def icon(value: str | None, fallback: str = "") -> str:
+    """Spell out a Font Awesome icon in full.
+
+    `video`, `fa-video` and `fa-solid fa-video` all work. A lone name
+    is given the solid style, which is the one Font Awesome Free has
+    for every icon.
+
+    :param value: The icon as written, or `None` when unset.
+    :param fallback: The icon to use when there is not one.
+    :return: The icon's classes, or an empty string for no icon.
+    """
+    parts = (value or fallback).split()
+    if len(parts) == 1:
+        name = parts[0] if parts[0].startswith("fa-") else f"fa-{parts[0]}"
+        parts = ["fa-solid", name]
+    return " ".join(parts)
+
+
+def youtube_id(url: str) -> str | None:
+    """Find the video id in a YouTube link.
+
+    Watch pages with the id anywhere in the query, `youtu.be` short
+    links, and the `embed`, `shorts`, `live` and `v` paths all work, as
+    does the bare id.
+
+    :param url: The link, as written.
+    :return: The eleven character id, or `None` when there is not one.
+    """
+    parts = urlsplit(url.strip())
+    host = parts.netloc.lower().removeprefix("www.").removeprefix("m.")
+    segments = [_ for _ in parts.path.split("/") if _]
+    found = ""
+    if (not host and len(segments) == 1) or (host == "youtu.be" and segments):
+        found = segments[0]
+    elif host in YOUTUBE_HOSTS and segments[:1] == ["watch"]:
+        found = parse_qs(parts.query).get("v", [""])[0]
+    elif host in YOUTUBE_HOSTS and len(segments) > 1:
+        found = segments[1] if segments[0] in YOUTUBE_PATHS else ""
+    return found if YOUTUBE_ID.match(found) else None
+
+
+def elsewhere(url: str, site: str) -> bool:
+    """Say whether a link leaves the site.
+
+    A link leaves when it names a host other than the one in
+    `html_baseurl`, `www.` aside. A relative link, one to the site's own
+    address and a `mailto:` all stay, so none of them opens a new tab.
+    A link too malformed to read counts as leaving, which is what every
+    external link did before.
+
+    :param url: The link, as written.
+    :param site: The site's own address, `html_baseurl`.
+    :return: Whether the link goes to another site.
+    """
+    try:
+        host = urlsplit(url).hostname
+        home = urlsplit(site).hostname or ""
+    except ValueError:
+        return True
+    if not host:
+        return False
+    return host.removeprefix("www.") != home.removeprefix("www.")
 
 
 def trail(options: dict[str, t.Any]) -> list[nodes.Node]:
@@ -300,8 +344,6 @@ def trail(options: dict[str, t.Any]) -> list[nodes.Node]:
     :param options: The directive's options, as written in the rST.
     :return: One empty `raw` node per URL found, ready to sit beside
         the directive's own node.
-
-    .. versionadded:: 10.9.2026
     """
     found: list[nodes.Node] = []
     for option in LINKCHECK_OPTIONS:
@@ -314,84 +356,6 @@ def trail(options: dict[str, t.Any]) -> list[nodes.Node]:
             if "://" in uri
         ]
     return found
-
-
-def remove_empty_toctree_divs(tree: bs4.BeautifulSoup) -> None:
-    """Drop the wrapper a hidden toctree leaves behind.
-
-    Sphinx writes a `toctree-wrapper` div even for a `:hidden:`
-    toctree, which paints nothing and leaves a gap.
-
-    :param tree: Parsed HTML tree, edited in place.
-
-    .. versionchanged:: 31.8.2026
-
-        Only calls `.strip()` on the div's sole child when it is a
-        `NavigableString`, instead of assuming it always is one.
-    """
-    for div in tree.select("div.toctree-wrapper"):
-        if len(div.contents) != 1:
-            continue
-        content = div.contents[0]
-        if isinstance(content, NavigableString) and not content.strip():
-            div.decompose()
-
-
-def remove_comments(tree: bs4.BeautifulSoup) -> None:
-    """Strip the HTML comments out of a page.
-
-    The templates carry header comments the reader has no use for.
-
-    :param tree: Parsed HTML tree, edited in place.
-    """
-    for comment in tree.find_all(string=lambda c: isinstance(c, bs4.Comment)):
-        comment.extract()
-
-
-def add_copy_to_headerlinks(tree: bs4.BeautifulSoup) -> None:
-    """Make a heading's anchor copy its own URL when clicked.
-
-    :param tree: Parsed HTML tree, edited in place.
-    """
-    for link in tree.select("a.headerlink"):
-        link["@click.prevent"] = (
-            "window.navigator.clipboard.writeText($el.href);"
-        )
-        del link["title"]
-        link["aria-label"] = "Copy link"
-
-
-def open_links_in_new_tab(tree: bs4.BeautifulSoup) -> None:
-    """Open external links in a new tab.
-
-    `rel="nofollow noopener"` goes on with the target, so the new tab
-    cannot reach back at the page that opened it.
-
-    :param tree: Parsed HTML tree, edited in place.
-    """
-    for link in tree("a", class_="reference external"):
-        link["rel"] = "nofollow noopener"
-        link["target"] = "_blank"
-
-
-def postprocess(html: str) -> None:
-    """Run every transform over one written page.
-
-    :param html: Path to the HTML file, rewritten in place.
-
-    .. versionchanged:: 31.8.2026
-
-        Dropped the unused `app` parameter rather than reassigning it
-        to itself to appease the linter.
-    """
-    with open(html, encoding="utf-8") as f:
-        tree = bs4.BeautifulSoup(f, "html.parser")
-    open_links_in_new_tab(tree)
-    add_copy_to_headerlinks(tree)
-    remove_empty_toctree_divs(tree)
-    remove_comments(tree)
-    with open(html, "w", encoding="utf-8") as f:
-        f.write(str(tree))
 
 
 def plain(text: str) -> str:
@@ -407,8 +371,6 @@ def plain(text: str) -> str:
     :param text: Rendered HTML, or plain text.
     :return: The text with tags removed, entities resolved and
         whitespace collapsed onto a single line.
-
-    .. versionadded:: 10.9.2026
     """
     return " ".join(unescape(TAG_RE.sub("", text)).split())
 
@@ -420,8 +382,6 @@ def clip(text: str, limit: int) -> str:
     :param limit: Longest the result may be, ellipsis aside.
     :return: The text, trimmed and closed with an ellipsis when it
         had to be cut.
-
-    .. versionadded:: 10.9.2026
     """
     if len(text) <= limit:
         return text
@@ -436,8 +396,6 @@ def buried(paragraph: nodes.Element) -> bool:
 
     :param paragraph: The paragraph to place.
     :return: `True` when it has one of those for an ancestor.
-
-    .. versionadded:: 10.9.2026
     """
     parent: nodes.Element | None = paragraph.parent
     while parent is not None and not isinstance(parent, FURNITURE):
@@ -456,13 +414,11 @@ def standfirst(doctree: nodes.document | None, limit: int) -> str:
     :param limit: Longest the result may be.
     :return: The lead, or an empty string when the page hasn't got
         one.
-
-    .. versionadded:: 10.9.2026
     """
     if doctree is None:
         return ""
     for paragraph in findall(doctree, nodes.paragraph):
-        if "lead" not in (paragraph.get("classes") or []):
+        if "km-lead" not in (paragraph.get("classes") or []):
             continue
         if buried(paragraph):
             continue
@@ -483,11 +439,6 @@ def summarise(doctree: nodes.document | None, limit: int) -> str:
     :param limit: Longest the result may be.
     :return: A single-line summary, or an empty string when the page
         has no usable prose.
-
-    .. versionchanged:: 10.9.2026
-
-        Only returns the opening paragraph now. The lead moved out to
-        `standfirst` so the theme-wide default can sit between the two.
     """
     if doctree is None:
         return ""
@@ -509,44 +460,60 @@ def social_metadata(
 ) -> None:
     """Work out the Open Graph and Twitter values for a page.
 
-    Each one prefers the page's own `:og:*` field, then the default in
-    `html_context`, then whatever can be salvaged from the page. The
-    docinfo keys keep their `og:` prefix, so they are looked up under
-    that name and not the bare one.
+    Each one prefers the page's own `:km-pg-*:` field, then the default
+    in `html_context`, then whatever can be salvaged from the page. The
+    docinfo keys keep their `km-pg-` prefix, so they are looked up under
+    that name and not the bare one. The default image's alt text only
+    goes with the default image, since it describes that one and not a
+    picture of the page's own. An article carries the days it was
+    created and last updated, as `provenance` read them.
+
+    The search, index and 404 pages have no title yet when this runs,
+    so theirs come from `TITLES`, as their descriptions come from
+    `GENERATED`. An image given as a path counts from the root of the
+    site and goes out absolute, since a link preview ignores a relative
+    one.
 
     :param app: The Sphinx application instance.
-    :param pagename: The page being rendered (unused).
-    :param templatename: The template rendering it (unused).
+    :param pagename: The page being rendered.
+    :param templatename: The template rendering it.
     :param context: The page's rendering context, updated in place.
     :param doctree: The resolved doctree, or `None` for generated
         pages.
-
-    .. versionadded:: 10.9.2026
     """
-    options = app.config.html_context.get("open_graph") or {}
+    options = app.config.html_context.get("km_open_graph") or {}
     if options.get("enable") is False:
         return
     meta: dict[str, str] = context.get("meta") or {}
     limit = int(options.get("description_length", 200))
-    title = meta.get("og:title") or plain(
-        context.get("title") or context.get("docstitle") or ""
+    generated = doctree is None and pagename in GENERATED
+    title = meta.get("km-pg-title") or plain(
+        str(TITLES[pagename])
+        if generated
+        else context.get("title") or context.get("docstitle") or ""
     )
     description = (
-        meta.get("og:description")
+        meta.get("km-pg-description")
         or standfirst(doctree, limit)
+        or (str(GENERATED[pagename]) if generated else "")
         or options.get("description", "")
         or summarise(doctree, limit)
     )
-    image = meta.get("og:image") or options.get("image", "")
-    context["social"] = {
+    image = meta.get("km-pg-image") or options.get("image", "")
+    alt = meta.get("km-pg-image-alt") or (
+        options.get("image_alt", "") if image == options.get("image") else ""
+    )
+    context["km_social"] = {
         "title": plain(title),
         "description": plain(description),
-        "image": image,
-        "image_alt": meta.get("og:image:alt") or options.get("image_alt", ""),
+        "image": absolute(image, app.config.html_baseurl),
+        "image_alt": plain(alt),
+        "published": day(meta.get("created", "")),
+        "modified": day(meta.get("last_updated", "")),
         "site_name": options.get("site_name") or context.get("docstitle", ""),
-        "type": meta.get("og:type") or options.get("type", "website"),
-        "locale": meta.get("og:locale") or options.get("locale", ""),
-        "card": meta.get("og:card")
+        "type": meta.get("km-pg-type") or options.get("type", "website"),
+        "locale": meta.get("km-pg-locale") or options.get("locale", ""),
+        "card": meta.get("km-pg-card")
         or options.get("card", "summary_large_image"),
         "site": options.get("twitter_site", ""),
     }
@@ -555,8 +522,14 @@ def social_metadata(
 def context_defaults(app: Sphinx) -> None:
     """Fill in the `html_context` keys the templates expect.
 
-    Templates read `fa_icons` and `project` straight off the context,
-    so a site that sets neither fails the build with an
+    A site writes its settings the way it always has, `fa_icons`,
+    `fa_kit` and the rest. Each one in `SETTINGS` is copied under a
+    `km_` name, which is the only one the theme reads, so its templates
+    and code never take a name of Sphinx's or another extension's for
+    one of their own. The site's keys are left as they were written.
+
+    Templates read `km_fa_icons` and `km_project` straight off the
+    context, so a site that sets neither would fail the build with an
     `UndefinedError`. The `default` filter does not help, since the
     attribute is looked up before the filter runs. Merging defaults
     here means a site names only what it wants changed.
@@ -566,17 +539,26 @@ def context_defaults(app: Sphinx) -> None:
     being built, by which time `config-inited` has gone.
 
     :param app: The Sphinx application instance.
-
-    .. versionadded:: 10.9.2026
     """
     context: dict[str, t.Any] = app.config.html_context
+    for key in SETTINGS:
+        if key in context:
+            context[f"km_{key}"] = context[key]
     icons: dict[str, str] = dict(ICONS)
     icons.update(context.get("fa_icons") or {})
-    context["fa_icons"] = icons
+    context["km_fa_icons"] = icons
     project: dict[str, str] = dict(PROJECT)
     project["author"] = app.config.author
     project.update(context.get("project") or {})
-    context["project"] = project
+    context["km_project"] = project
+    for key, value in SWITCHES.items():
+        context.setdefault(f"km_{key}", value)
+    context.setdefault("km_show_feedback", bool(project["email"]))
+    context.setdefault("km_fa_style", FA_STYLE)
+    context.setdefault("km_fa_css", FA_FREE)
+    config = app.config
+    if "html_show_sphinx" not in config._raw_config | config._overrides:
+        context.setdefault("show_sphinx", False)
 
 
 def wordcount(doctree: nodes.document | None) -> int:
@@ -589,8 +571,6 @@ def wordcount(doctree: nodes.document | None) -> int:
     :param doctree: The resolved doctree, or `None` for generated
         pages.
     :return: The number of words counted.
-
-    .. versionadded:: 10.9.2026
     """
     if doctree is None:
         return 0
@@ -610,8 +590,6 @@ def reading_time(doctree: nodes.document | None) -> int:
     :param doctree: The resolved doctree, or `None` for generated
         pages.
     :return: Minutes, rounded up.
-
-    .. versionadded:: 10.9.2026
     """
     return ceil(wordcount(doctree) / WORDS_PER_MINUTE)
 
@@ -625,106 +603,179 @@ def reading_length(
 ) -> None:
     """Decide whether a page is long enough to fold up.
 
-    `show_show_more` in `html_context` is the site-wide switch. This
-    replaces it in the page context with the answer for this page:
-    true only when the page runs to `show_more_after` minutes or more,
-    and false everywhere when the switch is off.
+    `show_show_more` in `html_context` is the site-wide switch. The
+    page's `km_show_show_more` is the answer for this page: true only
+    when the page runs to `show_more_after` minutes or more, and false
+    everywhere when the switch is off.
 
     :param app: The Sphinx application instance.
-    :param pagename: The name of the page being rendered (unused).
-    :param templatename: The template rendering it (unused).
+    :param pagename: The name of the page being rendered.
+    :param templatename: The template rendering it.
     :param context: The page's rendering context, updated in place.
     :param doctree: The resolved doctree, or `None` for generated
         pages.
-
-    .. versionadded:: 10.9.2026
     """
     options = app.config.html_context
     minutes = reading_time(doctree)
-    after = int(options.get("show_more_after", SHOW_MORE_AFTER))
-    context["reading_time"] = minutes
-    context["show_show_more"] = (
-        bool(options.get("show_show_more", True)) and minutes >= after
+    after = int(options.get("km_show_more_after", SHOW_MORE_AFTER))
+    context["km_reading_time"] = minutes
+    context["km_show_show_more"] = (
+        bool(options.get("km_show_show_more", True)) and minutes >= after
     )
 
 
-def ensure_classes_on_nodes(
-    app: Sphinx, doctree: nodes.document, docname: str
+def feedback(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: dict[str, t.Any],
+    doctree: nodes.document | None,
 ) -> None:
-    """Give every node a `classes` list.
+    """Work out what a page's feedback box says and where it points.
 
-    Parts of Sphinx assume the attribute is there and fall over on a
-    node that never got one.
+    The page's own `:km-fb-*:` fields win and the theme's words fill in
+    the rest. The box mails the address in `project`, with the page
+    title as the subject, unless the page links somewhere instead. With
+    neither, it has no button.
 
-    :param app: The Sphinx application instance (unused).
-    :param doctree: The resolved doctree, edited in place.
-    :param docname: The document's name (unused).
-
-    .. versionchanged:: 31.8.2026
-
-        Was annotated and connected for a different event. It matches
-        `doctree-resolved` now and uses `findall()` rather than the
-        removed `.traverse()`.
+    :param app: The Sphinx application instance.
+    :param pagename: The page being rendered.
+    :param templatename: The template rendering it.
+    :param context: The page's rendering context, updated in place.
+    :param doctree: The resolved doctree, or `None` for generated
+        pages.
     """
-    for node in findall(doctree, nodes.Element):
-        node.setdefault("classes", [])
+    options = app.config.html_context
+    meta: dict[str, str] = context.get("meta") or {}
+    email = (options.get("km_project") or {}).get("email", "")
+    title = plain(context.get("title") or "")
+    subject = quote(str(_("Feedback about %s")) % title)
+    href: str | None = f"mailto:{email}?subject={subject}" if email else None
+    if meta.get("km-fb-type") == "link":
+        href = meta.get("km-fb-target") or href
+    icons = options.get("km_fa_icons") or ICONS
+    context["km_feedback"] = {
+        "mode": meta.get("km-fb-mode", "default"),
+        "title": meta.get("km-fb-title") or str(FEEDBACK["title"]),
+        "description": meta.get("km-fb-description")
+        or str(FEEDBACK["description"]),
+        "button": meta.get("km-fb-button") or str(FEEDBACK["button"]),
+        "icon": icon(meta.get("km-fb-fa-icon"), icons.get("feedback", "")),
+        "href": href,
+    }
 
 
-def last_updated_date(app: Sphinx, docname: str, source: list[str]) -> None:
-    """Work out when a page was last updated.
+def header(source: str) -> dict[str, str]:
+    """Read the comments heading a page.
 
-    A `.. Last updated on:` comment in the source wins. Failing that,
-    the date of the file's last commit, and failing that, the file's
-    own timestamp.
+    Only the comments before its first line of anything else count, so
+    a date quoted further down, in an example say, is not taken for the
+    page's own. The address after an author's name is left off.
+
+    :param source: The page's source.
+    :return: What they say, keyed `author`, `created on` and
+        `last updated on`, for the ones the page has.
+    """
+    found: dict[str, str] = {}
+    for line in source.splitlines():
+        if line.strip() and not line.startswith(".."):
+            break
+        match = HEADER_RE.match(line.strip())
+        if match:
+            found.setdefault(match.group(1).lower(), match.group(2).strip())
+    if "author" in found:
+        found["author"] = found["author"].split("<")[0].strip()
+    return found
+
+
+def committed(app: Sphinx, docname: str, *, first: bool = False) -> dt | None:
+    """Ask git when a page was last committed, or first.
+
+    :param app: The Sphinx application instance.
+    :param docname: The document to ask about.
+    :param first: Ask for the commit that brought the page in, following
+        it through renames, rather than the latest one.
+    :return: The commit's date, or `None` outside a repository and for a
+        page git has never seen.
+    """
+    src = str(app.env.doc2path(docname, base=True))
+    order = ["--follow"] if first else ["-n1"]
+    cmd = ["git", "log", *order, "--format=%cI", "--", src]
+    try:
+        on = co(cmd, cwd=app.confdir, stderr=DEVNULL).decode().split()  # noqa: S603
+    except CalledProcessError, FileNotFoundError:
+        return None
+    return dt.fromisoformat(on[-1]) if on else None
+
+
+def written(when: dt | None) -> str:
+    """Write a date the way a page's header comments write it.
+
+    :param when: The date, or `None` for the day the site is built.
+    :return: The date, as `29 September, 2026`.
+    """
+    when = when or dt.now().astimezone()
+    return f"{when.day} {when:%B}, {when.year}"
+
+
+def absolute(url: str, home: str) -> str:
+    """Make an address absolute against the site's own.
+
+    A path counts from the root of the site, with or without its
+    leading slash, so `_static/cover.png` means the same picture on
+    every page. A site without `html_baseurl` has nothing to resolve it
+    against, so the path is left as written.
+
+    :param url: The address, as written.
+    :param home: The site's `html_baseurl`.
+    :return: The address, absolute where it can be.
+    """
+    if not url or not home or urlsplit(url).scheme:
+        return url
+    if url.startswith("//"):
+        return f"{urlsplit(home).scheme}:{url}"
+    return home.rstrip("/") + "/" + quote(url.lstrip("/"), safe="/%?=&#:")
+
+
+def day(date: str) -> str:
+    """Turn a date written the way the header comments write it into ISO.
+
+    :param date: The date, as `29 September, 2026`.
+    :return: `2026-09-29`, or an empty string when it does not read as a
+        date.
+    """
+    try:
+        return dt.strptime(date, "%d %B, %Y").astimezone().date().isoformat()
+    except ValueError:
+        return ""
+
+
+def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
+    """Work out who wrote a page and when it was created and updated.
+
+    The page's own `.. Author:`, `.. Created on:` and `.. Last updated
+    on:` comments win. A date the page leaves out is the one of its first
+    commit or its latest, and failing that, the day the site is built.
+    An author it leaves out is the name its `author` directive gives,
+    and failing that, the project's, which is settled as the page is
+    written.
 
     :param app: The Sphinx application instance.
     :param docname: The document being read.
     :param source: The document's source, as docutils hands it over.
-
-    .. versionchanged:: 31.8.2026
-
-        Fixed a `dt.timezone.utc` typo. `dt` is the class, not the
-        module, so this uses `datetime.UTC` directly.
     """
     metadata = app.env.metadata.setdefault(docname, {})
-    if metadata.get("last_updated"):
-        return
-    on = None
-    if source:
-        for line in source[0].splitlines():
-            match = LAST_UPDATED_RE.match(line.strip())
-            if match:
-                on = match.group(1).strip()
-                break
-    if on:
-        metadata["last_updated"] = on
-        return
-    src = Path(app.env.doc2path(docname, base=True))
-    if not src.is_file():
-        return
-    on = ""
-    try:
-        cmd = [
-            "git",
-            "log",
-            "--pretty=format:%cd",
-            "--date=format:%B %d, %Y",
-            "-n1",
-            "--",
-            str(src),
-        ]
-        on = co(cmd, cwd=app.confdir).decode().strip()  # noqa: S603
-    except (CalledProcessError, FileNotFoundError):
-        on = ""
-    if not on:
-        timestamp = src.stat().st_mtime
-        try:
-            tz = dt.now().astimezone().tzinfo or UTC
-            on = dt.fromtimestamp(timestamp, tz=tz).strftime("%b %d, %Y")
-        except FileNotFoundError:
-            on = ""
-    if on:
-        metadata["last_updated"] = on
+    found = header(source[0] if source else "")
+    if found.get("author"):
+        metadata.setdefault("author", found["author"])
+    if not metadata.get("created"):
+        metadata["created"] = found.get("created on") or written(
+            committed(app, docname, first=True)
+        )
+    if not metadata.get("last_updated"):
+        metadata["last_updated"] = found.get("last updated on") or written(
+            committed(app, docname)
+        )
 
 
 def root_urls(tree: bs4.BeautifulSoup, base: str, root: str) -> None:
@@ -738,8 +789,6 @@ def root_urls(tree: bs4.BeautifulSoup, base: str, root: str) -> None:
     :param tree: Parsed HTML tree, edited in place.
     :param base: The directory the page was rendered as being in.
     :param root: The path the site is served under, with its slashes.
-
-    .. versionadded:: 10.9.2026
     """
     for tag in tree.find_all(True):
         for attribute in ROOTED_ATTRIBUTES:
@@ -771,64 +820,167 @@ def not_found(app: Sphinx) -> None:
     Set `show_404` to `False` in `html_context` to skip it.
 
     :param app: The Sphinx application instance.
-
-    .. versionadded:: 10.9.2026
     """
     builder = app.builder
     if not isinstance(builder, StandaloneHTMLBuilder):
         return
-    if not app.config.html_context.get("show_404", True):
+    if not app.config.html_context.get("km_show_404", True):
         return
     if getattr(builder, "globalcontext", None) is None:
         return
-    page = Path(app.outdir, f"{NOT_FOUND}.html")
+    page = p.join(app.outdir, f"{NOT_FOUND}.html")
     builder.handle_page(
         NOT_FOUND,
         {
             "pageurl": None,
-            "show_breadcrumbs": False,
-            "show_feedback": False,
-            "show_last_updated_on": False,
-            "show_previous_next_pages": False,
-            "show_scrolltop": False,
-            "show_show_more": False,
+            "km_show_breadcrumbs": False,
+            "km_show_feedback": False,
+            "km_show_last_updated_on": False,
+            "km_show_previous_next_pages": False,
+            "km_show_scrolltop": False,
+            "km_show_show_more": False,
         },
         f"{NOT_FOUND}.html",
-        outfilename=page,
+        outfilename=page,  # type: ignore[arg-type]
     )
     base = posixpath.dirname(builder.get_target_uri(NOT_FOUND))
     root = urlsplit(app.config.html_baseurl).path or "/"
     with open(page, encoding="utf-8") as f:
         tree = bs4.BeautifulSoup(f, "html.parser")
     root_urls(tree, base, root)
-    page.write_text(str(tree), encoding="utf-8")
+    with open(page, "w", encoding="utf-8") as f:
+        f.write(str(tree))
+
+
+@functools.cache
+def designed() -> frozenset[str]:
+    """Name the theme's templates that draw a `sphinx_design` component.
+
+    They are read once, the first time a page asks.
+
+    :return: Their file names.
+    """
+    names: set[str] = set()
+    for name in os.listdir(TEMPLATES):
+        path = p.join(TEMPLATES, name)
+        if not p.isfile(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            if "sd-" in f.read():
+                names.add(name)
+    return frozenset(names)
+
+
+def design_assets(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: dict[str, t.Any],
+    doctree: nodes.document | None,
+) -> None:
+    """Leave `sphinx_design`'s stylesheet and script off a page without it.
+
+    `sphinx_design` hands every page its stylesheet and its tab script,
+    about 50 KB between them, whether or not the page has a single card
+    on it. A page keeps them when its body carries a class of theirs, or
+    when its template draws one itself, the way the 404 page's button
+    does. The theme's own `sphinx-design.css` stays on every page, since
+    it styles icons outside the components too.
+
+    The lists are trimmed in place, so a file added for the page after
+    this runs, an `embed`'s stylesheet say, still makes it.
+
+    :param app: The Sphinx application instance.
+    :param pagename: The page being rendered.
+    :param templatename: The template rendering it.
+    :param context: The page's rendering context.
+    :param doctree: The resolved doctree.
+    """
+    if not themed(app.builder) or templatename in designed():
+        return
+    if "sd-" in str(context.get("body") or ""):
+        return
+    for key in ("css_files", "script_files"):
+        files = context.get(key)
+        if not isinstance(files, list):
+            continue
+        kept = []
+        for item in files:
+            filename = str(getattr(item, "filename", item) or "")
+            if p.basename(filename) not in DESIGN_ASSETS:
+                kept.append(item)
+        files[:] = kept
+
+
+def hidden(robots: str) -> bool:
+    """Say whether a page's robots rules keep it out of search engines.
+
+    :param robots: The page's `:km-pg-robots:` field, as written.
+    :return: `True` for `noindex`, or `none`, which is `noindex` and
+        `nofollow` together.
+    """
+    rules = {_.strip().lower() for _ in robots.split(",")}
+    return bool(rules & {"noindex", "none"})
+
+
+def sitemap(app: Sphinx) -> None:
+    """Write `sitemap.xml` and `robots.txt` at the top of the output.
+
+    The sitemap lists every page the site is built from, with the day
+    it was last updated where that reads as a date, and `robots.txt`
+    points crawlers at it. A page asking search engines to leave it
+    out, through `:km-pg-robots:`, is left out of the sitemap too, since
+    listing it would ask them to index it. A sitemap holds whole
+    addresses, so a site without `html_baseurl` gets neither, and nor
+    does one that turns `show_sitemap` off. A `robots.txt` the site
+    keeps in `html_extra_path` is left as it is.
+
+    :param app: The Sphinx application instance.
+    """
+    home = app.config.html_baseurl
+    if not home or not app.config.html_context.get("km_show_sitemap", True):
+        return
+    home = home.rstrip("/") + "/"
+    urls: list[str] = []
+    for docname in sorted(app.env.found_docs):
+        metadata = app.env.metadata.get(docname, {})
+        if hidden(metadata.get("km-pg-robots", "")):
+            continue
+        loc = escape(home + quote(app.builder.get_target_uri(docname)))
+        updated = day(metadata.get("last_updated", ""))
+        lastmod = f"<lastmod>{updated}</lastmod>" if updated else ""
+        urls.append(f"  <url><loc>{loc}</loc>{lastmod}</url>")
+    text = "\n".join(
+        [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+            *urls,
+            "</urlset>",
+            "",
+        ]
+    )
+    with open(p.join(app.outdir, "sitemap.xml"), "w", encoding="utf-8") as f:
+        f.write(text)
+    extra = [p.join(app.confdir, _) for _ in app.config.html_extra_path]
+    if any(
+        (p.basename(_) == "robots.txt" and p.isfile(_))
+        or p.isfile(p.join(_, "robots.txt"))
+        for _ in extra
+    ):
+        return
+    with open(p.join(app.outdir, "robots.txt"), "w", encoding="utf-8") as f:
+        f.write(f"User-agent: *\nDisallow:\n\nSitemap: {home}sitemap.xml\n")
 
 
 def build_finished(app: Sphinx, exc: Exception | None) -> None:
-    """Write the 404 page and post-process every page.
-
-    Only for the HTML builders, and only when the build worked. The 404
-    page goes out first so it is post-processed along with the rest.
+    """Write the theme's 404 page and sitemap once the build has worked.
 
     :param app: The Sphinx application instance.
     :param exc: Whatever went wrong during the build, or `None`.
-
-    .. versionchanged:: 10.9.2026
-
-        Writes the theme's 404 page through `not_found` before the
-        post-processing pass.
     """
-    if exc or app.builder.name not in {"html", "dirhtml"}:
+    builder = app.builder
+    if exc or not isinstance(builder, StandaloneHTMLBuilder):
         return
-    not_found(app)
-    htmls = sorted(str(_) for _ in Path(app.outdir).rglob("*.html"))
-    if not htmls:
-        return
-    for html in status_iterator(
-        htmls,
-        "Postprocessing... ",
-        "darkgreen",
-        len(htmls),
-        app.verbosity,
-    ):
-        postprocess(html)
+    if themed(builder) and builder.name in {"html", "dirhtml"}:
+        not_found(app)
+        sitemap(app)

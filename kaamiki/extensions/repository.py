@@ -4,7 +4,7 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October, 2025
-Last updated on: 12 September, 2026
+Last updated on: 29 September, 2026
 
 A `repository` directive that renders a GitHub project as a card::
 
@@ -13,34 +13,11 @@ A `repository` directive that renders a GitHub project as a card::
 
 The card comes from `repository.html.jinja`. The counts themselves are
 fetched by `theme.js` when the card scrolls into view.
-
-.. versionadded:: 10.9.2026
-
-    `:stars:` and `:forks:` gate their counters. Naming one shows only
-    that one, naming neither shows both. They were accepted but ignored
-    before, and `:issues:` never had a counter to point at.
-
-.. versionchanged:: 10.9.2026
-
-    Rendering goes through `utils.render`, which has autoescaping on.
-    The per-module templates it replaced had it off, so a project name
-    carrying an `&`, a `<` or a stray quote emitted broken markup.
-
-.. deprecated:: 10.9.2026
-
-    [1] The module-level path fiddling has moved to `utils`, along with
-        the `jinja2` import. `template` is now just the filename.
-    [2] The `:issues:` option is gone. The widget renders stars and
-        forks, so an issues flag pointed at a counter the template
-        never had.
-    [3] Dropped the `node` class and the `visit`/`depart` pair. This
-        directive hands back a `nodes.raw` and never reaches a
-        translator, so all three only existed to keep the registration
-        loop happy.
 """
 
 from __future__ import annotations
 
+import re
 import typing as t
 
 import docutils.nodes as nodes
@@ -50,6 +27,9 @@ from kaamiki.extensions.utils import render
 
 name: t.Final[str] = "repository"
 template: t.Final[str] = "repository.html.jinja"
+OWNER_NAME: re.Pattern[str] = re.compile(
+    r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?/(?!\.{1,2}$)[A-Za-z0-9_.-]{1,100}$"
+)
 
 
 class directive(rst.Directive):
@@ -74,22 +54,24 @@ class directive(rst.Directive):
     def run(self) -> list[nodes.Node]:
         """Render the card and return it as a raw node.
 
+        The argument has to be a GitHub `owner/name`, since the card
+        asks GitHub's API for it by that name. Anything else would ask
+        for a repository that isn't there and show 0 for good, so it
+        fails the directive instead.
+
         :return: A list holding the one `raw` node.
-
-        .. versionchanged:: 10.9.2026
-
-            [1] Renders through `utils.render`, so the project name is
-                escaped on its way into the template.
-            [2] `:stars:` and `:forks:` now actually gate their
-                counters. Naming a flag shows only that one; naming
-                neither shows both, as before.
-            [3] The `raw` node carries the repository URL as its
-                `source`, which is where `linkcheck` looks. Every
-                widget was being skipped by the link checker.
+        :raises rst.DirectiveError: When the argument isn't an
+            `owner/name`.
         """
         stars = "stars" in self.options
         forks = "forks" in self.options
-        self.options["project"] = self.arguments.pop().strip()
+        project = self.arguments.pop().strip()
+        if not OWNER_NAME.match(project):
+            raise self.error(
+                f"repository needs a GitHub owner/name, like"
+                f" xames3/xsnumpy; got {project!r}"
+            )
+        self.options["project"] = project
         self.options["stars"] = stars or not forks
         self.options["forks"] = forks or not stars
         attributes: dict[str, str] = {}
