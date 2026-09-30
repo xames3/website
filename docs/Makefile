@@ -76,13 +76,12 @@ SPHINX_LINKCHECK_FLAGS := \
 	--quiet \
 	--color
 
-# Quiet drops tox's own env-setup chatter. The command output it wraps
-# is kept, which is the half worth reading when a run goes red.
 TOX_FLAGS := \
 	--quiet
 
 SPHINX_LINT_FLAGS := \
 	--disable role-with-double-backticks,role-without-backticks \
+	--enable line-too-long \
 	--max-line-length 79
 
 HTTP_SERVER_FLAGS := \
