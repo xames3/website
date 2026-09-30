@@ -2,6 +2,7 @@
     --km-shadow-none: 0 0 #0000;
     --sd-color-warning: hsl(48.47, 100%, 50%);
     --sd-color-tabs-label-active: hsl(var(--km-color-fg));
+    --sd-color-tabs-label-inactive: hsl(var(--km-color-muted-fg));
     --sd-color-tabs-underline-active: hsl(var(--km-color-accent-fg));
     --sd-color-tabs-label-hover: hsl(var(--km-color-accent-fg));
     --sd-color-tabs-overline: hsl(var(--km-color-border));
@@ -185,7 +186,7 @@ details.sd-dropdown .sd-summary-content {
     display: block;
 }
 
-details.sd-dropdown.is-animating .sd-summary-content {
+details.sd-dropdown.km-is-animating .sd-summary-content {
     overflow: hidden;
 }
 
@@ -265,7 +266,7 @@ nav a svg .sd-material-icon {
 }
 
 .sd-tab-set>input:focus-visible+label,
-html[data-keyboard] .sd-tab-set>input:focus+label {
+html[data-km-keyboard] .sd-tab-set>input:focus+label {
     outline: 2px solid hsl(var(--km-color-focus));
     outline-offset: 2px;
 }
@@ -285,8 +286,12 @@ details.sd-dropdown summary.sd-summary-title:focus-visible {
 }
 
 .sd-tab-label:hover {
-    color: hsl(var(--km-color-fg) / 0.5) !important;
+    color: hsl(var(--km-color-fg) / 0.75) !important;
     border-bottom: none;
+}
+
+html[data-km-theme="dark"] .sd-tab-label:hover {
+    color: hsl(var(--km-color-fg) / 0.5) !important;
 }
 
 .sd-stretched-link {
@@ -372,33 +377,33 @@ details.sd-dropdown summary.sd-summary-title:focus-visible {
     margin-bottom: 1rem;
 }
 
-.right-link-button {
+.km-right-link-button {
     flex-direction: row;
 }
 
-.right-link-button .sd-stretched-link {
+.km-right-link-button .sd-stretched-link {
     margin: auto 1rem auto !important;
 }
 
-.right-link-button .sd-card {
+.km-right-link-button .sd-card {
     padding-bottom: 0;
 }
 
-.right-link-button .sd-card-header {
+.km-right-link-button .sd-card-header {
     position: absolute;
     padding-bottom: 1rem;
 }
 
-.right-link-button .sd-card-header+.sd-card-body {
+.km-right-link-button .sd-card-header+.sd-card-body {
     padding-top: 3rem;
 }
 
-.right-link-button .sd-card-header>.sd-stretched-link {
+.km-right-link-button .sd-card-header>.sd-stretched-link {
     margin: 4rem 1rem auto !important;
 }
 
 @media (max-width: 1200px) {
-    .right-link-button {
+    .km-right-link-button {
         flex-direction: column;
         padding-bottom: 1rem;
     }
