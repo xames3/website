@@ -1,17 +1,19 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 05 September, 2025
-.. Last updated on: 28 June, 2026
+.. Last updated on: 30 September, 2026
 
-:og:title: The best YouTube has to Offer
-:og:description: A curated list of my favourite YouTube videos that I've found
-    over the years: good, bad and weird!
-:og:type: article
-:og:image: https://i.imgur.com/RLsdjyG.jpeg
-:fb:title: Got a cracking video recommendation?
-:fb:description: Did you enjoy any of them? Or better yet, do you have a
+:km-pg-title: The best YouTube has to Offer
+:km-pg-description: A curated list of my favourite YouTube videos that I've
+    found over the years: good, bad and weird!
+:km-pg-type: article
+:km-pg-image: https://i.imgur.com/RLsdjyG.jpeg
+:km-pg-image-alt: A curated list of my favourite YouTube videos that I've
+    found over the years: good, bad and weird!
+:km-fb-title: Got a cracking video recommendation?
+:km-fb-description: Did you enjoy any of them? Or better yet, do you have a
     must-see video I should add to my list?
-:fb:button: Send a recommendation
-:fb:fa-icon: fa-thumbs-up
+:km-fb-button: Send a recommendation
+:km-fb-fa-icon: fa-thumbs-up
 
 .. _miscellany-best-of-youtube:
 
@@ -56,7 +58,7 @@ Technology.
 .. rubric::
     This section features some of my go-to videos and channels related to
     **programming**, **science** and **technology**.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 Here, the videos are related to programming tutorials, tips and tricks, tech
 talks, education, concepts of computer science and more.
@@ -791,7 +793,7 @@ Comic Relief.
 -------------------------------------------------------------------------------
 
 .. rubric:: Because sometimes, we all need a break from the serious stuff.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 After hours of staring at code, sometimes all you need is a good, hearty laugh.
 I'm not saying these are the funniest videos out there, but they sure do the
@@ -1037,7 +1039,7 @@ Scene-by-Scene.
 .. rubric::
     I've always been fascinated by the art of **storytelling**, whether it's in
     a block of code or on the silver screen.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 This section is for the fellow film lovers out there. For me, understanding how
 a story is built visually makes the experience of watching it all the more
@@ -1095,7 +1097,7 @@ magical.
 .. rubric::
     We've all been there. It's late, you should be sleeping, but you've
     stumbled upon a video that leads to another and another.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 This section is a tribute to those late-night YouTube journeys. It's a random,
 mostly pointless mix, documentaries I definitely shouldn't have started at

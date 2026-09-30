@@ -1,16 +1,18 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 01 March, 2025
-.. Last updated on: 28 June, 2026
+.. Last updated on: 30 September, 2026
 
-:og:title: Why write xsNumPy?
-:og:description: Journey of building a lightweight, pure-python implementation
-    of NumPy's core features
-:og:type: article
-:og:image: https://i.imgur.com/BPxkNzC.jpeg
-:fb:title: Have you rebuilt something just to learn?
-:fb:description: If you've cracked open an industry standard to truly master
+:km-pg-title: Why write xsNumPy?
+:km-pg-description: Journey of building a lightweight, pure-python
+    implementation of NumPy's core features
+:km-pg-type: article
+:km-pg-image: https://i.imgur.com/BPxkNzC.jpeg
+:km-pg-image-alt: How writing a simplified NumPy in pure-Python taught me more
+    about numerical computing than using the real thing.
+:km-fb-title: Have you rebuilt something just to learn?
+:km-fb-description: If you've cracked open an industry standard to truly master
     it, I'd love to hear your experiences.
-:fb:button: Share your "aha" moment
+:km-fb-button: Share your "aha" moment
 
 .. _project-building-xsnumpy:
 
@@ -18,7 +20,7 @@
 :fas:`at far` Why write xsNumPy?
 ===============================================================================
 
-.. rst-class:: lead
+.. rst-class:: km-lead
 
     How writing a simplified NumPy in pure-Python taught me more about
     numerical computing than using the real thing.
@@ -77,8 +79,8 @@ Could I build a dinky version of NumPy from scratch? Because if I'm going to
 teach these concepts one day, I have to go **deeper**. If I were going to learn
 this properly, I needed discipline and some rules to follow.
 
-.. admonition:: :fas:`badge-check green` Rules of engagement
-    :class: unusual-one note
+.. admonition:: :fas:`badge-check km-green` Rules of engagement
+    :class: km-unusual-one note
 
     - No use of LLMs or any AI usage of anything.
     - Every line of code and every solution had to come from my own
@@ -105,7 +107,7 @@ It's also worth noting that this function is a cheeky little wrapper for the
 implementing my own |xp.ndarray|_ data structure.
 
 .. admonition:: :fas:`lightbulb` Quick analogy
-    :class: unusual-one seealso
+    :class: km-unusual-one seealso
 
     If you're new to arrays, think of them as egg cartons, each slot holds an
     egg and the shape of the carton tells you how many eggs you've got.
@@ -180,7 +182,7 @@ It worked poorly. But it worked!
 .. rubric::
     I've intentionally removed loads of details to keep things simple. Check
     out the complete implementation of **ndarray** on GitHub.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 .. button:: https://github.com/xames3/xsnumpy/blob/main/xsnumpy/_core.py
     :fa-icon: fab fa-github
@@ -191,7 +193,7 @@ It worked poorly. But it worked!
 .. rubric::
     A shape of an array is a tuple of integers that represents the number of
     elements along **each dimension** (axis) of the array.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 I started by checking if the provided shape can be
 :py:class:`iterated <collections.abc.Iterable>`. If it wasn't, I wrapped it in
@@ -369,7 +371,7 @@ learning and simultaneously recreating NumPy's broadcasting rules.
 
 .. rubric:: Final boss, Matrix Multiplication.
 .. rubric:: Matrix multiplication was another **beast** entirely.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 I thought it would be just a matter of looping through rows and columns,
 summing them element-wise, high school maths, if you ask me. And it worked as
@@ -392,7 +394,7 @@ affects the output shapes.
 .. rubric::
     Here comes December. By now, I wasn't just rebuilding a scrappy numerical
     computing **doppelganger** like I thought I was.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 I was on my winter break. I was fully committed to this project because I
 didn't have to attend uni or work on any assignments. After days of debugging,
@@ -714,7 +716,7 @@ does quite well.
 .. rubric::
     I gave a talk at `ChiPy`_ titled **"xsNumPy: Curiosity to Code"**, walking
     through the decisions, the missteps and the insights that stayed with me.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 .. youtube:: https://www.youtube.com/watch?v=QIhyix3oEns
     :caption: The presentation covered the technical challenges, mathematical

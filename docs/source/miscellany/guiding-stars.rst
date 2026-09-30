@@ -1,16 +1,16 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 24 February, 2025
-.. Last updated on: 28 June, 2026
+.. Last updated on: 30 September, 2026
 
-:og:title: Guiding stars
-:og:description: Expressing heartfelt gratitude to the heros who shaped my
+:km-pg-title: Guiding stars
+:km-pg-description: Expressing heartfelt gratitude to the heroes who shaped my
     path in life, learning and beyond...
-:og:type: article
-:fb:title: What are the guiding stars in your life?
-:fb:description: We all have mentors and friends who guide us. Reading this,
+:km-pg-type: article
+:km-fb-title: What are the guiding stars in your life?
+:km-fb-description: We all have mentors and friends who guide us. Reading this,
     did anyone come to your mind? I'd be honoured to hear about them.
-:fb:button: Share your reflections
-:fb:fa-icon: fa-sparkles
+:km-fb-button: Share your reflections
+:km-fb-fa-icon: fa-sparkles
 
 .. _miscellany-guiding-stars:
 
@@ -18,7 +18,7 @@
 :fas:`sparkles far` Guiding stars
 ===============================================================================
 
-.. rst-class:: lead
+.. rst-class:: km-lead
 
     You all are my stars, because I look up to you.
 
@@ -40,8 +40,8 @@ left a significant mark on me.
 
 And from the bottom of my heart, I thank you for that.
 
-.. admonition:: :fas:`heart mrl-0` A note of gratitude
-    :class: unusual-one danger
+.. admonition:: :fas:`heart km-margin-inline` A note of gratitude
+    :class: km-unusual-one danger
 
     These reflections aren't exhaustive, nor could they ever be. I've shared
     stories or incidents in very minor detail. But every single person here has
@@ -61,7 +61,7 @@ me during my highs and lows and helped shape my character.
 
 .. figure:: https://i.imgur.com/Gn1b6Cs.jpeg
     :alt: Me and Mum celebrating my admission into DePaul University
-    :figclass: zoom grayscale fuzzy-blur
+    :figclass: km-zoom km-grayscale km-fuzzy-blur
 
     Mum and I, September 2022, celebrating my admission into DePaul University.
 
@@ -100,7 +100,7 @@ reminding me of our last chat...
 .. rubric::
     I believe that life, much like a cinema, is **never** a solo act, but in
     the collective effort of those who work behind the scenes.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 And so, my life or this journey has always been shaped and tweaked by an
 extraordinary cast of mentors, friends, coworkers, supporters and even
@@ -138,7 +138,7 @@ ready with valuable advice and encouragement.
 .. figure:: https://i.imgur.com/H4LzSiU.jpeg
     :alt: Dr Tovar with my students at NASA Open Science 2025 Workshop on the
         final day
-    :figclass: zoom grayscale fuzzy-blur
+    :figclass: km-zoom km-grayscale km-fuzzy-blur
 
     Dr Tovar (left) with my students, `Huzaifa Quaid`_ (left-centre),
     `Ishrak Rahman`_ (centre), `Orkhan Guliyev`_ (right-centre) and
@@ -183,7 +183,7 @@ well-wisher.
 
 .. figure:: https://i.imgur.com/zNiGX0H.jpeg
     :alt: Fatemeh attending my graduation ceremony, alongside Young
-    :figclass: zoom grayscale fuzzy-blur
+    :figclass: km-zoom km-grayscale km-fuzzy-blur
 
     Fatemeh attending my graduation ceremony alongside Young, June 2025
 
@@ -268,7 +268,7 @@ genuine admiration for your steady commitment to hard work.
 
 .. figure:: https://i.imgur.com/E6bpo9w.jpeg
     :alt: Sameer and I at our graduation ceremony
-    :figclass: zoom grayscale fuzzy-blur
+    :figclass: km-zoom km-grayscale km-fuzzy-blur
 
     Sameer and I, June 2025 at our graduation ceremony
 
@@ -331,7 +331,7 @@ then.
 
 .. figure:: https://i.imgur.com/weM4qDW.jpeg
     :alt: Young attending our graduation ceremony in June 2025
-    :figclass: zoom grayscale fuzzy-blur
+    :figclass: km-zoom km-grayscale km-fuzzy-blur
 
     Young attending and celebrating our graduation ceremony, June 2025
 

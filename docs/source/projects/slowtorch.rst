@@ -1,17 +1,19 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 18 April, 2025
-.. Last updated on: 28 June, 2026
+.. Last updated on: 30 September, 2026
 
-:og:title: PyTorch... but much slower
-:og:description: PyTorch taught me how to build while SlowTorch taught me how
-    it's built!
-:og:type: article
-:og:image: https://i.imgur.com/HLTLqVl.jpeg
-:fb:title: Is slow learning the "key"?
-:fb:description: I wrote SlowTorch to truly understand the magic behind
+:km-pg-title: PyTorch... but much slower
+:km-pg-description: PyTorch taught me how to build while SlowTorch taught me
+    how it's built!
+:km-pg-type: article
+:km-pg-image: https://i.imgur.com/HLTLqVl.jpeg
+:km-pg-image-alt: Exploring automatic differentiation and tensor mechanics by
+    hand-crafting a slow but pure-Python reimplementation.
+:km-fb-title: Is slow learning the "key"?
+:km-fb-description: I wrote SlowTorch to truly understand the magic behind
     PyTorch. Have you done anything similar?
-:fb:button: Tell me your story
-:fb:mode: split
+:km-fb-button: Tell me your story
+:km-fb-mode: split
 
 .. _project-pytorch-but-much-slower:
 
@@ -19,7 +21,7 @@
 :fas:`fire-flame-curved far` PyTorch... but much slower
 ===============================================================================
 
-.. rst-class:: lead
+.. rst-class:: km-lead
 
     Exploring automatic differentiation and tensor mechanics by hand-crafting a
     slow but pure-Python reimplementation.
@@ -37,7 +39,7 @@ learning arrays, memory buffers and `broadcasting`_. As mentioned in
     :link: xsnumpy
     :link-type: doc
     :link-alt: Read
-    :class-card: right-link-button
+    :class-card: km-right-link-button
 
     An experimental re-implementation of few of the core NumPy features in pure
     Python.
@@ -59,7 +61,7 @@ worked under the hood, so why not? Thus, it all began.
 .. rubric::
     Before starting off with SlowTorch, I took a moment to reflect on the
     lessons I learnt while writing **xsNumPy**.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 It became super clear that the most valuable insights came from the process of
 building it and not the results. Sure, the results were important, but this
@@ -71,8 +73,8 @@ Much like my approach to xsNumPy, I wanted to take my time with SlowTorch too.
 I wanted to build it slowly, understanding each component and appreciating the
 complexity of the system. I had the same three rules.
 
-.. admonition:: :fas:`badge-check green` Rules of engagement
-    :class: unusual-one note
+.. admonition:: :fas:`badge-check km-green` Rules of engagement
+    :class: km-unusual-one note
 
     - No use of LLMs or any AI usage of anything.
     - Every line of code and every solution had to come from my own
@@ -95,7 +97,7 @@ of the initial work in building the tensor class was similar to what I had done
 with xsNumPy, as :ref:`discussed here <writing-my-first-array>`.
 
 .. admonition:: :fas:`sparkles` Quick analogy
-    :class: unusual-one hint
+    :class: km-unusual-one hint
 
     To put it simply, if arrays were like egg cartons, tensors were like egg
     trays. Stacked in a way that you could easily access any egg (element) in
@@ -110,10 +112,10 @@ operations, gradients and compute them efficiently.
 .. rubric::
     PyTorch documentation were super duper helpful in understanding the various
     implementation details of the :py:class:`tensor <torch.Tensor>` class.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 .. button:: https://docs.pytorch.org/docs/stable/
-    :fa-icon: far fa-file-lines
+    :fa-icon: fas fa-file-lines
 
     Checkout docs
 
@@ -159,7 +161,7 @@ code resembling a family tree. But Andrej's video made me realise that I was
 overcomplicating things and I reworked my implementation slowly.
 
 .. admonition:: :fas:`sparkles` Inspiration
-    :class: unusual-one danger
+    :class: km-unusual-one danger
 
     `Andrej Karpathy`_ had explained this concept in much detail in his video,
     where he builds `micrograd`_, a simple autograd engine, from scratch. This
@@ -220,8 +222,8 @@ capable of handling basic arithmetic operations alongside complex matrix
 multiplication and broadcasting. I was able to calculate gradients for tensors
 with respect to a loss function.
 
-.. admonition:: :fas:`heart red` Special shoutout
-    :class: unusual-one danger
+.. admonition:: :fas:`heart km-red` Special shoutout
+    :class: km-unusual-one danger
 
     I want to give a special shoutout to my colleague,
     :ref:`Fatemeh Taghvaei <fatemeh-taghvaei>`, for her patience and late-night
@@ -475,13 +477,13 @@ wrapped around classes much like PyTorch.
                 \text{for } x[j], j \neq dim_0, dim_1 \end{cases}`
             * - Reshape (View)
               - :math:`f(x) = x.reshape(shape)`
-              - :fas:`triangle-exclamation red` N/A (no backward pass)
+              - :fas:`triangle-exclamation km-red` N/A (no backward pass)
             * - Unsqueeze
               - :math:`f(x) = x.unsqueeze(dim)`
-              - :fas:`triangle-exclamation red` N/A (no backward pass)
+              - :fas:`triangle-exclamation km-red` N/A (no backward pass)
             * - One Hot Encoding
               - :math:`f(x) = \text{one_hot}(x, classes)`
-              - :fas:`triangle-exclamation red` N/A (no backward pass)
+              - :fas:`triangle-exclamation km-red` N/A (no backward pass)
 
         For example, below is a minimal implementation of the ravel (flatten)
         function with its backward pass.
@@ -537,8 +539,8 @@ wrapped around classes much like PyTorch.
                         raise TypeError("Parameter data must be a tensor")
                     self.storage[:] = value.storage
 
-.. admonition:: :fas:`heart red` Massive thanks
-    :class: unusual-one danger
+.. admonition:: :fas:`heart km-red` Massive thanks
+    :class: km-unusual-one danger
 
     I want to thank my friends, :ref:`Sameer <sameer-g-mathad>` and
     `Lucas Yong`_, for their amazing insights while implementing the
@@ -560,7 +562,7 @@ mistakes, learning from them and adjusting my gradients.
 .. rubric::
     PyTorch's optimisers are **elegant** and **efficient**, but wanted to
     understand their mechanics.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 With some of my neural network modules in place, I moved on to building my
 optimiser, which presented another challenge. I implemented a simple optimiser,
@@ -619,7 +621,7 @@ code, asking it questions, coaxing it to reveal its secrets.
 
 .. figure:: https://i.imgur.com/CI2lvx3.jpeg
     :alt: SlowTorch, embrace the journey, not the race meme
-    :figclass: grayscale zoom
+    :figclass: km-grayscale km-zoom
 
     By the end, this was me realising the true meaning of "slow" in SlowTorch
     and began embracing the slowness for understanding, over speed.

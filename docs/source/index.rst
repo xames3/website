@@ -1,17 +1,17 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 29 September, 2026
+.. Last updated on: 30 September, 2026
 
 :orphan:
-:og:title: Akshay Mestry
-:og:description: Akshay's corner on the internet.
-:og:type: website
-:og:image: https://avatars.githubusercontent.com/u/90549089?v=4
-:fb:title: So, what do you think?
-:fb:description: I'd love to hear your suggestions or even a recommendation for
-    a great film!!
-:fb:button: Let's chat
-:fb:mode: split
+:km-pg-title: Akshay Mestry
+:km-pg-description: Akshay's corner on the internet.
+:km-pg-type: website
+:km-pg-image: https://avatars.githubusercontent.com/u/90549089?v=4
+:km-fb-title: So, what do you think?
+:km-fb-description: I'd love to hear your suggestions or even a recommendation
+    for a great film!!
+:km-fb-button: Let's chat
+:km-fb-mode: split
 
 .. _home-page:
 
@@ -19,7 +19,7 @@
 Akshay Mestry
 ===============================================================================
 
-.. rst-class:: lead
+.. rst-class:: km-lead
 
     Educator, software engineer and storyteller.
 
@@ -42,7 +42,7 @@ I currently live in Chicago. I got my Master's in AI from `DePaul University`_
 in 2025. I also have a special interest in natural language processing and
 reinforcement learning.
 
-.. container:: inline-container
+.. container:: km-inline-container
 
     .. grid:: 2
 
@@ -70,7 +70,7 @@ reinforcement learning.
                         LinkedIn
 
 .. rubric:: :fab:`compass-drafting far` Build and share
-    :class: pre-title-text
+    :class: km-pre-title-text
 
 .. _open-source:
 
@@ -78,7 +78,7 @@ reinforcement learning.
 Love for open source.
 -------------------------------------------------------------------------------
 
-I :fas:`heart mrl-0 red` Open source!
+I :fas:`heart km-margin-inline km-red` Open source!
 
 I accidentally got started on it and I don't know why; I bloody loved it.
 Doing open source was and still is, a personal reminder to share my struggles

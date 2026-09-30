@@ -1,17 +1,17 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 November, 2025
-.. Last updated on: 13 September, 2026
+.. Last updated on: 30 September, 2026
 
-:og:title: Explain Like I'm 5
-:og:description: Not exactly short, but simple answers to tricky technical
+:km-pg-title: Explain Like I'm 5
+:km-pg-description: Not exactly short, but simple answers to tricky technical
     concepts and questions
-:og:type: article
-:fb:title: Well, what you think of this plan?
-:fb:description: If you've better examples to share, feel free to send it my
+:km-pg-type: article
+:km-fb-title: Well, what you think of this plan?
+:km-fb-description: If you've better examples to share, feel free to send it my
     way. I'm always looking for more ideas and suggestions.
-:fb:button: Share your thoughts
-:fb:fa-icon: fa-sparkles
-:fb:mode: split
+:km-fb-button: Share your thoughts
+:km-fb-fa-icon: fa-sparkles
+:km-fb-mode: split
 
 .. _explained-explain-like-im-five:
 
@@ -44,7 +44,7 @@ super-duper relatable to everyday things instead of explaining through
 :abbr:`jargon (technical term)`.
 
 .. rubric:: :fas:`spell-check far` Simple English.
-    :class: pre-title-text
+    :class: km-pre-title-text
 
 .. _making-the-concepts-click:
 
@@ -56,7 +56,7 @@ Making the concepts click!
     In my experience as an engineer and now a faculty, the code or concept's
     rarely the hard part. It's the **ability to imagine** that thing you can't
     see.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 Ever since I started teaching since April, 2025, I've realised and learnt that
 I find a great joy in sharing my own experiences (good, bad and ugly) as
