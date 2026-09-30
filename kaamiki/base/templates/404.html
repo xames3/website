@@ -13,29 +13,28 @@ Last updated on: 29 September, 2026
           content="noindex, follow" />
 {%- endblock extrahead %}
 {%- block body %}
-    <div class="site-page">
-        <div id="content"
+    <div class="km-page">
+        <div id="km-content"
              role="main"
-             class="site-page__content site-notfound">
-            <p class="site-notfound__code"
+             class="km-page__content km-notfound">
+            <p class="km-notfound__code"
                aria-hidden="true">404</p>
-            <h1 class="site-notfound__title">
-                {{ _("You're lost beyond the
-                                Sirens, mate?!") }}
+            <h1 class="km-notfound__title">
+                {{ _("You're lost beyond the Sirens, mate?!") }}
             </h1>
-            <p class="site-notfound__message">
+            <p class="km-notfound__message">
                 {%- trans -%}
                 The sirens' song brought you this far, but there's nothing here. The page may have moved or your course may have gone astray.
             {%- endtrans -%}
         </p>
-        <p class="site-notfound__actions">
+        <p class="km-notfound__actions">
             <a class="sd-sphinx-override sd-btn sd-text-wrap sd-btn-primary"
                href="{{ pathto(master_doc) }}">
                 <span>{{ _("Take me home") }}</span>
             </a>
         </p>
         <img src="https://preview.redd.it/imo-this-scene-is-the-peak-of-matt-damons-entire-acting-v0-t10f37ucrleh1.jpeg?auto=webp&s=41a2b0d10dea99be61101b50e6d12f98f7d7e741"
-             alt="You lost it">
+             alt="{{ _('You lost it') }}">
     </div>
 </div>
 {%- endblock body %}
