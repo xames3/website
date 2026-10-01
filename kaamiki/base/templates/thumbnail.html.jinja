@@ -1,30 +1,34 @@
-<!--
+{#
 YouTube Thumbnail Template
 ==========================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September, 2025
-Last updated on: 21 December, 2025
--->
-{% block youtube_thumbnail %}
-    <a href="{{ src }}"
+Last updated on: 29 September, 2026
+#}
+{% block km_youtube_thumbnail %}
+    <a href="{{ km_src }}"
        target="_blank"
        rel="noopener noreferrer"
-       class="site-youtube-card"
-       data-youtube-id="{{ video_id }}"
-       data-youtube-src="{{ src }}">
-        <article class="site-youtube-card__body">
-            <div class="site-youtube-card__thumbnail grayscale">
-                <img src="{{ thumbnail }}"
+       class="km-youtube-card"
+       data-km-youtube-id="{{ km_video_id }}"
+       data-km-youtube-src="{{ km_src }}"
+       {% if km_title %}data-km-youtube-title{% endif %}
+       {% if km_channel %}data-km-youtube-channel{% endif %}>
+        <article class="km-youtube-card__body">
+            <div class="km-youtube-card__thumbnail km-grayscale">
+                <img src="{{ km_thumbnail }}"
                      alt=""
                      width="480"
                      height="360"
                      loading="lazy">
             </div>
-            <div class="site-youtube-card__content">
-                <p class="site-youtube-card__title">{{ title|d("YouTube Video") }}</p>
-                <p class="site-youtube-card__channel">{{ channel|d("Watch on YouTube") }}</p>
+            <div class="km-youtube-card__content">
+                <p class="km-youtube-card__title">{{ km_title or _("YouTube Video") }}</p>
+                <p class="km-youtube-card__channel">
+                    {{- km_channel or _("Watch on YouTube") -}}
+                </p>
             </div>
         </article>
     </a>
-{% endblock youtube_thumbnail %}
+{% endblock km_youtube_thumbnail %}

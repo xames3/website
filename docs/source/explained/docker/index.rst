@@ -1,17 +1,19 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 August, 2025
-.. Last updated on: 29 June, 2026
+.. Last updated on: 30 September, 2026
 
-:og:title: A week into Docker
-:og:description: Begineer's guide to Docker and containerisation
-:og:type: article
-:og:image: https://i.imgur.com/TL3wLY8.jpeg
-:fb:title: But, I'd love to hear from you
-:fb:description: What was the moment that made you realise you needed a tool
+:km-pg-title: A week into Docker
+:km-pg-description: Beginner's guide to Docker and containerisation
+:km-pg-type: article
+:km-pg-image: https://i.imgur.com/TL3wLY8.jpeg
+:km-pg-image-alt: How a week of using Docker transformed the way I manage my
+    local development environments and why I think it was worth a look.
+:km-fb-title: But, I'd love to hear from you
+:km-fb-description: What was the moment that made you realise you needed a tool
     like Docker? Or if you're new to this, what's the one thing you're hoping
     it'll solve for you?
-:fb:button: Let me know
-:fb:mode: split
+:km-fb-button: Let me know
+:km-fb-mode: split
 
 .. _explained-a-week-into-docker:
 
@@ -19,7 +21,7 @@
 :fas:`box-isometric-tape far` A week into Docker
 ===============================================================================
 
-.. rst-class:: lead
+.. rst-class:: km-lead
 
     How a week of using Docker transformed the way I manage my local
     development environments and why I think it was worth a look.
@@ -53,7 +55,7 @@ So, I decided to give it a try.
 
 .. rubric:: And here I'm today, talking about Docker.
 .. rubric:: Think of this as the start of a journey we can take together.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 In this first chapter, I want to walk you through my initial experience with
 this whole containerisation business and explain the basic ideas that finally
@@ -92,11 +94,11 @@ server in the cloud.
 .. rubric::
     Docker was introduced in 2013 and solved the classic **"it works on my
     machine"** problem.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 .. figure:: https://i.imgur.com/csI4fZe.png
     :alt: It works on my machine
-    :figclass: zoom grayscale
+    :figclass: km-zoom km-grayscale
 
 In the spirit of keeping things simple, I'd say there are two main ideas around
 Docker: `Docker Engine`_ and `Docker Hub`_ and let's just stick with these two
@@ -115,7 +117,7 @@ for now.
    them with others.
 
 .. rubric:: :fab:`bolt far` Crafting environment = Instant isolation
-    :class: pre-title-text
+    :class: km-pre-title-text
 .. rubric:: Magic of Docker Engine.
 
 When I first started using Docker, I'll be honest, I really didn't understand
@@ -154,7 +156,7 @@ was creating an isolated environment to run my experiments within it.
 These environments are what we call **containers**.
 
 .. rubric:: :fab:`truck-fast far` From ships to shipping
-    :class: pre-title-text
+    :class: km-pre-title-text
 
 .. _idea-behind-containers:
 
@@ -198,7 +200,7 @@ an operating system (guest) inside your local machine (host). At the same time,
 containers share your host OS kernel.
 
 .. admonition:: :fas:`sparkles` Quick analogy
-    :class: unusual-one hint
+    :class: km-unusual-one hint
 
     Think of it this way, having a VM is like renting an entire flat/apartment
     when you just need a room. Whereas using a container is like renting a room
@@ -239,7 +241,7 @@ together.
 .. rubric::
     The below table can paint a rough picture why containers are better in some
     scenarios.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 .. list-table::
     :header-rows: 1
@@ -248,26 +250,26 @@ together.
       - Containers
       - Virtual Machines (VMs)
     * - Isolation
-      - :fas:`circle-check far yellow` Shared OS resources
-      - :fas:`circle-check green` Full isolation
+      - :fas:`circle-check far km-yellow` Shared OS resources
+      - :fas:`circle-check km-green` Full isolation
     * - Storage
-      - :fas:`circle-check far yellow` Volatile
-      - :fas:`circle-check green` Persistent
+      - :fas:`circle-check far km-yellow` Volatile
+      - :fas:`circle-check km-green` Persistent
     * - Resource usage
-      - :fas:`circle-check green` Low (efficient)
-      - :fas:`triangle-exclamation red` High (CPU, RAM, Storage)
+      - :fas:`circle-check km-green` Low (efficient)
+      - :fas:`triangle-exclamation km-red` High (CPU, RAM, Storage)
     * - Size
-      - :fas:`circle-check green` Lightweight (MBs)
-      - :fas:`triangle-exclamation red` Heavyweight (GBs)
+      - :fas:`circle-check km-green` Lightweight (MBs)
+      - :fas:`triangle-exclamation km-red` Heavyweight (GBs)
     * - Startup speed
-      - :fas:`circle-check green` Fast (seconds)
-      - :fas:`circle-check far yellow` Slow (minutes)
+      - :fas:`circle-check km-green` Fast (seconds)
+      - :fas:`circle-check far km-yellow` Slow (minutes)
     * - Flexibiltiy
-      - :fas:`circle-check green` More flexible migrations
-      - :fas:`circle-check far yellow` Limited in comparison
+      - :fas:`circle-check km-green` More flexible migrations
+      - :fas:`circle-check far km-yellow` Limited in comparison
     * - Scalability
-      - :fas:`circle-check green` Inexpensive
-      - :fas:`triangle-exclamation red` Costly
+      - :fas:`circle-check km-green` Inexpensive
+      - :fas:`triangle-exclamation km-red` Costly
 
 .. _pulling-images-from-the-internet:
 
@@ -287,7 +289,7 @@ I wondered where I had been getting all these containers from in the first
 place. I knew I was pulling these **containers\*** from the internet, but I had
 no idea from where.
 
-.. container:: inline-container
+.. container:: km-inline-container
 
     .. grid:: 2
 
@@ -310,7 +312,7 @@ no idea from where.
 
 .. rubric:: `Docker Hub`_ is a cloud-based registry service where you can find
     and share **container images**, not containers.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 But what's an image now? With a bit of research, I found out that a Docker
 image is a lightweight executable package that includes it needs to run the
@@ -324,7 +326,7 @@ image, it creates a container based on that image. It is a read-only template
 that contains the instructions for creating a container.
 
 .. admonition:: :fas:`sparkles` Quick analogy
-    :class: unusual-one hint
+    :class: km-unusual-one hint
 
     In programming terms, you can think of an image as a class and a container
     as an instance of that class. You can have multiple containers (instances)

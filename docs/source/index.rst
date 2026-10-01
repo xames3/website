@@ -1,17 +1,17 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 13 September, 2026
+.. Last updated on: 01 October, 2026
 
 :orphan:
-:og:title: Akshay Mestry
-:og:description: Akshay's corner on the internet.
-:og:type: website
-:og:image: https://avatars.githubusercontent.com/u/90549089?v=4
-:fb:title: So, what do you think?
-:fb:description: I'd love to hear your suggestions or even a recommendation for
-    a great film!!
-:fb:button: Let's chat
-:fb:mode: split
+:km-pg-title: Akshay Mestry
+:km-pg-description: Akshay's corner on the internet.
+:km-pg-type: website
+:km-pg-image: https://avatars.githubusercontent.com/u/90549089?v=4
+:km-fb-title: So, what do you think?
+:km-fb-description: I'd love to hear your suggestions or even a recommendation
+    for a great film!!
+:km-fb-button: Let's chat
+:km-fb-mode: split
 
 .. _home-page:
 
@@ -19,7 +19,7 @@
 Akshay Mestry
 ===============================================================================
 
-.. rst-class:: lead
+.. rst-class:: km-lead
 
     Educator, software engineer and storyteller.
 
@@ -35,14 +35,14 @@ Hello, hello!!
 I'm Akshay, an educator, engineer and currently an Assistant Professor at
 `National Louis University`_. Before getting into academia, I worked at
 consulting firms, corporate product companies and startups. This cheeky corner
-of the internet is where I dump all that: the wins, the mistakes, and
+of the internet is where I dump all that: the wins, the mistakes and
 everything messy in between, one story at a time.
 
 I currently live in Chicago. I got my Master's in AI from `DePaul University`_
 in 2025. I also have a special interest in natural language processing and
 reinforcement learning.
 
-.. container:: inline-container
+.. container:: km-inline-container
 
     .. grid:: 2
 
@@ -70,7 +70,7 @@ reinforcement learning.
                         LinkedIn
 
 .. rubric:: :fab:`compass-drafting far` Build and share
-    :class: pre-title-text
+    :class: km-pre-title-text
 
 .. _open-source:
 
@@ -78,7 +78,7 @@ reinforcement learning.
 Love for open source.
 -------------------------------------------------------------------------------
 
-I :fas:`heart mrl-0 red` Open source!
+I :fas:`heart km-margin-inline km-red` Open source!
 
 I accidentally got started on it and I don't know why; I bloody loved it.
 Doing open source was and still is, a personal reminder to share my struggles
@@ -141,7 +141,7 @@ Early in my software engineering career, I came across a quote:
 
 And I absolutely fell in love with this idea. Soon, I realised you can't
 really call yourself an :abbr:`SME (Subject-matter expert)` until you can
-teach a concept to someone who knows next to bugger all about it, and still
+teach a concept to someone who knows next to bugger all about it and still
 put up with their questions without getting cocky about how much you know.
 
 Thus began my journey into teaching. So far, I've taught...
@@ -161,7 +161,7 @@ Thus began my journey into teaching. So far, I've taught...
     :pause-after-deleting: 1000
 
 My approach to mentoring's changed loads over the years, mind. It shifts
-depending on who's actually in front of me, what they need, and, if I'm being
+depending on who's actually in front of me, what they need and, if I'm being
 honest, what kind of mood I'm in that day when they come asking for help.
 
 .. _National Louis University: https://nl.edu/undergraduate-college/
@@ -175,7 +175,6 @@ honest, what kind of mood I'm in that day when they come asking for help.
     :titlesonly:
 
     academia/thoughts-on-teaching
-    academia/wish-it-want-it-do-it
 
 .. toctree::
     :caption: Explained
@@ -184,14 +183,6 @@ honest, what kind of mood I'm in that day when they come asking for help.
 
     explained/docker/index
     explained/eli5/index
-
-.. toctree::
-    :caption: Projects
-    :hidden:
-    :titlesonly:
-
-    projects/xsnumpy
-    projects/slowtorch
 
 .. toctree::
     :caption: Miscellany

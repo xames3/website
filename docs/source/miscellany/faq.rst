@@ -1,14 +1,13 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 11 September, 2026
+.. Last updated on: 01 October, 2026
 
-:og:title: FAQs
-:og:description: Frequently Asked Questions about me and this website
-:og:type: article
-:fb:title: Do you've any questions for me?
-:fb:description: Feel free to ask anything you're curious about.
-:fb:button: Send in your questions
-:fb:fa-icon: far fa-seal-question
+:km-pg-title: FAQs
+:km-pg-description: Frequently Asked Questions about me and this website
+:km-pg-type: article
+:km-fb-title: Do you've any questions for me?
+:km-fb-description: Feel free to ask anything you're curious about.
+:km-fb-button: Send in your questions
 
 .. _miscellany-faq:
 
@@ -32,12 +31,6 @@ I think I've noticed a pattern. A lot of the same questions pop up; some are
 esoteric about a topic, while others are simple *"why?"* questions. Ever since
 I transitioned into teaching, some of you've also questioned that, too.
 
-While many have asked about my thoughts on the late 2025 job situation. Some
-have even asked why even I built projects like
-:doc:`xsNumPy <../projects/xsnumpy>` and
-:doc:`SlowTorch <../projects/slowtorch>`, which seem like reinventing the
-wheel.
-
 By the way, all of them are great questions! Then there are the questions
 about what my favourite films are and what I'm currently watching. So to make
 this easier for everyone, I've put together my answers to your most frequent
@@ -53,10 +46,10 @@ Frequently asked questions
 -------------------------------------------------------------------------------
 
 .. dropdown:: What the f*ck is XAMES3 and why you use it everywhere? |pop|
-    :class-container: site-faq
+    :class-container: km-faq
 
     .. rubric:: Asked on November 02, 2025
-        :class: date-text
+        :class: km-date-text
 
     So, *XAMES3* is my alias and username for online profiles. The first part,
     "*XA*", represents my first name, Akshay. The letter X is a sound-alike for
@@ -77,38 +70,38 @@ Frequently asked questions
     "*JL*" is a gramogram for "jail", etc.
 
 .. dropdown:: How do you pronounce XAMES3 or XA?
-    :class-container: site-faq
+    :class-container: km-faq
 
     .. rubric:: Asked on November 02, 2025
-        :class: date-text
+        :class: km-date-text
 
     It's literally pronounced as "X-A" or "X-A-Mes-three".
 
 .. dropdown:: Why did you transitioned into teaching?
-    :class-container: site-faq
+    :class-container: km-faq
 
     .. rubric:: Asked on November 16, 2025
-        :class: date-text
+        :class: km-date-text
 
     I promised :ref:`Charlotte <charlotte-parks>` that I'd teach someday to
     students or be in academia. Honestly speaking, I meant it as a joke, in
     that moment, but now that I'm teaching, I understand what she meant.
 
 .. dropdown:: What is your role at National Louis University?
-    :class-container: site-faq
+    :class-container: km-faq
 
     .. rubric:: Asked on November 16, 2025
-        :class: date-text
+        :class: km-date-text
 
     I'm an :strike:`Adjunct` :strike:`Assistant` Adjunct Professor at
     `National Louis University`_'s Undergraduate college in Computer Science &
     Information Systems (CSIS) Department.
 
 .. dropdown:: What are your primary interests as IT professional?
-    :class-container: site-faq
+    :class-container: km-faq
 
     .. rubric:: Asked on December 02, 2025
-        :class: date-text
+        :class: km-date-text
 
     Looking back, I'd say I've transitioned from a Software Engineer to AI. So,
     I still love to build or brainstorm about solutions or ideas that solve a
@@ -127,25 +120,26 @@ Frequently asked questions
     brings me joy!
 
 .. dropdown:: What is your favourite movie/TV show?
-    :class-container: site-faq
+    :class-container: km-faq
 
     .. rubric:: Asked on December 02, 2025
-        :class: date-text
+        :class: km-date-text
 
-    I'm a huge `Christopher Nolan`_ fan and I :fas:`heart mrl-0 red` his
-    films. I tend to watch a lot of films, so it's difficult to say, what's my
-    favourite. But, my go-to movie is `Interstellar`_. I absolutely love the
-    music compositions by `Hans Zimmer`_. It's truly a masterpiece!
+    I'm a huge `Christopher Nolan`_ fan and I
+    :fas:`heart km-margin-inline km-red` his films. I tend to watch a lot of
+    films, so it's difficult to say, what's my favourite. But, my go-to movie
+    is `Interstellar`_. I absolutely love the music compositions by
+    `Hans Zimmer`_. It's truly a masterpiece!
 
     As far as my favourite TV show, I've a few. My go-to would be obviously,
     `Family Guy`_. But, if I were to recommend a TV show to anyone, I'd
     probably say, `Dark`_.
 
 .. dropdown:: What is your website's tech stack? The GitHub source looks simple
-    :class-container: site-faq
+    :class-container: km-faq
 
     .. rubric:: Asked on December 12, 2025
-        :class: date-text
+        :class: km-date-text
 
     Thanks for checking out the source code on GitHub! I'm no Frontend
     engineer and have sparse knowledge about modern JS frameworks at best. As
@@ -168,7 +162,6 @@ Frequently asked questions
 
     - **author.** This renders author details like name, :strike:`about`,
       :strike:`email`, GitHub, :strike:`LinkedIn and a timestamp of article`
-    - **picture.** Show colour-scheme aware images on the website
     - **repository.** Renders a small widget to show information about the
       GitHub repository. The details include stars and fork counts
     - **thumbnail.** This links YouTube videos by showing thumbnails

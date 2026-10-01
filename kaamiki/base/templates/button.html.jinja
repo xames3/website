@@ -1,19 +1,23 @@
-<!--
+{#
 Button Template
 ===============
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April, 2026
-Last updated on: 29 April, 2026
--->
-{% block button %}
+Last updated on: 29 September, 2026
+#}
+{% block km_button %}
     <p>
-        <a class="sd-sphinx-override sd-btn sd-text-wrap sd-btn-{{ scheme or 'primary' }} reference external"
-           href="{{ url }}"
-           rel="nofollow noopener"
-           target="_blank">
+        <a class="sd-sphinx-override sd-btn sd-text-wrap sd-btn-{{ km_scheme or 'primary' }} reference external"
+           href="{{ km_url }}"
+           {% if km_new_tab %}rel="nofollow noopener" target="_blank"{% endif %}>
             <span>
-                {%- if faicon %}<span class="fas {{ faicon }}"></span>{% endif %}
-        {{- text }}</span></a>
+                {%- if km_faicon -%}
+                    <span class="{{ km_faicon }}"
+                          aria-hidden="true"></span>
+                {%- endif -%}
+                {{ km_text }}
+            </span>
+        </a>
     </p>
-{% endblock button %}
+{% endblock km_button %}

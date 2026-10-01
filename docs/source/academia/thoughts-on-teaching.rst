@@ -1,14 +1,16 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April, 2026
-.. Last updated on: 30 August, 2026
+.. Last updated on: 30 September, 2026
 
-:og:title: Thoughts on teaching
-:og:description: Teaching the same courses, but differently every single time!
-:og:type: article
-:fb:title: These were my thoughts on teaching. What about you?
-:fb:description: If you have any new idea or suggestions about teaching, please let
-    share. I'm always on the lookout for better ways to teach my student.
-:fb:button: Share your ways
+:km-pg-title: Thoughts on teaching
+:km-pg-description: Teaching the same courses, but differently every single
+    time!
+:km-pg-type: article
+:km-fb-title: These were my thoughts on teaching. What about you?
+:km-fb-description: If you have any new ideas or suggestions about teaching,
+    please share. I'm always on the lookout for better ways to teach my
+    students.
+:km-fb-button: Share your ways
 
 .. _academia-thoughts-on-teaching:
 
@@ -16,7 +18,7 @@
 :fas:`seedling far` Thoughts on teaching
 ===============================================================================
 
-.. rst-class:: lead
+.. rst-class:: km-lead
 
     Lessons I didn't plan on teaching, but I re-learnt them along the way.
 
@@ -36,7 +38,7 @@ Repetition, but never the same.
 -------------------------------------------------------------------------------
 
 .. rubric:: Teaching the same courses, but differently every single time!
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 What came next was a whole year of teaching
 `CSS 225 Introduction to Applied Programming <https://nl.smartcatalogiq.com/en/
@@ -67,7 +69,7 @@ And somewhere in that strange unpredictability, I found the part I enjoyed the
 most my students!
 
 .. rubric:: :fab:`backward-fast far` Looking back
-    :class: pre-title-text
+    :class: km-pre-title-text
 
 .. _students-who-made-it-memorable:
 
@@ -78,7 +80,7 @@ Students who made it memorable.
 .. rubric:: They brought their **humour**, their **hobbies**, their **side
     comments** and some of their perfectly timed jokes that derailed the whole
     class in the best way possible.
-    :class: subtitle-text
+    :class: km-subtitle-text
 
 Some students brought in their questions. Ooh, those questions?!
 
@@ -115,7 +117,7 @@ something new, I felt like I was able to teach and explain things more
 effectively from both my successes and failures.
 
 .. rubric:: :fab:`seedling far` Growth, gratitude and moments
-    :class: pre-title-text
+    :class: km-pre-title-text
 
 .. _a-year-shaped-by-people:
 

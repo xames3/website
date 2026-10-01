@@ -1,12 +1,12 @@
 # =============================================================================
-# Makefile for testing Akshay's Corner
+# Makefile for Akshay's Corner
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 22 February, 2025
-# Last updated on: 13 September, 2026
+# Last updated on: 01 October, 2026
 #
 # This Makefile provides a comprehensive set of commands (targets) for building
-# and testing my website.
+# and checking my website.
 # =============================================================================
 
 # === CONFIGURATIONS ==========================================================
@@ -26,9 +26,17 @@ SPINNER_DELAY   := 0.25
 SOURCE_DIR      := source
 OUTPUT_DIR      := build
 CACHE_DIR       := .cache
+DOCTREE_DIR     := $(CACHE_DIR)/doctrees
+INVENTORY_DIR   := $(CACHE_DIR)/intersphinx
 LINKCHECK_DIR   := $(CACHE_DIR)/linkcheck
 LINKCHECK_FILE  := $(LINKCHECK_DIR)/output.txt
 LOG_FILE        := $(CACHE_DIR)/last.log
+
+INVENTORIES     := \
+	numpy=https://numpy.org/doc/stable/objects.inv \
+	python=https://docs.python.org/3/objects.inv \
+	sphinx=https://www.sphinx-doc.org/en/master/objects.inv \
+	torch=https://docs.pytorch.org/docs/2.11/objects.inv
 
 PROTOCOL        := http
 LOCALHOST       := localhost
@@ -39,15 +47,27 @@ SPHINX_BUILD    ?= sphinx-build
 SPHINX_LINT     ?= sphinx-lint
 HTTP_SERVER     ?= python3 -m http.server
 TOX             ?= tox
+CURL            ?= curl
 
 # === FLAGS ===================================================================
 SPHINX_BUILD_FLAGS := \
 	--builder dirhtml \
+	--doctree-dir $(DOCTREE_DIR) \
 	--fail-on-warning \
 	--show-traceback \
 	--fresh-env \
 	--quiet \
 	--color
+
+CURL_FLAGS := \
+	--fail \
+	--location \
+	--silent \
+	--show-error \
+	--retry 3 \
+	--retry-all-errors \
+	--connect-timeout 10 \
+	--max-time 30
 
 SPHINX_LINKCHECK_FLAGS := \
 	--builder linkcheck \
@@ -56,13 +76,12 @@ SPHINX_LINKCHECK_FLAGS := \
 	--quiet \
 	--color
 
-# Quiet drops tox's own env-setup chatter. The command output it wraps
-# is kept, which is the half worth reading when a run goes red.
 TOX_FLAGS := \
 	--quiet
 
 SPHINX_LINT_FLAGS := \
 	--disable role-with-double-backticks,role-without-backticks \
+	--enable line-too-long \
 	--max-line-length 79
 
 HTTP_SERVER_FLAGS := \
@@ -103,8 +122,8 @@ endef
 
 # === TARGETS =================================================================
 .DEFAULT_GOAL := help
-.PHONY: help clean check lint format typecheck tox html linkcheck test \
-	rebuild serve start stop devserver
+.PHONY: help clean check lint format typecheck tox html linkcheck \
+	rebuild serve start stop devserver inventories all
 
 # Improvement based on: https://stackoverflow.com/a/64394417
 help: ## Show this help and list available targets.
@@ -118,7 +137,7 @@ help: ## Show this help and list available targets.
 	@printf "$(COLOUR_DIM)Read complete documentation at: https://github.com/xames3/website.$(COLOUR_RESET)\n"
 
 clean: ## Remove build artifacts and temporary directories.
-	$(call spin,[  CLEAN],Removing build artifacts,rm -rf $(OUTPUT_DIR) $(CACHE_DIR))
+	$(call spin,[  CLEAN],Removing build artifacts,rm -rf $(OUTPUT_DIR) $(DOCTREE_DIR) $(LINKCHECK_DIR))
 
 check: ## Perform linting checks and report issues, if any.
 	$(call spin,[ SPHINX],Running sphinx linter,$(SPHINX_LINT) $(SPHINX_LINT_FLAGS) $(SOURCE_DIR))
@@ -126,6 +145,9 @@ check: ## Perform linting checks and report issues, if any.
 html: ## Build HTML files from the source directory.
 	@$(MAKE) check --no-print-directory
 	$(call spin,[  BUILD],Building HTML pages,$(SPHINX_BUILD) $(SPHINX_BUILD_FLAGS) $(SOURCE_DIR) $(OUTPUT_DIR))
+
+inventories: ## Fetch the intersphinx inventories the build falls back on.
+	$(call spin,[  FETCH],Fetching intersphinx inventories,mkdir -p $(INVENTORY_DIR); for pair in $(INVENTORIES); do name=$${pair%%=*}; $(CURL) $(CURL_FLAGS) --output $(INVENTORY_DIR)/$$name.part $${pair#*=} && mv $(INVENTORY_DIR)/$$name.part $(INVENTORY_DIR)/$$name.inv || rm -f $(INVENTORY_DIR)/$$name.part; done)
 
 linkcheck: ## Check every external link and report the dead ones.
 	$(call spin,[  CHECK],Checking for broken external links,$(SPHINX_BUILD) $(SPHINX_LINKCHECK_FLAGS) $(SOURCE_DIR) $(LINKCHECK_DIR),$(LINKCHECK_FILE))
@@ -142,12 +164,9 @@ typecheck: ## Typecheck Python code with mypy, through tox.
 tox: ## Run every tox environment in parallel.
 	$(call spin,[    TOX],Running every tox environment,$(TOX) $(TOX_FLAGS) -p)
 
-test: ## Lint, build and check every link in one go.
-	@$(MAKE) html --no-print-directory
-	@$(MAKE) linkcheck --no-print-directory
-
 rebuild: ## Rebuild HTML files after cleaning the build directory.
 	@$(MAKE) clean --no-print-directory
+	@$(MAKE) inventories --no-print-directory
 	@$(MAKE) html --no-print-directory
 
 serve: ## Start a development web server, if not running already and serve.
@@ -197,7 +216,4 @@ all: ## Run all targets except linkcheck and start the development server
 	@$(MAKE) stop --no-print-directory
 	@$(MAKE) rebuild --no-print-directory
 	@$(MAKE) tox --no-print-directory
-	@$(MAKE) lint --no-print-directory
-	@$(MAKE) typecheck --no-print-directory
-	@$(MAKE) format --no-print-directory
 	@$(MAKE) serve --no-print-directory

@@ -2,6 +2,7 @@
     --km-shadow-none: 0 0 #0000;
     --sd-color-warning: hsl(48.47, 100%, 50%);
     --sd-color-tabs-label-active: hsl(var(--km-color-fg));
+    --sd-color-tabs-label-inactive: hsl(var(--km-color-muted-fg));
     --sd-color-tabs-underline-active: hsl(var(--km-color-accent-fg));
     --sd-color-tabs-label-hover: hsl(var(--km-color-accent-fg));
     --sd-color-tabs-overline: hsl(var(--km-color-border));
@@ -135,7 +136,7 @@ details.sd-dropdown .sd-summary-chevron-right::before {
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
     font-size: 1rem !important;
-    font: var(--fa-font-regular);
+    font: var(--km-icon-font);
     margin-right: 0;
     margin-left: 0.5rem;
     transform: rotateZ(0deg) !important;
@@ -173,7 +174,7 @@ details.sd-dropdown summary.sd-summary-title .sd-material-icon {
     margin-right: 0 !important;
 }
 
-details.sd-dropdown summary:focus {
+details.sd-dropdown summary:focus:not(:focus-visible) {
     outline-style: none;
 }
 
@@ -185,7 +186,7 @@ details.sd-dropdown .sd-summary-content {
     display: block;
 }
 
-details.sd-dropdown.is-animating .sd-summary-content {
+details.sd-dropdown.km-is-animating .sd-summary-content {
     overflow: hidden;
 }
 
@@ -223,7 +224,7 @@ nav a svg .sd-material-icon {
 }
 
 /* iPad view */
-@media (max-width: 768px) {
+@media (width < 768px) {
     .admonition-title .fas {
         margin-right: 0.6rem !important;
     }
@@ -245,7 +246,10 @@ nav a svg .sd-material-icon {
 }
 
 .sd-tab-set input[type="radio"] {
-    display: none;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
 }
 
 .sd-tab-set input[type="radio"]:checked+.sd-tab-label {
@@ -261,6 +265,18 @@ nav a svg .sd-material-icon {
     outline: 1px solid hsl(var(--km-color-code-border));
 }
 
+.sd-tab-set>input:focus-visible+label,
+html[data-km-keyboard] .sd-tab-set>input:focus+label {
+    outline: 2px solid hsl(var(--km-color-focus));
+    outline-offset: 2px;
+}
+
+details.sd-dropdown summary.sd-summary-title:focus-visible {
+    border-radius: 0.5rem;
+    outline: 2px solid hsl(var(--km-color-focus));
+    outline-offset: 6px;
+}
+
 .sd-tab-label {
     padding: 0.5rem 0.9rem !important;
     background-color: transparent;
@@ -270,8 +286,12 @@ nav a svg .sd-material-icon {
 }
 
 .sd-tab-label:hover {
-    color: hsl(var(--km-color-fg) / 0.5) !important;
+    color: hsl(var(--km-color-fg) / 0.75) !important;
     border-bottom: none;
+}
+
+html[data-km-theme="dark"] .sd-tab-label:hover {
+    color: hsl(var(--km-color-fg) / 0.5) !important;
 }
 
 .sd-stretched-link {
@@ -352,70 +372,39 @@ nav a svg .sd-material-icon {
     border: 1px solid hsl(var(--km-color-border)) !important;
 }
 
-.sd-cards-carousel {
-    gap: 0.35rem;
-}
-
 .sd-card .sd-stretched-link {
     margin-left: 1rem;
     margin-bottom: 1rem;
 }
 
-.right-link-button {
+.km-right-link-button {
     flex-direction: row;
 }
 
-.right-link-button .sd-stretched-link {
+.km-right-link-button .sd-stretched-link {
     margin: auto 1rem auto !important;
 }
 
-.right-link-button .sd-card {
+.km-right-link-button .sd-card {
     padding-bottom: 0;
 }
 
-.right-link-button .sd-card-header {
+.km-right-link-button .sd-card-header {
     position: absolute;
     padding-bottom: 1rem;
 }
 
-.right-link-button .sd-card-header+.sd-card-body {
+.km-right-link-button .sd-card-header+.sd-card-body {
     padding-top: 3rem;
 }
 
-.right-link-button .sd-card-header>.sd-stretched-link {
+.km-right-link-button .sd-card-header>.sd-stretched-link {
     margin: 4rem 1rem auto !important;
 }
 
 @media (max-width: 1200px) {
-    .right-link-button {
+    .km-right-link-button {
         flex-direction: column;
         padding-bottom: 1rem;
     }
-}
-
-@media (min-width: 769px) {
-    .auto-padding .sd-row-cols-lg-2>*:nth-child(odd) {
-        padding-right: 1rem !important;
-    }
-
-    .auto-padding .sd-row-cols-lg-2>*:nth-child(even) {
-        padding-left: 1rem !important;
-    }
-}
-
-/* iPad view */
-@media (max-width: 768px) {
-
-    .auto-padding .sd-row-cols-lg-2>*:nth-child(odd),
-    .auto-padding .sd-row-cols-lg-2>*:nth-child(even) {
-        margin: 0.5rem 0 !important;
-    }
-}
-
-.kind-text {
-    opacity: 0.75;
-}
-
-.kind-text .highlighted {
-    opacity: 1;
 }

@@ -1,48 +1,40 @@
-<!--
+{#
 Feedback Template
 =================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 19 October, 2025
-Last updated on: 22 June, 2026
--->
-{% block feedback %}
-    {% set _fb_mode = meta.get('fb:mode', 'default') %}
-    <div class="site-feedback-shell{% if _fb_mode == 'split' %} site-feedback-shell--split{% endif %}">
-        {% if _fb_mode == 'split' %}
-            <div class="site-feedback-shell__header--split">
-                <p class="site-feedback-shell__title">
-                    {{ meta.get("fb:title",
-                                        "Feedback") }}
-                </p>
-                <a href="{{ meta['fb:target'] if meta.get('fb:type') == 'link' else 'mailto:' ~ project.email ~ '?subject=Feedback about ' ~ title|striptags|e }}"
-                   class="site-feedback-shell__button"
-                   data-index="0">
-                    <span class="fas {{ meta.get('fb:fa-icon', 'fa-paper-plane') }}"></span>
-                    {{ meta.get('fb:button', 'Submit') }}
-                </a>
-            </div>
-            <p class="site-feedback-shell__subtitle">
-                {{ meta.get("fb:description",
-                                "Let me know how this can be improved.") }}
-            </p>
-        {% else %}
-            <div class="site-feedback-shell__inner">
-                <p class="site-feedback-shell__title">
-                    {{ meta.get("fb:title",
-                                        "Feedback") }}
-                </p>
-                <p class="site-feedback-shell__subtitle">
-                    {{ meta.get("fb:description",
-                                        "Let me know how this can be improved.") }}
-                </p>
-            </div>
-            <a href="{{ meta['fb:target'] if meta.get('fb:type') == 'link' else 'mailto:' ~ project.email ~ '?subject=Feedback about ' ~ title|striptags|e }}"
-               class="site-feedback-shell__button"
-               data-index="0">
-                <span class="fas {{ meta.get('fb:fa-icon', 'fa-paper-plane') }}"></span>
-                {{ meta.get('fb:button', 'Submit') }}
+Last updated on: 29 September, 2026
+#}
+{% block km_feedback %}
+    {%- set km_split = km_feedback.mode == 'split' %}
+    {%- macro km_button() %}
+        {%- if km_feedback.href %}
+            <a href="{{ km_feedback.href|e }}"
+               class="km-feedback-shell__button">
+                {%- if km_feedback.icon -%}
+                    <span class="{{ km_feedback.icon|e }}"
+                          aria-hidden="true"></span>
+                {%- endif %}
+                {{ km_feedback.button|e }}
             </a>
+        {%- endif %}
+    {%- endmacro %}
+    <div class="km-feedback-shell{% if km_split %} km-feedback-shell--split{% endif %}"
+         role="complementary"
+         aria-label="{{ km_feedback.title|e }}">
+        {% if km_split %}
+            <div class="km-feedback-shell__header--split">
+                <p class="km-feedback-shell__title">{{ km_feedback.title|e }}</p>
+                {{ km_button() }}
+            </div>
+            <p class="km-feedback-shell__subtitle">{{ km_feedback.description|e }}</p>
+        {% else %}
+            <div class="km-feedback-shell__inner">
+                <p class="km-feedback-shell__title">{{ km_feedback.title|e }}</p>
+                <p class="km-feedback-shell__subtitle">{{ km_feedback.description|e }}</p>
+            </div>
+            {{ km_button() }}
         {% endif %}
     </div>
-{% endblock feedback %}
+{% endblock km_feedback %}

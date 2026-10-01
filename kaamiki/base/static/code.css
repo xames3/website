@@ -1,37 +1,45 @@
 :root {
-    --obj-foreground: 210.71 55.46% 55.1%;
-    --import-foreground: 355.52 72.5% 47.06%;
-    --comment-foreground: 212.98 96.61% 34.71%;
-    --function-foreground: 260.93 53.09% 47.65%;
-    --syntax-comment: 212 10% 58%;
-    --syntax-error: 357 94% 63%;
-    --syntax-keyword: 9 100% 73%;
-    --syntax-deleted-fg: 10 100% 80%;
-    --syntax-deleted-bg: 0 100% 15%;
-    --syntax-generic-error: var(--syntax-deleted-fg);
-    --syntax-inserted-fg: 131 65% 58%;
-    --syntax-inserted-bg: 140 74% 19%;
-    --syntax-prompt: var(--syntax-keyword);
-    --syntax-traceback: var(--syntax-keyword);
-    --syntax-class: 27 84% 55%;
-    --syntax-entity: 30 100% 67%;
-    --syntax-tag: 131 74% 71%;
-    --syntax-whitespace: 213 12% 46%;
-    --syntax-output: var(--syntax-comment);
-    --syntax-highlight-accent: 210 100% 64%;
-    --lineno-padding: 5px;
+    --km-obj-foreground: 210.71 55.46% 43%;
+    --km-import-foreground: 355.52 72.5% 47.06%;
+    --km-comment-foreground: 212.98 96.61% 34.71%;
+    --km-function-foreground: 260.93 53.09% 47.65%;
+    --km-syntax-comment: 212 10% 42%;
+    --km-syntax-error: 357 94% 43%;
+    --km-syntax-keyword: 9 100% 41%;
+    --km-syntax-deleted-fg: 10 100% 80%;
+    --km-syntax-deleted-bg: 0 100% 15%;
+    --km-syntax-generic-error: var(--km-syntax-deleted-fg);
+    --km-syntax-inserted-fg: 131 65% 58%;
+    --km-syntax-inserted-bg: 140 74% 19%;
+    --km-syntax-prompt: var(--km-syntax-keyword);
+    --km-syntax-traceback: var(--km-syntax-keyword);
+    --km-syntax-class: 27 84% 35%;
+    --km-syntax-entity: 30 100% 32%;
+    --km-syntax-tag: 131 74% 27%;
+    --km-syntax-whitespace: 213 12% 42%;
+    --km-syntax-output: var(--km-syntax-comment);
+    --km-syntax-highlight-accent: 210 100% 40%;
+    --km-lineno-padding: 5px;
     --km-code-bar-offset: 1rem;
     --km-code-bar-stop: 16.81%;
     --km-code-bar-height: 20px;
-    --km-code-bar-height-mobile: 17px;
 }
 
-html[data-theme="dark"] {
-    --obj-foreground: 208.4 100.8% 73.79%;
-    --import-foreground: 3.83 100% 72.35%;
-    --comment-foreground: 207.33 100% 82.35%;
-    --function-foreground: 268.97 100% 82.94%;
-    --syntax-error: 357 92% 63%;
+html[data-km-theme="dark"] {
+    --km-obj-foreground: 208.4 100.8% 73.79%;
+    --km-import-foreground: 3.83 100% 72.35%;
+    --km-comment-foreground: 207.33 100% 82.35%;
+    --km-function-foreground: 268.97 100% 82.94%;
+    --km-syntax-comment: 212 10% 58%;
+    --km-syntax-comment-strong: 212 10% 62%;
+    --km-syntax-error: 357 92% 63%;
+    --km-syntax-error-strong: 357 92% 70%;
+    --km-syntax-keyword: 9 100% 73%;
+    --km-syntax-class: 27 84% 55%;
+    --km-syntax-entity: 30 100% 67%;
+    --km-syntax-tag: 131 74% 71%;
+    --km-syntax-whitespace: 213 12% 46%;
+    --km-syntax-highlight-accent: 210 100% 64%;
 }
 
 pre {
@@ -42,7 +50,7 @@ td.linenos .normal,
 td.linenos .special,
 span.linenos,
 span.linenos.special {
-    padding-inline: var(--lineno-padding);
+    padding-inline: var(--km-lineno-padding);
 }
 
 td.linenos .normal,
@@ -67,9 +75,10 @@ span.linenos.special {
 
 .highlight .hll {
     background-color: hsl(var(--km-color-highlight));
+    box-shadow: var(--km-code-bar-offset) 0 0 hsl(var(--km-color-highlight));
     position: relative;
     display: block;
-    width: calc(100% + var(--km-code-bar-offset));
+    min-width: var(--km-code-width, 0px);
 }
 
 .highlight .hll::before {
@@ -78,7 +87,7 @@ span.linenos.special {
     left: calc(var(--km-code-bar-offset) * -1);
     width: var(--km-code-bar-offset);
     height: var(--km-code-bar-height);
-    background: linear-gradient(to right, hsl(var(--syntax-highlight-accent)), hsl(var(--syntax-highlight-accent)) var(--km-code-bar-stop), hsl(var(--km-color-highlight)) var(--km-code-bar-stop));
+    background: linear-gradient(to right, hsl(var(--km-syntax-highlight-accent)), hsl(var(--km-syntax-highlight-accent)) var(--km-code-bar-stop), hsl(var(--km-color-highlight)) var(--km-code-bar-stop));
 }
 
 .highlight .c,
@@ -86,19 +95,19 @@ span.linenos.special {
 .highlight .cm,
 .highlight .c1,
 .highlight .cpf {
-    color: hsl(var(--syntax-comment));
+    color: hsl(var(--km-syntax-comment));
     font-style: italic;
 }
 
 .highlight .cp,
 .highlight .cs {
-    color: hsl(var(--syntax-comment));
+    color: hsl(var(--km-syntax-comment));
     font-weight: 500;
     font-style: italic;
 }
 
 .highlight .err {
-    color: hsl(var(--syntax-error));
+    color: hsl(var(--km-syntax-error));
 }
 
 .highlight .esc,
@@ -121,7 +130,7 @@ span.linenos.special {
 .highlight .kt,
 .highlight .ow,
 .highlight .gp {
-    color: hsl(var(--syntax-keyword));
+    color: hsl(var(--km-syntax-keyword));
     font-weight: 500;
 }
 
@@ -142,7 +151,7 @@ span.linenos.special {
 .highlight .sx,
 .highlight .s1,
 .highlight .ss {
-    color: hsl(var(--comment-foreground));
+    color: hsl(var(--km-comment-foreground));
 }
 
 .highlight .kc,
@@ -161,7 +170,7 @@ span.linenos.special {
 .highlight .se,
 .highlight .sh,
 .highlight .sr {
-    color: hsl(var(--obj-foreground));
+    color: hsl(var(--km-obj-foreground));
     font-weight: 500;
 }
 
@@ -169,13 +178,13 @@ span.linenos.special {
 .highlight .nd,
 .highlight .nf,
 .highlight .fm {
-    color: hsl(var(--function-foreground));
+    color: hsl(var(--km-function-foreground));
     font-weight: 500;
 }
 
 .highlight .gh,
 .highlight .gu {
-    color: hsl(var(--obj-foreground));
+    color: hsl(var(--km-obj-foreground));
     font-weight: 500;
 }
 
@@ -201,39 +210,39 @@ span.linenos.special {
 }
 
 .highlight .gd {
-    color: hsl(var(--syntax-deleted-fg));
-    background-color: hsl(var(--syntax-deleted-bg));
+    color: hsl(var(--km-syntax-deleted-fg));
+    background-color: hsl(var(--km-syntax-deleted-bg));
 }
 
 .highlight .gr {
-    color: hsl(var(--syntax-generic-error));
+    color: hsl(var(--km-syntax-generic-error));
 }
 
 .highlight .gi {
-    color: hsl(var(--syntax-inserted-fg));
-    background-color: hsl(var(--syntax-inserted-bg));
+    color: hsl(var(--km-syntax-inserted-fg));
+    background-color: hsl(var(--km-syntax-inserted-bg));
 }
 
 .highlight .go {
-    color: hsl(var(--syntax-output));
+    color: hsl(var(--km-syntax-output));
 }
 
 .highlight .gt {
-    color: hsl(var(--syntax-traceback));
+    color: hsl(var(--km-syntax-traceback));
 }
 
 .highlight .nc,
 .highlight .ne {
-    color: hsl(var(--syntax-class));
+    color: hsl(var(--km-syntax-class));
     font-weight: 500;
 }
 
 .highlight .ni {
-    color: hsl(var(--syntax-entity));
+    color: hsl(var(--km-syntax-entity));
 }
 
 .highlight .nt {
-    color: hsl(var(--syntax-tag));
+    color: hsl(var(--km-syntax-tag));
 }
 
 .highlight .nn {
@@ -242,19 +251,5 @@ span.linenos.special {
 }
 
 .highlight .w {
-    color: hsl(var(--syntax-whitespace));
-}
-
-/* iPad view */
-@media (max-width: 768px) {
-    .highlight .hll {
-        padding-right: 100vw;
-        margin-right: -100vw;
-        display: inline;
-    }
-
-    .highlight .hll::before {
-        height: var(--km-code-bar-height-mobile);
-        top: 0;
-    }
+    color: hsl(var(--km-syntax-whitespace));
 }

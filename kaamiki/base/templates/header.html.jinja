@@ -1,82 +1,86 @@
-<!--
+{#
 Header Template
 ===============
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 11 September, 2026
--->
-{%- from "logo.html.jinja" import site_logo with context -%}
-<header class="site-header">
-    {%- block header_before %}
-    {% endblock header_before -%}
-    <div class="site-header__inner">
-        {%- block header_left %}
-            <div class="site-header__primary">
-                {%- block website_logo %}
+Last updated on: 29 September, 2026
+#}
+{%- from "logo.html.jinja" import km_logo with context -%}
+<header class="km-header">
+    {%- block km_header_before %}
+    {% endblock km_header_before -%}
+    <div class="km-header__inner">
+        {%- block km_header_left %}
+            <div class="km-header__primary">
+                {%- block km_website_logo %}
                     <a href="{{ pathto(master_doc) }}"
-                       class="site-header__logo">
-                        {{- site_logo() -}}
-                        <span class="site-header__title">{{ docstitle }}</span>
+                       class="km-header__logo">
+                        {{- km_logo() -}}
+                        <span class="km-header__title">{{ docstitle|e }}{%- if km_fa_icons.title_badge %}<i class="{{ km_fa_icons.title_badge }} km-title-badge"
+   aria-hidden="true"></i>{%- endif %}</span>
                     </a>
-                {%- endblock website_logo %}
+                {%- endblock km_website_logo %}
             </div>
-        {%- endblock header_left %}
-        {%- if show_toctree|tobool %}
-            <nav class="site-header__nav"
+        {%- endblock km_header_left %}
+        {%- if km_show_toctree|tobool %}
+            <nav class="km-header__nav"
                  aria-label="{{ _('Primary navigation') }}">
-                <div class="site-header__nav-tree">
+                <div class="km-header__nav-tree">
                     {{ toctree(titles_only=true, collapse=false, includehidden=true) }}
                 </div>
             </nav>
         {%- endif %}
-        {%- block header_right %}
-            <div class="site-header__utilities">
-                {%- block mobile_menu %}
+        {%- block km_header_right %}
+            <div class="km-header__utilities">
+                {%- block km_mobile_menu %}
                     {%- if sidebars|length > 0 %}
-                        <button class="site-header__menu-toggle"
+                        <button class="km-header__menu-toggle"
                                 type="button"
-                                aria-controls="sidebar"
-                                :aria-expanded="showSidebar ? 'true' : 'false'"
-                                @click="showSidebar = !showSidebar">
-                            <i class="fa-regular fa-arrow-right-to-line"
+                                aria-controls="km-sidebar"
+                                aria-expanded="false">
+                            <i class="{{ km_fa_icons.menu }}"
                                aria-hidden="true"></i>
                             <span class="sr-only">{{ _("Toggle navigation menu") }}</span>
                         </button>
+                        <noscript>
+                            <a class="km-header__menu-toggle"
+                               href="#km-sidebar">
+                                <i class="{{ km_fa_icons.menu }}"
+                                   aria-hidden="true"></i>
+                                <span class="sr-only">{{ _("Open navigation menu") }}</span>
+                            </a>
+                        </noscript>
                     {%- endif %}
-                {%- endblock mobile_menu %}
-                {%- block header_buttons %}
-                    {%- if header_buttons|tobool %}
-                        <nav class="site-header__icon-list"
+                {%- endblock km_mobile_menu %}
+                {%- block km_header_buttons %}
+                    {%- if km_header_buttons|tobool %}
+                        <nav class="km-header__icon-list"
                              aria-label="{{ _('External links') }}">
-                            {%- for text, url in header_buttons.items() %}
+                            {%- for text, url in km_header_buttons.items() %}
                                 {%- if url is mapping %}
                                     <a href="{{ url.link }}"
-                                       title="{{ text }}"
+                                       title="{{ text|e }}"
                                        rel="noopener nofollow"
                                        {% if url.link != '#' %}target="_blank"{% endif %}
-                                       class="site-header__icon-link"
+                                       class="km-header__icon-link"
                                        {{ url.extras if url.extras else '' }}>
                                         {%- if url.icon %}
                                             {{ url.icon }}
                                         {%- else %}
-                                            <span>{{ text }}</span>
+                                            <span>{{ text|e }}</span>
                                         {%- endif %}
                                     </a>
                                 {%- endif %}
                             {%- endfor %}
                         </nav>
                     {%- endif %}
-                {%- endblock header_buttons %}
-                {%- if hasdoc('search') and show_searchbox|tobool %}
-                    <div class="site-header__search">
-                        {%- with search_variant = "header" %}
-                            {%- include "searchbox.html.jinja" %}
-                        {%- endwith %}
-                    </div>
+                {%- endblock km_header_buttons %}
+                {%- if hasdoc('search') and km_show_searchbox|tobool %}
+                    <div class="km-header__search">{%- include "searchbox.html.jinja" %}</div>
                 {%- endif %}
             </div>
-        {%- endblock header_right %}
+        {%- endblock km_header_right %}
     </div>
-    {%- block header_after %}{%- endblock header_after %}
+    {%- block km_header_after %}{%- endblock km_header_after %}
     </header>

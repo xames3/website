@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 26 August, 2025
-# Last updated on: 12 September, 2026
+# Last updated on: 29 September, 2026
 
 name: Continuous Integration
 run-name: Started ${{ github.workflow }} (CI) workflow
@@ -22,7 +22,7 @@ on:
       - "requirements.txt"
 
 env:
-  PYTHON_VERSION: "3.13.7"
+  PYTHON_VERSION: "3.14"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -135,7 +135,9 @@ jobs:
           key: ${{ needs.prepare.outputs.requirements-cache-key }}
           restore-keys: ${{ runner.os }}-pip-
       - name: Install documentation dependencies
-        run: python -m pip install -Uq -e .
+        run: |
+          python -m pip install -Uq pip
+          python -m pip install -Uq -e . --group dev
       - name: Run Sphinx linting
         run: make --directory docs check
 
@@ -159,6 +161,16 @@ jobs:
           key: ${{ needs.prepare.outputs.requirements-cache-key }}
           restore-keys: ${{ runner.os }}-pip-
       - name: Install documentation dependencies
-        run: python -m pip install -Uq -e .
+        run: |
+          python -m pip install -Uq pip
+          python -m pip install -Uq -e . --group dev
+      - name: Restore intersphinx inventories
+        uses: actions/cache@v6
+        with:
+          path: docs/.cache/intersphinx
+          key: intersphinx-${{ github.run_id }}
+          restore-keys: intersphinx-
+      - name: Fetch intersphinx inventories
+        run: make --directory docs inventories
       - name: Build HTML pages with Sphinx
         run: make --directory docs html

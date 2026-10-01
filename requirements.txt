@@ -1,6 +1,8 @@
-bs4
-sphinx
-sphinx-copybutton
-sphinx-design
-sphinx-lint
-urllib3>=2.7.0
+beautifulsoup4>=4.13
+docutils>=0.21
+jinja2>=3.1
+lightningcss>=0.3.1
+pygments>=2.17
+sphinx>=9.1
+sphinx-copybutton>=0.5.2
+sphinx-design>=0.6

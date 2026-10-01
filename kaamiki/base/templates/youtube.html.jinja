@@ -1,24 +1,25 @@
-<!--
+{#
 YouTube Template
 ================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February, 2025
-Last updated on: 21 December, 2025
--->
-{% block youtube %}
-    <figure class="site-media site-media--youtube">
-        <div class="site-media__frame site-media__frame--ratio">
-            <iframe class="site-media__iframe"
-                    src="{{ url }}&amp;color=white"
-                    title="{{ caption|default('YouTube video', true) |striptags|e }}"
+Last updated on: 29 September, 2026
+#}
+{% block km_youtube %}
+    {%- set km_label = km_caption or _("YouTube video") %}
+    <figure class="km-media km-media--youtube">
+        <div class="km-media__frame km-media__frame--ratio">
+            <iframe class="km-media__iframe"
+                    src="{{ km_url }}&amp;color=white"
+                    title="{{ km_label|striptags|e }}"
                     loading="lazy"
                     referrerpolicy="strict-origin-when-cross-origin"
                     allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowfullscreen></iframe>
         </div>
-        {%- if caption %}
-            <figcaption class="site-media__caption">{{ caption }}</figcaption>
+        {%- if km_caption %}
+            <figcaption class="km-media__caption">{{ km_caption }}</figcaption>
         {%- endif -%}
     </figure>
-{% endblock youtube %}
+{% endblock km_youtube %}
