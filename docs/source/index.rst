@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February, 2025
-.. Last updated on: 30 September, 2026
+.. Last updated on: 01 October, 2026
 
 :orphan:
 :km-pg-title: Akshay Mestry
@@ -183,14 +183,6 @@ honest, what kind of mood I'm in that day when they come asking for help.
 
     explained/docker/index
     explained/eli5/index
-
-.. toctree::
-    :caption: Projects
-    :hidden:
-    :titlesonly:
-
-    projects/xsnumpy
-    projects/slowtorch
 
 .. toctree::
     :caption: Miscellany

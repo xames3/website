@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October, 2025
-.. Last updated on: 30 September, 2026
+.. Last updated on: 01 October, 2026
 
 :km-pg-title: FAQs
 :km-pg-description: Frequently Asked Questions about me and this website
@@ -8,7 +8,6 @@
 :km-fb-title: Do you've any questions for me?
 :km-fb-description: Feel free to ask anything you're curious about.
 :km-fb-button: Send in your questions
-:km-fb-fa-icon: far fa-seal-question
 
 .. _miscellany-faq:
 
@@ -31,12 +30,6 @@ follow. I've had loads of interesting chats in person and a few over email and
 I think I've noticed a pattern. A lot of the same questions pop up; some are
 esoteric about a topic, while others are simple *"why?"* questions. Ever since
 I transitioned into teaching, some of you've also questioned that, too.
-
-While many have asked about my thoughts on the late 2025 job situation. Some
-have even asked why even I built projects like
-:doc:`xsNumPy <../projects/xsnumpy>` and
-:doc:`SlowTorch <../projects/slowtorch>`, which seem like reinventing the
-wheel.
 
 By the way, all of them are great questions! Then there are the questions
 about what my favourite films are and what I'm currently watching. So to make
