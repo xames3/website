@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 22 February, 2025
-# Last updated on: 29 September, 2026
+# Last updated on: 01 October, 2026
 #
 # This Makefile provides a comprehensive set of commands (targets) for building
 # and checking my website.
@@ -137,7 +137,7 @@ help: ## Show this help and list available targets.
 	@printf "$(COLOUR_DIM)Read complete documentation at: https://github.com/xames3/website.$(COLOUR_RESET)\n"
 
 clean: ## Remove build artifacts and temporary directories.
-	$(call spin,[  CLEAN],Removing build artifacts,rm -rf $(OUTPUT_DIR) $(CACHE_DIR))
+	$(call spin,[  CLEAN],Removing build artifacts,rm -rf $(OUTPUT_DIR) $(DOCTREE_DIR) $(LINKCHECK_DIR))
 
 check: ## Perform linting checks and report issues, if any.
 	$(call spin,[ SPHINX],Running sphinx linter,$(SPHINX_LINT) $(SPHINX_LINT_FLAGS) $(SOURCE_DIR))
@@ -166,6 +166,7 @@ tox: ## Run every tox environment in parallel.
 
 rebuild: ## Rebuild HTML files after cleaning the build directory.
 	@$(MAKE) clean --no-print-directory
+	@$(MAKE) inventories --no-print-directory
 	@$(MAKE) html --no-print-directory
 
 serve: ## Start a development web server, if not running already and serve.
