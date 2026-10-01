@@ -4,7 +4,7 @@ Explainer Chrome
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September, 2026
-Last updated on: 17 September, 2026
+Last updated on: 01 October, 2026
 
 The markup an explainer wraps itself in.
 """
@@ -288,7 +288,7 @@ def label(low: int, high: int) -> str:
     """
     if low == high:
         return f"line {low}"
-    return f"lines {low}-{high}"  # noqa: RUF001
+    return f"lines {low}-{high}"
 
 
 def visit_explanation(self: HTMLTranslator, node: nodes.Element) -> None:
