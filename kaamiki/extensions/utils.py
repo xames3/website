@@ -8,7 +8,7 @@ Last updated on: 30 September, 2026
 
 The theme's shared helpers. They fall into four groups: rendering a
 directive's template, reading things off the doctree (a lead, a
-description, a reading time), filling in the page context, and writing
+description, a reading time), filling in the page context and writing
 the 404 page once the build is done.
 """
 
@@ -288,7 +288,7 @@ def youtube_id(url: str) -> str | None:
     """Find the video id in a YouTube link.
 
     Watch pages with the id anywhere in the query, `youtu.be` short
-    links, and the `embed`, `shorts`, `live` and `v` paths all work, as
+    links and the `embed`, `shorts`, `live` and `v` paths all work, as
     does the bare id.
 
     :param url: The link, as written.
@@ -362,7 +362,7 @@ def plain(text: str) -> str:
     """Flatten rendered HTML down to bare text.
 
     A page title reaches the context already rendered, so a heading
-    carrying an icon role arrives as markup, and that would put
+    carrying an icon role arrives as markup and that would put
     escaped `<span>` soup in a `<meta>` tag.
 
     Only things that look like a tag are stripped, so a description
@@ -432,7 +432,7 @@ def summarise(doctree: nodes.document | None, limit: int) -> str:
     """Fall back to a page's opening paragraph.
 
     Only reached when the page sets no description of its own, has no
-    lead, and the theme carries no default either.
+    lead and the theme carries no default either.
 
     :param doctree: The resolved doctree, or `None` for generated
         pages.
@@ -605,7 +605,7 @@ def reading_length(
 
     `show_show_more` in `html_context` is the site-wide switch. The
     page's `km_show_show_more` is the answer for this page: true only
-    when the page runs to `show_more_after` minutes or more, and false
+    when the page runs to `show_more_after` minutes or more and false
     everywhere when the switch is off.
 
     :param app: The Sphinx application instance.
@@ -755,7 +755,7 @@ def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
 
     The page's own `.. Author:`, `.. Created on:` and `.. Last updated
     on:` comments win. A date the page leaves out is the one of its first
-    commit or its latest, and failing that, the day the site is built.
+    commit or its latest and failing that, the day the site is built.
     An author it leaves out is the name its `author` directive gives,
     and failing that, the project's, which is settled as the page is
     written.
@@ -927,11 +927,11 @@ def sitemap(app: Sphinx) -> None:
     """Write `sitemap.xml` and `robots.txt` at the top of the output.
 
     The sitemap lists every page the site is built from, with the day
-    it was last updated where that reads as a date, and `robots.txt`
+    it was last updated where that reads as a date and `robots.txt`
     points crawlers at it. A page asking search engines to leave it
     out, through `:km-pg-robots:`, is left out of the sitemap too, since
     listing it would ask them to index it. A sitemap holds whole
-    addresses, so a site without `html_baseurl` gets neither, and nor
+    addresses, so a site without `html_baseurl` gets neither and nor
     does one that turns `show_sitemap` off. A `robots.txt` the site
     keeps in `html_extra_path` is left as it is.
 

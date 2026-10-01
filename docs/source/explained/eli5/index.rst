@@ -90,5 +90,5 @@ won't be necessary here, as I intend to keep these articles completely
 independent. So feel free to jump in and explore whichever topic you fancy.
 
 These pages are meant to give you that **aha!** moment, hopefully without
-boring you to death. They're short\*, and hopefully sharp, though I make no
+boring you to death. They're short\* and hopefully sharp, though I make no
 promises on the sharp bit.

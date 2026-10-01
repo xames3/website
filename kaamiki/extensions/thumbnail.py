@@ -11,7 +11,7 @@ A `thumbnail` directive that renders a YouTube video as a card::
     .. thumbnail:: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
 Both URL forms are accepted. The video id is pulled out of the URL and
-used to build the still image, and the card itself comes from
+used to build the still image and the card itself comes from
 `thumbnail.html.jinja`.
 """
 

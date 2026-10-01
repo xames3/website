@@ -4,56 +4,73 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February, 2025
-Last updated on: 10 September, 2026
+Last updated on: 29 September, 2026
 
-The theme's inline roles: `style`, `email`, `mark` and `underline`.
+The theme's inline roles: `stylise`, `email`, `sharpie` and `underline`.
 Every public function here is registered as a role of the same name,
 so a helper in this module takes a leading underscore.
-
-.. versionadded:: 10.9.2026
-
-    A colour is checked against `COLOUR` before it reaches an
-    attribute. Nothing legitimate in a colour needs a quote or an angle
-    bracket, so anything carrying one is reported rather than pasted
-    into the markup.
-
-.. versionchanged:: 10.9.2026
-
-    [1] Every role escapes its text. They build HTML with f-strings, so
-        an `&` or a `<` in the content landed in the output raw, and a
-        quote in a colour could close the `style` attribute and open a
-        new one.
-    [2] `email` uses `utils.findall` rather than the deprecated
-        `.traverse()`.
-    [3] `email` survives a page with no title, and text with no `<`,
-        instead of raising at build time. Its subject is URL-encoded.
-
-.. deprecated:: 10.9.2026
-
-    [1] `underline_svg` is now `_underline_svg`. It was being handed to
-        docutils as a role of its own.
-    [2] `mark` and `underline` no longer shuffle their parameters about
-        to look used. Both genuinely use `rawtext`, `lineno` and
-        `inliner` now that they can report a bad colour.
 """
 
 from __future__ import annotations
 
 import re
 import typing as t
-from html import escape
-from random import uniform
+from hashlib import sha256
+from random import Random
 from urllib.parse import quote
 
 import docutils.nodes as nodes
 
 from kaamiki.extensions.utils import findall
 
-# A colour lands inside an attribute, and in `underline`'s case inside
+if t.TYPE_CHECKING:
+    from sphinx.writers.html import HTMLTranslator
+
+# A colour lands inside an attribute and in `underline`'s case inside
 # an SVG nested in a data URI in that attribute. Nothing legitimate in
 # there needs a quote or an angle bracket, so anything carrying one is
 # an author mistake rather than a colour.
 COLOUR: re.Pattern[str] = re.compile(r"^[#\w(),.%\s/-]+$")
+
+
+class ink(nodes.inline):
+    """A run of text wearing a style, a sharpie or a pencil underline.
+
+    The text stays a text node, so the reading time, the search index
+    and a page's description see the words and not the markup drawn
+    around them.
+    """
+
+
+def _visit(self: HTMLTranslator, node: ink) -> None:
+    """Open the span that carries the style.
+
+    :param self: The HTML translator, whose body this appends to.
+    :param node: The inked text.
+    """
+    self.body.append(self.starttag(node, "span", "", style=node["style"]))
+
+
+def _depart(self: HTMLTranslator, node: ink) -> None:
+    """Close the span.
+
+    :param self: The HTML translator, whose body this appends to.
+    :param node: The inked text (unused).
+    """
+    self.body.append("</span>")
+
+
+def _split(text: str) -> tuple[str, str | None]:
+    """Split a role's text into its label and what sits in angles.
+
+    :param text: What was written inside the role.
+    :return: The label and the value between `<` and `>`, or `None`
+        when there is not one.
+    """
+    if "<" not in text:
+        return text, None
+    element, value = text.split("<", 1)
+    return element.strip(), value.rstrip().removesuffix(">").strip()
 
 
 def _reject(
@@ -74,12 +91,15 @@ def _reject(
     return [inliner.problematic(rawtext, rawtext, msg)], [msg]
 
 
-def _underline_svg(color: str) -> tuple[str, str]:
+def _underline_svg(color: str, seed: str) -> tuple[str, str]:
     """Draw two wobbly strokes for a hand-drawn underline.
 
     :param color: The stroke colour, already checked.
+    :param seed: What the wobble is drawn from, so the same underline in
+        the same place comes out the same on every build.
     :return: The left-to-right and right-to-left SVGs.
     """
+    uniform = Random(sha256(seed.encode()).digest()).uniform
     segments = 7
     step = 500 / segments
 
@@ -124,36 +144,23 @@ def stylise(
 
     The text reads `label <css>`::
 
-        Text is normal, but now it is :style:`red <color: red;>`.
+        Text is normal, but now it is :stylise:`red <color: red;>`.
 
-    :param role: The role name, as written.
+    :param role: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
     :param text: What was written inside it.
     :param lineno: The line the role sits on, for error reporting.
     :param inliner: The docutils inliner that called this.
-    :param options: Role options, unused.
-    :param content: Role content, unused.
-    :return: One `raw` node, and the error messages if the text does
+    :param options: Role options (unused).
+    :param content: Role content (unused).
+    :return: The styled text and the error messages if the text does
         not split on a `<`.
     """
-    # NOTE(xames3): The parameters `role`, `options` and `content` are
-    # currently unused but are included to match the expected signature
-    # for a Sphinx role function.
-    role = role or ""
-    options = options or {}
-    content = content or []
-    try:
-        element, style = map(str.strip, text.split("<", 1))
-        style = style.rstrip(">")
-    except ValueError:
-        msg = inliner.reporter.error(
-            f"Invalid style: {text!r}",
-            nodes.literal_block(rawtext, rawtext),
-            line=lineno,
-        )
-        return [inliner.problematic(rawtext, rawtext, msg)], [msg]
-    raw = f'<span style="{escape(style, quote=True)}">{escape(element)}</span>'
-    return [nodes.raw(text=raw, format="html")], []
+    del role, options, content
+    element, style = _split(text)
+    if style is None:
+        return _reject(inliner, rawtext, lineno, f"Invalid style: {text!r}")
+    return [ink(rawtext, element, style=style)], []
 
 
 def email(
@@ -173,40 +180,32 @@ def email(
         Send me an :email:`email <xa@mes3.dev>`.
         Send me an :email:`email <xa@mes3.dev | Hello hello!!>`.
 
-    :param role: The role name, as written.
+    :param role: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
     :param text: What was written inside it.
     :param lineno: The line the role sits on, for error reporting.
     :param inliner: The docutils inliner that called this.
-    :param options: Role options, unused.
-    :param content: Role content, unused.
-    :return: One `reference` node, and the error messages if the text
+    :param options: Role options (unused).
+    :param content: Role content (unused).
+    :return: One `reference` node and the error messages if the text
         does not split on a `<`.
     """
-    # NOTE(xames3): The parameters `role`, `options` and `content` are
-    # currently unused but are included to match the expected signature
-    # for a Sphinx role function.
-    role = role or ""
-    options = options or {}
-    content = content or []
-    if "<" not in text:
+    del role, options, content
+    alt, rest = _split(text)
+    if rest is None:
         return _reject(inliner, rawtext, lineno, f"Invalid email: {text!r}")
-    subject = ""
-    for title in findall(inliner.document, nodes.title):
-        subject = title.astext().strip()
-        break
-    alt, rest = text.split("<", 1)
-    alt = alt.strip()
-    if "|" in rest:
-        href, _, subject = rest.partition("|")
-        subject = subject.strip(">").strip()
-    else:
-        href = rest.strip(">")
-    refuri = f"mailto:{href.strip()}?subject={quote(subject)}"
-    return [nodes.reference(rawtext, alt, refuri=refuri, line=lineno)], []
+    href, _, subject = rest.partition("|")
+    if not subject.strip():
+        subject = next(
+            (_.astext() for _ in findall(inliner.document, nodes.title)), ""
+        )
+    refuri = f"mailto:{href.strip()}"
+    if subject.strip():
+        refuri += f"?subject={quote(subject.strip())}"
+    return [nodes.reference(rawtext, alt, refuri=refuri)], []
 
 
-def mark(
+def sharpie(
     role: str,
     rawtext: str,
     text: str,
@@ -215,39 +214,30 @@ def mark(
     options: dict[str, t.Any] | None = None,
     content: list[t.Any] | None = None,
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
-    """Run a highlighter pen over a run of text.
+    """Run a highlighter over a run of text.
 
     The colour is yellow unless the role names one::
 
-        This is :mark:`important` information.
-        This is :mark:`critical <red>` information.
+        This is :sharpie:`important` information.
+        This is :sharpie:`critical <red>` information.
 
-    :param role: The role name, as written.
+    :param role: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
     :param text: What was written inside it.
     :param lineno: The line the role sits on, for error reporting.
     :param inliner: The docutils inliner that called this.
-    :param options: Role options, unused.
-    :param content: Role content, unused.
-    :return: One `raw` node, and the error messages if the colour looks
-        like markup.
+    :param options: Role options (unused).
+    :param content: Role content (unused).
+    :return: The highlighted text and the error messages if the colour
+        looks like markup.
     """
-    # NOTE(xames3): `role`, `options` and `content` are unused but are
-    # included to match the signature docutils expects of a role.
-    role = role or ""
-    options = options or {}
-    content = content or []
-    if "<" in text:
-        element, color = map(str.strip, text.split("<", 1))
-        color = color.rstrip(">").strip()
-    else:
-        element = text
-        color = "yellow"
+    del role, options, content
+    element, color = _split(text)
+    color = color or "yellow"
     if not COLOUR.match(color):
         return _reject(inliner, rawtext, lineno, f"Invalid colour: {color!r}")
-    raw = f'<span class="marker" style="--marker-color: {color};">'
-    raw += f"{escape(element)}</span>"
-    return [nodes.raw(text=raw, format="html")], []
+    style = f"--km-sharpie-color: {color};"
+    return [ink(rawtext, element, classes=["km-sharpie"], style=style)], []
 
 
 def underline(
@@ -266,36 +256,25 @@ def underline(
         This is :underline:`notable` content.
         This is :underline:`notable <red>` content.
 
-    :param role: The role name, as written.
+    :param role: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
     :param text: What was written inside it.
     :param lineno: The line the role sits on, for error reporting.
     :param inliner: The docutils inliner that called this.
-    :param options: Role options, unused.
-    :param content: Role content, unused.
-    :return: One `raw` node, and the error messages if the colour looks
-        like markup.
+    :param options: Role options (unused).
+    :param content: Role content (unused).
+    :return: The underlined text and the error messages if the colour
+        looks like markup.
     """
-    # NOTE(xames3): `role`, `options` and `content` are unused but are
-    # included to match the signature docutils expects of a role.
-    role = role or ""
-    options = options or {}
-    content = content or []
-    if "<" in text:
-        element, color = map(str.strip, text.split("<", 1))
-        color = color.rstrip(">").strip()
-    else:
-        element = text
-        color = "#FF9800"
+    del role, options, content
+    element, color = _split(text)
+    color = color or "#FF9800"
     if not COLOUR.match(color):
         return _reject(inliner, rawtext, lineno, f"Invalid colour: {color!r}")
-    ltr, rtl = _underline_svg(color)
-    ltr = ltr.replace("#", "%23")
-    rtl = rtl.replace("#", "%23")
-    raw = (
-        '<span class="pencil" '
-        f'style="--ul-fwd: url(&quot;data:image/svg+xml,{ltr}&quot;); '
-        f'--ul-ret: url(&quot;data:image/svg+xml,{rtl}&quot;);"'
-        f">{escape(element)}</span>"
+    seed = f"{inliner.document.get('source', '')}:{lineno}:{rawtext}"
+    ltr, rtl = (_.replace("#", "%23") for _ in _underline_svg(color, seed))
+    style = (
+        f'--km-ul-fwd: url("data:image/svg+xml,{ltr}");'
+        f' --km-ul-ret: url("data:image/svg+xml,{rtl}");'
     )
-    return [nodes.raw(text=raw, format="html")], []
+    return [ink(rawtext, element, classes=["km-pencil"], style=style)], []

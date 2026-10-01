@@ -15,7 +15,7 @@ A `youtube` directive that embeds a video in the page::
        What it is about.
 
 Both URL forms are accepted. The options become query parameters on the
-embed URL, and the player comes from `youtube.html.jinja`.
+embed URL and the player comes from `youtube.html.jinja`.
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ class directive(rst.Directive):
         - `autoplay`: Play the video as soon as it loads.
         - `showcaptions`: Turn closed captions on.
         - `caption`: A line of text under the player. The directive's
-           body does the same, and the option wins when both are
+           body does the same and the option wins when both are
            there.
         - `startfrom`: Seconds to start playing from.
         - `privacy`: Embed from `youtube-nocookie.com`.

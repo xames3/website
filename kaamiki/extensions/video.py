@@ -39,7 +39,7 @@ class directive(rst.Directive):
 
         - `autoplay`: Play the video, muted, as soon as it loads.
         - `caption`: A line of text under the video. The directive's
-          body does the same, and the option wins when both are there.
+          body does the same and the option wins when both are there.
         - `type`: The video's MIME type, when its extension does not
           say.
     """

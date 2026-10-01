@@ -106,9 +106,9 @@ def substitute(source: str, values: dict[str, str]) -> str:
     Markup, script and style want different things. A value in an
     attribute needs its quotes and brackets escaped or it closes the
     attribute early; the same treatment inside a `<script>` turns an
-    array into `[&quot;a&quot;]`, and JSON inside a `<style>` wraps a
+    array into `[&quot;a&quot;]` and JSON inside a `<style>` wraps a
     colour in quotes. The source is split on its script and style
-    blocks, and each gets what it needs.
+    blocks and each gets what it needs.
 
     :param source: The fragment, placeholders and all.
     :param values: Directive options, keyed as they are written in the
@@ -145,7 +145,7 @@ def literal(value: str) -> t.Any:
     """Read an option's value as a Python literal where it is one.
 
     :param value: The value, as written.
-    :return: A number, list or the like when it reads as one, and the
+    :return: A number, list or the like when it reads as one and the
         text otherwise.
     """
     with contextlib.suppress(ValueError, SyntaxError):

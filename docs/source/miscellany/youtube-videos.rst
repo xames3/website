@@ -1101,7 +1101,7 @@ magical.
 
 This section is a tribute to those late-night YouTube journeys. It's a random,
 mostly pointless mix, documentaries I definitely shouldn't have started at
-3am, unsolved mysteries, and whatever `VSauce`_ video the algorithm decides to
+3am, unsolved mysteries and whatever `VSauce`_ video the algorithm decides to
 throw at me, perfect for when your curiosity gets the better of your sleep
 schedule.
 

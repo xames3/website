@@ -58,7 +58,7 @@ class translator(base):
         """Work out a heading anchor's label and what it shows.
 
         :param title: The title Sphinx gives the anchor.
-        :return: The label's attribute, and the icon's markup. The
+        :return: The label's attribute and the icon's markup. The
             `permalink` icon replaces Sphinx's pilcrow, so a site that
             set `html_permalinks_icon` of its own keeps it.
         """
@@ -92,7 +92,7 @@ class translator(base):
 
     @t.override
     def depart_title(self, node: nodes.title) -> None:
-        """Close a title, and fix the anchor Sphinx writes by hand.
+        """Close a title and fix the anchor Sphinx writes by hand.
 
         A heading that links back to a table of contents gets its anchor
         written inline rather than through `add_permalink_ref`.

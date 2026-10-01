@@ -35,7 +35,7 @@ Hello, hello!!
 I'm Akshay, an educator, engineer and currently an Assistant Professor at
 `National Louis University`_. Before getting into academia, I worked at
 consulting firms, corporate product companies and startups. This cheeky corner
-of the internet is where I dump all that: the wins, the mistakes, and
+of the internet is where I dump all that: the wins, the mistakes and
 everything messy in between, one story at a time.
 
 I currently live in Chicago. I got my Master's in AI from `DePaul University`_
@@ -141,7 +141,7 @@ Early in my software engineering career, I came across a quote:
 
 And I absolutely fell in love with this idea. Soon, I realised you can't
 really call yourself an :abbr:`SME (Subject-matter expert)` until you can
-teach a concept to someone who knows next to bugger all about it, and still
+teach a concept to someone who knows next to bugger all about it and still
 put up with their questions without getting cocky about how much you know.
 
 Thus began my journey into teaching. So far, I've taught...
@@ -161,7 +161,7 @@ Thus began my journey into teaching. So far, I've taught...
     :pause-after-deleting: 1000
 
 My approach to mentoring's changed loads over the years, mind. It shifts
-depending on who's actually in front of me, what they need, and, if I'm being
+depending on who's actually in front of me, what they need and, if I'm being
 honest, what kind of mood I'm in that day when they come asking for help.
 
 .. _National Louis University: https://nl.edu/undergraduate-college/

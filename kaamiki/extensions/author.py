@@ -48,7 +48,7 @@ class directive(rst.Directive):
     Options::
 
         - `avatar`: URL of the author's picture. Falls back to the
-          `avatar` in `project`, and is left out when neither has one.
+          `avatar` in `project` and is left out when neither has one.
         - `target`: Where the name links to, a profile or a mailto.
         - `background`: One or more image URLs to fade through behind
           the title.

@@ -268,7 +268,7 @@ commands = [
 ]
 
 [tool.tox.env.reformat]
-description = "Reformat the HTML, Jinja, and Python sources in place"
+description = "Reformat the HTML, Jinja and Python sources in place"
 deps = [ "djlint==1.36.4", "ruff>=0.12.7" ]
 commands = [
   [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/assets/html", "-e", "html", "--reformat" ],

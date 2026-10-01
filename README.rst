@@ -14,9 +14,9 @@ experiments.
 
 The website and this complementary repository serves as:
 
-- **Digital Portfolio.** Showcasing my projects in AI, ML, and Software
+- **Digital Portfolio.** Showcasing my projects in AI, ML and Software
   Development.
-- **Pedagogy.** Mostly with blogs, references, and tutorial posts sharing
+- **Pedagogy.** Mostly with blogs, references and tutorial posts sharing
   insights into AI and Open Science.
 
 To learn more about this, visit `here <https://xa.mes3.dev>`_.
