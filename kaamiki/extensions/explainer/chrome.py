@@ -288,7 +288,7 @@ def label(low: int, high: int) -> str:
     """
     if low == high:
         return f"line {low}"
-    return f"lines {low}–{high}"  # noqa: RUF001
+    return f"lines {low}-{high}"  # noqa: RUF001
 
 
 def visit_explanation(self: HTMLTranslator, node: nodes.Element) -> None:

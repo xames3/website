@@ -227,7 +227,7 @@ Judy Cazares
 -------------------------------------------------------------------------------
 
 I first met `Judy`_ at `ChiPy`_ in 2024 and you were among the first to
-welcome me. Since then, we've been great friends. Your kindness and support
+welcome me. Since then, we've been great friends. Your kindness and support
 have always been appreciated. I've always valued your willingness to listen and
 offer thoughtful, grounded advice.
 

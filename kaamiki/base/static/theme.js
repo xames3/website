@@ -796,7 +796,7 @@
                 event.preventDefault();
                 event.stopPropagation();
                 const copied = await copyText(canonicalUrl());
-                flashTooltip(link, copied ? say('copied', 'Copied!') : say('failed', 'Copy failed'));
+                flashTooltip(link, copied ? say('copied', 'Copied!!') : say('failed', 'Copy failed'));
             });
         });
     }
@@ -807,7 +807,7 @@
             const link = event.target.closest?.('a.headerlink');
             if (!link || isModifiedClick(event)) return;
             copyText(canonicalUrl(link.getAttribute('href') || '')).then((copied) => {
-                flashTooltip(link, copied ? say('copied', 'Copied!') : say('failed', 'Copy failed'), true);
+                flashTooltip(link, copied ? say('copied', 'Copied!!') : say('failed', 'Copy failed'), true);
             });
         });
     }
@@ -1829,7 +1829,7 @@
                 const last = marked[marked.length - 1]?.dataset.kmNumber || first;
                 const where = first === last
                     ? say('line', 'line {line}', { line: first })
-                    : say('lines', 'lines {first}–{last}', { first, last });
+                    : say('lines', 'lines {first}-{last}', { first, last });
                 status.textContent = say('step', 'Step {step} of {steps}, {where}', {
                     step: index + 1, steps: steps.length, where,
                 });
@@ -2021,7 +2021,7 @@
             }, TIMING.tooltipHold());
         };
         copy?.addEventListener('click', () => {
-            copyText(walkthroughSource(payload)).then((done) => copied(done ? say('copied', 'Copied!') : say('failed', 'Copy failed')));
+            copyText(walkthroughSource(payload)).then((done) => copied(done ? say('copied', 'Copied!!') : say('failed', 'Copy failed')));
         });
 
         return walk;

@@ -113,7 +113,7 @@ def clip(text, width):
         return text
     head = width // 2
     tail = width - head - 1
-    return text[:head] + "…" + (text[-tail:] if tail else "")
+    return text[:head] + "..." + (text[-tail:] if tail else "")
 
 
 def abridge(value, text):
@@ -128,7 +128,7 @@ def abridge(value, text):
         else:
             items = list(value) if kind in (set, frozenset) else value
             ends = [clip(flat(repr(_)), 12) for _ in (items[0], items[-1])]
-        return SHELLS[kind] % (ends[0] + ", …, " + ends[1])
+        return SHELLS[kind] % (ends[0] + ", ..., " + ends[1])
     return clip(text, SHORT)
 
 
