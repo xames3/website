@@ -29,6 +29,9 @@
     const SIDEBAR_WIDE_PX = 1024;
     const SCROLLTOP_AFTER_PX = 200;
     const REVEAL_STEPS = 6;
+    const REVEAL_SLACK_MS = 8;
+    const REVEAL_WAITING = 'km-page-reveal-item';
+    const REVEAL_SHOWN = 'km-page-reveal-item--shown';
     const COLOUR_MODE_KEY = 'km:colourMode';
     const OLD_COLOUR_MODE_KEY = 'darkMode';
     const WALKTHROUGH_NARROW = 641;
@@ -168,18 +171,24 @@
         return Math.max(0, fromTokens, headerHeight);
     }
 
+    function afterReveal(node, fn) {
+        const block = node.closest?.(`.${REVEAL_WAITING}:not(.${REVEAL_SHOWN})`);
+        if (block) block.addEventListener('km:reveal', () => fn(node), { once: true });
+        else fn(node);
+    }
+
     function onVisible(nodes, onEnter, options = { rootMargin: '200px' }) {
         const list = Array.from(nodes);
         if (!list.length) return;
         if (!('IntersectionObserver' in window)) {
-            list.forEach(onEnter);
+            list.forEach((node) => afterReveal(node, onEnter));
             return;
         }
         const observer = new IntersectionObserver((entries) => {
             for (const entry of entries) {
                 if (!entry.isIntersecting) continue;
                 observer.unobserve(entry.target);
-                onEnter(entry.target);
+                afterReveal(entry.target, onEnter);
             }
         }, options);
         list.forEach((node) => observer.observe(node));
@@ -1162,39 +1171,140 @@
         );
     }
 
+    function revealBlocks(node) {
+        return Array.from(node?.children ?? []).flatMap((child) => (
+            child.tagName === 'SECTION' ? revealBlocks(child) : [child]
+        ));
+    }
+
     function initPageReveal() {
-        const assigned = new Set();
-        let delay = 0;
-        const assign = (element) => {
-            if (!element || assigned.has(element)) return;
-            assigned.add(element);
-            if (element.getBoundingClientRect().top > window.innerHeight) return;
-            element.classList.add('km-page-reveal-item');
-            element.style.setProperty('--km-reveal-delay', `${delay}ms`);
-            delay = Math.min(delay + TIMING.revealStep(), TIMING.revealStep() * REVEAL_STEPS);
+        if (prefersReducedMotion()) return;
+        const blocks = [
+            document.querySelector('.km-header'),
+            document.querySelector('.km-breadcrumbs'),
+            ...revealBlocks(document.getElementById('km-content')),
+            document.querySelector('.km-feedback-shell'),
+            document.querySelector('.km-layout__meta'),
+            document.querySelector('.km-page__more-button'),
+            document.querySelector('.km-pagination'),
+            document.querySelector('.km-footer'),
+        ].filter(Boolean);
+
+        const limit = TIMING.revealStep() * REVEAL_STEPS;
+        const duration = getDurationMs('--km-duration-normal', 750);
+        const nudges = ['wheel', 'touchmove', 'keydown', 'pointerdown', 'scroll'];
+        const hurried = new Set();
+        const anchor = window.scrollY;
+        let waiting = blocks;
+        let step = TIMING.revealStep();
+        let began = null;
+        let last = -Infinity;
+        let busy = 0;
+        let screen = 0;
+        let done = false;
+
+        const release = (block, animate) => {
+            if (animate) block.classList.add(REVEAL_SHOWN);
+            else block.classList.remove(REVEAL_WAITING);
+            block.dispatchEvent(new Event('km:reveal'));
         };
 
-        assign(document.querySelector('.km-header'));
-        assign(document.querySelector('.km-breadcrumbs'));
+        const finish = () => {
+            if (done) return;
+            done = true;
+            nudges.forEach((type) => window.removeEventListener(type, nudge));
+            waiting.forEach((block) => release(block, false));
+            waiting = [];
+            blocks.forEach((block) => block.classList.remove(REVEAL_WAITING, REVEAL_SHOWN));
+            hurried.forEach((block) => {
+                block.style.removeProperty('animation-duration');
+                if (!block.getAttribute('style')) block.removeAttribute('style');
+            });
+        };
 
-        const content = document.getElementById('km-content');
-        const topSection = content?.querySelector(':scope > section');
-        if (topSection) {
-            assign(topSection.querySelector(':scope > h1'));
-            assign(topSection.querySelector(':scope > .km-lead'));
-            assign(topSection.querySelector(':scope > .km-article'));
-            for (const child of topSection.children) {
-                if (child.tagName !== 'SECTION') assign(child);
+        const nudge = (event) => {
+            if (event.type !== 'scroll' || window.scrollY !== anchor) finish();
+        };
+
+        const play = (block, now, late) => {
+            if (late) {
+                block.style.animationDuration = `${Math.round(busy - now)}ms`;
+                hurried.add(block);
+            } else {
+                busy = now + duration;
             }
-            topSection.querySelectorAll(':scope > section').forEach(assign);
-        } else {
-            assign(content);
-        }
+            release(block, true);
+        };
 
-        assign(document.querySelector('.km-feedback-shell'));
-        assign(document.querySelector('.km-layout__meta'));
-        assign(document.querySelector('.km-pagination'));
-        assign(document.querySelector('.km-footer'));
+        const edges = (fold) => {
+            const known = new Map();
+            const clip = (node) => {
+                if (!node || node === document.body) return [0, fold];
+                if (!known.has(node)) {
+                    let [top, bottom] = clip(node.parentElement);
+                    if (getComputedStyle(node).overflowY !== 'visible') {
+                        const box = node.getBoundingClientRect();
+                        top = Math.max(top, box.top);
+                        bottom = Math.min(bottom, box.bottom);
+                    }
+                    known.set(node, [top, bottom]);
+                }
+                return known.get(node);
+            };
+            return clip;
+        };
+
+        const inView = (block, clip) => {
+            const box = block.getBoundingClientRect();
+            const [top, bottom] = clip(block.parentElement);
+            return (box.width > 0 || box.height > 0) && box.bottom >= top && box.top < bottom;
+        };
+
+        const tick = (now) => {
+            if (done) return;
+            try {
+                if (root.classList.contains('km-page-loading')) {
+                    requestAnimationFrame(tick);
+                    return;
+                }
+                if (began === null) {
+                    began = now;
+                    screen = walkthroughScreen();
+                }
+                const late = now - began >= limit + duration;
+                if (late && now >= busy) {
+                    finish();
+                    return;
+                }
+                const fold = Math.max(window.innerHeight, screen);
+                const clip = edges(fold);
+                const ready = waiting.filter((block) => inView(block, clip));
+                step = Math.min(step, limit / Math.max(1, ready.length - 1));
+                const next = last + step;
+                if (ready.length && (late || now >= next - REVEAL_SLACK_MS)) {
+                    const block = ready[0];
+                    const at = waiting.indexOf(block);
+                    waiting.slice(0, at).forEach((passed) => {
+                        const box = passed.getBoundingClientRect();
+                        if (box.bottom > 0 && box.top < 2 * fold) play(passed, now, late);
+                        else release(passed, false);
+                    });
+                    waiting = waiting.slice(at + 1);
+                    play(block, now, late);
+                    last = now - next > step ? now : next;
+                } else if (!ready.length && now >= busy) {
+                    finish();
+                    return;
+                }
+                requestAnimationFrame(tick);
+            } catch (error) {
+                finish();
+                console.error(error);
+            }
+        };
+        blocks.forEach((block) => block.classList.add(REVEAL_WAITING));
+        nudges.forEach((type) => window.addEventListener(type, nudge, { passive: true }));
+        requestAnimationFrame(tick);
     }
 
     function initArticleBackground() {
@@ -1239,6 +1349,7 @@
         window.addEventListener('resize', rafThrottle(measure), { passive: true });
         if ('ResizeObserver' in window) new ResizeObserver(measure).observe(main);
         if (document.fonts?.ready) document.fonts.ready.then(measure);
+        article.addEventListener('animationend', measure);
 
         if (urls.length === 1 || prefersReducedMotion()) return;
         let index = 0;

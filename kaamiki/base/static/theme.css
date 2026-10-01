@@ -1623,13 +1623,20 @@ html.km-page-loading :is(.km-header,
     #km-content,
     .km-feedback-shell,
     .km-layout__meta,
+    .km-page__more-button,
     .km-pagination,
     .km-footer) {
     opacity: 0;
 }
 
-html.km-page-loaded .km-page-reveal-item {
-    animation: km-page-fade-in var(--km-duration-normal) var(--km-ease-smooth) var(--km-reveal-delay, 0ms) both;
+@media screen and (prefers-reduced-motion: no-preference) {
+    .km-page-reveal-item:not(.km-page-reveal-item--shown) {
+        opacity: 0;
+    }
+}
+
+.km-page-reveal-item--shown {
+    animation: km-page-fade-in var(--km-duration-normal) var(--km-ease-smooth);
 }
 
 .km-container {
@@ -4462,14 +4469,14 @@ li .km-badge {
         #km-content,
         .km-feedback-shell,
         .km-layout__meta,
+        .km-page__more-button,
         .km-pagination,
         .km-footer) {
         opacity: 1;
     }
 
-    html.km-page-loaded .km-page-reveal-item {
+    .km-page-reveal-item--shown {
         animation: none;
-        opacity: 1;
     }
 
     .km-article__bg,
