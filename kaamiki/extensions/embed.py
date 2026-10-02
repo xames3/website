@@ -156,7 +156,7 @@ def literal(value: str) -> t.Any:
 def files(value: str | None) -> list[str]:
     """Split a `:css:` or `:js:` option into its files, in order.
 
-    :param value: The option's value, or `None` when unset.
+    :param value: The option's value or `None` when unset.
     :return: The files, in the order they were written.
     """
     return [_.strip() for _ in (value or "").split(",") if _.strip()]
@@ -165,7 +165,7 @@ def files(value: str | None) -> list[str]:
 class directive(rst.Directive):
     """The `embed` directive.
 
-    The argument is either `iframe`, with the markup as content, or the
+    The argument is either `iframe`, with the markup as content or the
     path to an HTML fragment. Every other option is a placeholder
     value, apart from `encoding`, `css` and `js`.
     """
@@ -235,7 +235,7 @@ class directive(rst.Directive):
     def read(self, file: str) -> str:
         """Read an HTML fragment off disk.
 
-        The path follows Sphinx's rule: relative to the document, or to
+        The path follows Sphinx's rule: relative to the document or to
         the source directory when it starts with a `/`.
 
         :param file: The path, as written.
@@ -272,7 +272,7 @@ def html_page_context(
     :param pagename: The page being rendered.
     :param templatename: The template rendering it.
     :param context: The page's rendering context.
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     """
     if doctree is None:

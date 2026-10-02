@@ -261,7 +261,7 @@ class directive(CodeBlock):
             takes = ", ".join(f":{_}:" for _ in sorted(OPTIONS[block]))
             raise self.error(
                 f"`.. {block}::` on line {line} has :{key}:, which it does"
-                f" not take, or takes twice; it takes {takes}"
+                f" not take or takes twice; it takes {takes}"
             ) from exc
         except ValueError as exc:
             line, text = exc.args

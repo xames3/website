@@ -91,7 +91,7 @@ def fix(module: types.ModuleType) -> type[nodes.Element]:
 def builder_inited(app: Sphinx) -> None:
     """Hand the theme's static files, stylesheets and scripts over.
 
-    Only an HTML builder writing pages with this theme, or with one
+    Only an HTML builder writing pages with this theme or with one
     built on it, gets them, so a site loading `kaamiki` for its
     directives under another theme keeps that theme's look.
 
@@ -125,7 +125,7 @@ def flatten(app: Sphinx, exc: Exception | None) -> None:
     `html_static_path` is left alone.
 
     :param app: The Sphinx application instance.
-    :param exc: Whatever went wrong during the build, or `None`.
+    :param exc: Whatever went wrong during the build or `None`.
     """
     builder = app.builder
     if exc or not isinstance(builder, StandaloneHTMLBuilder):

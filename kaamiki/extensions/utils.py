@@ -131,7 +131,7 @@ SWITCHES: t.Final[dict[str, bool]] = {
 }
 GENERATED: t.Final[dict[str, t.Any]] = {
     NOT_FOUND: _(
-        "There is nothing at this address. It may have moved, or it may"
+        "There is nothing at this address. It may have moved or it may"
         " never have been here."
     ),
     "genindex": _("Every term indexed on this site, from A to Z."),
@@ -273,9 +273,9 @@ def icon(value: str | None, fallback: str = "") -> str:
     is given the solid style, which is the one Font Awesome Free has
     for every icon.
 
-    :param value: The icon as written, or `None` when unset.
+    :param value: The icon as written or `None` when unset.
     :param fallback: The icon to use when there is not one.
-    :return: The icon's classes, or an empty string for no icon.
+    :return: The icon's classes or an empty string for no icon.
     """
     parts = (value or fallback).split()
     if len(parts) == 1:
@@ -292,7 +292,7 @@ def youtube_id(url: str) -> str | None:
     does the bare id.
 
     :param url: The link, as written.
-    :return: The eleven character id, or `None` when there is not one.
+    :return: The eleven character id or `None` when there is not one.
     """
     parts = urlsplit(url.strip())
     host = parts.netloc.lower().removeprefix("www.").removeprefix("m.")
@@ -368,7 +368,7 @@ def plain(text: str) -> str:
     Only things that look like a tag are stripped, so a description
     reading "when x < 5 and y > 0" keeps its middle.
 
-    :param text: Rendered HTML, or plain text.
+    :param text: Rendered HTML or plain text.
     :return: The text with tags removed, entities resolved and
         whitespace collapsed onto a single line.
     """
@@ -409,10 +409,10 @@ def standfirst(doctree: nodes.document | None, limit: int) -> str:
     It already answers "what is this page" in one line, which is what
     a social description wants.
 
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     :param limit: Longest the result may be.
-    :return: The lead, or an empty string when the page hasn't got
+    :return: The lead or an empty string when the page hasn't got
         one.
     """
     if doctree is None:
@@ -434,10 +434,10 @@ def summarise(doctree: nodes.document | None, limit: int) -> str:
     Only reached when the page sets no description of its own, has no
     lead and the theme carries no default either.
 
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     :param limit: Longest the result may be.
-    :return: A single-line summary, or an empty string when the page
+    :return: A single-line summary or an empty string when the page
         has no usable prose.
     """
     if doctree is None:
@@ -478,7 +478,7 @@ def social_metadata(
     :param pagename: The page being rendered.
     :param templatename: The template rendering it.
     :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     """
     options = app.config.html_context.get("km_open_graph") or {}
@@ -568,7 +568,7 @@ def wordcount(doctree: nodes.document | None) -> int:
     figures and admonitions are skipped, which is the list `buried`
     already keeps out of a social description.
 
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     :return: The number of words counted.
     """
@@ -587,7 +587,7 @@ def reading_time(doctree: nodes.document | None) -> int:
     Code is left out of the count, so a page that is mostly listings
     comes out shorter than its length suggests.
 
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     :return: Minutes, rounded up.
     """
@@ -612,7 +612,7 @@ def reading_length(
     :param pagename: The name of the page being rendered.
     :param templatename: The template rendering it.
     :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     """
     options = app.config.html_context
@@ -642,7 +642,7 @@ def feedback(
     :param pagename: The page being rendered.
     :param templatename: The template rendering it.
     :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     """
     options = app.config.html_context
@@ -689,13 +689,13 @@ def header(source: str) -> dict[str, str]:
 
 
 def committed(app: Sphinx, docname: str, *, first: bool = False) -> dt | None:
-    """Ask git when a page was last committed, or first.
+    """Ask git when a page was last committed or first.
 
     :param app: The Sphinx application instance.
     :param docname: The document to ask about.
     :param first: Ask for the commit that brought the page in, following
         it through renames, rather than the latest one.
-    :return: The commit's date, or `None` outside a repository and for a
+    :return: The commit's date or `None` outside a repository and for a
         page git has never seen.
     """
     src = str(app.env.doc2path(docname, base=True))
@@ -711,7 +711,7 @@ def committed(app: Sphinx, docname: str, *, first: bool = False) -> dt | None:
 def written(when: dt | None) -> str:
     """Write a date the way a page's header comments write it.
 
-    :param when: The date, or `None` for the day the site is built.
+    :param when: The date or `None` for the day the site is built.
     :return: The date, as `29 September, 2026`.
     """
     when = when or dt.now().astimezone()
@@ -741,7 +741,7 @@ def day(date: str) -> str:
     """Turn a date written the way the header comments write it into ISO.
 
     :param date: The date, as `29 September, 2026`.
-    :return: `2026-09-29`, or an empty string when it does not read as a
+    :return: `2026-09-29` or an empty string when it does not read as a
         date.
     """
     try:
@@ -882,7 +882,7 @@ def design_assets(
 
     `sphinx_design` hands every page its stylesheet and its tab script,
     about 50 KB between them, whether or not the page has a single card
-    on it. A page keeps them when its body carries a class of theirs, or
+    on it. A page keeps them when its body carries a class of theirs or
     when its template draws one itself, the way the 404 page's button
     does. The theme's own `sphinx-design.css` stays on every page, since
     it styles icons outside the components too.
@@ -916,7 +916,7 @@ def hidden(robots: str) -> bool:
     """Say whether a page's robots rules keep it out of search engines.
 
     :param robots: The page's `:km-pg-robots:` field, as written.
-    :return: `True` for `noindex`, or `none`, which is `noindex` and
+    :return: `True` for `noindex` or `none`, which is `noindex` and
         `nofollow` together.
     """
     rules = {_.strip().lower() for _ in robots.split(",")}
@@ -976,7 +976,7 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
     """Write the theme's 404 page and sitemap once the build has worked.
 
     :param app: The Sphinx application instance.
-    :param exc: Whatever went wrong during the build, or `None`.
+    :param exc: Whatever went wrong during the build or `None`.
     """
     builder = app.builder
     if exc or not isinstance(builder, StandaloneHTMLBuilder):

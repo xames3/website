@@ -25,7 +25,7 @@ Contributions
 -------------------------------------------------------------------------------
 
 Contributions and/or suggestions for improving Kaamiki (theme) and content are
-welcomed! If you find a bug, or want to contribute/suggest improvements,
+welcomed! If you find a bug or want to contribute/suggest improvements,
 please open an issue or submit a pull request on GitHub.
 
 License

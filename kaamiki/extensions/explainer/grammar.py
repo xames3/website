@@ -65,7 +65,7 @@ def indentation(lines: list[str]) -> int:
     """Measure the common indent across a block's lines.
 
     :param lines: The lines to measure, blanks included.
-    :return: The narrowest indent among the lines carrying text, or
+    :return: The narrowest indent among the lines carrying text or
         zero when none of them do.
     """
     widths = [len(_) - len(_.lstrip()) for _ in lines if _.strip()]
@@ -109,7 +109,7 @@ def split(
     :return: One `chunk` per block found, in the order written.
     :raises ValueError: For the first line belonging to no block, with
         its line number and its text.
-    :raises KeyError: For an option its block does not take, or takes
+    :raises KeyError: For an option its block does not take or takes
         twice, with its line number, its name and the block's name.
     """
     found: list[chunk] = []
@@ -185,7 +185,7 @@ def linerange(line: str) -> tuple[int, int] | None:
     """Read a `4` or a `4-9` line range off a block's argument.
 
     :param line: The argument, as written.
-    :return: The range as a low/high pair, or `None` when the argument
+    :return: The range as a low/high pair or `None` when the argument
         is not a pair of line numbers.
     """
     match = RANGE.match(line.strip())
@@ -199,7 +199,7 @@ def linerange(line: str) -> tuple[int, int] | None:
 def parse_list(value: str | None) -> list[str]:
     """Split a comma-separated option into its parts.
 
-    :param value: The option's value, or `None` when unset.
+    :param value: The option's value or `None` when unset.
     :return: The parts, trimmed, with the empties dropped.
     """
     return [_.strip() for _ in (value or "").split(",") if _.strip()]

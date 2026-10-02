@@ -147,9 +147,9 @@ class translator(base):
         """Open an image, loading it lazily unless told otherwise.
 
         docutils only writes `loading="lazy"` when an image asks for it
-        with `:loading: lazy`, or the site's docutils settings do, so
+        with `:loading: lazy` or the site's docutils settings do, so
         every image loaded with the page, the ones far below the fold
-        included. An image's own `:loading:`, or an `image_loading`
+        included. An image's own `:loading:` or an `image_loading`
         other than the default, still wins.
 
         :param node: The image being written.
@@ -175,7 +175,7 @@ class translator(base):
 def install(app: Sphinx) -> None:
     """Put `translator` in front of the builder's HTML translator.
 
-    Only an HTML builder writing pages with this theme, or with one
+    Only an HTML builder writing pages with this theme or with one
     built on it, gets it.
 
     :param app: The Sphinx application instance.
