@@ -106,15 +106,15 @@ def html_page_context(
     """Name the page's author for the `<head>`.
 
     `provenance` and the directive have already put the page's
-    `.. Author:` comment, or else its byline, in its metadata. A page
-    with neither, or one with no doctree at all, goes by the project's
+    `.. Author:` comment or else its byline, in its metadata. A page
+    with neither or one with no doctree at all, goes by the project's
     author, which is `conf.py`'s unless `html_context` says otherwise.
 
     :param app: The Sphinx application instance.
     :param pagename: The page being rendered.
     :param templatename: The template rendering it.
     :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree, or `None` for generated
+    :param doctree: The resolved doctree or `None` for generated
         pages.
     """
     meta: dict[str, str] = context.get("meta") or {}

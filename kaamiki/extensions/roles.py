@@ -64,7 +64,7 @@ def _split(text: str) -> tuple[str, str | None]:
     """Split a role's text into its label and what sits in angles.
 
     :param text: What was written inside the role.
-    :return: The label and the value between `<` and `>`, or `None`
+    :return: The label and the value between `<` and `>` or `None`
         when there is not one.
     """
     if "<" not in text:

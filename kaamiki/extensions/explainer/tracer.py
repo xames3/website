@@ -337,7 +337,7 @@ def show(text: str) -> tuple[str, str | None]:
 
     :param text: The value, as it would be printed.
     :return: The value whole, clipped to `full` and cut down to
-        `short`, or `None` when it did not need cutting.
+        `short` or `None` when it did not need cutting.
     """
     whole = clip(" ".join(text.split()), full)
     cut = clip(whole, short)

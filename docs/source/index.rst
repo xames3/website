@@ -27,6 +27,7 @@ Akshay Mestry
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
     :background: https://i.imgur.com/JOBRcgT.jpg
+        https://i.imgur.com/axxL9xQ.jpeg
         https://i.imgur.com/gcGHqxi.jpg
         https://i.imgur.com/weM4qDW.jpg
 
@@ -175,14 +176,6 @@ honest, what kind of mood I'm in that day when they come asking for help.
     :titlesonly:
 
     academia/thoughts-on-teaching
-
-.. toctree::
-    :caption: Explained
-    :hidden:
-    :titlesonly:
-
-    explained/docker/index
-    explained/eli5/index
 
 .. toctree::
     :caption: Miscellany

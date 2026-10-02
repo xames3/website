@@ -178,7 +178,7 @@ def comment(language: str) -> dict[str, str] | None:
     """Find how a language writes a comment, for the values beside it.
 
     :param language: The language named on the directive.
-    :return: What opens a comment and what closes it, or `None` for a
+    :return: What opens a comment and what closes it or `None` for a
         language `COMMENTS` does not know.
     """
     names = {language.lower(), *lexer_for(language).aliases}
@@ -284,7 +284,7 @@ def label(low: int, high: int) -> str:
 
     :param low: The first line.
     :param high: The last line.
-    :return: `line 6`, or `lines 7-8` with an en dash.
+    :return: `line 6` or `lines 7-8` with an en dash.
     """
     if low == high:
         return f"line {low}"
