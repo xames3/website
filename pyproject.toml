@@ -40,7 +40,12 @@ dev = [ "sphinx-lint>=1.0.2", "tox>=4.64.4" ]
 packages = [ "kaamiki", "kaamiki.extensions", "kaamiki.extensions.explainer" ]
 
 [tool.setuptools.package-data]
-kaamiki = [ "base/static/*", "base/templates/*" ]
+kaamiki = [
+    "base/static/*",
+    "base/templates/*",
+    "locale/*.pot",
+    "locale/*/LC_MESSAGES/*",
+]
 
 [tool.setuptools.dynamic]
 dependencies = { file = "requirements.txt" }
@@ -263,15 +268,25 @@ commands = [
 description = "Check HTML and Jinja formatting with djlint"
 deps = [ "djlint==1.36.4" ]
 commands = [
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/assets/html", "-e", "html", "--check" ],
+  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/_templates/", "docs/source/assets/html", "-e", "html", "--check" ],
   [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "-e", "html.jinja", "--check" ],
+]
+
+[tool.tox.env.translations]
+description = "Extract the theme's words into its catalog, then update and compile every language"
+skip_install = true
+deps = [ "babel>=2.13", "jinja2>=3.1" ]
+commands = [
+  [ "pybabel", "extract", "-F", "babel.cfg", "-o", "kaamiki/locale/sphinx.pot", "--project=kaamiki", "--copyright-holder=Akshay Mestry", "--msgid-bugs-address=xa@mes3.dev", "kaamiki" ],
+  [ "pybabel", "update", "-i", "kaamiki/locale/sphinx.pot", "-d", "kaamiki/locale", "-D", "sphinx" ],
+  [ "pybabel", "compile", "-d", "kaamiki/locale", "-D", "sphinx" ],
 ]
 
 [tool.tox.env.reformat]
 description = "Reformat the HTML, Jinja and Python sources in place"
 deps = [ "djlint==1.36.4", "ruff>=0.12.7" ]
 commands = [
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/assets/html", "-e", "html", "--reformat" ],
+  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/_templates/", "docs/source/assets/html", "-e", "html", "--reformat" ],
   [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "-e", "html.jinja", "--reformat" ],
   [ "ruff", "format", "." ],
 ]
