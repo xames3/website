@@ -3,15 +3,14 @@ GitHub Repository Template
 ==========================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 29 October, 2025
-Last updated on: 29 September, 2026
+Created on: 29 October 2025
+Last updated on: 06 October 2026
 #}
 {% block km_repository %}
     <div class="km-github-repository"
          data-km-repository="{{ km_project }}">
         <a href="https://github.com/{{ km_project }}"
-           target="_blank"
-           rel="noopener nofollow"
+           {% if km_new_tab %}rel="noopener nofollow" target="_blank"{% endif %}
            class="km-github-repository__name">{{ km_project }}</a>
         <div class="km-github-repository__details">
             {% if km_stars %}
