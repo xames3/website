@@ -119,8 +119,8 @@ def visit(self: HTMLTranslator, node: node) -> None:
     attributes = dict(node.attributes)
     attributes.update(fields(self, node))
     attributes["project"] = context["km_project"]
-    link = attributes.get("url") or attributes["project"]["source"]
-    attributes["new_tab"] = opens_new_tab(link, config)
+    url = attributes.get("url") or attributes["project"]["source"]
+    attributes["new_tab"] = opens_new_tab(url, config)
     attributes["fa_icons"] = context["km_fa_icons"]
     attributes["minutes"] = max(1, reading_time(node.document, config))
     attributes["data"] = {"data-km-background": attributes.get("background")}
