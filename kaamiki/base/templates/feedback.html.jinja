@@ -3,14 +3,14 @@ Feedback Template
 =================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 19 October, 2025
-Last updated on: 29 September, 2026
+Created on: 19 October 2025
+Last updated on: 29 September 2026
 #}
 {% block km_feedback %}
     {%- set km_split = km_feedback.mode == 'split' %}
     {%- macro km_button() %}
-        {%- if km_feedback.href %}
-            <a href="{{ km_feedback.href|e }}"
+        {%- if km_feedback.url %}
+            <a href="{{ km_feedback.url|e }}"
                class="km-feedback-shell__button">
                 {%- if km_feedback.icon -%}
                     <span class="{{ km_feedback.icon|e }}"

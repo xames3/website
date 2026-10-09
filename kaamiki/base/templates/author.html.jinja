@@ -3,23 +3,22 @@ Author Details Template
 =======================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 22 February, 2025
-Last updated on: 29 September, 2026
+Created on: 22 February 2025
+Last updated on: 08 October 2026
 #}
 {% block km_author %}
     {%- set km_who = km_name|d(km_project.author) %}
     <aside class="km-article"
-           {% if km_background %}data-km-background="{{ km_background }}"{% endif %}>
-        <a href="{{ km_target|d(km_project.source) }}"
-           target="_blank"
-           rel="noopener noreferrer"
+           {{ km_data|xmlattr }}>
+        <a href="{{ km_url|d(km_project.source) }}"
+           {% if km_new_tab %}rel="noopener noreferrer" target="_blank"{% endif %}
            class="km-article__profile"
-           aria-label="{{ _('Check out %(name)s', name=km_who) }}">
+           aria-label="{{ _('Check out %(name)s', name=km_who|striptags) }}">
             {%- if km_avatar|d(km_project.avatar) %}
                 <img class="km-article__avatar"
                      src="{{ km_avatar|d(km_project.avatar) }}"
-                     width="20"
-                     height="20"
+                     width="{{ km_avatar_size|d(20) }}"
+                     height="{{ km_avatar_size|d(20) }}"
                      loading="lazy"
                      alt="">
             {%- endif %}
@@ -27,17 +26,21 @@ Last updated on: 29 September, 2026
         </a>
         <div class="km-article__meta">
             <div class="km-article__meta-group">
-                <p class="km-article__reading-time">
-                    <i class="{{ km_fa_icons.reading_time }} km-article__reading-time-icon"
-                       aria-hidden="true"></i>{{ ngettext('%(num)d min read', '%(num)d mins read', km_minutes) }}
-                </p>
-                <button type="button"
-                        class="km-article__copy km-copy-url"
-                        data-tooltip="{{ _('Copy article URL to clipboard') }}">
-                    <i class="{{ km_fa_icons.copy_url }}"
-                       aria-hidden="true"></i>
-                    <span>{{ _("Copy") }}</span>
-                </button>
+                {%- if km_hide_reading_time|d(true) %}
+                    <p class="km-article__reading-time">
+                        <i class="{{ km_fa_icons.reading_time }} km-article__reading-time-icon"
+                           aria-hidden="true"></i>{{ ngettext('%(num)d min read', '%(num)d mins read', km_minutes) }}
+                    </p>
+                {%- endif %}
+                {%- if km_hide_copy_url|d(true) %}
+                    <button type="button"
+                            class="km-article__copy km-copy-url"
+                            data-tooltip="{{ _('Copy article URL to clipboard') }}">
+                        <i class="{{ km_fa_icons.copy_url }}"
+                           aria-hidden="true"></i>
+                        <span>{{ _("Copy") }}</span>
+                    </button>
+                {%- endif %}
             </div>
         </div>
     </aside>

@@ -3,12 +3,10 @@ Kaamiki Sphinx Theme
 ====================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 21 February, 2025
-Last updated on: 30 September, 2026
+Created on: 21 February 2025
+Last updated on: 05 October 2026
 
-The theme's entry point. `setup()` registers the theme itself, its
-directives and roles and the handlers that fill in the page context
-and tidy the written HTML.
+Kaamiki theme's entry point.
 """
 
 from __future__ import annotations
@@ -21,6 +19,7 @@ import typing as t
 
 import docutils.nodes as nodes
 import lightningcss
+from sphinx import locale
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util import logging
 
@@ -33,11 +32,13 @@ from kaamiki.extensions.utils import context_defaults
 from kaamiki.extensions.utils import depart
 from kaamiki.extensions.utils import design_assets
 from kaamiki.extensions.utils import feedback
+from kaamiki.extensions.utils import offer
 from kaamiki.extensions.utils import provenance
 from kaamiki.extensions.utils import reading_length
 from kaamiki.extensions.utils import skip
 from kaamiki.extensions.utils import social_metadata
 from kaamiki.extensions.utils import themed
+from kaamiki.extensions.utils import updated_on
 
 if t.TYPE_CHECKING:
     import types
@@ -48,11 +49,14 @@ version: str = "2026.10.5"
 theme_name: t.Final[str] = "kaamiki"
 theme_path = p.join(p.abspath(p.dirname(__file__)), "base", "templates")
 static_path = p.join(p.abspath(p.dirname(__file__)), "base", "static")
+locale_path = p.join(p.abspath(p.dirname(__file__)), "locale")
 supported_extensions: t.Sequence[str] = (
     "sphinx_copybutton",
     "sphinx_design",
 )
-# Explicit cascade order.
+# NOTE(xames3): This is an explicit cascade order and needs to be
+# respected in order to ensure the theme loads its UI elements in an
+# expected manner.
 stylesheets: t.Sequence[tuple[str, int]] = (
     ("font.css", 400),
     ("code.css", 600),
@@ -60,6 +64,8 @@ stylesheets: t.Sequence[tuple[str, int]] = (
     ("sphinx-design.css", 900),
 )
 scripts: t.Sequence[str] = ("theme.js",)
+# Proper list available here:
+# https://web-platform-dx.github.io/supported-browsers/
 browsers: t.Sequence[str] = (
     "chrome >= 100",
     "edge >= 100",
@@ -69,6 +75,9 @@ browsers: t.Sequence[str] = (
     "safari >= 15",
     "samsung >= 16",
 )
+# NOTE(xames3): `not (...)` is the newer Media Queries 4 grammar,
+# older browsers only read `not all and (...)`.
+# https://www.w3.org/TR/mediaqueries-4/#mq-not
 negated: re.Pattern[str] = re.compile(r"@media not \(")
 logger = logging.getLogger(__name__)
 
@@ -88,12 +97,9 @@ def fix(module: types.ModuleType) -> type[nodes.Element]:
     return node
 
 
-def builder_inited(app: Sphinx) -> None:
-    """Hand the theme's static files, stylesheets and scripts over.
-
-    Only an HTML builder writing pages with this theme or with one
-    built on it, gets them, so a site loading `kaamiki` for its
-    directives under another theme keeps that theme's look.
+def add_theme_assets(app: Sphinx) -> None:
+    """Add the theme's static files, stylesheets and scripts to HTML
+    builders using this theme.
 
     :param app: The Sphinx application instance.
     """
@@ -109,20 +115,11 @@ def builder_inited(app: Sphinx) -> None:
 
 
 def flatten(app: Sphinx, exc: Exception | None) -> None:
-    """Rewrite the theme's stylesheets for browsers a few years back.
+    """Rewrite the theme's stylesheets for older browsers.
 
     The stylesheets are written with nesting and range media queries,
-    which Safari before 16.4 drops whole, leaving an older iPhone with
-    no layout to speak of. `lightningcss` flattens the copies in
-    `_static` for the `browsers` listed, prefixes what those need
-    prefixing and minifies them and the sources stay as they are.
-
-    It writes a negated media query as `not (min-width: ...)`, which
-    only the newer grammar reads, so those become the older
-    `not all and (min-width: ...)`, which means the same thing to both.
-
-    A stylesheet a site put over one of the theme's through
-    `html_static_path` is left alone.
+    which older Safari dropped, leaving an older iPhone (which I had)
+    with no layout to speak of.
 
     :param app: The Sphinx application instance.
     :param exc: Whatever went wrong during the build or `None`.
@@ -158,10 +155,11 @@ def flatten(app: Sphinx, exc: Exception | None) -> None:
 def setup(app: Sphinx) -> dict[str, str | bool | int]:
     """Set the theme up with Sphinx.
 
-    Registers the theme and the extensions it relies on, its directives
-    and roles and the handlers that fill in the page context and tidy
-    the written HTML. `builder_inited` hands the stylesheets and scripts
-    over once the builder is known.
+    Registers the theme, its extensions, directives, roles and the
+    handlers that fill in the page context. The theme's own words join
+    Sphinx's catalogue, the way pydata-sphinx-theme's do, so a site's
+    translation of one still wins. If Sphinx has no catalogue for the
+    language, the builder's translator is pointed at the theme's.
 
     :param app: The Sphinx application instance.
     :return: The theme's version and that it is safe to read and write
@@ -170,6 +168,8 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     for extension in supported_extensions:
         app.setup_extension(extension)
     app.add_html_theme(theme_name, theme_path)
+    app.add_message_catalog("sphinx", locale_path)
+    app.translator = locale.get_translator()
     for key, value in inspect.getmembers(roles, inspect.isfunction):
         if key.startswith("_") or value.__module__ != roles.__name__:
             continue
@@ -196,15 +196,17 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
             directive.register(app)
         if hasattr(directive, "html_page_context"):
             app.connect("html-page-context", directive.html_page_context)
-    app.connect("builder-inited", builder_inited)
+    app.connect("builder-inited", add_theme_assets)
     app.connect("builder-inited", context_defaults)
     app.connect("builder-inited", bridge)
     app.connect("builder-inited", writer.install)
     app.connect("html-page-context", social_metadata)
     app.connect("html-page-context", reading_length)
     app.connect("html-page-context", feedback)
+    app.connect("html-page-context", updated_on)
     app.connect("html-page-context", design_assets)
     app.connect("source-read", provenance)
+    app.connect("doctree-read", offer, priority=400)
     app.connect("build-finished", build_finished)
     app.connect("build-finished", flatten)
     year, month, day = map(int, version.split("."))
