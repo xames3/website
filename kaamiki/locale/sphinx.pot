@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kaamiki VERSION\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-10-05 18:15-0500\n"
+"POT-Creation-Date: 2026-10-08 05:27-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #: kaamiki/base/templates/404.html:10 kaamiki/base/templates/404.html:22
-#: kaamiki/extensions/utils.py:558
+#: kaamiki/extensions/utils.py:727
 msgid "Page not found"
 msgstr ""
 
-#: kaamiki/base/templates/404.html:24 kaamiki/extensions/utils.py:560
+#: kaamiki/base/templates/404.html:24 kaamiki/extensions/utils.py:729
 msgid ""
 "There is nothing at this address. It may have moved or it may never have "
 "been here."
@@ -32,7 +32,7 @@ msgstr ""
 msgid "Go to the home page"
 msgstr ""
 
-#: kaamiki/base/templates/author.html.jinja:17
+#: kaamiki/base/templates/author.html.jinja:16
 #, python-format
 msgid "Check out %(name)s"
 msgstr ""
@@ -44,11 +44,11 @@ msgid_plural "%(num)d mins read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: kaamiki/base/templates/author.html.jinja:36
+#: kaamiki/base/templates/author.html.jinja:38
 msgid "Copy article URL to clipboard"
 msgstr ""
 
-#: kaamiki/base/templates/author.html.jinja:39
+#: kaamiki/base/templates/author.html.jinja:41
 #: kaamiki/base/templates/layout.html:12
 msgid "Copy"
 msgstr ""
@@ -92,7 +92,7 @@ msgstr ""
 
 #: kaamiki/base/templates/genindex.html:10
 #: kaamiki/base/templates/genindex.html:41
-#: kaamiki/base/templates/layout.html:217 kaamiki/extensions/utils.py:565
+#: kaamiki/base/templates/layout.html:217 kaamiki/extensions/utils.py:734
 msgid "Index"
 msgstr ""
 
@@ -194,7 +194,7 @@ msgid "Back to top"
 msgstr ""
 
 #: kaamiki/base/templates/search.html:10 kaamiki/base/templates/search.html:28
-#: kaamiki/extensions/utils.py:568
+#: kaamiki/extensions/utils.py:737
 msgid "Search Results"
 msgstr ""
 
@@ -218,97 +218,105 @@ msgstr ""
 msgid "External Links"
 msgstr ""
 
-#: kaamiki/base/templates/thumbnail.html.jinja:27
+#: kaamiki/base/templates/thumbnail.html.jinja:26
 #: kaamiki/base/templates/youtube.html.jinja:10
 msgid "YouTube video"
 msgstr ""
 
-#: kaamiki/base/templates/thumbnail.html.jinja:29
+#: kaamiki/base/templates/thumbnail.html.jinja:28
 msgid "Watch on YouTube"
 msgstr ""
 
-#: kaamiki/base/templates/video.html.jinja:17
+#: kaamiki/base/templates/video.html.jinja:24
 msgid "Your browser does not support the video tag."
 msgstr ""
 
-#: kaamiki/extensions/release.py:154
+#: kaamiki/base/templates/youtube.html.jinja:27
+msgid "Play video"
+msgstr ""
+
+#: kaamiki/extensions/release.py:193
 msgid "Added"
 msgstr ""
 
-#: kaamiki/extensions/release.py:155
+#: kaamiki/extensions/release.py:194
 msgid "Changed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:156
+#: kaamiki/extensions/release.py:195
 msgid "Deprecated"
 msgstr ""
 
-#: kaamiki/extensions/release.py:157
+#: kaamiki/extensions/release.py:196
 msgid "Fixed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:158
+#: kaamiki/extensions/release.py:197
 msgid "Removed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:192
+#: kaamiki/extensions/release.py:247
 msgid "Read the article"
 msgstr ""
 
-#: kaamiki/extensions/utils.py:566
+#: kaamiki/extensions/release.py:263
+msgid "View the release"
+msgstr ""
+
+#: kaamiki/extensions/utils.py:735
 msgid "Every term indexed on this site, from A to Z."
 msgstr ""
 
-#: kaamiki/extensions/utils.py:568
+#: kaamiki/extensions/utils.py:737
 msgid "Search every page on this site."
 msgstr ""
 
-#: kaamiki/extensions/utils.py:806
+#: kaamiki/extensions/utils.py:1049
 #, python-format
 msgid "Feedback about %s"
 msgstr ""
 
-#: kaamiki/extensions/utils.py:813
+#: kaamiki/extensions/utils.py:1060
 msgid "Feedback"
 msgstr ""
 
-#: kaamiki/extensions/utils.py:815
+#: kaamiki/extensions/utils.py:1063
 msgid "Let me know how this can be improved."
 msgstr ""
 
-#: kaamiki/extensions/utils.py:816
+#: kaamiki/extensions/utils.py:1066
 msgid "Submit"
 msgstr ""
 
-#: kaamiki/extensions/utils.py:923
+#: kaamiki/extensions/utils.py:1236
 #, python-format
 msgid "%d %B %Y"
 msgstr ""
 
-#: kaamiki/extensions/writer.py:73
+#: kaamiki/extensions/writer.py:61
 msgid "Copy link"
 msgstr ""
 
-#: kaamiki/extensions/explainer/chrome.py:260
+#: kaamiki/extensions/explainer/chrome.py:258
 #, python-format
 msgid "%d step"
 msgid_plural "%d steps"
 msgstr[0] ""
 msgstr[1] ""
 
-#: kaamiki/extensions/explainer/chrome.py:266
+#: kaamiki/extensions/explainer/chrome.py:264
 msgid "Previous step"
 msgstr ""
 
-#: kaamiki/extensions/explainer/chrome.py:268
+#: kaamiki/extensions/explainer/chrome.py:266
 msgid "Next step"
 msgstr ""
 
-#: kaamiki/extensions/explainer/chrome.py:271
+#: kaamiki/extensions/explainer/chrome.py:269
 msgid "Copy the snippet"
 msgstr ""
 
-#: kaamiki/extensions/explainer/chrome.py:280
+#: kaamiki/extensions/explainer/chrome.py:278
 msgid "Nothing printed yet"
 msgstr ""
 
