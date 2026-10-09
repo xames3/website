@@ -3,18 +3,10 @@ HTML Writer
 ===========
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 27 September, 2026
-Last updated on: 30 September, 2026
+Created on: 27 September 2026
+Last updated on: 09 October, 2026
 
-What the theme changes in the HTML Sphinx writes, done as it writes it.
-
-A heading's anchor shows the `permalink` icon and, with
-`add_copy_to_headerlinks` on, is labelled for the copy it makes. An
-external link that leaves the site opens in a new tab with `nofollow`
-and `noopener` added to its `rel`, unless `open_links_in_new_tab` is
-off. One to the site's own address or a `mailto:` stays in the tab.
-An image loads lazily unless it asks otherwise. The empty wrapper a
-hidden toctree leaves behind is never written.
+What the theme changes in the HTML Sphinx writes, as it writes it.
 """
 
 from __future__ import annotations
@@ -27,9 +19,8 @@ import docutils.nodes as nodes
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.locale import _
 
-from kaamiki.extensions.utils import ICONS
-from kaamiki.extensions.utils import elsewhere
-from kaamiki.extensions.utils import themed
+from kaamiki.extensions.utils.links import opens_new_tab
+from kaamiki.extensions.utils.templates import themed
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -49,34 +40,30 @@ BACKREF: re.Pattern[str] = re.compile(
 class translator(base):
     """What the theme adds to the builder's own HTML translator.
 
-    `install` puts it in front of whichever translator the builder was
-    going to use, so a site or an extension that swapped in one of its
-    own keeps it.
+    `install` puts it in front of the builder's translator, so one a
+    site swapped in is kept.
     """
 
     def permalink(self, title: str) -> tuple[str, str]:
         """Work out a heading anchor's label and what it shows.
 
         :param title: The title Sphinx gives the anchor.
-        :return: The label's attribute and the icon's markup. The
-            `permalink` icon replaces Sphinx's pilcrow, so a site that
+        :return: The label's attribute and the anchor's content.
+            Sphinx's pilcrow is dropped, since a click anywhere on the
+            heading follows the anchor. A site that
             set `html_permalinks_icon` of its own keeps it.
         """
         options = self.config.html_context
         icon: str = self.config.html_permalinks_icon
         if icon.strip() in PILCROW:
-            classes = (options.get("km_fa_icons") or ICONS).get("permalink", "")
-            if classes:
-                icon = (
-                    f'<i class="{html.escape(classes)}" aria-hidden="true"></i>'
-                )
+            icon = ""
         if options.get("km_add_copy_to_headerlinks", True):
             return f' aria-label="{html.escape(str(_("Copy link")))}"', icon
         return f' title="{title}"', icon
 
     @t.override
     def add_permalink_ref(self, node: nodes.Element, title: str) -> None:
-        """Write the anchor a heading, a caption or a table links to.
+        """Write the anchor a heading, caption or table links to.
 
         :param node: The element whose first id the anchor points at.
         :param title: The title Sphinx gives the anchor.
@@ -91,11 +78,34 @@ class translator(base):
         )
 
     @t.override
+    def section_title_tags(self, node: nodes.Element) -> tuple[str, str]:
+        """Open and close a section's heading, without a link back.
+
+        Under a `contents` table docutils links a heading back to its
+        entry. With `add_copy_to_headerlinks` on, a click copies the
+        heading's own link instead, so the link back is dropped.
+
+        :param node: The section's title.
+        :return: The opening and the closing markup.
+        """
+        options = self.config.html_context
+        if not node.hasattr("refid") or not options.get(
+            "km_add_copy_to_headerlinks", True
+        ):
+            return super().section_title_tags(node)
+        refid = node["refid"]
+        del node["refid"]
+        try:
+            return super().section_title_tags(node)
+        finally:
+            node["refid"] = refid
+
+    @t.override
     def depart_title(self, node: nodes.title) -> None:
         """Close a title and fix the anchor Sphinx writes by hand.
 
-        A heading that links back to a table of contents gets its anchor
-        written inline rather than through `add_permalink_ref`.
+        A heading linked back to a table of contents gets its anchor
+        written inline, not through `add_permalink_ref`.
 
         :param node: The title being closed.
         """
@@ -119,7 +129,8 @@ class translator(base):
         empty: bool = False,
         **attributes: t.Any,
     ) -> str:
-        """Open a tag, sending a link that leaves the site to a new tab.
+        """Open a tag, sending a link that leaves the site to a new
+        tab.
 
         :param node: The node the tag belongs to.
         :param tagname: The tag's name.
@@ -133,24 +144,24 @@ class translator(base):
         if (
             tagname == "a"
             and "external" in classes.split()
-            and elsewhere(href, self.config.html_baseurl)
-            and self.config.html_context.get("km_open_links_in_new_tab", True)
+            and opens_new_tab(href, self.config)
         ):
             rel = str(attributes.get("rel") or "").split()
             wanted = [*rel, "nofollow", "noopener"]
             attributes["rel"] = " ".join(dict.fromkeys(wanted))
             attributes["target"] = "_blank"
+        if isinstance(node, (nodes.bullet_list, nodes.enumerated_list)):
+            key = "CLASS" if "CLASS" in attributes else "class"
+            attributes[key] = f"{attributes.get(key) or ''} km-list".strip()
+        if tagname == "ol" and "start" in attributes:
+            attributes["style"] = (
+                f"counter-reset: km-list {int(attributes['start']) - 1}"
+            )
         return super().starttag(node, tagname, suffix, empty, **attributes)
 
     @t.override
     def visit_image(self, node: nodes.image) -> None:
         """Open an image, loading it lazily unless told otherwise.
-
-        docutils only writes `loading="lazy"` when an image asks for it
-        with `:loading: lazy` or the site's docutils settings do, so
-        every image loaded with the page, the ones far below the fold
-        included. An image's own `:loading:` or an `image_loading`
-        other than the default, still wins.
 
         :param node: The image being written.
         """
@@ -161,7 +172,8 @@ class translator(base):
 
     @t.override
     def visit_compound(self, node: nodes.compound) -> None:
-        """Open a compound, unless it is a hidden toctree's empty shell.
+        """Open a compound, unless it is a hidden toctree's empty
+        shell.
 
         :param node: The compound being opened.
         :raises nodes.SkipNode: For a `toctree-wrapper` with nothing
@@ -175,8 +187,7 @@ class translator(base):
 def install(app: Sphinx) -> None:
     """Put `translator` in front of the builder's HTML translator.
 
-    Only an HTML builder writing pages with this theme or with one
-    built on it, gets it.
+    Only HTML builders writing pages with this theme get it.
 
     :param app: The Sphinx application instance.
     """

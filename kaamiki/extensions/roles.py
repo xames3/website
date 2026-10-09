@@ -3,12 +3,10 @@ Custom Roles
 ============
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 21 February, 2025
-Last updated on: 29 September, 2026
+Created on: 21 February 2025
+Last updated on: 09 October, 2026
 
-The theme's inline roles: `stylise`, `email`, `sharpie` and `underline`.
-Every public function here is registered as a role of the same name,
-so a helper in this module takes a leading underscore.
+Kaamiki's custom inline roles.
 """
 
 from __future__ import annotations
@@ -22,6 +20,7 @@ from urllib.parse import quote
 import docutils.nodes as nodes
 
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import setting
 
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
@@ -31,14 +30,15 @@ if t.TYPE_CHECKING:
 # there needs a quote or an angle bracket, so anything carrying one is
 # an author mistake rather than a colour.
 COLOUR: re.Pattern[str] = re.compile(r"^[#\w(),.%\s/-]+$")
+WIDTHS: t.Final[tuple[float, float]] = (0.5, 4.0)
+WOBBLES: t.Final[tuple[float, float]] = (0.0, 2.0)
 
 
 class ink(nodes.inline):
-    """A run of text wearing a style, a sharpie or a pencil underline.
+    """Text wearing a style, a sharpie or a pencil underline.
 
-    The text stays a text node, so the reading time, the search index
-    and a page's description see the words and not the markup drawn
-    around them.
+    It stays a text node, so the reading time, search index and page
+    description see the words and not the markup.
     """
 
 
@@ -57,6 +57,7 @@ def _depart(self: HTMLTranslator, node: ink) -> None:
     :param self: The HTML translator, whose body this appends to.
     :param node: The inked text (unused).
     """
+    del node
     self.body.append("</span>")
 
 
@@ -91,12 +92,71 @@ def _reject(
     return [inliner.problematic(rawtext, rawtext, msg)], [msg]
 
 
-def _underline_svg(color: str, seed: str) -> tuple[str, str]:
-    """Draw two wobbly strokes for a hand-drawn underline.
+def _options(value: str | None) -> tuple[str, dict[str, str]]:
+    """Split what sits in a role's angles into a colour and settings.
+
+    :param value: What was between `<` and `>` or `None`.
+    :return: The colour, empty when there is none, and the settings.
+    :raises ValueError: When there is more than one colour.
+    """
+    colour = ""
+    found: dict[str, str] = {}
+    for part in (value or "").split(";"):
+        part = part.strip()
+        if not part:
+            continue
+        key, equals, number = part.partition("=")
+        if equals:
+            found[key.strip().lower()] = number.strip()
+        elif colour:
+            raise ValueError(f"{part!r} after the colour {colour!r}")
+        else:
+            colour = part
+    return colour, found
+
+
+def _colour(config: t.Any, value: str) -> str:
+    """Look a colour up among the names the site gave colours.
+
+    :param config: The Sphinx configuration.
+    :param value: A colour or the name of one.
+    :return: The colour the name stands for or the value as written.
+    """
+    names = {
+        str(key).strip().lower(): str(colour).strip()
+        for key, colour in setting(config, "role_colours").items()
+    }
+    return names.get(value.strip().lower(), value.strip())
+
+
+def _number(value: object, low: float, high: float) -> float | None:
+    """Read a number and keep it between two bounds.
+
+    :param value: The number, as written or set.
+    :param low: The smallest allowed.
+    :param high: The biggest allowed.
+    :return: The number or `None` when it is not a number in bounds.
+    """
+    try:
+        number = float(str(value))
+    except ValueError:
+        return None
+    return number if low <= number <= high else None
+
+
+def _underline_svg(
+    color: str, seed: str, width: float = 2.5, wobble: float = 1.0
+) -> tuple[str, str]:
+    """Draw two wobbly strokes for a (fake) hand-drawn underline.
+
+    The wobble is seeded, so the same underline comes out the same on
+    every build.
 
     :param color: The stroke colour, already checked.
     :param seed: What the wobble is drawn from, so the same underline in
         the same place comes out the same on every build.
+    :param width: How thick the stroke is.
+    :param wobble: How far the stroke strays, `0` being straight.
     :return: The left-to-right and right-to-left SVGs.
     """
     uniform = Random(sha256(seed.encode()).digest()).uniform
@@ -105,17 +165,19 @@ def _underline_svg(color: str, seed: str) -> tuple[str, str]:
 
     def stroke(start: float, stop: float) -> str:
         """Generate a wobbly path between two y anchors."""
-        points = [f"M{uniform(1.5, 2.5):.1f} {start + uniform(-0.4, 0.4):.1f}"]
+        x0 = uniform(1.5, 2.5)
+        y0 = start + uniform(-0.4, 0.4) * wobble
+        points = [f"M{x0:.1f} {y0:.1f}"]
         for index in range(1, segments):
             mid = start + (stop - start) * index / segments
-            midx = step * index - uniform(0, step * 0.4)
-            midy = mid + uniform(-1.2, 1.2)
-            x = step * index + uniform(-2, 2)
-            y = mid + uniform(-0.8, 0.8)
+            midx = step * index - uniform(0, step * 0.4) * wobble
+            midy = mid + uniform(-1.2, 1.2) * wobble
+            x = step * index + uniform(-2, 2) * wobble
+            y = mid + uniform(-0.8, 0.8) * wobble
             points.append(f"Q{midx:.1f} {midy:.1f} {x:.1f} {y:.1f}")
-        points.append(
-            f"L{uniform(497, 499):.1f} {stop + uniform(-0.4, 0.4):.1f}"
-        )
+        x1 = uniform(497, 499)
+        y1 = stop + uniform(-0.4, 0.4) * wobble
+        points.append(f"L{x1:.1f} {y1:.1f}")
         return " ".join(points)
 
     def make_svg(start: float, stop: float) -> str:
@@ -124,7 +186,7 @@ def _underline_svg(color: str, seed: str) -> tuple[str, str]:
             "<svg xmlns='http://www.w3.org/2000/svg'"
             " viewBox='0 0 500 8' preserveAspectRatio='none'>"
             f"<path d='{path}' fill='none' stroke='{color}'"
-            " stroke-width='2.5' stroke-linecap='round'/>"
+            f" stroke-width='{width:g}' stroke-linecap='round'/>"
             "</svg>"
         )
 
@@ -216,7 +278,9 @@ def sharpie(
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """Run a highlighter over a run of text.
 
-    The colour is yellow unless the role names one::
+    The colour is the site's `sharpie_colour`, yellow, unless the role
+    names one, either as a colour or as one of the
+    site's `role_colours`::
 
         This is :sharpie:`important` information.
         This is :sharpie:`critical <red>` information.
@@ -233,7 +297,8 @@ def sharpie(
     """
     del role, options, content
     element, color = _split(text)
-    color = color or "yellow"
+    config = inliner.document.settings.env.config
+    color = _colour(config, color or str(setting(config, "sharpie_colour")))
     if not COLOUR.match(color):
         return _reject(inliner, rawtext, lineno, f"Invalid colour: {color!r}")
     style = f"--km-sharpie-color: {color};"
@@ -251,10 +316,16 @@ def underline(
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """Draw a pencil underline beneath a run of text.
 
-    The colour is orange unless the role names one::
+    The colour, width and wobble are the site's `underline_colour`,
+    `underline_width` and `underline_wobble`, orange, 2.5 and 1, unless
+    the role names its own after the text, a semicolon between them::
 
         This is :underline:`notable` content.
         This is :underline:`notable <red>` content.
+        This is :underline:`notable <red; width=3; wobble=0>` content.
+
+    The width runs from 0.5 to 4 and the wobble from 0, which is
+    straight, to 2.
 
     :param role: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
@@ -264,15 +335,49 @@ def underline(
     :param options: Role options (unused).
     :param content: Role content (unused).
     :return: The underlined text and the error messages if the colour
-        looks like markup.
+        looks like markup or the width or wobble is off.
     """
     del role, options, content
-    element, color = _split(text)
-    color = color or "#FF9800"
+    element, rest = _split(text)
+    config = inliner.document.settings.env.config
+    try:
+        color, given = _options(rest)
+    except ValueError as exc:
+        return _reject(inliner, rawtext, lineno, f"Invalid underline: {exc}")
+    unknown = sorted(set(given) - {"width", "wobble"})
+    if unknown:
+        return _reject(
+            inliner,
+            rawtext,
+            lineno,
+            f"Invalid underline setting: {', '.join(unknown)};"
+            " it takes width and wobble",
+        )
+    color = _colour(config, color or str(setting(config, "underline_colour")))
     if not COLOUR.match(color):
         return _reject(inliner, rawtext, lineno, f"Invalid colour: {color!r}")
-    seed = f"{inliner.document.get('source', '')}:{lineno}:{rawtext}"
-    ltr, rtl = (_.replace("#", "%23") for _ in _underline_svg(color, seed))
+    width = _number(
+        given.get("width", setting(config, "underline_width")), *WIDTHS
+    )
+    wobble = _number(
+        given.get("wobble", setting(config, "underline_wobble")), *WOBBLES
+    )
+    if width is None or wobble is None:
+        low, high = WIDTHS if width is None else WOBBLES
+        return _reject(
+            inliner,
+            rawtext,
+            lineno,
+            f"Invalid underline {'width' if width is None else 'wobble'}:"
+            f" use a number from {low:g} to {high:g}",
+        )
+    seed = f"{inliner.document.settings.env.docname}:{lineno}:{rawtext}"
+    # NOTE(xames3): A `#` has to be percent-encoded inside a data URI.
+    # https://datatracker.ietf.org/doc/html/rfc2397
+    ltr, rtl = (
+        _.replace("#", "%23")
+        for _ in _underline_svg(color, seed, width, wobble)
+    )
     style = (
         f'--km-ul-fwd: url("data:image/svg+xml,{ltr}");'
         f' --km-ul-ret: url("data:image/svg+xml,{rtl}");'

@@ -4,9 +4,9 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 05 October 2026
+Last updated on: 09 October, 2026
 
-Kaamiki theme's entry point.
+Kaamiki's entry point.
 """
 
 from __future__ import annotations
@@ -25,7 +25,6 @@ from sphinx.util import logging
 
 from kaamiki.extensions import directives
 from kaamiki.extensions import roles
-from kaamiki.extensions import writer
 from kaamiki.extensions.utils import bridge
 from kaamiki.extensions.utils import build_finished
 from kaamiki.extensions.utils import context_defaults
@@ -33,19 +32,22 @@ from kaamiki.extensions.utils import depart
 from kaamiki.extensions.utils import design_assets
 from kaamiki.extensions.utils import feedback
 from kaamiki.extensions.utils import offer
+from kaamiki.extensions.utils import page_switches
 from kaamiki.extensions.utils import provenance
 from kaamiki.extensions.utils import reading_length
+from kaamiki.extensions.utils import reread
 from kaamiki.extensions.utils import skip
 from kaamiki.extensions.utils import social_metadata
 from kaamiki.extensions.utils import themed
 from kaamiki.extensions.utils import updated_on
+from kaamiki.extensions.utils import writer
 
 if t.TYPE_CHECKING:
     import types
 
     from sphinx.application import Sphinx
 
-version: str = "2026.10.5"
+version: str = "2026.10.8"
 theme_name: t.Final[str] = "kaamiki"
 theme_path = p.join(p.abspath(p.dirname(__file__)), "base", "templates")
 static_path = p.join(p.abspath(p.dirname(__file__)), "base", "static")
@@ -204,8 +206,10 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     app.connect("html-page-context", reading_length)
     app.connect("html-page-context", feedback)
     app.connect("html-page-context", updated_on)
+    app.connect("html-page-context", page_switches)
     app.connect("html-page-context", design_assets)
     app.connect("source-read", provenance)
+    app.connect("env-get-outdated", reread)
     app.connect("doctree-read", offer, priority=400)
     app.connect("build-finished", build_finished)
     app.connect("build-finished", flatten)
