@@ -3,8 +3,8 @@ YouTube Directive
 =================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 22 February, 2025
-Last updated on: 30 September, 2026
+Created on: 22 February 2025
+Last updated on: 08 October 2026
 
 A `youtube` directive that embeds a video in the page::
 
@@ -13,24 +13,59 @@ A `youtube` directive that embeds a video in the page::
        :privacy:
 
        What it is about.
-
-Both URL forms are accepted. The options become query parameters on the
-embed URL and the player comes from `youtube.html.jinja`.
 """
 
 from __future__ import annotations
 
+import re
 import typing as t
 import urllib.parse as urlparse
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
-from kaamiki.extensions.utils import render
+from kaamiki.extensions.utils import parse
+from kaamiki.extensions.utils import setting
+from kaamiki.extensions.utils import toggle
+from kaamiki.extensions.utils import trail
+from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import youtube_id
 
 name: t.Final[str] = "youtube"
 template: t.Final[str] = "youtube.html.jinja"
+LANGUAGE: re.Pattern[str] = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
+RATIO: re.Pattern[str] = re.compile(
+    r"^(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)$"
+)
+
+
+def tongue(argument: str) -> str:
+    """Check the `language` option reads as a language code.
+
+    :param argument: The value written in the rST.
+    :return: The code, like `en` or `pt-BR`.
+    :raises ValueError: When it is not one.
+    """
+    if not LANGUAGE.match(argument.strip()):
+        raise ValueError(f"expected a language code like en, got {argument!r}")
+    return argument.strip()
+
+
+def ratio(argument: str) -> str:
+    """Check the `ratio` option reads as a width and a height.
+
+    :param argument: The value written in the rST, as `4:3` or `16/9`.
+    :return: The ratio as CSS writes it, `4 / 3`.
+    :raises ValueError: When it is not one.
+    """
+    found = RATIO.match(argument.strip())
+    if found is None or not float(found[1]) or not float(found[2]):
+        raise ValueError(f"expected a ratio like 16:9, got {argument!r}")
+    return f"{found[1]} / {found[2]}"
+
+
+class node(nodes.Element):
+    """The player and its parsed caption, waiting for `visit`."""
 
 
 class directive(rst.Directive):
@@ -40,14 +75,20 @@ class directive(rst.Directive):
 
         - `autoplay`: Play the video as soon as it loads.
         - `showcaptions`: Turn closed captions on.
-        - `caption`: A line of text under the player. The directive's
-           body does the same and the option wins when both are
-           there.
+        - `caption`: A line of text under the player. It wins over the
+          directive's body.
         - `startfrom`: Seconds to start playing from.
-        - `privacy`: Embed from `youtube-nocookie.com`.
-        - `modestbranding`: Kept for older pages; always on now.
+        - `endat`: Seconds to stop playing at.
+        - `privacy`: Embed from `youtube-nocookie.com`. `false` embeds
+          from `youtube.com` when the site's `youtube_privacy` is on.
         - `controls`: `0` hides the player controls.
-        - `playsinline`: Kept for older pages; always on now.
+        - `loop`: Play it over and over.
+        - `mute`: Start with the sound off.
+        - `language`: The player's language and the captions' as a
+          code, like `en` or `pt-BR`.
+        - `ratio`: The player's shape, as `4:3`. Defaults to `16:9`.
+        - `click-to-load`: Show the video's picture and load the player
+          once it is clicked.
     """
 
     has_content = True
@@ -58,43 +99,71 @@ class directive(rst.Directive):
         "showcaptions": rst.directives.flag,
         "caption": rst.directives.unchanged,
         "startfrom": rst.directives.positive_int,
-        "privacy": rst.directives.flag,
-        "modestbranding": rst.directives.flag,
+        "endat": rst.directives.positive_int,
+        "privacy": toggle,
         "controls": rst.directives.nonnegative_int,
-        "playsinline": rst.directives.flag,
+        "loop": rst.directives.flag,
+        "mute": rst.directives.flag,
+        "language": tongue,
+        "ratio": ratio,
+        "click-to-load": rst.directives.flag,
     }
 
     def run(self) -> list[nodes.Node]:
-        """Build the embed URL and return the player as a raw node.
+        """Build the embed URL and return the player's node.
 
-        :return: A list holding the one `raw` node.
+        :return: The node, followed by the `raw` node `trail` returns
+            for the link checker and anything the caption reported.
         """
         src = rst.directives.uri(self.arguments.pop().strip())
         vid = youtube_id(src)
         if vid is None:
             raise self.error(f"youtube found no video in {src!r}")
+        config = self.state.document.settings.env.config
+        private = self.options.get(
+            "privacy", setting(config, "youtube_privacy")
+        )
         domain = (
             "https://www.youtube-nocookie.com"
-            if "privacy" in self.options
+            if private
             else "https://www.youtube.com"
         )
+        # NOTE(xames3): Checkout more options at their website.
+        # https://developers.google.com/youtube/player_parameters
         params = {
             "start": self.options.get("startfrom", 0),
             "autoplay": 1 if "autoplay" in self.options else 0,
             "cc_load_policy": 1 if "showcaptions" in self.options else 0,
-            "modestbranding": 1,
             "rel": 0,
             "playsinline": 1,
         }
         if "controls" in self.options:
             params["controls"] = int(self.options["controls"])
+        if "endat" in self.options:
+            params["end"] = self.options["endat"]
+        if "loop" in self.options:
+            params["loop"] = 1
+            params["playlist"] = vid
+        if "mute" in self.options:
+            params["mute"] = 1
+        if "language" in self.options:
+            params["hl"] = self.options["language"]
+            params["cc_lang_pref"] = self.options["language"]
         url = f"{domain}/embed/{vid}?{urlparse.urlencode(params)}"
         self.options["url"] = url
-        self.options["caption"] = (
-            self.options.get("caption") or "\n".join(self.content)
-        ).strip()
-        attributes: dict[str, str] = {}
-        attributes["source"] = src
-        attributes["text"] = render(template, **self.options)
-        attributes["format"] = "html"
-        return [nodes.raw(**attributes)]
+        self.options["src"] = src
+        self.options["watch"] = f"https://www.youtube.com/watch?v={vid}"
+        self.options["video_id"] = vid
+        self.options["facade"] = "click-to-load" in self.options
+        self.options["ratio"] = self.options.get("ratio", "")
+        self.options["allow"] = str(setting(config, "youtube_allow"))
+        self.options["referrer"] = str(
+            setting(config, "youtube_referrer_policy")
+        )
+        text = self.options.pop("caption", None) or "\n".join(self.content)
+        caption, messages = parse(self, text.strip(), "caption")
+        element = node("", caption, **self.options)
+        return [element, *trail(self.options, ("src",)), *messages]
+
+
+visit = visitor(template)
