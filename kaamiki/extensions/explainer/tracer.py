@@ -4,7 +4,7 @@ Explainer Tracer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 Running a snippet and writing down what it did, one line at a time.
 """

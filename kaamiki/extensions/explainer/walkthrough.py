@@ -4,7 +4,7 @@ Walkthrough Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 A `walkthrough` directive that steps a reader through a snippet, line
 by line, with the values it held at each one... telling a story::

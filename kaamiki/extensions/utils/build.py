@@ -4,7 +4,7 @@ Build Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 October, 2026
+Last updated on: 08 October 2026
 
 The utilities that write the 404 page and the sitemap after a build.
 """

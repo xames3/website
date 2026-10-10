@@ -4,7 +4,7 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 08 October, 2026
+Last updated on: 08 October 2026
 
 An `author` directive that renders the byline under a page title::
 

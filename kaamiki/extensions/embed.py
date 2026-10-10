@@ -4,7 +4,7 @@ Embed Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 11 August 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 An `embed` directive that drops a block of HTML into the page.
 

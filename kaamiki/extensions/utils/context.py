@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 The utilities that fill a page's context for the templates.
 """

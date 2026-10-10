@@ -4,7 +4,7 @@ Explainer Block Grammar
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 The block grammar the explainers carry in their bodies and the readers
 for the options beside it.
@@ -25,7 +25,7 @@ RANGE: re.Pattern[str] = re.compile(r"^(\d+)(?:\s*[-\u2013]\s*(\d+))?$")
 class chunk:
     """One `.. name:: argument` block pulled out of a directive's body.
 
-    docutils won't nest an unregistered directive inside another, so
+    `docutils` won't nest an unregistered directive inside another, so
     the walkthrough carries a little block grammar of its own. `split`
     returns one of these per block.
     """

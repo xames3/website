@@ -4,7 +4,7 @@ Release Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 September 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 A `release` directive that writes one entry of a changelog::
 

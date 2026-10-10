@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 Kaamiki's settings, their defaults and the helpers that read them.
 """

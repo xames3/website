@@ -4,7 +4,7 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 Kaamiki's custom inline roles.
 """

@@ -4,7 +4,7 @@ YouTube Thumbnail Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September 2025
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 A `thumbnail` directive that renders a YouTube video as a card::
 

@@ -4,7 +4,7 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October 2025
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 A `repository` directive that renders a GitHub project as a card::
 

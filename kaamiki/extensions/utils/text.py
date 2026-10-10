@@ -4,7 +4,7 @@ Text Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 The helpers that flatten and shorten text. These don't need their own
 module as of now, but I think I'll expand these helpers in future as

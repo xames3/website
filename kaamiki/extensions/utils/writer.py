@@ -4,7 +4,7 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 09 October, 2026
+Last updated on: 09 October 2026
 
 What Kaamiki changes in the HTML Sphinx writes, as it writes it.
 """
