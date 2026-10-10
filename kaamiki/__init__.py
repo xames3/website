@@ -100,7 +100,7 @@ def fix(module: types.ModuleType) -> type[nodes.Element]:
 
 
 def add_theme_assets(app: Sphinx) -> None:
-    """Add the theme's static files, stylesheets and scripts to HTML
+    """Add Kaamiki's static files, stylesheets and scripts to HTML
     builders using this theme.
 
     :param app: The Sphinx application instance.
@@ -117,7 +117,7 @@ def add_theme_assets(app: Sphinx) -> None:
 
 
 def flatten(app: Sphinx, exc: Exception | None) -> None:
-    """Rewrite the theme's stylesheets for older browsers.
+    """Rewrite Kaamiki's stylesheets for older browsers.
 
     The stylesheets are written with nesting and range media queries,
     which older Safari dropped, leaving an older iPhone (which I had)
@@ -155,16 +155,18 @@ def flatten(app: Sphinx, exc: Exception | None) -> None:
 
 
 def setup(app: Sphinx) -> dict[str, str | bool | int]:
-    """Set the theme up with Sphinx.
+    """Set Kaamiki up with Sphinx.
 
-    Registers the theme, its extensions, directives, roles and the
-    handlers that fill in the page context. The theme's own words join
+    Registers Kaamiki, its extensions, directives, roles and the
+    handlers that fill in the page context. Kaamiki's own words join
     Sphinx's catalogue, the way pydata-sphinx-theme's do, so a site's
-    translation of one still wins. If Sphinx has no catalogue for the
-    language, the builder's translator is pointed at the theme's.
+    translation of one still wins.
+
+    If Sphinx has no catalogue for the language, the builder's
+    translator is pointed at Kaamiki's.
 
     :param app: The Sphinx application instance.
-    :return: The theme's version and that it is safe to read and write
+    :return: Kaamiki's version and that it is safe to read and write
         in parallel.
     """
     for extension in supported_extensions:

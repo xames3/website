@@ -274,7 +274,7 @@ commands = [
 ]
 
 [tool.tox.env.translations]
-description = "Extract the theme's words into its catalog, then update and compile every language"
+description = "Extract Kaamiki's words into its catalog, then update and compile every language"
 skip_install = true
 deps = [ "babel>=2.13", "jinja2>=3.1" ]
 commands = [

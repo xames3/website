@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 October, 2026
+Last updated on: 09 October, 2026
 
 The utilities that fill a page's context for the templates.
 """
@@ -108,10 +108,10 @@ def feedback(
 ) -> None:
     """Work out what a page's feedback box says and where it points.
 
-    The page's `:km-fb-*:` fields win, then the `feedback` setting,
-    then the theme's own words. The button mails the address in `project`
-    or links where the page or the setting says. With neither, there is
-    no button.
+    The page's `:km-fb-*:` fields are considered first, then
+    the `feedback` setting, then Kaamiki's own words. The button mails
+    the address in `project` or links where the page or the setting
+    says.
 
     :param app: The Sphinx application instance.
     :param pagename: The page being rendered.
