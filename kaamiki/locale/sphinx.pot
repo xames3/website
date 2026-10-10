@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kaamiki VERSION\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-10-08 05:27-0500\n"
+"POT-Creation-Date: 2026-10-09 19:06-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,21 +16,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
-
-#: kaamiki/base/templates/404.html:10 kaamiki/base/templates/404.html:22
-#: kaamiki/extensions/utils.py:727
-msgid "Page not found"
-msgstr ""
-
-#: kaamiki/base/templates/404.html:24 kaamiki/extensions/utils.py:729
-msgid ""
-"There is nothing at this address. It may have moved or it may never have "
-"been here."
-msgstr ""
-
-#: kaamiki/base/templates/404.html:29
-msgid "Go to the home page"
-msgstr ""
 
 #: kaamiki/base/templates/author.html.jinja:16
 #, python-format
@@ -92,7 +77,7 @@ msgstr ""
 
 #: kaamiki/base/templates/genindex.html:10
 #: kaamiki/base/templates/genindex.html:41
-#: kaamiki/base/templates/layout.html:217 kaamiki/extensions/utils.py:734
+#: kaamiki/base/templates/layout.html:217 kaamiki/extensions/utils/social.py:51
 msgid "Index"
 msgstr ""
 
@@ -155,8 +140,8 @@ msgid "Show less"
 msgstr ""
 
 #: kaamiki/base/templates/layout.html:212
-#: kaamiki/base/templates/searchbox.html.jinja:17
-#: kaamiki/base/templates/searchbox.html.jinja:22
+#: kaamiki/base/templates/searchbox.html.jinja:13
+#: kaamiki/base/templates/searchbox.html.jinja:18
 msgid "Search"
 msgstr ""
 
@@ -194,7 +179,7 @@ msgid "Back to top"
 msgstr ""
 
 #: kaamiki/base/templates/search.html:10 kaamiki/base/templates/search.html:28
-#: kaamiki/extensions/utils.py:737
+#: kaamiki/extensions/utils/social.py:54
 msgid "Search Results"
 msgstr ""
 
@@ -202,7 +187,7 @@ msgstr ""
 msgid "Please activate JavaScript to enable searching the documentation."
 msgstr ""
 
-#: kaamiki/base/templates/searchbox.html.jinja:28
+#: kaamiki/base/templates/searchbox.html.jinja:24
 msgid "Submit search"
 msgstr ""
 
@@ -235,66 +220,32 @@ msgstr ""
 msgid "Play video"
 msgstr ""
 
-#: kaamiki/extensions/release.py:193
+#: kaamiki/extensions/release.py:189
 msgid "Added"
 msgstr ""
 
-#: kaamiki/extensions/release.py:194
+#: kaamiki/extensions/release.py:190
 msgid "Changed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:195
+#: kaamiki/extensions/release.py:191
 msgid "Deprecated"
 msgstr ""
 
-#: kaamiki/extensions/release.py:196
+#: kaamiki/extensions/release.py:192
 msgid "Fixed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:197
+#: kaamiki/extensions/release.py:193
 msgid "Removed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:247
-msgid "Read the article"
+#: kaamiki/extensions/release.py:240
+msgid "Read release notes"
 msgstr ""
 
-#: kaamiki/extensions/release.py:263
-msgid "View the release"
-msgstr ""
-
-#: kaamiki/extensions/utils.py:735
-msgid "Every term indexed on this site, from A to Z."
-msgstr ""
-
-#: kaamiki/extensions/utils.py:737
-msgid "Search every page on this site."
-msgstr ""
-
-#: kaamiki/extensions/utils.py:1049
-#, python-format
-msgid "Feedback about %s"
-msgstr ""
-
-#: kaamiki/extensions/utils.py:1060
-msgid "Feedback"
-msgstr ""
-
-#: kaamiki/extensions/utils.py:1063
-msgid "Let me know how this can be improved."
-msgstr ""
-
-#: kaamiki/extensions/utils.py:1066
-msgid "Submit"
-msgstr ""
-
-#: kaamiki/extensions/utils.py:1236
-#, python-format
-msgid "%d %B %Y"
-msgstr ""
-
-#: kaamiki/extensions/writer.py:61
-msgid "Copy link"
+#: kaamiki/extensions/release.py:256
+msgid "View release"
 msgstr ""
 
 #: kaamiki/extensions/explainer/chrome.py:258
@@ -318,5 +269,49 @@ msgstr ""
 
 #: kaamiki/extensions/explainer/chrome.py:278
 msgid "Nothing printed yet"
+msgstr ""
+
+#: kaamiki/extensions/utils/context.py:132
+#, python-format
+msgid "Feedback about %s"
+msgstr ""
+
+#: kaamiki/extensions/utils/context.py:143
+msgid "Feedback"
+msgstr ""
+
+#: kaamiki/extensions/utils/context.py:146
+msgid "Let me know how this can be improved."
+msgstr ""
+
+#: kaamiki/extensions/utils/context.py:149
+msgid "Submit"
+msgstr ""
+
+#: kaamiki/extensions/utils/dates.py:128
+#, python-format
+msgid "%d %B %Y"
+msgstr ""
+
+#: kaamiki/extensions/utils/social.py:44
+msgid "Page not found"
+msgstr ""
+
+#: kaamiki/extensions/utils/social.py:46
+msgid ""
+"There is nothing at this address. It may have moved or it may never have "
+"been here."
+msgstr ""
+
+#: kaamiki/extensions/utils/social.py:52
+msgid "Every term indexed on this site, from A to Z."
+msgstr ""
+
+#: kaamiki/extensions/utils/social.py:54
+msgid "Search every page on this site."
+msgstr ""
+
+#: kaamiki/extensions/utils/writer.py:61
+msgid "Copy link"
 msgstr ""
 

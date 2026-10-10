@@ -235,6 +235,7 @@ env_list = [
   "lint",
   "format",
   "typecheck",
+  "translations",
 ]
 package = "editable"
 
