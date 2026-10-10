@@ -3,11 +3,11 @@ Explainer Block Grammar
 =======================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 12 September, 2026
-Last updated on: 01 October, 2026
+Created on: 12 September 2026
+Last updated on: 09 October, 2026
 
-The little block grammar the explainers carry in their bodies and the
-readers for the options that go beside it.
+The block grammar the explainers carry in their bodies and the readers
+for the options beside it.
 """
 
 from __future__ import annotations
@@ -25,9 +25,9 @@ RANGE: re.Pattern[str] = re.compile(r"^(\d+)(?:\s*[-\u2013]\s*(\d+))?$")
 class chunk:
     """One `.. name:: argument` block pulled out of a directive's body.
 
-    The stepping directives carry their own little block grammar,
-    since docutils will not nest an unregistered directive inside
-    another one. `split` hands back one of these per block it finds.
+    docutils won't nest an unregistered directive inside another, so
+    the walkthrough carries a little block grammar of its own. `split`
+    returns one of these per block.
     """
 
     def __init__(
@@ -93,9 +93,14 @@ def split(
     content: StringList,
     offset: int,
     own: frozenset[str],
-    options: dict[str, frozenset[str]] | None = None,
+    options: dict[str, frozenset[str]],
 ) -> list[chunk]:
     """Pull this grammar's blocks out of a directive's content.
+
+    Only blocks listed in `options` read `:name:` lines and only when
+    followed by a space or nothing, so prose opening with a role is
+    left alone. An indented line carries on an option's value and a
+    blank line between options doesn't end them.
 
     :param content: The directive's content.
     :param offset: The content's offset in the document.
@@ -104,12 +109,12 @@ def split(
         blocks read options and only from `:name:` lines followed by a
         space or nothing, so prose opening with a role is left alone.
         A line indented under an option carries on its value and a
-        blank line between two options does not end them; they run to
-        the first line that is not one.
+        blank line between two options doesn't end them; they run to
+        the first line that isn't one.
     :return: One `chunk` per block found, in the order written.
     :raises ValueError: For the first line belonging to no block, with
         its line number and its text.
-    :raises KeyError: For an option its block does not take or takes
+    :raises KeyError: For an option its block doesn't take or takes
         twice, with its line number, its name and the block's name.
     """
     found: list[chunk] = []
@@ -130,7 +135,7 @@ def split(
         end = extent(content, index)
         raw = [content[_] for _ in range(start, end)]
         pad = indentation(raw)
-        allowed = (options or {}).get(name)
+        allowed = options.get(name)
         read: dict[str, str] = {}
         cursor = 0
         while cursor < len(raw) and not raw[cursor].strip():
@@ -186,7 +191,7 @@ def linerange(line: str) -> tuple[int, int] | None:
 
     :param line: The argument, as written.
     :return: The range as a low/high pair or `None` when the argument
-        is not a pair of line numbers.
+        isn't a pair of line numbers.
     """
     match = RANGE.match(line.strip())
     if match is None:
@@ -194,12 +199,3 @@ def linerange(line: str) -> tuple[int, int] | None:
     low = int(match.group(1))
     high = int(match.group(2)) if match.group(2) else low
     return min(low, high), max(low, high)
-
-
-def parse_list(value: str | None) -> list[str]:
-    """Split a comma-separated option into its parts.
-
-    :param value: The option's value or `None` when unset.
-    :return: The parts, trimmed, with the empties dropped.
-    """
-    return [_.strip() for _ in (value or "").split(",") if _.strip()]
