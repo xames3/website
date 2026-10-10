@@ -3,14 +3,16 @@ Explainer Tracer
 ================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 12 September, 2026
-Last updated on: 01 October, 2026
+Created on: 12 September 2026
+Last updated on: 09 October, 2026
 
-Running a snippet and writing down what it did, a line at a time.
+Running a snippet and writing down what it did, one line at a time.
 """
 
 from __future__ import annotations
 
+import functools
+import hashlib
 import json
 import os
 import signal
@@ -27,10 +29,16 @@ written: t.Final[int] = 64 << 20
 short: t.Final[int] = 28
 full: t.Final[int] = 480
 kinds: t.Final[frozenset[str]] = frozenset({"call", "line", "return"})
+exhausted: t.Final[frozenset[int]] = frozenset(
+    -getattr(signal, _) for _ in ("SIGXCPU", "SIGKILL") if hasattr(signal, _)
+)
+oversized: t.Final[frozenset[int]] = frozenset(
+    -getattr(signal, _) for _ in ("SIGXFSZ",) if hasattr(signal, _)
+)
 
 
 class Trace(t.TypedDict):
-    """What the tracer saw, before any of it is turned into steps."""
+    """What the tracer saw, before any of it's turned into steps."""
 
     events: list[dict[str, t.Any]]
     error: dict[str, t.Any] | None
@@ -40,6 +48,12 @@ class Trace(t.TypedDict):
     deps: list[str]
 
 
+# NOTE(xames3): The runner is a script of its own, run with `-s -P`
+# so neither the user site nor the working directory is on its path.
+# https://docs.python.org/3/library/sys.html#sys.settrace
+# https://docs.python.org/3/library/resource.html#resource.setrlimit
+# Comprehensions are inlined since 3.12, which is why `co_positions`
+# is used to tell their lines apart: https://peps.python.org/pep-0709/
 RUNNER: t.Final[str] = r"""
 import ast
 import builtins
@@ -112,7 +126,7 @@ def clip(text, width):
     if len(text) <= width:
         return text
     head = width // 2
-    tail = width - head - 1
+    tail = max(0, width - head - 3)
     return text[:head] + "..." + (text[-tail:] if tail else "")
 
 
@@ -318,17 +332,14 @@ finish(error)
 def clip(text: str, width: int) -> str:
     """Cut a value down to its two ends.
 
-    The middle goes rather than the end, since the end of a list is as
-    likely to be the interesting part as its start.
-
     :param text: The value, as it would be printed.
     :param width: How many characters it may take, ellipsis included.
-    :return: The value, whole when it fits and cut when it does not.
+    :return: The value, whole when it fits and cut when it doesn't.
     """
     if len(text) <= width:
         return text
     head = width // 2
-    tail = width - head - 1
+    tail = max(0, width - head - 3)
     return text[:head] + "..." + (text[-tail:] if tail else "")
 
 
@@ -337,7 +348,7 @@ def show(text: str) -> tuple[str, str | None]:
 
     :param text: The value, as it would be printed.
     :return: The value whole, clipped to `full` and cut down to
-        `short` or `None` when it did not need cutting.
+        `short` or `None` when it didn't need cutting.
     """
     whole = clip(" ".join(text.split()), full)
     cut = clip(whole, short)
@@ -370,24 +381,36 @@ def execute(
     pythonpath: list[str],
     *,
     comprehensions: bool,
+    python: str | None = None,
+    memory_limit: int = memory,
+    output_limit: int = written,
+    cache: str | None = None,
 ) -> Trace:
     """Run the snippet under a tracer and collect what it did.
 
-    The snippet runs in a subprocess of its own, so a build is never
-    at the mercy of a snippet that leaks state, rebinds `sys.stdout`
-    or runs away with itself. The answer comes back through a file,
-    which leaves stdout to the snippet and stderr to its warnings.
+    It runs in a subprocess of its own, so a snippet that leaks state,
+    rebinds `sys.stdout` or runs away can't hurt the main build. The
+    answer comes back through a file, which leaves `stdout` to the
+    snippet.
 
     :param code: The snippet to trace.
     :param setup: Code to run first, untraced.
     :param stdin: What `input()` reads, a line at a time.
-    :param watch: The names to keep, in the order they are shown.
+    :param watch: The names to keep, in the order they're shown.
         Empty keeps none.
     :param limit: How many events to collect before stopping.
     :param timeout: How long the snippet may run, in seconds.
     :param pythonpath: Directories to put on `sys.path` first.
     :param comprehensions: Whether to step into comprehensions, which
         each carry a frame of their own.
+    :param python: The interpreter to run it with, the one the build
+        runs on when unset.
+    :param memory_limit: Bytes of memory it may use.
+    :param output_limit: Bytes of files it may write.
+    :param cache: A folder to keep the trace in. The same snippet,
+        options, interpreter and packages get it back from there, so
+        long as the files it imported are as they were. A snippet that
+        raised is never kept.
     :return: The trace, with whatever went wrong on it.
     """
     job: dict[str, t.Any] = {
@@ -400,10 +423,19 @@ def execute(
         "comprehensions": comprehensions,
         "short": short,
         "full": full,
-        "memory": memory,
+        "memory": memory_limit,
         "cpu": timeout,
-        "written": written,
+        "written": output_limit,
     }
+    key = ""
+    if cache:
+        seen = fingerprint(python)
+        if seen:
+            blob = json.dumps([job, RUNNER, seen], sort_keys=True)
+            key = hashlib.sha256(blob.encode()).hexdigest()
+            kept = recall(cache, key)
+            if kept is not None:
+                return kept
     with tempfile.TemporaryDirectory(prefix="kaamiki-") as here:
         path = os.path.join(here, "job.json")
         answer = os.path.join(here, "answer.json")
@@ -411,7 +443,15 @@ def execute(
             json.dump(job, fd)
         try:
             finished = subprocess.run(  # noqa: S603
-                [sys.executable, "-s", "-P", "-c", RUNNER, path, answer],
+                [
+                    python or sys.executable,
+                    "-s",
+                    "-P",
+                    "-c",
+                    RUNNER,
+                    path,
+                    answer,
+                ],
                 capture_output=True,
                 text=True,
                 timeout=timeout,
@@ -422,19 +462,106 @@ def execute(
             )
         except subprocess.TimeoutExpired:
             return failed(f"ran past its {timeout}s")
+        except OSError as exc:
+            return failed(f"could not start {python or sys.executable}: {exc}")
         try:
             with open(answer) as fd:
-                return t.cast("Trace", json.load(fd))
+                result = t.cast("Trace", json.load(fd))
         except OSError, json.JSONDecodeError:
             return failed(verdict(finished, timeout))
+    if cache and key and result["error"] is None:
+        remember(cache, key, result)
+    return result
+
+
+@functools.cache
+def fingerprint(python: str | None) -> str:
+    """Describe the interpreter and the packages a snippet runs with.
+
+    :param python: The interpreter, the one the build runs on when
+        unset.
+    :return: A digest of its version and every package installed for it
+        or an empty string when it couldn't be asked.
+    """
+    code = (
+        "import importlib.metadata as m, sys\n"
+        "print(sys.version)\n"
+        "print(*sorted(f'{d.metadata[\"Name\"]}=={d.version}'"
+        " for d in m.distributions()), sep='\\n')\n"
+    )
+    try:
+        done = subprocess.run(  # noqa: S603
+            [python or sys.executable, "-s", "-P", "-c", code],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+            env=sandbox(tempfile.gettempdir()),
+            stdin=subprocess.DEVNULL,
+        )
+    except OSError, subprocess.TimeoutExpired:
+        return ""
+    if done.returncode:
+        return ""
+    return hashlib.sha256(done.stdout.encode()).hexdigest()
+
+
+def digest(path: str) -> str | None:
+    """Hash a file's contents.
+
+    :param path: The file.
+    :return: The digest or `None` when the file can't be read.
+    """
+    try:
+        with open(path, "rb") as fd:
+            return hashlib.sha256(fd.read()).hexdigest()
+    except OSError:
+        return None
+
+
+def recall(folder: str, key: str) -> Trace | None:
+    """Fetch a kept trace, if the files it imported are as they were.
+
+    :param folder: The cache folder.
+    :param key: What the trace was kept under.
+    :return: `Trace` or `None` when there's none or it has gone stale.
+    """
+    try:
+        with open(os.path.join(folder, f"{key}.json")) as fd:
+            kept = json.load(fd)
+        for path, was in kept["deps"].items():
+            if digest(path) != was:
+                return None
+        return t.cast("Trace", kept["trace"])
+    except OSError, ValueError, KeyError, TypeError, AttributeError:
+        return None
+
+
+def remember(folder: str, key: str, trace: Trace) -> None:
+    """Keep a trace along with the digests of the files it imported.
+
+    :param folder: The cache folder, made if it isn't there.
+    :param key: What to keep the trace under.
+    :param trace: The trace.
+    """
+    deps: dict[str, str] = {}
+    for path in trace["deps"]:
+        was = digest(path)
+        if was is None:
+            return
+        deps[path] = was
+    try:
+        os.makedirs(folder, exist_ok=True)
+        fd, temp = tempfile.mkstemp(dir=folder, suffix=".tmp")
+        with os.fdopen(fd, "w") as out:
+            json.dump({"trace": trace, "deps": deps}, out)
+        os.replace(temp, os.path.join(folder, f"{key}.json"))
+    except OSError:
+        return
 
 
 def sandbox(home: str) -> dict[str, str]:
     """Build the little environment a snippet runs in.
-
-    Nothing of the build's own environment goes through, so a snippet
-    printing `os.environ` shows no secrets. The temporary directory is
-    its home and its working directory and goes when it is done.
 
     :param home: The temporary directory.
     :return: The environment.
@@ -462,9 +589,9 @@ def verdict(finished: subprocess.CompletedProcess[str], timeout: int) -> str:
     :return: The reason, in a line.
     """
     code = finished.returncode
-    if code in {-signal.SIGXCPU, -signal.SIGKILL}:
+    if code in exhausted:
         return f"used more than its {timeout}s of processor time"
-    if code == -signal.SIGXFSZ:
+    if code in oversized:
         return f"wrote a file past {written >> 20} MB"
     detail = (finished.stderr or finished.stdout).strip()
     return detail[-400:] or "the snippet produced nothing"
@@ -587,7 +714,7 @@ def fault(
 
 
 def collapse(steps: list[dict[str, t.Any]]) -> list[dict[str, t.Any]]:
-    """Drop the steps that would not change the page.
+    """Drop the steps that wouldn't change the page.
 
     :param steps: The steps as replayed, in order.
     :return: The steps worth stepping through.
