@@ -1,39 +1,32 @@
 (() => {
     'use strict';
 
-    const SCROLL_DURATION_MIN_MS = 300;
-    const SCROLL_DURATION_MAX_MS = 1800;
-    const ANCHOR_SCROLL_PX_FACTOR = 0.6;
-    const ANCHOR_SCROLL_DIST_CAP_MS = 400;
-    const HEADER_OFFSET_DEFAULT_PX = 40;
-    const ANCHOR_EXTRA_OFFSET_DEFAULT_PX = 12;
-    const HEADER_BORDER_SCROLL_THRESHOLD = 250;
+    const SCROLL_QUIET_FRAMES = 3;
+    const SCROLL_PATIENCE_MS = 3000;
+    const GLIDE_STOPS = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
+    const GLIDE_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
     const HASH_SETTLE_MS = 2600;
     const CLAMP_SLACK_PX = 48;
     const CLAMP_SETTLE_MS = 60;
-    const CLAMP_GAP_PX = 32;
     const CLAMP_MIN_PX = 320;
     const DROPDOWN_OPEN_DELAY_MS = 40;
     const DROPDOWN_CLOSE_DELAY_MS = 140;
     const DROPDOWN_PX_FACTOR = 0.9;
     const FETCH_TIMEOUT_MS = 8000;
-    const ARTICLE_BG_FADE_MS = 600;
     const ARTICLE_BG_INTERVAL_MS = 7000;
-    const CAL_ORIGIN = 'https://app.cal.com';
     const TICKER_RADIX = 10;
     const TICKER_MAX_LAPS = 4;
     const TICKER_EASING = 'cubic-bezier(0.25, 1, 0.5, 1)';
     const TICKER_BLUR = 'blur(1.5px)';
     const TICKER_BLUR_AT = 0.4;
     const FOCUSABLE = 'a[href], button, input, select, textarea, summary, iframe, [tabindex]';
-    const SIDEBAR_WIDE_PX = 1024;
+    const SIDEBAR_WIDE_PX = 768;
     const SCROLLTOP_AFTER_PX = 200;
     const REVEAL_STEPS = 6;
     const REVEAL_SLACK_MS = 8;
     const REVEAL_WAITING = 'km-page-reveal-item';
     const REVEAL_SHOWN = 'km-page-reveal-item--shown';
     const COLOUR_MODE_KEY = 'km:colourMode';
-    const OLD_COLOUR_MODE_KEY = 'darkMode';
     const WALKTHROUGH_NARROW = 641;
     const WALKTHROUGH_LINES = 15;
     const WALKTHROUGH_MIN_LINES = 6;
@@ -45,28 +38,17 @@
     const WALKTHROUGH_JITTER = 120;
     const WALKTHROUGH_SETTLE = 120;
     const WALKTHROUGH_RISE = 6;
-    const WALKTHROUGH_QUIET = 3;
-    const WALKTHROUGH_PATIENCE = 60;
     const WALKTHROUGH_KEYS = { ArrowLeft: -1, ArrowRight: 1 };
     const walkthroughs = [];
     const walkthroughDrawn = new Map();
-    let walkthroughPieces = new Map();
-    let walkthroughLift = 0;
 
     window.Kaamiki = Object.freeze({ walkthroughs });
 
     const root = document.documentElement;
-    const STRINGS = (() => {
-        try {
-            return JSON.parse(root.dataset.kmStrings || '{}');
-        } catch {
-            return {};
-        }
-    })();
+    const STRINGS = JSON.parse(root.dataset.kmStrings);
 
-    function say(key, fallback, values = {}) {
-        const text = typeof STRINGS[key] === 'string' ? STRINGS[key] : fallback;
-        return text.replace(/\{(\w+)\}/g, (match, name) => (name in values ? values[name] : match));
+    function say(key, values = {}) {
+        return STRINGS[key].replace(/\{(\w+)\}/g, (match, name) => (name in values ? values[name] : match));
     }
 
     function ready(fn) {
@@ -115,64 +97,42 @@
 
     const durationCache = new Map();
 
-    function getDurationMs(cssVar = '--km-duration-normal', fallback = 500) {
-        if (durationCache.has(cssVar)) return durationCache.get(cssVar);
-        let value = fallback;
-        try {
-            const raw = getComputedStyle(root).getPropertyValue(cssVar).trim();
-            if (raw.endsWith('ms')) value = Math.max(0, parseFloat(raw));
-            else if (raw.endsWith('s')) value = Math.max(0, parseFloat(raw) * 1000);
-            else if (raw && !Number.isNaN(Number(raw))) value = Number(raw);
-        } catch { /* keep fallback */ }
-        durationCache.set(cssVar, value);
+    function getCssVar(name) {
+        return getComputedStyle(root).getPropertyValue(name).trim();
+    }
+
+    function getDurationMs(name) {
+        if (durationCache.has(name)) return durationCache.get(name);
+        const raw = getCssVar(name);
+        const value = raw.endsWith('ms') ? parseFloat(raw) : parseFloat(raw) * 1000;
+        durationCache.set(name, value);
         return value;
     }
 
     const TIMING = {
-        dropdownMin: () => getDurationMs('--km-duration-dropdown-min', 340),
-        dropdownMax: () => getDurationMs('--km-duration-dropdown-max', 760),
-        revealStep: () => getDurationMs('--km-reveal-step', 90),
-        scrollMin: () => getDurationMs('--km-scroll-min', 450),
-        scrollMax: () => getDurationMs('--km-scroll-max', 900),
-        tooltipHold: () => getDurationMs('--km-tooltip-hold', 1800),
-        showMoreHold: () => getDurationMs('--km-show-more-hold', 3000),
-        walkthroughSwap: () => getDurationMs('--km-walkthrough-swap', 420),
-        tickerBase: () => getDurationMs('--km-ticker-base', 1900),
-        tickerStep: () => getDurationMs('--km-ticker-step', 280),
+        dropdownMin: () => getDurationMs('--km-duration-dropdown-min'),
+        dropdownMax: () => getDurationMs('--km-duration-dropdown-max'),
+        revealStep: () => getDurationMs('--km-reveal-step'),
+        tooltipHold: () => getDurationMs('--km-tooltip-hold'),
+        fast: () => getDurationMs('--km-duration-fast'),
+        showMoreHold: () => getDurationMs('--km-show-more-hold'),
+        walkthroughSwap: () => getDurationMs('--km-walkthrough-swap'),
+        tickerBase: () => getDurationMs('--km-ticker-base'),
+        tickerStep: () => getDurationMs('--km-ticker-step'),
     };
 
-    function easingToken(name, fallback) {
-        return getComputedStyle(root).getPropertyValue(name).trim() || fallback;
-    }
-
-    function toPx(value, fallback) {
-        if (!value) return fallback;
+    function toPx(value) {
         const number = parseFloat(value);
-        if (Number.isNaN(number)) return fallback;
-        if (value.endsWith('rem')) {
-            return number * (parseFloat(getComputedStyle(root).fontSize) || 16);
-        }
-        if (value.endsWith('em')) {
-            return number * (parseFloat(getComputedStyle(document.body).fontSize) || 16);
-        }
-        return number;
+        return value.endsWith('rem') ? number * parseFloat(getComputedStyle(root).fontSize) : number;
     }
 
-    function getCssVar(name) {
-        try { return getComputedStyle(root).getPropertyValue(name).trim(); }
-        catch { return ''; }
-    }
-
-    function getHeaderOffsetPx() {
-        const fromTokens = toPx(getCssVar('--km-layout-header-offset'), HEADER_OFFSET_DEFAULT_PX)
-            + toPx(getCssVar('--km-layout-anchor-offset'), ANCHOR_EXTRA_OFFSET_DEFAULT_PX);
+    function headerHeight() {
         const header = document.querySelector('.km-header');
-        const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
-        return Math.max(0, fromTokens, headerHeight);
+        return header ? Math.ceil(header.getBoundingClientRect().height) : 0;
     }
 
     function afterReveal(node, fn) {
-        const block = node.closest?.(`.${REVEAL_WAITING}:not(.${REVEAL_SHOWN})`);
+        const block = node.closest(`.${REVEAL_WAITING}:not(.${REVEAL_SHOWN})`);
         if (block) block.addEventListener('km:reveal', () => fn(node), { once: true });
         else fn(node);
     }
@@ -180,10 +140,6 @@
     function onVisible(nodes, onEnter, options = { rootMargin: '200px' }) {
         const list = Array.from(nodes);
         if (!list.length) return;
-        if (!('IntersectionObserver' in window)) {
-            list.forEach((node) => afterReveal(node, onEnter));
-            return;
-        }
         const observer = new IntersectionObserver((entries) => {
             for (const entry of entries) {
                 if (!entry.isIntersecting) continue;
@@ -207,24 +163,19 @@
         }
     }
 
-    function resolveTheme(mode) {
-        if (mode === 'system') {
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        return mode || 'light';
-    }
-
     function syncThemeColor() {
         const meta = document.querySelector('meta[name="theme-color"]');
         const background = document.body && getComputedStyle(document.body).backgroundColor;
         if (meta && background) meta.setAttribute('content', background);
     }
 
+    let shownTheme = root.dataset.kmTheme || 'dark';
+
     function applyTheme(mode) {
-        const resolved = resolveTheme(mode);
+        shownTheme = mode;
         const commit = () => {
-            root.setAttribute('data-km-theme', resolved);
-            root.classList.toggle('km-dark', resolved === 'dark');
+            root.setAttribute('data-km-theme', mode);
+            root.classList.toggle('km-dark', mode === 'dark');
             syncThemeColor();
         };
 
@@ -262,20 +213,19 @@
         let chosen = null;
         if (root.hasAttribute('data-km-colour-toggle')) {
             try {
-                chosen = localStorage.getItem(COLOUR_MODE_KEY) ?? localStorage.getItem(OLD_COLOUR_MODE_KEY);
+                chosen = localStorage.getItem(COLOUR_MODE_KEY);
             } catch { /* storage unavailable */ }
         }
         if (chosen) return;
-        window.matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', (event) => {
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (event) => {
             applyTheme(event.matches ? 'light' : 'dark');
         });
     }
 
     function initThemeToggle() {
-        let mode = root.dataset.kmTheme || 'dark';
         document.querySelectorAll('.km-footer__theme-toggle').forEach((button) => {
             button.addEventListener('click', () => {
-                mode = mode === 'light' ? 'dark' : 'light';
+                const mode = shownTheme === 'light' ? 'dark' : 'light';
                 try { localStorage.setItem(COLOUR_MODE_KEY, mode); } catch { /* storage unavailable */ }
                 applyTheme(mode);
             });
@@ -284,7 +234,7 @@
 
     function initKeyboardModality() {
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Tab' || event.key.startsWith('Arrow')) root.setAttribute('data-km-keyboard', '');
+            if (event.key === 'Tab' || event.key?.startsWith('Arrow')) root.setAttribute('data-km-keyboard', '');
         }, true);
         document.addEventListener('pointerdown', () => root.removeAttribute('data-km-keyboard'), true);
     }
@@ -317,6 +267,14 @@
         };
         toggle.addEventListener('click', (event) => show(!open, true, event.detail === 0));
         backdrop?.addEventListener('click', () => show(false));
+        sidebar.addEventListener('click', (event) => {
+            const link = event.target.closest?.('a[href^="#"]');
+            if (!open || !link || isModifiedClick(event)) return;
+            show(false);
+            if (link.getAttribute('href') !== '#') return;
+            event.preventDefault();
+            glideTo(0);
+        });
         window.addEventListener('keydown', (event) => {
             if (!open) return;
             if (event.key === 'Escape') {
@@ -340,7 +298,7 @@
         const button = document.getElementById('km-scrolltop');
         if (!button) return;
         let last = 0;
-        button.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        button.addEventListener('click', () => glideTo(0));
         window.addEventListener('scroll', () => {
             const y = window.scrollY;
             const bottom = y + window.innerHeight >= root.scrollHeight - SCROLLTOP_AFTER_PX;
@@ -350,6 +308,90 @@
             );
             last = Math.max(0, y);
         }, { passive: true });
+    }
+
+    function viewportHeight() {
+        return window.visualViewport?.height || window.innerHeight;
+    }
+
+    function showMoreDock() {
+        return toPx(getCssVar('--km-show-more-dock'));
+    }
+
+    function keepInView(content, collapsed, tail) {
+        const top = window.scrollY + content.getBoundingClientRect().top;
+        const targetY = Math.max(0, top + collapsed + tail - viewportHeight());
+        const distance = window.scrollY - targetY;
+        if (distance <= 0) return Promise.resolve();
+        return glideTo(targetY);
+    }
+
+    function foldMotion(host, content, clamped, clamping, settled) {
+        let timer = 0;
+        const settle = (next) => {
+            window.clearTimeout(timer);
+            host.classList.remove(clamping);
+            settled(!next);
+            content.style.maxHeight = '';
+        };
+        const clamp = (next, from, to) => {
+            host.classList.toggle(clamped, !next);
+            host.classList.add(clamping);
+            content.style.maxHeight = `${from}px`;
+            void content.offsetHeight;
+            content.style.maxHeight = `${to}px`;
+            window.clearTimeout(timer);
+            timer = window.setTimeout(
+                () => settle(next),
+                getDurationMs('--km-duration-clamp') + CLAMP_SETTLE_MS,
+            );
+        };
+        const stop = () => window.clearTimeout(timer);
+        return { settle, clamp, stop };
+    }
+
+    function idleShell(shell, button, name, awake) {
+        let timer = 0;
+        let stirred = 0;
+
+        const riding = () => shell.getBoundingClientRect().bottom > viewportHeight() - showMoreDock() - 1;
+
+        const rest = () => {
+            window.clearTimeout(timer);
+            timer = 0;
+            shell.classList.remove(name);
+        };
+
+        const idle = () => {
+            timer = 0;
+            if (!awake()) return;
+            const hold = TIMING.showMoreHold();
+            const quiet = performance.now() - stirred;
+            if (quiet < hold) {
+                timer = window.setTimeout(idle, hold - quiet);
+                return;
+            }
+            if (button.matches(':hover, :focus-visible')) {
+                timer = window.setTimeout(idle, hold);
+                return;
+            }
+            if (riding()) shell.classList.add(name);
+        };
+
+        const stir = () => {
+            if (!awake()) return;
+            stirred = performance.now();
+            shell.classList.remove(name);
+            if (!timer) timer = window.setTimeout(idle, TIMING.showMoreHold());
+        };
+
+        for (const type of [
+            'pointermove', 'pointerdown', 'keydown', 'touchstart', 'focusin',
+        ]) {
+            window.addEventListener(type, stir, { passive: true });
+        }
+        onScroll(stir);
+        return { stir, rest };
     }
 
     function initShowMore() {
@@ -366,17 +408,12 @@
         }
 
         let expanded = false;
-        let timer = 0;
-        let idleTimer = 0;
-        let stirred = 0;
 
-        const dock = () => toPx(getCssVar('--km-show-more-dock'), CLAMP_GAP_PX);
-        const tail = () => button.getBoundingClientRect().height + dock();
+        const tail = () => button.getBoundingClientRect().height + showMoreDock();
 
         const fit = () => {
             const top = window.scrollY + content.getBoundingClientRect().top;
-            const viewport = window.visualViewport?.height || window.innerHeight;
-            const room = Math.max(CLAMP_MIN_PX, viewport - top - tail());
+            const room = Math.max(CLAMP_MIN_PX, viewportHeight() - top - tail());
             page.style.setProperty('--km-show-more-clamp', `${Math.round(room)}px`);
         };
 
@@ -388,12 +425,7 @@
             document.dispatchEvent(new Event('km:fold'));
         };
 
-        const settle = (next) => {
-            window.clearTimeout(timer);
-            page.classList.remove('km-page--clamping');
-            fold(!next);
-            content.style.maxHeight = '';
-        };
+        const motion = foldMotion(page, content, 'km-page--clamped', 'km-page--clamping', fold);
 
         const measure = () => {
             content.style.maxHeight = '';
@@ -406,72 +438,15 @@
 
         fit();
         const { collapsed: first, full: whole } = measure();
-        settle(false);
+        motion.settle(false);
         if (whole - first < CLAMP_SLACK_PX) {
             page.classList.remove('km-page--clamped');
             shell.remove();
             return;
         }
 
-        const keepInView = (collapsed) => {
-            const top = window.scrollY + content.getBoundingClientRect().top;
-            const viewport = window.visualViewport?.height || window.innerHeight;
-            const targetY = Math.max(0, top + collapsed + tail() - viewport);
-            const distance = window.scrollY - targetY;
-            if (distance <= 0) return Promise.resolve();
-            return smoothScrollTo(targetY, scrollDuration(distance));
-        };
-
+        const { stir, rest } = idleShell(shell, button, 'km-page__more--idle', () => expanded);
         let turn = 0;
-
-        const clamp = (next, from, to) => {
-            page.classList.toggle('km-page--clamped', !next);
-            page.classList.add('km-page--clamping');
-            content.style.maxHeight = `${from}px`;
-            void content.offsetHeight;
-            content.style.maxHeight = `${to}px`;
-            window.clearTimeout(timer);
-            timer = window.setTimeout(
-                () => settle(next),
-                getDurationMs('--km-duration-clamp', 420) + CLAMP_SETTLE_MS,
-            );
-        };
-
-        const IDLE = 'km-page__more--idle';
-
-        const riding = () => {
-            const viewport = window.visualViewport?.height || window.innerHeight;
-            return shell.getBoundingClientRect().bottom > viewport - dock() - 1;
-        };
-
-        const rest = () => {
-            window.clearTimeout(idleTimer);
-            idleTimer = 0;
-            shell.classList.remove(IDLE);
-        };
-
-        const idle = () => {
-            idleTimer = 0;
-            if (!expanded) return;
-            const hold = TIMING.showMoreHold();
-            const quiet = performance.now() - stirred;
-            if (quiet < hold) {
-                idleTimer = window.setTimeout(idle, hold - quiet);
-                return;
-            }
-            if (button.matches(':hover, :focus-visible')) {
-                idleTimer = window.setTimeout(idle, hold);
-                return;
-            }
-            if (riding()) shell.classList.add(IDLE);
-        };
-
-        const stir = () => {
-            if (!expanded) return;
-            stirred = performance.now();
-            shell.classList.remove(IDLE);
-            if (!idleTimer) idleTimer = window.setTimeout(idle, TIMING.showMoreHold());
-        };
 
         const toggle = (next, animate = true) => {
             if (next === expanded) return;
@@ -488,25 +463,28 @@
 
             const start = content.getBoundingClientRect().height;
             const current = ++turn;
-            window.clearTimeout(timer);
+            motion.stop();
             if (next) {
                 const { full } = measure();
-                if (!animate || prefersReducedMotion()) settle(true);
-                else clamp(true, start, full);
+                if (!animate || prefersReducedMotion()) {
+                    motion.settle(true);
+                    return;
+                }
+                const room = viewportHeight() - content.getBoundingClientRect().top;
+                motion.clamp(true, start, Math.min(full, Math.max(start, room, viewportHeight())));
                 return;
             }
             const room = page.style.getPropertyValue('--km-show-more-clamp');
-            const collapsed = Math.min(start, toPx(room, start));
+            const collapsed = Math.min(start, toPx(room));
             if (!animate || prefersReducedMotion()) {
-                keepInView(collapsed);
-                settle(false);
+                keepInView(content, collapsed, tail());
+                motion.settle(false);
                 return;
             }
-            keepInView(collapsed).then(() => {
+            keepInView(content, collapsed, tail()).then(() => {
                 if (current !== turn) return;
-                const viewport = window.visualViewport?.height || window.innerHeight;
-                const shown = viewport - content.getBoundingClientRect().top;
-                clamp(false, Math.min(start, Math.max(collapsed, shown)), collapsed);
+                const shown = viewportHeight() - content.getBoundingClientRect().top;
+                motion.clamp(false, Math.min(start, Math.max(collapsed, shown)), collapsed);
             });
         };
 
@@ -548,16 +526,9 @@
             }
         });
 
-        for (const type of [
-            'pointermove', 'pointerdown', 'keydown', 'touchstart', 'focusin',
-        ]) {
-            window.addEventListener(type, stir, { passive: true });
-        }
-        onScroll(stir);
-
         window.addEventListener('resize', rafThrottle(fit), { passive: true });
-        if ('ResizeObserver' in window) new ResizeObserver(rafThrottle(fit)).observe(document.body);
-        if (document.fonts?.ready) document.fonts.ready.then(fit);
+        new ResizeObserver(rafThrottle(fit)).observe(document.body);
+        document.fonts.ready.then(fit);
 
         if (holds(location.hash) || history.state?.kmExpanded) toggle(true, false);
     }
@@ -605,38 +576,54 @@
         });
     }
 
-    function easeOutCubic(t) {
-        return 1 - (1 - t) ** 3;
-    }
-
-    function smoothScrollTo(targetY, duration) {
-        const startY = window.scrollY;
-        const maxY = Math.max(0, root.scrollHeight - window.innerHeight);
-        const endY = Math.min(maxY, Math.max(0, targetY));
-        const distance = endY - startY;
-
-        if (Math.abs(distance) < 1 || prefersReducedMotion()) {
-            window.scrollTo(0, endY);
-            return Promise.resolve();
-        }
-
-        const start = performance.now();
-        const total = Math.max(SCROLL_DURATION_MIN_MS, Math.min(duration, SCROLL_DURATION_MAX_MS));
-        const previousBehavior = root.style.scrollBehavior;
-        root.style.scrollBehavior = 'auto';
-
+    function scrollSettled(endY) {
+        const began = performance.now();
+        let last = window.scrollY;
+        let moved = false;
+        let quiet = 0;
         return new Promise((resolve) => {
-            function step(now) {
-                const t = Math.min(1, (now - start) / total);
-                window.scrollTo(0, startY + distance * easeOutCubic(t));
-                if (t < 1) {
-                    requestAnimationFrame(step);
+            const look = (now) => {
+                const y = window.scrollY;
+                moved = moved || y !== last;
+                quiet = y === last ? quiet + 1 : 0;
+                last = y;
+                if (Math.abs(y - endY) < 1 || (moved && quiet >= SCROLL_QUIET_FRAMES)
+                    || now - began > SCROLL_PATIENCE_MS) {
+                    resolve();
                     return;
                 }
-                root.style.scrollBehavior = previousBehavior || '';
-                resolve();
-            }
-            requestAnimationFrame(step);
+                requestAnimationFrame(look);
+            };
+            requestAnimationFrame(look);
+        });
+    }
+
+    function glideTo(targetY) {
+        const endY = clamp(targetY, 0, Math.max(0, root.scrollHeight - window.innerHeight));
+        if (Math.abs(endY - window.scrollY) < 1) return Promise.resolve(true);
+        if (prefersReducedMotion()) {
+            window.scrollTo(0, endY);
+            return Promise.resolve(true);
+        }
+        let stopped = false;
+        const stop = (event) => {
+            if (event.type === 'keydown' && !GLIDE_KEYS.has(event.key)) return;
+            if (event.type === 'wheel' && !event.deltaX && !event.deltaY) return;
+            release();
+            stopped = true;
+            const previousBehavior = root.style.scrollBehavior;
+            root.style.scrollBehavior = 'auto';
+            window.scrollTo(0, window.scrollY);
+            root.style.scrollBehavior = previousBehavior || '';
+        };
+        const release = () => {
+            GLIDE_STOPS.forEach((type) => window.removeEventListener(type, stop, true));
+        };
+        GLIDE_STOPS.forEach((type) => window.addEventListener(type, stop, { capture: true, passive: true }));
+        window.scrollTo({ top: endY, behavior: 'smooth' });
+        return scrollSettled(endY).then(() => {
+            release();
+            return !stopped;
         });
     }
 
@@ -663,19 +650,11 @@
         const top = host.offsetParent
             ? layoutTop(host)
             : window.scrollY + host.getBoundingClientRect().top;
-        return Math.max(0, top - getHeaderOffsetPx());
-    }
-
-    function scrollDuration(distance) {
-        return Math.max(TIMING.scrollMin(), Math.min(
-            TIMING.scrollMax(),
-            TIMING.scrollMin() + Math.min(ANCHOR_SCROLL_DIST_CAP_MS, Math.abs(distance) * ANCHOR_SCROLL_PX_FACTOR),
-        ));
+        return Math.max(0, top - headerHeight());
     }
 
     function scrollToElement(element) {
-        const targetY = anchorTargetY(element);
-        return smoothScrollTo(targetY, scrollDuration(window.scrollY - targetY));
+        return glideTo(anchorTargetY(element));
     }
 
     function isModifiedClick(event) {
@@ -694,9 +673,9 @@
             if (!target) return;
 
             event.preventDefault();
-            scrollToElement(target).then(() => {
-                try { history.pushState(history.state, '', `#${id}`); } catch { /* noop */ }
-                if (!target.contains(link)) focusTarget(target);
+            try { history.pushState(history.state, '', `#${id}`); } catch { /* noop */ }
+            scrollToElement(target).then((arrived) => {
+                if (arrived && !target.contains(link)) focusTarget(target);
             });
         });
 
@@ -704,7 +683,7 @@
     }
 
     function revisited() {
-        const [entry] = performance.getEntriesByType?.('navigation') ?? [];
+        const [entry] = performance.getEntriesByType('navigation');
         return entry?.type === 'reload' || entry?.type === 'back_forward';
     }
 
@@ -713,17 +692,47 @@
         element.focus({ preventScroll: true });
     }
 
+    function reachFocus(target) {
+        const began = performance.now();
+        let last = window.scrollY;
+        let quiet = 0;
+        const look = (now) => {
+            if (document.activeElement !== target) return;
+            quiet = window.scrollY === last ? quiet + 1 : 0;
+            last = window.scrollY;
+            if (quiet < SCROLL_QUIET_FRAMES) {
+                if (now - began < SCROLL_PATIENCE_MS) requestAnimationFrame(look);
+                return;
+            }
+            const top = headerHeight();
+            const rect = target.getBoundingClientRect();
+            const fits = rect.height <= window.innerHeight - top;
+            const seen = fits
+                ? rect.top >= top - 1 && rect.bottom <= window.innerHeight + 1
+                : rect.top < window.innerHeight && rect.bottom > top;
+            if (!seen) glideTo(layoutTop(target) - top);
+        };
+        requestAnimationFrame(look);
+    }
+
+    function initFocusInView() {
+        document.addEventListener('focusin', (event) => {
+            if (!root.hasAttribute('data-km-keyboard')) return;
+            if (event.target.closest?.('.km-header, #km-sidebar')) return;
+            reachFocus(event.target);
+        });
+    }
+
     function settleHash() {
         if (location.hash.length <= 1) return;
         const target = document.getElementById(decodeId(location.hash.slice(1)));
         if (!target) return;
 
         let cancelled = false;
-        let observer = null;
+        const observer = new ResizeObserver(() => requestAnimationFrame(apply));
         const stop = () => {
             cancelled = true;
-            observer?.disconnect();
-            observer = null;
+            observer.disconnect();
         };
         const apply = () => {
             if (cancelled) return;
@@ -738,13 +747,10 @@
         }
 
         requestAnimationFrame(apply);
-        if ('ResizeObserver' in window) {
-            observer = new ResizeObserver(() => requestAnimationFrame(apply));
-            observer.observe(document.documentElement);
-        }
+        observer.observe(document.documentElement);
         const finish = () => {
             apply();
-            document.fonts?.ready.then(apply);
+            document.fonts.ready.then(apply);
             setTimeout(stop, HASH_SETTLE_MS);
         };
         if (document.readyState === 'complete') finish();
@@ -763,7 +769,7 @@
             if (!transient) return;
             tooltipTimers.set(link, window.setTimeout(
                 () => link.removeAttribute('data-tooltip'),
-                getDurationMs('--km-duration-fast', 250),
+                getDurationMs('--km-duration-fast'),
             ));
         }, TIMING.tooltipHold()));
     }
@@ -805,32 +811,54 @@
                 event.preventDefault();
                 event.stopPropagation();
                 const copied = await copyText(canonicalUrl());
-                flashTooltip(link, copied ? say('copied', 'Copied!!') : say('failed', 'Copy failed'));
+                flashTooltip(link, copied ? say('copied') : say('failed'));
             });
         });
+    }
+
+    function measureHeaderLink(link, x) {
+        const frame = link.parentElement.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(link.parentElement);
+        const text = range.getBoundingClientRect();
+        link.style.setProperty('--km-headerlink-top', `${text.top - frame.top}px`);
+        link.style.setProperty('--km-headerlink-x', `${(x ?? text.left) - frame.left}px`);
+        return text;
+    }
+
+    function headingLink(event) {
+        const heading = event.target.closest('h1, h2, h3, h4, h5, h6');
+        const link = heading?.querySelector(':scope > a.headerlink');
+        if (!link) return null;
+        const other = event.target.closest(FOCUSABLE);
+        if (other && other !== heading
+            && (heading.contains(other) || !other.matches('[tabindex]'))) return null;
+        if (String(window.getSelection())) return null;
+        const text = measureHeaderLink(link, event.clientX);
+        return event.clientY >= text.top && event.clientY <= text.bottom ? link : null;
     }
 
     function initHeaderLinks() {
-        if (!root.hasAttribute('data-km-copy-links')) return;
+        const copying = root.hasAttribute('data-km-copy-links');
+        document.querySelectorAll('a.headerlink').forEach((link) => {
+            link.parentElement.classList.add('km-has-headerlink');
+        });
+        document.addEventListener('focusin', (event) => {
+            if (event.target.matches?.('a.headerlink')) measureHeaderLink(event.target);
+        });
         document.addEventListener('click', (event) => {
+            if (isModifiedClick(event)) return;
             const link = event.target.closest?.('a.headerlink');
-            if (!link || isModifiedClick(event)) return;
+            if (!link) {
+                headingLink(event)?.click();
+                return;
+            }
+            if (event.isTrusted) measureHeaderLink(link, event.detail ? event.clientX : undefined);
+            if (!copying) return;
             copyText(canonicalUrl(link.getAttribute('href') || '')).then((copied) => {
-                flashTooltip(link, copied ? say('copied', 'Copied!!') : say('failed', 'Copy failed'), true);
+                flashTooltip(link, copied ? say('copied') : say('failed'), true);
             });
         });
-    }
-
-    function initHeaderBorder() {
-        const header = document.querySelector('.km-header');
-        if (!header) return;
-        const update = rafThrottle(() => {
-            header.classList.toggle(
-                'km-header--with-border',
-                window.scrollY > HEADER_BORDER_SCROLL_THRESHOLD,
-            );
-        });
-        onScroll(update);
     }
 
     function initCopyButtonNames() {
@@ -841,11 +869,11 @@
             buttons.forEach((button) => {
                 if (button.hasAttribute('aria-label')) return;
                 const title = button.querySelector('svg title')?.textContent.trim();
-                button.setAttribute('aria-label', title || button.dataset.tooltip || say('copy', 'Copy'));
+                button.setAttribute('aria-label', title || button.dataset.tooltip || say('copy'));
             });
             return buttons.length >= cells;
         };
-        if (name() || !('MutationObserver' in window)) return;
+        if (name()) return;
         const watch = new MutationObserver(() => {
             if (name()) watch.disconnect();
         });
@@ -867,12 +895,74 @@
         };
         const soon = rafThrottle(measure);
         measure();
-        document.fonts?.ready.then(measure);
+        document.fonts.ready.then(measure);
         window.addEventListener('resize', soon, { passive: true });
-        if ('ResizeObserver' in window) {
-            const watch = new ResizeObserver(soon);
-            blocks.forEach((pre) => watch.observe(pre));
-        }
+        const watch = new ResizeObserver(soon);
+        blocks.forEach((pre) => watch.observe(pre));
+    }
+
+    function initTabSets() {
+        const bars = [];
+        const panels = new Map();
+        document.querySelectorAll('.sd-tab-set').forEach((set) => {
+            const tabs = Array.from(set.querySelectorAll(':scope > input'), (input) => {
+                const label = input.nextElementSibling;
+                return [input, label, label?.nextElementSibling];
+            });
+            const shaped = ([, label, panel]) => label?.matches('label') && panel?.matches('.sd-tab-content');
+            if (!tabs.length || !tabs.every(shaped)) return;
+            const bar = document.createElement('div');
+            bar.className = 'km-tab-bar';
+            set.prepend(bar);
+            bars.push(bar);
+            tabs.forEach(([input, label, panel]) => {
+                bar.append(input, label);
+                panels.set(input, panel);
+            });
+        });
+        if (!bars.length) return;
+
+        const mark = () => panels.forEach((panel, input) => {
+            panel.classList.toggle('km-is-current', input.checked);
+        });
+        const place = (bar, slide) => {
+            const label = bar.querySelector(':scope > input:checked + label');
+            if (!label) return;
+            const view = bar.getBoundingClientRect();
+            const box = label.getBoundingClientRect();
+            bar.classList.toggle('km-is-sliding', slide);
+            bar.style.setProperty('--km-tab-x', `${box.left - view.left - bar.clientLeft + bar.scrollLeft}px`);
+            bar.style.setProperty('--km-tab-y', `${box.top - view.top - bar.clientTop + bar.scrollTop}px`);
+            bar.style.setProperty('--km-tab-width', `${box.width}px`);
+            bar.style.setProperty('--km-tab-height', `${box.height}px`);
+        };
+        const settle = () => {
+            mark();
+            bars.forEach((bar) => place(bar, false));
+        };
+        const reveal = (label) => {
+            const bar = label.parentElement;
+            const inset = parseFloat(getComputedStyle(bar).paddingLeft);
+            const view = bar.getBoundingClientRect();
+            const box = label.getBoundingClientRect();
+            const start = box.left - view.left - bar.clientLeft - inset;
+            const end = box.right - view.left - bar.clientLeft - bar.clientWidth + inset;
+            const shift = start < 0 ? start : Math.min(Math.max(end, 0), start);
+            if (shift) bar.scrollBy({ left: shift, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        };
+
+        settle();
+        document.addEventListener('DOMContentLoaded', settle, { once: true });
+        const watch = new ResizeObserver((entries) => {
+            new Set(entries.map(({ target }) => target.parentElement)).forEach((bar) => place(bar, false));
+        });
+        bars.forEach((bar) => bar.querySelectorAll(':scope > label').forEach((label) => watch.observe(label)));
+        document.addEventListener('change', (event) => {
+            if (!panels.has(event.target)) return;
+            mark();
+            bars.forEach((bar) => place(bar, true));
+            reveal(event.target.nextElementSibling);
+        });
     }
 
     function initScrollable() {
@@ -888,41 +978,27 @@
         };
         const soon = rafThrottle(mark);
         mark();
-        document.fonts?.ready.then(mark);
+        document.fonts.ready.then(mark);
         window.addEventListener('resize', soon, { passive: true });
-        if ('ResizeObserver' in window) {
-            const watch = new ResizeObserver(soon);
-            blocks.forEach((pre) => watch.observe(pre));
-        }
+        const watch = new ResizeObserver(soon);
+        blocks.forEach((pre) => watch.observe(pre));
     }
 
     function initImageZoom() {
         if (prefersReducedMotion()) return;
 
-        const wrap = (element, container, standalone) => {
-            if (element.classList.contains('km-no-zoom')) return;
+        const wrap = (image, standalone) => {
             const inner = document.createElement('div');
             inner.className = standalone ? 'km-zoom-inner km-zoom-inner--standalone' : 'km-zoom-inner';
             const scale = document.createElement('div');
             scale.className = 'km-zoom-scale';
-            (container || element.parentElement).insertBefore(inner, element);
+            image.parentElement.insertBefore(inner, image);
             inner.appendChild(scale);
-            scale.appendChild(element);
+            scale.appendChild(image);
         };
 
-        document.querySelectorAll('#km-content figure.km-zoom:not([data-km-zoom-ready]) > img')
-            .forEach((image) => {
-                const figure = image.parentElement;
-                if (!figure || figure.dataset.kmZoomReady === 'true') return;
-                wrap(image, figure, false);
-                figure.dataset.kmZoomReady = 'true';
-            });
-
-        document.querySelectorAll('#km-content img.km-zoom:not(figure img):not(.km-no-zoom):not([data-km-zoom-ready])')
-            .forEach((image) => {
-                wrap(image, null, true);
-                image.dataset.kmZoomReady = 'true';
-            });
+        document.querySelectorAll('#km-content figure.km-zoom > img').forEach((image) => wrap(image, false));
+        document.querySelectorAll('#km-content img.km-zoom:not(figure img)').forEach((image) => wrap(image, true));
     }
 
     function initTouchReveal() {
@@ -1004,53 +1080,239 @@
         });
     }
 
-    function initDropdowns() {
-        const easing = easingToken('--km-ease-smooth', 'cubic-bezier(0.32, 0.72, 0, 1)');
+    function dropdownFold(details, summary, content, index) {
+        const CLAMPED = 'km-dropdown--clamped';
+        const CLAMPING = 'km-dropdown--clamping';
+        const LONG = 'km-dropdown--long';
+        let body = null;
+        let shell = null;
+        let button = null;
+        let label = null;
+        let motion = null;
+        let idle = null;
+        let expanded = false;
+        let turn = 0;
 
-        document.querySelectorAll('details.sd-dropdown').forEach((details) => {
+        const tail = () => (button ? button.getBoundingClientRect().height : 0);
+
+        const limit = () => {
+            const style = getComputedStyle(content);
+            const room = viewportHeight() - headerHeight()
+                - summary.getBoundingClientRect().height
+                - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - tail();
+            return Math.max(CLAMP_MIN_PX, Math.round(room));
+        };
+
+        const full = () => {
+            if (!body) {
+                const style = getComputedStyle(content);
+                return content.getBoundingClientRect().height
+                    - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+            }
+            const clamped = details.classList.contains(CLAMPED);
+            details.classList.remove(CLAMPED);
+            const height = body.getBoundingClientRect().height;
+            details.classList.toggle(CLAMPED, clamped);
+            return height;
+        };
+
+        const name = (next) => {
+            button.setAttribute('aria-expanded', String(next));
+            label.textContent = next ? say('less') : say('more');
+        };
+
+        const toggle = (next, animate = true) => {
+            if (next === expanded) return;
+            expanded = next;
+            name(next);
+            if (next) idle.stir();
+            else idle.rest();
+            const start = body.getBoundingClientRect().height;
+            const current = ++turn;
+            motion.stop();
+            if (next) {
+                const height = full();
+                if (!animate || prefersReducedMotion()) {
+                    motion.settle(true);
+                    return;
+                }
+                const room = viewportHeight() - body.getBoundingClientRect().top;
+                motion.clamp(true, start, Math.min(height, Math.max(start, room, viewportHeight())));
+                return;
+            }
+            const collapsed = Math.min(start, limit());
+            const keep = () => keepInView(body, collapsed, tail() + showMoreDock());
+            if (!animate || prefersReducedMotion()) {
+                keep();
+                motion.settle(false);
+                return;
+            }
+            keep().then(() => {
+                if (current !== turn) return;
+                const shown = viewportHeight() - body.getBoundingClientRect().top;
+                motion.clamp(false, Math.min(start, Math.max(collapsed, shown)), collapsed);
+            });
+        };
+
+        const measure = () => {
+            if (!details.open) return;
+            if (details.classList.contains('km-is-animating') || details.classList.contains(CLAMPING)) return;
+            if (full() - limit() < CLAMP_SLACK_PX) {
+                if (!body) return;
+                expanded = false;
+                name(false);
+                idle.rest();
+                details.classList.remove(LONG, CLAMPED);
+                return;
+            }
+            build();
+            details.classList.add(LONG);
+            details.style.setProperty('--km-dropdown-clamp', `${limit()}px`);
+            if (!expanded) details.classList.add(CLAMPED);
+        };
+
+        const soon = rafThrottle(measure);
+
+        const build = () => {
+            if (body) return;
+            body = document.createElement('div');
+            body.className = 'km-dropdown__body';
+            body.id = `km-dropdown-body-${index}`;
+            body.append(...content.childNodes);
+            shell = document.createElement('div');
+            shell.className = 'km-dropdown__more';
+            button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'km-dropdown__more-button';
+            button.setAttribute('aria-controls', body.id);
+            label = document.createElement('span');
+            label.className = 'km-dropdown__more-label';
+            const icon = document.createElement('i');
+            icon.className = `${root.dataset.kmMoreIcon} km-dropdown__more-icon`;
+            icon.setAttribute('aria-hidden', 'true');
+            button.append(label, icon);
+            shell.append(button);
+            content.append(body, shell);
+            name(false);
+            motion = foldMotion(details, body, CLAMPED, CLAMPING, (next) => {
+                details.classList.toggle(CLAMPED, next);
+            });
+            idle = idleShell(shell, button, 'km-dropdown__more--idle', () => expanded && details.open);
+            button.addEventListener('click', () => toggle(!expanded));
+            body.addEventListener('focusin', (event) => {
+                if (expanded || !details.classList.contains(CLAMPED)) return;
+                if (event.target.getBoundingClientRect().bottom > shell.getBoundingClientRect().top) {
+                    toggle(true, false);
+                }
+            });
+            const watch = new ResizeObserver(soon);
+            Array.from(body.children).forEach((child) => watch.observe(child));
+        };
+
+        const reset = () => {
+            if (!body || !expanded) return;
+            expanded = false;
+            name(false);
+            idle.rest();
+            motion.settle(false);
+        };
+
+        window.addEventListener('resize', soon, { passive: true });
+        new ResizeObserver(soon).observe(content);
+        document.fonts.ready.then(soon);
+        return { measure, reset };
+    }
+
+    function initDropdowns() {
+        const easing = getCssVar('--km-ease-smooth');
+
+        document.querySelectorAll('details.sd-dropdown').forEach((details, index) => {
             const summary = details.querySelector(':scope > summary');
             const content = details.querySelector(':scope > .sd-summary-content');
             if (!summary || !content) return;
+            const fold = dropdownFold(details, summary, content, index);
 
             let animation = null;
             let wanted = details.open;
+
+            const finish = (opening) => {
+                details.classList.remove('km-is-animating', 'km-is-closing');
+                if (opening) {
+                    fold.measure();
+                    return;
+                }
+                details.open = false;
+                fold.reset();
+            };
+
+            const frame = (state) => ({
+                height: `${state.height}px`,
+                paddingTop: `${state.top}px`,
+                paddingBottom: `${state.bottom}px`,
+                opacity: state.opacity,
+            });
+
             summary.addEventListener('click', (event) => {
                 if (isModifiedClick(event)) return;
                 event.preventDefault();
 
-                if (prefersReducedMotion() || typeof content.animate !== 'function') {
-                    details.open = !details.open;
+                const opening = animation ? !wanted : !details.open;
+                wanted = opening;
+                const moving = getComputedStyle(content);
+                const from = animation ? {
+                    height: content.getBoundingClientRect().height,
+                    top: parseFloat(moving.paddingTop),
+                    bottom: parseFloat(moving.paddingBottom),
+                    opacity: Number(moving.opacity),
+                } : null;
+                animation?.cancel();
+                animation = null;
+                details.classList.toggle('km-is-closing', !opening);
+                if (opening && !details.open) {
+                    details.open = true;
+                    fold.measure();
+                }
+                if (prefersReducedMotion()) {
+                    finish(opening);
                     return;
                 }
 
-                const opening = animation ? !wanted : !details.open;
-                wanted = opening;
-                animation?.cancel();
-                if (opening) details.open = true;
                 details.classList.add('km-is-animating');
+                const style = getComputedStyle(content);
+                const top = parseFloat(style.paddingTop);
+                const bottom = parseFloat(style.paddingBottom);
+                const box = content.getBoundingClientRect();
+                const room = Math.max(0, viewportHeight() - box.top);
+                const start = from || (opening
+                    ? { height: 0, top: 0, bottom: 0, opacity: 0 }
+                    : { height: box.height, top, bottom, opacity: 1 });
+                if (!opening) start.height = Math.min(start.height, room);
+                const end = opening
+                    ? { height: Math.min(box.height, Math.max(room, viewportHeight(), start.height)), top, bottom, opacity: 1 }
+                    : { height: 0, top: 0, bottom: 0, opacity: 0 };
+                const duration = Math.min(TIMING.dropdownMax(), Math.max(
+                    TIMING.dropdownMin(),
+                    Math.abs(end.height - start.height) * DROPDOWN_PX_FACTOR,
+                ));
 
-                const height = content.scrollHeight;
-                const duration = Math.min(TIMING.dropdownMax(),
-                    Math.max(TIMING.dropdownMin(), height * DROPDOWN_PX_FACTOR));
-                animation = content.animate({
-                    height: opening ? ['0px', `${height}px`] : [`${height}px`, '0px'],
-                    opacity: opening ? [0, 1] : [1, 0],
-                }, { duration, easing, fill: 'both' });
-
-                animation.finished.then(() => {
-                    animation?.cancel();
+                const current = content.animate([frame(start), frame(end)], {
+                    duration, easing, fill: 'both',
+                });
+                animation = current;
+                current.finished.then(() => {
+                    current.cancel();
                     animation = null;
-                    details.classList.remove('km-is-animating');
-                    if (!opening) details.open = false;
+                    finish(opening);
                 }).catch(() => { /* superseded by a newer toggle */ });
             });
+
+            if (details.open) fold.measure();
         });
     }
 
     function enrichYouTubeCard(card) {
         const id = card.getAttribute('data-km-youtube-id');
-        if (!id || card.dataset.kmYoutubeEnriched === '1') return;
-        card.dataset.kmYoutubeEnriched = '1';
+        if (!id) return;
         const title = card.hasAttribute('data-km-youtube-title')
             ? null
             : card.querySelector('.km-youtube-card__title');
@@ -1072,6 +1334,27 @@
             document.querySelectorAll('.km-youtube-card[data-km-youtube-id]'),
             enrichYouTubeCard,
         );
+    }
+
+    function initYouTubeFacades() {
+        document.querySelectorAll('[data-km-facade]').forEach((facade) => {
+            facade.addEventListener('click', (event) => {
+                if (event.button !== 0 || event.metaKey || event.ctrlKey
+                    || event.shiftKey || event.altKey) return;
+                event.preventDefault();
+                const url = new URL(facade.getAttribute('data-km-facade-src'), window.location.href);
+                url.searchParams.set('autoplay', '1');
+                const frame = document.createElement('iframe');
+                frame.className = 'km-media__iframe';
+                frame.src = url.href;
+                frame.title = facade.getAttribute('data-km-facade-title') || '';
+                frame.allow = facade.getAttribute('data-km-facade-allow') || '';
+                frame.referrerPolicy = facade.getAttribute('data-km-facade-referrer') || '';
+                frame.allowFullscreen = true;
+                facade.replaceWith(frame);
+                frame.focus();
+            });
+        });
     }
 
     function formatCount(value) {
@@ -1123,7 +1406,7 @@
         field.replaceChildren(ticker);
         const reduced = prefersReducedMotion();
         for (const { reel, shift, duration } of columns) {
-            if (reduced || typeof reel.animate !== 'function') {
+            if (reduced) {
                 reel.style.transform = shift;
                 continue;
             }
@@ -1138,9 +1421,6 @@
     }
 
     async function loadRepository(widget) {
-        if (widget.dataset.kmRepositoryLoaded === '1') return;
-        widget.dataset.kmRepositoryLoaded = '1';
-
         const project = widget.getAttribute('data-km-repository');
         const fields = widget.querySelectorAll('[data-km-repository-count]');
         if (!project || !fields.length) return;
@@ -1154,8 +1434,6 @@
     }
 
     function initRepositoryWidgets() {
-        // The reel should roll once per page load, the moment the widget is first
-        // scrolled into view - not while it is still off-screen.
         onVisible(
             document.querySelectorAll('.km-github-repository[data-km-repository]'),
             loadRepository,
@@ -1191,7 +1469,7 @@
         ].filter(Boolean);
 
         const limit = TIMING.revealStep() * REVEAL_STEPS;
-        const duration = getDurationMs('--km-duration-normal', 750);
+        const duration = getDurationMs('--km-reveal-duration');
         const nudges = ['wheel', 'touchmove', 'keydown', 'pointerdown', 'scroll'];
         const hurried = new Set();
         const anchor = window.scrollY;
@@ -1347,11 +1625,12 @@
         }));
 
         window.addEventListener('resize', rafThrottle(measure), { passive: true });
-        if ('ResizeObserver' in window) new ResizeObserver(measure).observe(main);
-        if (document.fonts?.ready) document.fonts.ready.then(measure);
+        new ResizeObserver(measure).observe(main);
+        document.fonts.ready.then(measure);
         article.addEventListener('animationend', measure);
 
         if (urls.length === 1 || prefersReducedMotion()) return;
+        const every = Number(article.getAttribute('data-km-interval')) || ARTICLE_BG_INTERVAL_MS;
         let index = 0;
         setInterval(() => {
             overlay.style.opacity = '0';
@@ -1364,50 +1643,8 @@
                 requestAnimationFrame(() => requestAnimationFrame(() => {
                     overlay.style.opacity = '';
                 }));
-            }, ARTICLE_BG_FADE_MS + 50);
-        }, ARTICLE_BG_INTERVAL_MS);
-    }
-
-    (function initCalEmbed(window_, source, action) {
-        const push = (target, args) => target.q.push(args);
-        window_.Cal = window_.Cal || function Cal(...args) {
-            const cal = window_.Cal;
-            if (!cal.loaded) {
-                cal.ns = {};
-                cal.q = cal.q || [];
-                document.head.appendChild(document.createElement('script')).src = source;
-                cal.loaded = true;
-            }
-            if (args[0] !== action) {
-                push(cal, args);
-                return;
-            }
-            const api = function api(...inner) { push(api, inner); };
-            const namespace = args[1];
-            api.q = api.q || [];
-            if (typeof namespace === 'string') {
-                cal.ns[namespace] = cal.ns[namespace] || api;
-                push(cal.ns[namespace], args);
-                push(cal, ['initNamespace', namespace]);
-            } else {
-                push(cal, args);
-            }
-        };
-    }(window, 'https://app.cal.com/embed/embed.js', 'init'));
-
-    function initCalNamespaces() {
-        document.addEventListener('click', (event) => {
-            const link = event.target.closest?.('a[href="#"]');
-            if (link?.hasAttribute('data-cal-link') || link?.querySelector('[data-cal-link]')) event.preventDefault();
-        });
-        const seen = new Set();
-        document.querySelectorAll('[data-cal-namespace]').forEach((el) => {
-            const ns = el.getAttribute('data-cal-namespace');
-            if (!ns || seen.has(ns)) return;
-            seen.add(ns);
-            Cal('init', ns, { origin: CAL_ORIGIN });
-            Cal.ns[ns]('ui', { hideEventTypeDetails: false, layout: 'month_view' });
-        });
+            }, getDurationMs('--km-duration-slow') + 50);
+        }, every);
     }
 
     function clamp(value, low, high) {
@@ -1415,16 +1652,7 @@
     }
 
     function readWalkthroughPayload(host) {
-        try {
-            return JSON.parse(host.querySelector('[data-km-payload]')?.textContent || 'null');
-        } catch {
-            return null;
-        }
-    }
-
-    function walkthroughHeader() {
-        const header = document.querySelector('.km-header');
-        return header ? Math.ceil(header.getBoundingClientRect().height) : 0;
+        return JSON.parse(host.querySelector('[data-km-payload]').textContent);
     }
 
     function walkthroughSource(payload) {
@@ -1520,29 +1748,19 @@
     }
 
     function walkthroughLayout() {
-        const pieces = new Map();
         walkthroughs.forEach((walk) => {
             if (!walk.span) return;
-            const start = walkthroughTop(walk.host) - walk.stick;
-            walk.start = start;
-            walk.piece = [start, start + walk.span, -walk.span, 0];
-            walk.tail.forEach((element) => {
-                if (!pieces.has(element)) pieces.set(element, []);
-                pieces.get(element).push(walk.piece);
-            });
+            walk.start = walkthroughTop(walk.host) - walk.stick;
         });
-        walkthroughPieces = pieces;
     }
 
     function walkthroughDraw() {
         const shifts = new Map();
-        let lift = 0;
         walkthroughs.forEach((walk) => {
             if (!walk.span) return;
             const shift = walk.pane.getBoundingClientRect().bottom
                 - walk.host.getBoundingClientRect().bottom;
             shifts.set(walk, shift);
-            lift += shift;
         });
         const totals = new Map();
         shifts.forEach((shift, walk) => {
@@ -1550,12 +1768,6 @@
                 totals.set(element, (totals.get(element) || 0) + shift);
             });
         });
-        lift = walkthroughSnap(lift);
-        if (lift !== walkthroughLift) {
-            walkthroughLift = lift;
-            document.querySelector('.km-layout__content')
-                ?.style.setProperty('--km-walkthrough-lift', `${lift}px`);
-        }
         walkthroughDrawn.forEach((_, element) => {
             if (!totals.has(element)) totals.set(element, 0);
         });
@@ -1605,50 +1817,14 @@
         walkthroughSettling = window.setTimeout(walkthroughRefit, WALKTHROUGH_SETTLE);
     }
 
-    function walkthroughMoved(element) {
-        for (let node = element; node && node !== document.body; node = node.parentElement) {
-            if (walkthroughPieces.has(node)) return true;
-        }
-        return false;
-    }
-
-    function walkthroughReach(target) {
-        let last = window.scrollY;
-        let quiet = 0;
-        let frames = 0;
-        const look = () => {
-            if (document.activeElement !== target) return;
-            frames += 1;
-            quiet = window.scrollY === last ? quiet + 1 : 0;
-            last = window.scrollY;
-            if (quiet < WALKTHROUGH_QUIET && frames < WALKTHROUGH_PATIENCE) {
-                requestAnimationFrame(look);
-                return;
-            }
-            const top = walkthroughHeader();
-            const rect = target.getBoundingClientRect();
-            const fits = rect.height <= window.innerHeight - top;
-            const seen = fits
-                ? rect.top >= top - 1 && rect.bottom <= window.innerHeight + 1
-                : rect.top < window.innerHeight && rect.bottom > top;
-            if (seen) return;
-            const previousBehavior = root.style.scrollBehavior;
-            root.style.scrollBehavior = 'auto';
-            window.scrollTo(0, Math.max(0, layoutTop(target) - getHeaderOffsetPx()));
-            root.style.scrollBehavior = previousBehavior || '';
-        };
-        requestAnimationFrame(look);
-    }
-
     function createWalkthrough(host) {
         const payload = readWalkthroughPayload(host);
-        const steps = payload?.steps;
+        const { steps } = payload;
         const pane = host.querySelector('[data-km-pane]');
         const frame = host.querySelector('[data-km-frame]');
         const stage = host.querySelector('[data-km-stage]');
-        const code = stage?.querySelector('pre');
+        const code = stage.querySelector('pre');
         const box = host.querySelector('[data-km-notes]');
-        if (!steps?.length || !pane || !frame || !code || !box) return null;
 
         const lead = host.querySelector('[data-km-lead]');
         const foot = host.querySelector('.km-walkthrough__tail') || box;
@@ -1705,7 +1881,7 @@
                 pane.clientWidth,
                 code.offsetHeight,
                 lead?.offsetHeight ?? 0,
-                walkthroughHeader(),
+                headerHeight(),
             ].join(' ');
         }
 
@@ -1861,7 +2037,7 @@
                 return;
             }
             const swap = TIMING.walkthroughSwap();
-            const easing = easingToken('--km-ease-smooth', 'ease-out');
+            const easing = getCssVar('--km-ease-smooth');
             if (leaving) {
                 const { opacity, translate } = getComputedStyle(leaving);
                 leaving.getAnimations().forEach((animation) => animation.cancel());
@@ -1939,9 +2115,9 @@
                 const first = marked[0]?.dataset.kmNumber || step.line;
                 const last = marked[marked.length - 1]?.dataset.kmNumber || first;
                 const where = first === last
-                    ? say('line', 'line {line}', { line: first })
-                    : say('lines', 'lines {first}-{last}', { first, last });
-                status.textContent = say('step', 'Step {step} of {steps}, {where}', {
+                    ? say('line', { line: first })
+                    : say('lines', { first, last });
+                status.textContent = say('step', {
                     step: index + 1, steps: steps.length, where,
                 });
             }
@@ -1972,7 +2148,7 @@
         }
 
         function measure() {
-            const top = walkthroughHeader();
+            const top = headerHeight();
             const width = window.innerWidth;
             const height = window.innerHeight;
             const narrow = width < WALKTHROUGH_NARROW;
@@ -2050,7 +2226,7 @@
                 return;
             }
             const into = at * payload.pace + payload.pace / 2;
-            smoothScrollTo(walk.start + into, TIMING.scrollMin());
+            glideTo(walk.start + into);
         }
 
         function release() {
@@ -2122,17 +2298,25 @@
             }
         });
 
-        const idle = copy?.dataset.tooltip || say('copy', 'Copy');
-        const copied = (message) => {
-            copy.dataset.tooltip = message;
-            copy.classList.add('success');
-            window.setTimeout(() => {
-                copy.classList.remove('success');
-                copy.dataset.tooltip = idle;
-            }, TIMING.tooltipHold());
+        let copiedTimer = 0;
+        const later = (wait, then) => {
+            copiedTimer = window.setTimeout(then, wait);
+        };
+        const copied = (done) => {
+            window.clearTimeout(copiedTimer);
+            copy.classList.remove('km-is-fading');
+            copy.classList.toggle('success', done);
+            if (!done) return;
+            later(TIMING.tooltipHold(), () => {
+                copy.classList.add('km-is-fading');
+                later(TIMING.fast(), () => {
+                    copy.classList.remove('success');
+                    later(TIMING.fast() * 2, () => copy.classList.remove('km-is-fading'));
+                });
+            });
         };
         copy?.addEventListener('click', () => {
-            copyText(walkthroughSource(payload)).then((done) => copied(done ? say('copied', 'Copied!!') : say('failed', 'Copy failed')));
+            copyText(walkthroughSource(payload)).then(copied);
         });
 
         return walk;
@@ -2140,26 +2324,20 @@
 
     function initWalkthroughs() {
         document.querySelectorAll('[data-km-walkthrough]').forEach((host) => {
-            const walk = createWalkthrough(host);
-            if (walk) walkthroughs.push(walk);
+            walkthroughs.push(createWalkthrough(host));
         });
         if (!walkthroughs.length) return;
         walkthroughMeasure();
         onScroll(walkthroughTick);
 
-        if ('ResizeObserver' in window) {
-            const panes = new ResizeObserver(() => {
-                walkthroughDraw();
-                walkthroughSoon();
-            });
-            walkthroughs.forEach((walk) => panes.observe(walk.pane));
-            new ResizeObserver(walkthroughSoon).observe(document.body);
-        }
+        const panes = new ResizeObserver(() => {
+            walkthroughDraw();
+            walkthroughSoon();
+        });
+        walkthroughs.forEach((walk) => panes.observe(walk.pane));
+        new ResizeObserver(walkthroughSoon).observe(document.body);
 
         document.addEventListener('km:fold', walkthroughMeasure);
-        document.addEventListener('focusin', (event) => {
-            if (walkthroughMoved(event.target)) walkthroughReach(event.target);
-        });
 
         let width = window.innerWidth;
         let height = window.innerHeight;
@@ -2176,8 +2354,8 @@
         }, { passive: true });
 
         window.matchMedia('(prefers-reduced-motion: reduce)')
-            .addEventListener?.('change', walkthroughMeasure);
-        document.fonts?.ready.then(walkthroughMeasure);
+            .addEventListener('change', walkthroughMeasure);
+        document.fonts.ready.then(walkthroughMeasure);
     }
 
     ready(() => {
@@ -2189,13 +2367,13 @@
             initKeyboardModality,
             initSidebar,
             initScrollTop,
-            initCalNamespaces,
+            initTabSets,
             initShowMore,
             initHeaderSearch,
             initAnchorScrolling,
+            initFocusInView,
             initCopyUrl,
             initHeaderLinks,
-            initHeaderBorder,
             initImageZoom,
             initTouchReveal,
             initHeaderNavDropdowns,
@@ -2204,6 +2382,7 @@
             initCopyButtonNames,
             initScrollable,
             initYouTubeCards,
+            initYouTubeFacades,
             initRepositoryWidgets,
             initInkReveal,
             initPageReveal,

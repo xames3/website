@@ -1893,7 +1893,7 @@ html:not(.km-js) button.km-header__menu-toggle {
                 place-items: center;
                 width: 2.1538em;
                 height: 2.1538em;
-                border: 1px solid var(--km-list-ring);
+                border: 1px dashed var(--km-list-ring);
                 border-radius: 50%;
                 font-size: 0.8125em;
                 font-weight: 500;
