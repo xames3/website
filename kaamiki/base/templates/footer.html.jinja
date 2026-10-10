@@ -3,8 +3,8 @@ Footer Template
 ===============
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 21 February, 2025
-Last updated on: 29 September, 2026
+Created on: 21 February 2025
+Last updated on: 05 October 2026
 #}
 <footer class="km-footer km-container">
     {%- block km_footer_before %}{%- endblock km_footer_before %}
@@ -36,12 +36,28 @@ Last updated on: 29 September, 2026
             {%- endtrans -%}
         </p>
     {%- endif %}
+    {%- if km_show_kaamiki_theme|tobool %}
+        {%- set km_theme -%}
+            <a href="https://github.com/xames3/website"
+               {% if km_open_links_in_new_tab|default(true) %}rel="noopener" target="_blank"{% endif %}>Kaamiki</a>
+        {%- endset %}
+        <p class="km-footer__text">
+            {%- trans km_theme=km_theme -%}
+            Styled with the {{ km_theme }} theme.
+        {%- endtrans -%}
+    </p>
+{%- endif %}
+{%- if km_license.name %}
     <p class="km-footer__text">
         {% trans %}Content licensed under{% endtrans %}
-        <a href="https://creativecommons.org/licenses/by/4.0/"
-           rel="noopener"
-           target="_blank">CC BY 4.0</a>.
+        {% if km_license.url -%}
+            <a href="{{ km_license.url|e }}"
+               {% if km_license.new_tab %}rel="noopener" target="_blank"{% endif %}>{{ km_license.name|e }}</a>.
+        {%- else -%}
+            {{ km_license.name|e }}.
+        {%- endif %}
     </p>
+{%- endif %}
 </div>
 {%- if km_show_colour_modes|tobool %}
     <button type="button"

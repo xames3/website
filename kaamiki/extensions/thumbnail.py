@@ -44,7 +44,7 @@ class directive(rst.Directive):
 
         - `title`: User-provided YouTube video title.
         - `channel`: User-provided YouTube video channel name.
-        - `grayscale`: Draws the still in grey until it is hovered.
+        - `grayscale`: Draws the still in grey until it's hovered.
     """
 
     required_arguments = 1

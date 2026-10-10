@@ -92,7 +92,7 @@ def encode(value: str, kind: str) -> str:
 
     :param value: The option's value, as written.
     :param kind: `script`, `style` or anything else for markup.
-    :return: The value, escaped so it cannot break out of its place.
+    :return: The value, escaped so it can't break out of its place.
     """
     read = literal(value)
     if kind == "script":
@@ -116,7 +116,7 @@ def substitute(source: str, values: dict[str, str]) -> str:
     its own.
 
     :param source: The fragment, placeholders and all.
-    :param values: Directive options, keyed as they are written in the
+    :param values: Directive options, keyed as they're written in the
         rST. A placeholder may spell them with underscores instead of
         hyphens.
     :return: The fragment with every known placeholder filled in.
@@ -239,7 +239,7 @@ class directive(rst.Directive):
 
         :param markup: The embedded HTML, placeholders filled in.
         :raises rst.DirectiveError: When an iframe comes from a host
-            that is not allowed.
+            that isn't allowed.
         """
         config = self.state.document.settings.env.config
         allowed = hostnames(setting(config, "embed_iframe_hosts"), www=True)

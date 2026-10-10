@@ -48,7 +48,7 @@ def preload(argument: str) -> str:
     """Check the `preload` option against the values a browser knows.
 
     :param argument: The value written in the rST.
-    :return: The value, once it is known to be one of them.
+    :return: The value, once it's known to be one of them.
     """
     return rst.directives.choice(argument, PRELOAD)
 
@@ -57,7 +57,7 @@ def language(code: str) -> str:
     """Name a language in itself, `en` as `English`.
 
     :param code: The language code, as in `en` or `pt-BR`.
-    :return: The name or the code when Babel does not know it.
+    :return: The name or the code when Babel doesn't know it.
     """
     locale = code.replace("-", "_")
     try:
@@ -78,10 +78,10 @@ class directive(rst.Directive):
         - `autoplay`: Play the video, muted, as soon as it loads.
         - `caption`: A line of text under the video. It wins over the
           directive's body.
-        - `type`: The video's MIME type, when its extension does not
+        - `type`: The video's MIME type, when its extension doesn't
           say.
         - `sources`: More files of the same video, comma-separated, for
-          browsers that cannot play the first.
+          browsers that can't play the first.
         - `poster`: The picture shown until the video plays.
         - `preload`: How much the browser fetches ahead: `none`,
           `metadata` or `auto`.

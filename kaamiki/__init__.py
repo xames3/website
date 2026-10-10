@@ -57,7 +57,7 @@ supported_extensions: t.Sequence[str] = (
     "sphinx_design",
 )
 # NOTE(xames3): This is an explicit cascade order and needs to be
-# respected in order to ensure the theme loads its UI elements in an
+# respected in order to ensure Kaamiki loads its UI elements in an
 # expected manner.
 stylesheets: t.Sequence[tuple[str, int]] = (
     ("font.css", 400),
@@ -166,7 +166,7 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     translator is pointed at Kaamiki's.
 
     :param app: The Sphinx application instance.
-    :return: Kaamiki's version and that it is safe to read and write
+    :return: Kaamiki's version and that it's safe to read and write
         in parallel.
     """
     for extension in supported_extensions:

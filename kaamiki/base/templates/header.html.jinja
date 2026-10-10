@@ -3,8 +3,8 @@ Header Template
 ===============
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 21 February, 2025
-Last updated on: 29 September, 2026
+Created on: 21 February 2025
+Last updated on: 08 October 2026
 #}
 {%- from "logo.html.jinja" import km_logo with context -%}
 <header class="km-header">
@@ -17,7 +17,7 @@ Last updated on: 29 September, 2026
                     <a href="{{ pathto(master_doc) }}"
                        class="km-header__logo">
                         {{- km_logo() -}}
-                        <span class="km-header__title">{{ docstitle|e }}{%- if km_fa_icons.title_badge %}<i class="{{ km_fa_icons.title_badge }} km-title-badge"
+                        <span class="km-header__title">{{ (docstitle or title)|e }}{%- if km_fa_icons.title_badge %}<i class="{{ km_fa_icons.title_badge }} km-title-badge"
    aria-hidden="true"></i>{%- endif %}</span>
                     </a>
                 {%- endblock km_website_logo %}
@@ -27,7 +27,7 @@ Last updated on: 29 September, 2026
             <nav class="km-header__nav"
                  aria-label="{{ _('Primary navigation') }}">
                 <div class="km-header__nav-tree">
-                    {{ toctree(titles_only=true, collapse=false, includehidden=true) }}
+                    {{ toctree(titles_only=km_toctree_titles_only, collapse=false, **km_toctree_args) }}
                 </div>
             </nav>
         {%- endif %}
@@ -57,16 +57,15 @@ Last updated on: 29 September, 2026
                     {%- if km_header_buttons|tobool %}
                         <nav class="km-header__icon-list"
                              aria-label="{{ _('External links') }}">
-                            {%- for text, url in km_header_buttons.items() %}
-                                {%- if url is mapping %}
-                                    <a href="{{ url.link }}"
+                            {%- for text, button in km_header_buttons.items() %}
+                                {%- if button is mapping %}
+                                    <a href="{{ button.url }}"
                                        title="{{ text|e }}"
-                                       rel="noopener nofollow"
-                                       {% if url.link != '#' %}target="_blank"{% endif %}
+                                       {% if button.new_tab %}rel="noopener nofollow" target="_blank"{% endif %}
                                        class="km-header__icon-link"
-                                       {{ url.extras if url.extras else '' }}>
-                                        {%- if url.icon %}
-                                            {{ url.icon }}
+                                       {{ button.extras if button.extras else '' }}>
+                                        {%- if button.icon %}
+                                            {{ button.icon }}
                                         {%- else %}
                                             <span>{{ text|e }}</span>
                                         {%- endif %}

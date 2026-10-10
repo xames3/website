@@ -51,7 +51,7 @@ def position(argument: str) -> str:
     """Check the `fa-icon-position` option against its two values.
 
     :param argument: The value written in the rST.
-    :return: The value, once it is known to be `before` or `after`.
+    :return: The value, once it's known to be `before` or `after`.
     """
     return rst.directives.choice(argument, POSITIONS)
 
@@ -97,7 +97,7 @@ class directive(rst.Directive):
           `nofollow noopener` for a new tab.
         - `title`: The tooltip.
         - `download`: Save the link instead of opening it, under the
-          file name given if there is one.
+          file name given if there's one.
         - `class`: More classes for the link.
 
     The site's `button_scheme` and `button_icon_position` settle the

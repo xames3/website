@@ -37,7 +37,7 @@ kaamiki = "kaamiki"
 dev = [ "sphinx-lint>=1.0.2", "tox>=4.64.4" ]
 
 [tool.setuptools]
-packages = [ "kaamiki", "kaamiki.extensions", "kaamiki.extensions.explainer" ]
+packages = [ "kaamiki", "kaamiki.extensions", "kaamiki.extensions.explainer", "kaamiki.extensions.utils" ]
 
 [tool.setuptools.package-data]
 kaamiki = [

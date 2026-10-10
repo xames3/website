@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
 Last updated on: 09 October, 2026
 
-What the theme changes in the HTML Sphinx writes, as it writes it.
+What Kaamiki changes in the HTML Sphinx writes, as it writes it.
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ BACKREF: re.Pattern[str] = re.compile(
 
 
 class translator(base):
-    """What the theme adds to the builder's own HTML translator.
+    """What Kaamiki adds to the builder's own HTML translator.
 
     `install` puts it in front of the builder's translator, so one a
     site swapped in is kept.
@@ -172,7 +172,7 @@ class translator(base):
 
     @t.override
     def visit_compound(self, node: nodes.compound) -> None:
-        """Open a compound, unless it is a hidden toctree's empty
+        """Open a compound, unless it's a hidden toctree's empty
         shell.
 
         :param node: The compound being opened.

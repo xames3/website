@@ -12,7 +12,7 @@ A `youtube` directive that embeds a video in the page::
        :startfrom: 90
        :privacy:
 
-       What it is about.
+       What it's about.
 """
 
 from __future__ import annotations
@@ -44,7 +44,7 @@ def tongue(argument: str) -> str:
 
     :param argument: The value written in the rST.
     :return: The code, like `en` or `pt-BR`.
-    :raises ValueError: When it is not one.
+    :raises ValueError: When it isn't one.
     """
     if not LANGUAGE.match(argument.strip()):
         raise ValueError(f"expected a language code like en, got {argument!r}")
@@ -56,7 +56,7 @@ def ratio(argument: str) -> str:
 
     :param argument: The value written in the rST, as `4:3` or `16/9`.
     :return: The ratio as CSS writes it, `4 / 3`.
-    :raises ValueError: When it is not one.
+    :raises ValueError: When it isn't one.
     """
     found = RATIO.match(argument.strip())
     if found is None or not float(found[1]) or not float(found[2]):
@@ -88,7 +88,7 @@ class directive(rst.Directive):
           code, like `en` or `pt-BR`.
         - `ratio`: The player's shape, as `4:3`. Defaults to `16:9`.
         - `click-to-load`: Show the video's picture and load the player
-          once it is clicked.
+          once it's clicked.
     """
 
     has_content = True

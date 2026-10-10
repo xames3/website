@@ -66,7 +66,7 @@ def _split(text: str) -> tuple[str, str | None]:
 
     :param text: What was written inside the role.
     :return: The label and the value between `<` and `>` or `None`
-        when there is not one.
+        when there isn't one.
     """
     if "<" not in text:
         return text, None
@@ -82,7 +82,7 @@ def _reject(
     :param inliner: The docutils inliner that called the role.
     :param rawtext: The whole role, markup and all.
     :param lineno: The line the role sits on.
-    :param message: What is wrong with it.
+    :param message: What's wrong with it.
     :return: The problematic node and the message, as docutils wants
         them.
     """
@@ -96,8 +96,8 @@ def _options(value: str | None) -> tuple[str, dict[str, str]]:
     """Split what sits in a role's angles into a colour and settings.
 
     :param value: What was between `<` and `>` or `None`.
-    :return: The colour, empty when there is none, and the settings.
-    :raises ValueError: When there is more than one colour.
+    :return: The colour, empty when there's none, and the settings.
+    :raises ValueError: When there's more than one colour.
     """
     colour = ""
     found: dict[str, str] = {}
@@ -135,7 +135,7 @@ def _number(value: object, low: float, high: float) -> float | None:
     :param value: The number, as written or set.
     :param low: The smallest allowed.
     :param high: The biggest allowed.
-    :return: The number or `None` when it is not a number in bounds.
+    :return: The number or `None` when it isn't a number in bounds.
     """
     try:
         number = float(str(value))
@@ -206,7 +206,7 @@ def stylise(
 
     The text reads `label <css>`::
 
-        Text is normal, but now it is :stylise:`red <color: red;>`.
+        Text is normal, but now it's :stylise:`red <color: red;>`.
 
     :param role: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
@@ -215,8 +215,8 @@ def stylise(
     :param inliner: The docutils inliner that called this.
     :param options: Role options (unused).
     :param content: Role content (unused).
-    :return: The styled text and the error messages if the text does
-        not split on a `<`.
+    :return: The styled text and the error messages if the text doesn't
+        split on a `<`.
     """
     del role, options, content
     element, style = _split(text)
@@ -250,7 +250,7 @@ def email(
     :param options: Role options (unused).
     :param content: Role content (unused).
     :return: One `reference` node and the error messages if the text
-        does not split on a `<`.
+        doesn't split on a `<`.
     """
     del role, options, content
     alt, rest = _split(text)

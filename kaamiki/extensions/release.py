@@ -15,7 +15,7 @@ A `release` directive that writes one entry of a changelog::
        The first paragraph sums the release up.
 
        Added
-           - What is new, a line each.
+           - What's new, a line each.
        Fixed
            - What works now.
 """
@@ -65,12 +65,12 @@ class directive(rst.Directive):
         - `title`: What the release is about. Without one, the version
           is the title.
         - `article`: A page telling the story behind the release, as
-          `:doc:` would name it. It is linked under the notes.
+          `:doc:` would name it. It's linked under the notes.
         - `article-label`: What the article's link says. Defaults to
           "Read the article".
         - `date`: The day it went out, as `5 October 2026` or
           `2026-10-05`. It wins over the version.
-        - `url`: The release elsewhere, a GitHub release say. It is
+        - `url`: The release elsewhere, a GitHub release say. It's
           linked next to the article.
 
     The site's `release_version_fmt` says how a version spells its
@@ -125,7 +125,7 @@ class directive(rst.Directive):
         """Work out the day a release went out.
 
         The `:date:` option says it, failing that the version does when
-        it is spelt like `release_version_fmt`.
+        it's spelt like `release_version_fmt`.
 
         :param version: The version, as written.
         :return: The day or `None` when nothing says.
