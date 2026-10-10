@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kaamiki VERSION\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-10-09 19:06-0500\n"
+"POT-Creation-Date: 2026-10-09 22:05-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,7 +77,7 @@ msgstr ""
 
 #: kaamiki/base/templates/genindex.html:10
 #: kaamiki/base/templates/genindex.html:41
-#: kaamiki/base/templates/layout.html:217 kaamiki/extensions/utils/social.py:51
+#: kaamiki/base/templates/layout.html:217 kaamiki/extensions/utils/social.py:50
 msgid "Index"
 msgstr ""
 
@@ -179,7 +179,7 @@ msgid "Back to top"
 msgstr ""
 
 #: kaamiki/base/templates/search.html:10 kaamiki/base/templates/search.html:28
-#: kaamiki/extensions/utils/social.py:54
+#: kaamiki/extensions/utils/social.py:53
 msgid "Search Results"
 msgstr ""
 
@@ -213,7 +213,7 @@ msgid "Watch on YouTube"
 msgstr ""
 
 #: kaamiki/base/templates/video.html.jinja:24
-msgid "Your browser does not support the video tag."
+msgid "Your browser doesn't support the video tag."
 msgstr ""
 
 #: kaamiki/base/templates/youtube.html.jinja:27
@@ -288,26 +288,26 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
-#: kaamiki/extensions/utils/dates.py:128
+#: kaamiki/extensions/utils/dates.py:130
 #, python-format
 msgid "%d %B %Y"
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:44
+#: kaamiki/extensions/utils/social.py:43
 msgid "Page not found"
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:46
+#: kaamiki/extensions/utils/social.py:45
 msgid ""
 "There is nothing at this address. It may have moved or it may never have "
 "been here."
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:52
+#: kaamiki/extensions/utils/social.py:51
 msgid "Every term indexed on this site, from A to Z."
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:54
+#: kaamiki/extensions/utils/social.py:53
 msgid "Search every page on this site."
 msgstr ""
 
