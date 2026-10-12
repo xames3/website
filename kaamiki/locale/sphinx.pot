@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kaamiki VERSION\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-10-09 22:05-0500\n"
+"POT-Creation-Date: 2026-10-11 23:32-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,19 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
+
+#: kaamiki/base/templates/404.html:10 kaamiki/base/templates/404.html:23
+#: kaamiki/extensions/utils/social.py:43
+msgid "Page not found"
+msgstr ""
+
+#: kaamiki/base/templates/404.html:26
+msgid "The page you requested doesn't exist or may've been removed."
+msgstr ""
+
+#: kaamiki/base/templates/404.html:33
+msgid "Take me home"
+msgstr ""
 
 #: kaamiki/base/templates/author.html.jinja:16
 #, python-format
@@ -291,10 +304,6 @@ msgstr ""
 #: kaamiki/extensions/utils/dates.py:130
 #, python-format
 msgid "%d %B %Y"
-msgstr ""
-
-#: kaamiki/extensions/utils/social.py:43
-msgid "Page not found"
 msgstr ""
 
 #: kaamiki/extensions/utils/social.py:45
