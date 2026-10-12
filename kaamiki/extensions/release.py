@@ -43,7 +43,7 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 name: t.Final[str] = "release"
-template: t.Final[str] = "release.html.jinja"
+template: t.Final[str] = "directives/release.html.jinja"
 TONES: t.Final[tuple[str, ...]] = ("red", "yellow", "blue", "green")
 BUTTON: t.Final[tuple[str, ...]] = (
     "sd-sphinx-override",

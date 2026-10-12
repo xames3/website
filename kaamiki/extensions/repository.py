@@ -24,7 +24,7 @@ from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import render
 
 name: t.Final[str] = "repository"
-template: t.Final[str] = "repository.html.jinja"
+template: t.Final[str] = "directives/repository.html.jinja"
 # NOTE(xames3): Owners run to 39 characters, repositories to 100.
 # https://docs.github.com/en/repositories/creating-and-managing-repositories/renaming-a-repository
 # https://docs.github.com/en/rest/repos/repos#get-a-repository

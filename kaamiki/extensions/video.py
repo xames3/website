@@ -40,7 +40,7 @@ from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import visitor
 
 name: t.Final[str] = "video"
-template: t.Final[str] = "video.html.jinja"
+template: t.Final[str] = "directives/video.html.jinja"
 PRELOAD: t.Final[tuple[str, ...]] = ("none", "metadata", "auto")
 
 

@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
 Last updated on: 08 October 2026
 #}
-{%- from "logo.html.jinja" import km_logo with context -%}
+{%- from "components/logo.html.jinja" import km_logo with context -%}
 <aside id="km-sidebar"
        class="km-layout__sidebar km-sidebar km-sidebar--primary">
     <noscript>
@@ -20,7 +20,9 @@ Last updated on: 08 October 2026
    aria-hidden="true"></i>{%- endif %}</span>
     </a>
     {%- if hasdoc('search') and km_show_searchbox|tobool %}
-        <div class="km-sidebar__search">{%- include "searchbox.html.jinja" %}</div>
+        <div class="km-sidebar__search">
+            {%- include "components/searchbox.html.jinja" %}
+        </div>
     {%- endif %}
     <div class="km-sidebar__scroll">
         <div class="km-sidebar__content">

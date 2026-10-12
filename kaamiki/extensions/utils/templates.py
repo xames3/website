@@ -24,7 +24,7 @@ if t.TYPE_CHECKING:
 
 # NOTE(xames3): Three levels up from here is the `kaamiki` package.
 TEMPLATES: t.Final[str] = p.join(
-    p.dirname(p.dirname(p.dirname(p.realpath(__file__)))), "base", "templates"
+    p.dirname(p.dirname(p.dirname(p.realpath(__file__)))), "theme", "templates"
 )
 DESIGN_ASSETS: t.Final[frozenset[str]] = frozenset(
     {"design-tabs.js", "sphinx-design.min.css"}
@@ -45,7 +45,7 @@ def render(template: str, /, **context: t.Any) -> str:
 
     Context values are exposed to the template with a `km_` prefix.
 
-    :param template: Template filename, relative to `base/templates`.
+    :param template: Template filename, relative to `theme/templates`.
     :param context: Values made available to the template.
     :return: The rendered HTML.
     """

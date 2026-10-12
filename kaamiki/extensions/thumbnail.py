@@ -29,7 +29,7 @@ from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import youtube_id
 
 name: t.Final[str] = "thumbnail"
-template: t.Final[str] = "thumbnail.html.jinja"
+template: t.Final[str] = "directives/thumbnail.html.jinja"
 TEXTS: t.Final[tuple[str, ...]] = ("title", "channel")
 
 

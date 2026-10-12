@@ -245,29 +245,29 @@ Last updated on: 06 October 2026
                     </p>
                 </noscript>
                 {%- block header %}
-                    {%- include "header.html.jinja" %}
+                    {%- include "sections/header.html.jinja" %}
                 {%- endblock header %}
                 <div class="km-shell__main">
                     <div class="km-layout km-container {% if km_show_toctree|tobool %}km-layout--nav-in-header{% endif %}">
                         {%- block km_sidebar %}
                             {%- if sidebars|length > 0 %}
-                                {%- include "sidebar.html.jinja" %}
+                                {%- include "sections/sidebar.html.jinja" %}
                             {%- endif %}
                         {%- endblock km_sidebar %}
                         {%- block km_main %}
                             <div class="km-layout__content">{%- block body %}{%- endblock body %}</div>
                                 {%- if km_show_previous_next_pages|tobool %}
-                                    {%- include "previous_next_pages.html.jinja" %}
+                                    {%- include "components/previous_next_pages.html.jinja" %}
                                 {%- endif %}
                             {%- endblock km_main %}
                             {%- block km_aside %}{%- endblock km_aside %}
                             </div>
                         </div>
                         {%- if km_show_scrolltop|tobool %}
-                            {%- include "scrolltop.html.jinja" %}
+                            {%- include "components/scrolltop.html.jinja" %}
                         {%- endif %}
                         {%- block footer %}
-                            {%- include "footer.html.jinja" %}
+                            {%- include "sections/footer.html.jinja" %}
                         {%- endblock footer %}
                     </div>
                     {%- block scripts %}

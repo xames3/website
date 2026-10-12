@@ -34,7 +34,7 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "author"
-template: t.Final[str] = "author.html.jinja"
+template: t.Final[str] = "directives/author.html.jinja"
 INTERVAL: t.Final[float] = 3.0
 
 

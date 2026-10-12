@@ -46,8 +46,8 @@ packages = [
 
 [tool.setuptools.package-data]
 kaamiki = [
-    "base/static/*",
-    "base/templates/*",
+    "theme/static/**/*",
+    "theme/templates/**/*",
     "locale/*.pot",
     "locale/*/LC_MESSAGES/*",
 ]
@@ -275,10 +275,10 @@ description = "Format HTML and Jinja with djlint in place"
 deps = [ "djlint==1.36.4" ]
 allowlist_externals = [ "sh" ]
 commands = [
-  [ "sh", "-c", "djlint kaamiki/base/templates docs/source/_static/ docs/source/_templates/ docs/source/assets/html -e html --reformat || true" ],
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/_templates/", "docs/source/assets/html", "-e", "html", "--check" ],
-  [ "sh", "-c", "djlint kaamiki/base/templates docs/source/_static/ -e html.jinja --reformat || true" ],
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "-e", "html.jinja", "--check" ],
+  [ "sh", "-c", "djlint kaamiki/theme/templates docs/source/_static/ docs/source/_templates/ docs/source/assets/html -e html --reformat || true" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "docs/source/_templates/", "docs/source/assets/html", "-e", "html", "--check" ],
+  [ "sh", "-c", "djlint kaamiki/theme/templates docs/source/_static/ -e html.jinja --reformat || true" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "-e", "html.jinja", "--check" ],
 ]
 
 [tool.tox.env.translations]
@@ -295,7 +295,7 @@ commands = [
 description = "Reformat the HTML, Jinja and Python sources in place"
 deps = [ "djlint==1.36.4", "ruff>=0.12.7" ]
 commands = [
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/_templates/", "docs/source/assets/html", "-e", "html", "--reformat" ],
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "-e", "html.jinja", "--reformat" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "docs/source/_templates/", "docs/source/assets/html", "-e", "html", "--reformat" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "-e", "html.jinja", "--reformat" ],
   [ "ruff", "format", "." ],
 ]

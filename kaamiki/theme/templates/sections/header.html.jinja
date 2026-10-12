@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
 Last updated on: 08 October 2026
 #}
-{%- from "logo.html.jinja" import km_logo with context -%}
+{%- from "components/logo.html.jinja" import km_logo with context -%}
 <header class="km-header">
     {%- block km_header_before %}
     {% endblock km_header_before -%}
@@ -76,7 +76,9 @@ Last updated on: 08 October 2026
                     {%- endif %}
                 {%- endblock km_header_buttons %}
                 {%- if hasdoc('search') and km_show_searchbox|tobool %}
-                    <div class="km-header__search">{%- include "searchbox.html.jinja" %}</div>
+                    <div class="km-header__search">
+                        {%- include "components/searchbox.html.jinja" %}
+                    </div>
                 {%- endif %}
             </div>
         {%- endblock km_header_right %}

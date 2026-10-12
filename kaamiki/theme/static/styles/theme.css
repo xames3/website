@@ -1382,30 +1382,6 @@ html.km-theme-switching .km-header * {
         gap: 0.25rem;
         flex-direction: column;
 
-        &::before,
-        &::after {
-            content: "";
-            position: absolute;
-            left: 1.5rem;
-            width: 0.85rem;
-            height: 0.85rem;
-            transform: rotate(45deg);
-            z-index: -1;
-            border-radius: 2px;
-        }
-
-        &::before {
-            top: -8px;
-            background: linear-gradient(to bottom right, hsl(var(--km-color-border)) 54%, hsl(var(--km-color-bg)) 50%);
-            border-top-right-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-
-        &::after {
-            top: -6px;
-            background: hsl(var(--km-color-bg));
-        }
-
         & a {
             display: block;
             padding: 0.5rem 3rem 0.25rem 0.25rem;
@@ -2164,6 +2140,29 @@ table.docutils caption {
 
 #km-content figure.km-fuzzy-blur.km-is-revealed .km-zoom-scale img {
     filter: blur(0);
+}
+
+.km-pixelated-frame {
+    position: relative;
+}
+
+.km-pixelated-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    image-rendering: pixelated;
+    transition: opacity var(--km-duration-slow) var(--km-ease-swift);
+}
+
+.km-pixelated-canvas.km-is-drawn {
+    opacity: 1;
+}
+
+#km-content figure.km-pixelated-blur.km-is-revealed .km-pixelated-canvas.km-is-drawn {
+    opacity: 0;
 }
 
 .km-grayscale {
@@ -3736,6 +3735,10 @@ html[data-km-theme="light"] .km-sharpie {
 
     #km-content figure.km-fuzzy-blur:is(:hover, :focus-within) .km-zoom-scale img {
         filter: blur(0);
+    }
+
+    #km-content figure.km-pixelated-blur:is(:hover, :focus-within) .km-pixelated-canvas.km-is-drawn {
+        opacity: 0;
     }
 }
 

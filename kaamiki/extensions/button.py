@@ -32,7 +32,7 @@ from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import visitor
 
 name: t.Final[str] = "button"
-template: t.Final[str] = "button.html.jinja"
+template: t.Final[str] = "directives/button.html.jinja"
 COLOURS: t.Final[tuple[str, ...]] = ("red", "yellow", "blue", "green")
 # NOTE(xames3): Inspired by Sphinx Design's button directive.
 # https://sphinx-design.readthedocs.io/en/latest/badges_buttons.html

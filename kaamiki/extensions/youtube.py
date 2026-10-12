@@ -32,7 +32,7 @@ from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import youtube_id
 
 name: t.Final[str] = "youtube"
-template: t.Final[str] = "youtube.html.jinja"
+template: t.Final[str] = "directives/youtube.html.jinja"
 LANGUAGE: re.Pattern[str] = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
 RATIO: re.Pattern[str] = re.compile(
     r"^(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)$"

@@ -168,7 +168,7 @@ def visitor(template: str) -> t.Callable[[HTMLTranslator, nodes.Element], None]:
     to walk into.
 
     :param template: The directive's template, relative to
-        `base/templates`.
+        `theme/templates`.
     :return: The visitor, which raises `nodes.SkipNode` once written.
     """
 

@@ -9,6 +9,7 @@
     const CLAMP_SLACK_PX = 48;
     const CLAMP_SETTLE_MS = 60;
     const CLAMP_MIN_PX = 320;
+    const PIXELATE_RATIO = 20;
     const DROPDOWN_OPEN_DELAY_MS = 40;
     const DROPDOWN_CLOSE_DELAY_MS = 140;
     const DROPDOWN_PX_FACTOR = 0.9;
@@ -1001,9 +1002,40 @@
         document.querySelectorAll('#km-content img.km-zoom:not(figure img)').forEach((image) => wrap(image, true));
     }
 
+    function initPixelatedBlur() {
+        const draw = (image, canvas) => {
+            const width = Math.max(1, Math.round(image.naturalWidth / PIXELATE_RATIO));
+            const height = Math.max(1, Math.round(image.naturalHeight / PIXELATE_RATIO));
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+            canvas.classList.add('km-is-drawn');
+        };
+
+        document.querySelectorAll('#km-content figure.km-pixelated-blur img').forEach((image) => {
+            const frame = document.createElement('div');
+            frame.className = 'km-pixelated-frame';
+            const canvas = document.createElement('canvas');
+            canvas.className = 'km-pixelated-canvas';
+            canvas.setAttribute('aria-hidden', 'true');
+            image.parentElement.insertBefore(frame, image);
+            frame.append(image, canvas);
+
+            const paint = () => {
+                try {
+                    draw(image, canvas);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+            if (image.complete && image.naturalWidth) paint();
+            else image.addEventListener('load', paint, { once: true });
+        });
+    }
+
     function initTouchReveal() {
         if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-        const selector = '#km-content figure.km-zoom, #km-content figure.km-fuzzy-blur';
+        const selector = '#km-content figure.km-zoom, #km-content figure.km-fuzzy-blur, #km-content figure.km-pixelated-blur';
         const figures = document.querySelectorAll(selector);
         if (!figures.length) return;
 
@@ -2375,6 +2407,7 @@
             initCopyUrl,
             initHeaderLinks,
             initImageZoom,
+            initPixelatedBlur,
             initTouchReveal,
             initHeaderNavDropdowns,
             initDropdowns,

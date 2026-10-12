@@ -49,8 +49,8 @@ if t.TYPE_CHECKING:
 
 version: str = "2026.10.8"
 theme_name: t.Final[str] = "kaamiki"
-theme_path = p.join(p.abspath(p.dirname(__file__)), "base", "templates")
-static_path = p.join(p.abspath(p.dirname(__file__)), "base", "static")
+theme_path = p.join(p.abspath(p.dirname(__file__)), "theme", "templates")
+static_path = p.join(p.abspath(p.dirname(__file__)), "theme", "static")
 locale_path = p.join(p.abspath(p.dirname(__file__)), "locale")
 supported_extensions: t.Sequence[str] = (
     "sphinx_copybutton",
@@ -60,12 +60,12 @@ supported_extensions: t.Sequence[str] = (
 # respected in order to ensure Kaamiki loads its UI elements in an
 # expected manner.
 stylesheets: t.Sequence[tuple[str, int]] = (
-    ("font.css", 400),
-    ("code.css", 600),
-    ("theme.css", 700),
-    ("sphinx-design.css", 900),
+    ("styles/font.css", 400),
+    ("styles/code.css", 600),
+    ("styles/theme.css", 700),
+    ("styles/sphinx-design.css", 900),
 )
-scripts: t.Sequence[str] = ("theme.js",)
+scripts: t.Sequence[str] = ("scripts/theme.js",)
 # Proper list available here:
 # https://web-platform-dx.github.io/supported-browsers/
 browsers: t.Sequence[str] = (

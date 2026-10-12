@@ -11,13 +11,13 @@ Last updated on: 04 October 2026
     <div class="km-page{% if km_show_show_more|tobool %} km-page--clamped{% endif %}">
         {%- block km_body_before %}{%- endblock km_body_before %}
             {%- if km_show_breadcrumbs|tobool %}
-                {%- include "breadcrumbs.html.jinja" %}
+                {%- include "components/breadcrumbs.html.jinja" %}
             {%- endif %}
             <div id="km-content"
                  role="main"
                  class="km-page__content">{{ body }}</div>
             {%- if km_show_feedback|tobool %}
-                {%- include "feedback.html.jinja" %}
+                {%- include "components/feedback.html.jinja" %}
             {%- endif %}
             {%- if km_show_last_updated_on|tobool and km_updated_on %}
                 <p class="km-layout__meta"
@@ -29,7 +29,7 @@ Last updated on: 04 October 2026
             </p>
         {%- endif %}
         {%- if km_show_show_more|tobool %}
-            {%- include "show_more.html.jinja" %}
+            {%- include "components/show_more.html.jinja" %}
         {%- endif %}
         {%- block km_body_after %}{%- endblock km_body_after %}
         </div>
