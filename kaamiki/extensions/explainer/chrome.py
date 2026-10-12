@@ -4,7 +4,7 @@ Explainer Chrome
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 06 October 2026
+Last updated on: 12 October 2026
 
 The markup an explainer wraps itself in.
 """
@@ -222,7 +222,6 @@ def pane(
     :param linenos: Whether to show a line-number gutter.
     :return: The pane's markup.
     """
-    width = max((len(_.expandtabs(4)) for _ in code.splitlines()), default=0)
     rows: list[str] = []
     for offset, line in enumerate(highlight(code, language)):
         number = start + offset
@@ -238,8 +237,7 @@ def pane(
     return (
         '<div class="km-walkthrough__stage" data-km-stage tabindex="0">'
         f'<pre class="highlight km-walkthrough__code{gutter}"'
-        f' style="--km-walkthrough-col: {width + 4};'
-        f' --km-walkthrough-gutter: {digits}ch">'
+        f' style="--km-walkthrough-gutter: {digits}ch">'
         + "".join(rows)
         + "</pre></div>"
     )
@@ -259,12 +257,6 @@ def controls(count: int) -> str:
     return (
         '<span class="km-walkthrough__counter" data-km-counter>'
         f"{html.escape(steps)}</span>"
-        '<span class="km-walkthrough__pager">'
-        '<button type="button" class="km-walkthrough__step" data-km-step="-1"'
-        f' aria-label="{html.escape(str(_("Previous step")))}"></button>'
-        '<button type="button" class="km-walkthrough__step" data-km-step="1"'
-        f' aria-label="{html.escape(str(_("Next step")))}"></button>'
-        "</span>"
         '<button type="button" class="km-walkthrough__copy" data-km-copy'
         f' aria-label="{html.escape(str(_("Copy the snippet")))}">'
         "</button>"

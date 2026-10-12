@@ -4,7 +4,7 @@ Walkthrough Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 09 October 2026
+Last updated on: 12 October 2026
 
 A `walkthrough` directive that steps a reader through a snippet, line
 by line, with the values it held at each one... telling a story::
@@ -54,7 +54,6 @@ import typing as t
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
-from docutils.transforms import Transform
 from sphinx.directives.code import CodeBlock
 from sphinx.util import logging
 
@@ -77,6 +76,7 @@ from kaamiki.extensions.explainer.tracer import replay
 from kaamiki.extensions.explainer.tracer import show
 from kaamiki.extensions.explainer.tracer import timeout
 from kaamiki.extensions.explainer.tracer import written
+from kaamiki.extensions.utils import badged
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import skip
@@ -92,6 +92,7 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 name: t.Final[str] = "walkthrough"
+POSITIONS: t.Final[tuple[str, str]] = ("right", "left")
 BLOCKS: t.Final[frozenset[str]] = frozenset({"code", "setup", "stdin", "lines"})
 OPTIONS: t.Final[dict[str, frozenset[str]]] = {
     "lines": frozenset({"at", "clear", "output", "values"}),
@@ -126,16 +127,9 @@ class node(nodes.container):
     """
 
 
-class lead(nodes.container):
-    """The paragraph or two leading into the walkthrough."""
-
-
-class tail(nodes.container):
-    """The prose after the walkthrough in its section."""
-
-
 class heading(nodes.paragraph):
-    """The caption, parsed as rST and the step counter.
+    """The caption, parsed as rST, the language's icon and the step
+    counter.
 
     docutils already has a `caption` node and finds visitors by class
     name, so this can't borrow that one.
@@ -149,18 +143,33 @@ class plain(nodes.literal_block):
 
 
 class explanations(nodes.container):
-    """The notes under the snippet, one of which shows at a time."""
+    """The notes beside the snippet, scrolling past it."""
 
 
 class explanation(nodes.container):
     """One `lines` block's note."""
 
 
+def position(argument: str) -> str:
+    """Check the `code-position` option against its two values.
+
+    :param argument: The value written in the rST.
+    :return: The value, once it's known to be `right` or `left`.
+    """
+    return rst.directives.choice(argument, POSITIONS)
+
+
 class directive(CodeBlock):
     """The `walkthrough` directive.
 
+    The notes scroll past the code instead of swapping under it, so it
+    needs at least one `.. lines::` block. It stands alone, nothing
+    around it is pulled in or moved.
+
     Options::
 
+        - `code-position`: Which side the code holds, `right` for the
+          default or `left`.
         - `watch`: Names to show, comma-separated. Without it only a
           function's return value and what the snippet raises show.
         - `limit`: How many steps to show. Defaults to 100.
@@ -186,6 +195,7 @@ class directive(CodeBlock):
             for key, value in CodeBlock.option_spec.items()
             if key not in {"dedent", "force"}
         },
+        "code-position": position,
         "watch": rst.directives.unchanged,
         "limit": rst.directives.positive_int,
         "timeout": rst.directives.positive_int,
@@ -204,6 +214,8 @@ class directive(CodeBlock):
         """
         language = self.arguments.pop().strip() if self.arguments else "python"
         code, setup, stdin, notes = self.blocks()
+        if not notes:
+            raise self.error("walkthrough needs a `.. lines::` block per note")
         start = self.options.get("lineno-start", 1)
         total = len(code.splitlines())
         ranges = [self.span(_.argument, start, total) for _ in notes]
@@ -214,6 +226,7 @@ class directive(CodeBlock):
             steps = self.recite(setup, stdin, notes, ranges, start, total)
         attributes: dict[str, t.Any] = {}
         attributes["classes"] = self.options.get("class", [])
+        attributes["position"] = self.options.get("code-position", "right")
         attributes["payload"] = {
             "steps": [compact(_) for _ in steps],
             "pace": self.options.get("pace", pace(language)),
@@ -230,7 +243,7 @@ class directive(CodeBlock):
             linenos="linenos" in self.options,
         )
         element = node("", **attributes)
-        element += self.caption(len(steps))
+        element += self.caption(len(steps), language)
         element += self.snippet(code, language, start)
         element += self.explain(notes)
         self.add_name(element)
@@ -459,8 +472,6 @@ class directive(CodeBlock):
         ]
         if unused:
             self.warn(f"{', '.join(unused)} only apply to a python walkthrough")
-        if not notes:
-            raise self.error("walkthrough needs a `.. lines::` block per step")
         values: dict[str, tuple[int, str]] = {}
         steps: list[dict[str, t.Any]] = []
         for index, (block, (low, high)) in enumerate(
@@ -548,16 +559,18 @@ class directive(CodeBlock):
             )
         return {"open": "#", "close": ""}
 
-    def caption(self, count: int) -> heading:
-        """Build the header, with the caption parsed as rST.
+    def caption(self, count: int, language: str) -> heading:
+        """Build the header, with the caption parsed as rST and the
+        icon of the snippet's language.
 
         The caption keeps its place in the source, so `gettext` can
         collect it.
 
         :param count: How many steps the walkthrough holds.
+        :param language: The language named on the directive.
         :return: The header node.
         """
-        head = heading(count=count)
+        head = heading(count=count, icon="")
         if not self.options.get("caption"):
             return head
         parsed = self.parse_text_to_nodes(
@@ -572,6 +585,8 @@ class directive(CodeBlock):
         head.rawsource = self.options["caption"]
         head.source, head.line = source, line
         head.extend(parsed[0].children)
+        site = self.state.document.settings.env.config.html_context
+        head["icon"] = badged(head, language, kit=bool(site.get("fa_kit")))
         return head
 
     def snippet(self, code: str, language: str, start: int) -> plain:
@@ -676,84 +691,6 @@ class directive(CodeBlock):
         return marked
 
 
-class adopt(Transform):
-    """Take the prose either side of a walkthrough into it."""
-
-    default_priority = 900
-
-    def apply(self, **kwargs: t.Any) -> None:
-        """Move the prose around every walkthrough into it.
-
-        How many paragraphs lead in is the site's `walkthrough_lead`,
-        two by default and none with `0`.
-        """
-        del kwargs
-        env = self.document.settings.env
-        leading_paragraphs = env.config.html_context.get("walkthrough_lead", 2)
-        if (
-            isinstance(leading_paragraphs, bool)
-            or not isinstance(leading_paragraphs, int)
-            or leading_paragraphs < 0
-        ):
-            logger.warning(
-                "walkthrough_lead needs a whole number, 0 or more, got %r;"
-                " using 2",
-                leading_paragraphs,
-                type="walkthrough",
-            )
-            leading_paragraphs = 2
-        for element in list(findall(self.document, node)):
-            parent = element.parent
-            if parent is None:
-                continue
-            index = parent.index(element)
-            before: list[nodes.Node] = []
-            for sibling in reversed(parent.children[:index]):
-                if len(before) >= leading_paragraphs or not leading(sibling):
-                    break
-                before.insert(0, sibling)
-            after: list[nodes.Node] = []
-            for sibling in parent.children[index + 1 :]:
-                if not prose(sibling):
-                    break
-                after.append(sibling)
-            for sibling in before + after:
-                parent.remove(sibling)
-            if before:
-                element.insert(0, lead("", *before))
-                element["classes"].append("km-walkthrough--lead")
-            if after:
-                element += tail("", *after)
-
-
-def leading(sibling: nodes.Node) -> bool:
-    """Say whether something before a walkthrough can be taken into it.
-
-    :param sibling: The node before the walkthrough.
-    :return: `True` when it's a plain paragraph.
-    """
-    return isinstance(sibling, nodes.paragraph) and not sibling["classes"]
-
-
-def prose(sibling: nodes.Node) -> bool:
-    """Say whether something after a walkthrough can be taken into it.
-
-    :param sibling: The node after the walkthrough.
-    :return: `True` when it's prose belonging to this section.
-    """
-    if not isinstance(sibling, nodes.Element):
-        return False
-    if isinstance(sibling, nodes.paragraph) and sibling["classes"]:
-        return False
-    if not isinstance(sibling, nodes.Body) or isinstance(
-        sibling, nodes.Invisible
-    ):
-        return False
-    if "km-pre-title-text" in sibling["classes"]:
-        return False
-    return next(iter(findall(sibling, node)), None) is None
-
-
 def inherit(steps: list[dict[str, t.Any]]) -> None:
     """Give a step no note covers the note before it."""
     last = next((_["note"] for _ in steps if _["note"] is not None), None)
@@ -812,7 +749,13 @@ def visit(self: HTMLTranslator, node: node) -> None:
     :param node: The `walkthrough` node and its attributes.
     """
     ids: list[str] = node["ids"]
-    classes = " ".join(["km-walkthrough", *node.get("classes", [])])
+    classes = " ".join(
+        [
+            "km-walkthrough",
+            f"km-walkthrough--{node['position']}",
+            *node.get("classes", []),
+        ]
+    )
     anchor = f' id="{self.attval(ids[0])}"' if ids else ""
     self.body.append(f'<div{anchor} class="{classes}" data-km-walkthrough>')
     self.body.extend(f'<span id="{self.attval(_)}"></span>' for _ in ids[1:])
@@ -831,48 +774,33 @@ def depart(self: HTMLTranslator, node: node) -> None:
     :param node: The `walkthrough` node (unused).
     """
     del node
-    self.body.append(
-        '<span class="sr-only" aria-live="polite" data-km-status></span>'
-        "</div></div>"
-    )
-
-
-def visit_lead(self: HTMLTranslator, node: lead) -> None:
-    """Open the paragraphs that lead into the walkthrough.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The lead node (unused).
-    """
-    del node
-    self.body.append('<div class="km-walkthrough__lead" data-km-lead>')
-
-
-def visit_tail(self: HTMLTranslator, node: tail) -> None:
-    """Open the prose that follows the walkthrough.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The tail node (unused).
-    """
-    del node
-    self.body.append('<div class="km-walkthrough__tail">')
+    self.body.append("</div></div>")
 
 
 def visit_heading(self: HTMLTranslator, node: heading) -> None:
-    """Open the snippet's frame and, if there's one, its caption.
+    """Open the code's side, its frame and the caption, icon first.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The header node, empty when there's no caption.
     """
+    self.body.append('<div class="km-walkthrough__grid">')
+    self.body.append('<div class="km-walkthrough__side">')
     self.body.append('<div class="km-walkthrough__frame" data-km-frame>')
     if node.children:
         self.body.append(
             '<div class="code-block-caption km-walkthrough__caption">'
             '<span class="caption-text">'
         )
+        if node["icon"]:
+            self.body.append(
+                f'<span class="km-lang-icon {node["icon"]}"'
+                ' aria-hidden="true"></span>'
+            )
 
 
 def depart_heading(self: HTMLTranslator, node: heading) -> None:
-    """Close the caption, then write the snippet and close the frame.
+    """Close the caption, then write the snippet and close the code's
+    side.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The header node, carrying the step count.
@@ -888,17 +816,28 @@ def depart_heading(self: HTMLTranslator, node: heading) -> None:
         )
     self.body.append(node.parent["pane"])
     self.body.append(output())
-    self.body.append("</div>")
+    self.body.append("</div></div>")
 
 
 def visit_explanations(self: HTMLTranslator, node: explanations) -> None:
-    """Open the notes under the snippet.
+    """Open the notes beside the code.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The container node (unused).
     """
     del node
     self.body.append('<div class="km-walkthrough__notes" data-km-notes>')
+    self.body.append('<div class="km-walkthrough__track" data-km-track>')
+
+
+def depart_explanations(self: HTMLTranslator, node: explanations) -> None:
+    """Close the notes and the row they share with the code.
+
+    :param self: The HTML translator, whose body this appends to.
+    :param node: The container node (unused).
+    """
+    del node
+    self.body.append("</div></div></div>")
 
 
 def close(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -912,14 +851,11 @@ def close(self: HTMLTranslator, node: nodes.Element) -> None:
 
 
 def register(app: Sphinx) -> None:
-    """Register the nodes and the transform the directive loop misses.
+    """Register the nodes only a walkthrough has.
 
     :param app: The Sphinx application instance.
     """
-    app.add_transform(adopt)
-    app.add_node(lead, html=(visit_lead, close))
-    app.add_node(tail, html=(visit_tail, close))
     app.add_node(heading, html=(visit_heading, depart_heading))
     app.add_node(plain, html=(skip, None))
-    app.add_node(explanations, html=(visit_explanations, close))
+    app.add_node(explanations, html=(visit_explanations, depart_explanations))
     app.add_node(explanation, html=(visit_explanation, close))
