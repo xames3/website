@@ -4,7 +4,7 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 09 October 2026
+Last updated on: 12 October 2026
 
 What Kaamiki changes in the HTML Sphinx writes, as it writes it.
 """
@@ -19,6 +19,7 @@ import docutils.nodes as nodes
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.locale import _
 
+from kaamiki.extensions.utils.doctree import badged
 from kaamiki.extensions.utils.links import opens_new_tab
 from kaamiki.extensions.utils.templates import themed
 
@@ -169,6 +170,32 @@ class translator(base):
         if "loading" not in node and default == "link":
             node["loading"] = "lazy"
         super().visit_image(node)
+
+    @t.override
+    def visit_caption(self, node: nodes.caption) -> None:
+        """Open a code block's caption with its language's icon in
+        front.
+
+        :param node: The caption being opened.
+        """
+        super().visit_caption(node)
+        parent = node.parent
+        if not isinstance(parent, nodes.container):
+            return
+        if not parent.get("literal_block"):
+            return
+        block = next(
+            (_ for _ in parent.children if isinstance(_, nodes.literal_block)),
+            None,
+        )
+        if block is None:
+            return
+        kit = bool(self.config.html_context.get("fa_kit"))
+        icon = badged(node, block.get("language"), kit=kit)
+        if icon:
+            self.body.append(
+                f'<span class="km-lang-icon {icon}" aria-hidden="true"></span>'
+            )
 
     @t.override
     def visit_compound(self, node: nodes.compound) -> None:

@@ -4,7 +4,7 @@ Doctree Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October 2026
+Last updated on: 12 October 2026
 
 The helpers that walk a doctree and pick prose out of it.
 """
@@ -17,6 +17,7 @@ from uuid import uuid4
 from docutils import nodes
 from sphinx.builders.gettext import MessageCatalogBuilder
 
+from kaamiki.extensions.utils.settings import language_icon
 from kaamiki.extensions.utils.text import clip
 
 if t.TYPE_CHECKING:
@@ -54,6 +55,26 @@ def findall[T: nodes.Element](
     :return: Every match, in document order.
     """
     return t.cast("Iterator[T]", node.findall(element))
+
+
+def badged(
+    caption: nodes.Element,
+    language: str | None,
+    *,
+    kit: bool = False,
+) -> str:
+    """Pick the icon a code block's caption wears for its language.
+
+    :param caption: The caption.
+    :param language: The language of the code under it.
+    :param kit: Whether the site has a Font Awesome kit.
+    :return: The icon's classes or an empty string when the language
+        has none or the caption opens with an icon of its own.
+    """
+    first = caption.children[0] if caption.children else None
+    if type(first).__name__ == "fontawesome":
+        return ""
+    return language_icon(language, kit=kit)
 
 
 def buried(paragraph: nodes.Element) -> bool:

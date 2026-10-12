@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October 2026
+Last updated on: 12 October 2026
 
 Kaamiki's settings, their defaults and the helpers that read them.
 """
@@ -48,6 +48,71 @@ ICONS: t.Final[dict[str, str]] = {
     "reading_time": "fa-regular fa-clock",
     "search": "fa-solid fa-magnifying-glass",
     "show_more": "fa-solid fa-chevron-down",
+}
+# NOTE(xames3): Brands wear `fa-brands` and the rest `fa-solid`, every
+# one of them is in Font Awesome Free. A language it has no brand for
+# gets what suits it best: a terminal for shells, a code file for C.
+LANGUAGE_ICONS: t.Final[tuple[tuple[str, frozenset[str]], ...]] = (
+    (
+        "fa-brands fa-python",
+        frozenset({"py", "py3", "pycon", "python", "python3"}),
+    ),
+    (
+        "fa-brands fa-js",
+        frozenset({"javascript", "js", "jsx", "node", "nodejs"}),
+    ),
+    ("fa-brands fa-typescript", frozenset({"ts", "tsx", "typescript"})),
+    ("fa-brands fa-rust", frozenset({"rs", "rust"})),
+    ("fa-brands fa-golang", frozenset({"go", "golang"})),
+    ("fa-brands fa-java", frozenset({"java"})),
+    ("fa-brands fa-swift", frozenset({"swift"})),
+    ("fa-brands fa-r-project", frozenset({"r", "rscript"})),
+    ("fa-brands fa-php", frozenset({"php", "php3", "php4", "php5"})),
+    ("fa-brands fa-erlang", frozenset({"erl", "erlang"})),
+    ("fa-brands fa-html5", frozenset({"html", "xhtml"})),
+    ("fa-brands fa-css3-alt", frozenset({"css"})),
+    ("fa-brands fa-sass", frozenset({"sass", "scss"})),
+    ("fa-brands fa-less", frozenset({"less"})),
+    ("fa-brands fa-markdown", frozenset({"markdown", "md"})),
+    ("fa-brands fa-docker", frozenset({"docker", "dockerfile"})),
+    ("fa-brands fa-vuejs", frozenset({"vue"})),
+    ("fa-solid fa-gem", frozenset({"rb", "ruby"})),
+    (
+        "fa-solid fa-database",
+        frozenset(
+            {"mysql", "plpgsql", "postgres", "postgresql", "sql", "sqlite3"}
+        ),
+    ),
+    (
+        "fa-solid fa-terminal",
+        frozenset(
+            {
+                "bash",
+                "bat",
+                "batch",
+                "console",
+                "doscon",
+                "fish",
+                "powershell",
+                "pwsh",
+                "sh",
+                "shell",
+                "shell-session",
+                "zsh",
+            }
+        ),
+    ),
+    (
+        "fa-solid fa-brackets-curly",
+        frozenset(
+            {"c", "c++", "cpp", "cuda", "h", "hpp", "objc", "objective-c"}
+        ),
+    ),
+)
+# NOTE(xames3): `brackets-curly` is a Pro icon, so a site without a kit
+# gets the Free `file-code` in its place.
+PRO_ICONS: t.Final[dict[str, str]] = {
+    "fa-solid fa-brackets-curly": "fa-solid fa-file-code",
 }
 OPTIONS: t.Final[tuple[str, ...]] = (
     "add_copy_to_headerlinks",
@@ -130,7 +195,6 @@ PARSE_TIME: t.Final[tuple[str, ...]] = (
     "walkthrough_cache",
     "walkthrough_comprehensions",
     "walkthrough_events",
-    "walkthrough_lead",
     "walkthrough_limit",
     "walkthrough_memory",
     "walkthrough_output_limit",
@@ -206,6 +270,22 @@ def icon(value: str | None, fallback: str = "") -> str:
         name = parts[0] if parts[0].startswith("fa-") else f"fa-{parts[0]}"
         parts = ["fa-solid", name]
     return " ".join(parts)
+
+
+def language_icon(language: str | None, *, kit: bool = False) -> str:
+    """Pick the Font Awesome icon a language is known by.
+
+    :param language: The language a code block is written in.
+    :param kit: Whether the site has a Font Awesome kit, which has the
+        Pro icons.
+    :return: The icon's classes or an empty string for a language
+        with none.
+    """
+    name = (language or "").strip().lower()
+    for classes, names in LANGUAGE_ICONS:
+        if name in names:
+            return classes if kit else PRO_ICONS.get(classes, classes)
+    return ""
 
 
 def toctree_args(config: Config) -> dict[str, t.Any]:

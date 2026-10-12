@@ -4,7 +4,7 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 09 October 2026
+Last updated on: 12 October 2026
 
 Kaamiki's shared helpers, now as its own module.
 """
@@ -37,6 +37,7 @@ from kaamiki.extensions.utils.directives import skip
 from kaamiki.extensions.utils.directives import toggle
 from kaamiki.extensions.utils.directives import trail
 from kaamiki.extensions.utils.directives import visitor
+from kaamiki.extensions.utils.doctree import badged
 from kaamiki.extensions.utils.doctree import buried
 from kaamiki.extensions.utils.doctree import findall
 from kaamiki.extensions.utils.doctree import offer
@@ -53,6 +54,7 @@ from kaamiki.extensions.utils.reading import reading_speed
 from kaamiki.extensions.utils.reading import reading_time
 from kaamiki.extensions.utils.reading import wordcount
 from kaamiki.extensions.utils.settings import icon
+from kaamiki.extensions.utils.settings import language_icon
 from kaamiki.extensions.utils.settings import logo_size
 from kaamiki.extensions.utils.settings import reread
 from kaamiki.extensions.utils.settings import setting
@@ -71,6 +73,7 @@ from kaamiki.extensions.utils.text import tidy
 
 __all__: list[str] = [
     "absolute",
+    "badged",
     "bridge",
     "build_finished",
     "buried",
@@ -93,6 +96,7 @@ __all__: list[str] = [
     "hostnames",
     "hosts",
     "icon",
+    "language_icon",
     "listed",
     "logo_size",
     "not_found",

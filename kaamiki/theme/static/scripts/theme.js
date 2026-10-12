@@ -28,20 +28,23 @@
     const REVEAL_WAITING = 'km-page-reveal-item';
     const REVEAL_SHOWN = 'km-page-reveal-item--shown';
     const COLOUR_MODE_KEY = 'km:colourMode';
-    const WALKTHROUGH_NARROW = 641;
-    const WALKTHROUGH_LINES = 15;
     const WALKTHROUGH_MIN_LINES = 6;
-    const WALKTHROUGH_SHARE = 0.55;
-    const WALKTHROUGH_LEAD = 0.24;
-    const WALKTHROUGH_LEAD_NARROW = 0.14;
-    const WALKTHROUGH_ROOM = 120;
-    const WALKTHROUGH_OUT_LINES = 4;
     const WALKTHROUGH_JITTER = 120;
     const WALKTHROUGH_SETTLE = 120;
-    const WALKTHROUGH_RISE = 6;
-    const WALKTHROUGH_KEYS = { ArrowLeft: -1, ArrowRight: 1 };
+    const WALKTHROUGH_WIDE = 880;
+    const WALKTHROUGH_PAD = 16;
+    const WALKTHROUGH_SHARE = 0.6;
+    const WALKTHROUGH_ROOM = 24;
+    const WALKTHROUGH_ARM = 120;
+    const WALKTHROUGH_HOLD = 350;
+    const WALKTHROUGH_INPUT = 500;
+    const WALKTHROUGH_GLIDE = 1500;
+    const WALKTHROUGH_FOCUS = 300;
+    const WALKTHROUGH_STACK_LINES = 12;
     const walkthroughs = [];
-    const walkthroughDrawn = new Map();
+    let walkthroughHeld = null;
+    let walkthroughHand = 0;
+    let walkthroughWired = false;
 
     window.Kaamiki = Object.freeze({ walkthroughs });
 
@@ -117,7 +120,6 @@
         tooltipHold: () => getDurationMs('--km-tooltip-hold'),
         fast: () => getDurationMs('--km-duration-fast'),
         showMoreHold: () => getDurationMs('--km-show-more-hold'),
-        walkthroughSwap: () => getDurationMs('--km-walkthrough-swap'),
         tickerBase: () => getDurationMs('--km-ticker-base'),
         tickerStep: () => getDurationMs('--km-ticker-step'),
     };
@@ -1730,31 +1732,6 @@
         return entry;
     }
 
-    function walkthroughMovable(element) {
-        const { display, position } = getComputedStyle(element);
-        return display !== 'none' && (position === 'static' || position === 'relative');
-    }
-
-    function walkthroughHeight(element) {
-        return element.getBoundingClientRect().height;
-    }
-
-    function walkthroughShifted(element) {
-        const { translate, transform } = getComputedStyle(element);
-        let shifted = translate && translate !== 'none' ? parseFloat(translate.split(' ')[1]) || 0 : 0;
-        const matrix = /^matrix(3d)?\((.+)\)$/.exec(transform || '');
-        if (matrix) shifted += Number(matrix[2].split(',')[matrix[1] ? 13 : 5]) || 0;
-        return shifted;
-    }
-
-    function walkthroughTop(element) {
-        let top = element.getBoundingClientRect().top + window.scrollY;
-        for (let node = element; node && node !== root; node = node.parentElement) {
-            top -= walkthroughShifted(node);
-        }
-        return top;
-    }
-
     function walkthroughScreen() {
         const probe = document.createElement('div');
         probe.style.cssText = 'position: absolute; top: 0; width: 0; height: 100lvh; visibility: hidden;';
@@ -1769,77 +1746,22 @@
         return Math.round(value * ratio) / ratio;
     }
 
-    function walkthroughTail(host) {
-        const found = [];
-        for (let node = host; node && node !== document.body; node = node.parentElement) {
-            for (let next = node.nextElementSibling; next; next = next.nextElementSibling) {
-                if (walkthroughMovable(next)) found.push(next);
-            }
-        }
-        return found;
-    }
-
-    function walkthroughLayout() {
-        walkthroughs.forEach((walk) => {
-            if (!walk.span) return;
-            walk.start = walkthroughTop(walk.host) - walk.stick;
-        });
-    }
-
-    function walkthroughDraw() {
-        const shifts = new Map();
-        walkthroughs.forEach((walk) => {
-            if (!walk.span) return;
-            const shift = walk.pane.getBoundingClientRect().bottom
-                - walk.host.getBoundingClientRect().bottom;
-            shifts.set(walk, shift);
-        });
-        const totals = new Map();
-        shifts.forEach((shift, walk) => {
-            walk.tail.forEach((element) => {
-                totals.set(element, (totals.get(element) || 0) + shift);
-            });
-        });
-        walkthroughDrawn.forEach((_, element) => {
-            if (!totals.has(element)) totals.set(element, 0);
-        });
-        totals.forEach((value, element) => {
-            const offset = walkthroughSnap(value);
-            if ((walkthroughDrawn.get(element) || 0) === offset) return;
-            if (offset) {
-                element.style.translate = `0 ${offset}px`;
-                element.setAttribute('data-km-drawn', '');
-                walkthroughDrawn.set(element, offset);
-            } else {
-                element.style.removeProperty('translate');
-                element.removeAttribute('data-km-drawn');
-                walkthroughDrawn.delete(element);
-            }
-        });
-    }
-
-    function walkthroughFrame(animate = true) {
-        walkthroughs.forEach((walk) => walk.update(animate));
-        walkthroughDraw();
+    function walkthroughFrame() {
+        walkthroughs.forEach((walk) => walk.update());
     }
 
     const walkthroughTick = rafThrottle(() => walkthroughFrame());
 
     function walkthroughMeasure() {
         walkthroughs.forEach((walk) => walk.measure());
-        walkthroughLayout();
-        walkthroughFrame(false);
+        walkthroughFrame();
     }
 
     function walkthroughRefit() {
-        let changed = false;
         walkthroughs.forEach((walk) => {
-            if (walk.shape() === walk.shaped) return;
-            walk.measure();
-            changed = true;
+            if (walk.shape() !== walk.shaped) walk.measure();
         });
-        walkthroughLayout();
-        walkthroughFrame(!changed);
+        walkthroughFrame();
     }
 
     let walkthroughSettling = 0;
@@ -1849,36 +1771,229 @@
         walkthroughSettling = window.setTimeout(walkthroughRefit, WALKTHROUGH_SETTLE);
     }
 
+    function initWalkthroughs() {
+        document.querySelectorAll('[data-km-walkthrough]').forEach((host) => {
+            walkthroughs.push(createWalkthrough(host));
+        });
+        if (!walkthroughs.length) return;
+        walkthroughMeasure();
+        onScroll(walkthroughTick);
+
+        const panes = new ResizeObserver(walkthroughSoon);
+        walkthroughs.forEach((walk) => {
+            panes.observe(walk.pane);
+            panes.observe(walk.track);
+        });
+        new ResizeObserver(walkthroughSoon).observe(document.body);
+
+        document.addEventListener('km:fold', walkthroughMeasure);
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        let resizing = 0;
+        window.addEventListener('resize', () => {
+            window.clearTimeout(resizing);
+            resizing = window.setTimeout(() => {
+                const moved = Math.abs(window.innerHeight - height);
+                if (window.innerWidth === width && moved < WALKTHROUGH_JITTER) {
+                    walkthroughHeld?.recentre();
+                    return;
+                }
+                width = window.innerWidth;
+                height = window.innerHeight;
+                walkthroughMeasure();
+            }, WALKTHROUGH_SETTLE);
+        }, { passive: true });
+
+        window.matchMedia('(prefers-reduced-motion: reduce)')
+            .addEventListener('change', walkthroughMeasure);
+        document.fonts.ready.then(walkthroughMeasure);
+    }
+
+    function walkthroughFocus() {
+        const top = headerHeight();
+        return top + (window.innerHeight - top) / 2;
+    }
+
+    function walkthroughJump(top) {
+        window.scrollTo({ top, behavior: 'instant' });
+    }
+
+    function walkthroughConsumes(element, dy) {
+        for (let node = element; node instanceof Element && node !== document.body; node = node.parentElement) {
+            if (!/auto|scroll/.test(getComputedStyle(node).overflowY)) continue;
+            const spare = dy > 0
+                ? node.scrollHeight - node.clientHeight - node.scrollTop
+                : node.scrollTop;
+            if (spare > 1) return true;
+        }
+        return false;
+    }
+
+    function walkthroughView(frame) {
+        const stage = frame.querySelector('[data-km-stage]');
+        const lines = new Map();
+        frame.querySelectorAll('[data-km-line]').forEach((line) => {
+            lines.set(Number(line.dataset.kmLine), line);
+        });
+        return {
+            frame,
+            stage,
+            lines,
+            code: stage.querySelector('pre'),
+            out: frame.querySelector('[data-km-out]'),
+            marked: [],
+            filled: [],
+            current: null,
+        };
+    }
+
+    function walkthroughMark(view, step) {
+        view.marked.forEach((line) => line.removeAttribute('data-km-current'));
+        view.marked = [];
+        for (let line = step.line; line <= (step.end ?? step.line); line += 1) {
+            const found = view.lines.get(line);
+            if (!found) continue;
+            found.setAttribute('data-km-current', '');
+            view.marked.push(found);
+        }
+        view.current = view.marked[0] || null;
+    }
+
+    function walkthroughAnnotate(view, step, comment, opened) {
+        view.filled.forEach((slot) => slot.replaceChildren());
+        view.filled = [];
+        const groups = new Map();
+        const add = (at, item) => {
+            if (!view.lines.has(at)) return;
+            if (!groups.has(at)) groups.set(at, []);
+            groups.get(at).push(item);
+        };
+        (step.vars || []).forEach(([name, at, full, short, fresh]) => {
+            add(at, { name, full, short, fresh, key: name });
+        });
+        if (step.ret) {
+            add(step.line, {
+                mark: 'returns:', full: step.ret[0], short: step.ret[1],
+                key: 'returns:', kind: 'return', fresh: 1,
+            });
+        }
+        if (step.error) {
+            add(step.line, {
+                mark: 'error:', full: step.error[0], short: step.error[1],
+                key: 'error:', kind: 'error', fresh: 1,
+            });
+        }
+        const { open = '#', close = '' } = comment || {};
+        groups.forEach((items, at) => {
+            const slot = view.lines.get(at).querySelector('[data-km-ann]');
+            slot.append(`${open} `);
+            items.forEach((item, n) => {
+                if (n) slot.append(', ');
+                slot.append(walkthroughEntry(item, opened));
+            });
+            if (close) slot.append(` ${close}`);
+            view.filled.push(slot);
+        });
+    }
+
+    function walkthroughFollow(view, room, shift) {
+        const line = view.current;
+        if (!line) return shift;
+        const rect = line.getBoundingClientRect();
+        const top = rect.top - view.code.getBoundingClientRect().top;
+        const pad = Math.min(room / 3, rect.height * 2);
+        let target = shift;
+        if (top < target + pad) target = top - pad;
+        else if (top + rect.height > target + room - pad) {
+            target = top + rect.height - room + pad;
+        }
+        return clamp(Math.round(target), 0, Math.max(0, view.code.offsetHeight - room));
+    }
+
+    function walkthroughEdge(view, above, below) {
+        const { stage } = view;
+        stage.toggleAttribute('data-km-more', stage.scrollWidth - stage.clientWidth - stage.scrollLeft > 2);
+        stage.toggleAttribute('data-km-above', above > 2);
+        stage.toggleAttribute('data-km-below', below > 2);
+    }
+
+    function walkthroughWire() {
+        if (walkthroughWired) return;
+        walkthroughWired = true;
+        const steps = { ArrowDown: 60, ArrowUp: -60 };
+        const pages = { PageDown: 1, PageUp: -1 };
+        const hand = (wait) => {
+            walkthroughHand = Math.max(walkthroughHand, performance.now() + wait);
+        };
+        const taken = (event, dy) => event.target.closest?.('.km-header')
+            || walkthroughConsumes(event.target, dy);
+        window.addEventListener('wheel', (event) => {
+            if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+            hand(WALKTHROUGH_INPUT);
+            if (!walkthroughHeld || taken(event, event.deltaY)) return;
+            const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+            walkthroughHeld.nudge(event.deltaY * unit);
+        }, { passive: true });
+        window.addEventListener('keydown', (event) => {
+            if (event.altKey || event.ctrlKey || event.metaKey) return;
+            if (event.target.closest?.('input, textarea, select, [contenteditable]')) return;
+            if (event.key === 'Escape') {
+                walkthroughHeld?.release();
+                return;
+            }
+            const space = event.key === ' ' && !event.target.closest?.('button, a, summary, [role="button"]');
+            let delta = steps[event.key];
+            if (delta === undefined && (event.key in pages || space)) {
+                delta = (event.key in pages ? pages[event.key] : event.shiftKey ? -1 : 1) * window.innerHeight * 0.85;
+            }
+            if (delta === undefined) return;
+            hand(WALKTHROUGH_INPUT);
+            if (walkthroughHeld) {
+                event.preventDefault();
+                walkthroughHeld.nudge(delta);
+            }
+        });
+        let touchY = 0;
+        window.addEventListener('touchstart', (event) => {
+            touchY = event.touches[0].clientY;
+            hand(WALKTHROUGH_INPUT);
+        }, { passive: true });
+        window.addEventListener('touchmove', (event) => {
+            hand(WALKTHROUGH_INPUT);
+            const y = event.touches[0].clientY;
+            const delta = touchY - y;
+            touchY = y;
+            if (walkthroughHeld && !taken(event, delta)) walkthroughHeld.nudge(delta);
+        }, { passive: true });
+        ['touchend', 'touchcancel'].forEach((name) => {
+            window.addEventListener(name, () => hand(WALKTHROUGH_GLIDE), { passive: true });
+        });
+    }
+
     function createWalkthrough(host) {
         const payload = readWalkthroughPayload(host);
         const { steps } = payload;
         const pane = host.querySelector('[data-km-pane]');
         const frame = host.querySelector('[data-km-frame]');
-        const stage = host.querySelector('[data-km-stage]');
-        const code = stage.querySelector('pre');
         const box = host.querySelector('[data-km-notes]');
-
-        const lead = host.querySelector('[data-km-lead]');
-        const foot = host.querySelector('.km-walkthrough__tail') || box;
-        const counter = host.querySelector('[data-km-counter]');
-        const out = host.querySelector('[data-km-out]');
-        const status = host.querySelector('[data-km-status]');
-        const copy = host.querySelector('[data-km-copy]');
-        const buttons = Array.from(host.querySelectorAll('[data-km-step]'));
-        const lines = new Map();
-        host.querySelectorAll('[data-km-line]').forEach((line) => {
-            lines.set(Number(line.dataset.kmLine), line);
+        const track = host.querySelector('[data-km-track]');
+        const counter = frame.querySelector('[data-km-counter]');
+        const blocks = Array.from(track.querySelectorAll('[data-km-note]'));
+        const main = walkthroughView(frame);
+        const { stage, code, out } = main;
+        host.querySelectorAll('img[loading="lazy"]').forEach((image) => {
+            image.loading = 'eager';
         });
-        const notes = new Map();
-        box.querySelectorAll('[data-km-note]').forEach((note) => {
-            notes.set(Number(note.dataset.kmNote), note);
-        });
-        const runs = steps.map((step, at) => {
-            let first = at;
-            let last = at;
-            while (first > 0 && steps[first - 1].note === step.note) first -= 1;
-            while (last < steps.length - 1 && steps[last + 1].note === step.note) last += 1;
-            return [first, last];
+        let carry = 0;
+        const owned = blocks.map((_, at) => {
+            const own = [];
+            steps.forEach((step, n) => {
+                if (step.note === at) own.push(n);
+            });
+            if (!own.length) return [carry];
+            carry = own[own.length - 1];
+            return own;
         });
         const printed = [];
         let text = '';
@@ -1886,22 +2001,28 @@
             text += step.out || '';
             printed.push(text.length);
         });
+        const idle = counter ? counter.textContent : '';
 
         const opened = new Set();
         const walk = {
-            host, pane, tail: [], stick: 0, span: 0, start: 0, resting: 0, shaped: '', update, measure, shape,
+            host, pane, track, shaped: '', update, measure, shape, nudge, release, recentre,
         };
+        let snaps = [];
+        let keys = [];
         let index = -1;
+        let active = -1;
         let mode = '';
-        let current = null;
-        let marked = [];
-        let filled = [];
-        let shown = null;
-        let grow = null;
-        let settling = 0;
         let shift = 0;
-        let most = 0;
-        let fitted = new Map();
+        let room = 0;
+        let height = 0;
+        let total = 0;
+        let progress = 0;
+        let heldAt = 0;
+        let heldY = 0;
+        let focusedAt = 0;
+        let armed = false;
+        let unseen = true;
+        let lastAway = null;
         let loose = false;
         let touched = false;
         let steady = false;
@@ -1912,8 +2033,8 @@
                 host.closest('.km-page--clamped') !== null,
                 pane.clientWidth,
                 code.offsetHeight,
-                lead?.offsetHeight ?? 0,
                 headerHeight(),
+                blocks.map((block) => block.offsetHeight).join(','),
             ].join(' ');
         }
 
@@ -1921,40 +2042,7 @@
             const focused = stage.contains(document.activeElement)
                 ? document.activeElement.closest('[data-km-long]')?.dataset.kmKey
                 : undefined;
-            filled.forEach((slot) => slot.replaceChildren());
-            filled = [];
-            const groups = new Map();
-            const add = (at, item) => {
-                if (!lines.has(at)) return;
-                if (!groups.has(at)) groups.set(at, []);
-                groups.get(at).push(item);
-            };
-            (step.vars || []).forEach(([name, at, full, short, fresh]) => {
-                add(at, { name, full, short, fresh, key: name });
-            });
-            if (step.ret) {
-                add(step.line, {
-                    mark: 'returns:', full: step.ret[0], short: step.ret[1],
-                    key: 'returns:', kind: 'return', fresh: 1,
-                });
-            }
-            if (step.error) {
-                add(step.line, {
-                    mark: 'error:', full: step.error[0], short: step.error[1],
-                    key: 'error:', kind: 'error', fresh: 1,
-                });
-            }
-            const { open = '#', close = '' } = payload.comment || {};
-            groups.forEach((items, at) => {
-                const slot = lines.get(at).querySelector('[data-km-ann]');
-                slot.append(`${open} `);
-                items.forEach((item, n) => {
-                    if (n) slot.append(', ');
-                    slot.append(walkthroughEntry(item, opened));
-                });
-                if (close) slot.append(` ${close}`);
-                filled.push(slot);
-            });
+            walkthroughAnnotate(main, step, payload.comment, opened);
             if (focused === undefined) return;
             const again = Array.from(stage.querySelectorAll('[data-km-long]'))
                 .find((value) => value.dataset.kmKey === focused);
@@ -1963,37 +2051,17 @@
             steady = false;
         }
 
-        function room() {
-            return Math.floor(fitted.get(shown ?? -1) ?? most);
-        }
-
-        function follow(line) {
-            const height = room();
-            const rect = line.getBoundingClientRect();
-            const top = rect.top - code.getBoundingClientRect().top;
-            const pad = Math.min(height / 3, rect.height * 2);
-            let target = shift;
-            if (top < target + pad) target = top - pad;
-            else if (top + rect.height > target + height - pad) {
-                target = top + rect.height - height + pad;
-            }
-            shift = clamp(Math.round(target), 0, Math.max(0, code.offsetHeight - height));
+        function follow() {
+            shift = walkthroughFollow(main, room, shift);
             host.style.setProperty('--km-walkthrough-shift', `${shift}px`);
         }
 
         function edge() {
-            const right = stage.scrollWidth - stage.clientWidth - stage.scrollLeft;
             const top = loose ? stage.scrollTop : shift;
             const below = loose
                 ? stage.scrollHeight - stage.clientHeight - top
-                : code.offsetHeight - room() - shift;
-            stage.toggleAttribute('data-km-more', right > 2);
-            stage.toggleAttribute('data-km-above', top > 2);
-            stage.toggleAttribute('data-km-below', below > 2);
-            if (box.hasAttribute('data-km-moving')) return;
-            const rest = Math.max(0, box.scrollHeight - box.clientHeight - box.scrollTop);
-            box.style.setProperty('--km-walkthrough-notes-above', `${Math.round(box.scrollTop)}px`);
-            box.style.setProperty('--km-walkthrough-notes-below', `${Math.round(rest)}px`);
+                : code.offsetHeight - room - shift;
+            walkthroughEdge(main, mode === 'stage' ? top : 0, mode === 'stage' ? below : 0);
         }
 
         function print(at) {
@@ -2008,15 +2076,19 @@
                 fresh.textContent = text.slice(start, end);
                 out.append(fresh);
             }
+            const before = out.offsetHeight;
+            out.style.height = 'auto';
+            const after = out.offsetHeight;
+            if (Math.abs(after - before) > 0.5) {
+                out.style.height = `${before}px`;
+                void out.offsetHeight;
+            }
+            out.style.height = `${after}px`;
             out.scrollTop = out.scrollHeight;
         }
 
-        function fit() {
-            host.style.setProperty('--km-walkthrough-stage', `${room()}px`);
-        }
-
         function loosen() {
-            if (loose || !mode || steady || touched) return;
+            if (loose || mode !== 'stage' || steady || touched) return;
             loose = true;
             stage.setAttribute('data-km-loose', '');
             host.style.setProperty('--km-walkthrough-shift', '0px');
@@ -2034,237 +2106,10 @@
             void code.offsetHeight;
         }
 
-        function trailing() {
-            const probe = document.createElement('div');
-            probe.style.cssText = 'display: block; height: 0; margin: 0; padding: 0; border: 0';
-            pane.append(probe);
-            const gap = probe.getBoundingClientRect().top - foot.getBoundingClientRect().bottom;
-            probe.remove();
-            return Math.max(0, gap);
-        }
-
-        function still() {
-            grow?.cancel();
-            grow = null;
-            window.clearTimeout(settling);
-            box.removeAttribute('data-km-moving');
-            notes.forEach((note) => {
-                note.getAnimations().forEach((animation) => animation.cancel());
-                note.removeAttribute('data-km-leaving');
-            });
-        }
-
-        function reveal(next, animate) {
-            if (next === shown) return;
-            const from = box.getBoundingClientRect().height;
-            const leaving = notes.get(shown);
-            const arriving = notes.get(next);
-            shown = next;
-            leaving?.removeAttribute('aria-current');
-            arriving?.setAttribute('aria-current', 'step');
-            if (!animate) {
-                still();
-                notes.forEach((note) => note.toggleAttribute('data-km-shown', note === arriving));
-                fit();
-                return;
-            }
-            const swap = TIMING.walkthroughSwap();
-            const easing = getCssVar('--km-ease-smooth');
-            if (leaving) {
-                const { opacity, translate } = getComputedStyle(leaving);
-                leaving.getAnimations().forEach((animation) => animation.cancel());
-                leaving.removeAttribute('data-km-shown');
-                leaving.setAttribute('data-km-leaving', '');
-                const fade = leaving.animate(
-                    [{ opacity, translate }, { opacity: 0, translate }],
-                    { duration: swap * 0.4, easing, fill: 'forwards' },
-                );
-                fade.onfinish = () => {
-                    leaving.removeAttribute('data-km-leaving');
-                    fade.cancel();
-                };
-            }
-            if (arriving) {
-                const { opacity, translate } = arriving.hasAttribute('data-km-leaving')
-                    ? getComputedStyle(arriving)
-                    : { opacity: 0, translate: `0 ${WALKTHROUGH_RISE}px` };
-                arriving.getAnimations().forEach((animation) => animation.cancel());
-                arriving.removeAttribute('data-km-leaving');
-                arriving.setAttribute('data-km-shown', '');
-                arriving.animate(
-                    [{ opacity, translate }, { opacity: 1, translate: '0 0' }],
-                    { duration: swap * 0.8, delay: swap * 0.2, easing, fill: 'backwards' },
-                );
-            }
-            fit();
-            grow?.cancel();
-            box.scrollTop = 0;
-            box.style.setProperty('--km-walkthrough-notes-above', '0px');
-            box.style.setProperty('--km-walkthrough-notes-below', '0px');
-            const to = box.getBoundingClientRect().height;
-            grow = Math.abs(to - from) > 0.5
-                ? box.animate(
-                    [{ height: `${from}px` }, { height: `${to}px` }],
-                    { duration: swap, easing },
-                )
-                : null;
-            box.setAttribute('data-km-moving', '');
-            window.clearTimeout(settling);
-            settling = window.setTimeout(() => {
-                box.removeAttribute('data-km-moving');
-                read();
-                edge();
-            }, swap);
-        }
-
-        function paint(at, animate = true) {
-            const next = clamp(at, 0, steps.length - 1);
-            if (next === index && animate) return;
-            index = next;
-            rejoin();
-            const step = steps[index];
-            marked.forEach((line) => line.removeAttribute('data-km-current'));
-            marked = [];
-            for (let at = step.line; at <= (step.end ?? step.line); at += 1) {
-                const line = lines.get(at);
-                if (!line) continue;
-                line.setAttribute('data-km-current', '');
-                marked.push(line);
-            }
-            current = marked[0] || null;
-            annotate(step);
-            print(index);
-            reveal(step.note ?? -1, animate && !prefersReducedMotion());
-            if (current) follow(current);
-            edge();
-            if (counter) counter.textContent = `${index + 1} / ${steps.length}`;
-            buttons.forEach((button) => {
-                const back = Number(button.dataset.kmStep) < 0;
-                const stuck = back ? index === 0 : index === steps.length - 1;
-                button.setAttribute('aria-disabled', String(stuck));
-            });
-            if (status && mode === 'pager') {
-                const first = marked[0]?.dataset.kmNumber || step.line;
-                const last = marked[marked.length - 1]?.dataset.kmNumber || first;
-                const where = first === last
-                    ? say('line', { line: first })
-                    : say('lines', { first, last });
-                status.textContent = say('step', {
-                    step: index + 1, steps: steps.length, where,
-                });
-            }
-        }
-
-        function update(animate) {
-            if (mode !== 'scroll') return;
-            const into = window.scrollY - walk.start;
-            paint(Math.floor(into / payload.pace), animate);
-            read();
-        }
-
-        function read() {
-            if (mode !== 'scroll' || box.hasAttribute('data-km-moving')) return;
-            const spare = box.scrollHeight - box.clientHeight;
-            if (spare < 1) return;
-            const [first, last] = runs[index] || [index, index];
-            const into = window.scrollY - walk.start - first * payload.pace;
-            const through = clamp(into / ((last - first + 1) * payload.pace), 0, 1);
-            box.scrollTop = Math.round(through * spare);
-        }
-
-        function switchTo(next) {
-            if (next === mode) return;
-            mode = next;
-            host.dataset.kmMode = next;
-            if (status) status.textContent = '';
-        }
-
-        function measure() {
-            const top = headerHeight();
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const narrow = width < WALKTHROUGH_NARROW;
-            rejoin();
-            still();
-            host.setAttribute('data-km-measuring', '');
-            pane.style.removeProperty('min-height');
-            if (out) {
-                out.hidden = !text;
-                const rows = text.replace(/\n$/, '').split('\n').length;
-                host.style.setProperty(
-                    '--km-walkthrough-out-rows',
-                    String(Math.min(WALKTHROUGH_OUT_LINES, rows)),
-                );
-            }
-            const tucked = !host.getClientRects().length
-                || host.closest('.km-page--clamped') !== null;
-            switchTo(prefersReducedMotion() || tucked ? 'pager' : 'scroll');
-            host.style.removeProperty('--km-walkthrough-stage');
-            const whole = code.offsetHeight;
-            const line = lines.get(1)?.getBoundingClientRect().height || 20;
-            const pad = Math.max(0, whole - line * lines.size);
-            const least = Math.min(whole, pad + line * WALKTHROUGH_MIN_LINES);
-            const chrome = box.offsetTop - frame.offsetTop - stage.offsetHeight;
-            most = Math.min(whole, Math.max(least, narrow
-                ? pad + line * WALKTHROUGH_LINES
-                : (height - top) * WALKTHROUGH_SHARE - chrome));
-            const above = lead
-                ? frame.getBoundingClientRect().top - pane.getBoundingClientRect().top
-                : 0;
-            const share = narrow ? WALKTHROUGH_LEAD_NARROW : WALKTHROUGH_LEAD;
-            const keep = clamp(Math.round(height * share), 0, above);
-            const free = height - top - keep - chrome;
-            if (mode === 'scroll' && free - least < WALKTHROUGH_ROOM) switchTo('pager');
-            host.style.setProperty('--km-walkthrough-notes', `${Math.floor(free - least)}px`);
-            const heights = new Map();
-            notes.forEach((note) => note.removeAttribute('data-km-shown'));
-            heights.set(-1, walkthroughHeight(box));
-            notes.forEach((note, key) => {
-                note.setAttribute('data-km-shown', '');
-                heights.set(key, walkthroughHeight(box));
-                note.removeAttribute('data-km-shown');
-            });
-            notes.get(shown)?.setAttribute('data-km-shown', '');
-            fitted = new Map();
-            heights.forEach((size, key) => {
-                const fits = clamp(free - size, least, most);
-                const lined = fits < whole ? pad + line * Math.floor((fits - pad) / line) : fits;
-                fitted.set(key, Math.max(least, lined));
-            });
-            fit();
-            const last = steps[steps.length - 1].note ?? -1;
-            const base = walkthroughHeight(pane) - walkthroughHeight(stage) - walkthroughHeight(box);
-            walk.stick = top - (above - keep);
-            walk.span = mode === 'scroll' ? steps.length * payload.pace : 0;
-            const floor = narrow && walk.span ? Math.ceil(walkthroughScreen() - walk.stick) : 0;
-            walk.resting = Math.max(
-                floor,
-                base + Math.floor(fitted.get(last) ?? most) + (heights.get(last) ?? 0),
-            );
-            pane.style.minHeight = floor ? `${floor}px` : '';
-            walk.tail = walk.span ? walkthroughTail(host) : [];
-            host.style.marginBottom = walk.span ? `${trailing()}px` : '';
-            host.style.height = walk.span ? `${walk.span + walk.resting}px` : '';
-            host.style.setProperty('--km-walkthrough-stick', `${walk.stick}px`);
-            if (mode === 'pager') paint(Math.max(0, index), false);
-            void host.offsetHeight;
-            host.removeAttribute('data-km-measuring');
-            walk.shaped = shape();
-        }
-
-        function go(at) {
-            if (mode === 'pager') {
-                paint(at);
-                return;
-            }
-            const into = at * payload.pace + payload.pace / 2;
-            glideTo(walk.start + into);
-        }
-
-        function release() {
+        function ease() {
             if (!loose) return;
             rejoin();
-            if (current) follow(current);
+            follow();
             edge();
         }
 
@@ -2276,19 +2121,325 @@
             edge();
         }
 
-        stage.addEventListener('scroll', rafThrottle(edge), { passive: true });
-        box.addEventListener('scroll', rafThrottle(edge), { passive: true });
+        function rest() {
+            rejoin();
+            main.marked.forEach((line) => line.removeAttribute('data-km-current'));
+            main.marked = [];
+            main.filled.forEach((slot) => slot.replaceChildren());
+            main.filled = [];
+            main.current = null;
+            blocks.forEach((block) => {
+                block.removeAttribute('data-km-active');
+                block.removeAttribute('aria-current');
+            });
+            out?.replaceChildren();
+            out?.style.removeProperty('height');
+            if (counter) counter.textContent = idle;
+            ['--km-walkthrough-stage', '--km-walkthrough-notes']
+                .forEach((name) => host.style.removeProperty(name));
+            host.style.setProperty('--km-walkthrough-shift', '0px');
+            track.style.removeProperty('translate');
+            keys = [];
+            index = -1;
+            active = -1;
+            shift = 0;
+        }
 
-        stage.addEventListener('click', (event) => {
+        function mark(at) {
+            if (at === active) return;
+            blocks[active]?.removeAttribute('data-km-active');
+            blocks[active]?.removeAttribute('aria-current');
+            active = at;
+            blocks[at].setAttribute('data-km-active', '');
+            blocks[at].setAttribute('aria-current', 'step');
+        }
+
+        function paint(at) {
+            const next = clamp(at, 0, steps.length - 1);
+            if (next === index) return;
+            index = next;
+            rejoin();
+            const step = steps[index];
+            walkthroughMark(main, step);
+            annotate(step);
+            print(index);
+            follow();
+            edge();
+            if (counter) counter.textContent = `${index + 1} / ${steps.length}`;
+        }
+
+        function locate(value) {
+            const into = clamp(value, 0, total);
+            const found = keys.findIndex((item) => into <= item.to);
+            const at = found < 0 ? keys.length - 1 : found;
+            const key = keys[at];
+            return { at, through: clamp((into - key.from) / Math.max(1, key.to - key.from), 0, 1) };
+        }
+
+        function render() {
+            if (mode !== 'stage' || !keys.length) return;
+            const { at: slot, through } = locate(progress);
+            const key = keys[slot];
+            track.style.translate = `0 ${-walkthroughSnap(key.a + (key.b - key.a) * through)}px`;
+            let note = key.note;
+            const own = owned[note];
+            let at = own[Math.min(own.length - 1, Math.floor(through * own.length))];
+            if (key.kind === 'move' && through >= 0.5) {
+                note += 1;
+                at = owned[note][0];
+            } else if (key.kind === 'move') {
+                at = own[own.length - 1];
+            }
+            mark(note);
+            paint(at);
+        }
+
+        function centre() {
+            return frame.getBoundingClientRect().top + height / 2;
+        }
+
+        function recentre() {
+            walkthroughJump(window.scrollY + centre() - walkthroughFocus());
+            heldY = window.scrollY;
+        }
+
+        function lock(side) {
+            if (walkthroughHeld) return;
+            progress = side > 0 ? 0 : total;
+            recentre();
+            const bar = window.innerWidth - root.clientWidth;
+            root.style.overflow = 'hidden';
+            if (bar > 0) root.style.paddingRight = `${bar}px`;
+            walkthroughHeld = walk;
+            heldAt = performance.now();
+            render();
+        }
+
+        function release() {
+            if (walkthroughHeld !== walk) return;
+            walkthroughHeld = null;
+            root.style.removeProperty('overflow');
+            root.style.removeProperty('padding-right');
+            armed = false;
+        }
+
+        function nudge(delta) {
+            if (performance.now() - heldAt < WALKTHROUGH_HOLD) return;
+            if ((delta > 0 && progress >= total) || (delta < 0 && progress <= 0)) {
+                release();
+                return;
+            }
+            progress = clamp(progress + delta, 0, total);
+            render();
+        }
+
+        function update() {
+            if (mode !== 'stage') return;
+            if (walkthroughHeld === walk) {
+                if (Math.abs(window.scrollY - heldY) <= 2) return;
+                if (performance.now() - focusedAt < WALKTHROUGH_FOCUS) walkthroughJump(heldY);
+                else release();
+                return;
+            }
+            const away = centre() - walkthroughFocus();
+            if (unseen || Math.abs(away) > window.innerHeight) {
+                unseen = false;
+                progress = away > 0 ? 0 : total;
+                render();
+            }
+            if (Math.abs(away) > WALKTHROUGH_ARM) armed = true;
+            const byHand = performance.now() < walkthroughHand;
+            if (armed && byHand && !walkthroughHeld && lastAway !== null) {
+                if (lastAway > 0 && away <= 0) lock(1);
+                else if (lastAway < 0 && away >= 0) lock(-1);
+            }
+            lastAway = away;
+        }
+
+        function clearStack() {
+            snaps.forEach((view) => view.frame.remove());
+            snaps = [];
+        }
+
+        function stack() {
+            blocks.forEach((block) => {
+                const clone = frame.cloneNode(true);
+                clone.removeAttribute('data-km-frame');
+                clone.classList.add('km-walkthrough__snap');
+                block.prepend(clone);
+                snaps.push(walkthroughView(clone));
+            });
+            const [first] = snaps;
+            const line = first.lines.get(1)?.getBoundingClientRect().height || 20;
+            const whole = first.code.offsetHeight;
+            const pad = Math.max(0, whole - line * first.lines.size);
+            const most = Math.min(whole, pad + line * WALKTHROUGH_STACK_LINES);
+            snaps.forEach((view, at) => {
+                const upto = owned[at][owned[at].length - 1];
+                const step = steps[upto];
+                walkthroughMark(view, step);
+                walkthroughAnnotate(view, step, payload.comment, opened);
+                if (view.out) {
+                    view.out.textContent = text.slice(0, printed[upto]);
+                    view.out.hidden = !view.out.textContent;
+                }
+                view.frame.style.setProperty('--km-walkthrough-stage', `${most}px`);
+                const to = walkthroughFollow(view, most, 0);
+                view.frame.style.setProperty('--km-walkthrough-shift', `${to}px`);
+                walkthroughEdge(view, to, whole - most - to);
+            });
+        }
+
+        function measure() {
+            const wasHeld = walkthroughHeld === walk;
+            const where = wasHeld && keys.length ? locate(progress) : null;
+            clearStack();
+            rejoin();
+            host.setAttribute('data-km-measuring', '');
+            host.removeAttribute('data-km-mode');
+            mode = '';
+            rest();
+            pane.style.removeProperty('min-height');
+            if (host.getClientRects().length) {
+                mode = 'stack';
+                if (!prefersReducedMotion() && host.closest('.km-page--clamped') === null) {
+                    host.setAttribute('data-km-mode', 'stage');
+                    if (host.clientWidth >= WALKTHROUGH_WIDE) mode = 'stage';
+                }
+                host.setAttribute('data-km-mode', mode);
+            }
+            if (out) out.hidden = mode !== 'stage' || !text;
+            if (mode === 'stage') {
+                const top = headerHeight();
+                const space = window.innerHeight - top;
+                if (out && text) {
+                    out.textContent = text;
+                    out.style.height = 'auto';
+                }
+                const full = out && text ? out.offsetHeight : 0;
+                const whole = code.offsetHeight;
+                const line = main.lines.get(1)?.getBoundingClientRect().height || 20;
+                const pad = Math.max(0, whole - line * main.lines.size);
+                const least = Math.min(whole, pad + line * WALKTHROUGH_MIN_LINES);
+                const caption = frame.offsetHeight - stage.offsetHeight - full;
+                const most = Math.min(
+                    whole,
+                    Math.max(
+                        least,
+                        Math.min(
+                            space * WALKTHROUGH_SHARE,
+                            space - 2 * (full + WALKTHROUGH_ROOM),
+                        ) - caption,
+                    ),
+                );
+                room = most < whole
+                    ? Math.max(least, pad + line * Math.floor((most - pad) / line))
+                    : most;
+                host.style.setProperty('--km-walkthrough-stage', `${room}px`);
+                height = caption + room;
+                host.style.setProperty('--km-walkthrough-notes', `${height}px`);
+                pane.style.minHeight = `${pane.offsetHeight}px`;
+                if (out) {
+                    out.replaceChildren();
+                    out.style.removeProperty('height');
+                }
+                const starts = [];
+                const ends = [];
+                blocks.forEach((block) => {
+                    const size = block.offsetHeight;
+                    const tall = size > height - 2 * WALKTHROUGH_PAD;
+                    const from = tall
+                        ? block.offsetTop - WALKTHROUGH_PAD
+                        : block.offsetTop + size / 2 - height / 2;
+                    starts.push(from);
+                    ends.push(tall ? block.offsetTop + size - height + WALKTHROUGH_PAD : from);
+                });
+                let at = 0;
+                blocks.forEach((_, note) => {
+                    const hold = Math.max(
+                        owned[note].length * payload.pace,
+                        ends[note] - starts[note],
+                    );
+                    keys.push({
+                        kind: 'hold', note, from: at, to: at + hold, a: starts[note], b: ends[note],
+                    });
+                    at += hold;
+                    if (note === blocks.length - 1) return;
+                    const move = Math.max(1, Math.abs(starts[note + 1] - ends[note]));
+                    keys.push({
+                        kind: 'move', note, from: at, to: at + move, a: ends[note], b: starts[note + 1],
+                    });
+                    at += move;
+                });
+                total = at;
+                progress = clamp(progress, 0, total);
+            } else if (mode === 'stack') {
+                stack();
+            }
+            void host.offsetHeight;
+            host.removeAttribute('data-km-measuring');
+            walk.shaped = shape();
+            unseen = true;
+            lastAway = null;
+            edge();
+            if (!wasHeld) return;
+            if (mode !== 'stage') {
+                release();
+                return;
+            }
+            if (where) {
+                const key = keys[where.at];
+                progress = key.from + (key.to - key.from) * where.through;
+            }
+            recentre();
+            render();
+        }
+
+        function go(at) {
+            const key = keys.find((item) => item.kind === 'hold' && item.note === at);
+            if (!key || walkthroughHeld !== walk) return;
+            progress = key.from + 1;
+            render();
+        }
+
+        let copiedTimer = 0;
+        let copiedButton = null;
+        const later = (wait, then) => {
+            copiedTimer = window.setTimeout(then, wait);
+        };
+        const copied = (button, done) => {
+            window.clearTimeout(copiedTimer);
+            copiedButton?.classList.remove('km-is-fading', 'success');
+            copiedButton = button;
+            button.classList.toggle('success', done);
+            if (!done) return;
+            later(TIMING.tooltipHold(), () => {
+                button.classList.add('km-is-fading');
+                later(TIMING.fast(), () => {
+                    button.classList.remove('success');
+                    later(TIMING.fast() * 2, () => button.classList.remove('km-is-fading'));
+                });
+            });
+        };
+
+        stage.addEventListener('scroll', rafThrottle(edge), { passive: true });
+
+        host.addEventListener('click', (event) => {
             const value = event.target.closest?.('[data-km-long]');
             if (value) unfold(value);
+            const button = event.target.closest?.('[data-km-copy]');
+            if (button) copyText(walkthroughSource(payload)).then((done) => copied(button, done));
         });
 
-        stage.addEventListener('keydown', (event) => {
+        host.addEventListener('keydown', (event) => {
             if (event.key !== 'Enter' && event.key !== ' ') return;
             if (!event.target.matches?.('[data-km-long]')) return;
             event.preventDefault();
             unfold(event.target);
+        });
+
+        host.addEventListener('focusin', () => {
+            focusedAt = performance.now();
         });
 
         stage.addEventListener('pointerdown', (event) => {
@@ -2297,14 +2448,19 @@
         });
         stage.addEventListener('focusin', loosen);
         stage.addEventListener('focusout', (event) => {
-            if (!stage.contains(event.relatedTarget)) release();
+            if (!stage.contains(event.relatedTarget)) ease();
         });
 
+        box.addEventListener('scroll', () => {
+            box.scrollTop = 0;
+        }, { passive: true });
+
         box.addEventListener('focusin', (event) => {
-            const note = event.target.closest?.('[data-km-note]');
-            if (!mode || !note || note.hasAttribute('data-km-shown')) return;
-            const at = steps.findIndex((step) => step.note === Number(note.dataset.kmNote));
-            if (at >= 0) go(at);
+            const block = event.target.closest?.('[data-km-note]');
+            if (mode !== 'stage' || !block) return;
+            if (!walkthroughHeld) lock(centre() >= walkthroughFocus() ? 1 : -1);
+            else if (walkthroughHeld !== walk) return;
+            if (!block.hasAttribute('data-km-active')) go(Number(block.dataset.kmNote));
         });
 
         host.addEventListener('load', () => {
@@ -2312,82 +2468,8 @@
             walkthroughSoon();
         }, true);
 
-        buttons.forEach((button) => {
-            button.addEventListener('click', () => {
-                paint(index + Number(button.dataset.kmStep));
-            });
-        });
-
-        host.addEventListener('keydown', (event) => {
-            if (mode !== 'pager' || event.altKey || event.ctrlKey || event.metaKey) return;
-            if (!pane.contains(event.target) || event.target === stage) return;
-            if (WALKTHROUGH_KEYS[event.key]) {
-                event.preventDefault();
-                paint(index + WALKTHROUGH_KEYS[event.key]);
-            } else if (event.key === 'Home' || event.key === 'End') {
-                event.preventDefault();
-                paint(event.key === 'Home' ? 0 : steps.length - 1);
-            }
-        });
-
-        let copiedTimer = 0;
-        const later = (wait, then) => {
-            copiedTimer = window.setTimeout(then, wait);
-        };
-        const copied = (done) => {
-            window.clearTimeout(copiedTimer);
-            copy.classList.remove('km-is-fading');
-            copy.classList.toggle('success', done);
-            if (!done) return;
-            later(TIMING.tooltipHold(), () => {
-                copy.classList.add('km-is-fading');
-                later(TIMING.fast(), () => {
-                    copy.classList.remove('success');
-                    later(TIMING.fast() * 2, () => copy.classList.remove('km-is-fading'));
-                });
-            });
-        };
-        copy?.addEventListener('click', () => {
-            copyText(walkthroughSource(payload)).then(copied);
-        });
-
+        walkthroughWire();
         return walk;
-    }
-
-    function initWalkthroughs() {
-        document.querySelectorAll('[data-km-walkthrough]').forEach((host) => {
-            walkthroughs.push(createWalkthrough(host));
-        });
-        if (!walkthroughs.length) return;
-        walkthroughMeasure();
-        onScroll(walkthroughTick);
-
-        const panes = new ResizeObserver(() => {
-            walkthroughDraw();
-            walkthroughSoon();
-        });
-        walkthroughs.forEach((walk) => panes.observe(walk.pane));
-        new ResizeObserver(walkthroughSoon).observe(document.body);
-
-        document.addEventListener('km:fold', walkthroughMeasure);
-
-        let width = window.innerWidth;
-        let height = window.innerHeight;
-        let resizing = 0;
-        window.addEventListener('resize', () => {
-            window.clearTimeout(resizing);
-            resizing = window.setTimeout(() => {
-                const moved = Math.abs(window.innerHeight - height);
-                if (window.innerWidth === width && moved < WALKTHROUGH_JITTER) return;
-                width = window.innerWidth;
-                height = window.innerHeight;
-                walkthroughMeasure();
-            }, WALKTHROUGH_SETTLE);
-        }, { passive: true });
-
-        window.matchMedia('(prefers-reduced-motion: reduce)')
-            .addEventListener('change', walkthroughMeasure);
-        document.fonts.ready.then(walkthroughMeasure);
     }
 
     ready(() => {
