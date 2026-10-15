@@ -64,6 +64,7 @@ at some amazing research labs and projects under the guidance of some
 super-duper talented people in the industry.
 
 .. embed:: ./assets/html/contributed.html
+    :source: _static/contributed.json
     :data-speed: slow
     :data-direction: left
 
@@ -154,12 +155,7 @@ put up with their questions without getting cocky about how much you know.
 Thus began my journey into teaching. So far, I've taught...
 
 .. embed:: ./assets/html/currently-teaching.html
-    :courses: [
-        "Programming",
-        "Cloud Computing",
-        "Data Analysis",
-        "Applications of AI"
-    ]
+    :source: _static/courses.json
     :prefix-text:
     :typing-speed: 120
     :deleting-speed: 80
