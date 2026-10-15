@@ -1,0 +1,426 @@
+:root {
+    --km-shadow-none: 0 0 #0000;
+    --sd-color-warning: hsl(48.47, 100%, 50%);
+    --sd-color-success: hsl(var(--km-color-green));
+    --sd-color-success-bg: hsl(var(--km-color-green) / 0.2);
+    --sd-color-success-highlight: color-mix(in srgb, hsl(var(--km-color-green)), white 15%);
+    --sd-color-success-text: hsl(var(--km-color-bg));
+    --sd-color-tabs-label-active: hsl(var(--km-color-fg));
+    --sd-color-tabs-label-inactive: hsl(var(--km-color-muted-fg));
+    --sd-color-tabs-label-hover: hsl(var(--km-color-accent-fg));
+    --sd-section-spacing: 2rem;
+    --sd-pill-radius: 50px;
+    --sd-text-sm: 0.9rem;
+    --sd-gutter-x: 0.35rem;
+    --sd-gutter-y: 0.5rem;
+}
+
+.sd-row {
+    --sd-gutter-x: 0.35rem;
+    --sd-gutter-y: 0.5rem;
+    align-items: center;
+}
+
+.sd-row pre {
+    margin-top: 0;
+}
+
+.sd-card {
+    border-radius: var(--km-radius-normal);
+    border: 0;
+    margin: var(--sd-section-spacing) 0 !important;
+    background-color: hsl(var(--km-color-code-bg));
+}
+
+.sd-card-hover:hover,
+.sd-card-body:hover {
+    transform: none;
+}
+
+.sd-card .sd-card-body:hover,
+.sd-dropdown .sd-card-body:hover {
+    box-shadow: none;
+}
+
+@media (min-width: 768px) {
+    .sd-card-cols-1>.sd-card {
+        width: 75%;
+    }
+}
+
+.sd-container-fluid {
+    padding-inline: 0;
+    margin: var(--sd-section-spacing) 0 !important;
+}
+
+.sd-container-fluid .sd-card {
+    margin: 0 !important;
+}
+
+.sd-card-footer,
+.sd-card-header {
+    font-size: var(--sd-text-sm);
+    line-height: 1.25rem;
+    border: none;
+}
+
+.sd-card-header {
+    color: hsl(var(--km-color-muted-fg));
+    padding: 0 1rem;
+}
+
+.sd-card-header:first-child {
+    border-radius: 0;
+}
+
+.sd-card-title {
+    font-weight: 600 !important;
+    letter-spacing: -0.86px !important;
+    margin-bottom: -0.5rem;
+}
+
+.sd-card-text {
+    margin-top: 1rem !important;
+    color: hsl(var(--km-color-muted-fg));
+    font-size: var(--sd-text-sm);
+}
+
+details.sd-dropdown summary.sd-summary-title svg {
+    display: none !important;
+}
+
+.sd-tab-set {
+    justify-content: center;
+    margin-top: 2.5rem;
+}
+
+.sd-tab-content {
+    box-shadow: none;
+    padding-top: 40px;
+}
+
+.sd-tab-set>input:checked+label+.sd-tab-content,
+.sd-tab-set>.km-is-current {
+    animation: km-tab-in var(--km-duration-fast) var(--km-ease-smooth);
+}
+
+@keyframes km-tab-in {
+    from {
+        opacity: 0;
+    }
+}
+
+.km-dropdown__body>.sd-tab-set:first-child {
+    margin-top: 0;
+}
+
+.sd-tab-content>p {
+    margin-bottom: 1.5rem;
+}
+
+:is(.sd-tab-set, .km-tab-bar)>label {
+    font-weight: 500;
+    font-size: var(--sd-text-sm);
+    letter-spacing: .05em;
+    border-bottom: 0;
+}
+
+details.sd-dropdown {
+    background-color: transparent;
+}
+
+details.sd-dropdown:not([open])>.sd-card-header {
+    border: none;
+}
+
+details.sd-dropdown .sd-summary-chevron-right::before {
+    content: "\2b";
+    text-rendering: auto;
+    font: var(--km-icon-font);
+    margin-left: 0.5rem;
+    transform: rotateZ(0deg) !important;
+    transition: transform var(--km-duration-fast) var(--km-ease-smooth);
+}
+
+details .sd-tab-content .sd-card-text {
+    color: unset !important;
+    font-size: unset !important;
+}
+
+details.sd-dropdown[open]:not(.km-is-closing) .sd-summary-chevron-right::before {
+    transform: rotateZ(45deg) !important;
+}
+
+details.sd-dropdown[open]>.sd-summary-title .sd-summary-chevron-down,
+details.sd-dropdown[open]>.sd-summary-title .sd-summary-chevron-right {
+    transform: none !important;
+}
+
+details.sd-dropdown summary.sd-summary-title {
+    padding: 0;
+    color: hsl(var(--km-color-fg));
+    font-weight: 400;
+}
+
+details.sd-dropdown summary.sd-summary-title .km-glyph,
+details.sd-dropdown summary.sd-summary-title .sd-octicon,
+details.sd-dropdown summary.sd-summary-title .sd-material-icon {
+    margin-right: 0 !important;
+}
+
+details.sd-dropdown summary:focus:not(:focus-visible) {
+    outline-style: none;
+}
+
+div.sd-summary-content.sd-card-body {
+    padding: 2rem 0;
+}
+
+details.sd-dropdown.km-is-animating .sd-summary-content {
+    overflow: hidden;
+}
+
+.sd-shadow-sm {
+    box-shadow: var(--km-shadow-none) !important;
+}
+
+.sd-octicon,
+.sd-material-icon {
+    vertical-align: unset;
+    margin-bottom: -0.125rem;
+    margin-right: .25rem;
+}
+
+nav a svg .sd-octicon,
+nav a svg .sd-material-icon {
+    margin-right: 0.45rem;
+    vertical-align: text-bottom;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sd-tab-set>input:checked+label+.sd-tab-content,
+    .sd-tab-set>.km-is-current {
+        animation: none;
+    }
+}
+
+.caption-text .sd-octicon,
+.caption-text .sd-material-icon {
+    vertical-align: middle;
+}
+
+.sd-tab-set input[type="radio"] {
+    margin: 0;
+    pointer-events: none;
+}
+
+.km-tab-bar {
+    display: flex;
+    position: relative;
+    max-width: 100%;
+    padding: 0.35rem;
+    border: 1px solid hsl(var(--km-color-border));
+    border-radius: var(--sd-pill-radius);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+}
+
+.km-tab-bar>input[type="radio"] {
+    flex: none;
+    width: 1px;
+    height: 1px;
+    margin-right: -1px;
+    opacity: 0;
+    appearance: none;
+}
+
+.km-tab-bar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--km-tab-width, 0);
+    height: var(--km-tab-height, 0);
+    translate: var(--km-tab-x, 0) var(--km-tab-y, 0);
+    border-radius: var(--sd-pill-radius);
+    background-color: hsl(var(--km-color-surface));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .km-tab-bar.km-is-sliding::before {
+        transition:
+            translate var(--km-duration-hover) var(--km-ease-smooth),
+            width var(--km-duration-hover) var(--km-ease-smooth);
+    }
+}
+
+.km-tab-bar>label {
+    position: relative;
+    flex: none;
+    margin-bottom: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    color: var(--sd-color-tabs-label-inactive);
+    transition: color 250ms;
+}
+
+.km-tab-bar>input:checked+label {
+    color: var(--sd-color-tabs-label-active);
+}
+
+.sd-tab-set>.sd-tab-content.km-is-current {
+    display: block;
+}
+
+.sd-tab-set>input[type="radio"]:checked+.sd-tab-label {
+    background-color: hsl(var(--km-color-surface));
+}
+
+:is(.sd-tab-set, .km-tab-bar)>input:checked+label {
+    border-radius: var(--sd-pill-radius);
+}
+
+:is(.sd-tab-set, .km-tab-bar)>input:focus-visible+label,
+html[data-km-keyboard] :is(.sd-tab-set, .km-tab-bar)>input:focus+label {
+    outline: 2px solid hsl(var(--km-color-focus));
+    outline-offset: 2px;
+}
+
+details.sd-dropdown summary.sd-summary-title:focus-visible {
+    border-radius: 0.5rem;
+    outline: 2px solid hsl(var(--km-color-focus));
+    outline-offset: 6px;
+}
+
+.sd-tab-label {
+    padding: 0.5rem 0.9rem !important;
+    border: none;
+}
+
+.sd-tab-label:hover {
+    color: hsl(var(--km-color-fg) / 0.5) !important;
+    border-bottom: none;
+}
+
+.sd-stretched-link {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0;
+    border-radius: 50%;
+    background: hsl(var(--km-color-fg));
+    color: hsl(var(--km-color-bg)) !important;
+    transition:
+        background var(--km-duration-hover) var(--km-ease-swift),
+        color var(--km-duration-hover) var(--km-ease-swift);
+}
+
+.sd-stretched-link:hover {
+    background: hsl(var(--km-color-surface));
+    color: hsl(var(--km-color-fg)) !important;
+}
+
+.sd-stretched-link::after {
+    content: "\f061";
+    font: var(--fa-font-solid);
+    font-size: 0.8rem;
+    position: relative;
+}
+
+.sd-card .sd-card-img,
+.sd-card .sd-card-img-top,
+.sd-card .sd-card-img-bottom {
+    margin: 0 !important;
+}
+
+.sd-card .sd-card-img-top {
+    border-radius: var(--km-radius-normal) var(--km-radius-normal) 0 0 !important;
+}
+
+.sd-card .sd-card-img-bottom {
+    border-radius: 0 0 var(--km-radius-normal) var(--km-radius-normal) !important;
+}
+
+.sd-card .sd-card-img-top,
+.sd-card .sd-card-img-bottom {
+    max-height: var(--km-card-img-height);
+    object-fit: cover;
+}
+
+.sd-btn {
+    transition:
+        background-color var(--km-duration-hover) var(--km-ease-swift),
+        color var(--km-duration-hover) var(--km-ease-swift),
+        border-color var(--km-duration-hover) var(--km-ease-swift);
+    border-radius: var(--sd-pill-radius);
+    width: max-content;
+    max-width: 100%;
+    font-size: var(--sd-text-sm);
+    line-height: 1.5rem;
+    padding: calc(0.5rem + 1px) calc(1rem + 1px);
+    background-color: hsl(var(--km-color-surface)) !important;
+    color: hsl(var(--km-color-fg)) !important;
+    border: 0 !important;
+}
+
+.sd-btn-primary,
+.sd-btn-secondary:hover,
+.sd-btn-secondary:focus,
+.sd-btn-light,
+.sd-btn-dark:hover,
+.sd-btn-dark:focus {
+    background-color: hsl(var(--km-color-fg)) !important;
+    color: hsl(var(--km-color-bg)) !important;
+    border: 0 !important;
+}
+
+.sd-btn-secondary,
+.sd-btn-primary:hover,
+.sd-btn-primary:focus,
+.sd-btn-dark,
+.sd-btn-light:hover,
+.sd-btn-light:focus {
+    background-color: hsl(var(--km-color-surface)) !important;
+    color: hsl(var(--km-color-fg)) !important;
+    border: 0 !important;
+}
+
+.sd-card :is(.sd-btn-secondary:not(:hover, :focus), .sd-btn-primary:is(:hover, :focus)) {
+    background-color: hsl(var(--km-color-muted-bg)) !important;
+}
+
+.sd-btn:is(.km-button--red, .km-button--yellow, .km-button--blue, .km-button--green, .km-button--custom) {
+    padding: 0.5rem 1rem;
+    background-color: transparent !important;
+    color: hsl(var(--km-button-colour)) !important;
+    border: 1px solid hsl(var(--km-button-colour) / 0.3) !important;
+
+    &:is(:hover, :focus-visible) {
+        border-color: hsl(var(--km-button-colour)) !important;
+    }
+}
+
+.km-button--red {
+    --km-button-colour: var(--km-color-red);
+}
+
+.km-button--yellow {
+    --km-button-colour: var(--km-color-yellow);
+}
+
+.km-button--blue {
+    --km-button-colour: var(--km-color-blue);
+}
+
+.km-button--green {
+    --km-button-colour: var(--km-color-green);
+}
+
+.sd-card .sd-stretched-link {
+    margin-left: 1rem;
+    margin-bottom: 1rem;
+}

@@ -1,0 +1,211 @@
+:root {
+    --km-obj-foreground: 208.4 100.8% 73.79%;
+    --km-comment-foreground: 207.33 100% 82.35%;
+    --km-function-foreground: 268.97 100% 82.94%;
+    --km-syntax-comment: 212 10% 58%;
+    --km-syntax-error: 357 92% 63%;
+    --km-syntax-keyword: 9 100% 73%;
+    --km-syntax-deleted-fg: 10 100% 80%;
+    --km-syntax-generic-error: var(--km-syntax-deleted-fg);
+    --km-syntax-traceback: var(--km-syntax-keyword);
+    --km-syntax-class: 27 84% 55%;
+    --km-syntax-entity: 30 100% 67%;
+    --km-syntax-tag: 131 74% 71%;
+    --km-syntax-whitespace: 213 12% 46%;
+    --km-syntax-output: var(--km-syntax-comment);
+    --km-syntax-highlight-accent: 210 100% 64%;
+    --km-code-bar-offset: 1rem;
+    --km-code-bar-stop: 16.81%;
+    --km-code-bar-height: 20px;
+    --km-syntax-comment-strong: 212 10% 62%;
+    --km-syntax-error-strong: 357 92% 70%;
+}
+
+td.linenos .special,
+span.linenos.special {
+    color: hsl(var(--km-color-fg));
+    background-color: hsl(var(--km-color-bg));
+}
+
+.highlight .hll {
+    background-color: hsl(var(--km-color-highlight));
+    box-shadow: var(--km-code-bar-offset) 0 0 hsl(var(--km-color-highlight));
+    position: relative;
+    display: block;
+    min-width: var(--km-code-width, 0px);
+}
+
+.highlight .hll::before {
+    content: " ";
+    position: absolute;
+    left: calc(var(--km-code-bar-offset) * -1);
+    width: var(--km-code-bar-offset);
+    height: var(--km-code-bar-height);
+    background: linear-gradient(to right, hsl(var(--km-syntax-highlight-accent)), hsl(var(--km-syntax-highlight-accent)) var(--km-code-bar-stop), hsl(var(--km-color-highlight)) var(--km-code-bar-stop));
+}
+
+.highlight .c,
+.highlight .ch,
+.highlight .cm,
+.highlight .c1,
+.highlight .cpf {
+    color: hsl(var(--km-syntax-comment));
+}
+
+.highlight .cp,
+.highlight .cs {
+    color: hsl(var(--km-syntax-comment));
+    font-weight: 500;
+    font-style: italic;
+}
+
+.highlight .err {
+    color: hsl(var(--km-syntax-error));
+    border: 0;
+}
+
+.highlight {
+    color: hsl(var(--km-color-fg));
+}
+
+.highlight :is(.c1, .cpf) {
+    font-style: italic;
+}
+
+.highlight :is(.ni, .nt, .si) {
+    font-weight: 700;
+}
+
+.highlight .esc,
+.highlight .g,
+.highlight .n,
+.highlight .x,
+.highlight .p,
+.highlight .pm,
+.highlight .na,
+.highlight .nx,
+.highlight .bp {
+    color: hsl(var(--km-color-fg));
+}
+
+.highlight .k,
+.highlight .o,
+.highlight .kd,
+.highlight .kn,
+.highlight .kr,
+.highlight .kt,
+.highlight .ow,
+.highlight .gp {
+    color: hsl(var(--km-syntax-keyword));
+    font-weight: 500;
+}
+
+.highlight .l,
+.highlight .m,
+.highlight .s,
+.highlight .mb,
+.highlight .mf,
+.highlight .mh,
+.highlight .mi,
+.highlight .mo,
+.highlight .il,
+.highlight .sb,
+.highlight .sc,
+.highlight .sd,
+.highlight .s2,
+.highlight .si,
+.highlight .sx,
+.highlight .s1,
+.highlight .ss {
+    color: hsl(var(--km-comment-foreground));
+}
+
+.highlight .kc,
+.highlight .kp,
+.highlight .ld,
+.highlight .no,
+.highlight .nl,
+.highlight .py,
+.highlight .nv,
+.highlight .vc,
+.highlight .vg,
+.highlight .vi,
+.highlight .vm,
+.highlight .sa,
+.highlight .dl,
+.highlight .se,
+.highlight .sh,
+.highlight .sr {
+    color: hsl(var(--km-obj-foreground));
+    font-weight: 500;
+}
+
+.highlight .nb,
+.highlight .nd,
+.highlight .nf,
+.highlight .fm {
+    color: hsl(var(--km-function-foreground));
+    font-weight: 500;
+}
+
+.highlight .gh,
+.highlight .gu {
+    color: hsl(var(--km-obj-foreground));
+    font-weight: 500;
+}
+
+.highlight .ge {
+    color: hsl(var(--km-color-fg));
+    font-style: italic;
+}
+
+.highlight .ges {
+    color: hsl(var(--km-color-fg));
+    font-weight: 500;
+    font-style: italic;
+}
+
+.highlight .gs {
+    color: hsl(var(--km-color-fg));
+    font-weight: 500;
+}
+
+.highlight .g-Underline {
+    color: hsl(var(--km-color-fg));
+    text-decoration: underline;
+}
+
+.highlight .gr {
+    color: hsl(var(--km-syntax-generic-error));
+}
+
+.highlight .go {
+    color: hsl(var(--km-syntax-output));
+}
+
+.highlight .gt {
+    color: hsl(var(--km-syntax-traceback));
+}
+
+.highlight .nc,
+.highlight .ne {
+    color: hsl(var(--km-syntax-class));
+    font-weight: 500;
+}
+
+.highlight .ni {
+    color: hsl(var(--km-syntax-entity));
+}
+
+.highlight .nt {
+    color: hsl(var(--km-syntax-tag));
+}
+
+.highlight .nn {
+    color: hsl(var(--km-color-fg));
+    font-weight: 500;
+}
+
+.highlight .w {
+    color: hsl(var(--km-syntax-whitespace));
+}

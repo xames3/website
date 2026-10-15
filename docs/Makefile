@@ -2,8 +2,8 @@
 # Makefile for Akshay's Corner
 #
 # Author: Akshay Mestry <xa@mes3.dev>
-# Created on: 22 February, 2025
-# Last updated on: 01 October, 2026
+# Created on: 22 February 2025
+# Last updated on: 01 October 2026
 #
 # This Makefile provides a comprehensive set of commands (targets) for building
 # and checking my website.

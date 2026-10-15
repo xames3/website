@@ -3,11 +3,10 @@ Embed Directive
 ===============
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 11 August, 2026
-Last updated on: 29 September, 2026
+Created on: 11 August 2026
+Last updated on: 15 October 2026
 
-An `embed` directive that drops a block of HTML into the page. Written
-inline, the argument is `iframe` and the content is the markup::
+An `embed` directive that drops a block of HTML into the page.
 
     .. embed:: iframe
        :expected-count: 10
@@ -19,22 +18,19 @@ inline, the argument is `iframe` and the content is the markup::
            data-expected-count="{{ expected-count }}">
        </iframe>
 
-A larger embed is better kept in a file of its own, named as the
-argument instead, relative to the document or, with a leading `/`, to
-the source directory. Any CSS or JavaScript it needs is named in
-`:css:` and `:js:`, comma-separated, as filenames under
-`html_static_path`. They load in the order written, on the pages that
-use the directive and on no others::
+Every other option is a placeholder, so `{{ expected-count }}` is
+replaced by the option's value, escaped for where it lands.
+
+A larger embed can live in a file of its own, named as the argument,
+relative to the document or to the source directory with a leading `/`.
+The `:css:` and `:js:` options are for the files under
+`html_static_path`, which load in order on the pages that use the
+directive::
 
     .. embed:: ../assets/html/embed.html
        :css: embed.css
        :js: embed.js
-
-Options become placeholders: `{{ expected-count }}` in the HTML is
-replaced by the option's value, escaped for wherever it lands.
 """
-
-from __future__ import annotations
 
 import ast
 import contextlib
@@ -42,28 +38,39 @@ import json
 import re
 import typing as t
 from html import escape
+from html import unescape
+from urllib.parse import urlsplit
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 from sphinx.util import logging
 
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import hostnames
+from kaamiki.extensions.utils import listed
+from kaamiki.extensions.utils import setting
 
 if t.TYPE_CHECKING:
+    from collections.abc import Callable
+
     from sphinx.application import Sphinx
 
 logger = logging.getLogger(__name__)
 
 name: t.Final[str] = "embed"
-pattern: t.Pattern[str] = re.compile(
+pattern: re.Pattern[str] = re.compile(
     r"^[ \t]*:([\w-]+):[ \t]*(.*?)(?=^[ \t]*:[\w-]+:|\Z)",
     re.MULTILINE | re.DOTALL,
 )
-SCRIPTISH: t.Pattern[str] = re.compile(
+SCRIPTISH: re.Pattern[str] = re.compile(
     r"<(script|style)\b[^>]*>.*?</\1>", re.DOTALL | re.IGNORECASE
 )
-PLACEHOLDER: t.Pattern[str] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
-NOTE: t.Pattern[str] = re.compile(r"\{#.*?#\}[ \t]*\n?", re.DOTALL)
+PLACEHOLDER: re.Pattern[str] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
+NOTE: re.Pattern[str] = re.compile(r"\{#.*?#\}[ \t]*\n?", re.DOTALL)
+# NOTE(xames3): Keeps a value from closing its `<script>` early and
+# U+2028/2029 from ending a JavaScript string line.
+# https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
+# https://github.com/tc39/proposal-json-superset
 ESCAPES: dict[str, str] = {
     "<": "\\u003c",
     ">": "\\u003e",
@@ -71,20 +78,20 @@ ESCAPES: dict[str, str] = {
     "\u2028": "\\u2028",
     "\u2029": "\\u2029",
 }
-STYLE_ESCAPES: frozenset[str] = frozenset("<>&\"'\\\n\r")
+STYLE_ESCAPES: frozenset[str] = frozenset("<>&\"'\\\n\r{};")
 ASSETS: t.Final[frozenset[str]] = frozenset({"css", "js", "encoding"})
+IFRAME: re.Pattern[str] = re.compile(
+    r"<iframe\b[^>]*?\bsrc\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s>]+))",
+    re.IGNORECASE,
+)
 
 
 def encode(value: str, kind: str) -> str:
     """Write a placeholder's value for where it sits.
 
-    A script gets the value read as a Python literal, so a number stays
-    a number and a list becomes an array. Markup and CSS get it as it
-    was written, less the quotes around a quoted string.
-
     :param value: The option's value, as written.
     :param kind: `script`, `style` or anything else for markup.
-    :return: The value, escaped so it cannot break out of its place.
+    :return: The value, escaped so it can't break out of its place.
     """
     read = literal(value)
     if kind == "script":
@@ -103,23 +110,20 @@ def encode(value: str, kind: str) -> str:
 def substitute(source: str, values: dict[str, str]) -> str:
     """Fill a fragment's placeholders, escaping each for where it sits.
 
-    Markup, script and style want different things. A value in an
-    attribute needs its quotes and brackets escaped or it closes the
-    attribute early; the same treatment inside a `<script>` turns an
-    array into `[&quot;a&quot;]` and JSON inside a `<style>` wraps a
-    colour in quotes. The source is split on its script and style
-    blocks and each gets what it needs.
+    Markup, `<script>` and `<style>` want different escaping, so the
+    source is split on its script and style blocks and each part gets
+    its own.
 
     :param source: The fragment, placeholders and all.
-    :param values: Directive options, keyed as they are written in the
+    :param values: Directive options, keyed as they're written in the
         rST. A placeholder may spell them with underscores instead of
         hyphens.
     :return: The fragment with every known placeholder filled in.
         Anything unrecognised is left alone.
     """
 
-    def swap(kind: str) -> t.Callable[[t.Match[str]], str]:
-        def fill(match: t.Match[str]) -> str:
+    def swap(kind: str) -> Callable[[re.Match[str]], str]:
+        def fill(match: re.Match[str]) -> str:
             key = match.group(1)
             if key not in values:
                 key = key.replace("_", "-")
@@ -153,25 +157,25 @@ def literal(value: str) -> t.Any:
     return value
 
 
-def files(value: str | None) -> list[str]:
-    """Split a `:css:` or `:js:` option into its files, in order.
-
-    :param value: The option's value or `None` when unset.
-    :return: The files, in the order they were written.
-    """
-    return [_.strip() for _ in (value or "").split(",") if _.strip()]
-
-
 class directive(rst.Directive):
     """The `embed` directive.
 
-    The argument is either `iframe`, with the markup as content or the
-    path to an HTML fragment. Every other option is a placeholder
-    value, apart from `encoding`, `css` and `js`.
+    The argument is `iframe`, with the markup as content or the path to
+    an HTML fragment.
+
+    Options::
+
+        - `css`: Stylesheets under `html_static_path`, comma-separated.
+        - `js`: Scripts under `html_static_path`, comma-separated.
+        - `encoding`: The fragment's encoding. Defaults to `utf-8`.
+
+    Every other option is a placeholder's value.
     """
 
     has_content = True
     required_arguments = 1
+    # HACK(xames3): No `option_spec` is declared, so docutils hands the
+    # options over inside the argument and `run` reads them back out.
     final_argument_whitespace = True
 
     def run(self) -> list[nodes.Node]:
@@ -200,17 +204,17 @@ class directive(rst.Directive):
         self.check(source, values)
         attributes: dict[str, t.Any] = {}
         attributes["text"] = substitute(source, values)
+        self.guard(attributes["text"])
         attributes["format"] = "html"
-        attributes["css"] = files(self.options.get("css"))
-        attributes["js"] = files(self.options.get("js"))
+        attributes["css"] = listed(self.options.get("css", ""))
+        attributes["js"] = listed(self.options.get("js", ""))
         return [nodes.raw(**attributes)]
 
     def check(self, source: str, values: dict[str, str]) -> None:
         """Catch an option or a placeholder that has been misspelt.
 
-        An option the fragment never asks for is an error, since its
-        value would go nowhere. A placeholder no option fills is left in
-        the page as written, which may be meant, so it only warns.
+        An option the fragment never asks for is an error. A
+        placeholder no option fills only warns, since it may be meant.
 
         :param source: The fragment, placeholders and all.
         :param values: The options that fill placeholders.
@@ -229,14 +233,46 @@ class directive(rst.Directive):
                 "embed: {{ %s }} has no option to fill it",
                 key,
                 location=(env.docname, self.lineno),
-                type="embed",
+                type="kaamiki",
+                subtype="embed",
+            )
+
+    def guard(self, markup: str) -> None:
+        """Keep an `<iframe>` to the hosts the site allows.
+
+        Nothing is checked without `embed_iframe_hosts`. With it, a
+        source on a relative path is allowed and one from another host
+        has to be on the list, or on a subdomain of a host that is.
+
+        :param markup: The embedded HTML, placeholders filled in.
+        :raises rst.DirectiveError: When an iframe comes from a host
+            that isn't allowed.
+        """
+        config = self.state.document.settings.env.config
+        allowed = hostnames(setting(config, "embed_iframe_hosts"), www=True)
+        if not allowed:
+            return
+        for match in IFRAME.finditer(markup):
+            src = unescape(next(_ for _ in match.groups() if _ is not None))
+            parts = urlsplit(src.strip())
+            host = parts.hostname or ""
+            if src.strip().lower() == "about:blank":
+                continue
+            if parts.scheme.lower() in {"", "http", "https"}:
+                if not parts.netloc:
+                    continue
+                if any(host == _ or host.endswith(f".{_}") for _ in allowed):
+                    continue
+            raise self.error(
+                f"embed has an iframe from {src!r}, which embed_iframe_hosts"
+                f" does not allow; it allows {', '.join(sorted(allowed))}"
             )
 
     def read(self, file: str) -> str:
         """Read an HTML fragment off disk.
 
-        The path follows Sphinx's rule: relative to the document or to
-        the source directory when it starts with a `/`.
+        The path is relative to the document or to the source directory
+        when it starts with a `/`.
 
         :param file: The path, as written.
         :return: The fragment.
@@ -246,11 +282,8 @@ class directive(rst.Directive):
         env = self.state.document.settings.env
         relative, path = env.relfn2path(file, env.docname)
         encoding = self.options.get("encoding", "utf-8")
-        try:
-            with open(path, encoding=encoding) as fd:
-                source = fd.read()
-        except OSError as exc:
-            raise self.error(f"embed could not read {file!r}: {exc}") from exc
+        with open(path, encoding=encoding) as fd:
+            source = fd.read()
         env.note_dependency(relative)
         return source
 
@@ -264,9 +297,9 @@ def html_page_context(
 ) -> None:
     """Attach the page's embedded stylesheets and scripts to it.
 
-    They go in the order the page names them, embed after embed, each
-    file once. Only the pages carrying an `embed` that named assets get
-    them, so the rest of the site is free of files it does not use.
+    The site's `embed_css` and `embed_js` come first, then the page's
+    own in the order it names them, each once. Pages without an `embed`
+    don't get any.
 
     :param app: The Sphinx application instance.
     :param pagename: The page being rendered.
@@ -275,14 +308,21 @@ def html_page_context(
     :param doctree: The resolved doctree or `None` for generated
         pages.
     """
+    del pagename, templatename, context
     if doctree is None:
         return
-    css: dict[str, None] = {}
-    js: dict[str, None] = {}
-    for raw in findall(doctree, nodes.raw):
+    embeds = [_ for _ in findall(doctree, nodes.raw) if "css" in _]
+    if not embeds:
+        return
+    css = dict.fromkeys(setting(app.config, "embed_css"))
+    js = dict.fromkeys(setting(app.config, "embed_js"))
+    for raw in embeds:
         css.update(dict.fromkeys(raw.get("css", ())))
         js.update(dict.fromkeys(raw.get("js", ())))
+    loading = setting(app.config, "embed_js_loading")
     for filename in css:
         app.add_css_file(filename)
     for filename in js:
-        app.add_js_file(filename)
+        app.add_js_file(
+            filename, loading_method=None if loading == "normal" else loading
+        )

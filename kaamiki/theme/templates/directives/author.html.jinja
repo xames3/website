@@ -1,0 +1,47 @@
+{#
+Author Details Template
+=======================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 22 February 2025
+Last updated on: 08 October 2026
+#}
+{% block km_author %}
+    {%- set km_who = km_name|d(km_project.author) %}
+    <aside class="km-article"
+           {{ km_data|xmlattr }}>
+        <a href="{{ km_url|d(km_project.source) }}"
+           {% if km_new_tab %}rel="{{ km_rel }}" target="_blank"{% endif %}
+           class="km-article__profile"
+           aria-label="{{ _('Check out %(name)s', name=km_who|striptags) }}">
+            {%- if km_avatar %}
+                <img class="km-article__avatar"
+                     src="{{ km_avatar }}"
+                     width="{{ km_avatar_size|d(20) }}"
+                     height="{{ km_avatar_size|d(20) }}"
+                     loading="lazy"
+                     alt="">
+            {%- endif %}
+            <p class="km-article__name">{{ km_who }}</p>
+        </a>
+        <div class="km-article__meta">
+            <div class="km-article__meta-group">
+                {%- if km_reading_time %}
+                    <p class="km-article__reading-time">
+                        <i class="{{ km_fa_icons.reading_time }} km-article__reading-time-icon"
+                           aria-hidden="true"></i>{{ ngettext('%(num)d min read', '%(num)d mins read', km_minutes) }}
+                    </p>
+                {%- endif %}
+                {%- if km_copy_url %}
+                    <button type="button"
+                            class="km-article__copy km-copy-url"
+                            data-tooltip="{{ _('Copy article URL to clipboard') }}">
+                        <i class="{{ km_fa_icons.copy_url }}"
+                           aria-hidden="true"></i>
+                        <span>{{ _("Copy") }}</span>
+                    </button>
+                {%- endif %}
+            </div>
+        </div>
+    </aside>
+{% endblock km_author %}

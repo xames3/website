@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
-.. Created on: 21 February, 2025
-.. Last updated on: 25 September, 2026
+.. Created on: 21 February 2025
+.. Last updated on: 02 October 2026
 
 Akshay's Corner (Website + Kaamiki Sphinx Theme)
 ===============================================================================
@@ -28,7 +28,7 @@ Contributions and/or suggestions for improving Kaamiki (theme) and content are
 welcomed! If you find a bug or want to contribute/suggest improvements,
 please open an issue or submit a pull request on GitHub.
 
-License
+Licence
 -------------------------------------------------------------------------------
 
 This project is dual-licensed:

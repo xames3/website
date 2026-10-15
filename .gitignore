@@ -142,3 +142,5 @@ venv/
 .python-version
 archive/*
 *.bak
+!kaamiki/locale/**/*.mo
+!kaamiki/locale/*.pot

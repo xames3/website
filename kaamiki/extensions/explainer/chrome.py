@@ -3,13 +3,11 @@ Explainer Chrome
 ================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 12 September, 2026
-Last updated on: 01 October, 2026
+Created on: 12 September 2026
+Last updated on: 15 October 2026
 
 The markup an explainer wraps itself in.
 """
-
-from __future__ import annotations
 
 import html
 import typing as t
@@ -162,11 +160,11 @@ COMMENTS: t.Final[tuple[tuple[str, str, frozenset[str]], ...]] = (
 
 
 def lexer_for(language: str) -> Lexer:
-    """Find the Pygments lexer for a language.
+    """Find the Pygments lexer for a language, plain text if unknown.
 
     :param language: The language named on the directive.
     :return: Its lexer, falling back to plain text for a name Pygments
-        does not know.
+        doesn't know.
     """
     try:
         return get_lexer_by_name(language)
@@ -179,7 +177,7 @@ def comment(language: str) -> dict[str, str] | None:
 
     :param language: The language named on the directive.
     :return: What opens a comment and what closes it or `None` for a
-        language `COMMENTS` does not know.
+        language `COMMENTS` doesn't know.
     """
     names = {language.lower(), *lexer_for(language).aliases}
     for opens, closes, languages in COMMENTS:
@@ -210,6 +208,7 @@ def pane(
     emphasis: set[int],
     *,
     linenos: bool,
+    digits: int = 0,
 ) -> str:
     """Write the highlighted snippet the stepper walks through.
 
@@ -219,9 +218,11 @@ def pane(
     :param emphasis: The lines to mark, numbered as the reader sees
         them.
     :param linenos: Whether to show a line-number gutter.
+    :param digits: How many characters the gutter takes, for versions of
+        a snippet that have to line up. Defaults to what the snippet
+        needs.
     :return: The pane's markup.
     """
-    width = max((len(_.expandtabs(4)) for _ in code.splitlines()), default=0)
     rows: list[str] = []
     for offset, line in enumerate(highlight(code, language)):
         number = start + offset
@@ -233,38 +234,25 @@ def pane(
             '<span class="km-walkthrough__ann" data-km-ann></span>\n</span>'
         )
     gutter = " km-walkthrough__code--linenos" if linenos else ""
-    digits = len(str(start + max(len(rows), 1) - 1))
+    digits = digits or len(str(start + max(len(rows), 1) - 1))
     return (
         '<div class="km-walkthrough__stage" data-km-stage tabindex="0">'
         f'<pre class="highlight km-walkthrough__code{gutter}"'
-        f' style="--km-walkthrough-col: {width + 4};'
-        f' --km-walkthrough-gutter: {digits}ch">'
+        f' style="--km-walkthrough-gutter: {digits}ch">'
         + "".join(rows)
         + "</pre></div>"
     )
 
 
-def controls(count: int) -> str:
+def controls() -> str:
     """Write what sits at the end of an explainer's caption.
 
-    With no caption, the same markup sits in the snippet's top corner
-    instead.
+    Without a caption, the same markup sits in the snippet's top corner.
 
-    :param count: How many steps the explainer holds.
     :return: The markup.
     """
-    steps = str(_("1 step")) if count == 1 else str(_("%d steps")) % count
     return (
-        '<span class="km-walkthrough__counter" data-km-counter>'
-        f"{html.escape(steps)}</span>"
-        '<span class="km-walkthrough__pager">'
-        '<button type="button" class="km-walkthrough__step" data-km-step="-1"'
-        f' aria-label="{html.escape(str(_("Previous step")))}"></button>'
-        '<button type="button" class="km-walkthrough__step" data-km-step="1"'
-        f' aria-label="{html.escape(str(_("Next step")))}"></button>'
-        "</span>"
-        '<button type="button" class="km-walkthrough__copy o-tooltip--left"'
-        f' data-km-copy data-tooltip="{html.escape(str(_("Copy")))}"'
+        '<button type="button" class="km-walkthrough__copy" data-km-copy'
         f' aria-label="{html.escape(str(_("Copy the snippet")))}">'
         "</button>"
     )
@@ -284,7 +272,7 @@ def label(low: int, high: int) -> str:
 
     :param low: The first line.
     :param high: The last line.
-    :return: `line 6` or `lines 7-8` with an en dash.
+    :return: `line 6` or `lines 7-8`.
     """
     if low == high:
         return f"line {low}"
@@ -300,12 +288,3 @@ def visit_explanation(self: HTMLTranslator, node: nodes.Element) -> None:
     self.body.append(
         f'<div class="km-walkthrough__note" data-km-note="{node["index"]}">'
     )
-
-
-def depart_explanation(self: HTMLTranslator, node: nodes.Element) -> None:
-    """Close one `lines` block's note.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The explanation node (unused).
-    """
-    self.body.append("</div>")

@@ -3,8 +3,8 @@ Walkthrough Directive
 =====================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 12 September, 2026
-Last updated on: 01 October, 2026
+Created on: 12 September 2026
+Last updated on: 15 October 2026
 
 A `walkthrough` directive that steps a reader through a snippet, line
 by line, with the values it held at each one... telling a story::
@@ -33,29 +33,17 @@ by line, with the values it held at each one... telling a story::
 
            Then I walk the shape **backwards**.
 
-Any other language is not run. Each `.. lines::` is a step of its own,
-in the order written and brings its own values and prints::
-
-    .. walkthrough:: c
-
-       .. code::
-
-           int total = 0;
-           total += 3;
-
-       .. lines:: 2
-           :values: total: 3
-
-           Add three.
-
 .. note::
 
-    The Python runs in a scratch directory with a bare environment, a
-    gigabyte of memory and ten seconds and the directory goes when it
-    finishes.
+    The Python runs in a scratch directory with a bare environment, 1GB
+    of memory and 10 seconds, and the directory goes when it finishes.
+    A site changes those, and what the snippet may run with, through
+    the `walkthrough_*` settings in `html_context`. A snippet's
+    own `:limit:` and `:timeout:` can lower what the site sets but not
+    go past it. A trace is kept next to the doctrees and used again
+    while the snippet, its options, the interpreter, the installed
+    packages and the files it imported stay the same.
 """
-
-from __future__ import annotations
 
 import json
 import os.path as p
@@ -64,30 +52,28 @@ import typing as t
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
-from docutils.transforms import Transform
 from sphinx.directives.code import CodeBlock
 from sphinx.util import logging
 
 from kaamiki.extensions.explainer.chrome import comment
 from kaamiki.extensions.explainer.chrome import controls
-from kaamiki.extensions.explainer.chrome import depart_explanation
 from kaamiki.extensions.explainer.chrome import label
 from kaamiki.extensions.explainer.chrome import lexer_for
 from kaamiki.extensions.explainer.chrome import output
 from kaamiki.extensions.explainer.chrome import pane
 from kaamiki.extensions.explainer.chrome import visit_explanation
 from kaamiki.extensions.explainer.grammar import linerange
-from kaamiki.extensions.explainer.grammar import parse_list
 from kaamiki.extensions.explainer.grammar import split
-from kaamiki.extensions.explainer.tracer import budget
 from kaamiki.extensions.explainer.tracer import collapse
 from kaamiki.extensions.explainer.tracer import execute
 from kaamiki.extensions.explainer.tracer import kinds
-from kaamiki.extensions.explainer.tracer import limit
 from kaamiki.extensions.explainer.tracer import replay
 from kaamiki.extensions.explainer.tracer import show
-from kaamiki.extensions.explainer.tracer import timeout
+from kaamiki.extensions.utils import badged
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import listed
+from kaamiki.extensions.utils import setting
+from kaamiki.extensions.utils import skip
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -99,6 +85,7 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 name: t.Final[str] = "walkthrough"
+POSITIONS: t.Final[tuple[str, str]] = ("right", "left")
 BLOCKS: t.Final[frozenset[str]] = frozenset({"code", "setup", "stdin", "lines"})
 OPTIONS: t.Final[dict[str, frozenset[str]]] = {
     "lines": frozenset({"at", "clear", "output", "values"}),
@@ -115,11 +102,14 @@ TRACED: t.Final[tuple[str, ...]] = (
     "watch",
 )
 VALUE: re.Pattern[str] = re.compile(r"^\s*([^=:]+?)\s*[:=]\s*(.*?)\s*$")
-ENTRIES: re.Pattern[str] = re.compile(r"[;\n]")
+# NOTE(xames3): A `;` only ends a value when a `name:` or `name=` follows,
+# so `for (i = 0; i < n; i++)` stays in one piece.
+ENTRIES: re.Pattern[str] = re.compile(
+    r"\n|;\s*(?=[A-Za-z_][\w.\[\]]*\s*[:=](?!=))"
+)
 PACE: t.Final[int] = 72
 PACES: t.Final[tuple[tuple[int, frozenset[str]], ...]] = (
     (104, frozenset({"bash"})),
-    (112, frozenset({"javascript", "typescript"})),
     (120, frozenset({"c"})),
     (128, frozenset({"c++", "rust"})),
 )
@@ -128,68 +118,76 @@ PACES: t.Final[tuple[tuple[int, frozenset[str]], ...]] = (
 class node(nodes.container):
     """The parsed directive, waiting for `visit` to write it out.
 
-    It is a `container` underneath, as are its notes, so a builder that
-    has never heard of a walkthrough still has something to write.
+    It's a `container` underneath, so a builder that has never heard of
+    a walkthrough still has something to write.
     """
 
 
-class lead(nodes.container):
-    """The paragraph or two leading into the walkthrough, taken in."""
-
-
-class tail(nodes.container):
-    """The prose after the walkthrough in its section, taken in."""
-
-
 class heading(nodes.paragraph):
-    """The caption, parsed as rST and the step counter.
+    """The caption, parsed as rST and the language's icon.
 
-    docutils already has a `caption` node and finds a node's visitor by
-    its class name, so this cannot borrow that one.
+    docutils already has a `caption` node and finds visitors by class
+    name, so this can't borrow that one.
     """
 
 
 class plain(nodes.literal_block):
-    """The snippet as a plain code block, for every builder but HTML."""
+    """The snippet as a plain code block, for every builder
+    except HTML.
+    """
 
 
 class explanations(nodes.container):
-    """The notes under the snippet, one of which shows at a time."""
+    """The notes beside the snippet, scrolling past it."""
 
 
 class explanation(nodes.container):
-    """One `lines` block's note.
+    """One `lines` block's note."""
 
-    Calling it `note` would take over every `.. note::` on the site, for
-    the same reason `heading` is not a `caption`.
+
+def position(argument: str) -> str:
+    """Check the `code-position` option against its two values.
+
+    :param argument: The value written in the rST.
+    :return: The value, once it's known to be `right` or `left`.
     """
+    return rst.directives.choice(argument, POSITIONS)
 
 
 class directive(CodeBlock):
     """The `walkthrough` directive.
 
-    The argument is the snippet's language and defaults to `python`.
-    It takes the options `code-block` does, bar `dedent` and `force`,
-    and adds its own. All but `pace` only mean anything to a Python
-    snippet, since only that one is run::
+    The notes scroll past the code instead of swapping under it, so it
+    needs at least one `.. lines::` block. It stands alone, nothing
+    around it is pulled in or moved.
 
-        - `watch`: The names to show, comma-separated. Leaving it out
-          shows none, only what a function returns and what the
-          snippet raises.
+    Options::
+
+        - `code-position`: Which side the code holds, `right` for the
+          default or `left`.
+        - `watch`: Names to show, comma-separated. Without it only a
+          function's return value and what the snippet raises show.
         - `limit`: How many steps to show. Defaults to 100.
         - `timeout`: How long the snippet may run, in seconds.
-        - `pythonpath`: Directories to import from, comma-separated and
-          relative to the document.
+        - `pythonpath`: Directories to import from, comma-separated
+          and relative to the document. One that isn't there raises
+          `FileNotFoundError`.
         - `events`: Which of `call`, `line` and `return` make a step.
           Defaults to `line` and `return`.
-        - `comprehensions`: Step into comprehensions too.
-        - `pace`: How much scrolling a step takes, in pixels. Defaults
-          to what `pace` picks for the language.
+        - `comprehensions`: Step into comprehensions too, which a site
+          can do for every snippet with `walkthrough_comprehensions`.
+        - `pace`: Pixels of scrolling a step takes. Defaults to what
+          `pace` picks for the language.
         - `raises`: The snippet is meant to fail, so it ends on the
-          exception rather than warning about it.
-        - `comment`: How the snippet's language opens a comment and
-          closes one if it must (`(* *)`), for a language the theme
-          does not know. The values are written as that comment.
+          exception without a warning.
+        - `comment`: How the language opens a comment and closes one
+          if it must (`(* *)`), for a language Kaamiki doesn't know.
+        - `caption`: A line of text above the code, parsed as rST.
+        - `class`: More classes for the walkthrough.
+        - `name`: A name to link the walkthrough by.
+        - `linenos`: Number the lines.
+        - `lineno-start`: The number the first line is given.
+        - `emphasize-lines`: Lines to highlight, as `1, 3-5`.
     """
 
     option_spec = {  # noqa: RUF012
@@ -198,6 +196,7 @@ class directive(CodeBlock):
             for key, value in CodeBlock.option_spec.items()
             if key not in {"dedent", "force"}
         },
+        "code-position": position,
         "watch": rst.directives.unchanged,
         "limit": rst.directives.positive_int,
         "timeout": rst.directives.positive_int,
@@ -216,6 +215,8 @@ class directive(CodeBlock):
         """
         language = self.arguments.pop().strip() if self.arguments else "python"
         code, setup, stdin, notes = self.blocks()
+        if not notes:
+            raise self.error("walkthrough needs a `.. lines::` block per note")
         start = self.options.get("lineno-start", 1)
         total = len(code.splitlines())
         ranges = [self.span(_.argument, start, total) for _ in notes]
@@ -226,6 +227,7 @@ class directive(CodeBlock):
             steps = self.recite(setup, stdin, notes, ranges, start, total)
         attributes: dict[str, t.Any] = {}
         attributes["classes"] = self.options.get("class", [])
+        attributes["position"] = self.options.get("code-position", "right")
         attributes["payload"] = {
             "steps": [compact(_) for _ in steps],
             "pace": self.options.get("pace", pace(language)),
@@ -242,11 +244,43 @@ class directive(CodeBlock):
             linenos="linenos" in self.options,
         )
         element = node("", **attributes)
-        element += self.caption(len(steps))
+        element += self.caption(language)
         element += self.snippet(code, language, start)
         element += self.explain(notes)
         self.add_name(element)
         return [element]
+
+    def cache(self) -> str | None:
+        """Name the folder traces are kept in, unless the site turned
+        that off.
+
+        It sits with the doctrees, so a build that starts over with
+        `-E` and `-a` keeps it and deleting the build takes it away.
+
+        :return: The folder or `None` for no cache.
+        """
+        env = self.state.document.settings.env
+        if not setting(env.config, "walkthrough_cache"):
+            return None
+        return p.join(str(env.doctreedir), "kaamiki-walkthrough")
+
+    def capped(self, option: str, key: str) -> int:
+        """Read a number the snippet asks for, up to what the site
+        allows.
+
+        :param option: The directive's option.
+        :param key: The setting that holds the most it may ask for.
+        :return: What the snippet asked for or the most.
+        :raises rst.DirectiveError: When it asks for more than the site
+            allows.
+        """
+        most = setting(self.state.document.settings.env.config, key)
+        asked = self.options.get(option, most)
+        if asked > most:
+            raise self.error(
+                f":{option}: {asked} is more than {key} allows ({most})"
+            )
+        return int(asked)
 
     def blocks(self) -> tuple[str, str, str, list[chunk]]:
         """Pull the snippet, its setup, its input and its notes out.
@@ -312,8 +346,8 @@ class directive(CodeBlock):
     ) -> list[dict[str, t.Any]]:
         """Run the snippet and turn what it did into steps.
 
-        Each step is given the note whose lines it sits on, counting
-        them the way the reader sees them numbered.
+        Each step gets the note whose lines it sits on, counted the way
+        the reader sees them numbered.
 
         :param code: The snippet.
         :param setup: Code to run first, untraced.
@@ -329,30 +363,48 @@ class directive(CodeBlock):
                     f"the note for {label(low, high)} writes out values,"
                     " but a python walkthrough reads them off the snippet"
                 )
-        events = frozenset(parse_list(self.options.get("events", "")))
+        env = self.state.document.settings.env
+        config = env.config
+        events = frozenset(
+            listed(
+                self.options.get("events")
+                or setting(config, "walkthrough_events")
+            )
+        )
         if events - kinds:
             raise self.error(
                 f"events takes {', '.join(sorted(kinds))},"
                 f" got {', '.join(sorted(events - kinds))}"
             )
-        watch = list(dict.fromkeys(parse_list(self.options.get("watch", ""))))
+        watch = list(dict.fromkeys(listed(self.options.get("watch", ""))))
         here = p.dirname(str(self.state.document.current_source))
         paths = [
-            _ if p.isabs(_) else p.abspath(p.join(here, _))
-            for _ in parse_list(self.options.get("pythonpath", ""))
+            _ if p.isabs(_) else p.abspath(p.join(env.srcdir, _))
+            for _ in setting(config, "walkthrough_pythonpath")
         ]
-        most = self.options.get("limit", limit)
+        paths += [
+            _ if p.isabs(_) else p.abspath(p.join(here, _))
+            for _ in listed(self.options.get("pythonpath", ""))
+        ]
+        for path in paths:
+            if not p.isdir(path):
+                raise FileNotFoundError(f"pythonpath has no directory {path}")
+        most = self.capped("limit", "walkthrough_limit")
         traced = execute(
             code,
             setup,
             stdin,
             watch,
-            most * budget,
-            self.options.get("timeout", timeout),
+            most * setting(config, "walkthrough_budget"),
+            self.capped("timeout", "walkthrough_timeout"),
             paths,
-            comprehensions="comprehensions" in self.options,
+            comprehensions="comprehensions" in self.options
+            or bool(setting(config, "walkthrough_comprehensions")),
+            python=setting(config, "walkthrough_python"),
+            cache=self.cache(),
+            memory_limit=setting(config, "walkthrough_memory") << 20,
+            output_limit=setting(config, "walkthrough_output_limit") << 20,
         )
-        env = self.state.document.settings.env
         for dependency in traced["deps"]:
             env.note_dependency(dependency)
         error = traced["error"]
@@ -387,9 +439,9 @@ class directive(CodeBlock):
         start: int,
         total: int,
     ) -> list[dict[str, t.Any]]:
-        r"""Make a step of every note, for a snippet that is not run.
+        """Make a step of every note, for a snippet that isn't run.
 
-        :param setup: The `setup` block, which cannot run here.
+        :param setup: The `setup` block, which can't run here.
         :param stdin: The `stdin` block, which has nothing to read it.
         :param notes: The `lines` blocks.
         :param ranges: The lines each note covers.
@@ -405,15 +457,13 @@ class directive(CodeBlock):
         ]
         if unused:
             self.warn(f"{', '.join(unused)} only apply to a python walkthrough")
-        if not notes:
-            raise self.error("walkthrough needs a `.. lines::` block per step")
         values: dict[str, tuple[int, str]] = {}
         steps: list[dict[str, t.Any]] = []
         for index, (block, (low, high)) in enumerate(
             zip(notes, ranges, strict=True)
         ):
             where = self.place(block, high, start, total)
-            for key in parse_list(block.options.get("clear")):
+            for key in listed(block.options.get("clear", "")):
                 if values.pop(key, None) is None:
                     self.warn(
                         f"the note for {label(low, high)} clears {key},"
@@ -489,18 +539,22 @@ class directive(CodeBlock):
             return known
         if any(_.get("vars") for _ in steps):
             self.warn(
-                f"the theme does not know how {language} writes a comment;"
+                f"Kaamiki does not know how {language} writes a comment;"
                 " set :comment: so the values read as one"
             )
         return {"open": "#", "close": ""}
 
-    def caption(self, count: int) -> heading:
-        """Build the header, with the caption parsed as rST.
+    def caption(self, language: str) -> heading:
+        """Build the header, with the caption parsed as rST and the
+        icon of the snippet's language.
 
-        :param count: How many steps the walkthrough holds.
+        The caption keeps its place in the source, so `gettext` can
+        collect it.
+
+        :param language: The language named on the directive.
         :return: The header node.
         """
-        head = heading(count=count)
+        head = heading(icon="")
         if not self.options.get("caption"):
             return head
         parsed = self.parse_text_to_nodes(
@@ -512,7 +566,12 @@ class directive(CodeBlock):
         for child in findall(parsed[0], nodes.Element):
             child.source = source
             child.line = line
+        head.rawsource = self.options["caption"]
+        head.source, head.line = source, line
         head.extend(parsed[0].children)
+        config = self.state.document.settings.env.config
+        kit = bool(setting(config, "fa_kit"))
+        head["icon"] = badged(head, language, kit=kit)
         return head
 
     def snippet(self, code: str, language: str, start: int) -> plain:
@@ -533,7 +592,8 @@ class directive(CodeBlock):
     def explain(self, notes: list[chunk]) -> explanations:
         """Parse every `lines` block into the note it stands for.
 
-        :param notes: The `lines` blocks, in the order they were written.
+        :param notes: The `lines` blocks, in the order they were
+            written.
         :return: The notes, gathered under one container.
         """
         box = explanations()
@@ -552,7 +612,7 @@ class directive(CodeBlock):
         *,
         cut: bool,
     ) -> None:
-        """Warn about whatever the author probably did not mean.
+        """Warn about whatever the author probably didn't mean.
 
         :param traced: What the tracer saw.
         :param watch: The names asked for.
@@ -587,10 +647,12 @@ class directive(CodeBlock):
     def warn(self, message: str) -> None:
         """Log a warning against this directive."""
         logger.warning(
-            "walkthrough: %s",
+            "%s: %s",
+            self.name,
             message,
             location=self.get_location(),
-            type="walkthrough",
+            type="kaamiki",
+            subtype=self.name,
         )
 
     def emphasis(self, start: int, total: int) -> set[int]:
@@ -602,7 +664,7 @@ class directive(CodeBlock):
         """
         end = start + total - 1
         marked: set[int] = set()
-        for part in parse_list(self.options.get("emphasize-lines", "")):
+        for part in listed(self.options.get("emphasize-lines", "")):
             found = linerange(part)
             if found is None:
                 raise self.error(f"emphasize-lines got {part!r}")
@@ -614,65 +676,6 @@ class directive(CodeBlock):
                 )
             marked.update(range(max(low, start), min(high, end) + 1))
         return marked
-
-
-class adopt(Transform):
-    """Take the prose either side of a walkthrough into it."""
-
-    default_priority = 900
-
-    def apply(self, **kwargs: t.Any) -> None:
-        """Move the prose around every walkthrough into it."""
-        for element in list(findall(self.document, node)):
-            parent = element.parent
-            if parent is None:
-                continue
-            index = parent.index(element)
-            before: list[nodes.Node] = []
-            for sibling in reversed(parent.children[:index]):
-                if len(before) == 2 or not leading(sibling):
-                    break
-                before.insert(0, sibling)
-            after: list[nodes.Node] = []
-            for sibling in parent.children[index + 1 :]:
-                if not prose(sibling):
-                    break
-                after.append(sibling)
-            for sibling in before + after:
-                parent.remove(sibling)
-            if before:
-                element.insert(0, lead("", *before))
-                element["classes"].append("km-walkthrough--lead")
-            if after:
-                element += tail("", *after)
-
-
-def leading(sibling: nodes.Node) -> bool:
-    """Say whether something before a walkthrough can be taken into it.
-
-    :param sibling: The node before the walkthrough.
-    :return: `True` when it is a plain paragraph.
-    """
-    return isinstance(sibling, nodes.paragraph) and not sibling["classes"]
-
-
-def prose(sibling: nodes.Node) -> bool:
-    """Say whether something after a walkthrough can be taken into it.
-
-    :param sibling: The node after the walkthrough.
-    :return: `True` when it is prose belonging to this section.
-    """
-    if not isinstance(sibling, nodes.Element):
-        return False
-    if isinstance(sibling, nodes.paragraph) and sibling["classes"]:
-        return False
-    if not isinstance(sibling, nodes.Body) or isinstance(
-        sibling, nodes.Invisible
-    ):
-        return False
-    if "km-pre-title-text" in sibling["classes"]:
-        return False
-    return next(iter(findall(sibling, node)), None) is None
 
 
 def inherit(steps: list[dict[str, t.Any]]) -> None:
@@ -707,6 +710,9 @@ def compact(step: dict[str, t.Any]) -> dict[str, t.Any]:
     return out
 
 
+# HACK(xames3): This needs to be optimised sometime in the future. I
+# honestly feel this is just a patch to make it work for the very few
+# languages I've tested so far.
 def pace(language: str) -> int:
     """Pick how much scrolling a step takes, for a language.
 
@@ -730,7 +736,13 @@ def visit(self: HTMLTranslator, node: node) -> None:
     :param node: The `walkthrough` node and its attributes.
     """
     ids: list[str] = node["ids"]
-    classes = " ".join(["km-walkthrough", *node.get("classes", [])])
+    classes = " ".join(
+        [
+            "km-walkthrough",
+            f"km-walkthrough--{node['position']}",
+            *node.get("classes", []),
+        ]
+    )
     anchor = f' id="{self.attval(ids[0])}"' if ids else ""
     self.body.append(f'<div{anchor} class="{classes}" data-km-walkthrough>')
     self.body.extend(f'<span id="{self.attval(_)}"></span>' for _ in ids[1:])
@@ -748,71 +760,70 @@ def depart(self: HTMLTranslator, node: node) -> None:
     :param self: The HTML translator, whose body this appends to.
     :param node: The `walkthrough` node (unused).
     """
-    self.body.append(
-        '<span class="sr-only" aria-live="polite" data-km-status></span>'
-        "</div></div>"
-    )
-
-
-def visit_lead(self: HTMLTranslator, node: lead) -> None:
-    """Open the paragraphs that lead into the walkthrough.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The lead node (unused).
-    """
-    self.body.append('<div class="km-walkthrough__lead" data-km-lead>')
-
-
-def visit_tail(self: HTMLTranslator, node: tail) -> None:
-    """Open the prose that follows the walkthrough.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The tail node (unused).
-    """
-    self.body.append('<div class="km-walkthrough__tail">')
+    del node
+    self.body.append("</div></div>")
 
 
 def visit_heading(self: HTMLTranslator, node: heading) -> None:
-    """Open the snippet's frame and, when there is one, its caption.
+    """Open the code's side, its frame and the caption, icon first.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The header node, empty when there is no caption.
+    :param node: The header node, empty when there's no caption.
     """
+    self.body.append('<div class="km-walkthrough__grid">')
+    self.body.append('<div class="km-walkthrough__side">')
     self.body.append('<div class="km-walkthrough__frame" data-km-frame>')
     if node.children:
         self.body.append(
             '<div class="code-block-caption km-walkthrough__caption">'
             '<span class="caption-text">'
         )
+        if node["icon"]:
+            self.body.append(
+                f'<span class="km-lang-icon {node["icon"]}"'
+                ' aria-hidden="true"></span>'
+            )
 
 
 def depart_heading(self: HTMLTranslator, node: heading) -> None:
-    """Close the caption, then write the snippet and close the frame.
+    """Close the caption, then write the snippet and close the code's
+    side.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The header node, carrying the step count.
+    :param node: The header node.
     """
     if node.children:
         self.body.append("</span>")
-        self.body.append(controls(node["count"]))
+        self.body.append(controls())
         self.body.append("</div>")
     else:
         self.body.append(
-            f'<div class="km-walkthrough__corner">{controls(node["count"])}'
-            "</div>"
+            f'<div class="km-walkthrough__corner">{controls()}</div>'
         )
     self.body.append(node.parent["pane"])
     self.body.append(output())
-    self.body.append("</div>")
+    self.body.append("</div></div>")
 
 
 def visit_explanations(self: HTMLTranslator, node: explanations) -> None:
-    """Open the notes under the snippet.
+    """Open the notes beside the code.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The container node (unused).
     """
+    del node
     self.body.append('<div class="km-walkthrough__notes" data-km-notes>')
+    self.body.append('<div class="km-walkthrough__track" data-km-track>')
+
+
+def depart_explanations(self: HTMLTranslator, node: explanations) -> None:
+    """Close the notes and the row they share with the code.
+
+    :param self: The HTML translator, whose body this appends to.
+    :param node: The container node (unused).
+    """
+    del node
+    self.body.append("</div></div></div>")
 
 
 def close(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -821,28 +832,16 @@ def close(self: HTMLTranslator, node: nodes.Element) -> None:
     :param self: The HTML translator, whose body this appends to.
     :param node: The node being departed (unused).
     """
+    del node
     self.body.append("</div>")
 
 
-def skip(self: HTMLTranslator, node: plain) -> None:
-    """Leave the plain snippet out of HTML, which has the real one.
-
-    :param self: The HTML translator (unused).
-    :param node: The plain snippet (unused).
-    :raises nodes.SkipNode: Always.
-    """
-    raise nodes.SkipNode
-
-
 def register(app: Sphinx) -> None:
-    """Register the nodes and the transform the directive loop misses.
+    """Register the nodes only a walkthrough has.
 
     :param app: The Sphinx application instance.
     """
-    app.add_transform(adopt)
-    app.add_node(lead, html=(visit_lead, close))
-    app.add_node(tail, html=(visit_tail, close))
     app.add_node(heading, html=(visit_heading, depart_heading))
     app.add_node(plain, html=(skip, None))
-    app.add_node(explanations, html=(visit_explanations, close))
-    app.add_node(explanation, html=(visit_explanation, depart_explanation))
+    app.add_node(explanations, html=(visit_explanations, depart_explanations))
+    app.add_node(explanation, html=(visit_explanation, close))

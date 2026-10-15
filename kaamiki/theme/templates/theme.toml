@@ -1,0 +1,7 @@
+[theme]
+inherit = "basic"
+stylesheets = [  ]
+pygments_style = { default = "monokai" }
+
+[options]
+logo = ""

@@ -1,0 +1,68 @@
+{#
+Footer Template
+===============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 21 February 2025
+Last updated on: 12 October 2026
+#}
+<footer class="km-footer km-container">
+    {%- block km_footer_before %}{%- endblock km_footer_before %}
+        <div class="km-footer__inner">
+            <div class="km-footer__content">
+                {%- if show_copyright and copyright|length %}
+                    <p class="km-footer__text">
+                        {%- if hasdoc('copyright') -%}
+                            {%- trans path=pathto('copyright'), copyright=copyright|e -%}
+                            <a href="{{ path }}">Copyright</a> {{ copyright }}
+                        {%- endtrans -%}
+                    {%- else -%}
+                        {{ copyright|e }}
+                    {%- endif -%}
+                </p>
+            {%- endif %}
+            {%- if last_updated %}
+                <p class="km-footer__text">
+                    {%- trans updated_on=last_updated|e -%}
+                    Last updated on {{ updated_on }}.
+                {%- endtrans -%}
+            </p>
+        {%- endif %}
+        {%- if show_sphinx %}
+            <p class="km-footer__text">
+                {%- trans trimmed -%}
+                Built with <a href="https://www.sphinx-doc.org"
+    rel="noreferrer">Sphinx</a>.
+            {%- endtrans -%}
+        </p>
+    {%- endif %}
+    {%- if km_show_kaamiki_theme|tobool %}
+        {%- set km_theme -%}
+            <a href="{{ km_credit }}"
+               {% if km_credit_new_tab %}rel="{{ km_rel }}" target="_blank"{% endif %}>Kaamiki</a>
+        {%- endset %}
+        <p class="km-footer__text">
+            {%- trans km_theme=km_theme -%}
+            Styled with the {{ km_theme }} theme.
+        {%- endtrans -%}
+    </p>
+{%- endif %}
+{%- if km_license.name %}
+    <p class="km-footer__text">
+        {%- set km_licence -%}
+            {%- if km_license.url -%}
+                <a href="{{ km_license.url|e }}"
+                   {% if km_license.new_tab %}rel="{{ km_rel }}" target="_blank"{% endif %}>{{ km_license.name|e }}</a>
+            {%- else -%}
+                {{ km_license.name|e }}
+            {%- endif -%}
+        {%- endset %}
+        {%- trans km_licence=km_licence -%}
+        Content licensed under {{ km_licence }}.
+    {%- endtrans -%}
+</p>
+{%- endif %}
+</div>
+</div>
+{%- block km_footer_after %}{%- endblock km_footer_after %}
+</footer>

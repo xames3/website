@@ -1,0 +1,25 @@
+{#
+Logo Macro
+==========
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 10 September 2026
+Last updated on: 14 October 2026
+#}
+{%- macro km_logo() -%}
+    {%- if logo_url -%}
+        <img class="km-logo km-logo--single"
+             src="{{ logo_url }}"
+             alt=""
+             width="16"
+             height="16"
+             {% if km_logo_size %}style="--km-logo-size: {{ km_logo_size }}px"{% endif %} />
+    {%- elif theme_logo -%}
+        <img class="km-logo"
+             src="{{ pathto('_static/' + theme_logo, 1) }}"
+             alt=""
+             width="16"
+             height="16"
+             {% if km_logo_size %}style="--km-logo-size: {{ km_logo_size }}px"{% endif %} />
+    {%- endif -%}
+{%- endmacro -%}

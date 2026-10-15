@@ -1,0 +1,61 @@
+{#
+Sidebar Template
+================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 21 February 2025
+Last updated on: 08 October 2026
+#}
+{%- from "components/logo.html.jinja" import km_logo with context -%}
+<aside id="km-sidebar"
+       class="km-layout__sidebar km-sidebar km-sidebar--primary">
+    <noscript>
+        <a class="km-sidebar__close"
+           href="#km-content">{{ _("Close menu") }}</a>
+    </noscript>
+    <a href="{{ pathto(master_doc) }}"
+       class="km-sidebar__brand">
+        {{- km_logo() -}}
+        <span class="km-sidebar__brand-title">{{ (docstitle or title)|e }}{%- if km_fa_icons.title_badge %}<i class="{{ km_fa_icons.title_badge }} km-title-badge"
+   aria-hidden="true"></i>{%- endif %}</span>
+    </a>
+    {%- if hasdoc('search') and km_show_searchbox|tobool %}
+        <div class="km-sidebar__search">
+            {%- include "components/searchbox.html.jinja" %}
+        </div>
+    {%- endif %}
+    <div class="km-sidebar__scroll">
+        <div class="km-sidebar__content">
+            <nav class="km-sidebar__toc"
+                 aria-label="{{ _('Table of contents') }}">
+                {{ toctree(titles_only=km_toctree_titles_only, collapse=false, **km_toctree_args) }}
+                {%- if km_sidebar_buttons|tobool %}
+                    <p class="caption"
+                       role="heading">
+                        <span class="caption-text">{{ _("External links") }}</span>
+                    </p>
+                    <ul class="km-sidebar__mobile-list">
+                        {%- for text, button in km_sidebar_buttons.items() %}
+                            {%- if button is mapping %}
+                                <li>
+                                    <a href="{{ button.url }}"
+                                       title="{{ text|e }}"
+                                       {% if button.new_tab %}rel="{{ km_rel }}" target="_blank"{% endif %}
+                                       class="km-sidebar__mobile-item">
+                                        {%- if button.icon %}
+                                            {{ button.icon }}
+                                        {%- else %}
+                                            <i class="{{ km_fa_icons.external_link }}"
+                                               aria-hidden="true"></i>
+                                        {%- endif %}
+                                        <span {{ button.extras if button.extras else '' }}>{{ text|e }}</span>
+                                    </a>
+                                </li>
+                            {%- endif %}
+                        {%- endfor %}
+                    </ul>
+                {%- endif %}
+            </nav>
+        </div>
+    </div>
+</aside>

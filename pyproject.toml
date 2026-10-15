@@ -36,11 +36,17 @@ kaamiki = "kaamiki"
 [dependency-groups]
 dev = [ "sphinx-lint>=1.0.2", "tox>=4.64.4" ]
 
-[tool.setuptools]
-packages = [ "kaamiki", "kaamiki.extensions", "kaamiki.extensions.explainer" ]
+[tool.setuptools.packages.find]
+include = [ "kaamiki*" ]
+namespaces = true
 
 [tool.setuptools.package-data]
-kaamiki = [ "base/static/*", "base/templates/*" ]
+kaamiki = [
+    "theme/static/**/*",
+    "theme/templates/**/*",
+    "locale/*.pot",
+    "locale/*/LC_MESSAGES/*",
+]
 
 [tool.setuptools.dynamic]
 dependencies = { file = "requirements.txt" }
@@ -88,7 +94,6 @@ select = [
   "EM",       # flake8-errmsg
   "EXE",      # flake8-executable
   "F",        # pyflakes
-  "FA",       # flake8-future-annotations
   "FBT",      # flake8-boolean-trap
   "FLY",      # flynt
   "FURB",     # refurb
@@ -185,7 +190,6 @@ force-single-line = true
 known-first-party = ["kaamiki"]
 order-by-type = true
 relative-imports-order = "closest-to-furthest"
-required-imports = ["from __future__ import annotations"]
 split-on-trailing-comma = true
 
 [tool.ruff.lint.pep8-naming]
@@ -230,23 +234,26 @@ env_list = [
   "lint",
   "format",
   "typecheck",
+  "translations",
 ]
 package = "editable"
 
 [tool.tox.env.lint]
-description = "Run linting with ruff"
+description = "Lint with ruff, fixing what it can (CI passes --no-fix)"
+skip_install = true
 deps = [ "ruff>=0.12.7" ]
 commands = [
-  [ "ruff", "check", ".", "--diff" ],
+  [ "ruff", "check", ".", "{posargs:--fix}" ],
 ]
 
 [tool.tox.env.format]
-description = "Check code formatting with ruff"
+description = "Format Python sources with ruff in place (CI passes --check)"
+skip_install = true
 deps = [
   "ruff>=0.12.7",
 ]
 commands = [
-  [ "ruff", "format", ".", "--check" ],
+  [ "ruff", "format", "{posargs:--respect-gitignore}", "." ],
 ]
 
 [tool.tox.env.typecheck]
@@ -260,18 +267,53 @@ commands = [
 ]
 
 [tool.tox.env.website]
-description = "Check HTML and Jinja formatting with djlint"
+description = "Format HTML and Jinja with djlint in place"
+skip_install = true
+deps = [ "djlint==1.36.4" ]
+allowlist_externals = [ "sh" ]
+commands = [
+  [ "sh", "-c", "djlint kaamiki/theme/templates docs/source/_static/ docs/source/_templates/ docs/source/assets/html -e html --reformat || true" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "docs/source/_templates/", "docs/source/assets/html", "-e", "html", "--check" ],
+  [ "sh", "-c", "djlint kaamiki/theme/templates docs/source/_static/ -e html.jinja --reformat || true" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "-e", "html.jinja", "--check" ],
+]
+
+[tool.tox.env.website-check]
+description = "Check HTML and Jinja with djlint without changing anything (CI)"
+skip_install = true
 deps = [ "djlint==1.36.4" ]
 commands = [
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/assets/html", "-e", "html", "--check" ],
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "-e", "html.jinja", "--check" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "docs/source/assets/html", "-e", "html", "--check" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "-e", "html.jinja", "--check" ],
+]
+
+[tool.tox.env.translations]
+description = "Extract Kaamiki's words into its catalog, then update and compile every language"
+skip_install = true
+deps = [ "babel>=2.13", "jinja2>=3.1" ]
+commands = [
+  [ "pybabel", "extract", "-F", "babel.cfg", "-o", "kaamiki/locale/sphinx.pot", "--no-location", "--project=kaamiki", "--copyright-holder=Akshay Mestry", "--msgid-bugs-address=xa@mes3.dev", "kaamiki" ],
+  [ "pybabel", "update", "-i", "kaamiki/locale/sphinx.pot", "-d", "kaamiki/locale", "-D", "sphinx" ],
+  [ "pybabel", "compile", "-d", "kaamiki/locale", "-D", "sphinx" ],
+]
+
+[tool.tox.env.translations-check]
+description = "Fail when the committed catalogs are behind the sources (CI)"
+skip_install = true
+deps = [ "babel>=2.13", "jinja2>=3.1" ]
+allowlist_externals = [ "git" ]
+commands = [
+  [ "pybabel", "extract", "-F", "babel.cfg", "-o", "kaamiki/locale/sphinx.pot", "--no-location", "--project=kaamiki", "--copyright-holder=Akshay Mestry", "--msgid-bugs-address=xa@mes3.dev", "kaamiki" ],
+  [ "pybabel", "update", "-i", "kaamiki/locale/sphinx.pot", "-d", "kaamiki/locale", "-D", "sphinx" ],
+  [ "git", "diff", "--exit-code", "-IPOT-Creation-Date", "-IPO-Revision-Date", "--", "kaamiki/locale/*.pot", "kaamiki/locale/*.po" ],
 ]
 
 [tool.tox.env.reformat]
 description = "Reformat the HTML, Jinja and Python sources in place"
+skip_install = true
 deps = [ "djlint==1.36.4", "ruff>=0.12.7" ]
 commands = [
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "docs/source/assets/html", "-e", "html", "--reformat" ],
-  [ "djlint", "kaamiki/base/templates", "docs/source/_static/", "-e", "html.jinja", "--reformat" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "docs/source/_templates/", "docs/source/assets/html", "-e", "html", "--reformat" ],
+  [ "djlint", "kaamiki/theme/templates", "docs/source/_static/", "-e", "html.jinja", "--reformat" ],
   [ "ruff", "format", "." ],
 ]

@@ -3,15 +3,11 @@ Custom Roles
 ============
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 21 February, 2025
-Last updated on: 29 September, 2026
+Created on: 21 February 2025
+Last updated on: 11 October 2026
 
-The theme's inline roles: `stylise`, `email`, `sharpie` and `underline`.
-Every public function here is registered as a role of the same name,
-so a helper in this module takes a leading underscore.
+Kaamiki's custom inline roles.
 """
-
-from __future__ import annotations
 
 import re
 import typing as t
@@ -22,6 +18,7 @@ from urllib.parse import quote
 import docutils.nodes as nodes
 
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import setting
 
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
@@ -31,15 +28,30 @@ if t.TYPE_CHECKING:
 # there needs a quote or an angle bracket, so anything carrying one is
 # an author mistake rather than a colour.
 COLOUR: re.Pattern[str] = re.compile(r"^[#\w(),.%\s/-]+$")
+WIDTHS: t.Final[tuple[float, float]] = (0.5, 4.0)
+WOBBLES: t.Final[tuple[float, float]] = (0.0, 2.0)
+# NOTE(xames3): A hyphen can't sit in a function's name, so `setup`
+# registers the icon roles from this, each with its Font Awesome style.
+ICONS: t.Final[dict[str, str]] = {
+    "fab-icon": "fa-brands",
+    "fal-icon": "fa-light",
+    "far-icon": "fa-regular",
+    "fas-icon": "fa-solid",
+}
+GLYPH: re.Pattern[str] = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+CLASS: re.Pattern[str] = re.compile(r"^[\w-]+$")
 
 
 class ink(nodes.inline):
-    """A run of text wearing a style, a sharpie or a pencil underline.
+    """Text wearing a style, a sharpie or a pencil underline.
 
-    The text stays a text node, so the reading time, the search index
-    and a page's description see the words and not the markup drawn
-    around them.
+    It stays a text node, so the reading time, search index and page
+    description see the words and not the markup.
     """
+
+
+class glyph(nodes.inline):
+    """A Font Awesome icon, an empty span the stylesheet draws into."""
 
 
 def _visit(self: HTMLTranslator, node: ink) -> None:
@@ -51,12 +63,23 @@ def _visit(self: HTMLTranslator, node: ink) -> None:
     self.body.append(self.starttag(node, "span", "", style=node["style"]))
 
 
-def _depart(self: HTMLTranslator, node: ink) -> None:
+def _visit_glyph(self: HTMLTranslator, node: glyph) -> None:
+    """Open the span that carries the icon.
+
+    :param self: The HTML translator, whose body this appends to.
+    :param node: The icon.
+    """
+    attributes: dict[str, t.Any] = {"aria-hidden": "true"}
+    self.body.append(self.starttag(node, "span", "", **attributes))
+
+
+def _depart(self: HTMLTranslator, node: ink | glyph) -> None:
     """Close the span.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The inked text (unused).
+    :param node: The inked text or the icon (unused).
     """
+    del node
     self.body.append("</span>")
 
 
@@ -65,7 +88,7 @@ def _split(text: str) -> tuple[str, str | None]:
 
     :param text: What was written inside the role.
     :return: The label and the value between `<` and `>` or `None`
-        when there is not one.
+        when there isn't one.
     """
     if "<" not in text:
         return text, None
@@ -81,7 +104,7 @@ def _reject(
     :param inliner: The docutils inliner that called the role.
     :param rawtext: The whole role, markup and all.
     :param lineno: The line the role sits on.
-    :param message: What is wrong with it.
+    :param message: What's wrong with it.
     :return: The problematic node and the message, as docutils wants
         them.
     """
@@ -91,12 +114,56 @@ def _reject(
     return [inliner.problematic(rawtext, rawtext, msg)], [msg]
 
 
-def _underline_svg(color: str, seed: str) -> tuple[str, str]:
-    """Draw two wobbly strokes for a hand-drawn underline.
+def _options(value: str | None) -> tuple[str, dict[str, str]]:
+    """Split what sits in a role's angles into a colour and settings.
+
+    :param value: What was between `<` and `>` or `None`.
+    :return: The colour, empty when there's none, and the settings.
+    :raises ValueError: When there's more than one colour.
+    """
+    colour = ""
+    found: dict[str, str] = {}
+    for part in (value or "").split(";"):
+        part = part.strip()
+        if not part:
+            continue
+        key, equals, number = part.partition("=")
+        if equals:
+            found[key.strip().lower()] = number.strip()
+        elif colour:
+            raise ValueError(f"{part!r} after the colour {colour!r}")
+        else:
+            colour = part
+    return colour, found
+
+
+def _colour(config: t.Any, value: str) -> str:
+    """Look a colour up among the names the site gave colours.
+
+    :param config: The Sphinx configuration.
+    :param value: A colour or the name of one.
+    :return: The colour the name stands for or the value as written.
+    """
+    names = {
+        str(key).strip().lower(): str(colour).strip()
+        for key, colour in setting(config, "role_colours").items()
+    }
+    return names.get(value.strip().lower(), value.strip())
+
+
+def _underline_svg(
+    color: str, seed: str, width: float = 2.5, wobble: float = 1.0
+) -> tuple[str, str]:
+    """Draw two wobbly strokes for a (fake) hand-drawn underline.
+
+    The wobble is seeded, so the same underline comes out the same on
+    every build.
 
     :param color: The stroke colour, already checked.
     :param seed: What the wobble is drawn from, so the same underline in
         the same place comes out the same on every build.
+    :param width: How thick the stroke is.
+    :param wobble: How far the stroke strays, `0` being straight.
     :return: The left-to-right and right-to-left SVGs.
     """
     uniform = Random(sha256(seed.encode()).digest()).uniform
@@ -105,17 +172,19 @@ def _underline_svg(color: str, seed: str) -> tuple[str, str]:
 
     def stroke(start: float, stop: float) -> str:
         """Generate a wobbly path between two y anchors."""
-        points = [f"M{uniform(1.5, 2.5):.1f} {start + uniform(-0.4, 0.4):.1f}"]
+        x0 = uniform(1.5, 2.5)
+        y0 = start + uniform(-0.4, 0.4) * wobble
+        points = [f"M{x0:.1f} {y0:.1f}"]
         for index in range(1, segments):
             mid = start + (stop - start) * index / segments
-            midx = step * index - uniform(0, step * 0.4)
-            midy = mid + uniform(-1.2, 1.2)
-            x = step * index + uniform(-2, 2)
-            y = mid + uniform(-0.8, 0.8)
+            midx = step * index - uniform(0, step * 0.4) * wobble
+            midy = mid + uniform(-1.2, 1.2) * wobble
+            x = step * index + uniform(-2, 2) * wobble
+            y = mid + uniform(-0.8, 0.8) * wobble
             points.append(f"Q{midx:.1f} {midy:.1f} {x:.1f} {y:.1f}")
-        points.append(
-            f"L{uniform(497, 499):.1f} {stop + uniform(-0.4, 0.4):.1f}"
-        )
+        x1 = uniform(497, 499)
+        y1 = stop + uniform(-0.4, 0.4) * wobble
+        points.append(f"L{x1:.1f} {y1:.1f}")
         return " ".join(points)
 
     def make_svg(start: float, stop: float) -> str:
@@ -124,7 +193,7 @@ def _underline_svg(color: str, seed: str) -> tuple[str, str]:
             "<svg xmlns='http://www.w3.org/2000/svg'"
             " viewBox='0 0 500 8' preserveAspectRatio='none'>"
             f"<path d='{path}' fill='none' stroke='{color}'"
-            " stroke-width='2.5' stroke-linecap='round'/>"
+            f" stroke-width='{width:g}' stroke-linecap='round'/>"
             "</svg>"
         )
 
@@ -144,7 +213,7 @@ def stylise(
 
     The text reads `label <css>`::
 
-        Text is normal, but now it is :stylise:`red <color: red;>`.
+        Text is normal, but now it's :stylise:`red <color: red;>`.
 
     :param role: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
@@ -153,8 +222,8 @@ def stylise(
     :param inliner: The docutils inliner that called this.
     :param options: Role options (unused).
     :param content: Role content (unused).
-    :return: The styled text and the error messages if the text does
-        not split on a `<`.
+    :return: The styled text and the error messages if the text doesn't
+        split on a `<`.
     """
     del role, options, content
     element, style = _split(text)
@@ -175,7 +244,7 @@ def email(
     """Write a `mailto` link.
 
     The subject is the page title unless the role names one after a
-    pipe::
+    pipe. Without a label the address is the label::
 
         Send me an :email:`email <xa@mes3.dev>`.
         Send me an :email:`email <xa@mes3.dev | Hello hello!!>`.
@@ -188,13 +257,14 @@ def email(
     :param options: Role options (unused).
     :param content: Role content (unused).
     :return: One `reference` node and the error messages if the text
-        does not split on a `<`.
+        doesn't split on a `<`.
     """
     del role, options, content
     alt, rest = _split(text)
     if rest is None:
         return _reject(inliner, rawtext, lineno, f"Invalid email: {text!r}")
     href, _, subject = rest.partition("|")
+    alt = alt or href.strip()
     if not subject.strip():
         subject = next(
             (_.astext() for _ in findall(inliner.document, nodes.title)), ""
@@ -216,7 +286,9 @@ def sharpie(
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """Run a highlighter over a run of text.
 
-    The colour is yellow unless the role names one::
+    The colour is the site's `sharpie_colour`, yellow, unless the role
+    names one, either as a colour or as one of the
+    site's `role_colours`::
 
         This is :sharpie:`important` information.
         This is :sharpie:`critical <red>` information.
@@ -233,7 +305,8 @@ def sharpie(
     """
     del role, options, content
     element, color = _split(text)
-    color = color or "yellow"
+    config = inliner.document.settings.env.config
+    color = _colour(config, color or str(setting(config, "sharpie_colour")))
     if not COLOUR.match(color):
         return _reject(inliner, rawtext, lineno, f"Invalid colour: {color!r}")
     style = f"--km-sharpie-color: {color};"
@@ -251,10 +324,16 @@ def underline(
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """Draw a pencil underline beneath a run of text.
 
-    The colour is orange unless the role names one::
+    The colour, width and wobble are the site's `underline_colour`,
+    `underline_width` and `underline_wobble`, orange, 2.5 and 1, unless
+    the role names its own after the text, a semicolon between them::
 
         This is :underline:`notable` content.
         This is :underline:`notable <red>` content.
+        This is :underline:`notable <red; width=3; wobble=0>` content.
+
+    The width runs from 0.5 to 4 and the wobble from 0, which is
+    straight, to 2.
 
     :param role: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
@@ -264,17 +343,92 @@ def underline(
     :param options: Role options (unused).
     :param content: Role content (unused).
     :return: The underlined text and the error messages if the colour
-        looks like markup.
+        looks like markup or the width or wobble is off.
     """
     del role, options, content
-    element, color = _split(text)
-    color = color or "#FF9800"
+    element, rest = _split(text)
+    config = inliner.document.settings.env.config
+    try:
+        color, given = _options(rest)
+    except ValueError as exc:
+        return _reject(inliner, rawtext, lineno, f"Invalid underline: {exc}")
+    color = _colour(config, color or str(setting(config, "underline_colour")))
     if not COLOUR.match(color):
         return _reject(inliner, rawtext, lineno, f"Invalid colour: {color!r}")
-    seed = f"{inliner.document.get('source', '')}:{lineno}:{rawtext}"
-    ltr, rtl = (_.replace("#", "%23") for _ in _underline_svg(color, seed))
+    width = float(given.pop("width", setting(config, "underline_width")))
+    wobble = float(given.pop("wobble", setting(config, "underline_wobble")))
+    if given:
+        return _reject(
+            inliner,
+            rawtext,
+            lineno,
+            f"Invalid underline setting: {', '.join(given)};"
+            " it takes width and wobble",
+        )
+    for name, number, (low, high) in (
+        ("width", width, WIDTHS),
+        ("wobble", wobble, WOBBLES),
+    ):
+        if not low <= number <= high:
+            return _reject(
+                inliner,
+                rawtext,
+                lineno,
+                f"Invalid underline {name}: use a number from {low:g}"
+                f" to {high:g}",
+            )
+    seed = f"{inliner.document.settings.env.docname}:{lineno}:{rawtext}"
+    # NOTE(xames3): A `#` has to be percent-encoded inside a data URI.
+    # https://datatracker.ietf.org/doc/html/rfc2397
+    ltr, rtl = (
+        _.replace("#", "%23")
+        for _ in _underline_svg(color, seed, width, wobble)
+    )
     style = (
         f'--km-ul-fwd: url("data:image/svg+xml,{ltr}");'
         f' --km-ul-ret: url("data:image/svg+xml,{rtl}");'
     )
     return [ink(rawtext, element, classes=["km-pencil"], style=style)], []
+
+
+def _icon(
+    style: str,
+    role: str,
+    rawtext: str,
+    text: str,
+    lineno: int,
+    inliner: t.Any,
+    options: dict[str, t.Any] | None = None,
+    content: list[t.Any] | None = None,
+) -> tuple[list[nodes.Node], list[nodes.system_message]]:
+    """Draw a Font Awesome icon.
+
+    The text reads `name` and then any classes, a space between each.
+    The role names the style, `fab-icon` for brands, `fal-icon` for
+    light, `far-icon` for regular and `fas-icon` for solid::
+
+        Watch on :fab-icon:`youtube` or listen :far-icon:`headphones`.
+        Show some :fas-icon:`heart km-red` love.
+
+    :param style: The Font Awesome style class, bound by `setup`.
+    :param role: The role name, as written (unused).
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role sits on, for error reporting.
+    :param inliner: The docutils inliner that called this.
+    :param options: Role options (unused).
+    :param content: Role content (unused).
+    :return: The icon and the error messages if the name or a class
+        looks like anything but one.
+    """
+    del role, options, content
+    name, *classes = text.split()
+    if not GLYPH.match(name):
+        return _reject(inliner, rawtext, lineno, f"Invalid icon: {name!r}")
+    for found in classes:
+        if not CLASS.match(found):
+            return _reject(
+                inliner, rawtext, lineno, f"Invalid icon class: {found!r}"
+            )
+    node = glyph(rawtext, classes=[style, f"fa-{name}", "km-glyph", *classes])
+    return [node], []

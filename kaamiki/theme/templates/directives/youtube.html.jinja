@@ -1,0 +1,45 @@
+{#
+YouTube Template
+================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 22 February 2025
+Last updated on: 12 October 2026
+#}
+{% block km_youtube %}
+    {%- set km_label = km_caption or _("YouTube video") %}
+    <figure class="km-media km-media--youtube">
+        <div class="km-media__frame km-media__frame--ratio"
+             {% if km_ratio %}style="aspect-ratio: {{ km_ratio }}"{% endif %}>
+            {%- if km_facade %}
+                <a class="km-media__facade"
+                   href="{{ km_watch }}"
+                   data-km-facade
+                   data-km-facade-src="{{ km_url }}&amp;color=white"
+                   data-km-facade-title="{{ km_label|striptags|e }}"
+                   data-km-facade-allow="{{ km_allow }}"
+                   data-km-facade-referrer="{{ km_referrer }}">
+                    {%- if not km_private %}
+                        <img src="https://img.youtube.com/vi/{{ km_video_id }}/hqdefault.jpg"
+                             alt=""
+                             loading="lazy">
+                    {%- endif %}
+                    <i class="{{ km_fa_icons.play }} km-media__facade-icon"
+                       aria-hidden="true"></i>
+                    <span class="sr-only">{{ _("Play video") }}: {{ km_label|striptags|e }}</span>
+                </a>
+            {%- else %}
+                <iframe class="km-media__iframe"
+                        src="{{ km_url }}&amp;color=white"
+                        title="{{ km_label|striptags|e }}"
+                        loading="lazy"
+                        referrerpolicy="{{ km_referrer }}"
+                        allow="{{ km_allow }}"
+                        allowfullscreen></iframe>
+            {%- endif %}
+        </div>
+        {%- if km_caption %}
+            <figcaption class="km-media__caption">{{ km_caption }}</figcaption>
+        {%- endif -%}
+    </figure>
+{% endblock km_youtube %}
