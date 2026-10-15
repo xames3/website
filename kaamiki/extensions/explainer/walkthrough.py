@@ -4,7 +4,7 @@ Walkthrough Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 12 October 2026
+Last updated on: 15 October 2026
 
 A `walkthrough` directive that steps a reader through a snippet, line
 by line, with the values it held at each one... telling a story::
@@ -35,8 +35,8 @@ by line, with the values it held at each one... telling a story::
 
 .. note::
 
-    The Python runs in a scratch directory with a bare environment, a
-    1GB of memory, 10 seconds and the directory goes when it finishes.
+    The Python runs in a scratch directory with a bare environment, 1GB
+    of memory and 10 seconds, and the directory goes when it finishes.
     A site changes those, and what the snippet may run with, through
     the `walkthrough_*` settings in `html_context`. A snippet's
     own `:limit:` and `:timeout:` can lower what the site sets but not
@@ -44,8 +44,6 @@ by line, with the values it held at each one... telling a story::
     while the snippet, its options, the interpreter, the installed
     packages and the files it imported stay the same.
 """
-
-from __future__ import annotations
 
 import json
 import os.path as p
@@ -66,21 +64,16 @@ from kaamiki.extensions.explainer.chrome import pane
 from kaamiki.extensions.explainer.chrome import visit_explanation
 from kaamiki.extensions.explainer.grammar import linerange
 from kaamiki.extensions.explainer.grammar import split
-from kaamiki.extensions.explainer.tracer import budget
 from kaamiki.extensions.explainer.tracer import collapse
 from kaamiki.extensions.explainer.tracer import execute
 from kaamiki.extensions.explainer.tracer import kinds
-from kaamiki.extensions.explainer.tracer import limit
-from kaamiki.extensions.explainer.tracer import memory
 from kaamiki.extensions.explainer.tracer import replay
 from kaamiki.extensions.explainer.tracer import show
-from kaamiki.extensions.explainer.tracer import timeout
-from kaamiki.extensions.explainer.tracer import written
 from kaamiki.extensions.utils import badged
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import listed
+from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import skip
-from kaamiki.extensions.utils import toggle
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -109,11 +102,14 @@ TRACED: t.Final[tuple[str, ...]] = (
     "watch",
 )
 VALUE: re.Pattern[str] = re.compile(r"^\s*([^=:]+?)\s*[:=]\s*(.*?)\s*$")
-ENTRIES: re.Pattern[str] = re.compile(r"[;\n]")
+# NOTE(xames3): A `;` only ends a value when a `name:` or `name=` follows,
+# so `for (i = 0; i < n; i++)` stays in one piece.
+ENTRIES: re.Pattern[str] = re.compile(
+    r"\n|;\s*(?=[A-Za-z_][\w.\[\]]*\s*[:=](?!=))"
+)
 PACE: t.Final[int] = 72
 PACES: t.Final[tuple[tuple[int, frozenset[str]], ...]] = (
     (104, frozenset({"bash"})),
-    (112, frozenset({"javascript", "typescript"})),
     (120, frozenset({"c"})),
     (128, frozenset({"c++", "rust"})),
 )
@@ -128,8 +124,7 @@ class node(nodes.container):
 
 
 class heading(nodes.paragraph):
-    """The caption, parsed as rST, the language's icon and the step
-    counter.
+    """The caption, parsed as rST and the language's icon.
 
     docutils already has a `caption` node and finds visitors by class
     name, so this can't borrow that one.
@@ -175,18 +170,24 @@ class directive(CodeBlock):
         - `limit`: How many steps to show. Defaults to 100.
         - `timeout`: How long the snippet may run, in seconds.
         - `pythonpath`: Directories to import from, comma-separated
-          and relative to the document.
+          and relative to the document. One that isn't there raises
+          `FileNotFoundError`.
         - `events`: Which of `call`, `line` and `return` make a step.
           Defaults to `line` and `return`.
-        - `comprehensions`: Step into comprehensions too. `false`
-          leaves them out when the site's `walkthrough_comprehensions`
-          is on.
+        - `comprehensions`: Step into comprehensions too, which a site
+          can do for every snippet with `walkthrough_comprehensions`.
         - `pace`: Pixels of scrolling a step takes. Defaults to what
-          `pace` picks for the language. This is flaky...
+          `pace` picks for the language.
         - `raises`: The snippet is meant to fail, so it ends on the
           exception without a warning.
         - `comment`: How the language opens a comment and closes one
           if it must (`(* *)`), for a language Kaamiki doesn't know.
+        - `caption`: A line of text above the code, parsed as rST.
+        - `class`: More classes for the walkthrough.
+        - `name`: A name to link the walkthrough by.
+        - `linenos`: Number the lines.
+        - `lineno-start`: The number the first line is given.
+        - `emphasize-lines`: Lines to highlight, as `1, 3-5`.
     """
 
     option_spec = {  # noqa: RUF012
@@ -201,7 +202,7 @@ class directive(CodeBlock):
         "timeout": rst.directives.positive_int,
         "pythonpath": rst.directives.unchanged,
         "events": rst.directives.unchanged,
-        "comprehensions": toggle,
+        "comprehensions": rst.directives.flag,
         "pace": rst.directives.positive_int,
         "raises": rst.directives.flag,
         "comment": rst.directives.unchanged_required,
@@ -243,29 +244,11 @@ class directive(CodeBlock):
             linenos="linenos" in self.options,
         )
         element = node("", **attributes)
-        element += self.caption(len(steps), language)
+        element += self.caption(language)
         element += self.snippet(code, language, start)
         element += self.explain(notes)
         self.add_name(element)
         return [element]
-
-    def setting(self, key: str, default: int) -> int:
-        """Read a whole number the site sets for the walkthrough.
-
-        :param key: The setting's name in `html_context`.
-        :param default: What it is without one.
-        :return: The number, above zero.
-        :raises rst.DirectiveError: When the site set anything else.
-        """
-        site = self.state.document.settings.env.config.html_context
-        value = site.get(key)
-        if value is None:
-            return default
-        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
-            raise self.error(
-                f"{key} needs a whole number above zero, got {value!r}"
-            )
-        return value
 
     def cache(self) -> str | None:
         """Name the folder traces are kept in, unless the site turned
@@ -277,28 +260,26 @@ class directive(CodeBlock):
         :return: The folder or `None` for no cache.
         """
         env = self.state.document.settings.env
-        if not env.config.html_context.get("walkthrough_cache", True):
+        if not setting(env.config, "walkthrough_cache"):
             return None
         return p.join(str(env.doctreedir), "kaamiki-walkthrough")
 
-    def capped(self, option: str, key: str, default: int) -> int:
+    def capped(self, option: str, key: str) -> int:
         """Read a number the snippet asks for, up to what the site
         allows.
 
         :param option: The directive's option.
         :param key: The setting that holds the most it may ask for.
-        :param default: The most, when the site sets none.
         :return: What the snippet asked for or the most.
+        :raises rst.DirectiveError: When it asks for more than the site
+            allows.
         """
-        most = self.setting(key, default)
-        asked = self.options.get(option)
-        if asked is None:
-            return most
+        most = setting(self.state.document.settings.env.config, key)
+        asked = self.options.get(option, most)
         if asked > most:
-            self.warn(
-                f":{option}: {asked} is more than {key} allows; using {most}"
+            raise self.error(
+                f":{option}: {asked} is more than {key} allows ({most})"
             )
-            return most
         return int(asked)
 
     def blocks(self) -> tuple[str, str, str, list[chunk]]:
@@ -383,9 +364,12 @@ class directive(CodeBlock):
                     " but a python walkthrough reads them off the snippet"
                 )
         env = self.state.document.settings.env
-        site = env.config.html_context
+        config = env.config
         events = frozenset(
-            listed(self.options.get("events") or site.get("walkthrough_events"))
+            listed(
+                self.options.get("events")
+                or setting(config, "walkthrough_events")
+            )
         )
         if events - kinds:
             raise self.error(
@@ -396,29 +380,30 @@ class directive(CodeBlock):
         here = p.dirname(str(self.state.document.current_source))
         paths = [
             _ if p.isabs(_) else p.abspath(p.join(env.srcdir, _))
-            for _ in listed(site.get("walkthrough_pythonpath"))
+            for _ in setting(config, "walkthrough_pythonpath")
         ]
         paths += [
             _ if p.isabs(_) else p.abspath(p.join(here, _))
             for _ in listed(self.options.get("pythonpath", ""))
         ]
-        most = self.capped("limit", "walkthrough_limit", limit)
+        for path in paths:
+            if not p.isdir(path):
+                raise FileNotFoundError(f"pythonpath has no directory {path}")
+        most = self.capped("limit", "walkthrough_limit")
         traced = execute(
             code,
             setup,
             stdin,
             watch,
-            most * self.setting("walkthrough_budget", budget),
-            self.capped("timeout", "walkthrough_timeout", timeout),
+            most * setting(config, "walkthrough_budget"),
+            self.capped("timeout", "walkthrough_timeout"),
             paths,
-            comprehensions=self.options.get(
-                "comprehensions", bool(site.get("walkthrough_comprehensions"))
-            ),
-            python=site.get("walkthrough_python") or None,
+            comprehensions="comprehensions" in self.options
+            or bool(setting(config, "walkthrough_comprehensions")),
+            python=setting(config, "walkthrough_python"),
             cache=self.cache(),
-            memory_limit=self.setting("walkthrough_memory", memory) << 20,
-            output_limit=self.setting("walkthrough_output_limit", written)
-            << 20,
+            memory_limit=setting(config, "walkthrough_memory") << 20,
+            output_limit=setting(config, "walkthrough_output_limit") << 20,
         )
         for dependency in traced["deps"]:
             env.note_dependency(dependency)
@@ -478,7 +463,7 @@ class directive(CodeBlock):
             zip(notes, ranges, strict=True)
         ):
             where = self.place(block, high, start, total)
-            for key in listed(block.options.get("clear")):
+            for key in listed(block.options.get("clear", "")):
                 if values.pop(key, None) is None:
                     self.warn(
                         f"the note for {label(low, high)} clears {key},"
@@ -559,18 +544,17 @@ class directive(CodeBlock):
             )
         return {"open": "#", "close": ""}
 
-    def caption(self, count: int, language: str) -> heading:
+    def caption(self, language: str) -> heading:
         """Build the header, with the caption parsed as rST and the
         icon of the snippet's language.
 
         The caption keeps its place in the source, so `gettext` can
         collect it.
 
-        :param count: How many steps the walkthrough holds.
         :param language: The language named on the directive.
         :return: The header node.
         """
-        head = heading(count=count, icon="")
+        head = heading(icon="")
         if not self.options.get("caption"):
             return head
         parsed = self.parse_text_to_nodes(
@@ -585,8 +569,9 @@ class directive(CodeBlock):
         head.rawsource = self.options["caption"]
         head.source, head.line = source, line
         head.extend(parsed[0].children)
-        site = self.state.document.settings.env.config.html_context
-        head["icon"] = badged(head, language, kit=bool(site.get("fa_kit")))
+        config = self.state.document.settings.env.config
+        kit = bool(setting(config, "fa_kit"))
+        head["icon"] = badged(head, language, kit=kit)
         return head
 
     def snippet(self, code: str, language: str, start: int) -> plain:
@@ -662,10 +647,12 @@ class directive(CodeBlock):
     def warn(self, message: str) -> None:
         """Log a warning against this directive."""
         logger.warning(
-            "walkthrough: %s",
+            "%s: %s",
+            self.name,
             message,
             location=self.get_location(),
-            type="walkthrough",
+            type="kaamiki",
+            subtype=self.name,
         )
 
     def emphasis(self, start: int, total: int) -> set[int]:
@@ -803,16 +790,15 @@ def depart_heading(self: HTMLTranslator, node: heading) -> None:
     side.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The header node, carrying the step count.
+    :param node: The header node.
     """
     if node.children:
         self.body.append("</span>")
-        self.body.append(controls(node["count"]))
+        self.body.append(controls())
         self.body.append("</div>")
     else:
         self.body.append(
-            f'<div class="km-walkthrough__corner">{controls(node["count"])}'
-            "</div>"
+            f'<div class="km-walkthrough__corner">{controls()}</div>'
         )
     self.body.append(node.parent["pane"])
     self.body.append(output())

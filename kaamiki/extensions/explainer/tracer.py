@@ -4,12 +4,10 @@ Explainer Tracer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 Running a snippet and writing down what it did, one line at a time.
 """
-
-from __future__ import annotations
 
 import functools
 import hashlib
@@ -21,16 +19,14 @@ import sys
 import tempfile
 import typing as t
 
-limit: t.Final[int] = 100
-budget: t.Final[int] = 25
-timeout: t.Final[int] = 10
-memory: t.Final[int] = 1 << 30
-written: t.Final[int] = 64 << 20
 short: t.Final[int] = 28
 full: t.Final[int] = 480
 kinds: t.Final[frozenset[str]] = frozenset({"call", "line", "return"})
 exhausted: t.Final[frozenset[int]] = frozenset(
-    -getattr(signal, _) for _ in ("SIGXCPU", "SIGKILL") if hasattr(signal, _)
+    -getattr(signal, _) for _ in ("SIGXCPU",) if hasattr(signal, _)
+)
+killed: t.Final[frozenset[int]] = frozenset(
+    -getattr(signal, _) for _ in ("SIGKILL",) if hasattr(signal, _)
 )
 oversized: t.Final[frozenset[int]] = frozenset(
     -getattr(signal, _) for _ in ("SIGXFSZ",) if hasattr(signal, _)
@@ -62,6 +58,7 @@ import json
 import os
 import re
 import sys
+import sysconfig
 
 with open(sys.argv[1]) as fd:
     job = json.load(fd)
@@ -184,11 +181,18 @@ def drain():
 
 
 def imported():
-    roots = [os.path.join(_, "") for _ in job["pythonpath"]]
+    skip = {
+        os.path.join(os.path.realpath(path), "")
+        for key, path in sysconfig.get_paths().items()
+        if key in ("stdlib", "platstdlib", "purelib", "platlib")
+    }
     found = set()
     for module in list(sys.modules.values()):
         path = getattr(module, "__file__", None)
-        if path and any(path.startswith(_) for _ in roots):
+        if not path or not os.path.isfile(path):
+            continue
+        path = os.path.realpath(path)
+        if not any(path.startswith(_) for _ in skip):
             found.add(path)
     return sorted(found)
 
@@ -249,7 +253,12 @@ def record(frame, event, arg, ident, resumed=False):
         "vars": snapshot(frame),
         "out": drain(),
     }
-    if frame.f_code.co_name == "<module>":
+    # NOTE(xames3): A class body runs once, as its class is defined, so it
+    # gets the same treatment as a module: no step for its call or return.
+    scope = frame.f_locals
+    if frame.f_code.co_name == "<module>" or (
+        "__qualname__" in scope and "__module__" in scope
+    ):
         row["module"] = True
     if resumed:
         row["resumed"] = True
@@ -381,9 +390,9 @@ def execute(
     pythonpath: list[str],
     *,
     comprehensions: bool,
+    memory_limit: int,
+    output_limit: int,
     python: str | None = None,
-    memory_limit: int = memory,
-    output_limit: int = written,
     cache: str | None = None,
 ) -> Trace:
     """Run the snippet under a tracer and collect what it did.
@@ -468,7 +477,7 @@ def execute(
             with open(answer) as fd:
                 result = t.cast("Trace", json.load(fd))
         except OSError, json.JSONDecodeError:
-            return failed(verdict(finished, timeout))
+            return failed(verdict(finished, timeout, output_limit))
     if cache and key and result["error"] is None:
         remember(cache, key, result)
     return result
@@ -581,18 +590,23 @@ def sandbox(home: str) -> dict[str, str]:
     }
 
 
-def verdict(finished: subprocess.CompletedProcess[str], timeout: int) -> str:
+def verdict(
+    finished: subprocess.CompletedProcess[str], timeout: int, output_limit: int
+) -> str:
     """Say why a snippet left no answer behind.
 
     :param finished: The runner's process.
     :param timeout: How long it was allowed, in seconds.
+    :param output_limit: Bytes of files it was allowed to write.
     :return: The reason, in a line.
     """
     code = finished.returncode
     if code in exhausted:
         return f"used more than its {timeout}s of processor time"
     if code in oversized:
-        return f"wrote a file past {written >> 20} MB"
+        return f"wrote a file past {output_limit >> 20} MB"
+    if code in killed:
+        return "was killed, most likely for running out of memory"
     detail = (finished.stderr or finished.stdout).strip()
     return detail[-400:] or "the snippet produced nothing"
 
@@ -716,6 +730,10 @@ def fault(
 def collapse(steps: list[dict[str, t.Any]]) -> list[dict[str, t.Any]]:
     """Drop the steps that wouldn't change the page.
 
+    A step that only moves the highlight within a note that's already
+    showing, or that no note covers, has nothing new to say, so the step
+    before it stands for it.
+
     :param steps: The steps as replayed, in order.
     :return: The steps worth stepping through.
     """
@@ -726,9 +744,7 @@ def collapse(steps: list[dict[str, t.Any]]) -> list[dict[str, t.Any]]:
             before = [_[:4] for _ in last["vars"]]
             if (
                 [_[:4] for _ in step["vars"]] == before
-                and step["line"] == last["line"]
-                and step["frame"] == last["frame"]
-                and step["note"] == last["note"]
+                and step["note"] in (None, last["note"])
                 and not step["out"]
                 and step["ret"] is None
                 and step["error"] is None

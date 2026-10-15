@@ -4,17 +4,17 @@ Doctree Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 12 October 2026
+Last updated on: 14 October 2026
 
 The helpers that walk a doctree and pick prose out of it.
 """
-
-from __future__ import annotations
 
 import typing as t
 from uuid import uuid4
 
 from docutils import nodes
+from pygments.lexers import get_lexer_for_filename
+from pygments.util import ClassNotFound
 from sphinx.builders.gettext import MessageCatalogBuilder
 
 from kaamiki.extensions.utils.settings import language_icon
@@ -38,6 +38,7 @@ TRANSLATED: t.Final[frozenset[str]] = frozenset(
         "km-fb-description",
         "km-fb-title",
         "km-pg-description",
+        "km-header-subtitle",
         "km-pg-image-alt",
         "km-pg-title",
     }
@@ -70,9 +71,21 @@ def badged(
     :param kit: Whether the site has a Font Awesome kit.
     :return: The icon's classes or an empty string when the language
         has none or the caption opens with an icon of its own.
+
+    A diff has no language of its own, so its caption's file name stands
+    in for it.
     """
     first = caption.children[0] if caption.children else None
-    if type(first).__name__ == "fontawesome":
+    if type(first).__name__ == "glyph":
+        return ""
+    if (language or "").strip().lower() in {"diff", "udiff"}:
+        try:
+            lexer = get_lexer_for_filename(caption.astext().strip())
+        except ClassNotFound:
+            return ""
+        for alias in lexer.aliases:
+            if icon := language_icon(alias, kit=kit):
+                return icon
         return ""
     return language_icon(language, kit=kit)
 

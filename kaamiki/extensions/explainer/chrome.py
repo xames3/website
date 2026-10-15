@@ -4,12 +4,10 @@ Explainer Chrome
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 12 October 2026
+Last updated on: 15 October 2026
 
 The markup an explainer wraps itself in.
 """
-
-from __future__ import annotations
 
 import html
 import typing as t
@@ -19,7 +17,6 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
 from pygments.util import ClassNotFound
 from sphinx.locale import _
-from sphinx.locale import get_translator
 
 if t.TYPE_CHECKING:
     from docutils import nodes
@@ -211,6 +208,7 @@ def pane(
     emphasis: set[int],
     *,
     linenos: bool,
+    digits: int = 0,
 ) -> str:
     """Write the highlighted snippet the stepper walks through.
 
@@ -220,6 +218,9 @@ def pane(
     :param emphasis: The lines to mark, numbered as the reader sees
         them.
     :param linenos: Whether to show a line-number gutter.
+    :param digits: How many characters the gutter takes, for versions of
+        a snippet that have to line up. Defaults to what the snippet
+        needs.
     :return: The pane's markup.
     """
     rows: list[str] = []
@@ -233,7 +234,7 @@ def pane(
             '<span class="km-walkthrough__ann" data-km-ann></span>\n</span>'
         )
     gutter = " km-walkthrough__code--linenos" if linenos else ""
-    digits = len(str(start + max(len(rows), 1) - 1))
+    digits = digits or len(str(start + max(len(rows), 1) - 1))
     return (
         '<div class="km-walkthrough__stage" data-km-stage tabindex="0">'
         f'<pre class="highlight km-walkthrough__code{gutter}"'
@@ -243,20 +244,14 @@ def pane(
     )
 
 
-def controls(count: int) -> str:
+def controls() -> str:
     """Write what sits at the end of an explainer's caption.
 
     Without a caption, the same markup sits in the snippet's top corner.
-    The count goes through `ngettext`, since plural forms are the
-    language's to say.
 
-    :param count: How many steps the explainer holds.
     :return: The markup.
     """
-    steps = get_translator().ngettext("%d step", "%d steps", count) % count
     return (
-        '<span class="km-walkthrough__counter" data-km-counter>'
-        f"{html.escape(steps)}</span>"
         '<button type="button" class="km-walkthrough__copy" data-km-copy'
         f' aria-label="{html.escape(str(_("Copy the snippet")))}">'
         "</button>"
