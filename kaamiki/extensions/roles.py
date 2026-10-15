@@ -4,12 +4,10 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 09 October 2026
+Last updated on: 11 October 2026
 
 Kaamiki's custom inline roles.
 """
-
-from __future__ import annotations
 
 import re
 import typing as t
@@ -32,6 +30,16 @@ if t.TYPE_CHECKING:
 COLOUR: re.Pattern[str] = re.compile(r"^[#\w(),.%\s/-]+$")
 WIDTHS: t.Final[tuple[float, float]] = (0.5, 4.0)
 WOBBLES: t.Final[tuple[float, float]] = (0.0, 2.0)
+# NOTE(xames3): A hyphen can't sit in a function's name, so `setup`
+# registers the icon roles from this, each with its Font Awesome style.
+ICONS: t.Final[dict[str, str]] = {
+    "fab-icon": "fa-brands",
+    "fal-icon": "fa-light",
+    "far-icon": "fa-regular",
+    "fas-icon": "fa-solid",
+}
+GLYPH: re.Pattern[str] = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+CLASS: re.Pattern[str] = re.compile(r"^[\w-]+$")
 
 
 class ink(nodes.inline):
@@ -40,6 +48,10 @@ class ink(nodes.inline):
     It stays a text node, so the reading time, search index and page
     description see the words and not the markup.
     """
+
+
+class glyph(nodes.inline):
+    """A Font Awesome icon, an empty span the stylesheet draws into."""
 
 
 def _visit(self: HTMLTranslator, node: ink) -> None:
@@ -51,11 +63,21 @@ def _visit(self: HTMLTranslator, node: ink) -> None:
     self.body.append(self.starttag(node, "span", "", style=node["style"]))
 
 
-def _depart(self: HTMLTranslator, node: ink) -> None:
+def _visit_glyph(self: HTMLTranslator, node: glyph) -> None:
+    """Open the span that carries the icon.
+
+    :param self: The HTML translator, whose body this appends to.
+    :param node: The icon.
+    """
+    attributes: dict[str, t.Any] = {"aria-hidden": "true"}
+    self.body.append(self.starttag(node, "span", "", **attributes))
+
+
+def _depart(self: HTMLTranslator, node: ink | glyph) -> None:
     """Close the span.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The inked text (unused).
+    :param node: The inked text or the icon (unused).
     """
     del node
     self.body.append("</span>")
@@ -127,21 +149,6 @@ def _colour(config: t.Any, value: str) -> str:
         for key, colour in setting(config, "role_colours").items()
     }
     return names.get(value.strip().lower(), value.strip())
-
-
-def _number(value: object, low: float, high: float) -> float | None:
-    """Read a number and keep it between two bounds.
-
-    :param value: The number, as written or set.
-    :param low: The smallest allowed.
-    :param high: The biggest allowed.
-    :return: The number or `None` when it isn't a number in bounds.
-    """
-    try:
-        number = float(str(value))
-    except ValueError:
-        return None
-    return number if low <= number <= high else None
 
 
 def _underline_svg(
@@ -237,7 +244,7 @@ def email(
     """Write a `mailto` link.
 
     The subject is the page title unless the role names one after a
-    pipe::
+    pipe. Without a label the address is the label::
 
         Send me an :email:`email <xa@mes3.dev>`.
         Send me an :email:`email <xa@mes3.dev | Hello hello!!>`.
@@ -257,6 +264,7 @@ def email(
     if rest is None:
         return _reject(inliner, rawtext, lineno, f"Invalid email: {text!r}")
     href, _, subject = rest.partition("|")
+    alt = alt or href.strip()
     if not subject.strip():
         subject = next(
             (_.astext() for _ in findall(inliner.document, nodes.title)), ""
@@ -344,33 +352,31 @@ def underline(
         color, given = _options(rest)
     except ValueError as exc:
         return _reject(inliner, rawtext, lineno, f"Invalid underline: {exc}")
-    unknown = sorted(set(given) - {"width", "wobble"})
-    if unknown:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"Invalid underline setting: {', '.join(unknown)};"
-            " it takes width and wobble",
-        )
     color = _colour(config, color or str(setting(config, "underline_colour")))
     if not COLOUR.match(color):
         return _reject(inliner, rawtext, lineno, f"Invalid colour: {color!r}")
-    width = _number(
-        given.get("width", setting(config, "underline_width")), *WIDTHS
-    )
-    wobble = _number(
-        given.get("wobble", setting(config, "underline_wobble")), *WOBBLES
-    )
-    if width is None or wobble is None:
-        low, high = WIDTHS if width is None else WOBBLES
+    width = float(given.pop("width", setting(config, "underline_width")))
+    wobble = float(given.pop("wobble", setting(config, "underline_wobble")))
+    if given:
         return _reject(
             inliner,
             rawtext,
             lineno,
-            f"Invalid underline {'width' if width is None else 'wobble'}:"
-            f" use a number from {low:g} to {high:g}",
+            f"Invalid underline setting: {', '.join(given)};"
+            " it takes width and wobble",
         )
+    for name, number, (low, high) in (
+        ("width", width, WIDTHS),
+        ("wobble", wobble, WOBBLES),
+    ):
+        if not low <= number <= high:
+            return _reject(
+                inliner,
+                rawtext,
+                lineno,
+                f"Invalid underline {name}: use a number from {low:g}"
+                f" to {high:g}",
+            )
     seed = f"{inliner.document.settings.env.docname}:{lineno}:{rawtext}"
     # NOTE(xames3): A `#` has to be percent-encoded inside a data URI.
     # https://datatracker.ietf.org/doc/html/rfc2397
@@ -383,3 +389,46 @@ def underline(
         f' --km-ul-ret: url("data:image/svg+xml,{rtl}");'
     )
     return [ink(rawtext, element, classes=["km-pencil"], style=style)], []
+
+
+def _icon(
+    style: str,
+    role: str,
+    rawtext: str,
+    text: str,
+    lineno: int,
+    inliner: t.Any,
+    options: dict[str, t.Any] | None = None,
+    content: list[t.Any] | None = None,
+) -> tuple[list[nodes.Node], list[nodes.system_message]]:
+    """Draw a Font Awesome icon.
+
+    The text reads `name` and then any classes, a space between each.
+    The role names the style, `fab-icon` for brands, `fal-icon` for
+    light, `far-icon` for regular and `fas-icon` for solid::
+
+        Watch on :fab-icon:`youtube` or listen :far-icon:`headphones`.
+        Show some :fas-icon:`heart km-red` love.
+
+    :param style: The Font Awesome style class, bound by `setup`.
+    :param role: The role name, as written (unused).
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role sits on, for error reporting.
+    :param inliner: The docutils inliner that called this.
+    :param options: Role options (unused).
+    :param content: Role content (unused).
+    :return: The icon and the error messages if the name or a class
+        looks like anything but one.
+    """
+    del role, options, content
+    name, *classes = text.split()
+    if not GLYPH.match(name):
+        return _reject(inliner, rawtext, lineno, f"Invalid icon: {name!r}")
+    for found in classes:
+        if not CLASS.match(found):
+            return _reject(
+                inliner, rawtext, lineno, f"Invalid icon class: {found!r}"
+            )
+    node = glyph(rawtext, classes=[style, f"fa-{name}", "km-glyph", *classes])
+    return [node], []
