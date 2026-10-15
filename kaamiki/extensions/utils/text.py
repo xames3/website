@@ -4,14 +4,12 @@ Text Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 The helpers that flatten and shorten text. These don't need their own
 module as of now, but I think I'll expand these helpers in future as
 Kaamiki grows.
 """
-
-from __future__ import annotations
 
 import re
 from html import unescape
@@ -30,7 +28,11 @@ def tidy(text: str) -> str:
 
 
 def clip(text: str, limit: int) -> str:
-    """Cut a line down to length on a word boundary."""
+    """Cut a line down to length on a word boundary, `...` included."""
     if len(text) <= limit:
         return text
-    return text[:limit].rsplit(" ", 1)[0].rstrip(",;:.") + "..."
+    room = max(0, limit - 3)
+    cut = text[:room]
+    if text[room : room + 1] != " ":
+        cut = cut.rsplit(" ", 1)[0]
+    return cut.rstrip(",;:.") + "..."

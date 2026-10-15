@@ -4,12 +4,10 @@ Date Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 The helpers that date a page, from its comments or from git.
 """
-
-from __future__ import annotations
 
 import re
 import typing as t
@@ -106,10 +104,10 @@ def written(when: dt | None) -> str:
     """Write a date the way the header comments write it.
 
     :param when: The date or `None` for the day the site is built.
-    :return: The date, as `29 September 2026`.
+    :return: The date, as `05 October 2026`.
     """
     when = when or dt.now().astimezone()
-    return f"{when.day} {when:%B} {when.year}"
+    return f"{when:%d} {when:%B} {when.year}"
 
 
 def dated(when: dt, config: Config) -> str:
@@ -135,14 +133,13 @@ def dated(when: dt, config: Config) -> str:
 def day(date: str) -> str:
     """Turn a date written like the header comments write it into ISO.
 
-    The older `29 September, 2026` form is still read, so is
-    `2026-09-29`.
+    `2026-09-29` is read too.
 
     :param date: The date, as `29 September 2026`.
     :return: `2026-09-29` or an empty string when it doesn't read as a
         date.
     """
-    for form in ("%d %B %Y", "%d %B, %Y", "%Y-%m-%d"):
+    for form in ("%d %B %Y", "%Y-%m-%d"):
         try:
             return dt.strptime(date, form).astimezone().date().isoformat()
         except ValueError:
