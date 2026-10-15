@@ -1,17 +1,17 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
-.. Created on: 22 February, 2025
-.. Last updated on: 01 October, 2026
+.. Created on: 22 February 2025
+.. Last updated on: 02 October 2026
 
 :orphan:
 :km-pg-title: Akshay Mestry
-:km-pg-description: Akshay's corner on the internet.
+:km-pg-description: Educator, software engineer and a storyteller.
 :km-pg-type: website
 :km-pg-image: https://avatars.githubusercontent.com/u/90549089?v=4
 :km-fb-title: So, what do you think?
 :km-fb-description: I'd love to hear your suggestions or even a recommendation
     for a great film!!
 :km-fb-button: Let's chat
-:km-fb-mode: split
+:km-fb-split:
 
 .. _home-page:
 
@@ -21,13 +21,13 @@ Akshay Mestry
 
 .. rst-class:: km-lead
 
-    Educator, software engineer and storyteller.
+    Educator, software engineer and a storyteller.
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :target: https://github.com/xames3
+    :url: https://github.com/xames3
     :background: https://i.imgur.com/JOBRcgT.jpg
-        https://i.imgur.com/axxL9xQ.jpeg
+        https://i.imgur.com/hUhxigb.jpeg
         https://i.imgur.com/gcGHqxi.jpg
         https://i.imgur.com/weM4qDW.jpg
 
@@ -43,34 +43,7 @@ I currently live in Chicago. I got my Master's in AI from `DePaul University`_
 in 2025. I also have a special interest in natural language processing and
 reinforcement learning.
 
-.. container:: km-inline-container
-
-    .. grid:: 2
-
-        .. grid-item::
-
-            .. rubric:: No socials, but let's connect.
-
-        .. grid-item::
-            :columns: auto
-            :class: align-right
-
-            .. grid:: 2
-
-                .. grid-item::
-
-                    .. button:: mailto:xa@mes3.dev
-
-                        Send an email
-
-                .. grid-item::
-
-                    .. button:: https://linkedin.com/in/xames3
-                        :scheme: secondary
-
-                        LinkedIn
-
-.. rubric:: :fab:`compass-drafting far` Build and share
+.. rubric:: :far-icon:`compass-drafting` Build and share
     :class: km-pre-title-text
 
 .. _open-source:
@@ -79,7 +52,7 @@ reinforcement learning.
 Love for open source.
 -------------------------------------------------------------------------------
 
-I :fas:`heart km-margin-inline km-red` Open source!
+I :fas-icon:`heart km-margin-inline km-red` Open source!
 
 I accidentally got started on it and I don't know why; I bloody loved it.
 Doing open source was and still is, a personal reminder to share my struggles
@@ -120,6 +93,39 @@ thoughts on AI and how some frameworks actually work under the hood.
 It wouldn't be possible if I hadn't explored this; in doing so, I realised I
 had a passion for teaching.
 
+.. container:: km-inline-container
+
+    .. grid:: 2
+
+        .. grid-item::
+
+            .. rubric:: Not on socials, but let's connect.
+
+        .. grid-item::
+            :columns: auto
+            :class: align-right
+
+            .. grid:: 2
+
+                .. grid-item::
+                    :columns: auto
+
+                    .. button:: https://linkedin.com/in/xames3
+
+                        LinkedIn
+
+                .. grid-item::
+                    :columns: auto
+
+                    .. button:: mailto:xa@mes3.dev
+                        :fa-icon: fa-solid fa-envelope
+                        :scheme: dark
+
+                        Send an email
+
+.. rubric:: :far-icon:`comments` Keep it stupid simple
+    :class: km-pre-title-text
+
 .. _teaching-philosophy:
 
 -------------------------------------------------------------------------------
@@ -152,7 +158,6 @@ Thus began my journey into teaching. So far, I've taught...
         "Programming",
         "Cloud Computing",
         "Data Analysis",
-        "Introduction to CS",
         "Applications of AI"
     ]
     :prefix-text:
@@ -167,8 +172,6 @@ honest, what kind of mood I'm in that day when they come asking for help.
 
 .. _National Louis University: https://nl.edu/undergraduate-college/
 .. _DePaul University: https://www.depaul.edu
-.. _LinkedIn: https://linkedin.com/in/xames3
-.. _Rust: https://rust-lang.org
 
 .. toctree::
     :caption: Academia
@@ -178,10 +181,33 @@ honest, what kind of mood I'm in that day when they come asking for help.
     academia/thoughts-on-teaching
 
 .. toctree::
-    :caption: Miscellany
+    :caption: Journal
     :hidden:
     :maxdepth: 1
 
-    miscellany/guiding-stars
-    miscellany/youtube-videos
-    miscellany/faq
+    journal/xsnumpy
+
+.. toctree::
+    :caption: Explained
+    :hidden:
+    :maxdepth: 1
+
+.. toctree::
+    :caption: Reference
+    :hidden:
+    :maxdepth: 1
+
+.. toctree::
+    :caption: Extras
+    :hidden:
+    :maxdepth: 1
+
+    extras/guiding-stars
+    extras/best-of-youtube
+    extras/questions-i-get-asked
+
+.. toctree::
+    :hidden:
+    :maxdepth: 1
+
+    changelog

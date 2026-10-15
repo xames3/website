@@ -1,29 +1,29 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
-.. Created on: 05 September, 2025
-.. Last updated on: 30 September, 2026
+.. Created on: 05 September 2025
+.. Last updated on: 09 October 2026
 
-:km-pg-title: The best YouTube has to Offer
+:km-pg-title: Best of YouTube
 :km-pg-description: A curated list of my favourite YouTube videos that I've
-    found over the years: good, bad and weird!
+    found over the years: good, bad and weird!!
 :km-pg-type: article
 :km-pg-image: https://i.imgur.com/RLsdjyG.jpeg
 :km-pg-image-alt: A curated list of my favourite YouTube videos that I've
-    found over the years: good, bad and weird!
+    found over the years: good, bad and weird!!
 :km-fb-title: Got a cracking video recommendation?
-:km-fb-description: Did you enjoy any of them? Or better yet, do you have a
+:km-fb-description: Did you enjoy any of them? Or better yet, do you've a
     must-see video I should add to my list?
 :km-fb-button: Send a recommendation
-:km-fb-fa-icon: fa-thumbs-up
+:km-fb-icon: fa-thumbs-up
 
-.. _miscellany-best-of-youtube:
+.. _extras-best-of-youtube:
 
 ===============================================================================
-:fas:`play-pause far` Best of YouTube
+:far-icon:`tv` Best of YouTube
 ===============================================================================
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :target: https://github.com/xames3
+    :url: https://github.com/xames3
 
 Recently, out of nowhere, I was looking at my phone's screen time stats and I
 realised that I spend shitload of my time on YouTube. I got into tech in 2017.
@@ -69,7 +69,7 @@ talks, education, concepts of computer science and more.
 
     .. tab-set::
 
-        .. tab-item:: :fas:`code far` Programming
+        .. tab-item:: :far-icon:`code` Programming
 
             Collection of my favourite videos related to general programming or
             software engineering concepts. These videos have been instrumental
@@ -81,10 +81,12 @@ talks, education, concepts of computer science and more.
                 .. grid-item::
 
                     .. thumbnail:: https://www.youtube.com/watch?v=kCc8FmEb1nY
+                        :grayscale:
 
                 .. grid-item::
 
                     .. thumbnail:: https://www.youtube.com/watch?v=VMj-3S1tku0
+                        :grayscale:
 
                 .. grid-item::
 
@@ -454,7 +456,7 @@ talks, education, concepts of computer science and more.
 
                     .. thumbnail:: https://www.youtube.com/watch?v=Lakz2MoHy6o
 
-        .. tab-item:: :fas:`comments far` Talks & Interviews
+        .. tab-item:: :far-icon:`comments` Talks & Interviews
 
             The below collections are some of my favourite talks and interviews
             with some of the most influential people in the tech industry.
@@ -599,7 +601,7 @@ talks, education, concepts of computer science and more.
 
                     .. thumbnail:: https://www.youtube.com/watch?v=MYP56QJpDr4
 
-        .. tab-item:: :fas:`flask far` Science & Education
+        .. tab-item:: :far-icon:`flask` Science & Education
 
             Here, the videos are related to general science concepts, physics,
             mathematics, space and more. I've always been fascinated by
@@ -805,7 +807,7 @@ plain weird and cringe.
 
     .. tab-set::
 
-        .. tab-item:: :fas:`face-smile-halo far` Light-hearted
+        .. tab-item:: :far-icon:`face-smile-halo` Light-hearted
 
             An ever-growing collection of some of my favourite light-hearted
             comedy videos that I've found over the years. These videos are a
@@ -934,7 +936,7 @@ plain weird and cringe.
 
                     .. thumbnail:: https://www.youtube.com/watch?v=Y1IjX5TsKv8
 
-        .. tab-item:: :fas:`face-swear far` Diabolical & Dark
+        .. tab-item:: :far-icon:`face-swear` Diabolical & Dark
 
             And there's this side of YouTube that I absolutely love the
             absolutely weird, the delightfully strange, the content that makes
@@ -1050,7 +1052,7 @@ magical.
 
     .. tab-set::
 
-        .. tab-item:: :fas:`wand-magic-sparkles` Movie magic
+        .. tab-item:: :fas-icon:`wand-magic-sparkles` Movie magic
 
             A collection of some of my favourite behind-the-scenes videos from
             some of the most iconic movies and TV shows. These videos give you

@@ -3,42 +3,17 @@ Previously contributed at widget
 ================================
 
 Author: Akshay Mestry <xa@mes3.dev>
-Created on: 01 October, 2025
-Last updated on: 29 September, 2026
+Created on: 01 October 2025
+Last updated on: 14 October 2026
 #}
-<div class="contributed-at__container">
+<div class="contributed-at__container"
+     data-source="{{ source }}">
     <p class="contributed-at__title">Contributed at</p>
     <div class="contributed-at-scroller"
          data-contributed-at-scroller
          data-speed="{{ data-speed }}"
          data-direction="{{ data-direction }}">
         <ul class="contributed-at-scroller__list">
-            <li class="contributed-at-scroller__item contributed-at-scroller__item--accenture"
-                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/1/1c/Accenture_logo.svg')">
-                <span class="sr-only">Accenture</span>
-            </li>
-            <li class="contributed-at-scroller__item"
-                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/7/75/Django_logo.svg');
-                       inline-size: 7rem">
-                <span class="sr-only">Django</span>
-            </li>
-            <li class="contributed-at-scroller__item"
-                style="--km-organisation-logo: url('https://cdn.bfldr.com/C2SBP1PQ/at/mwnmb327vvh924grs7tj/RGB_NLU_Logo_1C_ALLWhite.png?format=png&crop=3697%2C1485%2Cx252%2Cy101')">
-                <span class="sr-only">National Louis University</span>
-            </li>
-            <li class="contributed-at-scroller__item"
-                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg')">
-                <span class="sr-only">Microsoft</span>
-            </li>
-            <li class="contributed-at-scroller__item"
-                style="--km-organisation-logo: url('https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg');
-                       inline-size: 4rem">
-                <span class="sr-only">AWS Boto3</span>
-            </li>
-            <li class="contributed-at-scroller__item"
-                style="--km-organisation-logo: url('https://cdn.worldvectorlogo.com/logos/tensoriot-1.svg')">
-                <span class="sr-only">TensorIoT</span>
-            </li>
         </ul>
     </div>
 </div>
@@ -114,12 +89,12 @@ Last updated on: 29 September, 2026
         box-sizing: border-box;
     }
 
-    .contributed-at-scroller__item--accenture {
+    .contributed-at-scroller__item--raised {
         margin-bottom: 0.75rem;
     }
 
     @media (min-width: 768px) {
-        .contributed-at-scroller__item--accenture {
+        .contributed-at-scroller__item--raised {
             margin-bottom: 1.25rem;
         }
     }
@@ -170,71 +145,97 @@ Last updated on: 29 September, 2026
         if (!scrollers.length) return;
         const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-        scrollers.forEach((scroller) => {
-            const list = scroller.querySelector('.contributed-at-scroller__list');
-            if (!list) return;
-            const originals = Array.from(list.children);
-            if (originals.length < 2) {
-                scroller.dataset.animated = 'false';
-                return;
-            }
-
-            let resizeObserver;
-            let resizeHandlerAttached = false;
-
-            function updateLoopDistance() {
-                const totalWidth = list.scrollWidth;
-                if (!totalWidth) return;
-                const loopDistance = totalWidth / 2;
-                list.style.setProperty('--km-contributed-at-loop-distance', `${loopDistance}px`);
-            }
-
-            function bindResizeListener() {
-                if (typeof ResizeObserver !== 'undefined') {
-                    if (resizeObserver) return;
-                    resizeObserver = new ResizeObserver(() => updateLoopDistance());
-                    resizeObserver.observe(list);
-                } else if (!resizeHandlerAttached) {
-                    resizeHandlerAttached = true;
-                    window.addEventListener('resize', updateLoopDistance, {
-                        passive: true
-                    });
-                }
-            }
-
-            function enableAnimation() {
-                if (reduceMotionQuery.matches) return;
-                scroller.dataset.animated = 'true';
-                updateLoopDistance();
-            }
-
-            function initialise() {
-                if (!scroller.dataset.employedAtInit) {
-                    originals.forEach((item) => {
-                        const clone = item.cloneNode(true);
-                        clone.setAttribute('aria-hidden', 'true');
-                        list.appendChild(clone);
-                    });
-                    scroller.dataset.employedAtInit = '1';
-                    bindResizeListener();
-                }
-                requestAnimationFrame(() => enableAnimation());
-            }
-
-            if (reduceMotionQuery.matches) {
-                scroller.dataset.animated = 'false';
-            } else {
-                initialise();
-            }
-
-            reduceMotionQuery.addEventListener('change', (event) => {
-                if (event.matches) {
+        function setup() {
+            scrollers.forEach((scroller) => {
+                const list = scroller.querySelector('.contributed-at-scroller__list');
+                if (!list) return;
+                const originals = Array.from(list.children);
+                if (originals.length < 2) {
                     scroller.dataset.animated = 'false';
-                    list.style.removeProperty('--km-contributed-at-loop-distance');
+                    return;
+                }
+
+                let resizeObserver;
+                let resizeHandlerAttached = false;
+
+                function updateLoopDistance() {
+                    const totalWidth = list.scrollWidth;
+                    if (!totalWidth) return;
+                    const loopDistance = totalWidth / 2;
+                    list.style.setProperty('--km-contributed-at-loop-distance', `${loopDistance}px`);
+                }
+
+                function bindResizeListener() {
+                    if (typeof ResizeObserver !== 'undefined') {
+                        if (resizeObserver) return;
+                        resizeObserver = new ResizeObserver(() => updateLoopDistance());
+                        resizeObserver.observe(list);
+                    } else if (!resizeHandlerAttached) {
+                        resizeHandlerAttached = true;
+                        window.addEventListener('resize', updateLoopDistance, {
+                            passive: true
+                        });
+                    }
+                }
+
+                function enableAnimation() {
+                    if (reduceMotionQuery.matches) return;
+                    scroller.dataset.animated = 'true';
+                    updateLoopDistance();
+                }
+
+                function initialise() {
+                    if (!scroller.dataset.employedAtInit) {
+                        originals.forEach((item) => {
+                            const clone = item.cloneNode(true);
+                            clone.setAttribute('aria-hidden', 'true');
+                            list.appendChild(clone);
+                        });
+                        scroller.dataset.employedAtInit = '1';
+                        bindResizeListener();
+                    }
+                    requestAnimationFrame(() => enableAnimation());
+                }
+
+                if (reduceMotionQuery.matches) {
+                    scroller.dataset.animated = 'false';
                 } else {
                     initialise();
                 }
+
+                reduceMotionQuery.addEventListener('change', (event) => {
+                    if (event.matches) {
+                        scroller.dataset.animated = 'false';
+                        list.style.removeProperty('--km-contributed-at-loop-distance');
+                    } else {
+                        initialise();
+                    }
+                });
             });
-        });
+        }
+
+        function render(organisations) {
+            const list = box.querySelector('.contributed-at-scroller__list');
+            organisations.forEach((organisation) => {
+                const item = document.createElement('li');
+                item.className = 'contributed-at-scroller__item';
+                if (organisation.raised) item.classList.add('contributed-at-scroller__item--raised');
+                item.style.setProperty('--km-organisation-logo', `url("${organisation.logo}")`);
+                if (organisation.width) item.style.inlineSize = organisation.width;
+                const label = document.createElement('span');
+                label.className = 'sr-only';
+                label.textContent = organisation.name;
+                item.appendChild(label);
+                list.appendChild(item);
+            });
+        }
+
+        fetch(box.dataset.source)
+            .then((response) => response.json())
+            .then((organisations) => {
+                render(organisations);
+                setup();
+            })
+            .catch(() => {});
     })();
 </script>

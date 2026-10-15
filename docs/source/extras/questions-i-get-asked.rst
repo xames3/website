@@ -1,9 +1,10 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
-.. Created on: 30 October, 2025
-.. Last updated on: 01 October, 2026
+.. Created on: 30 October 2025
+.. Last updated on: 01 October 2026
 
-:km-pg-title: FAQs
-:km-pg-description: Frequently Asked Questions about me and this website
+:km-pg-title: Questions I get asked
+:km-pg-description: Frequently asked questions about me and this website...
+    answered
 :km-pg-type: article
 :km-fb-title: Do you've any questions for me?
 :km-fb-description: Feel free to ask anything you're curious about.
@@ -12,12 +13,12 @@
 .. _miscellany-faq:
 
 ===============================================================================
-:fas:`circle-question far` FAQs
+:far-icon:`comments` Questions I get asked
 ===============================================================================
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :target: https://github.com/xames3
+    :url: https://github.com/xames3
 
 .. seealso::
 
@@ -126,10 +127,10 @@ Frequently asked questions
         :class: km-date-text
 
     I'm a huge `Christopher Nolan`_ fan and I
-    :fas:`heart km-margin-inline km-red` his films. I tend to watch a lot of
-    films, so it's difficult to say, what's my favourite. But, my go-to movie
-    is `Interstellar`_. I absolutely love the music compositions by
-    `Hans Zimmer`_. It's truly a masterpiece!
+    :fas-icon:`heart km-margin-inline km-red` his films. I tend to watch a
+    lot of films, so it's difficult to say, what's my favourite. But, my
+    go-to movie is `Interstellar`_. I absolutely love the music compositions
+    by `Hans Zimmer`_. It's truly a masterpiece!
 
     As far as my favourite TV show, I've a few. My go-to would be obviously,
     `Family Guy`_. But, if I were to recommend a TV show to anyone, I'd
@@ -143,7 +144,7 @@ Frequently asked questions
 
     Thanks for checking out the source code on GitHub! I'm no Frontend
     engineer and have sparse knowledge about modern JS frameworks at best. As
-    you may've seen from the source itself, it's built using simple HTML, CSS,
+    you may've seen from the source itself, it's built using simple HTML, CSS
     and vanilla JS (based on answers from StackOverflow).
 
     There's no proper modern "tech stack" so to speak used for this website.

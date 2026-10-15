@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
-.. Created on: 24 February, 2025
-.. Last updated on: 30 September, 2026
+.. Created on: 24 February 2025
+.. Last updated on: 30 September 2026
 
 :km-pg-title: Guiding stars
 :km-pg-description: Expressing heartfelt gratitude to the heroes who shaped my
@@ -10,12 +10,12 @@
 :km-fb-description: We all have mentors and friends who guide us. Reading this,
     did anyone come to your mind? I'd be honoured to hear about them.
 :km-fb-button: Share your reflections
-:km-fb-fa-icon: fa-sparkles
+:km-fb-icon: fa-sparkles
 
 .. _miscellany-guiding-stars:
 
 ===============================================================================
-:fas:`sparkles far` Guiding stars
+:far-icon:`sparkles` Guiding stars
 ===============================================================================
 
 .. rst-class:: km-lead
@@ -24,7 +24,7 @@
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :target: https://github.com/xames3
+    :url: https://github.com/xames3
     :background: https://i.imgur.com/Gn1b6Cs.jpeg
         https://i.imgur.com/CRsFJlJ.jpg
 
@@ -40,7 +40,7 @@ left a significant mark on me.
 
 And from the bottom of my heart, I thank you for that.
 
-.. admonition:: :fas:`heart km-margin-inline` A note of gratitude
+.. admonition:: :fas-icon:`heart km-margin-inline` A note of gratitude
     :class: km-unusual-one danger
 
     These reflections aren't exhaustive, nor could they ever be. I've shared
@@ -61,7 +61,7 @@ me during my highs and lows and helped shape my character.
 
 .. figure:: https://i.imgur.com/Gn1b6Cs.jpeg
     :alt: Me and Mum celebrating my admission into DePaul University
-    :figclass: km-zoom km-grayscale km-fuzzy-blur
+    :figclass: km-zoom km-grayscale km-pixelated-blur
 
     Mum and I, September 2022, celebrating my admission into DePaul University.
 
@@ -138,7 +138,7 @@ ready with valuable advice and encouragement.
 .. figure:: https://i.imgur.com/H4LzSiU.jpeg
     :alt: Dr Tovar with my students at NASA Open Science 2025 Workshop on the
         final day
-    :figclass: km-zoom km-grayscale km-fuzzy-blur
+    :figclass: km-zoom km-grayscale km-pixelated-blur
 
     Dr Tovar (left) with my students, `Huzaifa Quaid`_ (left-centre),
     `Ishrak Rahman`_ (centre), `Orkhan Guliyev`_ (right-centre) and
@@ -183,7 +183,7 @@ well-wisher.
 
 .. figure:: https://i.imgur.com/zNiGX0H.jpeg
     :alt: Fatemeh attending my graduation ceremony, alongside Young
-    :figclass: km-zoom km-grayscale km-fuzzy-blur
+    :figclass: km-zoom km-grayscale km-pixelated-blur
 
     Fatemeh attending my graduation ceremony alongside Young, June 2025
 
@@ -268,7 +268,7 @@ genuine admiration for your steady commitment to hard work.
 
 .. figure:: https://i.imgur.com/E6bpo9w.jpeg
     :alt: Sameer and I at our graduation ceremony
-    :figclass: km-zoom km-grayscale km-fuzzy-blur
+    :figclass: km-zoom km-grayscale km-pixelated-blur
 
     Sameer and I, June 2025 at our graduation ceremony
 
@@ -331,7 +331,7 @@ then.
 
 .. figure:: https://i.imgur.com/weM4qDW.jpeg
     :alt: Young attending our graduation ceremony in June 2025
-    :figclass: km-zoom km-grayscale km-fuzzy-blur
+    :figclass: km-zoom km-grayscale km-pixelated-blur
 
     Young attending and celebrating our graduation ceremony, June 2025
 

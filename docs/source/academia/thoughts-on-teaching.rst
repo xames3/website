@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
-.. Created on: 07 April, 2026
-.. Last updated on: 30 September, 2026
+.. Created on: 07 April 2026
+.. Last updated on: 30 September 2026
 
 :km-pg-title: Thoughts on teaching
 :km-pg-description: Teaching the same courses, but differently every single
@@ -15,7 +15,7 @@
 .. _academia-thoughts-on-teaching:
 
 ===============================================================================
-:fas:`seedling far` Thoughts on teaching
+:far-icon:`seedling` Thoughts on teaching
 ===============================================================================
 
 .. rst-class:: km-lead
@@ -24,7 +24,7 @@
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :target: https://github.com/xames3
+    :url: https://github.com/xames3
     :background: https://i.imgur.com/83ZcICa.jpg
 
 A year ago, as of writing this article in April of 2026, I walked into the 4024
@@ -68,7 +68,7 @@ lectures were conducted exactly as planned and sometimes they were simply
 And somewhere in that strange unpredictability, I found the part I enjoyed the
 most my students!
 
-.. rubric:: :fab:`backward-fast far` Looking back
+.. rubric:: :far-icon:`backward-fast` Looking back
     :class: km-pre-title-text
 
 .. _students-who-made-it-memorable:
@@ -116,7 +116,7 @@ The learning and teaching happened in both directions. Every time I learned
 something new, I felt like I was able to teach and explain things more
 effectively from both my successes and failures.
 
-.. rubric:: :fab:`seedling far` Growth, gratitude and moments
+.. rubric:: :far-icon:`seedling` Growth, gratitude and moments
     :class: km-pre-title-text
 
 .. _a-year-shaped-by-people:
@@ -127,7 +127,7 @@ A year shaped by people.
 
 Again, looking back, I'm seeing my lectures and classrooms in a much different
 way than I expected last year at this very moment. I'm seeing my whole year
-being shaped by so many people like my students, other faculty, staff members,
+being shaped by so many people like my students, other faculty, staff members
 and some friends I made along the way. It's shaped by those small moments,
 shared laughter, curiosities, growth, stories, gossips and loads of new
 memories!

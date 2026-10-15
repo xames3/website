@@ -1,0 +1,29 @@
+[
+    {
+        "name": "Accenture",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Accenture_logo.svg",
+        "raised": true
+    },
+    {
+        "name": "Django",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/7/75/Django_logo.svg",
+        "width": "7rem"
+    },
+    {
+        "name": "National Louis University",
+        "logo": "https://cdn.bfldr.com/C2SBP1PQ/at/mwnmb327vvh924grs7tj/RGB_NLU_Logo_1C_ALLWhite.png?format=png&crop=3697%2C1485%2Cx252%2Cy101"
+    },
+    {
+        "name": "Microsoft",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg"
+    },
+    {
+        "name": "AWS Boto3",
+        "logo": "https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg",
+        "width": "4rem"
+    },
+    {
+        "name": "TensorIoT",
+        "logo": "https://cdn.worldvectorlogo.com/logos/tensoriot-1.svg"
+    }
+]
