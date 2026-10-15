@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kaamiki VERSION\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-10-12 08:47-0500\n"
+"POT-Creation-Date: 2026-10-15 08:28-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,311 +17,216 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: kaamiki/extensions/release.py:189
 msgid "Added"
 msgstr ""
 
-#: kaamiki/extensions/release.py:190
 msgid "Changed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:191
 msgid "Deprecated"
 msgstr ""
 
-#: kaamiki/extensions/release.py:192
 msgid "Fixed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:193
 msgid "Removed"
 msgstr ""
 
-#: kaamiki/extensions/release.py:240
 msgid "Read release notes"
 msgstr ""
 
-#: kaamiki/extensions/release.py:256
 msgid "View release"
 msgstr ""
 
-#: kaamiki/extensions/explainer/chrome.py:258
-#, python-format
-msgid "%d step"
-msgid_plural "%d steps"
-msgstr[0] ""
-msgstr[1] ""
-
-#: kaamiki/extensions/explainer/chrome.py:264
-msgid "Previous step"
+msgid "Broke"
 msgstr ""
 
-#: kaamiki/extensions/explainer/chrome.py:266
-msgid "Next step"
+msgid "Worked"
 msgstr ""
 
-#: kaamiki/extensions/explainer/chrome.py:269
 msgid "Copy the snippet"
 msgstr ""
 
-#: kaamiki/extensions/explainer/chrome.py:278
 msgid "Nothing printed yet"
 msgstr ""
 
-#: kaamiki/extensions/utils/context.py:132
 #, python-format
 msgid "Feedback about %s"
 msgstr ""
 
-#: kaamiki/extensions/utils/context.py:143
 msgid "Feedback"
 msgstr ""
 
-#: kaamiki/extensions/utils/context.py:146
 msgid "Let me know how this can be improved."
 msgstr ""
 
-#: kaamiki/extensions/utils/context.py:149
 msgid "Submit"
 msgstr ""
 
-#: kaamiki/extensions/utils/dates.py:130
 #, python-format
 msgid "%d %B %Y"
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:43 kaamiki/theme/templates/404.html:10
-#: kaamiki/theme/templates/404.html:22
 msgid "Page not found"
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:45
 msgid ""
 "There is nothing at this address. It may have moved or it may never have "
 "been here."
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:50
-#: kaamiki/theme/templates/genindex.html:10
-#: kaamiki/theme/templates/genindex.html:41
-#: kaamiki/theme/templates/layout.html:217
 msgid "Index"
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:51
 msgid "Every term indexed on this site, from A to Z."
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:53 kaamiki/theme/templates/search.html:10
-#: kaamiki/theme/templates/search.html:28
 msgid "Search Results"
 msgstr ""
 
-#: kaamiki/extensions/utils/social.py:53
 msgid "Search every page on this site."
 msgstr ""
 
-#: kaamiki/extensions/utils/writer.py:61
 msgid "Copy link"
 msgstr ""
 
-#: kaamiki/theme/templates/404.html:24
-msgid "The page you requested doesn't exist or may've been removed."
-msgstr ""
-
-#: kaamiki/theme/templates/404.html:31
 msgid "Take me home"
 msgstr ""
 
-#: kaamiki/theme/templates/genindex.html:77
 msgid "Jump to letter"
 msgstr ""
 
-#: kaamiki/theme/templates/genindex.html:79
 msgid "Index shortcuts"
 msgstr ""
 
-#: kaamiki/theme/templates/layout.html:12
-msgid "Copied!!"
+msgid "Copied!"
 msgstr ""
 
-#: kaamiki/theme/templates/layout.html:12
 msgid "Copy failed"
 msgstr ""
 
-#: kaamiki/theme/templates/directives/author.html.jinja:41
-#: kaamiki/theme/templates/layout.html:12
 msgid "Copy"
 msgstr ""
 
-#: kaamiki/theme/templates/layout.html:12
-#, python-brace-format
-msgid "Step {step} of {steps}, {where}"
-msgstr ""
-
-#: kaamiki/theme/templates/layout.html:12
-#, python-brace-format
-msgid "line {line}"
-msgstr ""
-
-#: kaamiki/theme/templates/layout.html:12
-#, python-brace-format
-msgid "lines {first}-{last}"
-msgstr ""
-
-#: kaamiki/theme/templates/components/show_more.html.jinja:15
-#: kaamiki/theme/templates/components/show_more.html.jinja:17
-#: kaamiki/theme/templates/layout.html:12
 msgid "Show more"
 msgstr ""
 
-#: kaamiki/theme/templates/components/show_more.html.jinja:16
-#: kaamiki/theme/templates/layout.html:12
 msgid "Show less"
 msgstr ""
 
-#: kaamiki/theme/templates/components/searchbox.html.jinja:13
-#: kaamiki/theme/templates/components/searchbox.html.jinja:18
-#: kaamiki/theme/templates/layout.html:212
+msgid "returns:"
+msgstr ""
+
+msgid "error:"
+msgstr ""
+
+msgid "Setup"
+msgstr ""
+
 msgid "Search"
 msgstr ""
 
-#: kaamiki/theme/templates/layout.html:241
 msgid "Skip to content"
 msgstr ""
 
-#: kaamiki/theme/templates/layout.html:244
 msgid "JavaScript is off, so some parts of this site may not work."
 msgstr ""
 
-#: kaamiki/theme/templates/page.html:25
-msgid "Page details"
+msgid "Please activate JavaScript to enable searching the documentation."
 msgstr ""
 
-#: kaamiki/theme/templates/page.html:26
+msgid "Breadcrumbs"
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
 #, python-format
 msgid "Last updated on %(updated_on)s"
 msgstr ""
 
-#: kaamiki/theme/templates/search.html:31
-msgid "Please activate JavaScript to enable searching the documentation."
-msgstr ""
-
-#: kaamiki/theme/templates/components/breadcrumbs.html.jinja:9
-msgid "breadcrumbs"
-msgstr ""
-
-#: kaamiki/theme/templates/components/breadcrumbs.html.jinja:13
-msgid "Home"
-msgstr ""
-
-#: kaamiki/theme/templates/components/previous_next_pages.html.jinja:11
 msgid "Pagination"
 msgstr ""
 
-#: kaamiki/theme/templates/components/previous_next_pages.html.jinja:13
 msgid "Previous page"
 msgstr ""
 
-#: kaamiki/theme/templates/components/previous_next_pages.html.jinja:14
 msgid "Next page"
 msgstr ""
 
-#: kaamiki/theme/templates/components/scrolltop.html.jinja:12
 msgid "Back to top"
 msgstr ""
 
-#: kaamiki/theme/templates/components/searchbox.html.jinja:24
 msgid "Submit search"
 msgstr ""
 
-#: kaamiki/theme/templates/directives/author.html.jinja:16
 #, python-format
 msgid "Check out %(name)s"
 msgstr ""
 
-#: kaamiki/theme/templates/directives/author.html.jinja:32
 #, python-format
 msgid "%(num)d min read"
 msgid_plural "%(num)d mins read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: kaamiki/theme/templates/directives/author.html.jinja:38
 msgid "Copy article URL to clipboard"
 msgstr ""
 
-#: kaamiki/theme/templates/directives/thumbnail.html.jinja:26
-#: kaamiki/theme/templates/directives/youtube.html.jinja:10
+msgid "Stars"
+msgstr ""
+
+msgid "Forks"
+msgstr ""
+
 msgid "YouTube video"
 msgstr ""
 
-#: kaamiki/theme/templates/directives/thumbnail.html.jinja:28
 msgid "Watch on YouTube"
 msgstr ""
 
-#: kaamiki/theme/templates/directives/video.html.jinja:24
 msgid "Your browser doesn't support the video tag."
 msgstr ""
 
-#: kaamiki/theme/templates/directives/youtube.html.jinja:27
 msgid "Play video"
 msgstr ""
 
-#: kaamiki/theme/templates/sections/footer.html.jinja:16
 #, python-format
 msgid "<a href=\"%(path)s\">Copyright</a> %(copyright)s"
 msgstr ""
 
-#: kaamiki/theme/templates/sections/footer.html.jinja:26
 #, python-format
-msgid "Last updated %(last_updated)s."
+msgid "Last updated on %(updated_on)s."
 msgstr ""
 
-#: kaamiki/theme/templates/sections/footer.html.jinja:33
 msgid ""
 "Built with <a href=\"https://www.sphinx-doc.org\" "
 "rel=\"noreferrer\">Sphinx</a>."
 msgstr ""
 
-#: kaamiki/theme/templates/sections/footer.html.jinja:45
 #, python-format
 msgid "Styled with the %(km_theme)s theme."
 msgstr ""
 
-#: kaamiki/theme/templates/sections/footer.html.jinja:52
-msgid "Content licensed under"
+#, python-format
+msgid "Content licensed under %(km_licence)s."
 msgstr ""
 
-#: kaamiki/theme/templates/sections/footer.html.jinja:65
-msgid "Colour theme switcher"
-msgstr ""
-
-#: kaamiki/theme/templates/sections/header.html.jinja:28
 msgid "Primary navigation"
 msgstr ""
 
-#: kaamiki/theme/templates/sections/header.html.jinja:44
 msgid "Toggle navigation menu"
 msgstr ""
 
-#: kaamiki/theme/templates/sections/header.html.jinja:51
 msgid "Open navigation menu"
 msgstr ""
 
-#: kaamiki/theme/templates/sections/header.html.jinja:59
 msgid "External links"
 msgstr ""
 
-#: kaamiki/theme/templates/sections/sidebar.html.jinja:14
 msgid "Close menu"
 msgstr ""
 
-#: kaamiki/theme/templates/sections/sidebar.html.jinja:30
 msgid "Table of contents"
-msgstr ""
-
-#: kaamiki/theme/templates/sections/sidebar.html.jinja:39
-msgid "External Links"
 msgstr ""
 
