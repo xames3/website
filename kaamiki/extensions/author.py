@@ -4,7 +4,7 @@ Author Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 08 October 2026
+Last updated on: 12 October 2026
 
 An `author` directive that renders the byline under a page title::
 
@@ -13,8 +13,6 @@ An `author` directive that renders the byline under a page title::
        :url: https://github.com/xames3
        :avatar-size: 24
 """
-
-from __future__ import annotations
 
 import typing as t
 
@@ -26,6 +24,7 @@ from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import reading_time
 from kaamiki.extensions.utils import render
+from kaamiki.extensions.utils import rooted
 from kaamiki.extensions.utils import seconds
 from kaamiki.extensions.utils import trail
 
@@ -55,8 +54,10 @@ class directive(rst.Directive):
           Defaults to 20.
         - `interval`: Seconds each background stays, at least 3.
           Defaults to 7.
-        - `hide-reading-time`: Hides the reading time.
-        - `hide-copy-url`: Hides the copy button.
+        - `hide-reading-time`: Hides the reading time, which is shown
+          without it.
+        - `hide-copy-url`: Hides the copy button, which is shown
+          without it.
     """
 
     required_arguments = 1
@@ -88,14 +89,11 @@ class directive(rst.Directive):
             raise self.error(
                 f"author needs an interval of {INTERVAL:g} seconds or more"
             )
-        for key in (
-            "avatar-size",
-            "interval",
-            "hide-reading-time",
-            "hide-copy-url",
-        ):
-            if key in self.options:
-                self.options[key.replace("-", "_")] = self.options.pop(key)
+        options = self.options
+        options["reading_time"] = "hide-reading-time" not in options
+        options["copy_url"] = "hide-copy-url" not in options
+        if "avatar-size" in options:
+            options["avatar_size"] = options["avatar-size"]
         env = self.state.document.settings.env
         metadata = env.metadata.setdefault(env.docname, {})
         metadata.setdefault("author", text)
@@ -123,8 +121,12 @@ def visit(self: HTMLTranslator, node: node) -> None:
     attributes["new_tab"] = opens_new_tab(url, config)
     attributes["fa_icons"] = context["km_fa_icons"]
     attributes["minutes"] = max(1, reading_time(node.document, config))
-    attributes["data"] = {"data-km-background": attributes.get("background")}
-    if attributes.get("background") and "interval" in attributes:
+    avatar = attributes.get("avatar") or attributes["project"]["avatar"]
+    attributes["avatar"] = rooted(self, avatar)
+    background = attributes.get("background", "").split()
+    pictures = [rooted(self, _) for _ in background]
+    attributes["data"] = {"data-km-background": " ".join(pictures) or None}
+    if pictures and "interval" in attributes:
         attributes["data"]["data-km-interval"] = round(
             attributes["interval"] * 1000
         )

@@ -10,16 +10,20 @@ Last updated on: 06 October 2026
     <div class="km-github-repository"
          data-km-repository="{{ km_project }}">
         <a href="https://github.com/{{ km_project }}"
-           {% if km_new_tab %}rel="noopener nofollow" target="_blank"{% endif %}
+           {% if km_new_tab %}rel="{{ km_rel }}" target="_blank"{% endif %}
            class="km-github-repository__name">{{ km_project }}</a>
         <div class="km-github-repository__details">
             {% if km_stars %}
-                <p class="km-github-repository__stars"
-                   data-km-repository-count="stargazers_count">0</p>
+                <p class="km-github-repository__stars">
+                    <span class="sr-only">{{ _("Stars") }}</span>
+                    <span data-km-repository-count="stargazers_count">0</span>
+                </p>
             {% endif %}
             {% if km_forks %}
-                <p class="km-github-repository__forks"
-                   data-km-repository-count="forks_count">0</p>
+                <p class="km-github-repository__forks">
+                    <span class="sr-only">{{ _("Forks") }}</span>
+                    <span data-km-repository-count="forks_count">0</span>
+                </p>
             {% endif %}
         </div>
     </div>

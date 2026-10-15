@@ -4,7 +4,7 @@ Video Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 08 October 2026
+Last updated on: 15 October 2026
 
 A `video` directive that embeds a video in the page::
 
@@ -16,14 +16,13 @@ A `video` directive that embeds a video in the page::
 The caption is parsed as rST. More sources, a poster and captions
 go in options::
 
-    .. video:: /_static/clip.mp4
-       :sources: /_static/clip.webm
-       :poster: /_static/clip.png
-       :track: en=/_static/clip.en.vtt, hi=/_static/clip.hi.vtt
+    .. video:: _static/clip.mp4
+       :sources: _static/clip.webm
+       :poster: _static/clip.png
+       :track: en=_static/clip.en.vtt, hi=_static/clip.hi.vtt
 """
 
-from __future__ import annotations
-
+import functools
 import mimetypes
 import typing as t
 from urllib.parse import urlsplit
@@ -31,39 +30,19 @@ from urllib.parse import urlsplit
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 from babel import Locale
-from babel.core import UnknownLocaleError
 
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import parse
-from kaamiki.extensions.utils import toggle
+from kaamiki.extensions.utils import rooted
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import visitor
+
+if t.TYPE_CHECKING:
+    from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "video"
 template: t.Final[str] = "directives/video.html.jinja"
 PRELOAD: t.Final[tuple[str, ...]] = ("none", "metadata", "auto")
-
-
-def preload(argument: str) -> str:
-    """Check the `preload` option against the values a browser knows.
-
-    :param argument: The value written in the rST.
-    :return: The value, once it's known to be one of them.
-    """
-    return rst.directives.choice(argument, PRELOAD)
-
-
-def language(code: str) -> str:
-    """Name a language in itself, `en` as `English`.
-
-    :param code: The language code, as in `en` or `pt-BR`.
-    :return: The name or the code when Babel doesn't know it.
-    """
-    locale = code.replace("-", "_")
-    try:
-        return Locale.parse(locale).get_display_name(locale) or code
-    except ValueError, UnknownLocaleError:
-        return code
 
 
 class node(nodes.Element):
@@ -87,7 +66,8 @@ class directive(rst.Directive):
           `metadata` or `auto`.
         - `loop`: Play it over and over.
         - `muted`: Start with the sound off.
-        - `controls`: `false` hides the player controls.
+        - `hide-controls`: Hide the player controls, which are shown
+          without it.
         - `track`: Captions, as `language=file` and comma-separated.
     """
 
@@ -100,10 +80,10 @@ class directive(rst.Directive):
         "type": rst.directives.unchanged,
         "sources": rst.directives.unchanged_required,
         "poster": rst.directives.uri,
-        "preload": preload,
+        "preload": functools.partial(rst.directives.choice, values=PRELOAD),
         "loop": rst.directives.flag,
         "muted": rst.directives.flag,
-        "controls": toggle,
+        "hide-controls": rst.directives.flag,
         "track": rst.directives.unchanged_required,
     }
 
@@ -117,18 +97,15 @@ class directive(rst.Directive):
         guessed, _ = mimetypes.guess_type(urlsplit(url).path)
         kind = self.options.pop("type", None) or guessed or ""
         sources = [{"url": url, "type": kind}]
-        for more in listed(self.options.pop("sources", None)):
+        for more in listed(self.options.pop("sources", "")):
             guess, _ = mimetypes.guess_type(urlsplit(more).path)
             sources.append({"url": more, "type": guess or ""})
         tracks: list[dict[str, str]] = []
-        for entry in listed(self.options.pop("track", None)):
-            code, found, file = (_.strip() for _ in entry.partition("="))
-            if not (code and found and file):
-                raise self.error(
-                    f"video track needs language=file, like en=clip.vtt;"
-                    f" got {entry!r}"
-                )
-            tracks.append({"lang": code, "url": file, "label": language(code)})
+        for entry in listed(self.options.pop("track", "")):
+            code, file = (_.strip() for _ in entry.split("=", 1))
+            locale = code.replace("-", "_")
+            label = Locale.parse(locale).get_display_name(locale) or code
+            tracks.append({"lang": code, "url": file, "label": label})
         self.options["url"] = url
         self.options["sources"] = sources
         self.options["tracks"] = tracks
@@ -157,7 +134,7 @@ class directive(rst.Directive):
         options = self.options
         autoplay = "autoplay" in options
         return {
-            "controls": "" if options.get("controls", True) else None,
+            "controls": None if "hide-controls" in options else "",
             "autoplay": "" if autoplay else None,
             "muted": "" if autoplay or "muted" in options else None,
             "playsinline": "" if autoplay else None,
@@ -167,4 +144,27 @@ class directive(rst.Directive):
         }
 
 
-visit = visitor(template)
+def prepare(
+    self: HTMLTranslator, attributes: dict[str, t.Any]
+) -> dict[str, t.Any]:
+    """Turn the paths the video was given into addresses.
+
+    :param self: The HTML translator writing the page.
+    :param attributes: The node's attributes.
+    :return: A copy of them with the sources, captions and poster
+        resolved against the page.
+    """
+    found = dict(attributes)
+    found["sources"] = [
+        {**_, "url": rooted(self, _["url"])} for _ in attributes["sources"]
+    ]
+    found["tracks"] = [
+        {**_, "url": rooted(self, _["url"])} for _ in attributes["tracks"]
+    ]
+    if attributes.get("poster"):
+        found["poster"] = rooted(self, attributes["poster"])
+        found["player"] = {**attributes["player"], "poster": found["poster"]}
+    return found
+
+
+visit = visitor(template, prepare)

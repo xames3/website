@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
-Last updated on: 08 October 2026
+Last updated on: 13 October 2026
 
 A `button` directive that renders a link as a button::
 
@@ -15,10 +15,8 @@ A `button` directive that renders a link as a button::
        Watch it here!
 """
 
-from __future__ import annotations
-
 import colorsys
-import re
+import functools
 import typing as t
 
 import docutils.nodes as nodes
@@ -30,44 +28,28 @@ from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import visitor
+from kaamiki.extensions.utils.links import REL
+from kaamiki.extensions.utils.settings import CHOICES
+from kaamiki.extensions.utils.settings import TONES
 
 name: t.Final[str] = "button"
 template: t.Final[str] = "directives/button.html.jinja"
-COLOURS: t.Final[tuple[str, ...]] = ("red", "yellow", "blue", "green")
 # NOTE(xames3): Inspired by Sphinx Design's button directive.
 # https://sphinx-design.readthedocs.io/en/latest/badges_buttons.html
-SCHEMES: t.Final[tuple[str, ...]] = ("dark", "light", *COLOURS)
-POSITIONS: t.Final[tuple[str, str]] = ("before", "after")
-REL: t.Final[str] = "nofollow noopener"
-HEX: re.Pattern[str] = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
-# NOTE(xames3): The stylesheet draws its colours as `hsl(var(...))`, so
-# a colour is kept as the three numbers `hsl()` takes.
-TRIPLET: re.Pattern[str] = re.compile(
-    r"^\d{1,3}(?:\.\d+)?\s+\d{1,3}(?:\.\d+)?%\s+\d{1,3}(?:\.\d+)?%$"
-)
+SCHEMES: t.Final[tuple[str, ...]] = ("dark", "light", *TONES)
+POSITIONS: t.Final[tuple[str, ...]] = CHOICES["button_icon_position"]
 
 
-def position(argument: str) -> str:
-    """Check the `fa-icon-position` option against its two values.
-
-    :param argument: The value written in the rST.
-    :return: The value, once it's known to be `before` or `after`.
-    """
-    return rst.directives.choice(argument, POSITIONS)
-
-
-def hsl(value: str) -> str | None:
+def hsl(value: str) -> str:
     """Turn a colour into the three numbers `hsl()` takes.
 
     :param value: A hex colour like `#7c3aed` or the numbers
         themselves, as `262 83% 58%`.
-    :return: The numbers or `None` when the colour reads as neither.
+    :return: The numbers.
     """
     value = value.strip()
-    if TRIPLET.match(value):
+    if not value.startswith("#"):
         return " ".join(value.split())
-    if not HEX.match(value):
-        return None
     digits = value.removeprefix("#")
     if len(digits) == 3:
         digits = "".join(_ * 2 for _ in digits)
@@ -92,9 +74,11 @@ class directive(rst.Directive):
         - `scheme`: `dark`, `light`, `red`, `yellow`, `blue` or
           `green`, or a colour named in `button_colours`.
         - `new-tab`: Open the link in a new tab, even on this site.
-        - `same-tab`: Open the link in this tab, even off this site.
+        - `no-new-tab`: Open the link in this tab, even off this site.
+          A link off this site opens in a new tab without it, unless
+          the site's `open_links_in_new_tab` is off.
         - `rel`: What the link's `rel` says. Defaults to
-          `nofollow noopener` for a new tab.
+          `noopener noreferrer` for a new tab.
         - `title`: The tooltip.
         - `download`: Save the link instead of opening it, under the
           file name given if there's one.
@@ -109,10 +93,12 @@ class directive(rst.Directive):
     final_argument_whitespace = False
     option_spec = {  # noqa: RUF012
         "fa-icon": rst.directives.unchanged,
-        "fa-icon-position": position,
+        "fa-icon-position": functools.partial(
+            rst.directives.choice, values=POSITIONS
+        ),
         "scheme": rst.directives.unchanged_required,
         "new-tab": rst.directives.flag,
-        "same-tab": rst.directives.flag,
+        "no-new-tab": rst.directives.flag,
         "rel": rst.directives.unchanged_required,
         "title": rst.directives.unchanged_required,
         "download": rst.directives.unchanged,
@@ -128,20 +114,15 @@ class directive(rst.Directive):
         self.assert_has_content()
         config = self.state.document.settings.env.config
         options = self.options
-        if "new-tab" in options and "same-tab" in options:
-            raise self.error("button takes :new-tab: or :same-tab:, not both")
+        if "new-tab" in options and "no-new-tab" in options:
+            raise self.error("button takes :new-tab: or :no-new-tab:, not both")
         url = rst.directives.uri(self.arguments.pop().strip())
         new_tab = opens_new_tab(url, config)
-        if "new-tab" in options or "same-tab" in options:
+        if "new-tab" in options or "no-new-tab" in options:
             new_tab = "new-tab" in options
         side = options.pop("fa-icon-position", None)
         if side is None:
             side = setting(config, "button_icon_position")
-            if side not in POSITIONS:
-                raise self.error(
-                    f"button_icon_position takes {' or '.join(POSITIONS)},"
-                    f" got {side!r}"
-                )
         look, style = self.look(options.pop("scheme", None))
         attributes: dict[str, t.Any] = {}
         attributes["url"] = url
@@ -180,15 +161,9 @@ class directive(rst.Directive):
             where = ""
         key = scheme.strip().lower()
         if key in named:
-            colour = hsl(str(named[key]))
-            if colour is None:
-                raise self.error(
-                    f"button_colours has {named[key]!r} for {key}, which is"
-                    " neither a hex colour like #7c3aed nor hsl numbers"
-                )
             return (
                 f"km-button--custom km-button--{nodes.make_id(key)}",
-                f"--km-button-colour: {colour}",
+                f"--km-button-colour: {hsl(str(named[key]))}",
             )
         if key not in SCHEMES:
             options = ", ".join([*SCHEMES, *sorted(named)])
@@ -196,7 +171,7 @@ class directive(rst.Directive):
                 f"button scheme {scheme!r}{where} is not one of {options}"
             )
         return (
-            f"km-button--{key}" if key in COLOURS else f"sd-btn-{key}",
+            f"km-button--{key}" if key in TONES else f"sd-btn-{key}",
             "",
         )
 
