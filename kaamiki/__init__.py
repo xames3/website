@@ -4,14 +4,13 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 Kaamiki's entry point.
 """
 
-from __future__ import annotations
-
 import filecmp
+import functools
 import inspect
 import os.path as p
 import re
@@ -21,7 +20,6 @@ import docutils.nodes as nodes
 import lightningcss
 from sphinx import locale
 from sphinx.builders.html import StandaloneHTMLBuilder
-from sphinx.util import logging
 
 from kaamiki.extensions import directives
 from kaamiki.extensions import roles
@@ -31,8 +29,15 @@ from kaamiki.extensions.utils import context_defaults
 from kaamiki.extensions.utils import depart
 from kaamiki.extensions.utils import design_assets
 from kaamiki.extensions.utils import feedback
+from kaamiki.extensions.utils import follow
+from kaamiki.extensions.utils import forget_lead
+from kaamiki.extensions.utils import header_leads
+from kaamiki.extensions.utils import merge_leads
+from kaamiki.extensions.utils import neighbours
+from kaamiki.extensions.utils import note_lead
 from kaamiki.extensions.utils import offer
 from kaamiki.extensions.utils import page_switches
+from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import provenance
 from kaamiki.extensions.utils import reading_length
 from kaamiki.extensions.utils import reread
@@ -44,44 +49,44 @@ from kaamiki.extensions.utils import writer
 
 if t.TYPE_CHECKING:
     import types
+    from collections.abc import Sequence
 
     from sphinx.application import Sphinx
 
-version: str = "2026.10.8"
+version: str = "2026.10.28"
 theme_name: t.Final[str] = "kaamiki"
 theme_path = p.join(p.abspath(p.dirname(__file__)), "theme", "templates")
 static_path = p.join(p.abspath(p.dirname(__file__)), "theme", "static")
 locale_path = p.join(p.abspath(p.dirname(__file__)), "locale")
-supported_extensions: t.Sequence[str] = (
+supported_extensions: Sequence[str] = (
     "sphinx_copybutton",
     "sphinx_design",
 )
 # NOTE(xames3): This is an explicit cascade order and needs to be
 # respected in order to ensure Kaamiki loads its UI elements in an
 # expected manner.
-stylesheets: t.Sequence[tuple[str, int]] = (
+stylesheets: Sequence[tuple[str, int]] = (
     ("styles/font.css", 400),
     ("styles/code.css", 600),
     ("styles/theme.css", 700),
     ("styles/sphinx-design.css", 900),
 )
-scripts: t.Sequence[str] = ("scripts/theme.js",)
+scripts: Sequence[str] = ("scripts/theme.js",)
 # Proper list available here:
 # https://web-platform-dx.github.io/supported-browsers/
-browsers: t.Sequence[str] = (
-    "chrome >= 100",
-    "edge >= 100",
-    "firefox >= 100",
-    "ios_saf >= 15",
-    "opera >= 86",
-    "safari >= 15",
-    "samsung >= 16",
+browsers: Sequence[str] = (
+    "chrome >= 120",
+    "edge >= 120",
+    "firefox >= 121",
+    "ios_saf >= 17",
+    "opera >= 106",
+    "safari >= 17",
+    "samsung >= 25",
 )
 # NOTE(xames3): `not (...)` is the newer Media Queries 4 grammar,
 # older browsers only read `not all and (...)`.
 # https://www.w3.org/TR/mediaqueries-4/#mq-not
 negated: re.Pattern[str] = re.compile(r"@media not \(")
-logger = logging.getLogger(__name__)
 
 
 def fix(module: types.ModuleType) -> type[nodes.Element]:
@@ -138,18 +143,12 @@ def flatten(app: Sphinx, exc: Exception | None) -> None:
             continue
         with open(source, encoding="utf-8") as f:
             text = f.read()
-        try:
-            css = lightningcss.process_stylesheet(
-                text,
-                filename=stylesheet,
-                browsers_list=list(browsers),
-                minify=True,
-            )
-        except ValueError as error:
-            logger.warning(
-                "could not flatten %s: %s", stylesheet, error, type="kaamiki"
-            )
-            continue
+        css = lightningcss.process_stylesheet(
+            text,
+            filename=stylesheet,
+            browsers_list=list(browsers),
+            minify=True,
+        )
         with open(target, "w", encoding="utf-8") as f:
             f.write(negated.sub("@media not all and (", css))
 
@@ -178,7 +177,11 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
         if key.startswith("_") or value.__module__ != roles.__name__:
             continue
         app.add_role(key, value)
+    for key, style in roles.ICONS.items():
+        app.add_role(key, functools.partial(roles._icon, style))
     app.add_node(roles.ink, html=(roles._visit, roles._depart))
+    app.add_node(roles.glyph, html=(roles._visit_glyph, roles._depart))
+    app.add_node(phrase)
     for directive in directives:
         if hasattr(directive, "node"):
             node = fix(directive)
@@ -209,10 +212,16 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     app.connect("html-page-context", feedback)
     app.connect("html-page-context", updated_on)
     app.connect("html-page-context", page_switches)
+    app.connect("html-page-context", neighbours)
+    app.connect("html-page-context", header_leads)
     app.connect("html-page-context", design_assets)
     app.connect("source-read", provenance)
     app.connect("env-get-outdated", reread)
+    app.connect("env-get-outdated", follow)
     app.connect("doctree-read", offer, priority=400)
+    app.connect("doctree-read", note_lead)
+    app.connect("env-purge-doc", forget_lead)
+    app.connect("env-merge-info", merge_leads)
     app.connect("build-finished", build_finished)
     app.connect("build-finished", flatten)
     year, month, day = map(int, version.split("."))
