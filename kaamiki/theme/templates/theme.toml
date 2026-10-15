@@ -1,8 +1,7 @@
 [theme]
 inherit = "basic"
 stylesheets = [  ]
-pygments_style = { default = "default" }
+pygments_style = { default = "monokai" }
 
 [options]
-dark_logo = ""
-light_logo = ""
+logo = ""

@@ -4,7 +4,7 @@ Logo Macro
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 10 September 2026
-Last updated on: 08 October 2026
+Last updated on: 14 October 2026
 #}
 {%- macro km_logo() -%}
     {%- if logo_url -%}
@@ -14,22 +14,12 @@ Last updated on: 08 October 2026
              width="16"
              height="16"
              {% if km_logo_size %}style="--km-logo-size: {{ km_logo_size }}px"{% endif %} />
-    {%- else -%}
-        {%- if theme_dark_logo %}
-            <img class="km-logo km-logo--dark"
-                 src="{{ pathto('_static/' + theme_dark_logo, 1) }}"
-                 alt=""
-                 width="16"
-                 height="16"
-                 {% if km_logo_size %}style="--km-logo-size: {{ km_logo_size }}px"{% endif %} />
-        {%- endif -%}
-        {%- if theme_light_logo %}
-            <img class="km-logo km-logo--light"
-                 src="{{ pathto('_static/' + theme_light_logo, 1) }}"
-                 alt=""
-                 width="16"
-                 height="16"
-                 {% if km_logo_size %}style="--km-logo-size: {{ km_logo_size }}px"{% endif %} />
-        {%- endif -%}
+    {%- elif theme_logo -%}
+        <img class="km-logo"
+             src="{{ pathto('_static/' + theme_logo, 1) }}"
+             alt=""
+             width="16"
+             height="16"
+             {% if km_logo_size %}style="--km-logo-size: {{ km_logo_size }}px"{% endif %} />
     {%- endif -%}
 {%- endmacro -%}

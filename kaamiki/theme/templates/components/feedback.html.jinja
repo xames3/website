@@ -4,10 +4,10 @@ Feedback Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 19 October 2025
-Last updated on: 29 September 2026
+Last updated on: 15 October 2026
 #}
 {% block km_feedback %}
-    {%- set km_split = km_feedback.mode == 'split' %}
+    {%- set km_split = km_feedback.split %}
     {%- macro km_button() %}
         {%- if km_feedback.url %}
             <a href="{{ km_feedback.url|e }}"
@@ -36,5 +36,12 @@ Last updated on: 29 September 2026
             </div>
             {{ km_button() }}
         {% endif %}
-    </div>
+        {% if km_show_page_last_updated|tobool and km_updated_on %}
+            <p class="km-feedback-shell__updated">
+                {%- trans updated_on=km_updated_on|e -%}
+                Last updated on {{ updated_on }}
+            {%- endtrans -%}
+        </p>
+    {% endif %}
+</div>
 {% endblock km_feedback %}

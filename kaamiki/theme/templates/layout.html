@@ -4,31 +4,27 @@ Base Layout Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 11 October 2026
+Last updated on: 12 October 2026
 #}
 {%- set km_lang_attr = "en" if language == None else (language|replace('_','-')) -%}
-{%- set km_colour_mode = km_colour_mode|default('dark', true)|lower -%}
-{%- set km_colour_theme = 'light' if km_colour_mode == 'light' else 'dark' -%}
-{%- set km_strings = {"copied": _("Copied!!"), "failed": _("Copy failed"), "copy": _("Copy"), "more": _("Show more"), "less": _("Show less")} -%}
+{%- set km_strings = {"copied": _("Copied!"), "failed": _("Copy failed"), "copy": _("Copy"), "more": _("Show more"), "less": _("Show less"), "returns": _("returns:"), "error": _("error:"), "setup": _("Setup")} -%}
 <!DOCTYPE html>
 <html lang="{{ km_lang_attr }}"
-      {% if km_colour_theme == 'dark' %}class="km-dark"{% endif %}
-      data-km-theme="{{ km_colour_theme }}"
-      data-km-colour-mode="{{ km_colour_mode }}"
       data-content_root="{{ content_root }}"
       data-km-fa-style="{{ km_fa_style|default('solid') }}"
       data-km-strings="{{ km_strings|tojson|forceescape }}"
       data-km-more-icon="{{ km_fa_icons.show_more }}"
-      {% if km_show_colour_modes|tobool %}data-km-colour-toggle{% endif %}
-      {% if km_add_copy_to_headerlinks|default(true) %}data-km-copy-links{% endif %}>
+      {% if km_add_copy_to_headerlinks %}data-km-copy-links{% endif %}>
     <head>
         <meta charset="utf-8" />
         {%- if 'name="viewport"' not in metatags %}
             <meta name="viewport"
                   content="width=device-width, initial-scale=1" />
         {%- endif %}
+        <meta name="color-scheme"
+              content="dark" />
         <meta name="theme-color"
-              content="{{ '#fafafa' if km_colour_theme == 'light' else '#000000' }}" />
+              content="#000000" />
         <script>
             (function() {
                 var root = document.documentElement;
@@ -50,21 +46,6 @@ Last updated on: 11 October 2026
                 window.addEventListener('pageshow', function(e) {
                     if (e.persisted) reveal();
                 });
-
-                var mode = root.getAttribute('data-km-colour-mode') || 'dark';
-                if (root.hasAttribute('data-km-colour-toggle')) {
-                    try {
-                        mode = localStorage.getItem('km:colourMode') || mode;
-                    } catch (e) {}
-                }
-                if (mode === 'system') {
-                    mode = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-                }
-                mode = mode === 'light' ? 'light' : 'dark';
-                root.setAttribute('data-km-theme', mode);
-                root.classList.toggle('km-dark', mode === 'dark');
-                document.querySelector('meta[name="theme-color"]')
-                    .setAttribute('content', mode === 'dark' ? '#000000' : '#fafafa');
             })();
         </script>
         {{ metatags }}
@@ -83,6 +64,8 @@ Last updated on: 11 October 2026
                     <meta name="description"
                           content="{{ km_social.description|e }}" />
                 {% endif %}
+            {%- endif %}
+            {%- if km_social and km_social.enable %}
                 <meta property="og:title"
                       content="{{ km_social.title|e }}" />
                 <meta property="og:type"
@@ -137,9 +120,6 @@ Last updated on: 11 October 2026
             <title>{{ title|striptags|e if title else docstitle|e }}</title>
         {%- endblock htmltitle %}
         {%- block km_thirdparty %}
-            <link rel="preconnect"
-                  href="https://cdn.jsdelivr.net"
-                  crossorigin />
             {%- if km_fa_kit %}
                 <script src="{{ km_fa_kit }}"
                         crossorigin="anonymous"
