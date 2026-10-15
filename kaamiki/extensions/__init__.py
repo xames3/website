@@ -4,12 +4,10 @@ Theme Extension Manager
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 All of Kaamiki's custom directives.
 """
-
-from __future__ import annotations
 
 import typing as t
 
@@ -21,12 +19,15 @@ from . import repository
 from . import thumbnail
 from . import video
 from . import youtube
+from .explainer import attempts
 from .explainer import walkthrough
 
 if t.TYPE_CHECKING:
     import types
+    from collections.abc import Sequence
 
-directives: t.Sequence[types.ModuleType] = (
+directives: Sequence[types.ModuleType] = (
+    attempts,
     author,
     button,
     embed,
