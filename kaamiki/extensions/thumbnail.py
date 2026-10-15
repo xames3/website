@@ -4,7 +4,7 @@ YouTube Thumbnail Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September 2025
-Last updated on: 09 October 2026
+Last updated on: 12 October 2026
 
 A `thumbnail` directive that renders a YouTube video as a card::
 
@@ -12,8 +12,6 @@ A `thumbnail` directive that renders a YouTube video as a card::
         :title: Rick Rolled
         :grayscale:
 """
-
-from __future__ import annotations
 
 import typing as t
 from urllib.parse import urlsplit
@@ -42,9 +40,10 @@ class directive(rst.Directive):
 
     Options::
 
-        - `title`: User-provided YouTube video title.
-        - `channel`: User-provided YouTube video channel name.
-        - `grayscale`: Draws the still in grey until it's hovered.
+        - `title`: The video's title.
+        - `channel`: The channel's name.
+        - `grayscale`: Draws the still in grey until it's hovered. It
+          is drawn in colour without it.
     """
 
     required_arguments = 1
@@ -71,16 +70,15 @@ class directive(rst.Directive):
         texts = {_: self.options.pop(_) for _ in TEXTS if _ in self.options}
         self.options["src"] = src
         self.options["new_tab"] = opens_new_tab(src, config)
-        grayscale = setting(config, "thumbnail_grayscale")
-        if "grayscale" in self.options:
-            grayscale = not grayscale
-        self.options["grayscale"] = grayscale
+        self.options["grayscale"] = "grayscale" in self.options
         self.options["video_id"] = vid
-        self.options["thumbnail"] = (
-            # NOTE(xames3): YouTube doesn't document this URL, but it
-            # has served stills this way for years.
-            f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
-        )
+        self.options["private"] = bool(setting(config, "youtube_privacy"))
+        if not self.options["private"]:
+            self.options["thumbnail"] = (
+                # NOTE(xames3): YouTube doesn't document this URL, but it
+                # has served stills this way for years.
+                f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
+            )
         element = node("", **self.options)
         messages: list[nodes.Node] = []
         for field, text in texts.items():
