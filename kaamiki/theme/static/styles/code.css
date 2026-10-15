@@ -1,39 +1,24 @@
 :root {
-    --km-obj-foreground: 210.71 55.46% 43%;
-    --km-comment-foreground: 212.98 96.61% 34.71%;
-    --km-function-foreground: 260.93 53.09% 47.65%;
-    --km-syntax-comment: 212 10% 42%;
-    --km-syntax-error: 357 94% 43%;
-    --km-syntax-keyword: 9 100% 41%;
-    --km-syntax-deleted-fg: 357 94% 43%;
-    --km-syntax-generic-error: var(--km-syntax-deleted-fg);
-    --km-syntax-traceback: var(--km-syntax-keyword);
-    --km-syntax-class: 27 84% 35%;
-    --km-syntax-entity: 30 100% 32%;
-    --km-syntax-tag: 131 74% 27%;
-    --km-syntax-whitespace: 213 12% 42%;
-    --km-syntax-output: var(--km-syntax-comment);
-    --km-syntax-highlight-accent: 210 100% 40%;
-    --km-code-bar-offset: 1rem;
-    --km-code-bar-stop: 16.81%;
-    --km-code-bar-height: 20px;
-}
-
-html[data-km-theme="dark"] {
-    --km-syntax-deleted-fg: 10 100% 80%;
     --km-obj-foreground: 208.4 100.8% 73.79%;
     --km-comment-foreground: 207.33 100% 82.35%;
     --km-function-foreground: 268.97 100% 82.94%;
     --km-syntax-comment: 212 10% 58%;
-    --km-syntax-comment-strong: 212 10% 62%;
     --km-syntax-error: 357 92% 63%;
-    --km-syntax-error-strong: 357 92% 70%;
     --km-syntax-keyword: 9 100% 73%;
+    --km-syntax-deleted-fg: 10 100% 80%;
+    --km-syntax-generic-error: var(--km-syntax-deleted-fg);
+    --km-syntax-traceback: var(--km-syntax-keyword);
     --km-syntax-class: 27 84% 55%;
     --km-syntax-entity: 30 100% 67%;
     --km-syntax-tag: 131 74% 71%;
     --km-syntax-whitespace: 213 12% 46%;
+    --km-syntax-output: var(--km-syntax-comment);
     --km-syntax-highlight-accent: 210 100% 64%;
+    --km-code-bar-offset: 1rem;
+    --km-code-bar-stop: 16.81%;
+    --km-code-bar-height: 20px;
+    --km-syntax-comment-strong: 212 10% 62%;
+    --km-syntax-error-strong: 357 92% 70%;
 }
 
 td.linenos .special,
@@ -77,6 +62,18 @@ span.linenos.special {
 .highlight .err {
     color: hsl(var(--km-syntax-error));
     border: 0;
+}
+
+.highlight {
+    color: hsl(var(--km-color-fg));
+}
+
+.highlight :is(.c1, .cpf) {
+    font-style: italic;
+}
+
+.highlight :is(.ni, .nt, .si) {
+    font-weight: 700;
 }
 
 .highlight .esc,

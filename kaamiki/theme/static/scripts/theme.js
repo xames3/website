@@ -27,7 +27,6 @@
     const REVEAL_SLACK_MS = 8;
     const REVEAL_WAITING = 'km-page-reveal-item';
     const REVEAL_SHOWN = 'km-page-reveal-item--shown';
-    const COLOUR_MODE_KEY = 'km:colourMode';
     const WALKTHROUGH_MIN_LINES = 6;
     const WALKTHROUGH_JITTER = 120;
     const WALKTHROUGH_SETTLE = 120;
@@ -41,6 +40,8 @@
     const WALKTHROUGH_GLIDE = 1500;
     const WALKTHROUGH_FOCUS = 300;
     const WALKTHROUGH_STACK_LINES = 12;
+    const ATTEMPTS_SEE = 2;
+    const ATTEMPTS_NEAR = 2;
     const walkthroughs = [];
     let walkthroughHeld = null;
     let walkthroughHand = 0;
@@ -122,6 +123,7 @@
         showMoreHold: () => getDurationMs('--km-show-more-hold'),
         tickerBase: () => getDurationMs('--km-ticker-base'),
         tickerStep: () => getDurationMs('--km-ticker-step'),
+        walkthroughSwap: () => getDurationMs('--km-walkthrough-swap'),
     };
 
     function toPx(value) {
@@ -166,80 +168,51 @@
         }
     }
 
-    function syncThemeColor() {
-        const meta = document.querySelector('meta[name="theme-color"]');
-        const background = document.body && getComputedStyle(document.body).backgroundColor;
-        if (meta && background) meta.setAttribute('content', background);
-    }
-
-    let shownTheme = root.dataset.kmTheme || 'dark';
-
-    function applyTheme(mode) {
-        shownTheme = mode;
-        const commit = () => {
-            root.setAttribute('data-km-theme', mode);
-            root.classList.toggle('km-dark', mode === 'dark');
-            syncThemeColor();
-        };
-
-        if (prefersReducedMotion() || typeof document.startViewTransition !== 'function') {
-            commit();
-            return;
-        }
-
-        root.classList.add('km-theme-switching');
-        const transition = document.startViewTransition(commit);
-        transition.finished
-            .catch(() => { /* superseded by a newer switch */ })
-            .finally(() => root.classList.remove('km-theme-switching'));
-    }
-
-    function initPrintColours() {
-        let before = null;
-        window.addEventListener('beforeprint', () => {
-            before = root.getAttribute('data-km-theme');
-            root.classList.add('km-no-transitions');
-            root.setAttribute('data-km-theme', 'light');
-            root.classList.remove('km-dark');
-        });
-        window.addEventListener('afterprint', () => {
-            if (before === null) return;
-            root.setAttribute('data-km-theme', before);
-            root.classList.toggle('km-dark', before === 'dark');
-            root.classList.remove('km-no-transitions');
-            before = null;
-        });
-    }
-
-    function initSystemColours() {
-        if (root.dataset.kmColourMode !== 'system') return;
-        let chosen = null;
-        if (root.hasAttribute('data-km-colour-toggle')) {
-            try {
-                chosen = localStorage.getItem(COLOUR_MODE_KEY);
-            } catch { /* storage unavailable */ }
-        }
-        if (chosen) return;
-        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (event) => {
-            applyTheme(event.matches ? 'light' : 'dark');
-        });
-    }
-
-    function initThemeToggle() {
-        document.querySelectorAll('.km-footer__theme-toggle').forEach((button) => {
-            button.addEventListener('click', () => {
-                const mode = shownTheme === 'light' ? 'dark' : 'light';
-                try { localStorage.setItem(COLOUR_MODE_KEY, mode); } catch { /* storage unavailable */ }
-                applyTheme(mode);
-            });
-        });
-    }
-
     function initKeyboardModality() {
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Tab' || event.key?.startsWith('Arrow')) root.setAttribute('data-km-keyboard', '');
         }, true);
         document.addEventListener('pointerdown', () => root.removeAttribute('data-km-keyboard'), true);
+    }
+
+    function initLogoInvert() {
+        const SOLID_RATIO = 0.98;
+        const verdicts = new Map();
+
+        const isBlack = (image) => {
+            if (!image.naturalWidth) return false;
+            const scale = Math.min(1, 64 / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const context = canvas.getContext('2d', { willReadFrequently: true });
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+            let opaque = 0;
+            let black = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i + 3] < 32) continue;
+                opaque += 1;
+                if (Math.max(data[i], data[i + 1], data[i + 2]) < 64) black += 1;
+            }
+            return opaque > 0 && black / opaque >= SOLID_RATIO;
+        };
+
+        document.querySelectorAll('.km-logo--single').forEach((image) => {
+            const check = () => {
+                const key = image.currentSrc || image.src;
+                if (!verdicts.has(key)) {
+                    try {
+                        verdicts.set(key, isBlack(image));
+                    } catch {
+                        verdicts.set(key, false);
+                    }
+                }
+                image.classList.toggle('km-logo--invert', verdicts.get(key));
+            };
+            if (image.complete) check();
+            else image.addEventListener('load', check, { once: true });
+        });
     }
 
     function initSidebar() {
@@ -353,6 +326,19 @@
         return { settle, clamp, stop };
     }
 
+    const idleStirs = new Set();
+    let idleWired = false;
+
+    function wireIdle() {
+        if (idleWired) return;
+        idleWired = true;
+        for (const type of [
+            'pointermove', 'pointerdown', 'keydown', 'touchstart', 'focusin',
+        ]) {
+            window.addEventListener(type, () => idleStirs.forEach((stir) => stir()), { passive: true });
+        }
+    }
+
     function idleShell(shell, button, name, awake) {
         let timer = 0;
         let stirred = 0;
@@ -388,11 +374,8 @@
             if (!timer) timer = window.setTimeout(idle, TIMING.showMoreHold());
         };
 
-        for (const type of [
-            'pointermove', 'pointerdown', 'keydown', 'touchstart', 'focusin',
-        ]) {
-            window.addEventListener(type, stir, { passive: true });
-        }
+        idleStirs.add(stir);
+        wireIdle();
         onScroll(stir);
         return { stir, rest };
     }
@@ -1055,21 +1038,17 @@
         if (!nav) return;
 
         let uid = 0;
-        Array.from(nav.querySelectorAll('p.caption')).forEach((caption) => {
-            const list = caption.nextElementSibling;
-            if (list?.tagName !== 'UL') return;
-
-            const group = document.createElement('div');
-            group.className = 'km-header__nav-group';
-            caption.parentNode.insertBefore(group, caption);
-            group.append(caption, list);
-
+        const closers = [];
+        const dropdown = (group, trigger, list) => {
+            const isLink = trigger.tagName === 'A';
             list.id = list.id || `km-nav-group-${++uid}`;
-            caption.setAttribute('tabindex', '0');
-            caption.setAttribute('role', 'button');
-            caption.setAttribute('aria-haspopup', 'true');
-            caption.setAttribute('aria-controls', list.id);
-            caption.setAttribute('aria-expanded', 'false');
+            if (!isLink) {
+                trigger.setAttribute('tabindex', '0');
+                trigger.setAttribute('role', 'button');
+            }
+            trigger.setAttribute('aria-haspopup', 'true');
+            trigger.setAttribute('aria-controls', list.id);
+            trigger.setAttribute('aria-expanded', 'false');
 
             let openTimer;
             let closeTimer;
@@ -1077,8 +1056,10 @@
                 clearTimeout(openTimer);
                 clearTimeout(closeTimer);
                 group.classList.toggle('km-is-open', next);
-                caption.setAttribute('aria-expanded', String(next));
+                trigger.setAttribute('aria-expanded', String(next));
+                if (next) closers.forEach((close) => close !== set && close(false));
             };
+            closers.push(set);
             const open = () => {
                 clearTimeout(closeTimer);
                 openTimer = setTimeout(() => set(true), DROPDOWN_OPEN_DELAY_MS);
@@ -1088,16 +1069,16 @@
                 closeTimer = setTimeout(() => set(false), DROPDOWN_CLOSE_DELAY_MS);
             };
 
-            caption.addEventListener('mouseenter', open, { passive: true });
+            trigger.addEventListener('mouseenter', open, { passive: true });
             group.addEventListener('mouseenter', open, { passive: true });
             group.addEventListener('mouseleave', () => {
-                if (!group.contains(document.activeElement)) close();
+                if (!group.querySelector(':focus-visible')) close();
             }, { passive: true });
             group.addEventListener('focusout', (event) => {
                 if (!group.contains(event.relatedTarget)) set(false);
             });
-            caption.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
+            trigger.addEventListener('keydown', (event) => {
+                if (!isLink && (event.key === 'Enter' || event.key === ' ')) {
                     event.preventDefault();
                     set(!group.classList.contains('km-is-open'));
                 } else if (event.key === 'ArrowDown') {
@@ -1109,8 +1090,32 @@
             group.addEventListener('keydown', (event) => {
                 if (event.key !== 'Escape' || !group.classList.contains('km-is-open')) return;
                 set(false);
-                caption.focus();
+                trigger.focus();
             });
+        };
+
+        Array.from(nav.querySelectorAll('p.caption')).forEach((caption) => {
+            const list = caption.nextElementSibling;
+            if (list?.tagName !== 'UL') return;
+
+            const group = document.createElement('div');
+            group.className = 'km-header__nav-group';
+            caption.parentNode.insertBefore(group, caption);
+            group.append(caption, list);
+            dropdown(group, caption, list);
+        });
+
+        Array.from(nav.children).forEach((node) => {
+            if (node.tagName === 'UL') node.classList.add('km-header__nav-links');
+        });
+
+        nav.querySelectorAll('.km-header__nav-links > li').forEach((item) => {
+            const link = item.querySelector(':scope > a');
+            const list = item.querySelector(':scope > ul');
+            if (!link || !list) return;
+
+            item.classList.add('km-header__nav-group');
+            dropdown(item, link, list);
         });
     }
 
@@ -1346,7 +1351,7 @@
 
     function enrichYouTubeCard(card) {
         const id = card.getAttribute('data-km-youtube-id');
-        if (!id) return;
+        if (!id || card.hasAttribute('data-km-private')) return;
         const title = card.hasAttribute('data-km-youtube-title')
             ? null
             : card.querySelector('.km-youtube-card__title');
@@ -1496,7 +1501,6 @@
             document.querySelector('.km-breadcrumbs'),
             ...revealBlocks(document.getElementById('km-content')),
             document.querySelector('.km-feedback-shell'),
-            document.querySelector('.km-layout__meta'),
             document.querySelector('.km-page__more-button'),
             document.querySelector('.km-pagination'),
             document.querySelector('.km-footer'),
@@ -1693,7 +1697,7 @@
         const code = payload.code || '';
         if (!payload.setup) return code;
         const { open = '#', close = '' } = payload.comment || {};
-        return `${open} Setup${close ? ` ${close}` : ''}\n${payload.setup}\n\n${code}`;
+        return `${open} ${say('setup')}${close ? ` ${close}` : ''}\n${payload.setup}\n\n${code}`;
     }
 
     function walkthroughValue(item, opened) {
@@ -1730,6 +1734,55 @@
             walkthroughValue(item, opened),
         );
         return entry;
+    }
+
+    function attemptsDiff(before, after) {
+        const table = Array.from({ length: before.length + 1 }, () => new Uint32Array(after.length + 1));
+        for (let i = before.length - 1; i >= 0; i -= 1) {
+            for (let j = after.length - 1; j >= 0; j -= 1) {
+                table[i][j] = before[i] === after[j]
+                    ? table[i + 1][j + 1] + 1
+                    : Math.max(table[i + 1][j], table[i][j + 1]);
+            }
+        }
+        const script = [];
+        let i = 0;
+        let j = 0;
+        while (i < before.length || j < after.length) {
+            if (i < before.length && j < after.length && before[i] === after[j]) {
+                script.push(['=', i, j]);
+                i += 1;
+                j += 1;
+            } else if (j === after.length || (i < before.length && table[i + 1][j] >= table[i][j + 1])) {
+                script.push(['-', i, -1]);
+                i += 1;
+            } else {
+                script.push(['+', -1, j]);
+                j += 1;
+            }
+        }
+        return script;
+    }
+
+    function attemptsSign(line, change) {
+        const sign = document.createElement('span');
+        sign.className = 'km-attempts__sign';
+        sign.setAttribute('aria-hidden', 'true');
+        sign.textContent = change === 'added' ? '+' : '-';
+        line.dataset.kmDiff = change;
+        line.prepend(sign);
+    }
+
+    function walkthroughVersion(view, rows) {
+        view.marked = [];
+        view.filled = [];
+        view.current = null;
+        view.lines.clear();
+        view.code.replaceChildren(...rows.map((row) => {
+            const line = row.cloneNode(true);
+            view.lines.set(Number(line.dataset.kmLine), line);
+            return line;
+        }));
     }
 
     function walkthroughScreen() {
@@ -1787,6 +1840,9 @@
         new ResizeObserver(walkthroughSoon).observe(document.body);
 
         document.addEventListener('km:fold', walkthroughMeasure);
+        window.addEventListener('beforeprint', () => {
+            walkthroughs.forEach((walk) => walk.fillAll());
+        });
 
         let width = window.innerWidth;
         let height = window.innerHeight;
@@ -1874,13 +1930,13 @@
         });
         if (step.ret) {
             add(step.line, {
-                mark: 'returns:', full: step.ret[0], short: step.ret[1],
+                mark: say('returns'), full: step.ret[0], short: step.ret[1],
                 key: 'returns:', kind: 'return', fresh: 1,
             });
         }
         if (step.error) {
             add(step.line, {
-                mark: 'error:', full: step.error[0], short: step.error[1],
+                mark: say('error'), full: step.error[0], short: step.error[1],
                 key: 'error:', kind: 'error', fresh: 1,
             });
         }
@@ -1911,9 +1967,13 @@
         return clamp(Math.round(target), 0, Math.max(0, view.code.offsetHeight - room));
     }
 
-    function walkthroughEdge(view, above, below) {
+    function walkthroughMore({ stage }) {
+        return stage.scrollWidth - stage.clientWidth - stage.scrollLeft > 2;
+    }
+
+    function walkthroughEdge(view, above, below, more = walkthroughMore(view)) {
         const { stage } = view;
-        stage.toggleAttribute('data-km-more', stage.scrollWidth - stage.clientWidth - stage.scrollLeft > 2);
+        stage.toggleAttribute('data-km-more', more);
         stage.toggleAttribute('data-km-above', above > 2);
         stage.toggleAttribute('data-km-below', below > 2);
     }
@@ -1978,10 +2038,18 @@
         const frame = host.querySelector('[data-km-frame]');
         const box = host.querySelector('[data-km-notes]');
         const track = host.querySelector('[data-km-track]');
-        const counter = frame.querySelector('[data-km-counter]');
         const blocks = Array.from(track.querySelectorAll('[data-km-note]'));
         const main = walkthroughView(frame);
         const { stage, code, out } = main;
+        const versions = payload.codes || null;
+        const drafts = versions
+            ? Array.from(host.querySelectorAll('[data-km-draft]'), (draft) => {
+                return Array.from(draft.querySelectorAll('[data-km-line]'));
+            })
+            : [];
+        const texts = drafts.map((rows) => {
+            return rows.map((row) => row.querySelector('.km-walkthrough__src').textContent);
+        });
         host.querySelectorAll('img[loading="lazy"]').forEach((image) => {
             image.loading = 'eager';
         });
@@ -2001,13 +2069,19 @@
             text += step.out || '';
             printed.push(text.length);
         });
-        const idle = counter ? counter.textContent : '';
+        if (versions) {
+            text = steps.reduce((most, step) => ((step.out || '').length > most.length ? step.out : most), '');
+        }
+        const paced = (note) => owned[note].reduce((sum, at) => sum + (steps[at].pace || payload.pace), 0);
 
         const opened = new Set();
         const walk = {
-            host, pane, track, shaped: '', update, measure, shape, nudge, release, recentre,
+            host, pane, track, shaped: '', update, measure, shape, nudge, release, recentre, fillAll,
         };
         let snaps = [];
+        const holds = new Map();
+        let watcher = null;
+        let fit = null;
         let keys = [];
         let index = -1;
         let active = -1;
@@ -2026,15 +2100,17 @@
         let loose = false;
         let touched = false;
         let steady = false;
+        let version = 0;
+        let morphing = null;
 
         function shape() {
             return [
                 host.getClientRects().length > 0,
                 host.closest('.km-page--clamped') !== null,
                 pane.clientWidth,
-                code.offsetHeight,
+                versions ? getComputedStyle(code).lineHeight : code.offsetHeight,
                 headerHeight(),
-                blocks.map((block) => block.offsetHeight).join(','),
+                mode === 'stack' ? '' : blocks.map((block) => block.offsetHeight).join(','),
             ].join(' ');
         }
 
@@ -2064,17 +2140,27 @@
             walkthroughEdge(main, mode === 'stage' ? top : 0, mode === 'stage' ? below : 0);
         }
 
+        function showOutput(view, step) {
+            view.out.textContent = step.out || '';
+            if (step.verdict) view.out.dataset.kmVerdict = step.verdict;
+            else view.out.removeAttribute('data-km-verdict');
+        }
+
         function print(at) {
             if (!out || !text) return;
-            const end = printed[at];
-            const start = end - (steps[at].out || '').length;
-            out.replaceChildren();
-            if (start > 0) out.append(text.slice(0, start));
-            if (end > start) {
-                const fresh = document.createElement('span');
-                fresh.setAttribute('data-km-fresh', '');
-                fresh.textContent = text.slice(start, end);
-                out.append(fresh);
+            if (versions) {
+                showOutput(main, steps[at]);
+            } else {
+                const end = printed[at];
+                const start = end - (steps[at].out || '').length;
+                out.replaceChildren();
+                if (start > 0) out.append(text.slice(0, start));
+                if (end > start) {
+                    const fresh = document.createElement('span');
+                    fresh.setAttribute('data-km-fresh', '');
+                    fresh.textContent = text.slice(start, end);
+                    out.append(fresh);
+                }
             }
             const before = out.offsetHeight;
             out.style.height = 'auto';
@@ -2085,6 +2171,97 @@
             }
             out.style.height = `${after}px`;
             out.scrollTop = out.scrollHeight;
+        }
+
+        function renumber(staying, to) {
+            staying.forEach(([line, at]) => {
+                line.dataset.kmLine = String(at + 1);
+                line.dataset.kmNumber = drafts[to][at].dataset.kmNumber;
+            });
+        }
+
+        function land() {
+            if (!morphing) return;
+            const run = morphing;
+            morphing = null;
+            run.timers.forEach((timer) => window.clearTimeout(timer));
+            run.going.forEach((line) => line.remove());
+            run.coming.forEach((line) => {
+                line.removeAttribute('data-km-diff');
+                line.removeAttribute('data-km-settling');
+                line.querySelector('.km-attempts__sign')?.remove();
+            });
+        }
+
+        function swapNow(to) {
+            land();
+            walkthroughVersion(main, drafts[to]);
+            version = to;
+        }
+
+        // NOTE(xames3): The change lands in one go, like an editor
+        // applying a diff. Old lines stay red and new ones go green for a
+        // beat, then the old ones drop out together.
+        function morph(to, animate) {
+            if (to === version || !drafts[to]) return null;
+            land();
+            const from = version;
+            version = to;
+            const before = Array.from(code.children);
+            const rows = [];
+            const run = {
+                to, going: [], coming: [], staying: [], timers: [],
+            };
+            attemptsDiff(texts[from], texts[to]).forEach(([change, was, now]) => {
+                if (change === '=') {
+                    rows.push(before[was]);
+                    run.staying.push([before[was], now]);
+                } else if (change === '-') {
+                    rows.push(before[was]);
+                    run.going.push(before[was]);
+                } else {
+                    const line = drafts[to][now].cloneNode(true);
+                    rows.push(line);
+                    run.coming.push(line);
+                }
+            });
+            code.replaceChildren(...rows);
+            main.lines.clear();
+            run.staying.forEach(([line, now]) => main.lines.set(now + 1, line));
+            run.coming.forEach((line) => main.lines.set(Number(line.dataset.kmLine), line));
+            renumber(run.staying, to);
+            const first = run.coming[0] || null;
+            if (!animate || to < from) {
+                run.going.forEach((line) => line.remove());
+                return first;
+            }
+            morphing = run;
+            run.going.forEach((line) => {
+                line.setAttribute('aria-hidden', 'true');
+                line.setAttribute('data-km-going', '');
+                attemptsSign(line, 'removed');
+            });
+            run.coming.forEach((line) => attemptsSign(line, 'added'));
+            const swap = TIMING.walkthroughSwap();
+            const later = (delay, then) => run.timers.push(window.setTimeout(then, delay));
+            later(swap * ATTEMPTS_SEE, () => {
+                run.going.forEach((line) => line.remove());
+                run.going = [];
+                run.coming.forEach((line) => {
+                    line.setAttribute('data-km-settling', '');
+                    line.removeAttribute('data-km-diff');
+                });
+                follow();
+                edge();
+            });
+            later(swap * (ATTEMPTS_SEE + 1.2), () => {
+                run.coming.forEach((line) => {
+                    line.removeAttribute('data-km-settling');
+                    line.querySelector('.km-attempts__sign')?.remove();
+                });
+                morphing = null;
+            });
+            return first;
         }
 
         function loosen() {
@@ -2123,6 +2300,7 @@
 
         function rest() {
             rejoin();
+            if (versions) swapNow(0);
             main.marked.forEach((line) => line.removeAttribute('data-km-current'));
             main.marked = [];
             main.filled.forEach((slot) => slot.replaceChildren());
@@ -2133,8 +2311,8 @@
                 block.removeAttribute('aria-current');
             });
             out?.replaceChildren();
+            out?.removeAttribute('data-km-verdict');
             out?.style.removeProperty('height');
-            if (counter) counter.textContent = idle;
             ['--km-walkthrough-stage', '--km-walkthrough-notes']
                 .forEach((name) => host.style.removeProperty(name));
             host.style.setProperty('--km-walkthrough-shift', '0px');
@@ -2157,15 +2335,19 @@
         function paint(at) {
             const next = clamp(at, 0, steps.length - 1);
             if (next === index) return;
+            const animate = index !== -1
+                && Math.abs(next - index) <= ATTEMPTS_NEAR
+                && !prefersReducedMotion();
             index = next;
             rejoin();
             const step = steps[index];
+            const fresh = versions ? morph(step.version, animate) : null;
             walkthroughMark(main, step);
+            if (fresh && !main.current) main.current = fresh;
             annotate(step);
             print(index);
             follow();
             edge();
-            if (counter) counter.textContent = `${index + 1} / ${steps.length}`;
         }
 
         function locate(value) {
@@ -2183,7 +2365,16 @@
             track.style.translate = `0 ${-walkthroughSnap(key.a + (key.b - key.a) * through)}px`;
             let note = key.note;
             const own = owned[note];
-            let at = own[Math.min(own.length - 1, Math.floor(through * own.length))];
+            const length = paced(note);
+            let run = 0;
+            let at = own[own.length - 1];
+            for (const each of own) {
+                run += steps[each].pace || payload.pace;
+                if (through * length < run) {
+                    at = each;
+                    break;
+                }
+            }
             if (key.kind === 'move' && through >= 0.5) {
                 note += 1;
                 at = owned[note][0];
@@ -2257,37 +2448,119 @@
         }
 
         function clearStack() {
+            watcher?.disconnect();
+            watcher = null;
+            holds.forEach((_, hold) => hold.remove());
+            holds.clear();
             snaps.forEach((view) => view.frame.remove());
             snaps = [];
         }
 
-        function stack() {
-            blocks.forEach((block) => {
-                const clone = frame.cloneNode(true);
-                clone.removeAttribute('data-km-frame');
-                clone.classList.add('km-walkthrough__snap');
-                block.prepend(clone);
-                snaps.push(walkthroughView(clone));
+        function snapshot(block, hold) {
+            const clone = frame.cloneNode(true);
+            clone.removeAttribute('data-km-frame');
+            clone.classList.add('km-walkthrough__snap');
+            if (hold) hold.replaceWith(clone);
+            else block.prepend(clone);
+            const view = walkthroughView(clone);
+            snaps.push(view);
+            return view;
+        }
+
+        // NOTE(xames3): Writes, then reads, then writes. Mixing them per
+        // snapshot forces a full layout of the page for every note.
+        function fill(batch) {
+            const { most, whole, heights } = fit;
+            const rooms = batch.map(({ at }) => {
+                const step = steps[owned[at][owned[at].length - 1]];
+                return versions ? Math.min(most, heights[step.version]) : most;
             });
-            const [first] = snaps;
-            const line = first.lines.get(1)?.getBoundingClientRect().height || 20;
-            const whole = first.code.offsetHeight;
-            const pad = Math.max(0, whole - line * first.lines.size);
-            const most = Math.min(whole, pad + line * WALKTHROUGH_STACK_LINES);
-            snaps.forEach((view, at) => {
+            const totals = batch.map(({ at }) => {
+                const step = steps[owned[at][owned[at].length - 1]];
+                return versions ? heights[step.version] : whole;
+            });
+            batch.forEach(({ view, at }, n) => {
                 const upto = owned[at][owned[at].length - 1];
                 const step = steps[upto];
+                if (versions) walkthroughVersion(view, drafts[step.version]);
                 walkthroughMark(view, step);
                 walkthroughAnnotate(view, step, payload.comment, opened);
                 if (view.out) {
-                    view.out.textContent = text.slice(0, printed[upto]);
+                    if (versions) showOutput(view, step);
+                    else view.out.textContent = text.slice(0, printed[upto]);
                     view.out.hidden = !view.out.textContent;
                 }
-                view.frame.style.setProperty('--km-walkthrough-stage', `${most}px`);
-                const to = walkthroughFollow(view, most, 0);
-                view.frame.style.setProperty('--km-walkthrough-shift', `${to}px`);
-                walkthroughEdge(view, to, whole - most - to);
+                view.frame.style.setProperty('--km-walkthrough-stage', `${rooms[n]}px`);
             });
+            const shifts = batch.map(({ view }, n) => walkthroughFollow(view, rooms[n], 0));
+            const reach = batch.map(({ view }) => walkthroughMore(view));
+            batch.forEach(({ view }, n) => {
+                view.frame.style.setProperty('--km-walkthrough-shift', `${shifts[n]}px`);
+                walkthroughEdge(view, shifts[n], totals[n] - rooms[n] - shifts[n], reach[n]);
+            });
+        }
+
+        function reveal(targets) {
+            const batch = targets
+                .filter((hold) => holds.has(hold))
+                .map((hold) => ({ hold, at: holds.get(hold) }));
+            if (!batch.length) return;
+            host.setAttribute('data-km-measuring', '');
+            const passed = batch.map(({ hold }) => hold.getBoundingClientRect().bottom <= 0);
+            batch.forEach((item) => {
+                watcher.unobserve(item.hold);
+                holds.delete(item.hold);
+                item.view = snapshot(blocks[item.at], item.hold);
+            });
+            fill(batch);
+            const drift = batch.reduce(
+                (sum, { view }, n) => sum + (passed[n] ? view.frame.offsetHeight - fit.size : 0),
+                0,
+            );
+            if (Math.abs(drift) > 0.5) window.scrollBy(0, drift);
+            void host.offsetHeight;
+            host.removeAttribute('data-km-measuring');
+        }
+
+        function stack() {
+            const first = snapshot(blocks[0]);
+            const line = first.lines.get(1)?.getBoundingClientRect().height || 20;
+            let whole = first.code.offsetHeight;
+            let count = first.lines.size;
+            let heights = [];
+            if (versions) {
+                heights = drafts.map((rows) => {
+                    walkthroughVersion(first, rows);
+                    return first.code.offsetHeight;
+                });
+                whole = Math.max(...heights);
+                count = Math.max(...drafts.map((rows) => rows.length));
+            }
+            const pad = Math.max(0, whole - line * count);
+            const most = Math.min(whole, pad + line * WALKTHROUGH_STACK_LINES);
+            fit = { most, whole, heights, size: 0 };
+            fill([{ view: first, at: 0 }]);
+            fit.size = first.frame.offsetHeight;
+            if (blocks.length < 2) return;
+            watcher = new IntersectionObserver((entries) => {
+                reveal(entries.filter((entry) => entry.isIntersecting).map((entry) => entry.target));
+            }, { rootMargin: '150% 0px' });
+            blocks.forEach((block, at) => {
+                if (!at) return;
+                const hold = document.createElement('div');
+                hold.className = 'km-walkthrough__snap';
+                hold.style.height = `${fit.size}px`;
+                block.prepend(hold);
+                holds.set(hold, at);
+                watcher.observe(hold);
+            });
+            if (window.matchMedia('print').matches) fillAll();
+        }
+
+        // NOTE(xames3): Copies fill in as they near the screen, but paper
+        // has no screen, so printing fills them all.
+        function fillAll() {
+            reveal(Array.from(holds.keys()));
         }
 
         function measure() {
@@ -2317,9 +2590,18 @@
                     out.style.height = 'auto';
                 }
                 const full = out && text ? out.offsetHeight : 0;
-                const whole = code.offsetHeight;
+                let whole = code.offsetHeight;
+                let count = main.lines.size;
+                if (versions) {
+                    whole = Math.max(...drafts.map((_, n) => {
+                        swapNow(n);
+                        return code.offsetHeight;
+                    }));
+                    count = Math.max(...drafts.map((rows) => rows.length));
+                    swapNow(0);
+                }
                 const line = main.lines.get(1)?.getBoundingClientRect().height || 20;
-                const pad = Math.max(0, whole - line * main.lines.size);
+                const pad = Math.max(0, whole - line * count);
                 const least = Math.min(whole, pad + line * WALKTHROUGH_MIN_LINES);
                 const caption = frame.offsetHeight - stage.offsetHeight - full;
                 const most = Math.min(
@@ -2357,7 +2639,7 @@
                 let at = 0;
                 blocks.forEach((_, note) => {
                     const hold = Math.max(
-                        owned[note].length * payload.pace,
+                        paced(note),
                         ends[note] - starts[note],
                     );
                     keys.push({
@@ -2428,7 +2710,10 @@
             const value = event.target.closest?.('[data-km-long]');
             if (value) unfold(value);
             const button = event.target.closest?.('[data-km-copy]');
-            if (button) copyText(walkthroughSource(payload)).then((done) => copied(button, done));
+            if (button) {
+                const source = versions ? { ...payload, code: versions[version] } : payload;
+                copyText(walkthroughSource(source)).then((done) => copied(button, done));
+            }
         });
 
         host.addEventListener('keydown', (event) => {
@@ -2474,11 +2759,8 @@
 
     ready(() => {
         for (const init of [
-            syncThemeColor,
-            initPrintColours,
-            initSystemColours,
-            initThemeToggle,
             initKeyboardModality,
+            initLogoInvert,
             initSidebar,
             initScrollTop,
             initTabSets,
