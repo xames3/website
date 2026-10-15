@@ -4,12 +4,10 @@ Template Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 Kaamiki's Jinja environment and the helpers that read its templates.
 """
-
-from __future__ import annotations
 
 import functools
 import os
@@ -17,6 +15,8 @@ import os.path as p
 import typing as t
 
 import jinja2
+
+from kaamiki.extensions.utils.links import REL
 
 if t.TYPE_CHECKING:
     from docutils import nodes
@@ -27,7 +27,7 @@ TEMPLATES: t.Final[str] = p.join(
     p.dirname(p.dirname(p.dirname(p.realpath(__file__)))), "theme", "templates"
 )
 DESIGN_ASSETS: t.Final[frozenset[str]] = frozenset(
-    {"design-tabs.js", "sphinx-design.min.css"}
+    {"design-tabs.js", "sphinx-design.css", "sphinx-design.min.css"}
 )
 environment: jinja2.Environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(TEMPLATES),
@@ -49,7 +49,7 @@ def render(template: str, /, **context: t.Any) -> str:
     :param context: Values made available to the template.
     :return: The rendered HTML.
     """
-    values = {f"km_{key}": value for key, value in context.items()}
+    values = {"km_rel": REL, **{f"km_{k}": v for k, v in context.items()}}
     return environment.get_template(template).render(**values)
 
 

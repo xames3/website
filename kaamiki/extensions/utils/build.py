@@ -4,12 +4,10 @@ Build Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 October 2026
+Last updated on: 15 October 2026
 
 The utilities that write the 404 page and the sitemap after a build.
 """
-
-from __future__ import annotations
 
 import os.path as p
 import posixpath
@@ -22,6 +20,7 @@ import bs4
 from sphinx.builders.html import StandaloneHTMLBuilder
 
 from kaamiki.extensions.utils.dates import day
+from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.templates import themed
 
 if t.TYPE_CHECKING:
@@ -49,10 +48,8 @@ def root_urls(tree: bs4.BeautifulSoup, base: str, root: str) -> None:
     """
     for tag in tree.find_all(True):
         for attribute in ROOTED_ATTRIBUTES:
-            url = tag.get(attribute)
-            if not isinstance(url, str) or not url:
-                continue
-            if url.startswith(ROOTED_SKIP) or "://" in url:
+            url = str(tag.get(attribute) or "")
+            if not url or url.startswith(ROOTED_SKIP) or "://" in url:
                 continue
             url, _, fragment = url.partition("#")
             path = posixpath.normpath(posixpath.join("/", base, url))
@@ -68,14 +65,14 @@ def not_found(app: Sphinx) -> None:
     Hosts serve `404.html` from the root and `html_additional_pages`
     can't put it there under `dirhtml`.
 
-    ..  note:: Set `show_404` in `conf.py` to `False` to skip it.
+    ..  note:: Set `show_404` to `False` in `html_context` to skip it.
 
     :param app: The Sphinx application instance.
     """
     builder = app.builder
     if not isinstance(builder, StandaloneHTMLBuilder):
         return
-    if not app.config.html_context.get("km_show_404", True):
+    if not setting(app.config, "show_404"):
         return
     if getattr(builder, "globalcontext", None) is None:
         return
@@ -86,10 +83,10 @@ def not_found(app: Sphinx) -> None:
             "pageurl": None,
             "km_show_breadcrumbs": False,
             "km_show_feedback": False,
-            "km_show_last_updated_on": False,
+            "km_show_more": False,
+            "km_show_page_last_updated": False,
             "km_show_previous_next_pages": False,
             "km_show_scrolltop": False,
-            "km_show_show_more": False,
         },
         f"{NOT_FOUND}.html",
         outfilename=page,  # type: ignore[arg-type]
@@ -119,12 +116,12 @@ def sitemap(app: Sphinx) -> None:
 
     Pages marked `noindex` or `none` in `:km-pg-robots:` are left out.
     Nothing is written without `html_baseurl` or with `show_sitemap`
-    off and a `robots.txt` in `html_extra_path` is kept.
+    off. A `robots.txt` in `html_extra_path` is kept.
 
     :param app: The Sphinx application instance.
     """
     home = app.config.html_baseurl
-    if not home or not app.config.html_context.get("km_show_sitemap", True):
+    if not home or not setting(app.config, "show_sitemap"):
         return
     home = home.rstrip("/") + "/"
     urls: list[str] = []

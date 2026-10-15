@@ -4,7 +4,7 @@ Embed Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 11 August 2026
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 An `embed` directive that drops a block of HTML into the page.
 
@@ -32,8 +32,6 @@ directive::
        :js: embed.js
 """
 
-from __future__ import annotations
-
 import ast
 import contextlib
 import json
@@ -53,20 +51,22 @@ from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import setting
 
 if t.TYPE_CHECKING:
+    from collections.abc import Callable
+
     from sphinx.application import Sphinx
 
 logger = logging.getLogger(__name__)
 
 name: t.Final[str] = "embed"
-pattern: t.Pattern[str] = re.compile(
+pattern: re.Pattern[str] = re.compile(
     r"^[ \t]*:([\w-]+):[ \t]*(.*?)(?=^[ \t]*:[\w-]+:|\Z)",
     re.MULTILINE | re.DOTALL,
 )
-SCRIPTISH: t.Pattern[str] = re.compile(
+SCRIPTISH: re.Pattern[str] = re.compile(
     r"<(script|style)\b[^>]*>.*?</\1>", re.DOTALL | re.IGNORECASE
 )
-PLACEHOLDER: t.Pattern[str] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
-NOTE: t.Pattern[str] = re.compile(r"\{#.*?#\}[ \t]*\n?", re.DOTALL)
+PLACEHOLDER: re.Pattern[str] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
+NOTE: re.Pattern[str] = re.compile(r"\{#.*?#\}[ \t]*\n?", re.DOTALL)
 # NOTE(xames3): Keeps a value from closing its `<script>` early and
 # U+2028/2029 from ending a JavaScript string line.
 # https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
@@ -80,8 +80,7 @@ ESCAPES: dict[str, str] = {
 }
 STYLE_ESCAPES: frozenset[str] = frozenset("<>&\"'\\\n\r{};")
 ASSETS: t.Final[frozenset[str]] = frozenset({"css", "js", "encoding"})
-LOADING: t.Final[tuple[str, ...]] = ("defer", "async", "normal")
-IFRAME: t.Pattern[str] = re.compile(
+IFRAME: re.Pattern[str] = re.compile(
     r"<iframe\b[^>]*?\bsrc\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s>]+))",
     re.IGNORECASE,
 )
@@ -123,8 +122,8 @@ def substitute(source: str, values: dict[str, str]) -> str:
         Anything unrecognised is left alone.
     """
 
-    def swap(kind: str) -> t.Callable[[t.Match[str]], str]:
-        def fill(match: t.Match[str]) -> str:
+    def swap(kind: str) -> Callable[[re.Match[str]], str]:
+        def fill(match: re.Match[str]) -> str:
             key = match.group(1)
             if key not in values:
                 key = key.replace("_", "-")
@@ -162,8 +161,15 @@ class directive(rst.Directive):
     """The `embed` directive.
 
     The argument is `iframe`, with the markup as content or the path to
-    an HTML fragment. Every option but `encoding`, `css` and `js` is a
-    placeholder value.
+    an HTML fragment.
+
+    Options::
+
+        - `css`: Stylesheets under `html_static_path`, comma-separated.
+        - `js`: Scripts under `html_static_path`, comma-separated.
+        - `encoding`: The fragment's encoding. Defaults to `utf-8`.
+
+    Every other option is a placeholder's value.
     """
 
     has_content = True
@@ -200,8 +206,8 @@ class directive(rst.Directive):
         attributes["text"] = substitute(source, values)
         self.guard(attributes["text"])
         attributes["format"] = "html"
-        attributes["css"] = listed(self.options.get("css"))
-        attributes["js"] = listed(self.options.get("js"))
+        attributes["css"] = listed(self.options.get("css", ""))
+        attributes["js"] = listed(self.options.get("js", ""))
         return [nodes.raw(**attributes)]
 
     def check(self, source: str, values: dict[str, str]) -> None:
@@ -227,7 +233,8 @@ class directive(rst.Directive):
                 "embed: {{ %s }} has no option to fill it",
                 key,
                 location=(env.docname, self.lineno),
-                type="embed",
+                type="kaamiki",
+                subtype="embed",
             )
 
     def guard(self, markup: str) -> None:
@@ -247,13 +254,12 @@ class directive(rst.Directive):
             return
         for match in IFRAME.finditer(markup):
             src = unescape(next(_ for _ in match.groups() if _ is not None))
-            try:
-                parts = urlsplit(src.strip())
-                host = parts.hostname or ""
-            except ValueError:
-                parts, host = urlsplit(""), "?"
+            parts = urlsplit(src.strip())
+            host = parts.hostname or ""
+            if src.strip().lower() == "about:blank":
+                continue
             if parts.scheme.lower() in {"", "http", "https"}:
-                if not parts.netloc and host != "?":
+                if not parts.netloc:
                     continue
                 if any(host == _ or host.endswith(f".{_}") for _ in allowed):
                     continue
@@ -276,11 +282,8 @@ class directive(rst.Directive):
         env = self.state.document.settings.env
         relative, path = env.relfn2path(file, env.docname)
         encoding = self.options.get("encoding", "utf-8")
-        try:
-            with open(path, encoding=encoding) as fd:
-                source = fd.read()
-        except OSError as exc:
-            raise self.error(f"embed could not read {file!r}: {exc}") from exc
+        with open(path, encoding=encoding) as fd:
+            source = fd.read()
         env.note_dependency(relative)
         return source
 
@@ -311,20 +314,12 @@ def html_page_context(
     embeds = [_ for _ in findall(doctree, nodes.raw) if "css" in _]
     if not embeds:
         return
-    css = dict.fromkeys(listed(setting(app.config, "embed_css")))
-    js = dict.fromkeys(listed(setting(app.config, "embed_js")))
+    css = dict.fromkeys(setting(app.config, "embed_css"))
+    js = dict.fromkeys(setting(app.config, "embed_js"))
     for raw in embeds:
         css.update(dict.fromkeys(raw.get("css", ())))
         js.update(dict.fromkeys(raw.get("js", ())))
     loading = setting(app.config, "embed_js_loading")
-    if loading not in LOADING:
-        logger.warning(
-            "embed_js_loading takes %s, got %r; using defer",
-            ", ".join(LOADING),
-            loading,
-            type="embed",
-        )
-        loading = "defer"
     for filename in css:
         app.add_css_file(filename)
     for filename in js:

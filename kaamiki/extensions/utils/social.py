@@ -4,12 +4,10 @@ Social Metadata
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 The handler that works out a page's Open Graph and Twitter values.
 """
-
-from __future__ import annotations
 
 import typing as t
 
@@ -20,6 +18,8 @@ from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.doctree import standfirst
 from kaamiki.extensions.utils.doctree import summarise
 from kaamiki.extensions.utils.links import absolute
+from kaamiki.extensions.utils.settings import DESCRIPTION_LENGTH
+from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.text import plain
 from kaamiki.extensions.utils.text import tidy
 
@@ -84,11 +84,9 @@ def social_metadata(
         pages.
     """
     del templatename
-    options = app.config.html_context.get("km_open_graph") or {}
-    if options.get("enable") is False:
-        return
+    options = setting(app.config, "open_graph")
     meta: dict[str, str] = context.get("meta") or {}
-    limit = int(options.get("description_length", 200))
+    limit = int(options.get("description_length", DESCRIPTION_LENGTH))
     made = generated(pagename) if doctree is None else None
     title = tidy(meta.get("km-pg-title", "")) or plain(
         made[0]
@@ -125,4 +123,5 @@ def social_metadata(
         "card": meta.get("km-pg-card")
         or options.get("card", "summary_large_image"),
         "site": options.get("twitter_site", ""),
+        "enable": options.get("enable") is not False,
     }

@@ -4,12 +4,10 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 12 October 2026
+Last updated on: 15 October 2026
 
 What Kaamiki changes in the HTML Sphinx writes, as it writes it.
 """
-
-from __future__ import annotations
 
 import html
 import re
@@ -20,7 +18,9 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.locale import _
 
 from kaamiki.extensions.utils.doctree import badged
+from kaamiki.extensions.utils.links import REL
 from kaamiki.extensions.utils.links import opens_new_tab
+from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.templates import themed
 
 if t.TYPE_CHECKING:
@@ -31,7 +31,7 @@ if t.TYPE_CHECKING:
 else:
     base = object
 
-PILCROW: t.Final[frozenset[str]] = frozenset({"", "¶"})
+PILCROW: t.Final[frozenset[str]] = frozenset({"", "\u00b6"})
 BACKREF: re.Pattern[str] = re.compile(
     r'</a><a class="headerlink" href="([^"]*)" title="([^"]*)">(.*)',
     re.DOTALL,
@@ -54,11 +54,10 @@ class translator(base):
             heading follows the anchor. A site that
             set `html_permalinks_icon` of its own keeps it.
         """
-        options = self.config.html_context
         icon: str = self.config.html_permalinks_icon
         if icon.strip() in PILCROW:
             icon = ""
-        if options.get("km_add_copy_to_headerlinks", True):
+        if setting(self.config, "add_copy_to_headerlinks"):
             return f' aria-label="{html.escape(str(_("Copy link")))}"', icon
         return f' title="{title}"', icon
 
@@ -89,17 +88,15 @@ class translator(base):
         :param node: The section's title.
         :return: The opening and the closing markup.
         """
-        options = self.config.html_context
-        if not node.hasattr("refid") or not options.get(
-            "km_add_copy_to_headerlinks", True
+        if not node.hasattr("refid") or not setting(
+            self.config, "add_copy_to_headerlinks"
         ):
             return super().section_title_tags(node)
         refid = node["refid"]
         del node["refid"]
-        try:
-            return super().section_title_tags(node)
-        finally:
-            node["refid"] = refid
+        tags = super().section_title_tags(node)
+        node["refid"] = refid
+        return tags
 
     @t.override
     def depart_title(self, node: nodes.title) -> None:
@@ -148,7 +145,7 @@ class translator(base):
             and opens_new_tab(href, self.config)
         ):
             rel = str(attributes.get("rel") or "").split()
-            wanted = [*rel, "nofollow", "noopener"]
+            wanted = [*rel, *REL.split()]
             attributes["rel"] = " ".join(dict.fromkeys(wanted))
             attributes["target"] = "_blank"
         if isinstance(node, (nodes.bullet_list, nodes.enumerated_list)):
@@ -190,7 +187,7 @@ class translator(base):
         )
         if block is None:
             return
-        kit = bool(self.config.html_context.get("fa_kit"))
+        kit = bool(setting(self.config, "fa_kit"))
         icon = badged(node, block.get("language"), kit=kit)
         if icon:
             self.body.append(
