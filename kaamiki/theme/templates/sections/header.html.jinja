@@ -27,7 +27,7 @@ Last updated on: 08 October 2026
             <nav class="km-header__nav"
                  aria-label="{{ _('Primary navigation') }}">
                 <div class="km-header__nav-tree">
-                    {{ toctree(titles_only=km_toctree_titles_only, collapse=false, **km_toctree_args) }}
+                    {{ (km_header_toctree or toctree)(titles_only=km_toctree_titles_only, collapse=false, **km_toctree_args) }}
                 </div>
             </nav>
         {%- endif %}
@@ -61,7 +61,7 @@ Last updated on: 08 October 2026
                                 {%- if button is mapping %}
                                     <a href="{{ button.url }}"
                                        title="{{ text|e }}"
-                                       {% if button.new_tab %}rel="noopener nofollow" target="_blank"{% endif %}
+                                       {% if button.new_tab %}rel="{{ km_rel }}" target="_blank"{% endif %}
                                        class="km-header__icon-link"
                                        {{ button.extras if button.extras else '' }}>
                                         {%- if button.icon %}

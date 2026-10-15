@@ -4,7 +4,7 @@ Release Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 September 2026
-Last updated on: 09 October 2026
+Last updated on: 15 October 2026
 
 A `release` directive that writes one entry of a changelog::
 
@@ -20,8 +20,6 @@ A `release` directive that writes one entry of a changelog::
            - What works now.
 """
 
-from __future__ import annotations
-
 import re
 import typing as t
 from datetime import datetime as dt
@@ -30,21 +28,22 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 from sphinx import addnodes
 from sphinx.locale import _
-from sphinx.util import logging
+from sphinx.util import docname_join
 
+from kaamiki.extensions.utils import articles
 from kaamiki.extensions.utils import dated
 from kaamiki.extensions.utils import day
 from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import setting
+from kaamiki.extensions.utils.settings import TONES
 
 if t.TYPE_CHECKING:
+    from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
     from sphinx.writers.html import HTMLTranslator
-
-logger = logging.getLogger(__name__)
 
 name: t.Final[str] = "release"
 template: t.Final[str] = "directives/release.html.jinja"
-TONES: t.Final[tuple[str, ...]] = ("red", "yellow", "blue", "green")
 BUTTON: t.Final[tuple[str, ...]] = (
     "sd-sphinx-override",
     "sd-btn",
@@ -67,7 +66,7 @@ class directive(rst.Directive):
         - `article`: A page telling the story behind the release, as
           `:doc:` would name it. It's linked under the notes.
         - `article-label`: What the article's link says. Defaults to
-          "Read the article".
+          "Read release notes".
         - `date`: The day it went out, as `5 October 2026` or
           `2026-10-05`. It wins over the version.
         - `url`: The release elsewhere, a GitHub release say. It's
@@ -173,10 +172,8 @@ class directive(rst.Directive):
         the stylesheet to colour.
 
         A term in the site's own language is matched against Kaamiki's
-        translation of each name. They're translated here and not at
-        import, when Kaamiki's words haven't joined Sphinx's catalogue
-        yet. A group the site named in `release_kinds` also gets the
-        colour it was given.
+        translation of each name. A group the site named in
+        `release_kinds` also gets the colour it was given.
 
         :param body: The release's parsed content, changed in place.
         """
@@ -185,6 +182,8 @@ class directive(rst.Directive):
             str(key).strip().lower(): str(value).strip().lower()
             for key, value in setting(env.config, "release_kinds").items()
         }
+        # NOTE(xames3): Translated here and not at import, as Kaamiki's
+        # words only join Sphinx's catalogue once it has set up.
         kinds = {
             "added": str(_("Added")),
             "changed": str(_("Changed")),
@@ -213,19 +212,13 @@ class directive(rst.Directive):
                     ["km-release__kind", f"km-release__kind--{kind}"]
                 )
                 tone = tones.get(said)
-                if tone is None or kind in kinds:
-                    continue
-                if tone not in TONES:
-                    logger.warning(
-                        "release_kinds has %r for %s; a colour is one of %s",
-                        tone,
-                        said,
-                        ", ".join(TONES),
-                        location=(env.docname, self.lineno),
-                        type="release",
-                    )
-                    continue
-                term["classes"].append(f"km-release__tone--{tone}")
+                if tone is not None and kind not in kinds:
+                    if tone not in TONES:
+                        raise self.error(
+                            f"release_kinds has {tone!r} for {said}; a colour"
+                            f" is one of {', '.join(TONES)}"
+                        )
+                    term["classes"].append(f"km-release__tone--{tone}")
 
     def more(self) -> nodes.paragraph | None:
         """Link the article and the release elsewhere, if there are
@@ -236,6 +229,9 @@ class directive(rst.Directive):
         env = self.state.document.settings.env
         urls: list[nodes.Node] = []
         if "article" in self.options:
+            articles(env)[
+                docname_join(env.docname, self.options["article"])
+            ] = env.docname
             text = self.options.get("article-label") or str(
                 _("Read release notes")
             )
@@ -284,3 +280,44 @@ def visit(self: HTMLTranslator, node: node) -> None:
         dated(dt.fromisoformat(iso), self.builder.config) if iso else ""
     )
     self.body.append(render(template, **attributes))
+
+
+def purge(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
+    """Forget the articles a page's releases linked, as it's re-read.
+
+    :param app: The Sphinx application instance.
+    :param env: The build environment.
+    :param docname: The page about to be read again.
+    """
+    del app
+    found = articles(env)
+    for article in [key for key, page in found.items() if page == docname]:
+        del found[article]
+
+
+def merge(
+    app: Sphinx,
+    env: BuildEnvironment,
+    docnames: set[str],
+    other: BuildEnvironment,
+) -> None:
+    """Take in the articles a parallel reader found.
+
+    :param app: The Sphinx application instance.
+    :param env: The build environment.
+    :param docnames: The pages the reader read.
+    :param other: The reader's build environment.
+    """
+    del app
+    articles(env).update(
+        {key: page for key, page in articles(other).items() if page in docnames}
+    )
+
+
+def register(app: Sphinx) -> None:
+    """Keep track of the articles releases link to.
+
+    :param app: The Sphinx application instance.
+    """
+    app.connect("env-purge-doc", purge)
+    app.connect("env-merge-info", merge)
