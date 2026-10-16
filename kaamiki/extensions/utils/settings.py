@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 16 October 2026
 
 Kaamiki's settings, their defaults and the helpers that read them.
 """
@@ -49,6 +49,7 @@ ICONS: t.Final[dict[str, str]] = {
     "play": "fa-solid fa-play",
     "previous_button": "fa-solid fa-arrow-left",
     "reading_time": "fa-regular fa-clock",
+    "release_notes": "fa-solid fa-tag",
     "search": "fa-solid fa-magnifying-glass",
     "show_more": "fa-solid fa-chevron-down",
     "title_badge": "",

@@ -4,7 +4,7 @@ Release Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 September 2026
-Last updated on: 15 October 2026
+Last updated on: 16 October 2026
 
 A `release` directive that writes one entry of a changelog::
 
@@ -30,9 +30,12 @@ from sphinx import addnodes
 from sphinx.locale import _
 from sphinx.util import docname_join
 
+from kaamiki.extensions.roles import glyph
 from kaamiki.extensions.utils import articles
 from kaamiki.extensions.utils import dated
 from kaamiki.extensions.utils import day
+from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import icon
 from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils.settings import TONES
@@ -50,6 +53,7 @@ BUTTON: t.Final[tuple[str, ...]] = (
     "sd-text-wrap",
     "sd-btn-light",
 )
+NOTES: t.Final[str] = "km-release__notes"
 
 
 class node(nodes.Element):
@@ -245,7 +249,7 @@ class directive(rst.Directive):
                     refdoc=env.docname,
                     refexplicit=True,
                     refwarn=True,
-                    classes=list(BUTTON),
+                    classes=[*BUTTON, NOTES],
                 )
             )
         if "url" in self.options:
@@ -314,10 +318,41 @@ def merge(
     )
 
 
+def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
+    """Put the site's `release_notes` icon on the link to a release's
+    article.
+
+    Sphinx writes a link to a page out of its text alone, so the icon
+    goes in once the link has been resolved. An empty icon leaves the
+    link bare.
+
+    :param app: The Sphinx application instance.
+    :param doctree: The page's resolved doctree.
+    :param docname: The page being resolved (unused).
+    """
+    del docname
+    if app.builder.format != "html":
+        return
+    classes = icon(app.config.html_context["km_fa_icons"]["release_notes"])
+    if not classes:
+        return
+    after = setting(app.config, "button_icon_position") == "after"
+    for link in findall(doctree, nodes.reference):
+        if NOTES not in link["classes"]:
+            continue
+        badge = glyph("", "", classes=classes.split())
+        if after:
+            badge["classes"].append("km-icon-after")
+            link += badge
+        else:
+            link.insert(0, badge)
+
+
 def register(app: Sphinx) -> None:
-    """Keep track of the articles releases link to.
+    """Keep track of the articles releases link to and tag them.
 
     :param app: The Sphinx application instance.
     """
     app.connect("env-purge-doc", purge)
     app.connect("env-merge-info", merge)
+    app.connect("doctree-resolved", tag)
