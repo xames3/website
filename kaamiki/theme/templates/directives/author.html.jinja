@@ -28,10 +28,11 @@ Last updated on: 16 October 2026
             <div class="km-article__meta-group">
                 {%- if km_reading_time %}
                     {%- set km_seconds = [3, 2 + 0.7 * km_minutes]|min %}
-                    {%- set km_counter = ('<span class="km-ticker" style="--km-ticker-duration: ' ~ (km_seconds * 1000)|round|int ~ 'ms;">' ~ km_minutes ~ '</span>')|safe %}
+                    {%- set km_counter = ('<span class="km-ticker"
+                          style="--km-ticker-duration: ' ~ (km_seconds * 1000)|round|int ~ 'ms">' ~ km_minutes ~ '</span>')|safe %}
                     <p class="km-article__reading-time">
                         <i class="{{ km_fa_icons.reading_time }} km-article__reading-time-icon"
-                           aria-hidden="true"></i>{{ ngettext('%(num)d min read', '%(num)d mins read', km_minutes)|replace(km_minutes|string, km_counter, 1) }}
+                           aria-hidden="true"></i>{{ ngettext('%(num)d min read', '%(num)d mins read', km_minutes) |replace(km_minutes|string, km_counter, 1) }}
                     </p>
                 {%- endif %}
                 {%- if km_copy_url %}
