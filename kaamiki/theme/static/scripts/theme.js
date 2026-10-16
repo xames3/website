@@ -15,14 +15,12 @@
     const DROPDOWN_PX_FACTOR = 0.9;
     const FETCH_TIMEOUT_MS = 8000;
     const ARTICLE_BG_INTERVAL_MS = 7000;
-    const TICKER_RADIX = 10;
-    const TICKER_MAX_LAPS = 4;
-    const TICKER_EASING = 'cubic-bezier(0.25, 1, 0.5, 1)';
-    const TICKER_BLUR = 'blur(1.5px)';
-    const TICKER_BLUR_AT = 0.4;
+    const TICKER_CELLS = 11;
+    const TICKER_BLUR_PX = 2;
     const FOCUSABLE = 'a[href], button, input, select, textarea, summary, iframe, [tabindex]';
     const SIDEBAR_WIDE_PX = 768;
     const SCROLLTOP_AFTER_PX = 200;
+    const TOOLTIP_ROOM_PX = 32;
     const REVEAL_STEPS = 6;
     const REVEAL_SLACK_MS = 8;
     const REVEAL_WAITING = 'km-page-reveal-item';
@@ -121,8 +119,7 @@
         tooltipHold: () => getDurationMs('--km-tooltip-hold'),
         fast: () => getDurationMs('--km-duration-fast'),
         showMoreHold: () => getDurationMs('--km-show-more-hold'),
-        tickerBase: () => getDurationMs('--km-ticker-base'),
-        tickerStep: () => getDurationMs('--km-ticker-step'),
+        tickerDuration: () => getDurationMs('--km-ticker-duration'),
         walkthroughSwap: () => getDurationMs('--km-walkthrough-swap'),
     };
 
@@ -290,6 +287,18 @@
         return window.visualViewport?.height || window.innerHeight;
     }
 
+    let stableProbe = null;
+
+    function stableHeight() {
+        if (!stableProbe) {
+            stableProbe = document.createElement('div');
+            stableProbe.style.cssText = 'position: absolute; top: 0; width: 0; height: 100svh; visibility: hidden; pointer-events: none;';
+            stableProbe.setAttribute('aria-hidden', 'true');
+            document.body.append(stableProbe);
+        }
+        return stableProbe.offsetHeight || window.innerHeight;
+    }
+
     function showMoreDock() {
         return toPx(getCssVar('--km-show-more-dock'));
     }
@@ -399,7 +408,7 @@
 
         const fit = () => {
             const top = window.scrollY + content.getBoundingClientRect().top;
-            const room = Math.max(CLAMP_MIN_PX, viewportHeight() - top - tail());
+            const room = Math.max(CLAMP_MIN_PX, stableHeight() - top - tail());
             page.style.setProperty('--km-show-more-clamp', `${Math.round(room)}px`);
         };
 
@@ -807,6 +816,7 @@
         const range = document.createRange();
         range.selectNodeContents(link.parentElement);
         const text = range.getBoundingClientRect();
+        link.classList.toggle('km-tooltip-below', text.top - frame.top < TOOLTIP_ROOM_PX);
         link.style.setProperty('--km-headerlink-top', `${text.top - frame.top}px`);
         link.style.setProperty('--km-headerlink-x', `${(x ?? text.left) - frame.left}px`);
         return text;
@@ -1136,7 +1146,7 @@
 
         const limit = () => {
             const style = getComputedStyle(content);
-            const room = viewportHeight() - headerHeight()
+            const room = stableHeight() - headerHeight()
                 - summary.getBoundingClientRect().height
                 - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - tail();
             return Math.max(CLAMP_MIN_PX, Math.round(room));
@@ -1148,11 +1158,8 @@
                 return content.getBoundingClientRect().height
                     - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
             }
-            const clamped = details.classList.contains(CLAMPED);
-            details.classList.remove(CLAMPED);
-            const height = body.getBoundingClientRect().height;
-            details.classList.toggle(CLAMPED, clamped);
-            return height;
+            const bottoms = Array.from(body.children, (_) => _.getBoundingClientRect().bottom);
+            return Math.max(0, ...bottoms) - body.getBoundingClientRect().top;
         };
 
         const name = (next) => {
@@ -1402,61 +1409,78 @@
             : String(value);
     }
 
-    function buildTickerColumn(digit, index) {
-        const laps = Math.min(1 + index, TICKER_MAX_LAPS);
-        const stops = laps * TICKER_RADIX + digit;
-        const column = document.createElement('span');
-        column.className = 'km-github-repository__digit';
-        const reel = document.createElement('span');
-        reel.className = 'km-github-repository__reel';
-        for (let i = 0; i <= stops; i += 1) {
-            const cell = document.createElement('span');
-            cell.className = 'km-github-repository__cell';
-            cell.textContent = String(i % TICKER_RADIX);
-            reel.appendChild(cell);
-        }
-        column.appendChild(reel);
-        return {
-            column,
-            reel,
-            shift: `translateY(-${(stops / (stops + 1)) * 100}%)`,
-            duration: TIMING.tickerBase() + index * TIMING.tickerStep(),
-        };
+    function tickerSymbol(character) {
+        const symbol = document.createElement('span');
+        symbol.className = 'km-ticker__symbol';
+        symbol.textContent = character;
+        return symbol;
     }
 
-    function renderTicker(field, value) {
-        const ticker = document.createElement('span');
-        ticker.className = 'km-github-repository__ticker';
-        const columns = [];
-
-        for (const character of value) {
-            if (character < '0' || character > '9') {
-                const symbol = document.createElement('span');
-                symbol.className = 'km-github-repository__symbol';
-                symbol.textContent = character;
-                ticker.appendChild(symbol);
-                continue;
-            }
-            const built = buildTickerColumn(Number(character), columns.length);
-            ticker.appendChild(built.column);
-            columns.push(built);
+    function tickerWheel(place, shown, travel) {
+        const digit = document.createElement('span');
+        digit.className = 'km-ticker__digit';
+        digit.classList.toggle('km-is-shown', shown);
+        const reel = document.createElement('span');
+        reel.className = 'km-ticker__reel';
+        for (let i = 0; i < TICKER_CELLS; i += 1) {
+            const cell = document.createElement('span');
+            cell.className = 'km-ticker__cell';
+            cell.textContent = String(i % 10);
+            reel.appendChild(cell);
         }
+        digit.appendChild(reel);
+        return { digit, reel, place, shown, travel, at: 0 };
+    }
 
-        field.replaceChildren(ticker);
+    function turnTickerWheel(wheel, value, progress) {
+        if (!wheel.shown && value >= 10 ** wheel.place) {
+            wheel.shown = true;
+            wheel.digit.classList.add('km-is-shown');
+        }
+        const at = (wheel.travel * progress) % 10;
+        const blur = Math.min(TICKER_BLUR_PX, (at - wheel.at + 10) % 10);
+        wheel.reel.style.transform = `translateY(-${(at / TICKER_CELLS) * 100}%)`;
+        wheel.reel.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : '';
+        wheel.at = at;
+    }
+
+    function buildTicker(field, text) {
+        const decimal = text.includes('.');
+        const target = Number(text.replace(/\D/g, ''));
+        const places = Math.max(String(target).length, decimal ? 2 : 1);
+        const digits = String(target).padStart(places, '0');
         const reduced = prefersReducedMotion();
-        for (const { reel, shift, duration } of columns) {
-            if (reduced) {
-                reel.style.transform = shift;
-                continue;
-            }
-            reel.animate([
-                { transform: 'translateY(0%)', filter: 'blur(0)' },
-                { filter: TICKER_BLUR, offset: TICKER_BLUR_AT },
-                { transform: shift, filter: 'blur(0)' },
-            ], {
-                duration, easing: TICKER_EASING, fill: 'forwards',
-            });
+        const ticker = document.createElement('span');
+        ticker.className = 'km-ticker__wheels';
+        ticker.setAttribute('aria-hidden', 'true');
+        const wheels = [];
+        for (let place = places - 1; place >= 0; place -= 1) {
+            const index = places - 1 - place;
+            const travel = Number(digits[index]) + 10 * index;
+            const wheel = tickerWheel(place, reduced || place < (decimal ? 2 : 1), travel);
+            wheels.push(wheel);
+            ticker.appendChild(wheel.digit);
+            if (decimal && place === 1) ticker.appendChild(tickerSymbol('.'));
         }
+        if (/[kmb]$/.test(text)) ticker.appendChild(tickerSymbol(text.slice(-1)));
+        const label = document.createElement('span');
+        label.className = 'sr-only';
+        label.textContent = text;
+
+        wheels.forEach((wheel) => turnTickerWheel(wheel, reduced ? target : 0, reduced ? 1 : 0));
+        field.replaceChildren(label, ticker);
+
+        return (duration) => {
+            if (reduced || !target) return;
+            const began = performance.now();
+            const count = (now) => {
+                const time = clamp((now - began) / duration, 0, 1);
+                const progress = 1 - (1 - time) ** 4;
+                wheels.forEach((wheel) => turnTickerWheel(wheel, target * progress, progress));
+                if (time < 1) requestAnimationFrame(count);
+            };
+            requestAnimationFrame(count);
+        };
     }
 
     async function loadRepository(widget) {
@@ -1468,7 +1492,7 @@
         fields.forEach((field) => {
             const raw = Number(data[field.getAttribute('data-km-repository-count')]);
             const count = Number.isFinite(raw) ? Math.max(0, Math.trunc(raw)) : 0;
-            renderTicker(field, formatCount(count));
+            buildTicker(field, formatCount(count))(TIMING.tickerDuration());
         });
     }
 
@@ -1478,6 +1502,14 @@
             loadRepository,
             { rootMargin: '0px 0px -10% 0px' },
         );
+    }
+
+    function initTickers() {
+        document.querySelectorAll('.km-ticker').forEach((field) => {
+            const duration = parseFloat(field.style.getPropertyValue('--km-ticker-duration'));
+            const count = buildTicker(field, field.textContent);
+            onVisible([field], () => count(duration), { rootMargin: '0px 0px -10% 0px' });
+        });
     }
 
     function initInkReveal() {
@@ -2781,6 +2813,7 @@
             initYouTubeCards,
             initYouTubeFacades,
             initRepositoryWidgets,
+            initTickers,
             initInkReveal,
             initPageReveal,
             initArticleBackground,

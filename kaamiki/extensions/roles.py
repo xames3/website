@@ -4,7 +4,7 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 11 October 2026
+Last updated on: 16 October 2026
 
 Kaamiki's custom inline roles.
 """
@@ -30,6 +30,13 @@ if t.TYPE_CHECKING:
 COLOUR: re.Pattern[str] = re.compile(r"^[#\w(),.%\s/-]+$")
 WIDTHS: t.Final[tuple[float, float]] = (0.5, 4.0)
 WOBBLES: t.Final[tuple[float, float]] = (0.0, 2.0)
+SECONDS: t.Final[tuple[float, float]] = (0.1, 10.0)
+DURATION: re.Pattern[str] = re.compile(r"^(\d+(?:\.\d+)?)(ms|s)$")
+UNITS: t.Final[tuple[tuple[int, str], ...]] = (
+    (10**9, "b"),
+    (10**6, "m"),
+    (10**3, "k"),
+)
 # NOTE(xames3): A hyphen can't sit in a function's name, so `setup`
 # registers the icon roles from this, each with its Font Awesome style.
 ICONS: t.Final[dict[str, str]] = {
@@ -149,6 +156,22 @@ def _colour(config: t.Any, value: str) -> str:
         for key, colour in setting(config, "role_colours").items()
     }
     return names.get(value.strip().lower(), value.strip())
+
+
+def _short(number: int) -> str:
+    """Wrap a number in k, m or b, to one decimal, halves rounding up.
+
+    :param number: The number to wrap.
+    :return: The number as written when it's under a thousand.
+    """
+    if number < 1000:
+        return str(number)
+    for size, suffix in UNITS:
+        tenths = (number * 10 + size // 2) // size
+        if tenths >= 10:
+            whole, tenth = divmod(tenths, 10)
+            return f"{whole}.{tenth}".removesuffix(".0") + suffix
+    raise AssertionError(number)
 
 
 def _underline_svg(
@@ -389,6 +412,73 @@ def underline(
         f' --km-ul-ret: url("data:image/svg+xml,{rtl}");'
     )
     return [ink(rawtext, element, classes=["km-pencil"], style=style)], []
+
+
+def ticker(
+    role: str,
+    rawtext: str,
+    text: str,
+    lineno: int,
+    inliner: t.Any,
+    options: dict[str, t.Any] | None = None,
+    content: list[t.Any] | None = None,
+) -> tuple[list[nodes.Node], list[nodes.system_message]]:
+    """Roll a number up from zero.
+
+    The text reads `number`, then `short` and a duration after pipes,
+    both optional and in either order. `short` wraps the number in k, m
+    or b, a whole number shows without it. The duration is in `s` or
+    `ms`, from 0.1s to 10s, 2s unless the role gives one. The count
+    starts when the number scrolls into view::
+
+        We've :ticker:`2025` stars.
+        We've :ticker:`2025 | short` stars.
+        We've :ticker:`2025 | short | 1s` stars.
+
+    :param role: The role name, as written (unused).
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role sits on, for error reporting.
+    :param inliner: The docutils inliner that called this.
+    :param options: Role options (unused).
+    :param content: Role content (unused).
+    :return: The number and the error messages if it isn't a whole
+        number or a setting is off.
+    """
+    del role, options, content
+    number, *given = (_.strip() for _ in text.split("|"))
+    if not number.isascii() or not number.isdecimal():
+        return _reject(inliner, rawtext, lineno, f"Invalid number: {number!r}")
+    short = False
+    seconds = 2.0
+    seen: set[str] = set()
+    for part in given:
+        found = DURATION.match(part)
+        kind = "short" if part == "short" else "duration" if found else ""
+        if not kind or kind in seen:
+            return _reject(
+                inliner,
+                rawtext,
+                lineno,
+                f"Invalid ticker setting: {part!r}; it takes short"
+                " and a duration, once each",
+            )
+        seen.add(kind)
+        if found:
+            seconds = float(found[1]) / (1000 if found[2] == "ms" else 1)
+        else:
+            short = True
+    low, high = SECONDS
+    if not low <= seconds <= high:
+        return _reject(
+            inliner,
+            rawtext,
+            lineno,
+            f"Invalid ticker duration: use a time from {low:g}s to {high:g}s",
+        )
+    label = _short(int(number)) if short else str(int(number))
+    style = f"--km-ticker-duration: {round(seconds * 1000)}ms;"
+    return [ink(rawtext, label, classes=["km-ticker"], style=style)], []
 
 
 def _icon(

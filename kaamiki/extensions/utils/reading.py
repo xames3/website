@@ -44,7 +44,8 @@ def reading_time(doctree: nodes.document | None, config: Config) -> int:
     """Work out roughly how many minutes a page takes to read.
 
     Code isn't counted. Sadly, no one reads code these days because of
-    shitty AI slop.
+    shitty AI slop. Neither are the notes of a walkthrough, which a
+    reader scrolls through rather than reads.
 
     :param doctree: The resolved doctree or `None` for generated
         pages.

@@ -69,6 +69,7 @@ from kaamiki.extensions.explainer.tracer import execute
 from kaamiki.extensions.explainer.tracer import kinds
 from kaamiki.extensions.explainer.tracer import replay
 from kaamiki.extensions.explainer.tracer import show
+from kaamiki.extensions.utils import annotated
 from kaamiki.extensions.utils import badged
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import listed
@@ -115,7 +116,7 @@ PACES: t.Final[tuple[tuple[int, frozenset[str]], ...]] = (
 )
 
 
-class node(nodes.container):
+class node(annotated):
     """The parsed directive, waiting for `visit` to write it out.
 
     It's a `container` underneath, so a builder that has never heard of
