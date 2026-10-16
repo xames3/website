@@ -52,8 +52,7 @@
     --km-tooltip-hold: 1800ms;
     --km-show-more-hold: 3000ms;
     --km-walkthrough-swap: 420ms;
-    --km-ticker-base: 3900ms;
-    --km-ticker-step: 280ms;
+    --km-ticker-duration: 2600ms;
     --km-radius-round: 500px;
     --km-radius-normal: 1.15rem;
     --km-layout-sidebar: 250px;
@@ -465,7 +464,7 @@ div.deprecated .versionmodified {
     color: rgb(248 113 113)
 }
 
-.highlight {
+div.highlight {
     background-color: initial !important;
     position: relative
 }
@@ -496,6 +495,15 @@ code em {
 pre.literal-block {
     padding-left: 1rem;
     padding-right: 1rem
+}
+
+code.highlight {
+    background-color: hsl(var(--km-color-code-bg));
+    background-clip: padding-box;
+    border: 1px solid hsl(var(--km-color-muted-fg) / 0.3);
+    border-radius: 0.25rem;
+    padding: 2px 4px;
+    box-decoration-break: clone;
 }
 
 pre code {
@@ -1580,6 +1588,12 @@ html:not(.km-js) button.km-header__menu-toggle {
     }
 }
 
+@media (pointer: coarse) {
+    .km-search__input {
+        font-size: 1rem;
+    }
+}
+
 .km-search__submit {
     display: inline-flex;
     align-items: center;
@@ -1925,11 +1939,16 @@ html:not(.km-js) button.km-header__menu-toggle {
 
         &::after {
             z-index: 1;
-            top: calc(100% + 0.25rem);
+            top: calc(var(--km-headerlink-top, 0px) - 0.25rem);
             bottom: auto;
             left: clamp(2rem, var(--km-headerlink-x, 0px), calc(100% - 2rem));
-            transform: translateX(-50%);
+            transform: translate(-50%, -100%);
             letter-spacing: normal;
+        }
+
+        &.km-tooltip-below::after {
+            top: calc(100% + 0.25rem);
+            transform: translateX(-50%);
         }
     }
 }
@@ -2793,29 +2812,46 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     color: hsl(var(--km-color-green));
 }
 
-.km-github-repository__ticker {
+.km-ticker__wheels {
     display: inline-flex;
     align-items: center;
     color: hsl(var(--km-color-fg));
     font-variant-numeric: tabular-nums;
 }
 
-.km-github-repository__digit {
+.km-ticker__digit {
     display: block;
+    width: 0;
     height: 1.25em;
     overflow: hidden;
+    opacity: 0;
+    filter: blur(4px);
+    transition:
+        width var(--km-duration-normal) var(--km-ease-smooth),
+        opacity var(--km-duration-normal) var(--km-ease-smooth),
+        filter var(--km-duration-normal) var(--km-ease-smooth);
+
+    &.km-is-shown {
+        width: 1ch;
+        opacity: 1;
+        filter: blur(0);
+    }
 }
 
-.km-github-repository__reel {
+.km-ticker__reel {
     display: block;
 }
 
-.km-github-repository__cell,
-.km-github-repository__symbol {
+.km-ticker__cell,
+.km-ticker__symbol {
     display: block;
     height: 1.25em;
     line-height: 1.25em;
     text-align: center;
+}
+
+.km-ticker .km-ticker__wheels {
+    color: inherit;
 }
 
 .km-youtube-card {
