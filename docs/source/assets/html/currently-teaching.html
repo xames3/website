@@ -4,7 +4,7 @@ Currently teaching courses widget
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 16 February 2026
-Last updated on: 14 October 2026
+Last updated on: 16 October 2026
 #}
 <div class="currently-teaching"
      data-source="{{ source }}">
@@ -69,9 +69,21 @@ Last updated on: 14 October 2026
             return;
         }
 
+        function human(speed, last) {
+            var wait = speed * (0.6 + Math.random() * 0.8);
+            if (last === " " || last === "," || last === "-") wait += speed * Math.random();
+            if (Math.random() < 0.06) wait += speed * (2 + Math.random() * 2);
+            return Math.round(wait);
+        }
+
+        function typing(on) {
+            if (cursor) cursor.classList.toggle("km-is-typing", on);
+        }
+
         function tick() {
             var current = courses[courseIndex];
             if (!isDeleting) {
+                typing(true);
                 charIndex++;
                 element.textContent = current.substring(0, charIndex);
                 if (charIndex === current.length) {
@@ -79,6 +91,7 @@ Last updated on: 14 October 2026
                         "currently-teaching__course--idle"
                     );
                     isDeleting = true;
+                    typing(false);
                     setTimeout(function() {
                         element.classList.remove(
                             "currently-teaching__course--idle"
@@ -87,17 +100,19 @@ Last updated on: 14 October 2026
                     }, {{ pause-after-typing }});
                     return;
                 }
-                setTimeout(tick, {{ typing-speed }});
+                setTimeout(tick, human({{ typing-speed }}, current.charAt(charIndex - 1)));
             } else {
+                typing(true);
                 charIndex--;
                 element.textContent = current.substring(0, charIndex);
                 if (charIndex === 0) {
                     isDeleting = false;
                     courseIndex = (courseIndex + 1) % courses.length;
+                    typing(false);
                     setTimeout(tick, {{ pause-after-deleting }});
                     return;
                 }
-                setTimeout(tick, {{ deleting-speed }});
+                setTimeout(tick, human({{ deleting-speed }}, ""));
             }
         }
 

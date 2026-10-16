@@ -71,6 +71,8 @@ Last updated on: 14 October 2026
         flex-wrap: nowrap;
         animation: contributed-at-scroll var(--km-contributed-at-scroll-duration) linear infinite;
         animation-play-state: running;
+        will-change: transform;
+        backface-visibility: hidden;
     }
 
     .contributed-at-scroller[data-direction="right"][data-animated="true"] .contributed-at-scroller__list {
@@ -126,8 +128,12 @@ Last updated on: 14 October 2026
     }
 
     @keyframes contributed-at-scroll {
+        from {
+            transform: translate3d(0, 0, 0);
+        }
+
         to {
-            transform: translateX(calc(-1 * var(--km-contributed-at-loop-distance, 50%)));
+            transform: translate3d(calc(-1 * var(--km-contributed-at-loop-distance, 50%)), 0, 0);
         }
     }
 
@@ -156,12 +162,16 @@ Last updated on: 14 October 2026
                 }
 
                 let resizeObserver;
+                let lastDistance = 0;
                 let resizeHandlerAttached = false;
 
                 function updateLoopDistance() {
-                    const totalWidth = list.scrollWidth;
-                    if (!totalWidth) return;
-                    const loopDistance = totalWidth / 2;
+                    const first = list.children[originals.length];
+                    if (!first) return;
+                    const loopDistance = first.getBoundingClientRect().left - list.children[0].getBoundingClientRect().left;
+                    if (!loopDistance) return;
+                    if (Math.abs(loopDistance - lastDistance) < 0.5) return;
+                    lastDistance = loopDistance;
                     list.style.setProperty('--km-contributed-at-loop-distance', `${loopDistance}px`);
                 }
 

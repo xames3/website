@@ -38,17 +38,19 @@
     --km-show-more-fade: 11rem;
     --km-show-more-dock: 2rem;
     --km-ease-swift: cubic-bezier(0.22, 0.61, 0.36, 1);
-    --km-ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+    --km-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --km-spring-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+    --km-spring-snappy: cubic-bezier(0.34, 1.3, 0.64, 1);
     --km-duration-hover: 500ms;
     --km-duration-fast: 250ms;
-    --km-duration-drawer: 950ms;
-    --km-duration-dropdown-min: 1250ms;
-    --km-duration-dropdown-max: 1250ms;
+    --km-duration-drawer: 520ms;
+    --km-duration-dropdown-min: 400ms;
+    --km-duration-dropdown-max: 650ms;
     --km-duration-normal: 750ms;
     --km-duration-slow: 1000ms;
     --km-duration-clamp: 420ms;
     --km-reveal-step: 135ms;
-    --km-reveal-duration: 1125ms;
+    --km-reveal-duration: 750ms;
     --km-tooltip-hold: 1800ms;
     --km-show-more-hold: 3000ms;
     --km-walkthrough-swap: 420ms;
@@ -67,10 +69,17 @@
     --km-backdrop-color: color-mix(in srgb, hsl(var(--km-color-bg)) calc(var(--km-backdrop-alpha) * 100%), transparent);
     --km-color-more-bg: 0 0% 15%;
     --km-color-more-hover: var(--km-color-muted-bg);
-    --km-list-ring: hsl(var(--km-color-border));
+    --km-list-ring: 0 0% 45%;
     --km-color-header-bg: color-mix(in srgb, hsl(var(--km-color-bg)) 40%, transparent);
     --km-font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
     --km-font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+    :root {
+        --km-spring-smooth: linear(0, 0.035, 0.074, 0.116, 0.16, 0.205, 0.251, 0.296, 0.34, 0.384, 0.425, 0.465, 0.503, 0.539, 0.574, 0.606, 0.637, 0.665, 0.692, 0.716, 0.74, 0.761, 0.781, 0.799, 0.816, 0.832, 0.847, 0.86, 0.872, 0.883, 0.894, 0.903, 0.912, 0.92, 0.927, 0.934, 0.94, 0.945, 0.95, 0.955, 0.959, 0.963, 0.966, 0.97, 0.972, 0.975, 0.977, 0.98, 0.981, 0.983, 0.985, 0.986, 0.988, 0.989, 0.99, 0.991, 0.992, 0.993, 0.993, 0.994, 0.995, 0.995, 0.996, 1);
+        --km-spring-snappy: linear(0, 0.035, 0.075, 0.12, 0.167, 0.217, 0.269, 0.321, 0.373, 0.424, 0.475, 0.523, 0.571, 0.616, 0.659, 0.7, 0.738, 0.773, 0.807, 0.837, 0.865, 0.891, 0.914, 0.935, 0.953, 0.97, 0.984, 0.997, 1.008, 1.017, 1.025, 1.032, 1.037, 1.041, 1.044, 1.047, 1.048, 1.049, 1.049, 1.048, 1.047, 1.046, 1.044, 1.043, 1.041, 1.038, 1.036, 1.034, 1.031, 1.029, 1.027, 1.024, 1.022, 1.02, 1.018, 1.016, 1.014, 1.012, 1.01, 1.009, 1.008, 1.006, 1.005, 1);
+    }
 }
 html[data-km-fa-style="regular"] {
     --km-icon-font: var(--fa-font-regular);
@@ -604,8 +613,8 @@ dt .classifier:before {
     grid-auto-rows: max-content;
     line-height: 1.25rem;
     overflow: hidden;
-    transition-duration: .3s;
-    transition-timing-function: cubic-bezier(.4, 0, .2, 1)
+    transition-duration: var(--km-duration-fast);
+    transition-timing-function: var(--km-spring-smooth)
 }
 
 @media (prefers-reduced-motion:reduce) {
@@ -624,9 +633,9 @@ dt .classifier:before {
     opacity: 1;
     padding: .5rem 0 .5rem .75rem;
     position: relative;
-    transition-duration: .5s;
+    transition-duration: var(--km-duration-hover);
     transition-property: opacity;
-    transition-timing-function: cubic-bezier(.4, 0, .2, 1)
+    transition-timing-function: var(--km-ease-standard)
 }
 
 #km-sidebar a {
@@ -807,13 +816,11 @@ html.km-no-transitions *::after {
     from {
         opacity: 0;
         transform: translateY(0.5rem);
-        filter: blur(var(--km-backdrop-blur));
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
-        filter: blur(0);
     }
 }
 
@@ -834,7 +841,7 @@ html.km-page-loading :is(.km-header,
 }
 
 .km-page-reveal-item--shown {
-    animation: km-page-fade-in var(--km-reveal-duration) var(--km-ease-smooth);
+    animation: km-page-fade-in var(--km-reveal-duration) var(--km-spring-smooth);
 }
 
 .km-shell {
@@ -852,8 +859,8 @@ html.km-page-loading :is(.km-header,
     transform: translateX(-100%);
     opacity: 0;
     transition:
-        transform var(--km-duration-fast) var(--km-ease-swift),
-        opacity var(--km-duration-fast) var(--km-ease-swift);
+        transform var(--km-duration-fast) var(--km-spring-smooth),
+        opacity var(--km-duration-fast) var(--km-ease-standard);
 
     &:focus {
         transform: translateX(0);
@@ -902,7 +909,7 @@ html.km-page-loading :is(.km-header,
     }
 
     .km-page--clamping>.km-page__content {
-        transition: max-height var(--km-duration-clamp) var(--km-ease-smooth);
+        transition: max-height var(--km-duration-clamp) var(--km-spring-smooth);
     }
 
     .km-page--clamped>.km-feedback-shell,
@@ -917,7 +924,7 @@ html.km-page-loading :is(.km-header,
         justify-content: center;
         margin-top: 2rem;
         pointer-events: none;
-        transition: opacity var(--km-duration-fast) var(--km-ease-swift);
+        transition: opacity var(--km-duration-fast) var(--km-ease-standard);
     }
 
     .km-page--clamped>.km-page__more,
@@ -938,7 +945,7 @@ html.km-page-loading :is(.km-header,
                 hsl(var(--km-color-bg) / 0.9) calc(var(--km-show-more-fade) * 0.6),
                 hsl(var(--km-color-bg)) var(--km-show-more-fade));
         opacity: 0;
-        transition: opacity var(--km-duration-clamp) var(--km-ease-smooth);
+        transition: opacity var(--km-duration-clamp) var(--km-spring-smooth);
     }
 
     .km-page--clamped>.km-page__more::before,
@@ -963,7 +970,7 @@ html.km-page-loading :is(.km-header,
     }
 
     .km-dropdown--clamping>.sd-summary-content>.km-dropdown__body {
-        transition: max-height var(--km-duration-clamp) var(--km-ease-smooth);
+        transition: max-height var(--km-duration-clamp) var(--km-spring-smooth);
     }
 
     .km-dropdown--long>.sd-summary-content>.km-dropdown__more {
@@ -972,7 +979,7 @@ html.km-page-loading :is(.km-header,
         display: flex;
         justify-content: center;
         pointer-events: none;
-        transition: opacity var(--km-duration-fast) var(--km-ease-swift);
+        transition: opacity var(--km-duration-fast) var(--km-ease-standard);
     }
 
     .km-dropdown--clamped>.sd-summary-content>.km-dropdown__more,
@@ -991,7 +998,7 @@ html.km-page-loading :is(.km-header,
     .km-page__more--idle,
     .km-dropdown__more--idle {
         opacity: 0;
-        transition: opacity var(--km-duration-slow) var(--km-ease-smooth);
+        transition: opacity var(--km-duration-slow) var(--km-ease-standard);
 
         & :is(.km-page__more-button, .km-dropdown__more-button) {
             pointer-events: none;
@@ -1030,7 +1037,7 @@ html.km-page-loading :is(.km-header,
     .km-page__more-icon,
     .km-dropdown__more-icon {
         font-size: 0.75rem;
-        transition: transform var(--km-duration-hover) var(--km-ease-swift);
+        transition: transform var(--km-duration-hover) var(--km-spring-snappy);
     }
 
     .km-page__more-button[aria-expanded="true"] .km-page__more-icon,
@@ -1220,7 +1227,7 @@ html.km-page-loading :is(.km-header,
             content: "\f078";
             font: var(--fa-font-solid);
             font-size: 0.5rem;
-            transition: transform var(--km-duration-hover) var(--km-ease-swift);
+            transition: transform var(--km-duration-hover) var(--km-spring-snappy);
             text-rendering: auto;
         }
     }
@@ -1232,7 +1239,7 @@ html.km-page-loading :is(.km-header,
             content: "\f078";
             font: var(--fa-font-solid);
             font-size: 0.5rem;
-            transition: transform var(--km-duration-hover) var(--km-ease-swift);
+            transition: transform var(--km-duration-hover) var(--km-spring-snappy);
             text-rendering: auto;
         }
     }
@@ -1254,8 +1261,8 @@ html.km-page-loading :is(.km-header,
         opacity: 0;
         translate: 0 -0.375rem;
         transition:
-            opacity var(--km-duration-fast) var(--km-ease-smooth),
-            translate var(--km-duration-fast) var(--km-ease-smooth),
+            opacity var(--km-duration-fast) var(--km-ease-standard),
+            translate var(--km-duration-fast) var(--km-spring-smooth),
             visibility 0s linear var(--km-duration-fast);
         position: absolute;
         top: calc(100% + 1rem);
@@ -1316,8 +1323,8 @@ html.km-page-loading :is(.km-header,
         opacity: 1;
         translate: 0 0;
         transition:
-            opacity var(--km-duration-fast) var(--km-ease-smooth),
-            translate var(--km-duration-fast) var(--km-ease-smooth),
+            opacity var(--km-duration-fast) var(--km-ease-standard),
+            translate var(--km-duration-fast) var(--km-spring-smooth),
             visibility 0s;
     }
 }
@@ -1384,7 +1391,7 @@ html.km-page-loading :is(.km-header,
     visibility: hidden;
     transform: translateX(100%);
     transition:
-        transform var(--km-duration-drawer) var(--km-ease-smooth),
+        transform var(--km-duration-drawer) var(--km-spring-smooth),
         visibility var(--km-duration-drawer);
 }
 
@@ -1706,7 +1713,7 @@ html:not(.km-js) button.km-header__menu-toggle {
 
         &:hover {
             text-decoration-color: hsl(var(--km-color-url));
-            transition: text-decoration-color var(--km-duration-slow) var(--km-ease-smooth);
+            transition: text-decoration-color var(--km-duration-slow) var(--km-ease-standard);
         }
     }
 
@@ -1753,7 +1760,7 @@ html:not(.km-js) button.km-header__menu-toggle {
                 place-items: center;
                 width: 2.1538em;
                 height: 2.1538em;
-                border: 1px dashed var(--km-list-ring);
+                border: 1px dashed hsl(var(--km-list-ring));
                 border-radius: 50%;
                 font-size: 0.8125em;
                 font-weight: 500;
@@ -1769,7 +1776,7 @@ html:not(.km-js) button.km-header__menu-toggle {
                 bottom: calc(0.125em - var(--km-list-space));
                 left: calc(0.875em - 0.5px);
                 width: 1px;
-                background-color: var(--km-list-ring);
+                background-color: hsl(var(--km-list-ring) / 0.75);
             }
         }
 
@@ -1975,7 +1982,7 @@ blockquote {
     & p:first-child::before,
     & p:first-child::after {
         font-size: 2rem;
-        line-height: 2.25rem;
+        line-height: 0;
         font-family: Georgia, "Times New Roman", Times, serif;
         vertical-align: middle;
     }
@@ -2040,7 +2047,7 @@ table.docutils caption {
 }
 
 .km-zoom-scale {
-    transition: transform var(--km-duration-slow) var(--km-ease-swift);
+    transition: transform var(--km-duration-slow) var(--km-spring-smooth);
 }
 
 #km-content figure.km-zoom.km-is-revealed .km-zoom-scale {
@@ -2056,7 +2063,7 @@ table.docutils caption {
     border-radius: 0;
     transform: scale(var(--km-fuzzy-overscan));
     filter: blur(var(--km-fuzzy-radius));
-    transition: filter var(--km-duration-slow) var(--km-ease-swift);
+    transition: filter var(--km-duration-slow) var(--km-ease-standard);
 }
 
 #km-content figure.km-fuzzy-blur.km-is-revealed .km-zoom-scale img {
@@ -2075,7 +2082,7 @@ table.docutils caption {
     opacity: 0;
     pointer-events: none;
     image-rendering: pixelated;
-    transition: opacity var(--km-duration-slow) var(--km-ease-swift);
+    transition: opacity var(--km-duration-slow) var(--km-ease-standard);
 }
 
 .km-pixelated-canvas.km-is-drawn {
@@ -2088,7 +2095,7 @@ table.docutils caption {
 
 .km-grayscale {
     filter: grayscale(100%);
-    transition: filter var(--km-duration-fast) linear;
+    transition: filter var(--km-duration-fast) var(--km-ease-standard);
 
     &:hover {
         filter: grayscale(0%);
@@ -2162,7 +2169,7 @@ table.docutils caption {
     color: hsl(var(--km-color-fg-strong));
     font-size: 1.25rem;
     translate: -50% -50%;
-    transition: scale var(--km-duration-fast) var(--km-ease-smooth);
+    transition: scale var(--km-duration-fast) var(--km-spring-snappy);
 }
 
 .km-media__facade:is(:hover, :focus-visible) .km-media__facade-icon {
@@ -2295,7 +2302,7 @@ button.copybtn {
     color: hsl(var(--km-color-fg)) !important;
     top: 0.5em;
     right: 0.25em;
-    transition: opacity var(--km-duration-fast) var(--km-ease-swift);
+    transition: opacity var(--km-duration-fast) var(--km-ease-standard);
 
     &::before {
         content: "\f328";
@@ -2610,7 +2617,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     opacity: 0.3;
     filter: grayscale(1);
     animation: km-article-bg-zoom calc(8 * var(--km-duration-slow)) ease-in-out infinite;
-    transition: opacity var(--km-duration-slow) ease-in-out;
+    transition: opacity var(--km-duration-slow) var(--km-ease-standard);
     mask-image:
         linear-gradient(to right, transparent 0%, hsl(var(--km-color-bg)) 50%, hsl(var(--km-color-bg)) 50%, transparent 100%),
         linear-gradient(to bottom, transparent 0%, hsl(var(--km-color-bg)) 50%, hsl(var(--km-color-bg)) 50%, transparent 100%);
@@ -2645,7 +2652,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     border-radius: var(--km-radius-round);
     font-size: 1rem;
     background-color: hsl(var(--km-color-muted-bg));
-    transition: opacity var(--km-duration-fast) var(--km-ease-swift);
+    transition: opacity var(--km-duration-fast) var(--km-ease-standard);
 }
 
 .km-scrolltop--hidden {
@@ -2827,9 +2834,9 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     opacity: 0;
     filter: blur(4px);
     transition:
-        width var(--km-duration-normal) var(--km-ease-smooth),
-        opacity var(--km-duration-normal) var(--km-ease-smooth),
-        filter var(--km-duration-normal) var(--km-ease-smooth);
+        width var(--km-duration-normal) var(--km-spring-smooth),
+        opacity var(--km-duration-normal) var(--km-ease-standard),
+        filter var(--km-duration-normal) var(--km-ease-standard);
 
     &.km-is-shown {
         width: 1ch;
@@ -3187,7 +3194,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
         background: hsl(var(--km-color-surface));
         color: hsl(var(--km-color-fg));
         border-radius: calc(var(--km-radius-normal) / 4);
-        transition: opacity var(--km-duration-fast) var(--km-ease-swift);
+        transition: opacity var(--km-duration-fast) var(--km-ease-standard);
     }
 
     &.km-show-tooltip::after {
@@ -3359,7 +3366,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
 
         & p:first-child::before,
         & p:first-child::after {
-            line-height: 1rem;
+            line-height: 0;
         }
     }
 
@@ -3658,7 +3665,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
 .km-walkthrough {
     --km-walkthrough-bar: 3px;
     --km-walkthrough-dim: 0.3;
-    --km-walkthrough-gap: 3rem;
+    --km-walkthrough-gap: 5rem;
     --km-walkthrough-pad: 0.85rem;
     margin-block: 3rem;
     position: relative;
@@ -3714,7 +3721,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     inset-inline-end: 0.25rem;
     opacity: 0;
     position: absolute;
-    transition: opacity 0.3s;
+    transition: opacity var(--km-duration-fast) var(--km-ease-standard);
     z-index: 3;
 }
 
@@ -3743,7 +3750,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     margin-inline-start: auto;
     opacity: 0.5;
     position: relative;
-    transition: opacity var(--km-duration-fast) var(--km-ease-swift);
+    transition: opacity var(--km-duration-fast) var(--km-ease-standard);
     width: 1.75rem;
 
     &:is(:hover, :focus-visible, .success) {
@@ -3816,6 +3823,11 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     outline-offset: -2px;
 }
 
+/* NOTE(xames3): the pre carries `highlight`, so Pygments paints it grey. */
+pre.km-walkthrough__code {
+    background-color: hsl(var(--km-color-code-bg));
+}
+
 .km-walkthrough__code {
     border-radius: 0;
     line-height: 1.7;
@@ -3827,7 +3839,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
 }
 
 .km-walkthrough[data-km-mode] .km-walkthrough__code {
-    transition: translate var(--km-walkthrough-swap) var(--km-ease-smooth);
+    transition: translate var(--km-walkthrough-swap) var(--km-spring-smooth);
     translate: 0 calc(var(--km-walkthrough-shift, 0px) * -1);
 }
 
@@ -3849,7 +3861,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
 
 .km-walkthrough__src {
     display: inline-block;
-    transition: opacity var(--km-duration-fast) var(--km-ease-swift);
+    transition: opacity var(--km-duration-fast) var(--km-ease-standard);
 }
 
 .km-walkthrough__code--linenos .km-walkthrough__line {
@@ -3985,7 +3997,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     max-height: calc(8 * 1.5em + 1rem);
     overflow: auto;
     padding: 0.5rem var(--km-walkthrough-pad);
-    transition: height var(--km-walkthrough-swap) var(--km-ease-smooth);
+    transition: height var(--km-walkthrough-swap) var(--km-spring-smooth);
     white-space: pre-wrap;
 }
 
@@ -4066,7 +4078,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
 .km-walkthrough[data-km-mode="stage"] .km-walkthrough__note {
     margin-block: 0 var(--km-walkthrough-gap);
     opacity: var(--km-walkthrough-dim);
-    transition: opacity var(--km-walkthrough-swap) var(--km-ease-smooth);
+    transition: opacity var(--km-walkthrough-swap) var(--km-ease-standard);
 }
 
 .km-walkthrough[data-km-mode="stage"] .km-walkthrough__note:is([data-km-active], :focus-within) {
@@ -4141,7 +4153,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     margin-inline-start: -1.25ch;
     position: sticky;
     text-align: center;
-    transition: opacity var(--km-walkthrough-swap) var(--km-ease-smooth);
+    transition: opacity var(--km-walkthrough-swap) var(--km-ease-standard);
     user-select: none;
     width: 1.25ch;
     z-index: 2;
@@ -4166,8 +4178,8 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
 .km-attempts .km-walkthrough__out {
     box-shadow: inset 0 0 transparent,
         inset 0 0 0 100vmax transparent;
-    transition: box-shadow var(--km-walkthrough-swap) var(--km-ease-smooth),
-        height var(--km-walkthrough-swap) var(--km-ease-smooth);
+    transition: box-shadow var(--km-walkthrough-swap) var(--km-ease-standard),
+        height var(--km-walkthrough-swap) var(--km-spring-smooth);
 }
 
 .km-attempts .km-walkthrough__out[data-km-verdict="broke"] {
@@ -4307,7 +4319,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
 
     &:has(> .km-page-reveal-item--shown:first-child)::before,
     &:has(> .km-page-reveal-item--shown:first-child)::after {
-        animation: km-page-fade-in var(--km-reveal-duration) var(--km-ease-smooth);
+        animation: km-page-fade-in var(--km-reveal-duration) var(--km-spring-smooth);
     }
 }
 
