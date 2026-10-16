@@ -101,7 +101,7 @@ details.sd-dropdown summary.sd-summary-title svg {
 
 .sd-tab-set>input:checked+label+.sd-tab-content,
 .sd-tab-set>.km-is-current {
-    animation: km-tab-in var(--km-duration-fast) var(--km-ease-smooth);
+    animation: km-tab-in var(--km-duration-fast) cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @keyframes km-tab-in {
@@ -139,7 +139,7 @@ details.sd-dropdown .sd-summary-chevron-right::before {
     font: var(--km-icon-font);
     margin-left: 0.5rem;
     transform: rotateZ(0deg) !important;
-    transition: transform var(--km-duration-fast) var(--km-ease-smooth);
+    transition: transform var(--km-duration-fast) var(--km-spring-snappy);
 }
 
 details .sd-tab-content .sd-card-text {
@@ -250,8 +250,8 @@ nav a svg .sd-material-icon {
 @media (prefers-reduced-motion: no-preference) {
     .km-tab-bar.km-is-sliding::before {
         transition:
-            translate var(--km-duration-hover) var(--km-ease-smooth),
-            width var(--km-duration-hover) var(--km-ease-smooth);
+            translate var(--km-duration-hover) cubic-bezier(0.32, 0.72, 0, 1),
+            width var(--km-duration-hover) cubic-bezier(0.32, 0.72, 0, 1);
     }
 }
 

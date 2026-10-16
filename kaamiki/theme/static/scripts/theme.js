@@ -5,6 +5,10 @@
     const SCROLL_PATIENCE_MS = 3000;
     const GLIDE_STOPS = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
     const GLIDE_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
+    const GLIDE_BASE_MS = 300;
+    const GLIDE_PX_FACTOR = 0.1;
+    const GLIDE_MIN_MS = 400;
+    const GLIDE_MAX_MS = 900;
     const HASH_SETTLE_MS = 2600;
     const CLAMP_SLACK_PX = 48;
     const CLAMP_SETTLE_MS = 60;
@@ -37,6 +41,7 @@
     const WALKTHROUGH_INPUT = 500;
     const WALKTHROUGH_GLIDE = 1500;
     const WALKTHROUGH_FOCUS = 300;
+    const WALKTHROUGH_STIFFNESS = 22;
     const WALKTHROUGH_STACK_LINES = 12;
     const ATTEMPTS_SEE = 2;
     const ATTEMPTS_NEAR = 2;
@@ -110,6 +115,20 @@
         const value = raw.endsWith('ms') ? parseFloat(raw) : parseFloat(raw) * 1000;
         durationCache.set(name, value);
         return value;
+    }
+
+    function springProgress() {
+        const raw = getCssVar('--km-spring-smooth');
+        const points = raw.startsWith('linear(') ? raw.slice(7, -1).split(',').map(Number) : null;
+        // NOTE(xames3): the last two stops of the spring jump to 1; stop at
+        // the rest value so the reels land without a snap or a stuck blur.
+        const last = points ? points.length - 3 : 0;
+        return (time) => {
+            if (!points) return 1 - (1 - time) ** 4;
+            const at = time * last;
+            const low = Math.min(Math.floor(at), last - 1);
+            return (points[low] + (points[low + 1] - points[low]) * (at - low)) / points[last];
+        };
     }
 
     const TIMING = {
@@ -571,54 +590,43 @@
         });
     }
 
-    function scrollSettled(endY) {
-        const began = performance.now();
-        let last = window.scrollY;
-        let moved = false;
-        let quiet = 0;
-        return new Promise((resolve) => {
-            const look = (now) => {
-                const y = window.scrollY;
-                moved = moved || y !== last;
-                quiet = y === last ? quiet + 1 : 0;
-                last = y;
-                if (Math.abs(y - endY) < 1 || (moved && quiet >= SCROLL_QUIET_FRAMES)
-                    || now - began > SCROLL_PATIENCE_MS) {
-                    resolve();
-                    return;
-                }
-                requestAnimationFrame(look);
-            };
-            requestAnimationFrame(look);
-        });
-    }
+    let glideStop = null;
 
     function glideTo(targetY) {
+        const startY = window.scrollY;
         const endY = clamp(targetY, 0, Math.max(0, root.scrollHeight - window.innerHeight));
-        if (Math.abs(endY - window.scrollY) < 1) return Promise.resolve(true);
+        if (Math.abs(endY - startY) < 1) return Promise.resolve(true);
         if (prefersReducedMotion()) {
             window.scrollTo(0, endY);
             return Promise.resolve(true);
         }
-        let stopped = false;
-        const stop = (event) => {
-            if (event.type === 'keydown' && !GLIDE_KEYS.has(event.key)) return;
-            if (event.type === 'wheel' && !event.deltaX && !event.deltaY) return;
-            release();
-            stopped = true;
-            const previousBehavior = root.style.scrollBehavior;
-            root.style.scrollBehavior = 'auto';
-            window.scrollTo(0, window.scrollY);
-            root.style.scrollBehavior = previousBehavior || '';
-        };
-        const release = () => {
-            GLIDE_STOPS.forEach((type) => window.removeEventListener(type, stop, true));
-        };
-        GLIDE_STOPS.forEach((type) => window.addEventListener(type, stop, { capture: true, passive: true }));
-        window.scrollTo({ top: endY, behavior: 'smooth' });
-        return scrollSettled(endY).then(() => {
-            release();
-            return !stopped;
+        glideStop?.();
+        const distance = endY - startY;
+        const duration = clamp(GLIDE_BASE_MS + Math.abs(distance) * GLIDE_PX_FACTOR, GLIDE_MIN_MS, GLIDE_MAX_MS);
+        const spring = springProgress();
+        return new Promise((resolve) => {
+            let frame = 0;
+            const began = performance.now();
+            const finish = (arrived) => {
+                cancelAnimationFrame(frame);
+                GLIDE_STOPS.forEach((type) => window.removeEventListener(type, stop, true));
+                glideStop = null;
+                resolve(arrived);
+            };
+            const stop = (event) => {
+                if (event?.type === 'keydown' && !GLIDE_KEYS.has(event.key)) return;
+                if (event?.type === 'wheel' && !event.deltaX && !event.deltaY) return;
+                finish(false);
+            };
+            const step = (now) => {
+                const time = clamp((now - began) / duration, 0, 1);
+                window.scrollTo({ top: startY + distance * spring(time), behavior: 'instant' });
+                if (time === 1) finish(true);
+                else frame = requestAnimationFrame(step);
+            };
+            glideStop = stop;
+            GLIDE_STOPS.forEach((type) => window.addEventListener(type, stop, { capture: true, passive: true }));
+            frame = requestAnimationFrame(step);
         });
     }
 
@@ -1270,7 +1278,7 @@
     }
 
     function initDropdowns() {
-        const easing = getCssVar('--km-ease-smooth');
+        const easing = getCssVar('--km-spring-smooth');
 
         document.querySelectorAll('details.sd-dropdown').forEach((details, index) => {
             const summary = details.querySelector(':scope > summary');
@@ -1432,13 +1440,13 @@
         return { digit, reel, place, shown, travel, at: 0 };
     }
 
-    function turnTickerWheel(wheel, value, progress) {
+    function turnTickerWheel(wheel, value, progress, landed) {
         if (!wheel.shown && value >= 10 ** wheel.place) {
             wheel.shown = true;
             wheel.digit.classList.add('km-is-shown');
         }
         const at = (wheel.travel * progress) % 10;
-        const blur = Math.min(TICKER_BLUR_PX, (at - wheel.at + 10) % 10);
+        const blur = landed ? 0 : Math.min(TICKER_BLUR_PX, (at - wheel.at + 10) % 10);
         wheel.reel.style.transform = `translateY(-${(at / TICKER_CELLS) * 100}%)`;
         wheel.reel.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : '';
         wheel.at = at;
@@ -1473,10 +1481,11 @@
         return (duration) => {
             if (reduced || !target) return;
             const began = performance.now();
+            const spring = springProgress();
             const count = (now) => {
                 const time = clamp((now - began) / duration, 0, 1);
-                const progress = 1 - (1 - time) ** 4;
-                wheels.forEach((wheel) => turnTickerWheel(wheel, target * progress, progress));
+                const progress = spring(time);
+                wheels.forEach((wheel) => turnTickerWheel(wheel, target * progress, progress, time === 1));
                 if (time < 1) requestAnimationFrame(count);
             };
             requestAnimationFrame(count);
@@ -1904,6 +1913,7 @@
     }
 
     function walkthroughJump(top) {
+        glideStop?.();
         window.scrollTo({ top, behavior: 'instant' });
     }
 
@@ -2025,7 +2035,7 @@
             hand(WALKTHROUGH_INPUT);
             if (!walkthroughHeld || taken(event, event.deltaY)) return;
             const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
-            walkthroughHeld.nudge(event.deltaY * unit);
+            walkthroughHeld.nudge(event.deltaY * unit, true);
         }, { passive: true });
         window.addEventListener('keydown', (event) => {
             if (event.altKey || event.ctrlKey || event.metaKey) return;
@@ -2043,7 +2053,7 @@
             hand(WALKTHROUGH_INPUT);
             if (walkthroughHeld) {
                 event.preventDefault();
-                walkthroughHeld.nudge(delta);
+                walkthroughHeld.nudge(delta, true);
             }
         });
         let touchY = 0;
@@ -2134,6 +2144,9 @@
         let steady = false;
         let version = 0;
         let morphing = null;
+        let trackY = 0;
+        let trackSpeed = 0;
+        let trackFrame = 0;
 
         function shape() {
             return [
@@ -2390,11 +2403,44 @@
             return { at, through: clamp((into - key.from) / Math.max(1, key.to - key.from), 0, 1) };
         }
 
-        function render() {
+        function placeTrack(y) {
+            trackY = y;
+            track.style.translate = `0 ${-walkthroughSnap(y)}px`;
+        }
+
+        function glideTrack(goal, smooth) {
+            cancelAnimationFrame(trackFrame);
+            trackFrame = 0;
+            if (!smooth || prefersReducedMotion()) {
+                trackSpeed = 0;
+                placeTrack(goal);
+                return;
+            }
+            let last = performance.now();
+            const step = (now) => {
+                const seconds = Math.min((now - last) / 1000, 0.05);
+                last = now;
+                const away = trackY - goal;
+                const push = (trackSpeed + WALKTHROUGH_STIFFNESS * away) * seconds;
+                const decay = Math.exp(-WALKTHROUGH_STIFFNESS * seconds);
+                trackSpeed = (trackSpeed - WALKTHROUGH_STIFFNESS * push) * decay;
+                placeTrack(goal + (away + push) * decay);
+                if (Math.abs(trackY - goal) < 0.25 && Math.abs(trackSpeed) < 2) {
+                    trackSpeed = 0;
+                    placeTrack(goal);
+                    trackFrame = 0;
+                    return;
+                }
+                trackFrame = requestAnimationFrame(step);
+            };
+            trackFrame = requestAnimationFrame(step);
+        }
+
+        function render(smooth) {
             if (mode !== 'stage' || !keys.length) return;
             const { at: slot, through } = locate(progress);
             const key = keys[slot];
-            track.style.translate = `0 ${-walkthroughSnap(key.a + (key.b - key.a) * through)}px`;
+            glideTrack(key.a + (key.b - key.a) * through, smooth);
             let note = key.note;
             const own = owned[note];
             const length = paced(note);
@@ -2446,14 +2492,14 @@
             armed = false;
         }
 
-        function nudge(delta) {
+        function nudge(delta, smooth) {
             if (performance.now() - heldAt < WALKTHROUGH_HOLD) return;
             if ((delta > 0 && progress >= total) || (delta < 0 && progress <= 0)) {
                 release();
                 return;
             }
             progress = clamp(progress + delta, 0, total);
-            render();
+            render(smooth);
         }
 
         function update() {
