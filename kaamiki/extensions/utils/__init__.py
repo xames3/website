@@ -35,6 +35,7 @@ from kaamiki.extensions.utils.directives import skip
 from kaamiki.extensions.utils.directives import toggle
 from kaamiki.extensions.utils.directives import trail
 from kaamiki.extensions.utils.directives import visitor
+from kaamiki.extensions.utils.doctree import annotated
 from kaamiki.extensions.utils.doctree import badged
 from kaamiki.extensions.utils.doctree import findall
 from kaamiki.extensions.utils.doctree import offer
@@ -54,6 +55,7 @@ from kaamiki.extensions.utils.templates import render
 from kaamiki.extensions.utils.templates import themed
 
 __all__: list[str] = [
+    "annotated",
     "articles",
     "badged",
     "bridge",

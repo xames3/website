@@ -4,7 +4,7 @@ Doctree Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 14 October 2026
+Last updated on: 15 October 2026
 
 The helpers that walk a doctree and pick prose out of it.
 """
@@ -25,7 +25,13 @@ if t.TYPE_CHECKING:
 
     from sphinx.application import Sphinx
 
+
+class annotated(nodes.container):
+    """A snippet with notes beside it, the base of `walkthrough`."""
+
+
 FURNITURE: tuple[type, ...] = (
+    annotated,
     nodes.Admonition,
     nodes.figure,
     nodes.literal_block,
@@ -94,8 +100,8 @@ def buried(paragraph: nodes.Element) -> bool:
     """Say whether a paragraph sits inside an admonition, table or code
     block.
 
-    Figures and topics count too. Lifted out of those, a line reads as
-    a non-sequitur.
+    Figures, topics and the notes of a walkthrough count too. Lifted
+    out of those, a line reads as a non-sequitur.
 
     :param paragraph: The paragraph to place.
     :return: `True` when it has one of those for an ancestor.
