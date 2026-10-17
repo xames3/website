@@ -4,7 +4,7 @@ Template Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 16 October 2026
 
 Kaamiki's Jinja environment and the helpers that read its templates.
 """
@@ -22,7 +22,6 @@ if t.TYPE_CHECKING:
     from docutils import nodes
     from sphinx.application import Sphinx
 
-# NOTE(xames3): Three levels up from here is the `kaamiki` package.
 TEMPLATES: t.Final[str] = p.join(
     p.dirname(p.dirname(p.dirname(p.realpath(__file__)))), "theme", "templates"
 )

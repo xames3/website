@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 15 October 2026
+Last updated on: 17 October 2026
 
 Kaamiki's entry point.
 """
@@ -71,7 +71,12 @@ stylesheets: Sequence[tuple[str, int]] = (
     ("styles/theme.css", 700),
     ("styles/sphinx-design.css", 900),
 )
-scripts: Sequence[str] = ("scripts/theme.js",)
+scripts: Sequence[str] = (
+    "scripts/core.js",
+    "scripts/animations.js",
+    "scripts/explainer.js",
+    "scripts/theme.js",
+)
 # Proper list available here:
 # https://web-platform-dx.github.io/supported-browsers/
 browsers: Sequence[str] = (

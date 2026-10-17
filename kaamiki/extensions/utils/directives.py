@@ -4,7 +4,7 @@ Directive Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 17 October 2026
 
 The helpers Kaamiki's directives are built from.
 """
@@ -104,8 +104,6 @@ def trail(
     return found
 
 
-# NOTE(xames3): A `TextElement` and not an `inline`, which Sphinx unwraps
-# when it translates a page.
 class phrase(nodes.TextElement):
     """A directive's text, parsed and waiting for its template."""
 

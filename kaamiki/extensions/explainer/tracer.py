@@ -4,7 +4,7 @@ Explainer Tracer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 October 2026
+Last updated on: 17 October 2026
 
 Running a snippet and writing down what it did, one line at a time.
 """
@@ -253,8 +253,6 @@ def record(frame, event, arg, ident, resumed=False):
         "vars": snapshot(frame),
         "out": drain(),
     }
-    # NOTE(xames3): A class body runs once, as its class is defined, so it
-    # gets the same treatment as a module: no step for its call or return.
     scope = frame.f_locals
     if frame.f_code.co_name == "<module>" or (
         "__qualname__" in scope and "__module__" in scope

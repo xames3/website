@@ -2566,6 +2566,11 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     margin-right: 0.5rem;
 }
 
+/* NOTE(xames3): Without an avatar the name has no gap on its left. */
+.km-article__name:first-child {
+    margin-left: 0.5rem;
+}
+
 .km-article__reading-time-icon {
     margin-right: 0.5rem;
 }
@@ -3665,7 +3670,7 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
 .km-walkthrough {
     --km-walkthrough-bar: 3px;
     --km-walkthrough-dim: 0.3;
-    --km-walkthrough-gap: 5rem;
+    --km-walkthrough-gap: 3.5rem;
     --km-walkthrough-pad: 0.85rem;
     margin-block: 3rem;
     position: relative;
@@ -4041,12 +4046,12 @@ pre.km-walkthrough__code {
     column-gap: var(--km-walkthrough-gap);
     display: grid;
     grid-template-areas: "notes code";
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
 }
 
 .km-walkthrough--left[data-km-mode="stage"] .km-walkthrough__grid {
     grid-template-areas: "code notes";
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
 }
 
 .km-walkthrough[data-km-mode="stack"] .km-walkthrough__side {

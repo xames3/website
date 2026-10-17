@@ -23,10 +23,6 @@ from kaamiki.extensions.utils import setting
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
-# A colour lands inside an attribute and in `underline`'s case inside
-# an SVG nested in a data URI in that attribute. Nothing legitimate in
-# there needs a quote or an angle bracket, so anything carrying one is
-# an author mistake rather than a colour.
 COLOUR: re.Pattern[str] = re.compile(r"^[#\w(),.%\s/-]+$")
 WIDTHS: t.Final[tuple[float, float]] = (0.5, 4.0)
 WOBBLES: t.Final[tuple[float, float]] = (0.0, 2.0)
@@ -37,8 +33,6 @@ UNITS: t.Final[tuple[tuple[int, str], ...]] = (
     (10**6, "m"),
     (10**3, "k"),
 )
-# NOTE(xames3): A hyphen can't sit in a function's name, so `setup`
-# registers the icon roles from this, each with its Font Awesome style.
 ICONS: t.Final[dict[str, str]] = {
     "fab-icon": "fa-brands",
     "fal-icon": "fa-light",

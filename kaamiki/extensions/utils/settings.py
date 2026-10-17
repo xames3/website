@@ -54,9 +54,6 @@ ICONS: t.Final[dict[str, str]] = {
     "show_more": "fa-solid fa-chevron-down",
     "title_badge": "",
 }
-# NOTE(xames3): Brands wear `fa-brands` and the rest `fa-solid`, every
-# one of them is in Font Awesome Free. A language it has no brand for
-# gets what suits it best: a terminal for shells, a code file for C.
 LANGUAGE_ICONS: t.Final[tuple[tuple[str, frozenset[str]], ...]] = (
     (
         "fa-brands fa-python",
@@ -213,8 +210,6 @@ PARSE_TIME: t.Final[tuple[str, ...]] = (
     "youtube_privacy",
     "youtube_referrer_policy",
 )
-# NOTE(xames3): The switches a page may turn on or off for itself with a
-# `:km-show-*:` field, as in `:km-show-breadcrumbs: false`.
 PAGE_SWITCHES: t.Final[tuple[str, ...]] = (
     "show_breadcrumbs",
     "show_feedback",
@@ -226,8 +221,6 @@ PAGE_SWITCHES: t.Final[tuple[str, ...]] = (
     "show_searchbox",
     "show_toctree",
 )
-# NOTE(xames3): The words a setting's value may be, where it is one of a
-# few.
 CHOICES: t.Final[dict[str, tuple[str, ...]]] = {
     "button_icon_position": ("before", "after"),
     "embed_js_loading": ("defer", "async", "normal"),
