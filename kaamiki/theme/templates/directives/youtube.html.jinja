@@ -4,13 +4,13 @@ YouTube Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 12 October 2026
+Last updated on: 16 October 2026
 #}
 {% block km_youtube %}
     {%- set km_label = km_caption or _("YouTube video") %}
     <figure class="km-media km-media--youtube">
         <div class="km-media__frame km-media__frame--ratio"
-             {% if km_ratio %}style="aspect-ratio: {{ km_ratio }}"{% endif %}>
+             {% if km_ratio %}style="aspect-ratio: {{ km_ratio }}; --km-ratio: calc({{ km_ratio }})"{% endif %}>
             {%- if km_facade %}
                 <a class="km-media__facade"
                    href="{{ km_watch }}"
