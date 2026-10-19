@@ -2129,6 +2129,8 @@ table.docutils caption {
 .km-media__caption {
     text-align: center;
     margin-bottom: 2rem;
+    margin-inline: auto;
+    max-width: var(--km-layout-container);
 }
 
 .km-zoom-inner {
@@ -2392,6 +2394,7 @@ button.copybtn {
     border: none;
     background-color: transparent !important;
     color: hsl(var(--km-color-fg)) !important;
+    opacity: 0;
     top: 0.5em;
     right: 0.25em;
     transition: opacity var(--km-duration-fast) var(--km-ease-standard);
@@ -2415,15 +2418,15 @@ button.copybtn {
 }
 
 div.highlight:hover button.copybtn,
-.literal-block-wrapper button.copybtn {
+.literal-block-wrapper:hover button.copybtn {
     opacity: 0.5;
 }
 
-div.highlight button.copybtn:is(:hover, :focus-visible, .success) {
+:is(div.highlight, .literal-block-wrapper) button.copybtn:is(:hover, :focus-visible, .success) {
     opacity: 1;
 }
 
-div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
+button.copybtn:has(.icon-tabler-check):not(.success) {
     opacity: 0;
 }
 
@@ -3745,12 +3748,20 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
         margin: 4rem auto !important;
     }
 
+    :root {
+        /* NOTE: the media is scaled by 1.1 below, so divide to land on the
+           walkthrough's width (shell less its 2rem gutters) */
+        --km-layout-wide: calc((var(--km-layout-shell) - 4rem) / 1.1);
+    }
+
     #km-content :is(figure, section > img, section > .image-reference > img, .km-zoom-inner--standalone) {
         scale: 1.1;
     }
 
     #km-content figcaption {
-        margin-inline: 4rem;
+        /* NOTE: scaled by 1.1 with its figure, so it stays 800px on screen */
+        margin-inline: max(4rem, (100% - var(--km-layout-container) / 1.1) / 2);
+        max-width: none;
     }
 }
 
@@ -3878,10 +3889,15 @@ div.highlight button.copybtn:has(.icon-tabler-check):not(.success) {
     height: 1.75rem;
     justify-content: center;
     margin-inline-start: auto;
-    opacity: 0.5;
+    opacity: 0;
     position: relative;
     transition: opacity var(--km-duration-fast) var(--km-ease-standard);
     width: 1.75rem;
+
+    .km-walkthrough__corner > &,
+    :where(.km-walkthrough__frame:is(:hover, :has(:focus-visible))) .km-walkthrough__caption > & {
+        opacity: 0.5;
+    }
 
     &:is(:hover, :focus-visible, .success) {
         opacity: 1;
