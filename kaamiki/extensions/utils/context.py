@@ -50,7 +50,7 @@ def context_defaults(app: Sphinx) -> None:
     """Fill in the `html_context` keys the templates expect.
 
     Every setting in `DEFAULTS` is copied with a `km_` prefix, which is
-    the only one the templates read, so one that is missing is its
+    the only one the templates read, so one that's missing is its
     default and not an `UndefinedError`. The ones that need more than a
     copy are worked out after.
 
@@ -343,7 +343,7 @@ def neighbours(
             docname = docname_join(pagename, target)
             if docname not in app.env.found_docs:
                 logger.warning(
-                    ":km-pg-%s: names %r, which is not a document. As with"
+                    ":km-pg-%s: names %r, which isn't a document. As with"
                     " :doc:, a name not starting with / is relative to this"
                     " page",
                     key,

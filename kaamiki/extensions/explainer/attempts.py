@@ -7,7 +7,7 @@ Created on: 28 September 2026
 Last updated on: 15 October 2026
 
 An `attempts` directive that steps a reader through the versions a
-piece of code went through on its way to what it is now::
+piece of code went through on its way to what it's now::
 
     .. attempts:: python
        :caption: xsnumpy/_core.py
@@ -182,7 +182,7 @@ class directive(walkthrough.directive):
                     " what it printed says how it went"
                 )
         if len(found) == 1:
-            self.warn("there is one attempt, so nothing to step through")
+            self.warn("there's one attempt, so nothing to step through")
         return found
 
     def unpack(self, block: chunk, at: int) -> Pieces:

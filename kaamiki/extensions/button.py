@@ -86,6 +86,10 @@ class directive(rst.Directive):
 
     The site's `button_scheme` and `button_icon_position` settle the
     scheme and the icon's side for a button that doesn't say.
+
+    A button without an icon is centred. With one, it sits at the start
+    when the icon is `before` the label and at the end when it's
+    `after`.
     """
 
     has_content = True
@@ -168,7 +172,7 @@ class directive(rst.Directive):
         if key not in SCHEMES:
             options = ", ".join([*SCHEMES, *sorted(named)])
             raise self.error(
-                f"button scheme {scheme!r}{where} is not one of {options}"
+                f"button scheme {scheme!r}{where} isn't one of {options}"
             )
         return (
             f"km-button--{key}" if key in TONES else f"sd-btn-{key}",

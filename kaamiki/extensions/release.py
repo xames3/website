@@ -269,7 +269,9 @@ class directive(rst.Directive):
             if spaced:
                 spaced.append(nodes.Text(" "))
             spaced.append(url)
-        return nodes.paragraph("", "", *spaced, classes=["km-release__more"])
+        return nodes.paragraph(
+            "", "", *spaced, classes=["km-release__more", "km-button-row"]
+        )
 
 
 def visit(self: HTMLTranslator, node: node) -> None:
@@ -341,6 +343,9 @@ def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
         if NOTES not in link["classes"]:
             continue
         badge = glyph("", "", classes=classes.split())
+        link.parent["classes"].append(
+            "km-button-row--end" if after else "km-button-row--start"
+        )
         if after:
             badge["classes"].append("km-icon-after")
             link += badge

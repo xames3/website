@@ -160,7 +160,7 @@ class directive(CodeBlock):
 
     The notes scroll past the code instead of swapping under it, so it
     needs at least one `.. lines::` block. It stands alone, nothing
-    around it is pulled in or moved.
+    around it's pulled in or moved.
 
     Options::
 
@@ -410,7 +410,7 @@ class directive(CodeBlock):
             env.note_dependency(dependency)
         error = traced["error"]
         if error is not None and error.get("line") is None:
-            raise self.error(f"walkthrough could not run: {error['text']}")
+            raise self.error(f"walkthrough couldn't run: {error['text']}")
         steps = replay(traced, events or EVENTS)
         for step in steps:
             line = step["line"] + start - 1
@@ -468,7 +468,7 @@ class directive(CodeBlock):
                 if values.pop(key, None) is None:
                     self.warn(
                         f"the note for {label(low, high)} clears {key},"
-                        " which is not showing"
+                        " which isn't showing"
                     )
             fresh: set[str] = set()
             for entry in ENTRIES.split(block.options.get("values", "")):
@@ -477,7 +477,7 @@ class directive(CodeBlock):
                     if entry.strip():
                         self.warn(
                             f"the note for {label(low, high)} has {entry!r}"
-                            " in :values:, which is not `name: value`"
+                            " in :values:, which isn't `name: value`"
                         )
                     continue
                 values[match.group(1)] = (where, match.group(2))
@@ -540,7 +540,7 @@ class directive(CodeBlock):
             return known
         if any(_.get("vars") for _ in steps):
             self.warn(
-                f"Kaamiki does not know how {language} writes a comment;"
+                f"Kaamiki doesn't know how {language} writes a comment;"
                 " set :comment: so the values read as one"
             )
         return {"open": "#", "close": ""}
@@ -626,7 +626,7 @@ class directive(CodeBlock):
         if error is not None and not raises:
             self.warn(
                 f"the snippet raised {error['text']}; add :raises: if"
-                " it is meant to"
+                " it's meant to"
             )
         if error is None and raises:
             self.warn(":raises: is set, but the snippet ran to the end")

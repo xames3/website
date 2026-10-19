@@ -339,7 +339,7 @@ finish(error)
 def clip(text: str, width: int) -> str:
     """Cut a value down to its two ends.
 
-    :param text: The value, as it would be printed.
+    :param text: The value, as it'd be printed.
     :param width: How many characters it may take, ellipsis included.
     :return: The value, whole when it fits and cut when it doesn't.
     """
@@ -353,7 +353,7 @@ def clip(text: str, width: int) -> str:
 def show(text: str) -> tuple[str, str | None]:
     """Give a value in its two lengths, the way the runner does.
 
-    :param text: The value, as it would be printed.
+    :param text: The value, as it'd be printed.
     :return: The value whole, clipped to `full` and cut down to
         `short` or `None` when it didn't need cutting.
     """
@@ -470,7 +470,7 @@ def execute(
         except subprocess.TimeoutExpired:
             return failed(f"ran past its {timeout}s")
         except OSError as exc:
-            return failed(f"could not start {python or sys.executable}: {exc}")
+            return failed(f"couldn't start {python or sys.executable}: {exc}")
         try:
             with open(answer) as fd:
                 result = t.cast("Trace", json.load(fd))

@@ -122,7 +122,7 @@ def opens_new_tab(url: str, config: Config) -> bool:
 
 def rooted(translator: HTMLTranslator, url: str) -> str:
     """Make a path written in an option an address that works from the
-    page it is on.
+    page it's on.
 
     A path counts from the top of the site, with or without a leading
     `/`, so `_static/cover.png` is the same picture from every page and

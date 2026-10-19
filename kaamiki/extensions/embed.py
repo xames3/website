@@ -146,7 +146,7 @@ def substitute(source: str, values: dict[str, str]) -> str:
 
 
 def literal(value: str) -> t.Any:
-    """Read an option's value as a Python literal where it is one.
+    """Read an option's value as a Python literal where it's one.
 
     :param value: The value, as written.
     :return: A number, list or the like when it reads as one and the
@@ -211,7 +211,7 @@ class directive(rst.Directive):
         return [nodes.raw(**attributes)]
 
     def check(self, source: str, values: dict[str, str]) -> None:
-        """Catch an option or a placeholder that has been misspelt.
+        """Catch an option or a placeholder that's been misspelt.
 
         An option the fragment never asks for is an error. A
         placeholder no option fills only warns, since it may be meant.
@@ -265,7 +265,7 @@ class directive(rst.Directive):
                     continue
             raise self.error(
                 f"embed has an iframe from {src!r}, which embed_iframe_hosts"
-                f" does not allow; it allows {', '.join(sorted(allowed))}"
+                f" doesn't allow; it allows {', '.join(sorted(allowed))}"
             )
 
     def read(self, file: str) -> str:

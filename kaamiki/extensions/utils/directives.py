@@ -166,7 +166,7 @@ def visitor(
     :param template: The directive's template, relative to
         `theme/templates`.
     :param prepare: Called with the translator and a copy of the node's
-        attributes, it returns what the template is given. It is where
+        attributes, it returns what the template is given. It's where
         a directive turns the paths it was handed into addresses.
     :return: The visitor, which raises `nodes.SkipNode` once written.
     """

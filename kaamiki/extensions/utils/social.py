@@ -4,7 +4,7 @@ Social Metadata
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 16 October 2026
 
 The handler that works out a page's Open Graph and Twitter values.
 """
@@ -42,7 +42,7 @@ def generated(pagename: str) -> tuple[str, str] | None:
         NOT_FOUND: (
             _("Page not found"),
             _(
-                "There is nothing at this address. It may have moved or it"
+                "There's nothing at this address. It may've moved or it"
                 " may never have been here."
             ),
         ),
