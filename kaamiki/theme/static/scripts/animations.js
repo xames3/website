@@ -37,6 +37,32 @@
     const TICKER_BLUR_PX = 2;
     const REVEAL_STEPS = 6;
     const REVEAL_SLACK_MS = 8;
+    const SPEECH_WORD_MS = 170;
+    const SPEECH_CHAR_MS = 14;
+    const SPEECH_COMMA_MS = 260;
+    const SPEECH_STOP_MS = 480;
+    const SPEECH_MAX_MS = 9000;
+    const SPEECH_GAP_WORDS = 5;
+    const SPEECH_FIX_WORDS = 3;
+    const SOUND_ALIKES = new Map(Object.entries({
+        'your': "you're", "you're": 'your', 'their': 'there', 'there': 'their', "they're": 'there',
+        'to': 'two', 'too': 'to', 'two': 'to', 'for': 'four', 'four': 'for', 'no': 'know', 'know': 'no',
+        'knew': 'new', 'new': 'knew', 'write': 'right', 'right': 'write', 'one': 'won', 'won': 'one',
+        'would': 'wood', 'hear': 'here', 'here': 'hear', 'by': 'buy', 'buy': 'by', 'be': 'bee',
+        'see': 'sea', 'sea': 'see', 'son': 'sun', 'sun': 'son', 'whole': 'hole', 'hole': 'whole',
+        'weak': 'week', 'week': 'weak', 'peace': 'piece', 'piece': 'peace', 'break': 'brake',
+        'meat': 'meet', 'meet': 'meat', 'which': 'witch', 'way': 'weigh', 'wait': 'weight',
+        'where': 'wear', 'wear': 'where', 'weather': 'whether', 'whether': 'weather', 'hour': 'our',
+        'our': 'hour', 'its': "it's", "it's": 'its', 'then': 'than', 'than': 'then', 'of': 'off',
+        'off': 'of', 'are': 'our', 'were': 'where', "we're": 'were', 'said': 'set', 'man': 'men',
+        'men': 'man', 'live': 'leave', 'leave': 'live', 'loved': 'lived', 'lived': 'loved',
+        'if': 'is', 'is': 'if', 'me': 'be', 'like': 'light', 'life': 'live', 'walk': 'work',
+        'work': 'walk', 'calm': 'come', 'storm': 'store', 'form': 'from', 'from': 'form',
+        'through': 'threw', 'threw': 'through', 'teach': 'each', 'learn': 'earn', 'master': 'muster',
+        'want': "won't", 'something': 'some thing', 'someone': 'some one', 'will': 'well',
+        'well': 'will', 'mind': 'mine', 'mine': 'mind', 'told': 'toll', 'feel': 'fill',
+        'dream': 'cream', 'time': 'thyme', 'forward': 'foreword', 'moving': 'mooing',
+    }));
 
     function toPx(value) {
         const number = parseFloat(value);
@@ -673,6 +699,112 @@
         );
     }
 
+    function spokenForm(text) {
+        return text.replace(/^\W+|\W+$/g, '').toLowerCase().replace(/[\u2018\u2019]/g, "'");
+    }
+
+    function soundAlike(text) {
+        const [, lead, core, trail] = text.match(/^(\W*)(.*?)(\W*)$/);
+        const guess = SOUND_ALIKES.get(spokenForm(text));
+        if (!guess) return null;
+        const cased = core[0] === core[0].toUpperCase() ? guess[0].toUpperCase() + guess.slice(1) : guess;
+        return lead + cased + trail;
+    }
+
+    function transcribe(quote) {
+        const spoken = quote.querySelector('p');
+        if (!spoken) return;
+        const nodes = [];
+        const walker = document.createTreeWalker(spoken, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+
+        const words = [];
+        nodes.forEach((node) => {
+            const parts = node.textContent.split(/(\s+)/);
+            node.replaceWith(...parts.map((part) => {
+                if (!part.trim()) return part;
+                const word = document.createElement('span');
+                word.className = 'km-word';
+                word.textContent = part;
+                words.push(word);
+                return word;
+            }));
+        });
+
+        let at = 0;
+        const delays = words.map((word) => {
+            const text = word.textContent;
+            const start = at;
+            at += SPEECH_WORD_MS + SPEECH_CHAR_MS * text.length;
+            if (/[,;:]$/.test(text)) at += SPEECH_COMMA_MS;
+            else if (/[.!?\u2026\u2014]$/.test(text)) at += SPEECH_STOP_MS;
+            return start;
+        });
+        delays.push(at);
+
+        const guesses = words.map(() => null);
+        const taken = [];
+        const used = new Set();
+        const order = words.map((_, index) => [Math.random(), index]).sort((a, b) => a[0] - b[0]);
+        for (const [, index] of order) {
+            const word = words[index];
+            const key = spokenForm(word.textContent);
+            const guess = soundAlike(word.textContent);
+            if (!guess || word.closest('a') || used.has(key)) continue;
+            if (taken.some((other) => Math.abs(other - index) < SPEECH_GAP_WORDS)) continue;
+            guesses[index] = guess;
+            used.add(key);
+            taken.push(index);
+        }
+
+        const scale = Math.min(1, SPEECH_MAX_MS / at);
+        const ms = (value) => `${Math.round(value * scale)}ms`;
+        words.forEach((word, index) => {
+            if (!guesses[index]) {
+                word.style.setProperty('--km-delay', ms(delays[index]));
+                return;
+            }
+            const fix = ms(delays[Math.min(index + SPEECH_FIX_WORDS, words.length)]);
+            const heard = document.createElement('span');
+            const guess = document.createElement('span');
+            heard.className = 'km-heard';
+            guess.className = 'km-guess';
+            guess.setAttribute('aria-hidden', 'true');
+            guess.textContent = guesses[index];
+            guess.style.setProperty('--km-delay', ms(delays[index]));
+            guess.style.setProperty('--km-fix', fix);
+            word.style.setProperty('--km-delay', fix);
+            guess.addEventListener('animationstart', (event) => {
+                if (event.animationName !== 'km-guess-out') return;
+                const from = heard.getBoundingClientRect().width;
+                const to = word.getBoundingClientRect().width;
+                const close = heard.animate(
+                    [{ width: `${from}px` }, { width: `${to}px` }],
+                    { duration: TIMING.fast(), easing: getCssVar('--km-spring-smooth'), fill: 'forwards' },
+                );
+                close.onfinish = () => {
+                    guess.remove();
+                    close.cancel();
+                };
+            });
+            word.replaceWith(heard);
+            heard.append(guess, word);
+        });
+        quote.style.setProperty('--km-transcript-total', ms(at));
+        quote.classList.add('km-transcript');
+    }
+
+    function initTranscripts() {
+        if (prefersReducedMotion()) return;
+        const quotes = Array.from(document.querySelectorAll('blockquote.epigraph'));
+        quotes.forEach(transcribe);
+        onVisible(
+            quotes.filter((quote) => quote.classList.contains('km-transcript')),
+            (quote) => quote.classList.add('km-is-visible'),
+            { rootMargin: '0px 0px -15% 0px' },
+        );
+    }
+
     function revealBlocks(node) {
         return Array.from(node?.children ?? []).flatMap((child) => (
             child.tagName === 'SECTION' ? revealBlocks(child) : [child]
@@ -891,6 +1023,7 @@
         initRepositoryWidgets,
         initTickers,
         initInkReveal,
+        initTranscripts,
         initPageReveal,
         initArticleBackground,
     });
