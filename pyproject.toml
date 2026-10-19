@@ -34,7 +34,7 @@ issues = "https://github.com/xames3/website/issues"
 kaamiki = "kaamiki"
 
 [dependency-groups]
-dev = [ "sphinx-lint>=1.0.2", "tox>=4.65.4" ]
+dev = [ "sphinx-lint>=1.0.2", "tox>=4.66.0" ]
 
 [tool.setuptools.packages.find]
 include = [ "kaamiki*" ]
@@ -228,7 +228,7 @@ show_error_context = true
 warn_unreachable = true
 
 [tool.tox]
-requires = [ "tox>=4.65.4" ]
+requires = [ "tox>=4.66.0" ]
 env_list = [
   "website",
   "lint",
