@@ -230,6 +230,7 @@ warn_unreachable = true
 [tool.tox]
 requires = [ "tox>=4.65.4" ]
 env_list = [
+  "sphinxlint",
   "website",
   "lint",
   "format",
@@ -237,6 +238,14 @@ env_list = [
   "translations",
 ]
 package = "editable"
+
+[tool.tox.env.sphinxlint]
+description = "Lint the reStructuredText sources with sphinx-lint"
+skip_install = true
+deps = [ "sphinx-lint>=1.0.2" ]
+commands = [
+  [ "sphinx-lint", "--disable", "role-with-double-backticks,role-without-backticks", "--enable", "line-too-long", "--max-line-length", "79", "docs/source" ],
+]
 
 [tool.tox.env.lint]
 description = "Lint with ruff, fixing what it can (CI passes --no-fix)"
