@@ -4,7 +4,7 @@ Input Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 25 October 2026
+Last updated on: 26 October 2026
 
 Kaamiki takes what it's given or stops the build. Nothing is clamped,
 guessed or quietly dropped. Every option, role, page field and setting
@@ -55,13 +55,9 @@ STYLES: t.Final[frozenset[str]] = frozenset(
         "fab",
     }
 )
-# NOTE(xames3): Font Awesome 7 Pro draws a style in a family of its own,
-# `fa-sharp fa-solid fa-plus` or `fa-duotone fa-plus`.
 FAMILIES: t.Final[frozenset[str]] = frozenset(
     {"fa-duotone", "fa-sharp", "fa-sharp-duotone", "fad", "fass", "fasds"}
 )
-# NOTE(xames3): The sizes, animations and turns Font Awesome documents,
-# plus the colour classes Kaamiki's own stylesheet knows.
 MODIFIERS: t.Final[re.Pattern[str]] = re.compile(
     r"fa-(?:fw|spin|pulse|beat|fade|beat-fade|bounce|shake|spin-pulse"
     r"|spin-reverse|flip-horizontal|flip-vertical|flip-both"

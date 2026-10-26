@@ -543,9 +543,6 @@
             version = to;
         }
 
-        // NOTE(xames3): The change lands in one go, like an editor
-        // applying a diff. Old lines stay red and new ones go green for a
-        // beat, then the old ones drop out together.
         function morph(to, animate) {
             if (to === version || !drafts[to]) return null;
             land();
@@ -846,8 +843,6 @@
             return view;
         }
 
-        // NOTE(xames3): Writes, then reads, then writes. Mixing them per
-        // snapshot forces a full layout of the page for every note.
         function fill(batch) {
             const { most, whole, heights } = fit;
             const rooms = batch.map(({ at }) => {
@@ -936,8 +931,6 @@
             if (window.matchMedia('print').matches) fillAll();
         }
 
-        // NOTE(xames3): Copies fill in as they near the screen, but paper
-        // has no screen, so printing fills them all.
         function fillAll() {
             reveal(Array.from(holds.keys()));
         }

@@ -38,9 +38,7 @@
     const ROTATE_STEP_IN_MS = 25;
     const ROTATE_STEP_OUT_MS = 15;
     const ROTATE_SHIFT = '0.25em';
-    // NOTE(xames3): x.ai's rotating word skips the blur in Safari, so this does too.
     const ROTATE_BLUR = CSS.supports('hanging-punctuation', 'first') ? 'none' : 'blur(4px)';
-    // NOTE(xames3): a box per code point breaks a script whose letters join, so such a word moves whole.
     const ROTATE_JOINED = /[\p{Script=Devanagari}\p{Script=Bengali}\p{Script=Gurmukhi}\p{Script=Gujarati}\p{Script=Oriya}\p{Script=Tamil}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Sinhala}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Tibetan}]/u;
     const ROTATE_STAGGER_MAX_MS = 400;
     const REVEAL_STEPS = 6;

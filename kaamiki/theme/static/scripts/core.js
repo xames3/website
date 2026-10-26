@@ -70,8 +70,6 @@
     function springProgress() {
         const raw = getCssVar('--km-spring-smooth');
         const points = raw.startsWith('linear(') ? raw.slice(7, -1).split(',').map(Number) : null;
-        // NOTE(xames3): the last two stops of the spring jump to 1; stop at
-        // the rest value so the reels land without a snap or a stuck blur.
         const last = points ? points.length - 3 : 0;
         return (time) => {
             if (!points) return 1 - (1 - time) ** 4;

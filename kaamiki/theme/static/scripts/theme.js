@@ -571,13 +571,6 @@
         const nav = document.querySelector('.km-header__nav-tree');
         if (!nav) return;
 
-        // NOTE(xames3): One dropdown is open at a time and `km-is-open` is
-        // the only thing that shows it, so the pointer, the keyboard and the
-        // timers can't disagree. A pointer that rests on the seam between two
-        // triggers crosses it again and again, so a menu only gives way to the
-        // next once the pointer has settled there, and a pointer that comes
-        // back first leaves things as they were. One on its way down into the
-        // open dropdown is let through, even over the triggers beside it.
         let uid = 0;
         let current = null;
         let timer = 0;

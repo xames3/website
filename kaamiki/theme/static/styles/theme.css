@@ -102,7 +102,7 @@
     --km-font-mono: "Geist Mono", ui-monospace, monospace;
     --km-font-size-xs: 0.75rem;
     --km-font-size-sm: 0.85rem;
-    --km-font-size-md: 0.9rem;
+    --km-font-size-md: 0.95rem;
     --km-font-size-base: 1rem;
     --km-font-size-lg: 1.125rem;
     --km-font-size-xl: 1.25rem;
@@ -114,7 +114,7 @@
     --km-weight-h2: 515;
     --km-weight-h3: 496;
     --km-weight-medium: 490;
-    --km-weight-button: 515;
+    --km-weight-button: 490;
     --km-weight-lead: 450;
     --km-weight-body: 419;
     --km-tracking-h1: -0.025em;
@@ -141,8 +141,7 @@
         --km-spring-snappy: linear(0, 0.035, 0.075, 0.12, 0.167, 0.217, 0.269, 0.321, 0.373, 0.424, 0.475, 0.523, 0.571, 0.616, 0.659, 0.7, 0.738, 0.773, 0.807, 0.837, 0.865, 0.891, 0.914, 0.935, 0.953, 0.97, 0.984, 0.997, 1.008, 1.017, 1.025, 1.032, 1.037, 1.041, 1.044, 1.047, 1.048, 1.049, 1.049, 1.048, 1.047, 1.046, 1.044, 1.043, 1.041, 1.038, 1.036, 1.034, 1.031, 1.029, 1.027, 1.024, 1.022, 1.02, 1.018, 1.016, 1.014, 1.012, 1.01, 1.009, 1.008, 1.006, 1.005, 1);
     }
 }
-/* NOTE(xames3): Every transition and animation takes its length from one of
- * these, so a reader who asked for less motion gets none of it at once. */
+
 @media (prefers-reduced-motion: reduce) {
     :root {
         --km-duration-hover: 0.01ms;
@@ -1160,22 +1159,17 @@ html.km-page-loading :is(.km-header,
 }
 
 @media screen and (scripting: enabled) {
-    .km-page--clamped>.km-page__content {
+    .km-page--clamped>.km-page__fold>.km-page__content {
         max-height: var(--km-show-more-clamp);
     }
 
-    .km-page--clamped>.km-page__content,
-    .km-page--clamping>.km-page__content {
+    .km-page--clamped>.km-page__fold>.km-page__content,
+    .km-page--clamping>.km-page__fold>.km-page__content {
         overflow-y: clip;
     }
 
-    .km-page--clamping>.km-page__content {
+    .km-page--clamping>.km-page__fold>.km-page__content {
         transition: max-height var(--km-duration-clamp) var(--km-spring-smooth);
-    }
-
-    .km-page--clamped>.km-feedback-shell,
-    .km-page--clamping>.km-feedback-shell {
-        display: none;
     }
 
     .km-page__more {
@@ -1188,8 +1182,8 @@ html.km-page-loading :is(.km-header,
         transition: opacity var(--km-duration-fast) var(--km-ease-standard);
     }
 
-    .km-page--clamped>.km-page__more,
-    .km-page--clamping>.km-page__more {
+    .km-page--clamped>.km-page__fold>.km-page__more,
+    .km-page--clamping>.km-page__fold>.km-page__more {
         margin-inline: calc((100% - 100cqw) / 2);
         margin-top: calc(-1 * var(--km-show-more-fade));
         padding-top: var(--km-show-more-fade);
@@ -1209,13 +1203,13 @@ html.km-page-loading :is(.km-header,
         transition: opacity var(--km-duration-clamp) var(--km-spring-smooth);
     }
 
-    .km-page--clamped>.km-page__more::before,
+    .km-page--clamped>.km-page__fold>.km-page__more::before,
     .km-accordion--clamped>.km-accordion__body>.km-accordion__more::before {
         opacity: 1;
     }
 
-    .km-page:not(.km-page--clamped)>.km-page__more,
-    .km-page--clamping>.km-page__more {
+    .km-page:not(.km-page--clamped)>.km-page__fold>.km-page__more,
+    .km-page--clamping>.km-page__fold>.km-page__more {
         position: sticky;
         bottom: var(--km-show-more-dock);
         z-index: 5;
@@ -1874,8 +1868,6 @@ html:not(.km-js) button.km-header__menu-toggle {
     }
 }
 
-/* NOTE(xames3): The slot stays an icon wide and the box opens leftwards over
- * the links beside it, so nothing else in the header moves when it does. */
 .km-header__search {
     position: relative;
     z-index: 2;
@@ -1977,17 +1969,13 @@ html:not(.km-js) button.km-header__menu-toggle {
     }
 
     & h1 {
-        font-size: 2.5rem;
+        font-size: 3rem;
         font-weight: var(--km-weight-h1);
         line-height: 1.1;
         text-align: center;
         letter-spacing: var(--km-tracking-h1);
         text-wrap: balance;
         margin-bottom: 1rem;
-
-        @media (width >= 640px) {
-            font-size: 3rem;
-        }
 
         @media (width >= 1024px) {
             font-size: 3.75rem;
@@ -2625,17 +2613,17 @@ table.docutils caption {
 
 code {
     font-size: var(--km-font-size-md);
+    font-weight: 500;
     line-height: 1.25rem;
     position: relative;
     white-space: nowrap;
     color: hsl(var(--km-colour-orange));
 }
 
-/* NOTE(xames3): Headings scale their inline code with the title text. */
 :is(h1, h2, h3, h4, h5, h6) code {
     font-size: .85em;
     line-height: 1.25;
-    padding: 0.1em 0.3em;
+    padding: 0.1em;
 }
 
 pre {
@@ -3002,10 +2990,6 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
     color: hsl(var(--km-colour-grey-93));
 }
 
-/* NOTE(xames3): A phone has no room for a long trail, so past two parents each
- * one shrinks to its first letter. The text stays in the link for a screen
- * reader and `font-size: 0` is what lets `::first-letter` be the only part
- * drawn. */
 @media (width < 640px) {
     .km-breadcrumbs--deep {
         gap: 0.25rem;
@@ -3951,9 +3935,6 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
     --km-columns-padding: 1.5rem;
 }
 
-/* NOTE: A row's first and last children lose their outer margins with
- * `!important` because the theme sets some of them from `#km-content`, which
- * a class can't beat. */
 .km-columns--flush>.km-columns__row {
     &>:first-child {
         margin-top: 0 !important;
@@ -4508,9 +4489,6 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
     margin-inline: 0 !important;
 }
 
-/* NOTE(xames3): The `!important` left in the phone blocks beats a later or
- * more specific rule (a release title, the 404, an icon in an admonition's
- * title). Each was taken out in turn and the page moved. */
 @media (width < 768px) {
     :root {
         --km-weight-button: 490;
@@ -4864,8 +4842,6 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
     }
 
     :root {
-        /* NOTE: the media is scaled by 1.1 below, so divide to land on the
-           explainers' width */
         --km-layout-wide: calc(var(--km-layout-explainer) / 1.1);
     }
 
@@ -5059,7 +5035,6 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
     outline-offset: -2px;
 }
 
-/* NOTE(xames3): the pre carries `highlight`, so Pygments paints it grey. */
 pre.km-code-explain__code {
     background-color: hsl(var(--km-colour-code-bg));
 }
@@ -5566,8 +5541,6 @@ pre.km-code-explain__code {
     }
 }
 
-/* NOTE(xames3): an h2 scrolls to rest 3rem below the header (its `::before`
- * takes the space); a release has no such rule, so it asks for the same. */
 #km-content .km-release[id] {
     scroll-margin-top: calc(var(--km-header-height) + 3rem);
 }
@@ -5843,16 +5816,12 @@ pre.km-code-explain__code {
     }
 }
 
-/* NOTE(xames3): Without scripting the fold has nothing to open, so its button
- * stays out. */
 @media (scripting: none) {
     .km-page__more {
         display: none;
     }
 }
 
-/* NOTE(xames3): Forced colours replace every background, so what has only a
- * fill for an edge gets an outline that stays through them. */
 @media (forced-colors: active) {
     .km-button:not(:focus-visible),
     .km-block,
@@ -5861,8 +5830,6 @@ pre.km-code-explain__code {
     }
 }
 
-/* NOTE(xames3): The three loops never rest, so for a reader who asked for less
- * motion the background holds still and the blinkers stay lit. */
 @media (prefers-reduced-motion: reduce) {
     .km-article__bg,
     .km-recent-post,
