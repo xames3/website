@@ -968,7 +968,7 @@
             document.querySelector('.km-header'),
             document.querySelector('.km-breadcrumbs'),
             ...revealBlocks(document.getElementById('km-content')),
-            document.querySelector('.km-feedback-shell'),
+            document.querySelector('.km-feedback-section'),
             document.querySelector('.km-page__more-button'),
             document.querySelector('.km-pagination'),
             document.querySelector('.km-footer'),

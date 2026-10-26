@@ -1087,7 +1087,7 @@ html.km-no-transitions *::after {
 html.km-page-loading :is(.km-header,
     .km-breadcrumbs,
     #km-content,
-    .km-feedback-shell,
+    .km-feedback-section,
     .km-page__more-button,
     .km-pagination,
     .km-footer) {
@@ -2159,8 +2159,8 @@ html:not(.km-js) button.km-header__menu-toggle {
         }
     }
 
-    & .km-text-pre-title+section>h2,
-    & section:has(> .km-text-pre-title:last-child)+section>h2 {
+    & .km-text-pre-section+section>h2,
+    & section:has(> .km-text-pre-section:last-child)+section>h2 {
         margin-top: 0 !important;
 
         &::before {
@@ -2168,19 +2168,19 @@ html:not(.km-js) button.km-header__menu-toggle {
         }
     }
 
-    & .km-text-pre-title:has(+ section > h2),
-    & section>.km-text-pre-title:last-child {
+    & .km-text-pre-section:has(+ section > h2),
+    & section>.km-text-pre-section:last-child {
         margin-top: 3rem !important;
     }
 
-    & .km-text-pre-title+.km-blocks {
+    & .km-text-pre-section+.km-blocks {
         margin: 0 !important;
     }
 
 }
 
-#km-content :is(h2, .rubric:not(.km-text-subtitle)),
-.km-feedback-shell__title {
+#km-content :is(h2, .rubric:not(.km-text-subsection)),
+.km-feedback-section__title {
     font-size: var(--km-font-size-3xl);
     font-weight: var(--km-weight-h2);
     line-height: 2.25rem;
@@ -2194,10 +2194,10 @@ html:not(.km-js) button.km-header__menu-toggle {
     }
 }
 
-.km-feedback-shell__title::before,
+.km-feedback-section__title::before,
 #km-content h2::before,
-#km-content .km-text-pre-title:has(+ section > h2)::before,
-#km-content section>.km-text-pre-title:last-child::before,
+#km-content .km-text-pre-section:has(+ section > h2)::before,
+#km-content section>.km-text-pre-section:last-child::before,
 #search-results ul.search li:first-of-type::before,
 .km-article__meta::after {
     content: "";
@@ -3242,17 +3242,17 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
     }
 }
 
-.km-feedback-shell {
+.km-feedback-section {
     display: flex;
     flex-direction: column;
 }
 
-.km-feedback-shell__inner {
+.km-feedback-section__inner {
     margin-bottom: 1rem;
 }
 
-.km-feedback-shell__subtitle,
-.km-text-subtitle,
+.km-feedback-section__subtitle,
+.km-text-subsection,
 #km-content .km-release__body > p:first-child:not(.km-release__more) {
     color: hsl(var(--km-colour-subtitle));
     font-size: var(--km-font-size-base);
@@ -3261,22 +3261,22 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
     letter-spacing: var(--km-tracking-body);
 }
 
-.km-feedback-shell__subtitle,
-.km-text-subtitle,
-#km-content section>p.km-text-subtitle,
+.km-feedback-section__subtitle,
+.km-text-subsection,
+#km-content section>p.km-text-subsection,
 #km-content .km-release__body > p:first-child:not(.km-release__more) {
     width: 95%;
     margin-top: var(--km-subtitle-gap);
 }
 
-.km-feedback-shell__updated {
+.km-feedback-section__updated {
     order: 3;
     margin-block-start: 1rem;
     color: hsl(var(--km-colour-meta));
     font-size: var(--km-font-size-md);
 }
 
-.km-feedback-shell__button {
+.km-feedback-section__button {
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -4146,7 +4146,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
     }
 }
 
-.km-text-pre-title {
+.km-text-pre-section {
     color: hsl(var(--km-colour-subtitle));
     font-size: var(--km-font-size-base) !important;
     font-weight: var(--km-weight-body) !important;
@@ -4155,7 +4155,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
     padding-bottom: 0.5rem !important;
 }
 
-.km-text-pre-title+.rubric {
+.km-text-pre-section+.rubric {
     margin-top: 0 !important;
 }
 
@@ -4527,7 +4527,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
     }
 
     .km-footer__text,
-    .km-feedback-shell__updated {
+    .km-feedback-section__updated {
         letter-spacing: var(--km-tracking-small);
     }
 
@@ -4608,7 +4608,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
         }
     }
 
-    .km-feedback-shell__title,
+    .km-feedback-section__title,
     #km-content h2 {
         margin-top: calc(var(--km-layout-section-gap) / 2) !important;
     }
@@ -4638,23 +4638,23 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
         }
     }
 
-    .km-text-subtitle,
-    .km-feedback-shell__subtitle,
+    .km-text-subsection,
+    .km-feedback-section__subtitle,
     #km-content .km-release__body > p:first-child:not(.km-release__more) {
         width: 100%;
     }
 
-    .km-feedback-shell--split {
-        & .km-feedback-shell__header--split {
+    .km-feedback-section--split {
+        & .km-feedback-section__header--split {
             display: contents;
         }
 
-        & .km-feedback-shell__subtitle {
+        & .km-feedback-section__subtitle {
             order: 1;
             margin-bottom: 1rem;
         }
 
-        & .km-feedback-shell__button {
+        & .km-feedback-section__button {
             order: 2;
         }
     }
@@ -4806,7 +4806,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
         gap: 0 0.25rem;
     }
 
-    .km-feedback-shell__header--split {
+    .km-feedback-section__header--split {
         position: relative;
         display: flex;
         align-items: baseline;
@@ -4815,7 +4815,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
         padding-top: 3rem;
         margin-top: calc(var(--km-layout-section-gap) / 1.5);
 
-        & .km-feedback-shell__title {
+        & .km-feedback-section__title {
             flex: 1;
             min-width: 0;
             margin-top: 0;
@@ -4825,7 +4825,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
             }
         }
 
-        & .km-feedback-shell__button {
+        & .km-feedback-section__button {
             flex: none;
             white-space: nowrap;
         }
@@ -4874,7 +4874,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+label {
     html.km-page-loading :is(.km-header,
         .km-breadcrumbs,
         #km-content,
-        .km-feedback-shell,
+        .km-feedback-section,
         .km-page__more-button,
         .km-pagination,
         .km-footer) {

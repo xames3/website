@@ -70,7 +70,7 @@ class directive(rst.Directive):
           content, so it shows once the accordion is open, instead of
           under the title. It needs `subtitle`.
         - `class-subtitle`: More classes for the subtitle, which has
-          `km-text-subtitle` without them. It needs `subtitle`.
+          `km-text-subsection` without them. It needs `subtitle`.
         - `marker`: What shows an accordion opens, `plus`, a `down`
           chevron or a `right` one. A plus and a right chevron turn 45
           degrees as it opens, a down chevron turns over. It's the
@@ -245,7 +245,7 @@ def visit_subhead(self: HTMLTranslator, node: subhead) -> None:
     :param node: The subtitle's node.
     """
     classes = " ".join(
-        ["km-accordion__subtitle", "km-text-subtitle", *node["classes"]]
+        ["km-accordion__subtitle", "km-text-subsection", *node["classes"]]
     )
     self.body.append(f'<span class="{self.attval(classes)}">')
 

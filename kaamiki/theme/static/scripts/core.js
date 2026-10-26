@@ -131,9 +131,9 @@
     function anchorHost(element) {
         const previous = element.previousElementSibling;
         if (previous) {
-            if (previous.classList.contains('km-text-pre-title')) return previous;
+            if (previous.classList.contains('km-text-pre-section')) return previous;
             const last = previous.lastElementChild;
-            if (last && last.classList.contains('km-text-pre-title')) return last;
+            if (last && last.classList.contains('km-text-pre-section')) return last;
         }
         return element;
     }
