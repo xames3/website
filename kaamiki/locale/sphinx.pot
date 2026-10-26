@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kaamiki VERSION\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-10-18 20:05-0500\n"
+"POT-Creation-Date: 2026-10-26 12:32-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,16 +38,16 @@ msgstr ""
 msgid "View release"
 msgstr ""
 
-msgid "Broke"
-msgstr ""
-
-msgid "Worked"
-msgstr ""
-
 msgid "Copy the snippet"
 msgstr ""
 
 msgid "Nothing printed yet"
+msgstr ""
+
+msgid "Broke"
+msgstr ""
+
+msgid "Worked"
 msgstr ""
 
 #, python-format
@@ -75,12 +75,6 @@ msgid ""
 "been here."
 msgstr ""
 
-msgid "Index"
-msgstr ""
-
-msgid "Every term indexed on this site, from A to Z."
-msgstr ""
-
 msgid "Search Results"
 msgstr ""
 
@@ -91,12 +85,6 @@ msgid "Copy link"
 msgstr ""
 
 msgid "Take me home"
-msgstr ""
-
-msgid "Jump to letter"
-msgstr ""
-
-msgid "Index shortcuts"
 msgstr ""
 
 msgid "Copied!"
@@ -171,6 +159,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Copy article URL to clipboard"
+msgstr ""
+
+msgid "Show"
 msgstr ""
 
 msgid "Stars"
