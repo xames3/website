@@ -16,6 +16,7 @@
         onVisible,
         prefersReducedMotion,
         rafThrottle,
+        ready,
         say,
         settleHash,
     } = window.Kaamiki;
@@ -26,18 +27,23 @@
     const PIXELATE_RATIO = 20;
     const DROPDOWN_OPEN_DELAY_MS = 40;
     const DROPDOWN_CLOSE_DELAY_MS = 140;
+    const DROPDOWN_SWITCH_DELAY_MS = 90;
+    const DROPDOWN_AIM_WINDOW_MS = 120;
+    const DROPDOWN_AIM_STEP_MS = 60;
+    const DROPDOWN_AIM_MS = 450;
+    const DROPDOWN_WRAPPED_CLOSE_DELAY_MS = 700;
+    const DROPDOWN_EDGE_PX = 8;
     const SIDEBAR_WIDE_PX = 768;
     const SCROLLTOP_AFTER_PX = 200;
     const TOOLTIP_ROOM_PX = 32;
 
-    function ready(fn) {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', fn, { once: true });
-        } else {
-            fn();
-        }
+    function initHeaderHeight() {
+        const header = document.querySelector('.km-header');
+        if (!header) return;
+        const fit = () => root.style.setProperty('--km-header-height', `${headerHeight()}px`);
+        fit();
+        new ResizeObserver(rafThrottle(fit)).observe(header);
     }
-
     function initKeyboardModality() {
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Tab' || event.key?.startsWith('Arrow')) root.setAttribute('data-km-keyboard', '');
@@ -214,7 +220,7 @@
             if (!target) return;
 
             event.preventDefault();
-            try { history.pushState(history.state, '', `#${id}`); } catch { /* noop */ }
+            try { history.pushState(history.state, '', `#${id}`); } catch {}
             scrollToElement(target).then((arrived) => {
                 if (arrived && !target.contains(link)) focusTarget(target);
             });
@@ -386,15 +392,15 @@
     function initTabSets() {
         const bars = [];
         const panels = new Map();
-        document.querySelectorAll('.sd-tab-set').forEach((set) => {
+        document.querySelectorAll('.km-tabs').forEach((set) => {
             const tabs = Array.from(set.querySelectorAll(':scope > input'), (input) => {
                 const label = input.nextElementSibling;
                 return [input, label, label?.nextElementSibling];
             });
-            const shaped = ([, label, panel]) => label?.matches('label') && panel?.matches('.sd-tab-content');
+            const shaped = ([, label, panel]) => label?.matches('label') && panel?.matches('.km-tabs__panel');
             if (!tabs.length || !tabs.every(shaped)) return;
             const bar = document.createElement('div');
-            bar.className = 'km-tab-bar';
+            bar.className = ['km-tabs__bar', set.dataset.kmBar].filter(Boolean).join(' ');
             set.prepend(bar);
             bars.push(bar);
             tabs.forEach(([input, label, panel]) => {
@@ -404,6 +410,22 @@
         });
         if (!bars.length) return;
 
+        const kept = (group) => `km:tabs:${group}`;
+        const group = (input) => input.closest('.km-tabs')?.dataset.kmGroup;
+        const choose = (set, key) => {
+            const input = Array.from(set.querySelectorAll('input[data-km-key]')).find((_) => _.dataset.kmKey === key);
+            if (input && !input.checked) input.checked = true;
+        };
+        const linked = location.hash.length > 1
+            ? document.getElementById(decodeId(location.hash.slice(1)))
+            : null;
+        document.querySelectorAll('.km-tabs[data-km-group]').forEach((set) => {
+            if (linked && set.contains(linked)) return;
+            let key = null;
+            try { key = localStorage.getItem(kept(set.dataset.kmGroup)); } catch {}
+            if (key) choose(set, key);
+        });
+
         const mark = () => panels.forEach((panel, input) => {
             panel.classList.toggle('km-is-current', input.checked);
         });
@@ -412,7 +434,7 @@
             if (!label) return;
             const view = bar.getBoundingClientRect();
             const box = label.getBoundingClientRect();
-            bar.classList.toggle('km-is-sliding', slide);
+            bar.classList.toggle('km-is-sliding', slide && !bar.closest('.km-tabs--still'));
             bar.style.setProperty('--km-tab-x', `${box.left - view.left - bar.clientLeft + bar.scrollLeft}px`);
             bar.style.setProperty('--km-tab-y', `${box.top - view.top - bar.clientTop + bar.scrollTop}px`);
             bar.style.setProperty('--km-tab-width', `${box.width}px`);
@@ -439,8 +461,24 @@
             new Set(entries.map(({ target }) => target.parentElement)).forEach((bar) => place(bar, false));
         });
         bars.forEach((bar) => bar.querySelectorAll(':scope > label').forEach((label) => watch.observe(label)));
+        document.addEventListener('keydown', (event) => {
+            if (!panels.has(event.target) || (event.key !== 'Home' && event.key !== 'End')) return;
+            const inputs = Array.from(event.target.closest('.km-tabs__bar').querySelectorAll(':scope > input'));
+            const to = event.key === 'Home' ? inputs[0] : inputs[inputs.length - 1];
+            event.preventDefault();
+            to.checked = true;
+            to.focus();
+            to.dispatchEvent(new Event('change', { bubbles: true }));
+        });
         document.addEventListener('change', (event) => {
             if (!panels.has(event.target)) return;
+            const named = group(event.target);
+            if (named) {
+                try { localStorage.setItem(kept(named), event.target.dataset.kmKey); } catch {}
+                document.querySelectorAll(`.km-tabs[data-km-group="${CSS.escape(named)}"]`).forEach((set) => {
+                    if (!set.contains(event.target)) choose(set, event.target.dataset.kmKey);
+                });
+            }
             mark();
             bars.forEach((bar) => place(bar, true));
             reveal(event.target.nextElementSibling);
@@ -533,9 +571,74 @@
         const nav = document.querySelector('.km-header__nav-tree');
         if (!nav) return;
 
+        // NOTE(xames3): One dropdown is open at a time and `km-is-open` is
+        // the only thing that shows it, so the pointer, the keyboard and the
+        // timers can't disagree. A pointer that rests on the seam between two
+        // triggers crosses it again and again, so a menu only gives way to the
+        // next once the pointer has settled there, and a pointer that comes
+        // back first leaves things as they were. One on its way down into the
+        // open dropdown is let through, even over the triggers beside it.
         let uid = 0;
-        const closers = [];
+        let current = null;
+        let timer = 0;
+        const trail = [];
+        const track = (event) => {
+            const now = performance.now();
+            trail.push({ x: event.clientX, y: event.clientY, at: now });
+            while (trail.length > 1 && now - trail[0].at > DROPDOWN_AIM_WINDOW_MS) trail.shift();
+        };
+        const aimed = () => {
+            const to = trail[trail.length - 1];
+            if (!current || !to || performance.now() - to.at > DROPDOWN_AIM_WINDOW_MS) return false;
+            const box = current.list.getBoundingClientRect();
+            if (to.y >= box.top) return false;
+            if (trail.length < 2) return to.x >= box.left && to.x <= box.right;
+            const from = trail[0];
+            if (to.y <= from.y) return false;
+            const side = (a, b, c) => (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y);
+            const left = { x: box.left, y: box.top };
+            const right = { x: box.right, y: box.top };
+            const signs = [side(to, left, from), side(to, right, left), side(to, from, right)];
+            return signs.every((sign) => sign >= 0) || signs.every((sign) => sign <= 0);
+        };
+
+        const place = ({ group, list }) => {
+            group.style.setProperty('--km-dropdown-shift', '0px');
+            const drop = Math.max(0, nav.getBoundingClientRect().bottom - group.getBoundingClientRect().bottom);
+            const wrapped = drop > 1;
+            const box = list.getBoundingClientRect();
+            const room = document.documentElement.clientWidth - DROPDOWN_EDGE_PX;
+            const left = Math.max(DROPDOWN_EDGE_PX - box.left, Math.min(0, room - box.right));
+            group.style.setProperty('--km-dropdown-drop', `${wrapped ? drop : 0}px`);
+            group.style.setProperty('--km-dropdown-shift', `${left}px`);
+            group.dataset.kmWrapped = wrapped ? 'true' : '';
+        };
+        const hide = () => {
+            clearTimeout(timer);
+            if (!current) return;
+            current.group.classList.remove('km-is-open');
+            current.trigger.setAttribute('aria-expanded', 'false');
+            current = null;
+            document.removeEventListener('mousemove', track);
+            trail.length = 0;
+        };
+        const show = (menu) => {
+            clearTimeout(timer);
+            if (current === menu) return;
+            hide();
+            menu.group.classList.add('km-is-open');
+            place(menu);
+            menu.trigger.setAttribute('aria-expanded', 'true');
+            current = menu;
+            document.addEventListener('mousemove', track, { passive: true });
+        };
+        const later = (fn, delay) => {
+            clearTimeout(timer);
+            timer = setTimeout(fn, delay);
+        };
+
         const dropdown = (group, trigger, list) => {
+            const menu = { group, trigger, list };
             const isLink = trigger.tagName === 'A';
             list.id = list.id || `km-nav-group-${++uid}`;
             if (!isLink) {
@@ -546,49 +649,51 @@
             trigger.setAttribute('aria-controls', list.id);
             trigger.setAttribute('aria-expanded', 'false');
 
-            let openTimer;
-            let closeTimer;
-            const set = (next) => {
-                clearTimeout(openTimer);
-                clearTimeout(closeTimer);
-                group.classList.toggle('km-is-open', next);
-                trigger.setAttribute('aria-expanded', String(next));
-                if (next) closers.forEach((close) => close !== set && close(false));
-            };
-            closers.push(set);
-            const open = () => {
-                clearTimeout(closeTimer);
-                openTimer = setTimeout(() => set(true), DROPDOWN_OPEN_DELAY_MS);
-            };
-            const close = () => {
-                clearTimeout(openTimer);
-                closeTimer = setTimeout(() => set(false), DROPDOWN_CLOSE_DELAY_MS);
-            };
-
-            trigger.addEventListener('mouseenter', open, { passive: true });
-            group.addEventListener('mouseenter', open, { passive: true });
+            group.addEventListener('mouseenter', () => {
+                if (current === menu) {
+                    clearTimeout(timer);
+                } else if (!current) {
+                    later(() => show(menu), DROPDOWN_OPEN_DELAY_MS);
+                } else {
+                    const until = performance.now() + DROPDOWN_SWITCH_DELAY_MS + DROPDOWN_AIM_MS;
+                    const attempt = () => {
+                        if (aimed() && performance.now() < until) later(attempt, DROPDOWN_AIM_STEP_MS);
+                        else show(menu);
+                    };
+                    later(attempt, DROPDOWN_SWITCH_DELAY_MS);
+                }
+            }, { passive: true });
             group.addEventListener('mouseleave', () => {
-                if (!group.querySelector(':focus-visible')) close();
+                if (group.querySelector(':focus-visible')) return;
+                const delay = group.dataset.kmWrapped ? DROPDOWN_WRAPPED_CLOSE_DELAY_MS : DROPDOWN_CLOSE_DELAY_MS;
+                const until = performance.now() + delay + DROPDOWN_AIM_MS;
+                const attempt = () => {
+                    if (aimed() && performance.now() < until) later(attempt, DROPDOWN_AIM_STEP_MS);
+                    else hide();
+                };
+                later(attempt, delay);
             }, { passive: true });
             group.addEventListener('focusout', (event) => {
-                if (!group.contains(event.relatedTarget)) set(false);
+                if (current === menu && !group.contains(event.relatedTarget)) hide();
             });
             trigger.addEventListener('keydown', (event) => {
                 if (!isLink && (event.key === 'Enter' || event.key === ' ')) {
                     event.preventDefault();
-                    set(!group.classList.contains('km-is-open'));
+                    if (current === menu) hide();
+                    else show(menu);
                 } else if (event.key === 'ArrowDown') {
                     event.preventDefault();
-                    set(true);
+                    show(menu);
                     list.querySelector('a[href]')?.focus();
                 }
             });
             group.addEventListener('keydown', (event) => {
-                if (event.key !== 'Escape' || !group.classList.contains('km-is-open')) return;
-                set(false);
+                if (event.key !== 'Escape' || current !== menu) return;
+                hide();
                 trigger.focus();
             });
         };
+        window.addEventListener('resize', hide, { passive: true });
 
         Array.from(nav.querySelectorAll('p.caption')).forEach((caption) => {
             const list = caption.nextElementSibling;
@@ -615,15 +720,15 @@
         });
     }
 
-    function enrichYouTubeCard(card) {
-        const id = card.getAttribute('data-km-youtube-id');
-        if (!id || card.hasAttribute('data-km-private')) return;
-        const title = card.hasAttribute('data-km-youtube-title')
+    function enrichYouTubeBlock(block) {
+        const id = block.getAttribute('data-km-youtube-id');
+        if (!id || block.hasAttribute('data-km-private')) return;
+        const title = block.hasAttribute('data-km-youtube-title')
             ? null
-            : card.querySelector('.km-youtube-card__title');
-        const channel = card.hasAttribute('data-km-youtube-channel')
+            : block.querySelector('.km-youtube-block__title');
+        const channel = block.hasAttribute('data-km-youtube-channel')
             ? null
-            : card.querySelector('.km-youtube-card__channel');
+            : block.querySelector('.km-youtube-block__channel');
         if (!title && !channel) return;
 
         const watch = encodeURIComponent(`https://www.youtube.com/watch?v=${id}`);
@@ -634,10 +739,10 @@
         });
     }
 
-    function initYouTubeCards() {
+    function initYouTubeBlocks() {
         onVisible(
-            document.querySelectorAll('.km-youtube-card[data-km-youtube-id]'),
-            enrichYouTubeCard,
+            document.querySelectorAll('.km-youtube-block[data-km-youtube-id]'),
+            enrichYouTubeBlock,
         );
     }
 
@@ -662,20 +767,32 @@
         });
     }
 
+    function initVideoFlags() {
+        document.querySelectorAll('.km-media--video video').forEach((video) => {
+            const frame = video.closest('.km-media__frame');
+            const sync = () => frame.classList.toggle('km-is-paused', video.paused);
+            ['play', 'pause', 'ended', 'loadedmetadata'].forEach((name) => {
+                video.addEventListener(name, sync, { passive: true });
+            });
+            sync();
+        });
+    }
+
     ready(() => {
         const {
             initShowMore,
-            initDropdowns,
+            initAccordions,
             initRepositoryWidgets,
             initTickers,
+            initRotators,
             initInkReveal,
             initTranscripts,
             initPageReveal,
             initArticleBackground,
-            initWalkthroughs,
         } = window.Kaamiki;
         Object.freeze(window.Kaamiki);
         for (const init of [
+            initHeaderHeight,
             initKeyboardModality,
             initLogoInvert,
             initSidebar,
@@ -691,19 +808,20 @@
             initPixelatedBlur,
             initTouchReveal,
             initHeaderNavDropdowns,
-            initDropdowns,
+            initAccordions,
             initHighlightedLines,
             initCopyButtonNames,
             initScrollable,
-            initYouTubeCards,
+            initYouTubeBlocks,
             initYouTubeFacades,
+            initVideoFlags,
             initRepositoryWidgets,
             initTickers,
+            initRotators,
             initInkReveal,
             initTranscripts,
             initPageReveal,
             initArticleBackground,
-            initWalkthroughs,
         ]) {
             try {
                 init();

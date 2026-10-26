@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 22 February 2025
-# Last updated on: 01 October 2026
+# Last updated on: 25 October 2026
 #
 # This Makefile provides a comprehensive set of commands (targets) for building
 # and checking my website.
@@ -44,7 +44,7 @@ PORT            := 5500
 
 # === TOOLS ===================================================================
 SPHINX_BUILD    ?= sphinx-build
-SPHINX_LINT     ?= sphinx-lint
+CHECK           ?= check
 HTTP_SERVER     ?= python3 -m http.server
 TOX             ?= tox
 CURL            ?= curl
@@ -79,13 +79,9 @@ SPHINX_LINKCHECK_FLAGS := \
 TOX_FLAGS := \
 	--quiet
 
-SPHINX_LINT_FLAGS := \
-	--disable role-with-double-backticks,role-without-backticks \
-	--enable line-too-long \
-	--max-line-length 79
-
 HTTP_SERVER_FLAGS := \
 	$(PORT) \
+	--bind 127.0.0.1 \
 	--directory $(OUTPUT_DIR)
 
 define spin
@@ -122,7 +118,7 @@ endef
 
 # === TARGETS =================================================================
 .DEFAULT_GOAL := help
-.PHONY: help clean check lint format typecheck tox html linkcheck \
+.PHONY: help clean check lint format reformat typecheck tox html linkcheck \
 	rebuild serve start stop devserver inventories all
 
 # Improvement based on: https://stackoverflow.com/a/64394417
@@ -140,14 +136,14 @@ clean: ## Remove build artifacts and temporary directories.
 	$(call spin,[  CLEAN],Removing build artifacts,rm -rf $(OUTPUT_DIR) $(DOCTREE_DIR) $(LINKCHECK_DIR))
 
 check: ## Perform linting checks and report issues, if any.
-	$(call spin,[ SPHINX],Running sphinx linter,$(SPHINX_LINT) $(SPHINX_LINT_FLAGS) $(SOURCE_DIR))
+	$(call spin,[ SPHINX],Running sphinx linter,$(TOX) $(TOX_FLAGS) -e sphinxlint)
 
 html: ## Build HTML files from the source directory.
-	@$(MAKE) check --no-print-directory
+	@$(if $(CHECK),$(MAKE) $(CHECK) --no-print-directory)
 	$(call spin,[  BUILD],Building HTML pages,$(SPHINX_BUILD) $(SPHINX_BUILD_FLAGS) $(SOURCE_DIR) $(OUTPUT_DIR))
 
 inventories: ## Fetch the intersphinx inventories the build falls back on.
-	$(call spin,[  FETCH],Fetching intersphinx inventories,mkdir -p $(INVENTORY_DIR); for pair in $(INVENTORIES); do name=$${pair%%=*}; $(CURL) $(CURL_FLAGS) --output $(INVENTORY_DIR)/$$name.part $${pair#*=} && mv $(INVENTORY_DIR)/$$name.part $(INVENTORY_DIR)/$$name.inv || rm -f $(INVENTORY_DIR)/$$name.part; done)
+	$(call spin,[  FETCH],Fetching intersphinx inventories,mkdir -p $(INVENTORY_DIR); missing=0; for pair in $(INVENTORIES); do name=$${pair%%=*}; if $(CURL) $(CURL_FLAGS) --output $(INVENTORY_DIR)/$$name.part $${pair#*=}; then mv $(INVENTORY_DIR)/$$name.part $(INVENTORY_DIR)/$$name.inv; else rm -f $(INVENTORY_DIR)/$$name.part; [ -s $(INVENTORY_DIR)/$$name.inv ] || { echo "no inventory for $$name" >&2; missing=1; }; fi; done; exit $$missing)
 
 linkcheck: ## Check every external link and report the dead ones.
 	$(call spin,[  CHECK],Checking for broken external links,$(SPHINX_BUILD) $(SPHINX_LINKCHECK_FLAGS) $(SOURCE_DIR) $(LINKCHECK_DIR),$(LINKCHECK_FILE))
@@ -158,11 +154,14 @@ lint: ## Lint Python code with ruff, through tox.
 format: ## Check Python formatting with ruff, through tox.
 	$(call spin,[  STYLE],Checking code format,$(TOX) $(TOX_FLAGS) -e format)
 
+reformat: ## Fix and reformat Python, HTML and Jinja in place, through tox.
+	$(call spin,[ REFORM],Reformatting sources,$(TOX) $(TOX_FLAGS) -e reformat)
+
 typecheck: ## Typecheck Python code with mypy, through tox.
 	$(call spin,[   TYPE],Checking types,$(TOX) $(TOX_FLAGS) -e typecheck)
 
-tox: ## Run every tox environment in parallel.
-	$(call spin,[    TOX],Running every tox environment,$(TOX) $(TOX_FLAGS) -p)
+tox: ## Run every tox check in parallel.
+	$(call spin,[    TOX],Running every tox check,$(TOX) $(TOX_FLAGS) -p)
 
 rebuild: ## Rebuild HTML files after cleaning the build directory.
 	@$(MAKE) clean --no-print-directory
@@ -197,7 +196,7 @@ stop: ## Stop the development web server.
 
 devserver:
 	@printf "[  START] Starting development server at $(PROTOCOL)://$(LOCALHOST):$(PORT)... "
-	@($(HTTP_SERVER) $(HTTP_SERVER_FLAGS) >/dev/null &); \
+	@($(HTTP_SERVER) $(HTTP_SERVER_FLAGS) >/dev/null 2>&1 &); \
 	for _ in 1 2 3 4 5 6 7 8 9 10; do \
 		lsof -nP -i :$(PORT) 2>/dev/null | grep -q LISTEN && break; \
 		sleep 0.2; \

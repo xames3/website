@@ -31,10 +31,18 @@
     const CLAMP_SLACK_PX = 48;
     const CLAMP_SETTLE_MS = 60;
     const CLAMP_MIN_PX = 320;
-    const DROPDOWN_PX_FACTOR = 0.9;
+    const ACCORDION_PX_FACTOR = 0.9;
     const ARTICLE_BG_INTERVAL_MS = 7000;
     const TICKER_CELLS = 11;
     const TICKER_BLUR_PX = 2;
+    const ROTATE_STEP_IN_MS = 25;
+    const ROTATE_STEP_OUT_MS = 15;
+    const ROTATE_SHIFT = '0.25em';
+    // NOTE(xames3): x.ai's rotating word skips the blur in Safari, so this does too.
+    const ROTATE_BLUR = CSS.supports('hanging-punctuation', 'first') ? 'none' : 'blur(4px)';
+    // NOTE(xames3): a box per code point breaks a script whose letters join, so such a word moves whole.
+    const ROTATE_JOINED = /[\p{Script=Devanagari}\p{Script=Bengali}\p{Script=Gurmukhi}\p{Script=Gujarati}\p{Script=Oriya}\p{Script=Tamil}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Sinhala}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Tibetan}]/u;
+    const ROTATE_STAGGER_MAX_MS = 400;
     const REVEAL_STEPS = 6;
     const REVEAL_SLACK_MS = 8;
     const SPEECH_WORD_MS = 170;
@@ -232,7 +240,7 @@
         const toggle = (next, animate = true) => {
             if (next === expanded) return;
             expanded = next;
-            try { history.replaceState({ ...history.state, kmExpanded: next }, ''); } catch { /* noop */ }
+            try { history.replaceState({ ...history.state, kmExpanded: next }, ''); } catch {}
             button.setAttribute('aria-expanded', next ? 'true' : 'false');
             if (label) {
                 label.textContent = next
@@ -354,10 +362,10 @@
         });
     }
 
-    function dropdownFold(details, summary, content, index) {
-        const CLAMPED = 'km-dropdown--clamped';
-        const CLAMPING = 'km-dropdown--clamping';
-        const LONG = 'km-dropdown--long';
+    function accordionFold(details, summary, content, index) {
+        const CLAMPED = 'km-accordion--clamped';
+        const CLAMPING = 'km-accordion--clamping';
+        const LONG = 'km-accordion--long';
         let body = null;
         let shell = null;
         let button = null;
@@ -426,7 +434,7 @@
         };
 
         const measure = () => {
-            if (!details.open) return;
+            if (!details.open || details.dataset.kmWhole) return;
             if (details.classList.contains('km-is-animating') || details.classList.contains(CLAMPING)) return;
             if (full() - limit() < CLAMP_SLACK_PX) {
                 if (!body) return;
@@ -438,7 +446,7 @@
             }
             build();
             details.classList.add(LONG);
-            details.style.setProperty('--km-dropdown-clamp', `${limit()}px`);
+            details.style.setProperty('--km-accordion-clamp', `${limit()}px`);
             if (!expanded) details.classList.add(CLAMPED);
         };
 
@@ -447,19 +455,19 @@
         const build = () => {
             if (body) return;
             body = document.createElement('div');
-            body.className = 'km-dropdown__body';
-            body.id = `km-dropdown-body-${index}`;
+            body.className = 'km-accordion__fold';
+            body.id = `km-accordion-fold-${index}`;
             body.append(...content.childNodes);
             shell = document.createElement('div');
-            shell.className = 'km-dropdown__more';
+            shell.className = 'km-accordion__more';
             button = document.createElement('button');
             button.type = 'button';
-            button.className = 'km-dropdown__more-button';
+            button.className = 'km-accordion__more-button';
             button.setAttribute('aria-controls', body.id);
             label = document.createElement('span');
-            label.className = 'km-dropdown__more-label';
+            label.className = 'km-accordion__more-label';
             const icon = document.createElement('i');
-            icon.className = `${root.dataset.kmMoreIcon} km-dropdown__more-icon`;
+            icon.className = `${root.dataset.kmMoreIcon} km-accordion__more-icon`;
             icon.setAttribute('aria-hidden', 'true');
             button.append(label, icon);
             shell.append(button);
@@ -468,7 +476,7 @@
             motion = foldMotion(details, body, CLAMPED, CLAMPING, (next) => {
                 details.classList.toggle(CLAMPED, next);
             });
-            idle = idleShell(shell, button, 'km-dropdown__more--idle', () => expanded && details.open);
+            idle = idleShell(shell, button, 'km-accordion__more--idle', () => expanded && details.open);
             button.addEventListener('click', () => toggle(!expanded));
             body.addEventListener('focusin', (event) => {
                 if (expanded || !details.classList.contains(CLAMPED)) return;
@@ -494,14 +502,17 @@
         return { measure, reset };
     }
 
-    function initDropdowns() {
+    function initAccordions() {
         const easing = getCssVar('--km-spring-smooth');
 
-        document.querySelectorAll('details.sd-dropdown').forEach((details, index) => {
+        const folds = new Map();
+
+        document.querySelectorAll('details.km-accordion').forEach((details, index) => {
             const summary = details.querySelector(':scope > summary');
-            const content = details.querySelector(':scope > .sd-summary-content');
+            const content = details.querySelector(':scope > .km-accordion__body');
             if (!summary || !content) return;
-            const fold = dropdownFold(details, summary, content, index);
+            const fold = accordionFold(details, summary, content, index);
+            folds.set(details, fold);
 
             let animation = null;
             let wanted = details.open;
@@ -529,6 +540,13 @@
 
                 const opening = animation ? !wanted : !details.open;
                 wanted = opening;
+                if (opening && details.dataset.kmGroup) {
+                    const group = CSS.escape(details.dataset.kmGroup);
+                    document.querySelectorAll(`details.km-accordion[data-km-group="${group}"][open]`).forEach((other) => {
+                        if (other === details || other.classList.contains('km-is-closing')) return;
+                        other.querySelector(':scope > summary')?.click();
+                    });
+                }
                 const moving = getComputedStyle(content);
                 const from = animation ? {
                     height: content.getBoundingClientRect().height,
@@ -561,9 +579,9 @@
                 const end = opening
                     ? { height: Math.min(box.height, Math.max(room, viewportHeight(), start.height)), top, bottom, opacity: 1 }
                     : { height: 0, top: 0, bottom: 0, opacity: 0 };
-                const duration = Math.min(TIMING.dropdownMax(), Math.max(
-                    TIMING.dropdownMin(),
-                    Math.abs(end.height - start.height) * DROPDOWN_PX_FACTOR,
+                const duration = Math.min(TIMING.accordionMax(), Math.max(
+                    TIMING.accordionMin(),
+                    Math.abs(end.height - start.height) * ACCORDION_PX_FACTOR,
                 ));
 
                 const current = content.animate([frame(start), frame(end)], {
@@ -574,11 +592,53 @@
                     current.cancel();
                     animation = null;
                     finish(opening);
-                }).catch(() => { /* superseded by a newer toggle */ });
+                }).catch(() => {});
             });
 
             if (details.open) fold.measure();
         });
+
+        const reveal = (target) => {
+            let opened = false;
+            for (let host = target; host; host = host.parentElement) {
+                if (host.matches('.km-tabs__panel')) {
+                    const input = document.getElementById(host.dataset.kmTab);
+                    if (input && !input.checked) {
+                        input.checked = true;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                        opened = true;
+                    }
+                    continue;
+                }
+                if (!host.matches('details.km-accordion') || host.open) continue;
+                const group = host.dataset.kmGroup;
+                if (group) {
+                    document.querySelectorAll(`details.km-accordion[data-km-group="${CSS.escape(group)}"][open]`).forEach((other) => {
+                        if (other === host || other.contains(host)) return;
+                        other.open = false;
+                        folds.get(other)?.reset();
+                    });
+                }
+                host.open = true;
+                folds.get(host)?.measure();
+                opened = true;
+            }
+            return opened;
+        };
+        const fromHash = () => {
+            const id = decodeId(location.hash.slice(1));
+            const target = id ? document.getElementById(id) : null;
+            if (reveal(target)) target.scrollIntoView();
+        };
+
+        fromHash();
+        window.addEventListener('hashchange', fromHash);
+        document.addEventListener('click', (event) => {
+            if (isModifiedClick(event)) return;
+            const link = event.target.closest?.('a[href^="#"]');
+            const id = link ? decodeId((link.getAttribute('href') || '').slice(1)) : '';
+            if (id) reveal(document.getElementById(id));
+        }, true);
     }
 
     function formatCount(value) {
@@ -670,8 +730,9 @@
         const data = await fetchJson(`https://api.github.com/repos/${project}`) || {};
         fields.forEach((field) => {
             const raw = Number(data[field.getAttribute('data-km-repository-count')]);
-            const count = Number.isFinite(raw) ? Math.max(0, Math.trunc(raw)) : 0;
-            buildTicker(field, formatCount(count))(TIMING.tickerDuration());
+            if (!Number.isFinite(raw)) return;
+            field.closest('p').hidden = false;
+            buildTicker(field, formatCount(Math.max(0, Math.trunc(raw))))(TIMING.tickerDuration());
         });
     }
 
@@ -688,6 +749,98 @@
             const duration = parseFloat(field.style.getPropertyValue('--km-ticker-duration'));
             const count = buildTicker(field, field.textContent);
             onVisible([field], () => count(duration), { rootMargin: '0px 0px -10% 0px' });
+        });
+    }
+
+    function rotateParts(text) {
+        if (ROTATE_JOINED.test(text)) return [text];
+        return Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text), (part) => part.segment);
+    }
+
+    function rotateLetters(word, text) {
+        const letters = rotateParts(text).map((part) => {
+            const letter = document.createElement('span');
+            letter.className = 'km-rotate__letter';
+            letter.textContent = part;
+            return letter;
+        });
+        word.replaceChildren(...letters);
+        return letters;
+    }
+
+    function playLetters(letters, entering) {
+        const rest = { opacity: 1, filter: 'none', transform: 'none' };
+        const away = {
+            opacity: 0,
+            filter: ROTATE_BLUR,
+            transform: `translateY(${entering ? '' : '-'}${ROTATE_SHIFT})`,
+        };
+        const step = Math.min(entering ? ROTATE_STEP_IN_MS : ROTATE_STEP_OUT_MS, ROTATE_STAGGER_MAX_MS / letters.length);
+        return letters.map((letter, index) => letter.animate(entering ? [away, rest] : [rest, away], {
+            duration: TIMING.fast(),
+            delay: (entering ? index : letters.length - 1 - index) * step,
+            easing: getCssVar('--km-ease-expo'),
+            fill: 'both',
+        }));
+    }
+
+    function wordWidth(field) {
+        const range = document.createRange();
+        range.selectNodeContents(field);
+        return range.getBoundingClientRect().width;
+    }
+
+    async function swapWord(field, current, next) {
+        const from = wordWidth(field);
+        const stage = document.createElement('span');
+        stage.className = 'km-rotate__stage';
+        stage.setAttribute('aria-hidden', 'true');
+        const word = document.createElement('span');
+        stage.appendChild(word);
+        stage.style.width = `${from}px`;
+        field.replaceChildren(stage);
+        const leaving = playLetters(rotateLetters(word, current), false);
+        await Promise.all(leaving.map((animation) => animation.finished));
+        stage.style.width = '';
+        word.textContent = next;
+        const to = stage.getBoundingClientRect().width;
+        const entering = playLetters(rotateLetters(word, next), true);
+        const resize = stage.animate([{ width: `${from}px` }, { width: `${to}px` }], {
+            duration: TIMING.rotateResize(),
+            easing: getCssVar('--km-ease-expo'),
+            fill: 'forwards',
+        });
+        await Promise.all([...entering, resize].map((animation) => animation.finished));
+        field.textContent = next;
+    }
+
+    function buildRotator(field) {
+        const words = field.dataset.kmWords.split('|');
+        let index = 0;
+        let busy = false;
+        let timer;
+        const advance = async () => {
+            if (busy || document.hidden) return;
+            busy = true;
+            const current = words[index];
+            index = (index + 1) % words.length;
+            try {
+                await swapWord(field, current, words[index]);
+            } catch {
+                field.textContent = words[index];
+            }
+            busy = false;
+        };
+        new IntersectionObserver((entries) => {
+            clearInterval(timer);
+            if (entries[entries.length - 1].isIntersecting) timer = setInterval(advance, TIMING.rotateHold());
+        }).observe(field.parentElement);
+    }
+
+    function initRotators() {
+        if (prefersReducedMotion()) return;
+        document.querySelectorAll('.km-rotate[data-km-words]').forEach((field) => {
+            if (!field.closest('a')) buildRotator(field);
         });
     }
 
@@ -1019,9 +1172,10 @@
         glideTo,
         stopGlide,
         initShowMore,
-        initDropdowns,
+        initAccordions,
         initRepositoryWidgets,
         initTickers,
+        initRotators,
         initInkReveal,
         initTranscripts,
         initPageReveal,

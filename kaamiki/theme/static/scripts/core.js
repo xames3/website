@@ -1,6 +1,7 @@
 // NOTE(xames3): The four scripts share one `window.Kaamiki` and load in
-// this order: core, animations, explainer, theme. Each takes what it
-// needs from the ones before it, and theme starts everything.
+// this order: core, animations, theme, explainer. Each takes what it
+// needs from the ones before it, and theme starts everything. Explainer
+// is only on pages with a code-explain or code-version and starts its own.
 (() => {
     'use strict';
 
@@ -81,13 +82,15 @@
     }
 
     const TIMING = {
-        dropdownMin: () => getDurationMs('--km-duration-dropdown-min'),
-        dropdownMax: () => getDurationMs('--km-duration-dropdown-max'),
+        accordionMin: () => getDurationMs('--km-duration-accordion-min'),
+        accordionMax: () => getDurationMs('--km-duration-accordion-max'),
         revealStep: () => getDurationMs('--km-reveal-step'),
         tooltipHold: () => getDurationMs('--km-tooltip-hold'),
         fast: () => getDurationMs('--km-duration-fast'),
         showMoreHold: () => getDurationMs('--km-show-more-hold'),
         tickerDuration: () => getDurationMs('--km-ticker-duration'),
+        rotateHold: () => getDurationMs('--km-rotate-hold'),
+        rotateResize: () => getDurationMs('--km-rotate-resize'),
     };
 
     function headerHeight() {
@@ -130,9 +133,9 @@
     function anchorHost(element) {
         const previous = element.previousElementSibling;
         if (previous) {
-            if (previous.classList.contains('km-pre-title-text')) return previous;
+            if (previous.classList.contains('km-text-pre-title')) return previous;
             const last = previous.lastElementChild;
-            if (last && last.classList.contains('km-pre-title-text')) return last;
+            if (last && last.classList.contains('km-text-pre-title')) return last;
         }
         return element;
     }
@@ -150,7 +153,8 @@
         const top = host.offsetParent
             ? layoutTop(host)
             : window.scrollY + host.getBoundingClientRect().top;
-        return Math.max(0, top - headerHeight());
+        const margin = parseFloat(getComputedStyle(host).scrollMarginTop) || 0;
+        return Math.max(0, top - Math.max(headerHeight(), margin));
     }
 
     function isModifiedClick(event) {
@@ -222,8 +226,16 @@
         return Math.max(low, Math.min(high, value));
     }
 
+    function ready(fn) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fn, { once: true });
+        } else {
+            fn();
+        }
+    }
+
     window.Kaamiki = {
-        walkthroughs: [],
+        codeExplains: [],
         FOCUSABLE,
         REVEAL_SHOWN,
         REVEAL_WAITING,
@@ -242,6 +254,7 @@
         onVisible,
         prefersReducedMotion,
         rafThrottle,
+        ready,
         say,
         settleHash,
         springProgress,
