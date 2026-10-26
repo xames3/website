@@ -9,15 +9,21 @@ Last updated on: 29 September 2026
 {%- if prev or next %}
     <nav class="km-pagination"
          aria-label="{{ _('Pagination') }}">
-        {%- for page, modifier, icon, label in [
-            (prev, 'prev', km_fa_icons.previous_button, _('Previous page')),
-            (next, 'next', km_fa_icons.next_button, _('Next page'))
+        {%- for page, modifier, label in [
+            (prev, 'prev', _('Previous page')),
+            (next, 'next', _('Next page'))
             ] %}
             {%- if page %}
                 <a href="{{ page.link|e }}"
                    class="km-pagination__link km-pagination__link--{{ modifier }}">
-                    <i class="{{ icon }}"
-                       aria-hidden="true"></i>
+                    <svg class="km-chevron"
+                         viewBox="0 0 16 16"
+                         aria-hidden="true">
+                        <g class="km-chevron-arrow">
+                        <path class="km-chevron-shaft" d="M13 8H3" pathLength="1" />
+                        <path d="M9 4l4 4-4 4" />
+                        </g>
+                    </svg>
                     <span class="sr-only">{{ label }}</span>
                 </a>
             {%- endif %}

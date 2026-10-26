@@ -4,10 +4,10 @@ Breadcrumbs Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 29 September 2026
+Last updated on: 25 October 2026
 #}
 <nav aria-label="{{ _('Breadcrumbs') }}"
-     class="km-breadcrumbs{% if pagename == master_doc %} km-breadcrumbs--root{% endif %}">
+     class="km-breadcrumbs{% if pagename == master_doc %} km-breadcrumbs--root{% endif %}{% if parents|length > 2 %} km-breadcrumbs--deep{% endif %}">
     <a class="km-breadcrumbs__link km-breadcrumbs__link--home"
        href="{{ pathto(master_doc) }}"
        aria-label="{{ _('Home') }}">

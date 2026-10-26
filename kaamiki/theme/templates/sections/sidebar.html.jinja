@@ -4,11 +4,11 @@ Sidebar Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 08 October 2026
+Last updated on: 25 October 2026
 #}
 {%- from "components/logo.html.jinja" import km_logo with context -%}
 <aside id="km-sidebar"
-       class="km-layout__sidebar km-sidebar km-sidebar--primary">
+       class="km-sidebar km-sidebar--primary">
     <noscript>
         <a class="km-sidebar__close"
            href="#km-content">{{ _("Close menu") }}</a>
@@ -41,14 +41,15 @@ Last updated on: 08 October 2026
                                     <a href="{{ button.url }}"
                                        title="{{ text|e }}"
                                        {% if button.new_tab %}rel="{{ km_rel }}" target="_blank"{% endif %}
-                                       class="km-sidebar__mobile-item">
+                                       class="km-sidebar__mobile-item"
+                                       {{ button.extras if button.extras else '' }}>
                                         {%- if button.icon %}
                                             {{ button.icon }}
                                         {%- else %}
                                             <i class="{{ km_fa_icons.external_link }}"
                                                aria-hidden="true"></i>
                                         {%- endif %}
-                                        <span {{ button.extras if button.extras else '' }}>{{ text|e }}</span>
+                                        <span>{{ text|e }}</span>
                                     </a>
                                 </li>
                             {%- endif %}

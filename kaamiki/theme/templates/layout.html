@@ -134,6 +134,10 @@ Last updated on: 12 October 2026
                       href="{{ pathto(css, 1) |e }}" />
             {%- endif %}
         {%- endfor %}
+        {%- for name in km_embed_css %}
+            <link rel="stylesheet"
+                  href="{{ pathto('_static/' + name, 1) |e }}" />
+        {%- endfor %}
         {%- block km_icons %}
             {%- if km_fa_kit %}
                 {%- if km_fa_kit.endswith('.js') %}
@@ -192,11 +196,6 @@ Last updated on: 12 October 2026
                       title="{{ _('Search') }}"
                       href="{{ pathto('search') }}" />
             {%- endif %}
-            {%- if hasdoc('genindex') %}
-                <link rel="index"
-                      title="{{ _('Index') }}"
-                      href="{{ pathto('genindex') }}" />
-            {%- endif %}
             {%- if next %}
                 <link rel="next"
                       title="{{ next.title|striptags|e }}"
@@ -228,7 +227,7 @@ Last updated on: 12 October 2026
                     {%- include "sections/header.html.jinja" %}
                 {%- endblock header %}
                 <div class="km-shell__main">
-                    <div class="km-layout km-container {% if km_show_toctree|tobool %}km-layout--nav-in-header{% endif %}">
+                    <div class="km-layout km-container {% if km_toctree_in_header|tobool %}km-layout--nav-in-header{% endif %}">
                         {%- block km_sidebar %}
                             {%- if sidebars|length > 0 %}
                                 {%- include "sections/sidebar.html.jinja" %}
@@ -252,6 +251,10 @@ Last updated on: 12 October 2026
                     </div>
                     {%- block scripts %}
                         {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
+                            {%- for name in km_embed_js %}
+                                <script src="{{ pathto('_static/' + name, 1)|e }}"
+                                        {% if km_embed_js_loading != 'normal' %}{{ km_embed_js_loading }}{% endif %}></script>
+                            {%- endfor %}
                         {%- endblock scripts %}
                     </body>
                 </html>

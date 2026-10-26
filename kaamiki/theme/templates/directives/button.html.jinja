@@ -4,11 +4,12 @@ Button Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
-Last updated on: 15 October 2026
+Last updated on: 25 October 2026
 #}
 {% block km_button %}
-    <p class="km-button-row{% if km_faicon %} km-button-row--{{ 'end' if km_faicon_after else 'start' }}{% endif %}">
-        <a class="sd-sphinx-override sd-btn sd-text-wrap {{ km_look }}{% if km_extra %} {{ km_extra }}{% endif %} reference external"
+    <p class="km-button-row km-button-row--{{ km_align }}"
+       {% if km_ids %}id="{{ km_ids[0] }}"{% endif %}>
+        <a class="km-button {{ km_look }}{% if km_extra %} {{ km_extra }}{% endif %} reference external"
            href="{{ km_url }}"
            {{ km_anchor|xmlattr }}>
             <span>
@@ -20,6 +21,16 @@ Last updated on: 15 October 2026
                 {%- if km_faicon and km_faicon_after -%}
                     <span class="{{ km_faicon }} km-icon-after"
                           aria-hidden="true"></span>
+                {%- endif -%}
+                {%- if km_chevron -%}
+                    <svg class="km-chevron"
+                         viewBox="0 0 16 16"
+                         aria-hidden="true">
+                        <g class="km-chevron-arrow">
+                        <path class="km-chevron-shaft" d="M13 8H3" pathLength="1" />
+                        <path d="M9 4l4 4-4 4" />
+                        </g>
+                    </svg>
                 {%- endif -%}
             </span>
         </a>

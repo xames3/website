@@ -4,10 +4,11 @@ GitHub Repository Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October 2025
-Last updated on: 17 October 2026
+Last updated on: 25 October 2026
 #}
 {% block km_repository %}
-    <div class="km-github-repository"
+    <div class="km-github-repository{% for km_class in km_classes %} {{ km_class }}{% endfor %}"
+         {% if km_ids %}id="{{ km_ids[0] }}"{% endif %}
          data-km-repository="{{ km_project }}">
         <div class="km-github-repository__header">
             <a href="https://github.com/{{ km_project }}"
@@ -15,15 +16,17 @@ Last updated on: 17 October 2026
                class="km-github-repository__name">{{ km_project }}</a>
             <div class="km-github-repository__details">
                 {% if km_stars %}
-                    <p class="km-github-repository__stars">
+                    <p class="km-github-repository__stars"
+                       hidden>
                         <span class="sr-only">{{ _("Stars") }}</span>
-                        <span data-km-repository-count="stargazers_count">0</span>
+                        <span data-km-repository-count="stargazers_count"></span>
                     </p>
                 {% endif %}
                 {% if km_forks %}
-                    <p class="km-github-repository__forks">
+                    <p class="km-github-repository__forks"
+                       hidden>
                         <span class="sr-only">{{ _("Forks") }}</span>
-                        <span data-km-repository-count="forks_count">0</span>
+                        <span data-km-repository-count="forks_count"></span>
                     </p>
                 {% endif %}
             </div>

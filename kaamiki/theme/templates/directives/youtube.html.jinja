@@ -4,11 +4,12 @@ YouTube Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 16 October 2026
+Last updated on: 25 October 2026
 #}
 {% block km_youtube %}
     {%- set km_label = km_caption or _("YouTube video") %}
-    <figure class="km-media km-media--youtube">
+    <figure class="km-media{% for km_class in km_classes %} {{ km_class }}{% endfor %}"
+            {% if km_ids %}id="{{ km_ids[0] }}"{% endif %}>
         <div class="km-media__frame km-media__frame--ratio"
              {% if km_ratio %}style="aspect-ratio: {{ km_ratio }}; --km-ratio: calc({{ km_ratio }})"{% endif %}>
             {%- if km_facade %}
