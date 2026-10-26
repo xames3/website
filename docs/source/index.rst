@@ -1,16 +1,18 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February 2025
-.. Last updated on: 02 October 2026
+.. Last updated on: 23 October 2026
 
 :orphan:
 :km-pg-title: Akshay Mestry
-:km-pg-description: Educator, software engineer and a storyteller.
+:km-pg-description: Stories from what I build, explainers that make hard
+    things click and notes from the classroom.
 :km-pg-type: website
 :km-pg-image: https://avatars.githubusercontent.com/u/90549089?v=4
-:km-fb-title: So, what do you think?
-:km-fb-description: I'd love to hear your suggestions or even a recommendation
-    for a great film!!
-:km-fb-button: Let's chat
+:km-fb-title: Say hello, or recommend something to watch next.
+:km-fb-description: Got a question about teaching or a great film
+    I've somehow missed? Write to me.
+:km-fb-button: Say hello
+:km-fb-icon: fa-paper-plane
 :km-fb-split:
 
 .. _home-page:
@@ -21,7 +23,7 @@ Akshay Mestry
 
 .. rst-class:: km-lead
 
-    Educator, software engineer and a storyteller.
+    An educator, a software engineer and a storyteller.
 
 .. author:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
@@ -31,20 +33,21 @@ Akshay Mestry
         https://i.imgur.com/gcGHqxi.jpg
         https://i.imgur.com/weM4qDW.jpg
 
-Hello, hello!!
+.. embed:: ./assets/html/greetings.html
+    :source: _static/greetings.json
+    :interval: 2800
+    :duration: 700
+    :stagger: 45
 
-I'm Akshay, an educator, engineer and currently an Assistant Professor at
-`National Louis University`_. Before getting into academia, I worked at
-consulting firms, corporate product companies and startups. This cheeky corner
-of the internet is where I dump all that: the wins, the mistakes and
-everything messy in between, one story at a time.
+I'm Akshay (/uh-k-ʃ-æ/), an educator, engineer, avid cook and currently an
+Assistant Professor at `National Louis University`_. Before getting into
+academia, I worked at consulting firms, corporate product companies and
+startups. This cheeky corner of the internet is where I dump all that:
+the wins, the mistakes and everything messy in between... one story at a
+time.
 
-I currently live in Chicago. I got my Master's in AI from `DePaul University`_
-in 2025. I also have a special interest in natural language processing and
-reinforcement learning.
-
-.. rubric:: :far-icon:`compass-drafting` Build and share
-    :class: km-pre-title-text
+.. rubric:: :fa-icon:regular:`compass-drafting` Build and share
+    :class: km-text-pre-title
 
 .. _open-source:
 
@@ -52,80 +55,76 @@ reinforcement learning.
 Love for open source.
 -------------------------------------------------------------------------------
 
-I :fas-icon:`heart km-margin-inline km-red` Open source!
+I :fa-icon:solid:`heart km-margin-inline km-red` Open source!
 
-I accidentally got started on it and I don't know why; I bloody loved it.
-Doing open source was and still is, a personal reminder to share my struggles
-and achievements/learnings with everyone and invite collaboration across
-various disciplines.
-
-Fortunately, this naive belief in sharing has led me to contribute to and work
-at some amazing research labs and projects under the guidance of some
-super-duper talented people in the industry.
+I fell into it by accident and I bloody loved it. It was and still is a
+personal reminder to share my struggles and achievements with everyone and
+invite collaboration across various disciplines. That naive belief in sharing
+took me into some brilliant research labs and projects, working under the
+guidance of some super-duper talented people in the industry.
 
 .. embed:: ./assets/html/contributed.html
     :source: _static/contributed.json
     :data-speed: slow
     :data-direction: left
 
-In these labs, I worked on a different kinds of projects, from building
-performant machine learning models to eventually crafting numerical computing
-libraries. These projects and sometimes our clients (big and small) helped me
-reflect on both my technical depth and my knowledge gaps.
+In those labs I worked on all sorts of projects, from performant machine
+learning models to optimising their user-facing libraries. These projects and
+sometimes our clients (big and/or small), showed me exactly where my technical
+depth ended and my knowledge gaps began.
 
-.. grid:: 2
+.. columns:: 2
+    :flush:
 
-    .. grid-item-card::
+    .. rows::
 
         .. repository:: xames3/slowtorch
 
-        A subset of core PyTorch features re-built in pure Python.
+            A subset of core PyTorch features re-built in pure Python...
+            albeit, slowly.
 
-    .. grid-item-card::
+    .. rows::
 
         .. repository:: xames3/xsnumpy
 
-        An experimental re-implementation of a few NumPy features in Python.
+            An experimental re-implementation of a few NumPy features in
+            Python.
 
-Beyond these, I've also ended up speaking at a few tech meetups and
-conferences, rambling about my projects, my half-baked (somewhat condemning)
-thoughts on AI and how some frameworks actually work under the hood.
+Beyond these, I've also ended up speaking at a few tech meetups and now
+volunteering at `Chicago Code and Coffee`_, rambling about my projects, my
+half-baked (somewhat condemning) thoughts on AI and how some frameworks
+actually work under the hood.
 
-It wouldn't be possible if I hadn't explored this; in doing so, I realised I
-had a passion for teaching.
+.. columns:: 4
+    :gap: 1.5rem 0.35rem
+    :margin: 5rem 2rem
+    :flush:
+    :stack-align: center
 
-.. container:: km-inline-container
+    .. rows::
+        :span: 2
 
-    .. grid:: 2
+        .. rubric:: Not on social media, but let's connect.
 
-        .. grid-item::
+    .. rows::
+        :span: auto
+        :class: align-right
 
-            .. rubric:: Not on socials, but let's connect.
+        .. button:: mailto:xa@mes3.dev
+            :scheme: chevron
 
-        .. grid-item::
-            :columns: auto
-            :class: align-right
+            Send an email
 
-            .. grid:: 2
+    .. rows::
+        :span: auto
 
-                .. grid-item::
-                    :columns: auto
+        .. button:: https://linkedin.com/in/xames3
+            :scheme: dark
 
-                    .. button:: https://linkedin.com/in/xames3
+            LinkedIn
 
-                        LinkedIn
-
-                .. grid-item::
-                    :columns: auto
-
-                    .. button:: mailto:xa@mes3.dev
-                        :fa-icon: fa-solid fa-envelope
-                        :scheme: dark
-
-                        Send an email
-
-.. rubric:: :far-icon:`comments` Keep it stupid simple
-    :class: km-pre-title-text
+.. rubric:: :fa-icon:regular:`comments` Keep it stupid simple
+    :class: km-text-pre-title
 
 .. _teaching-philosophy:
 
@@ -133,24 +132,32 @@ had a passion for teaching.
 My teaching philosophy.
 -------------------------------------------------------------------------------
 
-I believe that "true" mastery of something comes from sharing learnings from
-mistakes and past experiences. I love taking something dense, be it some hi-fi
-machine learning algorithm or some software design pattern nobody can be
-arsed to explain properly and making it click for someone who's never
-touched it before.
+What I enjoy most is taking say, some computer science topic and explaining it
+in the simplest way possible, so it clicks for someone who's never bothered
+understanding it before. I'd say in practice, my teaching philosophy comes
+down to these three things:
 
-Early in my software engineering career, I came across a quote:
+- **Embrace failures.** When you're learning, fail early and often. Don't be
+  afraid of being wrong in the early days and learn from your mistakes.
+- **Show, don't tell.** A finished answer hides thinking and reasoning. If I
+  can't rebuild or live-code it, I don't understand it well enough to teach
+  it.
+- **Teach the person in front of me.** Every reader and student is different,
+  so my approach has to be too. Yes, it's fairly inconvenient at times, but
+  necessary.
+
+Early in my software engineering career, I came across a line that's often
+credited to Dr Richard Feynman:
 
 .. epigraph::
 
     If you want to master something, teach it.
 
-    -- Dr Richard Feynman
-
-And I absolutely fell in love with this idea. Soon, I realised you can't
+I went looking for where he actually said it and couldn't find a source, so
+take the credit with a pinch of salt. But I still think, he's right. You can't
 really call yourself an :abbr:`SME (Subject-matter expert)` until you can
-teach a concept to someone who knows next to bugger all about it and still
-put up with their questions without getting cocky about how much you know.
+teach a concept to someone who knows nothing about it and still put up with
+their questions without getting cocky about how much you know.
 
 Thus began my journey into teaching. So far, I've taught...
 
@@ -162,12 +169,12 @@ Thus began my journey into teaching. So far, I've taught...
     :pause-after-typing: 2000
     :pause-after-deleting: 1000
 
-My approach to mentoring's changed loads over the years, mind. It shifts
-depending on who's actually in front of me, what they need and, if I'm being
-honest, what kind of mood I'm in that day when they come asking for help.
+My approach to teaching and mentoring has changed loads over the years. You
+can read the long versions starting
+:doc:`here <academia/thoughts-on-teaching>`.
 
-.. _National Louis University: https://nl.edu/undergraduate-college/
-.. _DePaul University: https://www.depaul.edu
+.. _National Louis University: https://nl.edu/undergraduate-college
+.. _Chicago Code and Coffee: https://www.meetup.com/code-and-coffee-chicago
 
 .. toctree::
     :caption: Academia
@@ -189,9 +196,11 @@ honest, what kind of mood I'm in that day when they come asking for help.
     :maxdepth: 1
 
 .. toctree::
-    :caption: Reference
+    :caption: Docs
     :hidden:
     :maxdepth: 1
+
+    docs/kaamiki/index
 
 .. toctree::
     :caption: Extras

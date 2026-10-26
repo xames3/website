@@ -4,13 +4,15 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 15 October 2026
+Last updated on: 26 October 2026
 
 The Sphinx configuration for my website. Sphinx is a documentation
 generator; I use it as a teaching and learning platform instead.
 """
 
+import os
 import typing as t
+from datetime import UTC
 from datetime import datetime as dt
 
 from markupsafe import Markup
@@ -20,13 +22,19 @@ if t.TYPE_CHECKING:
 
 project: t.Final[str] = "Akshay Mestry"
 author: t.Final[str] = "Akshay Mestry"
-project_copyright: str = f"© 2025-{dt.now().year} {author}."
+# NOTE(xames3): `SOURCE_DATE_EPOCH` keeps a rebuild of the same sources
+# the same, whatever year it happens in.
+# https://reproducible-builds.org/specs/source-date-epoch/
+epoch: t.Final[str | None] = os.environ.get("SOURCE_DATE_EPOCH")
+year: t.Final[int] = (
+    dt.fromtimestamp(int(epoch), UTC) if epoch else dt.now()
+).year
+project_copyright: str = f"© 2025-{year} {author}."
 source: t.Final[str] = "https://github.com/xames3/website"
 email: t.Final[str] = "xa@mes3.dev"
 
 extensions: list[str] = [
     "kaamiki",
-    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
 ]
 
@@ -38,7 +46,7 @@ smartquotes: bool = False
 exclude_patterns: Sequence[str] = ["_build", "_static", "prolog.rst"]
 
 html_theme: t.Final[str] = "kaamiki"
-html_title: str = "amestry"
+html_title: str = "AM"
 html_baseurl: t.Final[str] = "https://xa.mes3.dev/"
 
 availability: t.Final[dict[str, str]] = {
@@ -55,7 +63,7 @@ html_context: dict[str, t.Any] = {
     "fa_icons": {
         "breadcrumb_home": "fa-regular fa-house",
         "copy_url": "fa-regular fa-link-simple",
-        "menu": "fa-regular fa-arrow-left-to-line",
+        "menu": "fa-regular fa-table-columns-merge-previous",
         "search": "fa-regular fa-magnifying-glass",
         "title_badge": "fa-solid fa-badge-check",
     },
@@ -98,7 +106,6 @@ html_static_path: list[str] = ["_static"]
 html_js_files: list[tuple[str, dict[str, str]]] = [
     ("cal.js", {"defer": "defer"}),
 ]
-templates_path: list[str] = ["_templates"]
 html_use_index: bool = False
 
 inventories: t.Final[dict[str, str]] = {
@@ -110,10 +117,6 @@ inventories: t.Final[dict[str, str]] = {
 intersphinx_mapping: dict[str, tuple[str, tuple[str | None, str]]] = {
     name: (url, (None, f"../.cache/intersphinx/{name}.inv"))
     for name, url in inventories.items()
-}
-suppress_warnings: list[str] = ["design.fa-build"]
-extlinks: dict[str, tuple[str, str | None]] = {
-    "c-ref": ("https://en.cppreference.com/w/c/language/%s", "%s"),
 }
 
 copybutton_exclude: str = ".linenos, .gp, .go"

@@ -4,7 +4,7 @@ Previously contributed at widget
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 01 October 2025
-Last updated on: 14 October 2026
+Last updated on: 25 October 2026
 #}
 <div class="contributed-at__container"
      data-source="{{ source }}">
@@ -33,13 +33,13 @@ Last updated on: 14 October 2026
     }
 
     .contributed-at__title {
-        font-size: 1.25rem;
-        letter-spacing: -0.86px;
-        line-height: 1.5rem;
+        font-size: 1.125rem;
+        font-weight: var(--km-weight-lead);
+        letter-spacing: var(--km-tracking-lead);
+        line-height: 1.625;
         text-align: center;
         margin-bottom: 1rem;
-        font-weight: 500;
-        color: hsl(var(--km-color-muted-fg));
+        color: hsl(var(--km-colour-grey-63));
     }
 
     .contributed-at-scroller[data-speed="fast"] {
@@ -106,7 +106,7 @@ Last updated on: 14 October 2026
         display: block;
         inline-size: 100%;
         block-size: var(--km-organisation-logo-height);
-        background-color: hsl(var(--km-color-fg));
+        background-color: hsl(var(--km-colour-grey-93));
         mask: var(--km-organisation-logo) center / contain no-repeat;
         -webkit-mask: var(--km-organisation-logo) center / contain no-repeat;
     }
