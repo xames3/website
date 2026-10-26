@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 22 February 2025
-# Last updated on: 25 October 2026
+# Last updated on: 26 October 2026
 #
 # This Makefile provides a comprehensive set of commands (targets) for building
 # and checking my website.
@@ -81,7 +81,7 @@ TOX_FLAGS := \
 
 HTTP_SERVER_FLAGS := \
 	$(PORT) \
-	--bind 127.0.0.1 \
+	--bind 0.0.0.0 \
 	--directory $(OUTPUT_DIR)
 
 define spin
