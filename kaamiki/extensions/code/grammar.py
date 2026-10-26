@@ -4,7 +4,7 @@ Explainer Block Grammar
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 October 2026
+Last updated on: 25 October 2026
 
 The block grammar the explainers carry in their bodies and the readers
 for the options beside it.
@@ -17,7 +17,7 @@ from docutils.statemachine import StringList
 BLOCK: re.Pattern[str] = re.compile(r"^\.\.[ \t]+([a-z][\w-]*)::[ \t]*(.*)$")
 COMMENT: re.Pattern[str] = re.compile(r"^\.\.(?:[ \t]|$)")
 OPTION: re.Pattern[str] = re.compile(r"^:([\w-]+):(?:[ \t]+(.*))?$")
-RANGE: re.Pattern[str] = re.compile(r"^(\d+)(?:\s*[-\u2013]\s*(\d+))?$")
+RANGE: re.Pattern[str] = re.compile(r"^([0-9]+)(?:\s*[-\u2013]\s*([0-9]+))?$")
 
 
 class chunk:
@@ -272,9 +272,9 @@ def linerange(line: str) -> tuple[int, int] | None:
     :return: The range as a low/high pair or `None` when the argument
         isn't a pair of line numbers.
     """
-    match = RANGE.match(line.strip())
+    match = RANGE.fullmatch(line.strip())
     if match is None:
         return None
     low = int(match.group(1))
     high = int(match.group(2)) if match.group(2) else low
-    return min(low, high), max(low, high)
+    return low, high

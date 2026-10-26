@@ -4,7 +4,7 @@ Link Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 25 October 2026
 
 The helpers that work out where a link goes.
 """
@@ -30,8 +30,6 @@ if t.TYPE_CHECKING:
 # `noreferrer` keeps it from seeing which page the reader came from.
 REL: t.Final[str] = "noopener noreferrer"
 YOUTUBE_ID: re.Pattern[str] = re.compile(r"[A-Za-z0-9_-]{11}")
-# HACK(xames3): Surprisingly, got this idea while installing an
-# AdBlocker and these domains were already configured in them.
 YOUTUBE_HOSTS: t.Final[frozenset[str]] = frozenset(
     {"youtube.com", "youtube-nocookie.com", "music.youtube.com"}
 )
@@ -50,7 +48,7 @@ def youtube_id(url: str) -> str | None:
     :return: The eleven character id or `None` when there isn't one.
     """
     parts = urlsplit(url.strip())
-    host = parts.netloc.lower().removeprefix("www.").removeprefix("m.")
+    host = (parts.hostname or "").removeprefix("www.").removeprefix("m.")
     segments = [_ for _ in parts.path.split("/") if _]
     found = ""
     if (not host and len(segments) == 1) or (host == "youtu.be" and segments):

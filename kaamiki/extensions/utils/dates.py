@@ -11,7 +11,9 @@ The helpers that date a page, from its comments or from git.
 
 import re
 import typing as t
+from datetime import date
 from datetime import datetime as dt
+from datetime import timedelta
 from subprocess import DEVNULL
 from subprocess import CalledProcessError
 from subprocess import check_output as co
@@ -19,6 +21,7 @@ from subprocess import check_output as co
 from sphinx.locale import _
 from sphinx.util.i18n import format_date
 
+from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.settings import setting
 
 if t.TYPE_CHECKING:
@@ -147,6 +150,19 @@ def day(date: str) -> str:
     return ""
 
 
+def within(iso: str) -> bool:
+    """Say whether a day is from 2000 to a year ahead.
+
+    :param iso: The day, as `2026-09-29`.
+    :return: Whether it's one a page or a release could have.
+    """
+    return (
+        date(2000, 1, 1)
+        <= date.fromisoformat(iso)
+        <= date.today() + timedelta(days=366)  # noqa: DTZ011
+    )
+
+
 def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
     """Work out who wrote a page and when it was created and updated.
 
@@ -158,11 +174,30 @@ def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
     :param app: The Sphinx application instance.
     :param docname: The document being read.
     :param source: The document's source, as docutils hands it over.
+    :raises KaamikiError: For a date comment that isn't a date from
+        2000 to a year ahead, or a page updated before it was created.
     """
     metadata = app.env.metadata.setdefault(docname, {})
     found = header(source[0] if source else "")
+    where = str(app.env.doc2path(docname))
     if found.get("author"):
         metadata.setdefault("author", found["author"])
+    for key in ("created on", "last updated on"):
+        if key in found:
+            iso = day(found[key])
+            if not iso or not within(iso):
+                fail(
+                    f"comment '{key.capitalize()}: {found[key]}' expected a"
+                    " date like 5 October 2026 or 2026-10-05, from 2000 to a"
+                    " year ahead",
+                    where,
+                )
+    if (
+        "created on" in found
+        and "last updated on" in found
+        and (day(found["last updated on"]) < day(found["created on"]))
+    ):
+        fail("comment 'Last updated on' is before 'Created on'", where)
     if not metadata.get("created"):
         metadata["created"] = found.get("created on") or written(
             committed(app, docname, first=True)

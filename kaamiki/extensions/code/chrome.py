@@ -4,7 +4,7 @@ Explainer Chrome
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 October 2026
+Last updated on: 25 October 2026
 
 The markup an explainer wraps itself in.
 """
@@ -159,17 +159,27 @@ COMMENTS: t.Final[tuple[tuple[str, str, frozenset[str]], ...]] = (
 )
 
 
-def lexer_for(language: str) -> Lexer:
-    """Find the Pygments lexer for a language, plain text if unknown.
+def known(language: str) -> bool:
+    """Say whether Pygments has a lexer for a language.
 
     :param language: The language named on the directive.
-    :return: Its lexer, falling back to plain text for a name Pygments
-        doesn't know.
+    :return: Whether it does.
     """
     try:
-        return get_lexer_by_name(language)
+        get_lexer_by_name(language)
     except ClassNotFound:
-        return get_lexer_by_name("text")
+        return False
+    return True
+
+
+def lexer_for(language: str) -> Lexer:
+    """Find the Pygments lexer for a language.
+
+    :param language: The language named on the directive, which `known`
+        has said Pygments has.
+    :return: Its lexer.
+    """
+    return get_lexer_by_name(language)
 
 
 def comment(language: str) -> dict[str, str] | None:
@@ -228,17 +238,17 @@ def pane(
         number = start + offset
         mark = " data-km-emphasis" if number in emphasis else ""
         rows.append(
-            f'<span class="km-walkthrough__line" data-km-line="{offset + 1}"'
+            f'<span class="km-code-explain__line" data-km-line="{offset + 1}"'
             f' data-km-number="{number}"{mark}>'
-            f'<span class="km-walkthrough__src">{line or "&nbsp;"}</span>'
-            '<span class="km-walkthrough__ann" data-km-ann></span>\n</span>'
+            f'<span class="km-code-explain__src">{line or "&nbsp;"}</span>'
+            '<span class="km-code-explain__ann" data-km-ann></span>\n</span>'
         )
-    gutter = " km-walkthrough__code--linenos" if linenos else ""
+    gutter = " km-code-explain__code--linenos" if linenos else ""
     digits = digits or len(str(start + max(len(rows), 1) - 1))
     return (
-        '<div class="km-walkthrough__stage" data-km-stage tabindex="0">'
-        f'<pre class="highlight km-walkthrough__code{gutter}"'
-        f' style="--km-walkthrough-gutter: {digits}ch">'
+        '<div class="km-code-explain__stage" data-km-stage tabindex="0">'
+        f'<pre class="highlight km-code-explain__code{gutter}"'
+        f' style="--km-code-explain-gutter: {digits}ch">'
         + "".join(rows)
         + "</pre></div>"
     )
@@ -252,7 +262,7 @@ def controls() -> str:
     :return: The markup.
     """
     return (
-        '<button type="button" class="km-walkthrough__copy" data-km-copy'
+        '<button type="button" class="km-code-explain__copy" data-km-copy'
         f' aria-label="{html.escape(str(_("Copy the snippet")))}">'
         "</button>"
     )
@@ -261,7 +271,7 @@ def controls() -> str:
 def output() -> str:
     """Write the box a snippet's prints land in."""
     return (
-        '<pre class="km-walkthrough__out" data-km-out'
+        '<pre class="km-code-explain__out" data-km-out'
         f' data-km-empty="{html.escape(str(_("Nothing printed yet")))}"'
         " hidden></pre>"
     )
@@ -286,5 +296,5 @@ def visit_explanation(self: HTMLTranslator, node: nodes.Element) -> None:
     :param node: The explanation node, carrying its index.
     """
     self.body.append(
-        f'<div class="km-walkthrough__note" data-km-note="{node["index"]}">'
+        f'<div class="km-code-explain__note" data-km-note="{node["index"]}">'
     )

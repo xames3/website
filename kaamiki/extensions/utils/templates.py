@@ -4,13 +4,11 @@ Template Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 16 October 2026
+Last updated on: 23 October 2026
 
 Kaamiki's Jinja environment and the helpers that read its templates.
 """
 
-import functools
-import os
 import os.path as p
 import typing as t
 
@@ -19,14 +17,10 @@ import jinja2
 from kaamiki.extensions.utils.links import REL
 
 if t.TYPE_CHECKING:
-    from docutils import nodes
     from sphinx.application import Sphinx
 
 TEMPLATES: t.Final[str] = p.join(
     p.dirname(p.dirname(p.dirname(p.realpath(__file__)))), "theme", "templates"
-)
-DESIGN_ASSETS: t.Final[frozenset[str]] = frozenset(
-    {"design-tabs.js", "sphinx-design.css", "sphinx-design.min.css"}
 )
 environment: jinja2.Environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(TEMPLATES),
@@ -87,48 +81,3 @@ def themed(builder: object) -> bool:
     if theme is None:
         return False
     return any(p.realpath(_) == TEMPLATES for _ in theme.get_theme_dirs())
-
-
-@functools.cache
-def designed() -> frozenset[str]:
-    """Name Kaamiki's templates that draw `sphinx_design` component."""
-    names: set[str] = set()
-    for name in os.listdir(TEMPLATES):
-        path = p.join(TEMPLATES, name)
-        if not p.isfile(path):
-            continue
-        with open(path, encoding="utf-8") as f:
-            if "sd-" in f.read():
-                names.add(name)
-    return frozenset(names)
-
-
-def design_assets(
-    app: Sphinx,
-    pagename: str,
-    templatename: str,
-    context: dict[str, t.Any],
-    doctree: nodes.document | None,
-) -> None:
-    """Drop `sphinx_design`'s stylesheet and script from pages
-    without it.
-
-    :param app: The Sphinx application instance.
-    :param pagename: The page being rendered.
-    :param templatename: The template rendering it.
-    :param context: The page's rendering context.
-    :param doctree: The resolved doctree.
-    """
-    del pagename, doctree
-    if not themed(app.builder) or templatename in designed():
-        return
-    if "sd-" in str(context.get("body") or ""):
-        return
-    for key in ("css_files", "script_files"):
-        files = context[key]
-        files[:] = [
-            _
-            for _ in files
-            if p.basename(str(getattr(_, "filename", _) or ""))
-            not in DESIGN_ASSETS
-        ]

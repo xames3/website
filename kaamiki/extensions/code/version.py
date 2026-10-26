@@ -1,15 +1,15 @@
 """\
-Attempts Directive
-==================
+Code Version Directive
+======================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 28 September 2026
-Last updated on: 15 October 2026
+Last updated on: 25 October 2026
 
-An `attempts` directive that steps a reader through the versions a
+A `code-version` directive that steps a reader through the versions a
 piece of code went through on its way to what it's now::
 
-    .. attempts:: python
+    .. code-version:: python
        :caption: xsnumpy/_core.py
 
        .. attempt::
@@ -42,33 +42,36 @@ piece of code went through on its way to what it's now::
 import typing as t
 
 import docutils.nodes as nodes
-import docutils.parsers.rst as rst
 from sphinx.directives.code import CodeBlock
 from sphinx.locale import _
 
-from kaamiki.extensions.explainer import walkthrough
-from kaamiki.extensions.explainer.chrome import label
-from kaamiki.extensions.explainer.chrome import pane
-from kaamiki.extensions.explainer.grammar import linerange
-from kaamiki.extensions.explainer.grammar import split
+from kaamiki.extensions.code import explain
+from kaamiki.extensions.code.chrome import known
+from kaamiki.extensions.code.chrome import label
+from kaamiki.extensions.code.chrome import pane
+from kaamiki.extensions.code.grammar import linerange
+from kaamiki.extensions.code.grammar import split
+from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import named
+from kaamiki.extensions.utils.settings import BOUNDS
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
-    from kaamiki.extensions.explainer.grammar import chunk
+    from kaamiki.extensions.code.grammar import chunk
 
     type Pieces = tuple[chunk, chunk | None, list[chunk]]
 
-name: t.Final[str] = "attempts"
+name: t.Final[str] = "code-version"
 ATTEMPT: t.Final[frozenset[str]] = frozenset({"attempt"})
 PARTS: t.Final[frozenset[str]] = frozenset({"code", "lines", "output"})
 VERDICTS: t.Final[frozenset[str]] = frozenset({"broke", "worked"})
 STRETCH: t.Final[float] = 2.5
 
 
-class node(walkthrough.node):
+class node(explain.node):
     """The parsed directive, waiting for `visit` to write it out.
 
     It's a walkthrough underneath, so the notes either side of the
@@ -92,8 +95,8 @@ class outcome(nodes.literal_block):
     """What an attempt printed, as the author wrote it."""
 
 
-class directive(walkthrough.directive):
-    """The `attempts` directive.
+class directive(explain.directive):
+    """The `code-version` directive.
 
     The argument is the language every version is written in, and
     defaults to `python`.
@@ -105,8 +108,8 @@ class directive(walkthrough.directive):
         - `pace`: Pixels of scrolling a step takes. A step bringing a
           version in takes `STRETCH` times that.
         - `caption`: A line of text above the code, parsed as rST.
-        - `class`: More classes for the attempts.
-        - `name`: A name to link the attempts by.
+        - `class`: More classes for the `code-version`.
+        - `name`: A name to link the `code-version` by.
         - `linenos`: Number the lines.
         - `lineno-start`: The number the first line is given.
     """
@@ -117,28 +120,42 @@ class directive(walkthrough.directive):
             for key, value in CodeBlock.option_spec.items()
             if key not in {"dedent", "emphasize-lines", "force"}
         },
-        "code-position": walkthrough.position,
-        "pace": rst.directives.positive_int,
+        "code-position": checks.word(*explain.POSITIONS),
+        "pace": checks.integer(*map(int, BOUNDS["pace"])),
+        "caption": checks.text,
+        "class": checks.classes,
+        "name": checks.slug,
+        "lineno-start": checks.integer(
+            *map(int, BOUNDS["code_explain_lineno"])
+        ),
     }
 
     def run(self) -> list[nodes.Node]:
         """Read every attempt and return the directive's node.
 
-        :return: A list holding the one `attempts` node.
+        :return: A list holding the one `code-version` node.
         """
         language = self.arguments.pop().strip() if self.arguments else "python"
+        if not known(language):
+            raise self.error(f"{self.name}: no Pygments lexer for {language!r}")
         start = self.options.get("lineno-start", 1)
         drafts = [
             self.unpack(block, index)
             for index, block in enumerate(self.attempts(), start=1)
         ]
         if not any(notes for _, _, notes in drafts):
-            raise self.error("attempts needs a note, in prose or `.. lines::`")
+            raise self.error(
+                "code-version: expected a note, in prose or `.. lines::`,"
+                " got none"
+            )
         codes = [code.text() for code, _, _ in drafts]
         digits = len(str(start + max(len(_.splitlines()) for _ in codes) - 1))
-        base = self.options.get("pace", walkthrough.pace(language))
+        base = self.options.get("pace", explain.pace(language))
         attributes: dict[str, t.Any] = {}
-        attributes["classes"] = ["km-attempts", *self.options.get("class", [])]
+        attributes["classes"] = [
+            "km-code-version",
+            *self.options.get("class", []),
+        ]
         attributes["position"] = self.options.get("code-position", "right")
         attributes["payload"] = {
             "steps": self.steps(drafts, start, base),
@@ -157,7 +174,7 @@ class directive(walkthrough.directive):
         element = node("", **attributes)
         element += self.caption(language)
         element += self.story(drafts, language, start, digits)
-        self.add_name(element)
+        named(self, element)
         return [element]
 
     def attempts(self) -> list[chunk]:
@@ -170,19 +187,23 @@ class directive(walkthrough.directive):
         except ValueError as exc:
             line, text = exc.args
             raise self.error(
-                f"attempts has {text!r} on line {line}, outside any"
+                f"code-version: {text!r} on line {line} is outside any"
                 " `.. attempt::`"
             ) from exc
         if not found:
-            raise self.error("attempts needs an `.. attempt::` per version")
+            raise self.error(
+                "code-version: expected an `.. attempt::` per version, got none"
+            )
         for block in found:
             if block.argument:
                 raise self.error(
-                    f"`.. attempt::` takes no name, got {block.argument!r};"
-                    " what it printed says how it went"
+                    f"code-version: `.. attempt::` takes no name, got "
+                    f"{block.argument!r}"
                 )
         if len(found) == 1:
-            self.warn("there's one attempt, so nothing to step through")
+            raise self.error(
+                "code-version: expected at least 2 attempts, got 1"
+            )
         return found
 
     def unpack(self, block: chunk, at: int) -> Pieces:
@@ -201,20 +222,29 @@ class directive(walkthrough.directive):
         found = split(block.body, block.offset, PARTS, {}, loose=True)
         for kind in ("code", "output"):
             if sum(_.name == kind for _ in found) > 1:
-                raise self.error(f"attempt {at} has more than one {kind}")
+                raise self.error(
+                    f"code-version: attempt {at} has more than one {kind}"
+                )
         code = next((_ for _ in found if _.name == "code"), None)
         if code is None:
-            raise self.error(f"attempt {at} needs a `.. code::` block")
+            raise self.error(
+                f"code-version: attempt {at} is missing a `.. code::` block"
+            )
         if not code.body:
-            raise self.error(f"attempt {at} has no code in its `.. code::`")
+            raise self.error(
+                f"code-version: attempt {at} has an empty `.. code::`"
+            )
         printed = next((_ for _ in found if _.name == "output"), None)
         if printed is not None and printed.argument not in VERDICTS | {""}:
             raise self.error(
-                f"the output of attempt {at} is broke or worked, or nothing;"
-                f" got {printed.argument!r}"
+                f"code-version: the output of attempt {at} expected broke or "
+                "worked,"
+                f" or nothing, got {printed.argument!r}"
             )
         if printed is not None and not printed.body:
-            raise self.error(f"the output of attempt {at} prints nothing")
+            raise self.error(
+                f"code-version: the output of attempt {at} is empty"
+            )
         notes: list[chunk] = []
         for part in found:
             if part.name == "lines":
@@ -240,11 +270,17 @@ class directive(walkthrough.directive):
         """
         found = linerange(argument)
         if found is None:
-            raise self.error(f"lines needs a line range, got {argument!r}")
+            raise self.error(f"lines: expected a line range, got {argument!r}")
         low, high = found
+        if low > high:
+            raise self.error(
+                f"code-version: lines expected a range that runs up, got "
+                f"{argument!r}"
+            )
         if low < start or high > start + total - 1:
-            self.warn(
-                f"{label(low, high)} is outside attempt {at}, which is"
+            raise self.error(
+                f"code-version: {label(low, high)} is outside attempt {at},"
+                " which is"
                 f" {label(start, start + total - 1)}"
             )
         return found
@@ -288,12 +324,12 @@ class directive(walkthrough.directive):
                 steps[-1]["out"] = printed.text()
                 if printed.argument:
                     steps[-1]["verdict"] = printed.argument
-        walkthrough.inherit(steps)
+        explain.inherit(steps)
         return steps
 
     def story(
         self, drafts: list[Pieces], language: str, start: int, digits: int
-    ) -> walkthrough.explanations:
+    ) -> explain.explanations:
         """Parse every attempt into its frame and its notes.
 
         :param drafts: The attempts, unpacked.
@@ -303,10 +339,10 @@ class directive(walkthrough.directive):
             take, so every version's code starts in the same column.
         :return: The attempts, under the container the notes go in.
         """
-        box = walkthrough.explanations()
+        box = explain.explanations()
         count = 0
         for index, (code, printed, notes) in enumerate(drafts):
-            group = attempt(index=index)
+            group = attempt()
             frame = draft(index=index, digits=digits)
             frame += self.snippet(code.text(), language, start)
             if printed is not None:
@@ -317,7 +353,7 @@ class directive(walkthrough.directive):
                 frame += result
             group += frame
             for part in notes:
-                note = walkthrough.explanation(index=count)
+                note = explain.explanation(index=count)
                 self.state.nested_parse(part.body, part.offset, note)
                 group += note
                 count += 1
@@ -329,30 +365,28 @@ def visit(self: HTMLTranslator, element: node) -> None:
     """Open the attempts, write their steps and open the pane.
 
     :param self: The HTML translator, whose body this appends to.
-    :param element: The `attempts` node and its attributes.
+    :param element: The `code-version` node and its attributes.
     """
-    walkthrough.visit(self, element)
+    explain.visit(self, element)
 
 
 def depart(self: HTMLTranslator, element: node) -> None:
     """Close the pane and the attempts.
 
     :param self: The HTML translator, whose body this appends to.
-    :param element: The `attempts` node.
+    :param element: The `code-version` node.
     """
-    walkthrough.depart(self, element)
+    explain.depart(self, element)
 
 
 def visit_attempt(self: HTMLTranslator, element: attempt) -> None:
     """Open one attempt.
 
     :param self: The HTML translator, whose body this appends to.
-    :param element: The attempt, carrying its index.
+    :param element: The attempt (unused).
     """
-    index = element["index"]
-    self.body.append(
-        f'<div class="km-attempts__attempt" data-km-attempt="{index}">'
-    )
+    del element
+    self.body.append('<div class="km-code-version__attempt">')
 
 
 def visit_draft(self: HTMLTranslator, element: draft) -> None:
@@ -365,10 +399,10 @@ def visit_draft(self: HTMLTranslator, element: draft) -> None:
     :param element: The frame, carrying its index and the gutter's
         width, and holding the plain code block.
     """
-    code = next(findall(element, walkthrough.plain))
+    code = next(findall(element, explain.plain))
     index = element["index"]
     self.body.append(
-        f'<div class="km-attempts__draft" data-km-draft="{index}">'
+        f'<div class="km-code-version__draft" data-km-draft="{index}">'
     )
     self.body.append(
         pane(
@@ -397,7 +431,7 @@ def visit_outcome(self: HTMLTranslator, element: outcome) -> None:
         else ""
     )
     self.body.append(
-        '<pre class="km-walkthrough__out km-attempts__out"'
+        '<pre class="km-code-explain__out"'
         + (f' data-km-verdict="{verdict}"' if verdict else "")
         + f">{spoken}{self.encode(element.astext())}</pre>"
     )
@@ -408,10 +442,10 @@ def register(app: Sphinx) -> None:
     """Register the nodes the directive loop misses.
 
     The caption, the notes and the prose taken in either side are the
-    walkthrough's, and registered with it.
+    the code-explain's, and registered with it.
 
     :param app: The Sphinx application instance.
     """
-    app.add_node(attempt, html=(visit_attempt, walkthrough.close))
-    app.add_node(draft, html=(visit_draft, walkthrough.close))
+    app.add_node(attempt, html=(visit_attempt, explain.close))
+    app.add_node(draft, html=(visit_draft, explain.close))
     app.add_node(outcome, html=(visit_outcome, None))

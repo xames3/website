@@ -4,14 +4,13 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 17 October 2026
+Last updated on: 25 October 2026
 
 Kaamiki's entry point.
 """
 
 import filecmp
 import functools
-import inspect
 import os.path as p
 import re
 import typing as t
@@ -25,17 +24,21 @@ from kaamiki.extensions import directives
 from kaamiki.extensions import roles
 from kaamiki.extensions.utils import bridge
 from kaamiki.extensions.utils import build_finished
+from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import context_defaults
 from kaamiki.extensions.utils import depart
-from kaamiki.extensions.utils import design_assets
 from kaamiki.extensions.utils import feedback
+from kaamiki.extensions.utils import field_lists
 from kaamiki.extensions.utils import follow
 from kaamiki.extensions.utils import forget_lead
+from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import header_leads
+from kaamiki.extensions.utils import keycaps
 from kaamiki.extensions.utils import merge_leads
 from kaamiki.extensions.utils import neighbours
 from kaamiki.extensions.utils import note_lead
 from kaamiki.extensions.utils import offer
+from kaamiki.extensions.utils import page_fields
 from kaamiki.extensions.utils import page_switches
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import provenance
@@ -58,10 +61,7 @@ theme_name: t.Final[str] = "kaamiki"
 theme_path = p.join(p.abspath(p.dirname(__file__)), "theme", "templates")
 static_path = p.join(p.abspath(p.dirname(__file__)), "theme", "static")
 locale_path = p.join(p.abspath(p.dirname(__file__)), "locale")
-supported_extensions: Sequence[str] = (
-    "sphinx_copybutton",
-    "sphinx_design",
-)
+supported_extensions: Sequence[str] = ("sphinx_copybutton",)
 # NOTE(xames3): This is an explicit cascade order and needs to be
 # respected in order to ensure Kaamiki loads its UI elements in an
 # expected manner.
@@ -69,16 +69,13 @@ stylesheets: Sequence[tuple[str, int]] = (
     ("styles/font.css", 400),
     ("styles/code.css", 600),
     ("styles/theme.css", 700),
-    ("styles/sphinx-design.css", 900),
 )
 scripts: Sequence[str] = (
     "scripts/core.js",
     "scripts/animations.js",
-    "scripts/explainer.js",
     "scripts/theme.js",
+    "scripts/explainer.js",
 )
-# Proper list available here:
-# https://web-platform-dx.github.io/supported-browsers/
 browsers: Sequence[str] = (
     "chrome >= 120",
     "edge >= 120",
@@ -173,26 +170,34 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     :return: Kaamiki's version and that it's safe to read and write
         in parallel.
     """
+    checks.install()
     for extension in supported_extensions:
         app.setup_extension(extension)
     app.add_html_theme(theme_name, theme_path)
     app.add_message_catalog("sphinx", locale_path)
     app.translator = locale.get_translator()
-    for key, value in inspect.getmembers(roles, inspect.isfunction):
-        if key.startswith("_") or value.__module__ != roles.__name__:
-            continue
-        app.add_role(key, value)
-    for key, style in roles.ICONS.items():
-        app.add_role(key, functools.partial(roles._icon, style))
+    for key in roles.ROLES:
+        app.add_role(key, getattr(roles, key))
+    app.add_role("fa-icon", functools.partial(roles._icon, None))
+    app.add_domain(roles.fa_icon)
+    app.add_domain(roles.kbd)
+    away = (skip, None)
     app.add_node(roles.ink, html=(roles._visit, roles._depart))
-    app.add_node(roles.glyph, html=(roles._visit_glyph, roles._depart))
+    app.add_node(roles.rotor, html=(roles._visit_rotor, roles._depart_rotor))
+    app.add_node(
+        glyph,
+        html=(roles._visit_glyph, roles._depart),
+        latex=away,
+        man=away,
+        texinfo=away,
+        text=away,
+    )
     app.add_node(phrase)
     for directive in directives:
         if hasattr(directive, "node"):
             node = fix(directive)
             html = (directive.visit, getattr(directive, "depart", depart))
             if node.__bases__ == (nodes.Element,):
-                away = (skip, None)
                 app.add_node(
                     node,
                     html=html,
@@ -219,12 +224,15 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     app.connect("html-page-context", page_switches)
     app.connect("html-page-context", neighbours)
     app.connect("html-page-context", header_leads)
-    app.connect("html-page-context", design_assets)
     app.connect("source-read", provenance)
     app.connect("env-get-outdated", reread)
     app.connect("env-get-outdated", follow)
+    app.connect("doctree-read", checks.promote, priority=100)
+    app.connect("doctree-read", field_lists, priority=300)
     app.connect("doctree-read", offer, priority=400)
+    app.connect("doctree-read", page_fields, priority=600)
     app.connect("doctree-read", note_lead)
+    app.connect("doctree-read", keycaps)
     app.connect("env-purge-doc", forget_lead)
     app.connect("env-merge-info", merge_leads)
     app.connect("build-finished", build_finished)

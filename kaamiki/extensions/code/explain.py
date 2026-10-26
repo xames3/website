@@ -1,15 +1,15 @@
 """\
-Walkthrough Directive
-=====================
+Code Explain Directive
+======================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 October 2026
+Last updated on: 26 October 2026
 
-A `walkthrough` directive that steps a reader through a snippet, line
+A `code-explain` directive that steps a reader through a snippet, line
 by line, with the values it held at each one... telling a story::
 
-    .. walkthrough:: python
+    .. code-explain:: python
        :caption: xsnumpy/_core.py
        :watch: shape, stride, strides
 
@@ -36,9 +36,13 @@ by line, with the values it held at each one... telling a story::
 .. note::
 
     The Python runs in a scratch directory with a bare environment, 1GB
-    of memory and 10 seconds, and the directory goes when it finishes.
+    of memory where the system keeps to the limit and 10 seconds, and
+    the directory goes when it finishes.
+    That is its working directory and not a sandbox: it runs with the
+    build's own permissions, so it can write elsewhere and reach the
+    network. Build only pages whose snippets you trust.
     A site changes those, and what the snippet may run with, through
-    the `walkthrough_*` settings in `html_context`. A snippet's
+    the `code_explain_*` settings in `html_context`. A snippet's
     own `:limit:` and `:timeout:` can lower what the site sets but not
     go past it. A trace is kept next to the doctrees and used again
     while the snippet, its options, the interpreter, the installed
@@ -53,40 +57,44 @@ import typing as t
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 from sphinx.directives.code import CodeBlock
-from sphinx.util import logging
 
-from kaamiki.extensions.explainer.chrome import comment
-from kaamiki.extensions.explainer.chrome import controls
-from kaamiki.extensions.explainer.chrome import label
-from kaamiki.extensions.explainer.chrome import lexer_for
-from kaamiki.extensions.explainer.chrome import output
-from kaamiki.extensions.explainer.chrome import pane
-from kaamiki.extensions.explainer.chrome import visit_explanation
-from kaamiki.extensions.explainer.grammar import linerange
-from kaamiki.extensions.explainer.grammar import split
-from kaamiki.extensions.explainer.tracer import collapse
-from kaamiki.extensions.explainer.tracer import execute
-from kaamiki.extensions.explainer.tracer import kinds
-from kaamiki.extensions.explainer.tracer import replay
-from kaamiki.extensions.explainer.tracer import show
+from kaamiki.extensions.code.chrome import comment
+from kaamiki.extensions.code.chrome import controls
+from kaamiki.extensions.code.chrome import known
+from kaamiki.extensions.code.chrome import label
+from kaamiki.extensions.code.chrome import lexer_for
+from kaamiki.extensions.code.chrome import output
+from kaamiki.extensions.code.chrome import pane
+from kaamiki.extensions.code.chrome import visit_explanation
+from kaamiki.extensions.code.grammar import linerange
+from kaamiki.extensions.code.grammar import split
+from kaamiki.extensions.code.tracer import collapse
+from kaamiki.extensions.code.tracer import execute
+from kaamiki.extensions.code.tracer import kinds
+from kaamiki.extensions.code.tracer import replay
+from kaamiki.extensions.code.tracer import show
 from kaamiki.extensions.utils import annotated
 from kaamiki.extensions.utils import badged
+from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import listed
+from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import skip
+from kaamiki.extensions.utils.settings import BOUNDS
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
-    from kaamiki.extensions.explainer.grammar import chunk
-    from kaamiki.extensions.explainer.tracer import Trace
+    from kaamiki.extensions.code.grammar import chunk
+    from kaamiki.extensions.code.tracer import Trace
 
-logger = logging.getLogger(__name__)
-
-name: t.Final[str] = "walkthrough"
+name: t.Final[str] = "code-explain"
 POSITIONS: t.Final[tuple[str, str]] = ("right", "left")
+NAME: t.Final[re.Pattern[str]] = re.compile(
+    r"[A-Za-z_][\w]*(?:\.[A-Za-z_]\w*|\[[\w'\"-]+\])*"
+)
 BLOCKS: t.Final[frozenset[str]] = frozenset({"code", "setup", "stdin", "lines"})
 OPTIONS: t.Final[dict[str, frozenset[str]]] = {
     "lines": frozenset({"at", "clear", "output", "values"}),
@@ -146,17 +154,39 @@ class explanation(nodes.container):
     """One `lines` block's note."""
 
 
-def position(argument: str) -> str:
-    """Check the `code-position` option against its two values.
+def names(argument: str | None) -> str:
+    """Check the names a walkthrough watches.
 
-    :param argument: The value written in the rST.
-    :return: The value, once it's known to be `right` or `left`.
+    :param argument: The names as written, comma-separated.
+    :return: The names.
+    :raises ValueError: For one that isn't a Python name, or a
+        dotted name or an index of one.
     """
-    return rst.directives.choice(argument, POSITIONS)
+    for each in listed(checks.text(argument)):
+        if not NAME.fullmatch(each):
+            raise ValueError(
+                f"expected Python names like total or self.x[0], got {each!r}"
+            )
+    return checks.text(argument)
+
+
+def comment_marks(argument: str | None) -> str:
+    """Check how a language opens a comment and closes one.
+
+    :param argument: The one or two marks as written.
+    :return: The marks.
+    :raises ValueError: For more than two or for marks that are text.
+    """
+    found = checks.text(argument, 12).split()
+    if len(found) > 2 or any(_.isalnum() for _ in found):
+        raise ValueError(
+            f"expected a comment mark like # or (* *), got {argument!r}"
+        )
+    return " ".join(found)
 
 
 class directive(CodeBlock):
-    """The `walkthrough` directive.
+    """The `code-explain` directive.
 
     The notes scroll past the code instead of swapping under it, so it
     needs at least one `.. lines::` block. It stands alone, nothing
@@ -168,15 +198,17 @@ class directive(CodeBlock):
           default or `left`.
         - `watch`: Names to show, comma-separated. Without it only a
           function's return value and what the snippet raises show.
-        - `limit`: How many steps to show. Defaults to 100.
-        - `timeout`: How long the snippet may run, in seconds.
+        - `limit`: How many steps to show, up to the site's
+          `code_explain_limit`, which is 100 unless it says otherwise.
+        - `timeout`: How long the snippet may run, in seconds, up to the
+          site's `code_explain_timeout`.
         - `pythonpath`: Directories to import from, comma-separated
-          and relative to the document. One that isn't there raises
-          `FileNotFoundError`.
+          and relative to the document. One that isn't there stops the
+          build.
         - `events`: Which of `call`, `line` and `return` make a step.
           Defaults to `line` and `return`.
         - `comprehensions`: Step into comprehensions too, which a site
-          can do for every snippet with `walkthrough_comprehensions`.
+          can do for every snippet with `code_explain_comprehensions`.
         - `pace`: Pixels of scrolling a step takes. Defaults to what
           `pace` picks for the language.
         - `raises`: The snippet is meant to fail, so it ends on the
@@ -184,8 +216,8 @@ class directive(CodeBlock):
         - `comment`: How the language opens a comment and closes one
           if it must (`(* *)`), for a language Kaamiki doesn't know.
         - `caption`: A line of text above the code, parsed as rST.
-        - `class`: More classes for the walkthrough.
-        - `name`: A name to link the walkthrough by.
+        - `class`: More classes for the `code-explain`.
+        - `name`: A name to link the `code-explain` by.
         - `linenos`: Number the lines.
         - `lineno-start`: The number the first line is given.
         - `emphasize-lines`: Lines to highlight, as `1, 3-5`.
@@ -197,27 +229,38 @@ class directive(CodeBlock):
             for key, value in CodeBlock.option_spec.items()
             if key not in {"dedent", "force"}
         },
-        "code-position": position,
-        "watch": rst.directives.unchanged,
-        "limit": rst.directives.positive_int,
-        "timeout": rst.directives.positive_int,
-        "pythonpath": rst.directives.unchanged,
-        "events": rst.directives.unchanged,
+        "code-position": checks.word(*POSITIONS),
+        "watch": names,
+        "limit": checks.integer(*map(int, BOUNDS["code_explain_limit"])),
+        "timeout": checks.integer(*map(int, BOUNDS["code_explain_timeout"])),
+        "pythonpath": checks.text,
+        "events": checks.text,
         "comprehensions": rst.directives.flag,
-        "pace": rst.directives.positive_int,
+        "pace": checks.integer(*map(int, BOUNDS["pace"])),
         "raises": rst.directives.flag,
-        "comment": rst.directives.unchanged_required,
+        "comment": comment_marks,
+        "caption": checks.text,
+        "class": checks.classes,
+        "name": checks.slug,
+        "lineno-start": checks.integer(
+            *map(int, BOUNDS["code_explain_lineno"])
+        ),
+        "emphasize-lines": checks.text,
     }
 
     def run(self) -> list[nodes.Node]:
         """Step through the snippet and return the walkthrough.
 
-        :return: A list holding the one `walkthrough` node.
+        :return: A list holding the one `code-explain` node.
         """
         language = self.arguments.pop().strip() if self.arguments else "python"
+        if not known(language):
+            raise self.error(f"{self.name}: no Pygments lexer for {language!r}")
         code, setup, stdin, notes = self.blocks()
         if not notes:
-            raise self.error("walkthrough needs a `.. lines::` block per note")
+            raise self.error(
+                "code-explain: expected a `.. lines::` block per note, got none"
+            )
         start = self.options.get("lineno-start", 1)
         total = len(code.splitlines())
         ranges = [self.span(_.argument, start, total) for _ in notes]
@@ -248,7 +291,7 @@ class directive(CodeBlock):
         element += self.caption(language)
         element += self.snippet(code, language, start)
         element += self.explain(notes)
-        self.add_name(element)
+        named(self, element)
         return [element]
 
     def cache(self) -> str | None:
@@ -261,9 +304,9 @@ class directive(CodeBlock):
         :return: The folder or `None` for no cache.
         """
         env = self.state.document.settings.env
-        if not setting(env.config, "walkthrough_cache"):
+        if not setting(env.config, "code_explain_cache"):
             return None
-        return p.join(str(env.doctreedir), "kaamiki-walkthrough")
+        return p.join(str(env.doctreedir), "kaamiki-code-explain")
 
     def capped(self, option: str, key: str) -> int:
         """Read a number the snippet asks for, up to what the site
@@ -279,7 +322,8 @@ class directive(CodeBlock):
         asked = self.options.get(option, most)
         if asked > most:
             raise self.error(
-                f":{option}: {asked} is more than {key} allows ({most})"
+                f"{self.name}: :{option}: {asked} is more than {key} allows "
+                f"({most})"
             )
         return int(asked)
 
@@ -295,23 +339,27 @@ class directive(CodeBlock):
             line, key, block = exc.args
             takes = ", ".join(f":{_}:" for _ in sorted(OPTIONS[block]))
             raise self.error(
-                f"`.. {block}::` on line {line} has :{key}:, which it does"
-                f" not take or takes twice; it takes {takes}"
+                f"{self.name}: `.. {block}::` on line {line} got :{key}:, "
+                "which is"
+                f" not accepted or is given twice; expected {takes}"
             ) from exc
         except ValueError as exc:
             line, text = exc.args
             raise self.error(
-                f"walkthrough has {text!r} on line {line}, outside any"
-                " `.. code::`, `.. setup::`, `.. stdin::` or `.. lines::`"
+                f"code-explain: {text!r} on line {line} is outside any `.. "
+                "code::`,"
+                " `.. setup::`, `.. stdin::` or `.. lines::`"
             ) from exc
         for block in ("code", "setup", "stdin"):
             if sum(_.name == block for _ in found) > 1:
-                raise self.error(f"walkthrough takes one `.. {block}::` block")
+                raise self.error(
+                    f"code-explain: expected one `.. {block}::` block, got more"
+                )
         code = next((_ for _ in found if _.name == "code"), None)
         if code is None:
-            raise self.error("walkthrough requires a `.. code::` block")
+            raise self.error("code-explain: missing a `.. code::` block")
         if not code.text().strip():
-            raise self.error("walkthrough has no code in its `.. code::`")
+            raise self.error("code-explain: the `.. code::` is empty")
         setup = next((_.text() for _ in found if _.name == "setup"), "")
         stdin = next((_.text() for _ in found if _.name == "stdin"), "")
         notes = [_ for _ in found if _.name == "lines"]
@@ -327,11 +375,19 @@ class directive(CodeBlock):
         """
         found = linerange(argument)
         if found is None:
-            raise self.error(f"lines needs a line range, got {argument!r}")
+            raise self.error(
+                f"{self.name}: lines expected a line range, got {argument!r}"
+            )
         low, high = found
+        if low > high:
+            raise self.error(
+                f"{self.name}: lines expected a range that runs up, got "
+                f"{argument!r}"
+            )
         if low < start or high > start + total - 1:
-            self.warn(
-                f"{label(low, high)} is outside the snippet, which is"
+            raise self.error(
+                f"{self.name}: {label(low, high)} is outside the snippet, "
+                "which is"
                 f" {label(start, start + total - 1)}"
             )
         return found
@@ -360,8 +416,9 @@ class directive(CodeBlock):
         """
         for block, (low, high) in zip(notes, ranges, strict=True):
             if block.options:
-                self.warn(
-                    f"the note for {label(low, high)} writes out values,"
+                raise self.error(
+                    f"{self.name}: the note for {label(low, high)} writes out "
+                    "values,"
                     " but a python walkthrough reads them off the snippet"
                 )
         env = self.state.document.settings.env
@@ -369,19 +426,19 @@ class directive(CodeBlock):
         events = frozenset(
             listed(
                 self.options.get("events")
-                or setting(config, "walkthrough_events")
+                or setting(config, "code_explain_events")
             )
         )
         if events - kinds:
             raise self.error(
-                f"events takes {', '.join(sorted(kinds))},"
+                f"{self.name}: :events: expected {', '.join(sorted(kinds))},"
                 f" got {', '.join(sorted(events - kinds))}"
             )
         watch = list(dict.fromkeys(listed(self.options.get("watch", ""))))
         here = p.dirname(str(self.state.document.current_source))
         paths = [
             _ if p.isabs(_) else p.abspath(p.join(env.srcdir, _))
-            for _ in setting(config, "walkthrough_pythonpath")
+            for _ in setting(config, "code_explain_pythonpath")
         ]
         paths += [
             _ if p.isabs(_) else p.abspath(p.join(here, _))
@@ -389,28 +446,32 @@ class directive(CodeBlock):
         ]
         for path in paths:
             if not p.isdir(path):
-                raise FileNotFoundError(f"pythonpath has no directory {path}")
-        most = self.capped("limit", "walkthrough_limit")
+                raise self.error(
+                    f"{self.name}: :pythonpath: has no directory {path!r}"
+                )
+        most = self.capped("limit", "code_explain_limit")
         traced = execute(
             code,
             setup,
             stdin,
             watch,
-            most * setting(config, "walkthrough_budget"),
-            self.capped("timeout", "walkthrough_timeout"),
+            most * setting(config, "code_explain_budget"),
+            self.capped("timeout", "code_explain_timeout"),
             paths,
             comprehensions="comprehensions" in self.options
-            or bool(setting(config, "walkthrough_comprehensions")),
-            python=setting(config, "walkthrough_python"),
+            or bool(setting(config, "code_explain_comprehensions")),
+            python=setting(config, "code_explain_python"),
             cache=self.cache(),
-            memory_limit=setting(config, "walkthrough_memory") << 20,
-            output_limit=setting(config, "walkthrough_output_limit") << 20,
+            memory_limit=setting(config, "code_explain_memory") << 20,
+            output_limit=setting(config, "code_explain_output_limit") << 20,
         )
         for dependency in traced["deps"]:
             env.note_dependency(dependency)
         error = traced["error"]
         if error is not None and error.get("line") is None:
-            raise self.error(f"walkthrough couldn't run: {error['text']}")
+            raise self.error(
+                f"{self.name}: could not run the snippet: {error['text']}"
+            )
         steps = replay(traced, events or EVENTS)
         for step in steps:
             line = step["line"] + start - 1
@@ -424,10 +485,21 @@ class directive(CodeBlock):
             )
         steps = collapse(steps)
         if not steps:
-            raise self.error("walkthrough captured no steps")
-        cut = traced["truncated"] or len(steps) > most
-        steps = steps[:most]
-        self.check(traced, watch, ranges, steps, cut=cut)
+            raise self.error(f"{self.name}: expected at least 1 step, got none")
+        budget = most * setting(config, "code_explain_budget")
+        if traced["truncated"]:
+            raise self.error(
+                f"{self.name}: the snippet ran past {budget} steps, so it is "
+                "long or"
+                " never ends; trim it or raise code_explain_budget"
+            )
+        if len(steps) > most:
+            raise self.error(
+                f"{self.name}: the snippet has {len(steps)} steps, :limit: "
+                "allows"
+                f" {most}; trim it or raise :limit:"
+            )
+        self.check(traced, watch, ranges, steps)
         inherit(steps)
         return steps
 
@@ -457,7 +529,10 @@ class directive(CodeBlock):
             if text
         ]
         if unused:
-            self.warn(f"{', '.join(unused)} only apply to a python walkthrough")
+            raise self.error(
+                f"{self.name}: {', '.join(unused)} apply to a python "
+                "code-explain only"
+            )
         values: dict[str, tuple[int, str]] = {}
         steps: list[dict[str, t.Any]] = []
         for index, (block, (low, high)) in enumerate(
@@ -466,18 +541,20 @@ class directive(CodeBlock):
             where = self.place(block, high, start, total)
             for key in listed(block.options.get("clear", "")):
                 if values.pop(key, None) is None:
-                    self.warn(
-                        f"the note for {label(low, high)} clears {key},"
-                        " which isn't showing"
+                    raise self.error(
+                        f"{self.name}: the note for {label(low, high)} clears "
+                        f"{key}, which is"
+                        " not showing"
                     )
             fresh: set[str] = set()
             for entry in ENTRIES.split(block.options.get("values", "")):
                 match = VALUE.match(entry)
                 if match is None:
                     if entry.strip():
-                        self.warn(
-                            f"the note for {label(low, high)} has {entry!r}"
-                            " in :values:, which isn't `name: value`"
+                        raise self.error(
+                            f"{self.name}: the note for {label(low, high)} "
+                            f"has {entry!r} in"
+                            " :values:, expected `name: value`"
                         )
                     continue
                 values[match.group(1)] = (where, match.group(2))
@@ -513,14 +590,15 @@ class directive(CodeBlock):
         if at is None:
             return high - start + 1
         if not at.isdigit():
-            raise self.error(f":at: takes a line number, got {at!r}")
+            raise self.error(
+                f"{self.name}: :at: expected a line number, got {at!r}"
+            )
         if not start <= int(at) <= start + total - 1:
-            self.warn(
-                f":at: {at} is outside the snippet, which is"
+            raise self.error(
+                f"{self.name}: :at: {at} is outside the snippet, which is"
                 f" {label(start, start + total - 1)}, so the values sit"
                 f" beside {label(high, high)}"
             )
-            return high - start + 1
         return int(at) - start + 1
 
     def marker(
@@ -539,9 +617,10 @@ class directive(CodeBlock):
         if known is not None:
             return known
         if any(_.get("vars") for _ in steps):
-            self.warn(
-                f"Kaamiki doesn't know how {language} writes a comment;"
-                " set :comment: so the values read as one"
+            raise self.error(
+                f"{self.name}: no comment mark known for {language}; set "
+                ":comment:"
+                " so the values read as one"
             )
         return {"open": "#", "close": ""}
 
@@ -610,51 +689,39 @@ class directive(CodeBlock):
         watch: list[str],
         ranges: list[tuple[int, int]],
         steps: list[dict[str, t.Any]],
-        *,
-        cut: bool,
     ) -> None:
-        """Warn about whatever the author probably didn't mean.
+        """Stop for whatever the author probably didn't mean.
 
         :param traced: What the tracer saw.
         :param watch: The names asked for.
         :param ranges: The lines each note covers.
         :param steps: The steps, with their notes.
-        :param cut: Whether the steps stop short of the snippet's end.
         """
         error = traced["error"]
         raises = "raises" in self.options
         if error is not None and not raises:
-            self.warn(
-                f"the snippet raised {error['text']}; add :raises: if"
-                " it's meant to"
+            raise self.error(
+                f"{self.name}: the snippet raised {error['text']}; add "
+                ":raises: if"
+                " that is meant"
             )
         if error is None and raises:
-            self.warn(":raises: is set, but the snippet ran to the end")
-        if cut:
-            self.warn(
-                f"stopped after {len(steps)} steps; raise :limit: or trim"
-                " the snippet"
+            raise self.error(
+                f"{self.name}: :raises: is set, but the snippet ran to the end"
             )
         unseen = ", ".join(_ for _ in watch if _ not in traced["seen"])
         if unseen:
-            self.warn(
-                f":watch: asks for {unseen}, which the snippet never sets"
+            raise self.error(
+                f"{self.name}: :watch: has {unseen}, which the snippet never "
+                "sets"
             )
         shown = {_["note"] for _ in steps}
         for index, (low, high) in enumerate(ranges):
             if index not in shown:
-                self.warn(f"the note for {label(low, high)} never comes up")
-
-    def warn(self, message: str) -> None:
-        """Log a warning against this directive."""
-        logger.warning(
-            "%s: %s",
-            self.name,
-            message,
-            location=self.get_location(),
-            type="kaamiki",
-            subtype=self.name,
-        )
+                raise self.error(
+                    f"{self.name}: the note for {label(low, high)} never "
+                    "comes up"
+                )
 
     def emphasis(self, start: int, total: int) -> set[int]:
         """Read `:emphasize-lines:` as the lines it names.
@@ -668,11 +735,21 @@ class directive(CodeBlock):
         for part in listed(self.options.get("emphasize-lines", "")):
             found = linerange(part)
             if found is None:
-                raise self.error(f"emphasize-lines got {part!r}")
+                raise self.error(
+                    f"{self.name}: :emphasize-lines: expected ranges, got "
+                    f"{part!r}"
+                )
             low, high = found
+            if low > high:
+                raise self.error(
+                    f"{self.name}: :emphasize-lines: expected ranges that run "
+                    "up, got"
+                    f" {part!r}"
+                )
             if low < start or high > end:
-                self.warn(
-                    f":emphasize-lines: {part} is outside the snippet,"
+                raise self.error(
+                    f"{self.name}: :emphasize-lines: {part} is outside the "
+                    "snippet,"
                     f" which is {label(start, end)}"
                 )
             marked.update(range(max(low, start), min(high, end) + 1))
@@ -711,9 +788,6 @@ def compact(step: dict[str, t.Any]) -> dict[str, t.Any]:
     return out
 
 
-# HACK(xames3): This needs to be optimised sometime in the future. I
-# honestly feel this is just a patch to make it work for the very few
-# languages I've tested so far.
 def pace(language: str) -> int:
     """Pick how much scrolling a step takes, for a language.
 
@@ -734,32 +808,32 @@ def visit(self: HTMLTranslator, node: node) -> None:
     """Open the walkthrough, write its steps and open the pane.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The `walkthrough` node and its attributes.
+    :param node: The `code-explain` node and its attributes.
     """
     ids: list[str] = node["ids"]
     classes = " ".join(
         [
-            "km-walkthrough",
-            f"km-walkthrough--{node['position']}",
+            "km-code-explain",
+            f"km-code-explain--{node['position']}",
             *node.get("classes", []),
         ]
     )
     anchor = f' id="{self.attval(ids[0])}"' if ids else ""
-    self.body.append(f'<div{anchor} class="{classes}" data-km-walkthrough>')
+    self.body.append(f'<div{anchor} class="{classes}" data-km-code-explain>')
     self.body.extend(f'<span id="{self.attval(_)}"></span>' for _ in ids[1:])
     self.body.append(
         '<script type="application/json" data-km-payload>'
         + json.dumps(node["payload"]).replace("<", "\\u003c")
         + "</script>"
     )
-    self.body.append('<div class="km-walkthrough__pane" data-km-pane>')
+    self.body.append("<div data-km-pane>")
 
 
 def depart(self: HTMLTranslator, node: node) -> None:
     """Close the pane and the walkthrough.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The `walkthrough` node (unused).
+    :param node: The `code-explain` node (unused).
     """
     del node
     self.body.append("</div></div>")
@@ -771,12 +845,12 @@ def visit_heading(self: HTMLTranslator, node: heading) -> None:
     :param self: The HTML translator, whose body this appends to.
     :param node: The header node, empty when there's no caption.
     """
-    self.body.append('<div class="km-walkthrough__grid">')
-    self.body.append('<div class="km-walkthrough__side">')
-    self.body.append('<div class="km-walkthrough__frame" data-km-frame>')
+    self.body.append('<div class="km-code-explain__grid">')
+    self.body.append('<div class="km-code-explain__side">')
+    self.body.append('<div class="km-code-explain__frame" data-km-frame>')
     if node.children:
         self.body.append(
-            '<div class="code-block-caption km-walkthrough__caption">'
+            '<div class="code-block-caption km-code-explain__caption">'
             '<span class="caption-text">'
         )
         if node["icon"]:
@@ -799,7 +873,7 @@ def depart_heading(self: HTMLTranslator, node: heading) -> None:
         self.body.append("</div>")
     else:
         self.body.append(
-            f'<div class="km-walkthrough__corner">{controls()}</div>'
+            f'<div class="km-code-explain__corner">{controls()}</div>'
         )
     self.body.append(node.parent["pane"])
     self.body.append(output())
@@ -813,8 +887,8 @@ def visit_explanations(self: HTMLTranslator, node: explanations) -> None:
     :param node: The container node (unused).
     """
     del node
-    self.body.append('<div class="km-walkthrough__notes" data-km-notes>')
-    self.body.append('<div class="km-walkthrough__track" data-km-track>')
+    self.body.append('<div class="km-code-explain__notes" data-km-notes>')
+    self.body.append('<div class="km-code-explain__track" data-km-track>')
 
 
 def depart_explanations(self: HTMLTranslator, node: explanations) -> None:
@@ -846,3 +920,34 @@ def register(app: Sphinx) -> None:
     app.add_node(plain, html=(skip, None))
     app.add_node(explanations, html=(visit_explanations, depart_explanations))
     app.add_node(explanation, html=(visit_explanation, close))
+
+
+def html_page_context(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: dict[str, t.Any],
+    doctree: nodes.document | None,
+) -> None:
+    """Load the explainer script on the pages that use it only.
+
+    It's the biggest of the scripts and a page without a walkthrough or
+    attempts has nothing for it to start.
+
+    :param app: The Sphinx application instance.
+    :param pagename: The page being rendered.
+    :param templatename: The template rendering it.
+    :param context: The page's rendering context, updated in place.
+    :param doctree: The resolved doctree or `None` for generated
+        pages.
+    """
+    del app, pagename, templatename
+    if "script_files" not in context:
+        return
+    if doctree is not None and next(findall(doctree, node), None):
+        return
+    context["script_files"] = [
+        _
+        for _ in context["script_files"]
+        if not str(getattr(_, "filename", _)).endswith("explainer.js")
+    ]

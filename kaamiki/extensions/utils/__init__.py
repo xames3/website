@@ -4,40 +4,49 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 15 October 2026
+Last updated on: 25 October 2026
 
 Kaamiki's shared helpers, now as its own module.
 """
 
+from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import writer
 from kaamiki.extensions.utils.build import build_finished
 from kaamiki.extensions.utils.context import articles
 from kaamiki.extensions.utils.context import context_defaults
 from kaamiki.extensions.utils.context import feedback
+from kaamiki.extensions.utils.context import field_lists
 from kaamiki.extensions.utils.context import follow
 from kaamiki.extensions.utils.context import forget_lead
 from kaamiki.extensions.utils.context import header_leads
 from kaamiki.extensions.utils.context import merge_leads
 from kaamiki.extensions.utils.context import neighbours
 from kaamiki.extensions.utils.context import note_lead
+from kaamiki.extensions.utils.context import page_fields
 from kaamiki.extensions.utils.context import page_switches
 from kaamiki.extensions.utils.dates import dated
 from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.dates import provenance
 from kaamiki.extensions.utils.dates import updated_on
+from kaamiki.extensions.utils.directives import NATIVE
 from kaamiki.extensions.utils.directives import depart
+from kaamiki.extensions.utils.directives import document
 from kaamiki.extensions.utils.directives import fields
+from kaamiki.extensions.utils.directives import hollow
 from kaamiki.extensions.utils.directives import listed
+from kaamiki.extensions.utils.directives import named
 from kaamiki.extensions.utils.directives import parse
 from kaamiki.extensions.utils.directives import phrase
-from kaamiki.extensions.utils.directives import seconds
+from kaamiki.extensions.utils.directives import shipped
 from kaamiki.extensions.utils.directives import skip
-from kaamiki.extensions.utils.directives import toggle
+from kaamiki.extensions.utils.directives import titled
 from kaamiki.extensions.utils.directives import trail
 from kaamiki.extensions.utils.directives import visitor
 from kaamiki.extensions.utils.doctree import annotated
 from kaamiki.extensions.utils.doctree import badged
 from kaamiki.extensions.utils.doctree import findall
+from kaamiki.extensions.utils.doctree import glyph
+from kaamiki.extensions.utils.doctree import keycaps
 from kaamiki.extensions.utils.doctree import offer
 from kaamiki.extensions.utils.links import hostnames
 from kaamiki.extensions.utils.links import opens_new_tab
@@ -50,35 +59,42 @@ from kaamiki.extensions.utils.settings import reread
 from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.social import social_metadata
 from kaamiki.extensions.utils.templates import bridge
-from kaamiki.extensions.utils.templates import design_assets
 from kaamiki.extensions.utils.templates import render
 from kaamiki.extensions.utils.templates import themed
 
 __all__: list[str] = [
+    "NATIVE",
     "annotated",
     "articles",
     "badged",
     "bridge",
     "build_finished",
+    "checks",
     "context_defaults",
     "dated",
     "day",
     "depart",
-    "design_assets",
+    "document",
     "feedback",
+    "field_lists",
     "fields",
     "findall",
     "follow",
     "forget_lead",
+    "glyph",
     "header_leads",
+    "hollow",
     "hostnames",
     "icon",
+    "keycaps",
     "listed",
     "merge_leads",
+    "named",
     "neighbours",
     "note_lead",
     "offer",
     "opens_new_tab",
+    "page_fields",
     "page_switches",
     "parse",
     "phrase",
@@ -88,12 +104,12 @@ __all__: list[str] = [
     "render",
     "reread",
     "rooted",
-    "seconds",
     "setting",
+    "shipped",
     "skip",
     "social_metadata",
     "themed",
-    "toggle",
+    "titled",
     "trail",
     "updated_on",
     "visitor",

@@ -4,13 +4,13 @@ YouTube Thumbnail Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September 2025
-Last updated on: 12 October 2026
+Last updated on: 25 October 2026
 
-A `thumbnail` directive that renders a YouTube video as a card::
+A `thumbnail` directive that renders a YouTube video as a block::
 
     .. thumbnail:: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         :title: Rick Rolled
-        :grayscale:
+        :greyscale:
 """
 
 import typing as t
@@ -19,6 +19,9 @@ from urllib.parse import urlsplit
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
+from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import setting
@@ -32,7 +35,7 @@ TEXTS: t.Final[tuple[str, ...]] = ("title", "channel")
 
 
 class node(nodes.Element):
-    """The card and its parsed title and channel, waiting for `visit`."""
+    """The block and its parsed title and channel, waiting for `visit`."""
 
 
 class directive(rst.Directive):
@@ -42,35 +45,39 @@ class directive(rst.Directive):
 
         - `title`: The video's title.
         - `channel`: The channel's name.
-        - `grayscale`: Draws the still in grey until it's hovered. It
+        - `greyscale`: Draws the still in grey until it's hovered. It
           is drawn in colour without it.
+        - `name`: A name to link to.
+        - `class`: More classes for the block.
     """
 
     required_arguments = 1
     final_argument_whitespace = False
     option_spec = {  # noqa: RUF012
-        "title": rst.directives.unchanged_required,
-        "channel": rst.directives.unchanged_required,
-        "grayscale": rst.directives.flag,
+        **NATIVE,
+        "title": checks.text,
+        "channel": checks.text,
+        "greyscale": rst.directives.flag,
     }
 
     def run(self) -> list[nodes.Node]:
-        """Parse the card's text and return its node.
+        """Parse the block's text and return its node.
 
         :return: The node, followed by the `raw` node `trail` returns
             for the link checker and anything the text reported.
         """
-        src = rst.directives.uri(self.arguments.pop().strip())
+        src = self.arguments.pop().strip()
         vid = youtube_id(src)
         if vid is None:
-            raise self.error(f"thumbnail found no YouTube video in {src!r}")
+            raise self.error(f"thumbnail: no YouTube video found in {src!r}")
         if not urlsplit(src).netloc:
             src = f"https://www.youtube.com/watch?v={vid}"
         config = self.state.document.settings.env.config
         texts = {_: self.options.pop(_) for _ in TEXTS if _ in self.options}
+        self.options["classes"] = self.options.pop("class", [])
         self.options["src"] = src
         self.options["new_tab"] = opens_new_tab(src, config)
-        self.options["grayscale"] = "grayscale" in self.options
+        self.options["greyscale"] = "greyscale" in self.options
         self.options["video_id"] = vid
         self.options["private"] = bool(setting(config, "youtube_privacy"))
         if not self.options["private"]:
@@ -80,6 +87,7 @@ class directive(rst.Directive):
                 f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
             )
         element = node("", **self.options)
+        named(self, element)
         messages: list[nodes.Node] = []
         for field, text in texts.items():
             parsed, reported = parse(self, text, field)

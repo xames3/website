@@ -13,7 +13,6 @@ import typing as t
 from math import ceil
 
 from docutils import nodes
-from sphinx.errors import ConfigError
 
 from kaamiki.extensions.utils.doctree import buried
 from kaamiki.extensions.utils.doctree import findall
@@ -43,19 +42,15 @@ def wordcount(doctree: nodes.document | None) -> int:
 def reading_time(doctree: nodes.document | None, config: Config) -> int:
     """Work out roughly how many minutes a page takes to read.
 
-    Code isn't counted. Sadly, no one reads code these days because of
-    shitty AI slop. Neither are the notes of a walkthrough, which a
-    reader scrolls through rather than reads.
+    Code isn't counted, since a reader skims it. Neither are the notes of
+    a walkthrough, which a reader scrolls through rather than reads.
 
     :param doctree: The resolved doctree or `None` for generated
         pages.
     :param config: The Sphinx configuration, for `words_per_minute`.
     :return: Minutes, rounded up.
-    :raises ConfigError: When `words_per_minute` is below one.
     """
     speed: int = setting(config, "words_per_minute")
-    if speed < 1:
-        raise ConfigError("words_per_minute takes a number above zero")
     return ceil(wordcount(doctree) / speed)
 
 

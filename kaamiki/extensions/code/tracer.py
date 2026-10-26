@@ -4,11 +4,12 @@ Explainer Tracer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 17 October 2026
+Last updated on: 25 October 2026
 
 Running a snippet and writing down what it did, one line at a time.
 """
 
+import contextlib
 import functools
 import hashlib
 import json
@@ -81,7 +82,7 @@ for limit_name, value in (
 for entry in job["pythonpath"]:
     sys.path.insert(0, entry)
 
-filename = "<walkthrough>"
+filename = "<code-explain>"
 watch = job["watch"]
 limit = job["limit"]
 events = []
@@ -161,13 +162,36 @@ def describe(exc):
     return exc.__class__.__name__ + (": " + text if text else "")
 
 
+PART = re.compile(r"\.([A-Za-z_]\w*)|\[([^\]]+)\]")
+
+
+def reach(scope, name):
+    head = re.match(r"[A-Za-z_]\w*", name).group(0)
+    if head not in scope:
+        return False, None
+    value = scope[head]
+    for attr, key in PART.findall(name[len(head):]):
+        try:
+            if attr:
+                value = getattr(value, attr)
+                continue
+            try:
+                key = ast.literal_eval(key)
+            except (ValueError, SyntaxError):
+                key = scope[key]
+            value = value[key]
+        except Exception:
+            return False, None
+    return True, value
+
+
 def snapshot(frame):
     scope = frame.f_locals
     rows = []
     for key in watch:
-        if key in scope:
+        found, value = reach(scope, key)
+        if found:
             seen.add(key)
-            value = scope[key]
             rows.append([key] + show(value) + [id(value)])
     return rows
 
@@ -449,7 +473,7 @@ def execute(
         with open(path, "w") as fd:
             json.dump(job, fd)
         try:
-            finished = subprocess.run(  # noqa: S603
+            with subprocess.Popen(  # noqa: S603
                 [
                     python or sys.executable,
                     "-s",
@@ -459,18 +483,26 @@ def execute(
                     path,
                     answer,
                 ],
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 text=True,
-                timeout=timeout,
-                check=False,
                 cwd=here,
                 env=sandbox(here),
                 stdin=subprocess.DEVNULL,
-            )
-        except subprocess.TimeoutExpired:
-            return failed(f"ran past its {timeout}s")
+                start_new_session=True,
+            ) as process:
+                try:
+                    out, err = process.communicate(timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    reap(process)
+                    return failed(f"ran past its {timeout}s")
+                finally:
+                    reap(process)
         except OSError as exc:
             return failed(f"couldn't start {python or sys.executable}: {exc}")
+        finished = subprocess.CompletedProcess(
+            process.args, process.returncode, out, err
+        )
         try:
             with open(answer) as fd:
                 result = t.cast("Trace", json.load(fd))
@@ -565,6 +597,15 @@ def remember(folder: str, key: str, trace: Trace) -> None:
         os.replace(temp, os.path.join(folder, f"{key}.json"))
     except OSError:
         return
+
+
+def reap(process: subprocess.Popen[str]) -> None:
+    """Stop whatever the snippet left running, its own children too.
+
+    :param process: The runner, which leads a process group of its own.
+    """
+    with contextlib.suppress(ProcessLookupError, PermissionError):
+        os.killpg(process.pid, signal.SIGKILL)
 
 
 def sandbox(home: str) -> dict[str, str]:

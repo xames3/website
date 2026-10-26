@@ -4,7 +4,7 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 15 October 2026
+Last updated on: 23 October 2026
 
 What Kaamiki changes in the HTML Sphinx writes, as it writes it.
 """
@@ -65,10 +65,16 @@ class translator(base):
     def add_permalink_ref(self, node: nodes.Element, title: str) -> None:
         """Write the anchor a heading, caption or table links to.
 
+        The page's own title gets none, only the headings inside it.
+
         :param node: The element whose first id the anchor points at.
         :param title: The title Sphinx gives the anchor.
         """
         if not node["ids"] or not self.config.html_permalinks:
+            return
+        if isinstance(node, nodes.section) and isinstance(
+            node.parent, nodes.document
+        ):
             return
         if not self.builder.add_permalinks:
             return

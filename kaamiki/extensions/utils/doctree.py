@@ -4,7 +4,7 @@ Doctree Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 25 October 2026
 
 The helpers that walk a doctree and pick prose out of it.
 """
@@ -17,7 +17,9 @@ from pygments.lexers import get_lexer_for_filename
 from pygments.util import ClassNotFound
 from sphinx.builders.gettext import MessageCatalogBuilder
 
+from kaamiki.extensions.utils.settings import free
 from kaamiki.extensions.utils.settings import language_icon
+from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.text import clip
 
 if t.TYPE_CHECKING:
@@ -27,7 +29,48 @@ if t.TYPE_CHECKING:
 
 
 class annotated(nodes.container):
-    """A snippet with notes beside it, the base of `walkthrough`."""
+    """A snippet with notes beside it, the base of `code-explain`."""
+
+
+class glyph(nodes.inline):
+    """A Font Awesome icon, an empty span the stylesheet draws into."""
+
+
+KEYS: t.Final[dict[str, str]] = {
+    "cmd": "cmd",
+    "command": "cmd",
+    "shift": "shift",
+    "control": "control",
+    "option": "option",
+    "tab": "tab",
+    "esc": "esc",
+    "caps lock": "caps",
+    "enter": "enter",
+    "return": "enter",
+    "backspace": "backspace",
+    "delete": "delete",
+    "left": "left",
+    "right": "right",
+    "up": "up",
+    "down": "down",
+    "fn": "globe",
+    "globe": "globe",
+    "super": "super",
+}
+PC_KEYS: t.Final[frozenset[str]] = frozenset(
+    {
+        "shift",
+        "caps",
+        "tab",
+        "esc",
+        "enter",
+        "backspace",
+        "delete",
+        "globe",
+    }
+)
+ARROWS: t.Final[frozenset[str]] = frozenset({"left", "right", "up", "down"})
+SEPARATORS: t.Final[frozenset[str]] = frozenset({"-", "+", "^"})
 
 
 FURNITURE: tuple[type, ...] = (
@@ -72,17 +115,17 @@ def badged(
 ) -> str:
     """Pick the icon a code block's caption wears for its language.
 
+    A diff has no language of its own, so its caption's file name stands
+    in for it.
+
     :param caption: The caption.
     :param language: The language of the code under it.
     :param kit: Whether the site has a Font Awesome kit.
     :return: The icon's classes or an empty string when the language
         has none or the caption opens with an icon of its own.
-
-    A diff has no language of its own, so its caption's file name stands
-    in for it.
     """
     first = caption.children[0] if caption.children else None
-    if type(first).__name__ == "glyph":
+    if isinstance(first, glyph):
         return ""
     if (language or "").strip().lower() in {"diff", "udiff"}:
         try:
@@ -179,3 +222,129 @@ def offer(app: Sphinx, doctree: nodes.document) -> None:
             box += copy
     if len(box):
         doctree += box
+
+
+def is_key(node: nodes.Node) -> t.TypeGuard[nodes.literal]:
+    """Say whether a node is a key, a `kbd` literal.
+
+    :param node: The node to look at.
+    :return: `True` when it's a key.
+    """
+    return isinstance(node, nodes.literal) and "kbd" in node["classes"]
+
+
+def dress(key: nodes.literal, *, kit: bool) -> None:
+    """Give a key the classes and the icon that draw it.
+
+    The arrows, the globe and Super wear a Font Awesome icon. The globe
+    is a solid one when the site has no kit.
+
+    :param key: The key.
+    :param kit: Whether the site has a Font Awesome kit.
+    """
+    classes = key["classes"]
+    pc = bool({"km-windows", "km-linux"} & set(classes))
+    text = " ".join(key.astext().lower().split())
+    name = KEYS.get(text)
+    icon = ""
+    if text in ("space", "space bar"):
+        classes.append("km-space")
+    elif name:
+        classes.append("km-key")
+        if name not in ARROWS:
+            classes.append(f"km-key-{name}")
+        if pc and name in PC_KEYS:
+            classes.append("km-pc")
+    elif pc and len(text) > 1:
+        classes.append("km-key-text")
+    if name in ARROWS:
+        icon = f"fa-solid fa-{'chevron' if pc else 'caret'}-{name}"
+    elif name == "globe" and not pc:
+        icon = "fa-light fa-globe"
+    elif name == "super":
+        logo = "ubuntu" if "km-linux" in classes else "microsoft"
+        icon = f"fa-brands fa-{logo}"
+    if icon:
+        if not kit:
+            icon = free(icon)
+        key += glyph("", "", classes=[*icon.split(), "km-key-icon"])
+
+
+def combos(children: list[nodes.Node], *, kit: bool) -> list[nodes.Node]:
+    """Dress the keys among some siblings and bind each combo.
+
+    A combo is two or more keys joined by `-`, `+` or `^`. It gets a
+    span of its own, which keeps it on one line when it fits.
+
+    :param children: The siblings, some of which are keys.
+    :param kit: Whether the site has a Font Awesome kit.
+    :return: The siblings, with every combo in a span.
+    """
+    result: list[nodes.Node] = []
+    combo: list[nodes.Node] = []
+
+    def close() -> None:
+        if len(combo) > 1:
+            result.append(nodes.inline("", "", *combo, classes=["km-combo"]))
+        else:
+            result.extend(combo)
+        combo.clear()
+
+    index = 0
+    while index < len(children):
+        node = children[index]
+        index += 1
+        after = children[index : index + 2]
+        if is_key(node):
+            if (
+                node.astext().lower() == "space"
+                and len(after) == 2
+                and isinstance(after[0], nodes.Text)
+                and after[0].astext().isspace()
+                and is_key(after[1])
+                and after[1].astext().lower() == "bar"
+            ):
+                node[:] = [nodes.Text(f"{node.astext()} {after[1].astext()}")]
+                index += 2
+            dress(node, kit=kit)
+            combo.append(node)
+        elif (
+            combo
+            and isinstance(node, nodes.Text)
+            and node.astext() in SEPARATORS
+            and after
+            and is_key(after[0])
+        ):
+            mark = node.astext()
+            combo.append(nodes.inline(mark, mark, classes=["km-kbd-sep"]))
+        else:
+            close()
+            result.append(node)
+    close()
+    return result
+
+
+def keycaps(app: Sphinx, doctree: nodes.document) -> None:
+    """Dress `kbd` keys as keycaps.
+
+    Each key named in `KEYS` gets `km-key` and, but for the arrows, a
+    `km-key-*` class, which the stylesheet draws as it's printed on a
+    Mac keyboard. The text stays, so search and screen readers still see
+    "Cmd". "Space bar" is one key, a wide one without text.
+
+    Written with `kbd:windows` or `kbd:linux`, the keys in `PC_KEYS` get
+    `km-pc` and are drawn as a PC prints them. Any other key named by a
+    word, like Alt or Home, gets `km-key-text`, which sets it a little
+    smaller.
+
+    Keys joined by `-`, `+` or `^` are one combo, wrapped in `km-combo`
+    so it stays on one line when it fits. The separators are wrapped in
+    `km-kbd-sep`, which the stylesheet hides.
+
+    :param app: The Sphinx application instance.
+    :param doctree: The page, just read.
+    """
+    kit = bool(setting(app.config, "fa_kit"))
+    for parent in list(findall(doctree, nodes.Element)):
+        if any(is_key(node) for node in parent.children):
+            parent[:] = combos(parent.children, kit=kit)

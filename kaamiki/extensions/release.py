@@ -4,7 +4,7 @@ Release Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 September 2026
-Last updated on: 16 October 2026
+Last updated on: 25 October 2026
 
 A `release` directive that writes one entry of a changelog::
 
@@ -28,17 +28,21 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 from sphinx import addnodes
 from sphinx.locale import _
-from sphinx.util import docname_join
 
-from kaamiki.extensions.roles import glyph
+from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import articles
+from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import dated
 from kaamiki.extensions.utils import day
+from kaamiki.extensions.utils import document
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import glyph
+from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import icon
 from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import setting
-from kaamiki.extensions.utils.settings import TONES
+from kaamiki.extensions.utils.checks import fail
+from kaamiki.extensions.utils.dates import within
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -47,13 +51,11 @@ if t.TYPE_CHECKING:
 
 name: t.Final[str] = "release"
 template: t.Final[str] = "directives/release.html.jinja"
-BUTTON: t.Final[tuple[str, ...]] = (
-    "sd-sphinx-override",
-    "sd-btn",
-    "sd-text-wrap",
-    "sd-btn-light",
-)
+BUTTON: t.Final[tuple[str, ...]] = ("km-button", "km-button--light")
 NOTES: t.Final[str] = "km-release__notes"
+VERSION: t.Final[re.Pattern[str]] = re.compile(
+    r"[A-Za-z0-9][A-Za-z0-9._+-]{0,63}"
+)
 
 
 class node(nodes.Element):
@@ -75,6 +77,8 @@ class directive(rst.Directive):
           `2026-10-05`. It wins over the version.
         - `url`: The release elsewhere, a GitHub release say. It's
           linked next to the article.
+        - `name`: Another name to link to, beside the version.
+        - `class`: More classes for the release.
 
     The site's `release_version_fmt` says how a version spells its
     date, `%Y.%m.%d` by default. A version that doesn't and has
@@ -85,11 +89,12 @@ class directive(rst.Directive):
     required_arguments = 1
     final_argument_whitespace = False
     option_spec = {  # noqa: RUF012
-        "title": rst.directives.unchanged_required,
-        "article": rst.directives.unchanged_required,
-        "article-label": rst.directives.unchanged_required,
-        "date": rst.directives.unchanged_required,
-        "url": rst.directives.uri,
+        **NATIVE,
+        "title": lambda _: checks.text(_, 120),
+        "article": checks.text,
+        "article-label": lambda _: checks.text(_, 60),
+        "date": checks.text,
+        "url": checks.web,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -102,25 +107,57 @@ class directive(rst.Directive):
         :return: The section, followed by anything its title reported.
         """
         version = self.arguments.pop().strip()
+        env = self.state.document.settings.env
+        if not VERSION.fullmatch(version):
+            raise self.error(
+                f"release: expected a version like 2026.10.5, got {version!r}"
+            )
+        found = versions(env)
+        if version in found:
+            raise self.error(
+                f"release: version {version!r} is on the page "
+                f"{found[version]!r}"
+                " already"
+            )
+        found[version] = env.docname
+        target = re.sub(r"[^\w-]+", "-", version)
+        same = env.temp_data.setdefault("km_release_ids", {})
+        if same.setdefault(target, version) != version:
+            raise self.error(
+                f"release: versions {same[target]!r} and {version!r} make the"
+                f" same id {target!r}"
+            )
+        if "article-label" in self.options and "article" not in self.options:
+            raise self.error("release: :article-label: requires :article:")
         released = self.released(version)
         title, messages = self.heading(version)
-        section = nodes.section("", classes=["km-release"])
+        section = nodes.section(
+            "", classes=["km-release", *self.options.get("class", [])]
+        )
         section.source, section.line = self.state_machine.get_source_and_line(
             self.lineno
         )
-        section["ids"].append(re.sub(r"[^\w-]+", "-", version))
+        section["ids"].append(target)
         section["names"].append(nodes.fully_normalize_name(version))
-        self.state.document.note_explicit_target(section, section)
+        if "name" in self.options:
+            alias = nodes.fully_normalize_name(self.options["name"])
+            if alias in self.state.document.nameids:
+                raise self.error(f":name: {alias!r} is on the page already")
+            section["ids"].append(nodes.make_id(alias))
+            section["names"].append(alias)
         attributes: dict[str, t.Any] = {}
         attributes["version"] = version
         attributes["datetime"] = released.date().isoformat() if released else ""
         attributes["titled"] = "title" in self.options
         body = nodes.container(classes=["km-release__body"])
         self.state.nested_parse(self.content, self.content_offset, body)
+        if hollow(body.children):
+            raise self.error("release: expected some content, got none")
         more = self.more()
         if more is not None:
             body.insert(1, more)
         self.label(body)
+        self.state.document.note_explicit_target(section, section)
         section.extend([title, node("", **attributes), body])
         return [section, *messages]
 
@@ -138,10 +175,16 @@ class directive(rst.Directive):
             iso = day(self.options["date"].strip())
             if not iso:
                 raise self.error(
-                    f"release needs a date like 5 October 2026 or"
-                    f" 2026-10-05 in :date:; got {self.options['date']!r}"
+                    f"release: :date: expected a date like 5 October 2026 or"
+                    f" 2026-10-05, got {self.options['date']!r}"
                 )
-            return dt.fromisoformat(iso).astimezone()
+            made = dt.fromisoformat(iso).astimezone()
+            if not within(iso):
+                raise self.error(
+                    f"release: :date: {self.options['date']!r} is before 2000"
+                    " or more than a year ahead"
+                )
+            return made
         env = self.state.document.settings.env
         form = setting(env.config, "release_version_fmt")
         if not form:
@@ -210,19 +253,22 @@ class directive(rst.Directive):
                         for key, word in kinds.items()
                         if said in {key, word.lower()}
                     ),
-                    nodes.make_id(said),
+                    None,
                 )
+                if kind is None and said not in tones:
+                    raise self.error(
+                        f"release: expected a group of"
+                        f" {', '.join(kinds.values())}, or one in"
+                        f" release_kinds, got {term.astext()!r}"
+                    )
                 term["classes"].extend(
-                    ["km-release__kind", f"km-release__kind--{kind}"]
+                    [
+                        "km-release__kind",
+                        f"km-release__kind--{kind or nodes.make_id(said)}",
+                    ]
                 )
-                tone = tones.get(said)
-                if tone is not None and kind not in kinds:
-                    if tone not in TONES:
-                        raise self.error(
-                            f"release_kinds has {tone!r} for {said}; a colour"
-                            f" is one of {', '.join(TONES)}"
-                        )
-                    term["classes"].append(f"km-release__tone--{tone}")
+                if kind is None:
+                    term["classes"].append(f"km-release__tone--{tones[said]}")
 
     def more(self) -> nodes.paragraph | None:
         """Link the article and the release elsewhere, if there are
@@ -234,7 +280,7 @@ class directive(rst.Directive):
         urls: list[nodes.Node] = []
         if "article" in self.options:
             articles(env)[
-                docname_join(env.docname, self.options["article"])
+                document(self, self.options["article"], "article")
             ] = env.docname
             text = self.options.get("article-label") or str(
                 _("Read release notes")
@@ -288,8 +334,19 @@ def visit(self: HTMLTranslator, node: node) -> None:
     self.body.append(render(template, **attributes))
 
 
+def versions(env: BuildEnvironment) -> dict[str, str]:
+    """Hold the page each release version is written on.
+
+    :param env: The build environment.
+    :return: Every version a `release` names, with its page.
+    """
+    found: dict[str, str] = env.__dict__.setdefault("km_versions", {})
+    return found
+
+
 def purge(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
-    """Forget the articles a page's releases linked, as it's re-read.
+    """Forget the articles and versions a page's releases had, as it's
+    re-read.
 
     :param app: The Sphinx application instance.
     :param env: The build environment.
@@ -299,6 +356,9 @@ def purge(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
     found = articles(env)
     for article in [key for key, page in found.items() if page == docname]:
         del found[article]
+    seen = versions(env)
+    for version in [key for key, page in seen.items() if page == docname]:
+        del seen[version]
 
 
 def merge(
@@ -307,7 +367,7 @@ def merge(
     docnames: set[str],
     other: BuildEnvironment,
 ) -> None:
-    """Take in the articles a parallel reader found.
+    """Take in the articles and versions a parallel reader found.
 
     :param app: The Sphinx application instance.
     :param env: The build environment.
@@ -318,6 +378,16 @@ def merge(
     articles(env).update(
         {key: page for key, page in articles(other).items() if page in docnames}
     )
+    for version, page in versions(other).items():
+        if page not in docnames:
+            continue
+        first = versions(env).setdefault(version, page)
+        if first != page:
+            fail(
+                f"release: version {version!r} is on the pages {first!r} and"
+                f" {page!r}",
+                page,
+            )
 
 
 def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
@@ -343,9 +413,7 @@ def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
         if NOTES not in link["classes"]:
             continue
         badge = glyph("", "", classes=classes.split())
-        link.parent["classes"].append(
-            "km-button-row--end" if after else "km-button-row--start"
-        )
+        link.parent["classes"].append("km-button-row--left")
         if after:
             badge["classes"].append("km-icon-after")
             link += badge

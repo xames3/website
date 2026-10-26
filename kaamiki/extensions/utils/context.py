@@ -4,46 +4,53 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 25 October 2026
 
 The utilities that fill a page's context for the templates.
 """
 
+import difflib
 import typing as t
 from urllib.parse import quote
 
 from docutils import nodes
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.environment.adapters.toctree import global_toctree_for_doc
-from sphinx.errors import ConfigError
 from sphinx.locale import _
 from sphinx.util import docname_join
-from sphinx.util import logging
 
+from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils.checks import fail
+from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.directives import toggle
+from kaamiki.extensions.utils.doctree import findall
 from kaamiki.extensions.utils.doctree import standfirst
 from kaamiki.extensions.utils.links import REL
 from kaamiki.extensions.utils.links import opens_new_tab
+from kaamiki.extensions.utils.settings import CARDS
 from kaamiki.extensions.utils.settings import CREDIT
 from kaamiki.extensions.utils.settings import DEFAULTS
 from kaamiki.extensions.utils.settings import HEADER_LEAD_LENGTH
 from kaamiki.extensions.utils.settings import HEADER_NO_SUBTITLE_FIELD
 from kaamiki.extensions.utils.settings import HEADER_SUBTITLE_FIELD
 from kaamiki.extensions.utils.settings import ICONS
-from kaamiki.extensions.utils.settings import LOGO_SIZES
 from kaamiki.extensions.utils.settings import PAGE_SWITCHES
 from kaamiki.extensions.utils.settings import PROJECT
+from kaamiki.extensions.utils.settings import RENAMED
 from kaamiki.extensions.utils.settings import icon
+from kaamiki.extensions.utils.settings import icon_style
+from kaamiki.extensions.utils.settings import pro
 from kaamiki.extensions.utils.settings import setting
+from kaamiki.extensions.utils.settings import validate
 from kaamiki.extensions.utils.text import clip
 from kaamiki.extensions.utils.text import plain
 from kaamiki.extensions.utils.text import tidy
 
 if t.TYPE_CHECKING:
+    from collections.abc import Callable
+
     from sphinx.application import Sphinx
     from sphinx.environment import BuildEnvironment
-
-logger = logging.getLogger(__name__)
 
 
 def context_defaults(app: Sphinx) -> None:
@@ -60,28 +67,25 @@ def context_defaults(app: Sphinx) -> None:
 
     :param app: The Sphinx application instance.
     """
+    validate(app)
     config = app.config
     context: dict[str, t.Any] = config.html_context
     for key in DEFAULTS:
         context[f"km_{key}"] = setting(config, key)
-    if unknown := context["km_fa_icons"].keys() - ICONS.keys():
-        raise KeyError(
-            f"fa_icons has {', '.join(sorted(unknown))};"
-            f" it takes {', '.join(ICONS)}"
-        )
-    context["km_fa_icons"] = {**ICONS, **context["km_fa_icons"]}
+    icons: dict[str, str] = context["km_fa_icons"]
+    if not setting(config, "fa_kit"):
+        icons = {key: _ for key, _ in icons.items() if not pro(_)}
+    context["km_fa_icons"] = {
+        **ICONS,
+        **{key: icon(_) for key, _ in icons.items()},
+    }
+    context["km_fa_style"] = icon_style(config)
     project = {**PROJECT, "author": config.author, **context["km_project"]}
     context["km_project"] = project
     if context["km_show_feedback"] is None:
         context["km_show_feedback"] = bool(
             project["email"] or context["km_feedback"].get("url")
         )
-    if context["km_show_more_after"] < 1:
-        raise ConfigError("show_more_after takes a number above zero")
-    size = context["km_logo_size"]
-    low, high = LOGO_SIZES
-    if size is not None and not low <= size <= high:
-        raise ConfigError(f"logo_size takes {low} to {high}, got {size}")
     depth = context["km_toctree_maxdepth"]
     context["km_toctree_args"] = {
         "includehidden": bool(context["km_toctree_includehidden"]),
@@ -98,8 +102,135 @@ def context_defaults(app: Sphinx) -> None:
     context["km_credit"] = CREDIT
     context["km_credit_new_tab"] = opens_new_tab(CREDIT, config)
     context["km_rel"] = REL
+    # NOTE(xames3): Kaamiki has no page for the general index. The builder
+    # read the setting before this runs, so it is told as well.
+    config.html_use_index = False
+    if isinstance(app.builder, StandaloneHTMLBuilder):
+        app.builder.use_index = False
     if "html_show_sphinx" not in config._raw_config | config._overrides:
         context.setdefault("show_sphinx", False)
+
+
+SWITCHES: t.Final[frozenset[str]] = frozenset(
+    {
+        "km-fb-split",
+        "km-header-no-subtitle",
+        *("km-" + _.replace("_", "-") for _ in PAGE_SWITCHES),
+    }
+)
+ROBOTS: t.Final[frozenset[str]] = frozenset(
+    {
+        "all",
+        "index",
+        "follow",
+        "noarchive",
+        "nofollow",
+        "noindex",
+        "none",
+        "nosnippet",
+    }
+)
+FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
+    "km-fb-button": checks.text,
+    "km-fb-description": checks.text,
+    "km-fb-icon": checks.icon,
+    "km-fb-subject": checks.text,
+    "km-fb-title": checks.text,
+    "km-fb-type": checks.word("mail", "link"),
+    "km-fb-url": checks.link,
+    "km-header-subtitle": lambda _: checks.text(_, 120),
+    "km-pg-card": checks.word(*CARDS),
+    "km-pg-description": lambda _: checks.text(_, 300),
+    "km-pg-image": checks.link,
+    "km-pg-image-alt": checks.text,
+    "km-pg-locale": checks.pattern(
+        r"[a-z]{2,3}_[A-Z]{2}", "a locale like en_GB"
+    ),
+    "km-pg-next": checks.text,
+    "km-pg-prev": checks.text,
+    "km-pg-robots": lambda _: [
+        checks.word(*ROBOTS)(each.strip()) for each in _.split(",")
+    ],
+    "km-pg-title": lambda _: checks.text(_, 120),
+    "km-pg-type": checks.pattern(
+        r"[a-z]+(?:\.[a-z_]+)?", "an Open Graph type like article"
+    ),
+}
+
+
+def field_lists(app: Sphinx, doctree: nodes.document) -> None:
+    """Stop for a `:km-*:` field that is written twice or isn't one of
+    the fields a page opens with.
+
+    :param app: The Sphinx application instance.
+    :param doctree: The page, just read.
+    :raises KaamikiError: For the first such field.
+    """
+    del app
+    info = next(findall(doctree, nodes.docinfo), None)
+    seen: set[str] = set()
+    for field in findall(doctree, nodes.field):
+        name = field[0].astext()
+        if not name.startswith("km-"):
+            continue
+        if info is None or field.parent is not info:
+            fail(
+                f"field :{name}: belongs above the page title, with the "
+                "page's other fields",
+                location(field),
+            )
+        if name in seen:
+            fail(f"field :{name}: is written twice", location(field))
+        seen.add(name)
+
+
+def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
+    """Check the `:km-*:` fields a page opens with.
+
+    :param app: The Sphinx application instance.
+    :param doctree: The page, just read.
+    :raises KaamikiError: For a `km-` field Kaamiki doesn't read, a
+        value it doesn't take or fields that don't go together.
+    """
+    docname = app.env.docname
+    found = app.env.metadata.get(docname, {})
+    where = str(app.env.doc2path(docname))
+    for key, value in found.items():
+        if not key.startswith("km-") or key == "km-pg-background":
+            continue
+        try:
+            if key in SWITCHES:
+                toggle(value)
+            elif key in FIELDS:
+                FIELDS[key](value)
+            elif key.removeprefix("km-") in {
+                _.replace("_", "-") for _ in RENAMED
+            }:
+                fail(f"field :{key}: was renamed :km-toctree-in-header:", where)
+            else:
+                known = sorted([*FIELDS, *SWITCHES])
+                near = difflib.get_close_matches(key, known, n=1, cutoff=0.7)
+                fail(
+                    f"field :{key}: is not one Kaamiki reads"
+                    + (f", did you mean :{near[0]}:" if near else ""),
+                    where,
+                )
+        except ValueError as error:
+            fail(f"field :{key}: {error}", where)
+    kind = found.get("km-fb-type")
+    if ("km-fb-url" in found) != (kind == "link"):
+        fail(
+            "field :km-fb-url: requires :km-fb-type: link and the reverse",
+            where,
+        )
+    for key in ("km-pg-prev", "km-pg-next"):
+        if key in found:
+            target = docname_join(docname, found[key].strip())
+            if target == docname or target not in app.env.found_docs:
+                fail(
+                    f"field :{key}: expected another page, got {found[key]!r}",
+                    where,
+                )
 
 
 def feedback(
@@ -157,7 +288,9 @@ def feedback(
         or site.get("button")
         or str(_("Submit")),
         "icon": icon(
-            meta.get("km-fb-icon") or site.get("icon"), icons["feedback"]
+            meta.get("km-fb-icon") or site.get("icon"),
+            icons["feedback"],
+            kit=bool(setting(app.config, "fa_kit")),
         ),
         "url": url,
     }
@@ -341,18 +474,6 @@ def neighbours(
         target = (meta.get(f"km-pg-{key}") or "").strip()
         if target:
             docname = docname_join(pagename, target)
-            if docname not in app.env.found_docs:
-                logger.warning(
-                    ":km-pg-%s: names %r, which isn't a document. As with"
-                    " :doc:, a name not starting with / is relative to this"
-                    " page",
-                    key,
-                    target,
-                    location=pagename,
-                    type="kaamiki",
-                    subtype="pages",
-                )
-                continue
         elif key == "prev" and not context.get(key) and pagename in released:
             docname = released[pagename]
         else:

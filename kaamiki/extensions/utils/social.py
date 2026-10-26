@@ -46,10 +46,6 @@ def generated(pagename: str) -> tuple[str, str] | None:
                 " may never have been here."
             ),
         ),
-        "genindex": (
-            _("Index"),
-            _("Every term indexed on this site, from A to Z."),
-        ),
         "search": (_("Search Results"), _("Search every page on this site.")),
     }
     found = pages.get(pagename)
