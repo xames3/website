@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kaamiki VERSION\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-10-26 12:32-0500\n"
+"POT-Creation-Date: 2026-10-27 18:04-0500\n"
 "PO-Revision-Date: 2026-10-05 18:15-0500\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -121,6 +121,43 @@ msgstr ""
 msgid "JavaScript is off, so some parts of this site may not work."
 msgstr ""
 
+msgid "Primary navigation"
+msgstr ""
+
+msgid "Toggle navigation menu"
+msgstr ""
+
+msgid "Open navigation menu"
+msgstr ""
+
+msgid "External links"
+msgstr ""
+
+#, python-format
+msgid "<a href=\"%(path)s\">Copyright</a> %(copyright)s"
+msgstr ""
+
+#, python-format
+msgid "Last updated on %(updated_on)s."
+msgstr ""
+
+msgid ""
+"Built with <a href=\"https://www.sphinx-doc.org\" "
+"rel=\"noreferrer\">Sphinx</a>."
+msgstr ""
+
+#, python-format
+msgid "Styled with the %(km_theme)s theme."
+msgstr ""
+
+#, python-format
+msgid "Content licensed under %(km_licence)s."
+msgstr ""
+
+#, python-format
+msgid "Last updated on %(updated_on)s"
+msgstr ""
+
 msgid "Please activate JavaScript to enable searching the documentation."
 msgstr ""
 
@@ -128,10 +165,6 @@ msgid "Breadcrumbs"
 msgstr ""
 
 msgid "Home"
-msgstr ""
-
-#, python-format
-msgid "Last updated on %(updated_on)s"
 msgstr ""
 
 msgid "Pagination"
@@ -181,39 +214,6 @@ msgid "Your browser doesn't support the video tag."
 msgstr ""
 
 msgid "Play video"
-msgstr ""
-
-#, python-format
-msgid "<a href=\"%(path)s\">Copyright</a> %(copyright)s"
-msgstr ""
-
-#, python-format
-msgid "Last updated on %(updated_on)s."
-msgstr ""
-
-msgid ""
-"Built with <a href=\"https://www.sphinx-doc.org\" "
-"rel=\"noreferrer\">Sphinx</a>."
-msgstr ""
-
-#, python-format
-msgid "Styled with the %(km_theme)s theme."
-msgstr ""
-
-#, python-format
-msgid "Content licensed under %(km_licence)s."
-msgstr ""
-
-msgid "Primary navigation"
-msgstr ""
-
-msgid "Toggle navigation menu"
-msgstr ""
-
-msgid "Open navigation menu"
-msgstr ""
-
-msgid "External links"
 msgstr ""
 
 msgid "Close menu"

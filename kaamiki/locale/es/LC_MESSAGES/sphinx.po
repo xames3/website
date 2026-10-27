@@ -1,0 +1,230 @@
+# Spanish translations for kaamiki.
+# Copyright (C) 2026 Akshay Mestry
+# This file is distributed under the same license as the kaamiki project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: kaamiki VERSION\n"
+"Report-Msgid-Bugs-To: xa@mes3.dev\n"
+"POT-Creation-Date: 2026-10-27 18:04-0500\n"
+"PO-Revision-Date: 2026-10-27 17:56-0500\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Added"
+msgstr "Añadido"
+
+msgid "Changed"
+msgstr "Cambiado"
+
+msgid "Deprecated"
+msgstr "Obsoleto"
+
+msgid "Fixed"
+msgstr "Corregido"
+
+msgid "Removed"
+msgstr "Eliminado"
+
+msgid "Read release notes"
+msgstr "Leer las notas de la versión"
+
+msgid "View release"
+msgstr "Ver versión"
+
+msgid "Copy the snippet"
+msgstr "Copiar el fragmento"
+
+msgid "Nothing printed yet"
+msgstr "Todavía no se ha impreso nada"
+
+msgid "Broke"
+msgstr "Falló"
+
+msgid "Worked"
+msgstr "Funcionó"
+
+#, python-format
+msgid "Feedback about %s"
+msgstr "Comentarios sobre %s"
+
+msgid "Feedback"
+msgstr "Comentarios"
+
+msgid "Let me know how this can be improved."
+msgstr "Cuéntame cómo se puede mejorar."
+
+msgid "Submit"
+msgstr "Enviar"
+
+#, python-format
+msgid "%d %B %Y"
+msgstr "%d de %B de %Y"
+
+msgid "Page not found"
+msgstr "Página no encontrada"
+
+msgid ""
+"There's nothing at this address. It may've moved or it may never have "
+"been here."
+msgstr ""
+"No hay nada en esta dirección. Puede que se haya movido o que nunca haya "
+"estado aquí."
+
+msgid "Search Results"
+msgstr "Resultados de la búsqueda"
+
+msgid "Search every page on this site."
+msgstr "Busca en todas las páginas de este sitio."
+
+msgid "Copy link"
+msgstr "Copiar enlace"
+
+msgid "Take me home"
+msgstr "Llévame al inicio"
+
+msgid "Copied!"
+msgstr "¡Copiado!"
+
+msgid "Copy failed"
+msgstr "No se pudo copiar"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Show more"
+msgstr "Mostrar más"
+
+msgid "Show less"
+msgstr "Mostrar menos"
+
+msgid "returns:"
+msgstr "devuelve:"
+
+msgid "error:"
+msgstr "error:"
+
+msgid "Setup"
+msgstr "Preparación"
+
+msgid "Search"
+msgstr "Búsqueda"
+
+msgid "Skip to content"
+msgstr "Saltar al contenido"
+
+msgid "JavaScript is off, so some parts of this site may not work."
+msgstr ""
+"JavaScript está desactivado, así que algunas partes de este sitio pueden "
+"no funcionar."
+
+msgid "Primary navigation"
+msgstr "Navegación principal"
+
+msgid "Toggle navigation menu"
+msgstr "Alternar el menú de navegación"
+
+msgid "Open navigation menu"
+msgstr "Abrir el menú de navegación"
+
+msgid "External links"
+msgstr "Enlaces externos"
+
+#, python-format
+msgid "<a href=\"%(path)s\">Copyright</a> %(copyright)s"
+msgstr "<a href=\"%(path)s\">Copyright</a> %(copyright)s"
+
+#, python-format
+msgid "Last updated on %(updated_on)s."
+msgstr "Última actualización el %(updated_on)s."
+
+msgid ""
+"Built with <a href=\"https://www.sphinx-doc.org\" "
+"rel=\"noreferrer\">Sphinx</a>."
+msgstr ""
+"Creado con <a href=\"https://www.sphinx-doc.org\" "
+"rel=\"noreferrer\">Sphinx</a>."
+
+#, python-format
+msgid "Styled with the %(km_theme)s theme."
+msgstr "Diseñado con el tema %(km_theme)s."
+
+#, python-format
+msgid "Content licensed under %(km_licence)s."
+msgstr "Contenido bajo la licencia %(km_licence)s."
+
+#, python-format
+msgid "Last updated on %(updated_on)s"
+msgstr "Última actualización el %(updated_on)s"
+
+msgid "Please activate JavaScript to enable searching the documentation."
+msgstr "Activa JavaScript para poder buscar en la documentación."
+
+msgid "Breadcrumbs"
+msgstr "Ruta de navegación"
+
+msgid "Home"
+msgstr "Inicio"
+
+msgid "Pagination"
+msgstr "Paginación"
+
+msgid "Previous page"
+msgstr "Página anterior"
+
+msgid "Next page"
+msgstr "Página siguiente"
+
+msgid "Back to top"
+msgstr "Volver arriba"
+
+msgid "Submit search"
+msgstr "Enviar búsqueda"
+
+#, python-format
+msgid "Check out %(name)s"
+msgstr "Echa un vistazo a %(name)s"
+
+#, python-format
+msgid "%(num)d min read"
+msgid_plural "%(num)d mins read"
+msgstr[0] "%(num)d min de lectura"
+msgstr[1] "%(num)d min de lectura"
+
+msgid "Copy article URL to clipboard"
+msgstr "Copiar la URL del artículo al portapapeles"
+
+msgid "Show"
+msgstr "Mostrar"
+
+msgid "Stars"
+msgstr "Estrellas"
+
+msgid "Forks"
+msgstr "Bifurcaciones"
+
+msgid "YouTube video"
+msgstr "Video de YouTube"
+
+msgid "Watch on YouTube"
+msgstr "Ver en YouTube"
+
+msgid "Your browser doesn't support the video tag."
+msgstr "Tu navegador no admite la etiqueta de video."
+
+msgid "Play video"
+msgstr "Reproducir video"
+
+msgid "Close menu"
+msgstr "Cerrar menú"
+
+msgid "Table of contents"
+msgstr "Tabla de contenido"
+
