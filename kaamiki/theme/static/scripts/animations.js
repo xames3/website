@@ -195,13 +195,16 @@
         }
 
         let expanded = false;
+        let whole = false;
+        let gliding = 0;
 
         const tail = () => button.getBoundingClientRect().height + showMoreDock();
 
         const fit = () => {
             const top = window.scrollY + content.getBoundingClientRect().top;
-            const room = Math.max(CLAMP_MIN_PX, stableHeight() - top - tail());
-            page.style.setProperty('--km-show-more-clamp', `${Math.round(room)}px`);
+            const room = Math.round(Math.max(CLAMP_MIN_PX, stableHeight() - top - tail()));
+            page.style.setProperty('--km-show-more-clamp', `${room}px`);
+            return { top, room };
         };
 
         let folded = true;
@@ -212,31 +215,46 @@
             document.dispatchEvent(new Event('km:fold'));
         };
 
-        const motion = foldMotion(page, content, 'km-page--clamped', 'km-page--clamping', fold);
-
         const measure = () => {
             content.style.maxHeight = '';
-            page.classList.add('km-page--clamped');
-            const collapsed = content.getBoundingClientRect().height;
             page.classList.remove('km-page--clamped');
             const full = content.getBoundingClientRect().height;
-            return { collapsed, full };
+            page.classList.add('km-page--clamped');
+            return full;
         };
 
-        fit();
-        const { collapsed: first, full: whole } = measure();
-        motion.settle(false);
-        if (whole - first < CLAMP_SLACK_PX) {
-            page.classList.remove('km-page--clamped');
-            shell.remove();
-            return;
-        }
+        const judge = (first = false) => {
+            if (gliding || page.classList.contains('km-page--clamping')) return;
+            shell.hidden = false;
+            const { top, room } = fit();
+            const full = page.classList.contains('km-page--clamped')
+                ? measure()
+                : content.getBoundingClientRect().height;
+            const more = full - room >= CLAMP_SLACK_PX;
+            const reading = window.scrollY + viewportHeight() > top + room + tail() + 1;
+            if (more && whole && !first && !expanded && reading) {
+                shell.hidden = true;
+                return;
+            }
+            whole = !more;
+            shell.hidden = whole;
+            fold(more && !expanded);
+        };
 
-        const { stir, rest } = idleShell(shell, button, 'km-page__more--idle', () => expanded);
+        const refit = rafThrottle(() => judge());
+
+        const motion = foldMotion(page, content, 'km-page--clamped', 'km-page--clamping', (next) => {
+            fold(next);
+            refit();
+        });
+
+        judge(true);
+
+        const { stir, rest } = idleShell(shell, button, 'km-page__more--idle', () => expanded && !whole);
         let turn = 0;
 
         const toggle = (next, animate = true) => {
-            if (next === expanded) return;
+            if (next === expanded || whole) return;
             expanded = next;
             try { history.replaceState({ ...history.state, kmExpanded: next }, ''); } catch {}
             button.setAttribute('aria-expanded', next ? 'true' : 'false');
@@ -252,7 +270,8 @@
             const current = ++turn;
             motion.stop();
             if (next) {
-                const { full } = measure();
+                const full = measure();
+                page.classList.remove('km-page--clamped');
                 if (!animate || prefersReducedMotion()) {
                     motion.settle(true);
                     return;
@@ -268,7 +287,9 @@
                 motion.settle(false);
                 return;
             }
+            gliding += 1;
             keepInView(content, collapsed, tail()).then(() => {
+                gliding -= 1;
                 if (current !== turn) return;
                 const shown = viewportHeight() - content.getBoundingClientRect().top;
                 motion.clamp(false, Math.min(start, Math.max(collapsed, shown)), collapsed);
@@ -284,21 +305,21 @@
         button.addEventListener('click', () => toggle(!expanded));
 
         document.addEventListener('click', (event) => {
-            if (expanded) return;
+            if (expanded || whole) return;
             const link = event.target.closest?.('a[href]');
             if (!link || !holds(link.getAttribute('href') || '')) return;
             toggle(true, false);
         }, true);
 
         window.addEventListener('hashchange', () => {
-            if (expanded || !holds(location.hash)) return;
+            if (expanded || whole || !holds(location.hash)) return;
             toggle(true, false);
             settleHash();
         });
 
         const buried = (node) => {
             const element = node?.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement;
-            if (expanded || !element || !content.contains(element)) return false;
+            if (expanded || whole || !element || !content.contains(element)) return false;
             return element.getBoundingClientRect().bottom > shell.getBoundingClientRect().top;
         };
 
@@ -313,11 +334,15 @@
             }
         });
 
-        window.addEventListener('resize', rafThrottle(fit), { passive: true });
-        new ResizeObserver(rafThrottle(fit)).observe(document.body);
-        document.fonts.ready.then(fit);
+        window.addEventListener('resize', refit, { passive: true });
+        window.addEventListener('load', refit, { once: true });
+        new ResizeObserver(refit).observe(document.body);
+        document.fonts.ready.then(refit);
+        document.fonts.addEventListener?.('loadingdone', refit);
 
         if (holds(location.hash) || history.state?.kmExpanded) toggle(true, false);
+        root.classList.add('km-fold-ready');
+        root.classList.remove('km-fold-failed');
     }
 
     let glideStop = null;

@@ -4,7 +4,7 @@ Reading Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 26 October 2026
 
 The helpers that work out how long a page takes to read.
 """
@@ -14,6 +14,7 @@ from math import ceil
 
 from docutils import nodes
 
+from kaamiki.extensions.utils.directives import toggle
 from kaamiki.extensions.utils.doctree import buried
 from kaamiki.extensions.utils.doctree import findall
 from kaamiki.extensions.utils.settings import setting
@@ -63,6 +64,10 @@ def reading_length(
 ) -> None:
     """Decide whether a page is long enough to fold up.
 
+    A page that takes less than `show_more_after` minutes to read never
+    folds, whatever `show_more` or the page's `:km-show-more:` says. Those
+    only switch the fold off, or back on, for a page that's long enough.
+
     :param app: The Sphinx application instance.
     :param pagename: The name of the page being rendered.
     :param templatename: The template rendering it.
@@ -73,6 +78,11 @@ def reading_length(
     del pagename, templatename
     config = app.config
     after = int(config.html_context["km_show_more_after"])
-    context["km_show_more"] = bool(
-        setting(config, "show_more") and reading_time(doctree, config) >= after
+    meta: dict[str, str] = context.get("meta") or {}
+    on = (
+        toggle(meta["km-show-more"])
+        if "km-show-more" in meta
+        else setting(config, "show_more")
     )
+    long_enough = reading_time(doctree, config) >= after
+    context["km_show_more"] = bool(on and long_enough)

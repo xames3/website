@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 25 October 2026
+Last updated on: 26 October 2026
 
 The utilities that fill a page's context for the templates.
 """
@@ -315,6 +315,8 @@ def page_switches(
     del app, pagename, templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
     for key in PAGE_SWITCHES:
+        if key == "show_more":
+            continue
         field = "km-" + key.replace("_", "-")
         if field not in meta:
             continue

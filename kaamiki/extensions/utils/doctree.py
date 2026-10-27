@@ -4,7 +4,7 @@ Doctree Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 25 October 2026
+Last updated on: 26 October 2026
 
 The helpers that walk a doctree and pick prose out of it.
 """
@@ -17,6 +17,7 @@ from pygments.lexers import get_lexer_for_filename
 from pygments.util import ClassNotFound
 from sphinx.builders.gettext import MessageCatalogBuilder
 
+from kaamiki.extensions.utils.settings import FILE_ICON
 from kaamiki.extensions.utils.settings import free
 from kaamiki.extensions.utils.settings import language_icon
 from kaamiki.extensions.utils.settings import setting
@@ -113,30 +114,31 @@ def badged(
     *,
     kit: bool = False,
 ) -> str:
-    """Pick the icon a code block's caption wears for its language.
+    """Pick the icon a code block's caption wears.
 
-    A diff has no language of its own, so its caption's file name stands
-    in for it.
+    The language has the first say. A language with no icon of its own,
+    like a diff's, hands over to the caption's file name and a name no
+    icon knows gets a plain file.
 
     :param caption: The caption.
     :param language: The language of the code under it.
     :param kit: Whether the site has a Font Awesome kit.
-    :return: The icon's classes or an empty string when the language
-        has none or the caption opens with an icon of its own.
+    :return: The icon's classes or an empty string when the caption
+        opens with an icon of its own.
     """
     first = caption.children[0] if caption.children else None
     if isinstance(first, glyph):
         return ""
-    if (language or "").strip().lower() in {"diff", "udiff"}:
-        try:
-            lexer = get_lexer_for_filename(caption.astext().strip())
-        except ClassNotFound:
-            return ""
-        for alias in lexer.aliases:
-            if icon := language_icon(alias, kit=kit):
-                return icon
-        return ""
-    return language_icon(language, kit=kit)
+    if icon := language_icon(language, kit=kit):
+        return icon
+    try:
+        lexer = get_lexer_for_filename(caption.astext().strip())
+    except ClassNotFound:
+        return FILE_ICON
+    for alias in lexer.aliases:
+        if icon := language_icon(alias, kit=kit):
+            return icon
+    return FILE_ICON
 
 
 def buried(paragraph: nodes.Element) -> bool:

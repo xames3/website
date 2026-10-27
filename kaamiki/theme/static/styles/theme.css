@@ -56,7 +56,7 @@
     --km-colour-admonition-warning-fg: 34.59 100% 50%;
     --km-colour-admonition-seealso-bg: 213.21 94% 15%;
     --km-colour-admonition-seealso-fg: 208.46 100% 64%;
-    --km-show-more-clamp: max(20rem, calc(100dvh - 16rem));
+    --km-show-more-clamp: max(20rem, calc(100dvh - 18rem));
     --km-show-more-fade: 11rem;
     --km-show-more-dock: 2rem;
     --km-ease-swift: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -1163,9 +1163,14 @@ html.km-page-loading :is(.km-header,
         max-height: var(--km-show-more-clamp);
     }
 
+    /* NOTE(xames3): The padding stops the last child's bottom margin from
+     * collapsing through the clipped box, which WebKit lets it do, so the
+     * button would sit that much below the content instead of 2rem above
+     * the bottom of the window. */
     .km-page--clamped>.km-page__fold>.km-page__content,
     .km-page--clamping>.km-page__fold>.km-page__content {
         overflow-y: clip;
+        padding-bottom: 1px;
     }
 
     .km-page--clamping>.km-page__fold>.km-page__content {
@@ -1173,8 +1178,9 @@ html.km-page-loading :is(.km-header,
     }
 
     .km-page__more {
-        position: relative;
-        z-index: 1;
+        position: sticky;
+        bottom: var(--km-show-more-dock);
+        z-index: 5;
         display: flex;
         justify-content: center;
         margin-top: 2rem;
@@ -1208,11 +1214,20 @@ html.km-page-loading :is(.km-header,
         opacity: 1;
     }
 
-    .km-page:not(.km-page--clamped)>.km-page__fold>.km-page__more,
-    .km-page--clamping>.km-page__fold>.km-page__more {
-        position: sticky;
-        bottom: var(--km-show-more-dock);
-        z-index: 5;
+    .km-page__more[hidden] {
+        display: none;
+    }
+
+    /* NOTE(xames3): The clamp only lifts when the page's script takes charge
+     * of it. If that never happens the page is shown in full, without the
+     * button, so it can still be read. */
+    html.km-fold-failed .km-page--clamped>.km-page__fold>.km-page__content {
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    html.km-fold-failed .km-page__more {
+        display: none;
     }
 
     .km-accordion--clamped>.km-accordion__body>.km-accordion__fold {
@@ -2705,16 +2720,19 @@ li .highlight pre {
     background-color: hsl(var(--km-colour-grey-11));
     border-radius: var(--km-radius-normal) var(--km-radius-normal) 0 0;
     color: hsl(var(--km-colour-subtitle));
-    font-size: var(--km-font-size-md);
+    font-family: var(--km-font-mono);
+    font-size: var(--km-font-size-sm);
     font-weight: var(--km-weight-body);
-    letter-spacing: var(--km-tracking-small);
-    line-height: 1.25rem;
+    letter-spacing: normal;
+    line-height: var(--km-code-line-height);
 
     &>span>a {
         color: hsl(var(--km-colour-subtitle)) !important;
-        font-family: var(--km-font-mono);
+    }
+
+    & strong {
+        font-weight: var(--km-weight-h2);
         letter-spacing: normal;
-        font-size: small;
     }
 
     & .caption-text {

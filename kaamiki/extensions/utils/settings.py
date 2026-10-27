@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 25 October 2026
+Last updated on: 26 October 2026
 
 Kaamiki's settings, their defaults and the helpers that read them.
 """
@@ -146,9 +146,27 @@ LANGUAGE_ICONS: t.Final[tuple[tuple[str, frozenset[str]], ...]] = (
     (
         "fa-solid fa-brackets-curly",
         frozenset(
-            {"c", "c++", "cpp", "cuda", "h", "hpp", "objc", "objective-c"}
+            {
+                "c",
+                "c++",
+                "cpp",
+                "cuda",
+                "h",
+                "hpp",
+                "json",
+                "json-object",
+                "objc",
+                "objective-c",
+            }
         ),
     ),
+    ("fa-regular fa-file-lines", frozenset({"rest", "restructuredtext", "rst", "text", "txt"})),
+    ("fa-solid fa-file-xml", frozenset({"xml"})),
+    (
+        "fa-solid fa-list",
+        frozenset({"cfg", "dosini", "ini", "toml", "yaml", "yml"}),
+    ),
+    ("fa-brands fa-android", frozenset({"kotlin"})),
 )
 PRO_STYLES: t.Final[tuple[str, ...]] = (
     "fa-light",
@@ -160,7 +178,8 @@ PRO_STYLES: t.Final[tuple[str, ...]] = (
 BLANK_ICONS: t.Final[tuple[str, ...]] = ("release_notes", "title_badge")
 PRO_ICONS: t.Final[dict[str, str]] = {
     "fa-light fa-globe": "fa-solid fa-globe",
-    "fa-solid fa-brackets-curly": "fa-solid fa-file-code",
+    "fa-solid fa-brackets-curly": "fa-solid fa-code",
+    "fa-solid fa-file-xml": "fa-solid fa-code",
 }
 FA_FREE: t.Final[str] = (
     "https://ka-f.fontawesome.com/releases/v7.3.1/css/free.min.css"
