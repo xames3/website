@@ -1,13 +1,16 @@
-# Dependabot configuration for pip and GitHub Actions.
 version: 2
 updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "github-actions"
     directories:
       - "/"
       - "/.github/actions/setup"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
