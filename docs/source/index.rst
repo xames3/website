@@ -1,19 +1,19 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February 2025
-.. Last updated on: 23 October 2026
+.. Last updated on: 02 November 2026
 
 :orphan:
-:km-pg-title: Akshay Mestry
-:km-pg-description: Stories from what I build, explainers that make hard
-    things click and notes from the classroom.
-:km-pg-type: website
-:km-pg-image: https://avatars.githubusercontent.com/u/90549089?v=4
-:km-fb-title: Say hello, or recommend something to watch next.
-:km-fb-description: Got a question about teaching or a great film
-    I've somehow missed? Write to me.
-:km-fb-button: Say hello
-:km-fb-icon: fa-paper-plane
-:km-fb-split:
+:km-page-title: Akshay Mestry
+:km-page-description: Stories from what I build, explainers and notes from
+    the classroom.
+:km-page-type: website
+:km-page-image: https://avatars.githubusercontent.com/u/90549089?v=4
+:km-feedback-title: So, what do you think?
+:km-feedback-description: Got a question about teaching or a great film
+    I've somehow missed? Let me know.
+:km-feedback-button: Say hello
+:km-feedback-icon: fa-solid fa-paper-plane
+:km-feedback-split:
 
 .. _home-page:
 
@@ -21,16 +21,16 @@
 Akshay Mestry
 ===============================================================================
 
-.. rst-class:: km-lead
+.. rst-class:: km-text-lead
 
     An educator, a software engineer and a storyteller.
 
-.. author:: @xames3
-    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :url: https://github.com/xames3
-    :background: https://i.imgur.com/JOBRcgT.jpg
-        https://i.imgur.com/hUhxigb.jpeg
-        https://i.imgur.com/gcGHqxi.jpg
+.. byline:: @xames3
+    :avatar: https://i.imgur.com/hUhxigb.jpeg
+    :target: https://github.com/xames3
+    :backdrop: https://i.imgur.com/JOBRcgT.jpg,
+        https://i.imgur.com/hUhxigb.jpeg,
+        https://i.imgur.com/gcGHqxi.jpg,
         https://i.imgur.com/weM4qDW.jpg
 
 .. embed:: ./assets/html/greetings.html
@@ -39,15 +39,14 @@ Akshay Mestry
     :duration: 700
     :stagger: 45
 
-I'm Akshay (/uh-k-ʃ-æ/), an educator, engineer, avid cook and currently an
+I'm Akshay (/uh-k-sh-ay/), an educator, engineer, avid cook and currently an
 Assistant Professor at `National Louis University`_. Before getting into
 academia, I worked at consulting firms, corporate product companies and
-startups. This cheeky corner of the internet is where I dump all that:
-the wins, the mistakes and everything messy in between... one story at a
-time.
+startups. This cheeky corner of the internet is where I dump all that: the
+wins and the mistakes, one story at a time.
 
-.. rubric:: :fa-icon:regular:`compass-drafting` Build and share
-    :class: km-text-pre-title
+.. rubric:: :fa-icon:`compass-drafting` Build and share
+    :class: km-text-pre-section
 
 .. _open-source:
 
@@ -55,35 +54,34 @@ time.
 Love for open source.
 -------------------------------------------------------------------------------
 
-I :fa-icon:solid:`heart km-margin-inline km-red` Open source!
+I :fa-icon:solid:`heart km-tone--red` Open source!
 
 I fell into it by accident and I bloody loved it. It was and still is a
 personal reminder to share my struggles and achievements with everyone and
-invite collaboration across various disciplines. That naive belief in sharing
-took me into some brilliant research labs and projects, working under the
-guidance of some super-duper talented people in the industry.
+invite collaboration. That naive belief in sharing took me into some brilliant
+research labs and projects, working under the guidance of some super-duper
+talented people in the industry.
 
 .. embed:: ./assets/html/contributed.html
     :source: _static/contributed.json
     :data-speed: slow
     :data-direction: left
 
-In those labs I worked on all sorts of projects, from performant machine
-learning models to optimising their user-facing libraries. These projects and
-sometimes our clients (big and/or small), showed me exactly where my technical
-depth ended and my knowledge gaps began.
+In those labs I worked on machine learning models and optimised their
+user-facing libraries. These projects and sometimes our clients (big and/or
+small) showed me exactly where my technical depth ended.
 
 .. columns:: 2
     :flush:
 
-    .. rows::
+    .. column::
 
         .. repository:: xames3/slowtorch
 
             A subset of core PyTorch features re-built in pure Python...
             albeit, slowly.
 
-    .. rows::
+    .. column::
 
         .. repository:: xames3/xsnumpy
 
@@ -101,12 +99,12 @@ actually work under the hood.
     :flush:
     :stack-align: center
 
-    .. rows::
+    .. column::
         :span: 2
 
         .. rubric:: Not on social media, but let's connect.
 
-    .. rows::
+    .. column::
         :span: auto
         :class: align-right
 
@@ -115,7 +113,7 @@ actually work under the hood.
 
             Send an email
 
-    .. rows::
+    .. column::
         :span: auto
 
         .. button:: https://linkedin.com/in/xames3
@@ -124,7 +122,7 @@ actually work under the hood.
             LinkedIn
 
 .. rubric:: :fa-icon:regular:`comments` Keep it stupid simple
-    :class: km-text-pre-title
+    :class: km-text-pre-section
 
 .. _teaching-philosophy:
 
@@ -132,18 +130,17 @@ actually work under the hood.
 My teaching philosophy.
 -------------------------------------------------------------------------------
 
-What I enjoy most is taking say, some computer science topic and explaining it
-in the simplest way possible, so it clicks for someone who's never bothered
+What I enjoy most is taking, say, some computer science topic and explaining
+it in the simplest way possible, so it clicks for someone who's never bothered
 understanding it before. I'd say in practice, my teaching philosophy comes
 down to these three things:
 
-- **Embrace failures.** When you're learning, fail early and often. Don't be
+- Embrace failures. When you're learning, fail early and often. Don't be
   afraid of being wrong in the early days and learn from your mistakes.
-- **Show, don't tell.** A finished answer hides thinking and reasoning. If I
-  can't rebuild or live-code it, I don't understand it well enough to teach
-  it.
-- **Teach the person in front of me.** Every reader and student is different,
-  so my approach has to be too. Yes, it's fairly inconvenient at times, but
+- Show, don't tell. A finished answer hides thinking and reasoning. If I can't
+  rebuild or live-code it, I don't understand it well enough to teach it.
+- Teach the person in front of me. Every reader and student is different, so
+  my approach has to be too. Yes, it's fairly inconvenient at times, but
   necessary.
 
 Early in my software engineering career, I came across a line that's often
@@ -159,7 +156,7 @@ really call yourself an :abbr:`SME (Subject-matter expert)` until you can
 teach a concept to someone who knows nothing about it and still put up with
 their questions without getting cocky about how much you know.
 
-Thus began my journey into teaching. So far, I've taught...
+So far, I've taught...
 
 .. embed:: ./assets/html/currently-teaching.html
     :source: _static/courses.json
@@ -170,10 +167,9 @@ Thus began my journey into teaching. So far, I've taught...
     :pause-after-deleting: 1000
 
 My approach to teaching and mentoring has changed loads over the years. You
-can read the long versions starting
-:doc:`here <academia/thoughts-on-teaching>`.
+can read the long versions in future blogs.
 
-.. _National Louis University: https://nl.edu/undergraduate-college
+.. _National Louis University: https://nl.edu/undergraduate-college/
 .. _Chicago Code and Coffee: https://www.meetup.com/code-and-coffee-chicago
 
 .. toctree::
@@ -188,8 +184,6 @@ can read the long versions starting
     :hidden:
     :maxdepth: 1
 
-    journal/xsnumpy
-
 .. toctree::
     :caption: Explained
     :hidden:
@@ -200,19 +194,7 @@ can read the long versions starting
     :hidden:
     :maxdepth: 1
 
-    docs/kaamiki/index
-
 .. toctree::
     :caption: Extras
     :hidden:
     :maxdepth: 1
-
-    extras/guiding-stars
-    extras/best-of-youtube
-    extras/questions-i-get-asked
-
-.. toctree::
-    :hidden:
-    :maxdepth: 1
-
-    changelog
