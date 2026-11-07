@@ -3,18 +3,12 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 27 October 2026
-# Last updated on: 2 November 2026
+# Last updated on: 07 November 2026
 #
-# Builds the sdist and the wheel and checks them. Publishing a GitHub release
-# then uploads them to PyPI through trusted publishing, with no token stored.
-# One-off setup on PyPI: add this repository, this workflow (release.yml) and
-# the environment `pypi` as a trusted publisher of the `kaamiki-sphinx-theme`
-# project.
-# https://docs.pypi.org/trusted-publishers/
-#
-# SOURCE_DATE_EPOCH makes the wheel the same bit for bit when it is rebuilt
-# from the tag. The sdist keeps its file times, so it differs on every build.
-# https://reproducible-builds.org/specs/source-date-epoch/
+# Runs every check of the CI workflow first, then builds the sdist and the
+# wheel and checks them. Publishing a GitHub release then uploads them to PyPI
+# through trusted publishing, with no token stored, and only when every check
+# was green.
 
 name: Release
 run-name: Started ${{ github.workflow }} workflow
@@ -29,8 +23,17 @@ permissions:
   contents: read
 
 jobs:
+  ci:
+    name: Run the CI checks
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/ci.yml
+
   build:
     name: Build the distributions
+    needs: ci
     runs-on: ubuntu-24.04
     steps:
       - name: Check out the code

@@ -222,8 +222,6 @@ commands = [
         "line-too-long",
         "--max-line-length",
         "80",
-        "--ignore",
-        "docs/source/locales",
         "docs/source",
     ],
 ]
@@ -360,11 +358,9 @@ commands = [
         '''
         pot=kaamiki/locale/sphinx.pot
         version=$(grep -m1 '^"Project-Id-Version:' "$pot")
+        escaped=$(printf '%s' "$version" | sed 's/[\\&|]/\\&/g')
         for po in kaamiki/locale/*/LC_MESSAGES/sphinx.po; do
-            VERSION="$version" awk '
-                /^"Project-Id-Version:/ { print ENVIRON["VERSION"]; next }
-                { print }
-            ' "$po" > "$po.tmp" && mv "$po.tmp" "$po"
+            sed "s|^\"Project-Id-Version:.*|$escaped|" "$po" > "$po.tmp" && mv "$po.tmp" "$po"
         done
         if git ls-files --error-unmatch "$pot" >/dev/null 2>&1 \
             && git diff --quiet -IPOT-Creation-Date -- "$pot"; then
@@ -379,6 +375,19 @@ commands = [
         "kaamiki/locale",
         "-D",
         "sphinx",
+    ],
+    [
+        "sh",
+        "-c",
+        '''
+        for po in kaamiki/locale/*/LC_MESSAGES/sphinx.po; do
+            if git ls-files --error-unmatch "$po" >/dev/null 2>&1 \
+                && git diff --quiet -IPOT-Creation-Date \
+                    -IPO-Revision-Date -- "$po"; then
+                git checkout -- "$po" "${po%.po}.mo"
+            fi
+        done
+        ''',
     ],
 ]
 
