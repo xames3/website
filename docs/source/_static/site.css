@@ -1,0 +1,123 @@
+.km-badge--beta {
+    color: hsl(var(--km-colour-red));
+}
+
+.km-header__title::after,
+.km-sidebar__brand-title::after {
+    content: "\f336";
+    font: var(--fa-font-solid);
+    font-size: var(--km-font-size-base);
+    letter-spacing: normal;
+    color: hsl(var(--km-colour-blue));
+    margin-left: var(--km-space-1);
+}
+
+.km-document--no-icons :is(.km-header__title, .km-sidebar__brand-title)::after {
+    content: none;
+}
+
+.km-header__logo,
+.km-sidebar__brand {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+
+    &::after {
+        content: "@xames3";
+        align-self: flex-start;
+        font-size: var(--km-font-size-sm);
+        line-height: 1.2;
+        color: hsl(var(--km-colour-secondary));
+    }
+}
+
+.km-header__title,
+.km-sidebar__brand-title {
+    line-height: 1.25;
+    margin-bottom: 0;
+}
+
+.site-strikethrough {
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+@keyframes site-blink-latest {
+    50% {
+        opacity: 0;
+    }
+}
+
+.site-recent-post {
+    display: inline-flex;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-left: 0.25rem;
+    border-radius: var(--km-radius-round);
+    background-color: hsl(142 76% 36%);
+    animation: site-blink-latest 2s infinite;
+}
+
+@keyframes site-cursor-blink {
+
+    0%,
+    100% {
+        background-color: hsl(var(--km-colour-blue));
+    }
+
+    25% {
+        background-color: hsl(var(--km-colour-red));
+    }
+
+    50% {
+        background-color: hsl(var(--km-colour-yellow));
+    }
+
+    75% {
+        background-color: hsl(var(--km-colour-green));
+    }
+}
+
+.site-blinking-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.15em;
+    margin-bottom: 0.15rem;
+    margin-left: 2px;
+    vertical-align: middle;
+    border-radius: var(--km-radius-round);
+    background-color: hsl(var(--km-colour-link));
+    animation: site-cursor-blink 4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .site-recent-post,
+    .site-blinking-cursor {
+        animation: none;
+    }
+}
+
+.admonition.site-unusual-one {
+    padding-left: 1.5rem;
+
+    &::before {
+        display: none;
+    }
+
+    & p:not(.admonition-title) {
+        margin-top: 0.5rem;
+    }
+
+    &>.admonition-title {
+        position: relative;
+        width: auto;
+        height: auto;
+        clip-path: none;
+        margin-bottom: 0.5rem;
+    }
+
+    @media (width < 640px) {
+        padding-inline: 1rem;
+    }
+}

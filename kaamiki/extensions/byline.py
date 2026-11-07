@@ -138,7 +138,7 @@ class directive(rst.Directive):
         - `hide-source`: Hides the link to the page's plain-text
           source, which is shown without it while `html_copy_source`
           and `html_show_sourcelink` are on.
-        - `hide-language`: Hides the page's language, which is shown
+        - `show-language`: Shows the page's language, which is hidden
           without it: the page's `:km-page-language:` field, or the
           `language` in Sphinx's configuration when it has none.
         - `name`: A name to link to.
@@ -158,7 +158,7 @@ class directive(rst.Directive):
         "hide-reading-time": rst.directives.flag,
         "hide-copy-url": rst.directives.flag,
         "hide-source": rst.directives.flag,
-        "hide-language": rst.directives.flag,
+        "show-language": rst.directives.flag,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -194,7 +194,7 @@ class directive(rst.Directive):
         options["reading_time"] = "hide-reading-time" not in options
         options["copy_url"] = "hide-copy-url" not in options
         options["page_source"] = "hide-source" not in options
-        options["language"] = "hide-language" not in options
+        options["language"] = "show-language" in options
         options["classes"] = options.pop("class", [])
         if "avatar-size" in options:
             options["avatar_size"] = options["avatar-size"]

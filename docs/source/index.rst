@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February 2025
-.. Last updated on: 02 November 2026
+.. Last updated on: 07 November 2026
 
 :orphan:
 :km-page-title: Akshay Mestry
@@ -8,7 +8,7 @@
     the classroom.
 :km-page-type: website
 :km-page-image: https://avatars.githubusercontent.com/u/90549089?v=4
-:km-feedback-title: So, what do you think?
+:km-feedback-title: So... what do you think?
 :km-feedback-description: Got a question about teaching or a great film
     I've somehow missed? Let me know.
 :km-feedback-button: Say hello
@@ -32,6 +32,7 @@ Akshay Mestry
         https://i.imgur.com/hUhxigb.jpeg,
         https://i.imgur.com/gcGHqxi.jpg,
         https://i.imgur.com/weM4qDW.jpg
+    :hide-language:
 
 .. embed:: ./assets/html/greetings.html
     :source: _static/greetings.json
@@ -39,11 +40,11 @@ Akshay Mestry
     :duration: 700
     :stagger: 45
 
-I'm Akshay (/uh-k-sh-ay/), an educator, engineer, avid cook and currently an
-Assistant Professor at `National Louis University`_. Before getting into
-academia, I worked at consulting firms, corporate product companies and
-startups. This cheeky corner of the internet is where I dump all that: the
-wins and the mistakes, one story at a time.
+I'm Akshay, an educator, engineer, avid cook and currently an Assistant
+Professor at `National Louis University`_. Before getting into academia, I
+worked at consulting firms, corporate product companies and startups. This
+cheeky corner of the internet is where I dump all that: the wins and the
+mistakes, one story at a time.
 
 .. rubric:: :fa-icon:`compass-drafting` Build and share
     :class: km-text-pre-section
@@ -121,7 +122,7 @@ actually work under the hood.
 
             LinkedIn
 
-.. rubric:: :fa-icon:regular:`comments` Keep it stupid simple
+.. rubric:: :fa-icon:regular:`comments` Keep it simple, stupid
     :class: km-text-pre-section
 
 .. _teaching-philosophy:
@@ -198,3 +199,9 @@ can read the long versions in future blogs.
     :caption: Extras
     :hidden:
     :maxdepth: 1
+
+.. toctree::
+    :hidden:
+    :maxdepth: 1
+
+    changelog
