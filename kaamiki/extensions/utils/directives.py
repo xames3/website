@@ -4,10 +4,12 @@ Directive Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 25 October 2026
+Last updated on: 07 November 2026
 
 The helpers Kaamiki's directives are built from.
 """
+
+from __future__ import annotations
 
 import os.path as p
 import typing as t
@@ -15,26 +17,34 @@ from urllib.parse import urlsplit
 
 from docutils import nodes
 from markupsafe import Markup
+from sphinx import addnodes
 from sphinx.util import docname_join
 
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils.settings import ICONS
 from kaamiki.extensions.utils.templates import render
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable
     from collections.abc import Iterable
+    from collections.abc import Iterator
     from collections.abc import Sequence
 
     from docutils.parsers.rst import Directive
     from sphinx.writers.html import HTMLTranslator
 
-LINKCHECK_OPTIONS: tuple[str, ...] = ("avatar", "background", "url")
+LINKCHECK_OPTIONS: tuple[str, ...] = ("avatar", "backdrop", "target")
+LINKS: t.Final[tuple[type[nodes.Node], ...]] = (
+    nodes.reference,
+    nodes.footnote_reference,
+    nodes.citation_reference,
+    addnodes.pending_xref,
+)
 # NOTE(xames3): The two options docutils gives its own directives, so a
 # Kaamiki directive reads `:class:` and `:name:` the same way.
+# https://docutils.sourceforge.io/docs/ref/rst/directives.html#common-options
 NATIVE: t.Final[dict[str, Callable[[str | None], t.Any]]] = {
     "class": checks.classes,
-    "name": checks.slug,
+    "name": checks.reference_name,
 }
 
 
@@ -58,10 +68,65 @@ def hollow(found: Iterable[nodes.Node]) -> bool:
     """Say whether some parsed nodes hold nothing a reader would see.
 
     :param found: The nodes.
-    :return: `True` when all there is are comments.
+    :return: `True` when all there is are comments and link targets.
     """
     skipped = (nodes.comment, nodes.target)
     return all(isinstance(_, skipped) for _ in found)
+
+
+def through(found: Iterable[nodes.Node]) -> Iterator[nodes.Node]:
+    """Walk some nodes, looking through each `only` to what it holds.
+
+    :param found: The nodes.
+    :return: Each node that isn't an `only`, in the order written.
+    """
+    for each in found:
+        if isinstance(each, addnodes.only):
+            yield from through(each.children)
+        else:
+            yield each
+
+
+def unlinked(
+    directive: Directive,
+    found: Iterable[nodes.Node] | nodes.Node,
+    part: str,
+) -> None:
+    """Refuse a link in a text that is a link already or a control.
+
+    :param directive: The directive that has the text.
+    :param found: The parsed text or the nodes it came to.
+    :param part: What the text is, `a label` for one.
+    :raises rst.DirectiveError: When the text holds a link.
+    """
+    for each in [found] if isinstance(found, nodes.Node) else found:
+        if any(isinstance(_, LINKS) for _ in each.findall()):
+            raise directive.error(
+                f"{directive.name}: expected {part} without a link, got one"
+            )
+
+
+def worded(
+    directive: Directive,
+    found: Iterable[nodes.Node] | nodes.Node,
+    part: str,
+) -> None:
+    """Refuse a text that has no words, only an icon or nothing.
+
+    An icon adds to a text and never stands for it, so a screen reader
+    and a reader with the icons switched off still get the meaning.
+
+    :param directive: The directive that has the text.
+    :param found: The parsed text or the nodes it came to.
+    :param part: What the text is, `a title` for one.
+    :raises rst.DirectiveError: When the text reads as nothing.
+    """
+    each = [found] if isinstance(found, nodes.Node) else found
+    if not "".join(_.astext() for _ in each).strip():
+        raise directive.error(
+            f"{directive.name}: expected {part} with words, got only an"
+            " icon or nothing"
+        )
 
 
 def titled(directive: Directive, argument: str) -> str:
@@ -82,8 +147,8 @@ def document(directive: Directive, name: str, option: str) -> str:
     """Find the document an option names, as `:doc:` would write it.
 
     :param directive: The directive that has the option.
-    :param name: The document, relative to the page or from the top with
-        a leading `/`.
+    :param name: The document, relative to the page or from the top
+        with a leading `/`.
     :param option: The option it was written in.
     :return: The document's name.
     :raises rst.DirectiveError: When the site has no such document.
@@ -92,18 +157,21 @@ def document(directive: Directive, name: str, option: str) -> str:
     found = docname_join(env.docname, name.strip())
     if found not in env.found_docs:
         raise directive.error(
-            f"{directive.name}: :{option}: {name!r} is not a document"
+            f"{directive.name}: :{option}: expected a document of this site,"
+            f" got {name!r}"
         )
     return found
 
 
 def shipped(directive: Directive, value: str, where: str) -> str:
-    """Check that a path from the top of the site is a file the build puts
-    there.
+    """Check that a path from the top of the site is a file the build
+    puts there.
 
     A full address or a `#` fragment is left alone. A path under
     `_static` has to be in one of `html_static_path` and any other path
-    in `html_extra_path`.
+    in `html_extra_path`, and it can't climb out of that folder. The
+    file is noted as one the page depends on, so the page is read again
+    when it changes or goes.
 
     :param directive: The directive that has the option.
     :param value: The path or address, as written.
@@ -111,6 +179,8 @@ def shipped(directive: Directive, value: str, where: str) -> str:
     :return: The value, as written.
     :raises rst.DirectiveError: When no such file ships with the site.
     """
+    from kaamiki.extensions.utils.context import confdir
+
     parts = urlsplit(value)
     if parts.scheme or value.startswith("#"):
         return value
@@ -122,14 +192,19 @@ def shipped(directive: Directive, value: str, where: str) -> str:
         roots = config.html_static_path
     else:
         roots = config.html_extra_path
-    for root in (p.join(env.app.confdir, _) for _ in roots):
-        if p.isfile(p.join(root, name)) or (
-            p.isfile(root) and p.basename(root) == name
-        ):
+    for root in (p.normpath(p.join(confdir(env), _)) for _ in roots):
+        if p.isfile(root) and p.basename(root) == name:
+            found = root
+        else:
+            found = p.normpath(p.join(root, name))
+            if p.commonpath([root, found]) != root:
+                continue
+        if p.isfile(found):
+            env.note_dependency(found)
             return value
     raise directive.error(
-        f"{directive.name}: {where} {value!r} is not in html_static_path or"
-        " html_extra_path"
+        f"{directive.name}: {where} expected a file in html_static_path or"
+        f" html_extra_path, got {value!r}"
     )
 
 
@@ -142,10 +217,12 @@ def named(directive: Directive, node: nodes.Element) -> None:
     """
     if "name" not in directive.options:
         return
-    document = directive.state.document
+    page = directive.state.document
     name = nodes.fully_normalize_name(directive.options["name"])
-    if name in document.nameids:
-        raise directive.error(f":name: {name!r} is on the page already")
+    if name in page.nameids:
+        raise directive.error(
+            f"{directive.name}: :name: {name!r} is on the page already"
+        )
     directive.add_name(node)
 
 
@@ -155,6 +232,16 @@ def depart(self: HTMLTranslator, node: nodes.Element) -> None:
     :param self: The HTML translator instance.
     :param node: The node being departed.
     """
+
+
+def close(self: HTMLTranslator, node: nodes.Element) -> None:
+    """Close the `<div>` a node's visitor opened.
+
+    :param self: The HTML translator instance.
+    :param node: The node being departed (unused).
+    """
+    del node
+    self.body.append("</div>")
 
 
 def skip(self: nodes.NodeVisitor, node: nodes.Element) -> None:
@@ -197,6 +284,20 @@ class phrase(nodes.TextElement):
     """A directive's text, parsed and waiting for its template."""
 
 
+def located[N: nodes.Node](directive: Directive, node: N) -> N:
+    """Give a node the place in the source it was written, which
+    `gettext` needs to collect the text.
+
+    :param directive: The directive the node's text belongs to.
+    :param node: The node.
+    :return: The same node.
+    """
+    node.source, node.line = directive.state_machine.get_source_and_line(
+        directive.lineno
+    )
+    return node
+
+
 def parse(
     directive: Directive, text: str, field: str
 ) -> tuple[phrase, list[nodes.system_message]]:
@@ -212,11 +313,63 @@ def parse(
         parsing reported.
     """
     words, messages = directive.state.inline_text(text, directive.lineno)
-    found = phrase(text, "", *words, field=field)
-    found.source, found.line = directive.state_machine.get_source_and_line(
-        directive.lineno
+    return located(directive, phrase(text, "", *words, field=field)), messages
+
+
+BLOCKS: t.Final[tuple[tuple[type[nodes.Node], str], ...]] = (
+    (nodes.bullet_list, "a list"),
+    (nodes.enumerated_list, "a list"),
+    (nodes.definition_list, "a definition list"),
+    (nodes.block_quote, "a block quote"),
+    (nodes.literal_block, "a code block"),
+    (nodes.table, "a table"),
+    (nodes.comment, "a comment"),
+)
+
+
+def paragraph(
+    directive: Directive, text: str, field: str
+) -> tuple[phrase, list[nodes.system_message]]:
+    """Parse a directive's content, which is one paragraph of text.
+
+    It reads the content as a page does, so a list, a second paragraph
+    or a directive in it is found and not written out as text.
+
+    :param directive: The directive the content belongs to.
+    :param text: The content, as written in the rST.
+    :param field: The name the directive's template knows it by.
+    :return: The parsed text, held under its name, and whatever the
+        parsing reported.
+    :raises rst.DirectiveError: When the content isn't one paragraph.
+    """
+    if not text.strip():
+        return parse(directive, text, field)
+    holder = nodes.Element()
+    directive.state.nested_parse(
+        directive.content, directive.content_offset, holder
     )
-    return found, messages
+    found = [
+        _ for _ in holder.children if not isinstance(_, nodes.system_message)
+    ]
+    messages = [
+        _ for _ in holder.children if isinstance(_, nodes.system_message)
+    ]
+    if len(found) != 1 or type(found[0]) is not nodes.paragraph:
+        what = "more than one block"
+        if found and all(type(_) is nodes.paragraph for _ in found):
+            what = "more than one paragraph"
+        if len(found) == 1:
+            what = next(
+                (name for kind, name in BLOCKS if isinstance(found[0], kind)),
+                "a directive",
+            )
+        raise directive.error(
+            f"{directive.name}: expected one paragraph of text, got {what}"
+        )
+    return (
+        located(directive, phrase(text, "", *found[0].children, field=field)),
+        messages,
+    )
 
 
 def fields(self: HTMLTranslator, node: nodes.Element) -> dict[str, Markup]:
@@ -261,7 +414,7 @@ def visitor(
     """
 
     def visit(self: HTMLTranslator, node: nodes.Element) -> None:
-        icons = self.builder.config.html_context.get("km_fa_icons", ICONS)
+        icons = self.builder.config.html_context["km_fa_icons"]
         attributes = dict(node.attributes)
         if prepare is not None:
             attributes = prepare(self, attributes)
@@ -271,6 +424,17 @@ def visitor(
         raise nodes.SkipNode
 
     return visit
+
+
+def what(found: nodes.Node) -> str:
+    """Say what a node is, the way a message names what author wrote.
+
+    :param found: The node.
+    :return: Its name with an article, `a paragraph` or `an accordion`.
+    """
+    from kaamiki.extensions import nesting
+
+    return nesting.describe(found)
 
 
 def listed(value: str) -> list[str]:
