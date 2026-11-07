@@ -4,7 +4,7 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October 2025
-Last updated on: 25 October 2026
+Last updated on: 07 November 2026
 
 A `repository` directive that renders a GitHub project as a block::
 
@@ -21,10 +21,14 @@ import docutils.nodes as nodes
 from docutils.parsers import rst
 
 from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
-from kaamiki.extensions.utils import parse
+from kaamiki.extensions.utils import paragraph
+from kaamiki.extensions.utils import phrase
+from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import visitor
+from kaamiki.extensions.utils import worded
 
 name: t.Final[str] = "repository"
 template: t.Final[str] = "directives/repository.html.jinja"
@@ -34,7 +38,7 @@ OWNER: t.Final[re.Pattern[str]] = re.compile(
 REPO: t.Final[re.Pattern[str]] = re.compile(r"[A-Za-z0-9._-]{1,100}")
 
 
-class node(nodes.Element):
+class Repository(nodes.Element):
     """The repository and its parsed text, waiting for `visit`."""
 
 
@@ -70,8 +74,8 @@ class directive(rst.Directive):
         :return: The node, followed by the `raw` node for the link
             checker and anything the text reported.
         """
-        name = self.arguments.pop().strip()
-        owner, slash, repo = name.partition("/")
+        project = self.arguments.pop().strip()
+        owner, slash, repo = project.partition("/")
         if (
             not slash
             or not OWNER.fullmatch(owner)
@@ -81,22 +85,46 @@ class directive(rst.Directive):
         ):
             raise self.error(
                 f"repository: expected owner/name like xames3/website, got "
-                f"{name!r}"
+                f"{project!r}"
             )
         source = f"https://github.com/{owner}/{repo}"
         config = self.state.document.settings.env.config
         attributes: dict[str, t.Any] = {}
-        attributes["project"] = f"{owner}/{repo}"
+        attributes["project"] = project
         attributes["stars"] = "hide-stars" not in self.options
         attributes["forks"] = "hide-forks" not in self.options
         attributes["classes"] = self.options.get("class", [])
         attributes["new_tab"] = opens_new_tab(source, config)
         text = "\n".join(self.content).strip()
-        body, messages = parse(self, text, "text")
-        element = node("", body, **attributes)
+        body, messages = paragraph(self, text, "text")
+        if text:
+            worded(self, body, "a text")
+        element = located(self, Repository("", body, **attributes))
         named(self, element)
-        link = nodes.raw(source=source, text="", format="html")
-        return [element, link, *messages]
+        return [element, *trail({"url": source}, ("url",)), *messages]
+
+
+def plain(node: Repository) -> list[nodes.Node]:
+    """Write a repository as words, for a builder that draws no HTML.
+
+    :param node: The repository's node.
+    :return: A paragraph with its name and the address of the project,
+        written as a link to itself, and one with the text below it.
+    """
+    url = f"https://github.com/{node['project']}"
+    link = nodes.reference("", url, refuri=url)
+    found: list[nodes.Node] = [
+        nodes.paragraph("", "", nodes.Text(f"{node['project']} "), link)
+    ]
+    found += [
+        nodes.paragraph("", "", *_.children)
+        for _ in node.children
+        if isinstance(_, phrase) and _.children
+    ]
+    return found
 
 
 visit = visitor(template)
+
+
+node = Repository
