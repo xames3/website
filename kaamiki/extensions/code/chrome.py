@@ -1,13 +1,15 @@
 """\
-Explainer Chrome
-================
+Walkthrough Chrome
+==================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 25 October 2026
+Last updated on: 07 November 2026
 
-The markup an explainer wraps itself in.
+The markup a walkthrough wraps itself in.
 """
+
+from __future__ import annotations
 
 import html
 import typing as t
@@ -19,6 +21,8 @@ from pygments.util import ClassNotFound
 from sphinx.locale import _
 
 if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from docutils import nodes
     from pygments.lexer import Lexer
     from sphinx.writers.html import HTMLTranslator
@@ -166,7 +170,7 @@ def known(language: str) -> bool:
     :return: Whether it does.
     """
     try:
-        get_lexer_by_name(language)
+        lexer_for(language)
     except ClassNotFound:
         return False
     return True
@@ -175,9 +179,9 @@ def known(language: str) -> bool:
 def lexer_for(language: str) -> Lexer:
     """Find the Pygments lexer for a language.
 
-    :param language: The language named on the directive, which `known`
-        has said Pygments has.
+    :param language: The language named on the directive.
     :return: Its lexer.
+    :raises ClassNotFound: When Pygments has none, which `known` asks.
     """
     return get_lexer_by_name(language)
 
@@ -211,7 +215,7 @@ def highlight(code: str, language: str) -> list[str]:
     return lines
 
 
-def pane(
+def notes_pane(
     code: str,
     language: str,
     start: int,
@@ -228,8 +232,8 @@ def pane(
     :param emphasis: The lines to mark, numbered as the reader sees
         them.
     :param linenos: Whether to show a line-number gutter.
-    :param digits: How many characters the gutter takes, for versions of
-        a snippet that have to line up. Defaults to what the snippet
+    :param digits: How many characters the gutter takes, for versions
+        of a snippet that have to line up. Defaults to what the snippet
         needs.
     :return: The pane's markup.
     """
@@ -240,13 +244,15 @@ def pane(
         rows.append(
             f'<span class="km-code-explain__line" data-km-line="{offset + 1}"'
             f' data-km-number="{number}"{mark}>'
-            f'<span class="km-code-explain__src">{line or "&nbsp;"}</span>'
-            '<span class="km-code-explain__ann" data-km-ann></span>\n</span>'
+            f'<span class="km-code-explain__source">{line or "&nbsp;"}</span>'
+            '<span class="km-code-explain__annotation"'
+            " data-km-annotation></span>\n</span>"
         )
     gutter = " km-code-explain__code--linenos" if linenos else ""
     digits = digits or len(str(start + max(len(rows), 1) - 1))
     return (
-        '<div class="km-code-explain__stage" data-km-stage tabindex="0">'
+        '<div class="km-code-explain__stage" data-km-stage tabindex="0"'
+        f' role="group" aria-label="{_("Code")}">'
         f'<pre class="highlight km-code-explain__code{gutter}"'
         f' style="--km-code-explain-gutter: {digits}ch">'
         + "".join(rows)
@@ -254,24 +260,33 @@ def pane(
     )
 
 
-def controls() -> str:
-    """Write what sits at the end of an explainer's caption.
+def controls(icons: Mapping[str, str]) -> str:
+    """Write what sits at the end of a walkthrough's caption.
 
-    Without a caption, the same markup sits in the snippet's top corner.
+    Without a caption, the same markup sits in the snippet's top
+    corner. The button holds both its icons, the stylesheet shows the
+    one that fits its state.
 
+    :param icons: The site's named icons.
     :return: The markup.
     """
+    marks = "".join(
+        f'<i class="{icons[key]} km-code-explain__{name}"'
+        ' aria-hidden="true"></i>'
+        for key, name in (("copy", "clipboard"), ("copied", "done"))
+        if icons[key]
+    )
     return (
         '<button type="button" class="km-code-explain__copy" data-km-copy'
         f' aria-label="{html.escape(str(_("Copy the snippet")))}">'
-        "</button>"
+        f"{marks}</button>"
     )
 
 
 def output() -> str:
     """Write the box a snippet's prints land in."""
     return (
-        '<pre class="km-code-explain__out" data-km-out'
+        '<pre class="km-code-explain__output" data-km-output'
         f' data-km-empty="{html.escape(str(_("Nothing printed yet")))}"'
         " hidden></pre>"
     )

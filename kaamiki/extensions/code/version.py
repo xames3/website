@@ -4,10 +4,10 @@ Code Version Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 28 September 2026
-Last updated on: 25 October 2026
+Last updated on: 07 November 2026
 
 A `code-version` directive that steps a reader through the versions a
-piece of code went through on its way to what it's now::
+piece of code went through on its way to what it is now::
 
     .. code-version:: python
        :caption: xsnumpy/_core.py
@@ -39,6 +39,8 @@ piece of code went through on its way to what it's now::
                The 1D case keeps what already worked.
 """
 
+from __future__ import annotations
+
 import typing as t
 
 import docutils.nodes as nodes
@@ -48,13 +50,14 @@ from sphinx.locale import _
 from kaamiki.extensions.code import explain
 from kaamiki.extensions.code.chrome import known
 from kaamiki.extensions.code.chrome import label
-from kaamiki.extensions.code.chrome import pane
+from kaamiki.extensions.code.chrome import notes_pane
 from kaamiki.extensions.code.grammar import linerange
 from kaamiki.extensions.code.grammar import split
-from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import named
-from kaamiki.extensions.utils.settings import BOUNDS
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -71,7 +74,7 @@ VERDICTS: t.Final[frozenset[str]] = frozenset({"broke", "worked"})
 STRETCH: t.Final[float] = 2.5
 
 
-class node(explain.node):
+class CodeVersion(explain.CodeExplain):
     """The parsed directive, waiting for `visit` to write it out.
 
     It's a walkthrough underneath, so the notes either side of the
@@ -99,19 +102,22 @@ class directive(explain.directive):
     """The `code-version` directive.
 
     The argument is the language every version is written in, and
-    defaults to `python`.
+    defaults to `python`. It goes on the page itself, where a plain
+    `container` or an `only` still counts as the page, and not in
+    another directive's content, a walkthrough's notes included.
 
     Options::
 
-        - `code-position`: Which side the code holds, `right` for the
-          default or `left`.
-        - `pace`: Pixels of scrolling a step takes. A step bringing a
-          version in takes `STRETCH` times that.
+        - `code-position`: Which side the code sits on, `right` for
+          the default or `left`.
+        - `pace`: Pixels of scrolling a step takes, from 24 to 240. A
+          step bringing a version in takes `STRETCH` times that.
         - `caption`: A line of text above the code, parsed as rST.
-        - `class`: More classes for the `code-version`.
-        - `name`: A name to link the `code-version` by.
         - `linenos`: Number the lines.
-        - `lineno-start`: The number the first line is given.
+        - `lineno-start`: The number the first line is given, from 0 to
+          10000.
+        - `name`: A name to link the `code-version` by.
+        - `class`: More classes for the `code-version`.
     """
 
     option_spec = {  # noqa: RUF012
@@ -120,14 +126,8 @@ class directive(explain.directive):
             for key, value in CodeBlock.option_spec.items()
             if key not in {"dedent", "emphasize-lines", "force"}
         },
-        "code-position": checks.word(*explain.POSITIONS),
-        "pace": checks.integer(*map(int, BOUNDS["pace"])),
-        "caption": checks.text,
-        "class": checks.classes,
-        "name": checks.slug,
-        "lineno-start": checks.integer(
-            *map(int, BOUNDS["code_explain_lineno"])
-        ),
+        **explain.SHARED,
+        **NATIVE,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -137,7 +137,10 @@ class directive(explain.directive):
         """
         language = self.arguments.pop().strip() if self.arguments else "python"
         if not known(language):
-            raise self.error(f"{self.name}: no Pygments lexer for {language!r}")
+            raise self.error(
+                f"{self.name}: expected a language Pygments knows, got"
+                f" {language!r}"
+            )
         start = self.options.get("lineno-start", 1)
         drafts = [
             self.unpack(block, index)
@@ -163,7 +166,7 @@ class directive(explain.directive):
             "code": codes[0],
             "codes": codes,
         }
-        attributes["pane"] = pane(
+        attributes["pane"] = notes_pane(
             codes[0],
             language,
             start,
@@ -171,7 +174,7 @@ class directive(explain.directive):
             linenos="linenos" in self.options,
             digits=digits,
         )
-        element = node("", **attributes)
+        element = located(self, CodeVersion("", **attributes))
         element += self.caption(language)
         element += self.story(drafts, language, start, digits)
         named(self, element)
@@ -187,8 +190,8 @@ class directive(explain.directive):
         except ValueError as exc:
             line, text = exc.args
             raise self.error(
-                f"code-version: {text!r} on line {line} is outside any"
-                " `.. attempt::`"
+                "code-version: expected text inside an `.. attempt::`, got"
+                f" {text!r} on line {line}"
             ) from exc
         if not found:
             raise self.error(
@@ -197,8 +200,8 @@ class directive(explain.directive):
         for block in found:
             if block.argument:
                 raise self.error(
-                    f"code-version: `.. attempt::` takes no name, got "
-                    f"{block.argument!r}"
+                    "code-version: `.. attempt::` expected no name, got"
+                    f" {block.argument!r}"
                 )
         if len(found) == 1:
             raise self.error(
@@ -223,27 +226,30 @@ class directive(explain.directive):
         for kind in ("code", "output"):
             if sum(_.name == kind for _ in found) > 1:
                 raise self.error(
-                    f"code-version: attempt {at} has more than one {kind}"
+                    f"code-version: attempt {at} expected one {kind}, got more"
+                    " than one"
                 )
         code = next((_ for _ in found if _.name == "code"), None)
         if code is None:
             raise self.error(
-                f"code-version: attempt {at} is missing a `.. code::` block"
+                f"code-version: attempt {at} expected one `.. code::` block,"
+                " got none"
             )
         if not code.body:
             raise self.error(
-                f"code-version: attempt {at} has an empty `.. code::`"
+                f"code-version: attempt {at} expected some code in the"
+                " `.. code::`, got none"
             )
         printed = next((_ for _ in found if _.name == "output"), None)
         if printed is not None and printed.argument not in VERDICTS | {""}:
             raise self.error(
-                f"code-version: the output of attempt {at} expected broke or "
-                "worked,"
-                f" or nothing, got {printed.argument!r}"
+                f"code-version: the output of attempt {at} expected broke or"
+                f" worked, or nothing, got {printed.argument!r}"
             )
         if printed is not None and not printed.body:
             raise self.error(
-                f"code-version: the output of attempt {at} is empty"
+                f"code-version: the output of attempt {at} expected some"
+                " text, got none"
             )
         notes: list[chunk] = []
         for part in found:
@@ -260,7 +266,8 @@ class directive(explain.directive):
     def span(
         self, argument: str, start: int, total: int, at: int = 0
     ) -> tuple[int, int]:
-        """Read the lines a `lines` block points at, in its own version.
+        """Read the lines a `lines` block points at, in its own
+        version.
 
         :param argument: The block's argument, as written.
         :param start: The number every version's first line is given.
@@ -270,18 +277,19 @@ class directive(explain.directive):
         """
         found = linerange(argument)
         if found is None:
-            raise self.error(f"lines: expected a line range, got {argument!r}")
+            raise self.error(
+                f"code-version: :lines: expected a line range, got {argument!r}"
+            )
         low, high = found
         if low > high:
             raise self.error(
-                f"code-version: lines expected a range that runs up, got "
+                f"code-version: :lines: expected a range that runs up, got "
                 f"{argument!r}"
             )
         if low < start or high > start + total - 1:
             raise self.error(
-                f"code-version: {label(low, high)} is outside attempt {at},"
-                " which is"
-                f" {label(start, start + total - 1)}"
+                f"code-version: :lines: expected a range within attempt {at},"
+                f" {label(start, start + total - 1)}, got {label(low, high)}"
             )
         return found
 
@@ -291,10 +299,11 @@ class directive(explain.directive):
         """Make a step of every note, attempt by attempt.
 
         An attempt with nothing to say still gets a step, since its
-        version has to come up. It borrows the note before it. The
-        first step of every attempt brings its version in, so it takes
-        `STRETCH` times the scrolling, and its last step is where its
-        output lands.
+        version has to come up. It borrows the note before it, or the
+        first note there is when none comes before it. The first step
+        of every attempt brings its version in, so it takes `STRETCH`
+        times the scrolling, and its last step is where its output
+        lands.
 
         :param drafts: The attempts, unpacked.
         :param start: The number every version's first line is given.
@@ -361,22 +370,8 @@ class directive(explain.directive):
         return box
 
 
-def visit(self: HTMLTranslator, element: node) -> None:
-    """Open the attempts, write their steps and open the pane.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param element: The `code-version` node and its attributes.
-    """
-    explain.visit(self, element)
-
-
-def depart(self: HTMLTranslator, element: node) -> None:
-    """Close the pane and the attempts.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param element: The `code-version` node.
-    """
-    explain.depart(self, element)
+visit = explain.visit
+depart = explain.depart
 
 
 def visit_attempt(self: HTMLTranslator, element: attempt) -> None:
@@ -399,13 +394,13 @@ def visit_draft(self: HTMLTranslator, element: draft) -> None:
     :param element: The frame, carrying its index and the gutter's
         width, and holding the plain code block.
     """
-    code = next(findall(element, explain.plain))
+    code = next(findall(element, explain.plain_code))
     index = element["index"]
     self.body.append(
         f'<div class="km-code-version__draft" data-km-draft="{index}">'
     )
     self.body.append(
-        pane(
+        notes_pane(
             code.astext(),
             code["language"],
             code["highlight_args"]["linenostart"],
@@ -431,7 +426,7 @@ def visit_outcome(self: HTMLTranslator, element: outcome) -> None:
         else ""
     )
     self.body.append(
-        '<pre class="km-code-explain__out"'
+        '<pre class="km-code-explain__output"'
         + (f' data-km-verdict="{verdict}"' if verdict else "")
         + f">{spoken}{self.encode(element.astext())}</pre>"
     )
@@ -439,13 +434,17 @@ def visit_outcome(self: HTMLTranslator, element: outcome) -> None:
 
 
 def register(app: Sphinx) -> None:
-    """Register the nodes the directive loop misses.
+    """Register the nodes only a code-version has.
 
-    The caption, the notes and the prose taken in either side are the
-    the code-explain's, and registered with it.
+    These are an attempt, its draft and its outcome. The caption, the
+    notes and the prose taken in either side are the code-explain's and
+    are registered with it.
 
     :param app: The Sphinx application instance.
     """
-    app.add_node(attempt, html=(visit_attempt, explain.close))
-    app.add_node(draft, html=(visit_draft, explain.close))
+    app.add_node(attempt, html=(visit_attempt, close))
+    app.add_node(draft, html=(visit_draft, close))
     app.add_node(outcome, html=(visit_outcome, None))
+
+
+node = CodeVersion
