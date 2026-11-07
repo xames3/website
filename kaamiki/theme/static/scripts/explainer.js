@@ -3,36 +3,35 @@
 
     const {
         TIMING,
+        announce,
         clamp,
         copyText,
-        getDurationMs,
         headerHeight,
         onScroll,
         prefersReducedMotion,
         rafThrottle,
-        ready,
         say,
         stopGlide,
         codeExplains,
     } = window.Kaamiki;
     const root = document.documentElement;
 
-    const MIN_LINES = 6;
-    const JITTER = 120;
-    const SETTLE = 120;
-    const WIDE = 880;
-    const PAD = 16;
-    const SHARE = 0.6;
-    const ROOM = 24;
-    const ARM = 120;
-    const HOLD = 350;
-    const INPUT = 500;
-    const GLIDE = 1500;
-    const FOCUS = 300;
-    const STIFFNESS = 22;
-    const STACK_LINES = 12;
-    const SEE_SWAPS = 2;
-    const ANIMATE_NEAR = 2;
+    const STAGE_MIN_LINES = 6;
+    const RESIZE_JITTER_PX = 120;
+    const RESIZE_SETTLE_MS = 120;
+    const STAGE_MIN_WIDTH_PX = 880;
+    const STAGE_PADDING_PX = 16;
+    const STAGE_SPACE_SHARE = 0.6;
+    const STAGE_MARGIN_PX = 24;
+    const REARM_DISTANCE_PX = 120;
+    const LOCK_GRACE_MS = 350;
+    const HAND_WINDOW_MS = 500;
+    const TOUCH_GLIDE_MS = 1500;
+    const FOCUS_SCROLL_WINDOW_MS = 300;
+    const TRACK_STIFFNESS = 16;
+    const STACK_MAX_LINES = 12;
+    const DIFF_VISIBLE_SWAPS = 3;
+    const ANIMATE_WITHIN_STEPS = 2;
     let held = null;
     let handUntil = 0;
     let wired = false;
@@ -45,7 +44,8 @@
         const code = payload.code || '';
         if (!payload.setup) return code;
         const { open = '#', close = '' } = payload.comment || {};
-        return `${open} ${say('setup')}${close ? ` ${close}` : ''}\n${payload.setup}\n\n${code}`;
+        const head = `${open} ${say('setup')}${close ? ` ${close}` : ''}`;
+        return `${head}\n${payload.setup}\n\n${code}`;
     }
 
     function valueNode(item, opened) {
@@ -74,7 +74,7 @@
 
     function entryNode(item, opened) {
         const entry = document.createElement('span');
-        entry.className = 'km-code-explain__var';
+        entry.className = 'km-code-explain__variable';
         if (item.fresh) entry.setAttribute('data-km-fresh', '');
         if (item.kind) entry.dataset.kmKind = item.kind;
         entry.append(
@@ -85,23 +85,28 @@
     }
 
     function diffLines(before, after) {
-        const table = Array.from({ length: before.length + 1 }, () => new Uint32Array(after.length + 1));
-        for (let i = before.length - 1; i >= 0; i -= 1) {
-            for (let j = after.length - 1; j >= 0; j -= 1) {
-                table[i][j] = before[i] === after[j]
-                    ? table[i + 1][j + 1] + 1
-                    : Math.max(table[i + 1][j], table[i][j + 1]);
+        const table = Array.from(
+            { length: before.length + 1 },
+            () => new Uint32Array(after.length + 1),
+        );
+        for (let row = before.length - 1; row >= 0; row -= 1) {
+            for (let column = after.length - 1; column >= 0; column -= 1) {
+                table[row][column] = before[row] === after[column]
+                    ? table[row + 1][column + 1] + 1
+                    : Math.max(table[row + 1][column], table[row][column + 1]);
             }
         }
         const script = [];
         let i = 0;
         let j = 0;
         while (i < before.length || j < after.length) {
-            if (i < before.length && j < after.length && before[i] === after[j]) {
+            if (i < before.length && j < after.length
+                && before[i] === after[j]) {
                 script.push(['=', i, j]);
                 i += 1;
                 j += 1;
-            } else if (j === after.length || (i < before.length && table[i + 1][j] >= table[i][j + 1])) {
+            } else if (j === after.length
+                || (i < before.length && table[i + 1][j] >= table[i][j + 1])) {
                 script.push(['-', i, -1]);
                 i += 1;
             } else {
@@ -139,19 +144,19 @@
     }
 
     function updateAll() {
-        codeExplains.forEach((walk) => walk.update());
+        codeExplains.forEach((explainer) => explainer.update());
     }
 
     const updateSoon = rafThrottle(() => updateAll());
 
     function measureAll() {
-        codeExplains.forEach((walk) => walk.measure());
+        codeExplains.forEach((explainer) => explainer.measure());
         updateAll();
     }
 
     function refitAll() {
-        codeExplains.forEach((walk) => {
-            if (walk.shape() !== walk.shaped) walk.measure();
+        codeExplains.forEach((explainer) => {
+            if (explainer.shape() !== explainer.shaped) explainer.measure();
         });
         updateAll();
     }
@@ -160,7 +165,7 @@
 
     function settleSoon() {
         window.clearTimeout(settleTimer);
-        settleTimer = window.setTimeout(refitAll, SETTLE);
+        settleTimer = window.setTimeout(refitAll, RESIZE_SETTLE_MS);
     }
 
     function initCodeExplains() {
@@ -172,15 +177,15 @@
         onScroll(updateSoon);
 
         const panes = new ResizeObserver(settleSoon);
-        codeExplains.forEach((walk) => {
-            panes.observe(walk.pane);
-            panes.observe(walk.track);
+        codeExplains.forEach((explainer) => {
+            panes.observe(explainer.pane);
+            panes.observe(explainer.track);
         });
         new ResizeObserver(settleSoon).observe(document.body);
 
         document.addEventListener('km:fold', measureAll);
         window.addEventListener('beforeprint', () => {
-            codeExplains.forEach((walk) => walk.fillAll());
+            codeExplains.forEach((explainer) => explainer.fillAll());
         });
 
         let width = window.innerWidth;
@@ -190,19 +195,20 @@
             window.clearTimeout(resizing);
             resizing = window.setTimeout(() => {
                 const moved = Math.abs(window.innerHeight - height);
-                if (window.innerWidth === width && moved < JITTER) {
+                if (window.innerWidth === width && moved < RESIZE_JITTER_PX) {
                     held?.recentre();
                     return;
                 }
                 width = window.innerWidth;
                 height = window.innerHeight;
                 measureAll();
-            }, SETTLE);
+            }, RESIZE_SETTLE_MS);
         }, { passive: true });
 
         window.matchMedia('(prefers-reduced-motion: reduce)')
             .addEventListener('change', measureAll);
         document.fonts.ready.then(measureAll);
+        window.addEventListener('load', measureAll, { once: true });
     }
 
     function focusLine() {
@@ -215,10 +221,14 @@
         window.scrollTo({ top, behavior: 'instant' });
     }
 
-    function scrollsInside(element, dy) {
-        for (let node = element; node instanceof Element && node !== document.body; node = node.parentElement) {
+    function scrollsInside(element, deltaY) {
+        for (
+            let node = element;
+            node instanceof Element && node !== document.body;
+            node = node.parentElement
+        ) {
             if (!/auto|scroll/.test(getComputedStyle(node).overflowY)) continue;
-            const spare = dy > 0
+            const spare = deltaY > 0
                 ? node.scrollHeight - node.clientHeight - node.scrollTop
                 : node.scrollTop;
             if (spare > 1) return true;
@@ -237,7 +247,7 @@
             stage,
             lines,
             code: stage.querySelector('pre'),
-            out: frame.querySelector('[data-km-out]'),
+            out: frame.querySelector('[data-km-output]'),
             marked: [],
             filled: [],
             current: null,
@@ -260,13 +270,13 @@
         view.filled.forEach((slot) => slot.replaceChildren());
         view.filled = [];
         const groups = new Map();
-        const add = (at, item) => {
-            if (!view.lines.has(at)) return;
-            if (!groups.has(at)) groups.set(at, []);
-            groups.get(at).push(item);
+        const add = (lineNumber, item) => {
+            if (!view.lines.has(lineNumber)) return;
+            if (!groups.has(lineNumber)) groups.set(lineNumber, []);
+            groups.get(lineNumber).push(item);
         };
-        (step.vars || []).forEach(([name, at, full, short, fresh]) => {
-            add(at, { name, full, short, fresh, key: name });
+        (step.vars || []).forEach(([name, lineNumber, full, short, fresh]) => {
+            add(lineNumber, { name, full, short, fresh, key: name });
         });
         if (step.ret) {
             add(step.line, {
@@ -281,8 +291,9 @@
             });
         }
         const { open = '#', close = '' } = comment || {};
-        groups.forEach((items, at) => {
-            const slot = view.lines.get(at).querySelector('[data-km-ann]');
+        groups.forEach((items, lineNumber) => {
+            const slot = view.lines.get(lineNumber)
+                .querySelector('[data-km-annotation]');
             slot.append(`${open} `);
             items.forEach((item, n) => {
                 if (n) slot.append(', ');
@@ -304,7 +315,11 @@
         else if (top + rect.height > target + room - pad) {
             target = top + rect.height - room + pad;
         }
-        return clamp(Math.round(target), 0, Math.max(0, view.code.offsetHeight - room));
+        return clamp(
+            Math.round(target),
+            0,
+            Math.max(0, view.code.offsetHeight - room),
+        );
     }
 
     function hasMore({ stage }) {
@@ -325,30 +340,45 @@
         const pages = { PageDown: 1, PageUp: -1 };
         const hand = (wait) => {
             handUntil = Math.max(handUntil, performance.now() + wait);
+            if (!held) updateSoon();
         };
-        const taken = (event, dy) => event.target.closest?.('.km-header')
-            || scrollsInside(event.target, dy);
+        const keyDelta = (event) => {
+            const step = steps[event.key];
+            if (step !== undefined) return step;
+            const space = event.key === ' '
+                && !event.target.closest?.(
+                    'button, a, summary, [role="button"]',
+                );
+            if (!(event.key in pages) && !space) return undefined;
+            const direction = event.key in pages
+                ? pages[event.key]
+                : (event.shiftKey ? -1 : 1);
+            return direction * window.innerHeight * 0.85;
+        };
+        const taken = (event, deltaY) => event.target.closest?.('.km-header')
+            || scrollsInside(event.target, deltaY);
         window.addEventListener('wheel', (event) => {
-            if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-            hand(INPUT);
+            if (event.ctrlKey
+                || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+            hand(HAND_WINDOW_MS);
             if (!held || taken(event, event.deltaY)) return;
-            const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+            const unit = event.deltaMode === 1
+                ? 16
+                : event.deltaMode === 2 ? window.innerHeight : 1;
             held.nudge(event.deltaY * unit, true);
         }, { passive: true });
         window.addEventListener('keydown', (event) => {
             if (event.altKey || event.ctrlKey || event.metaKey) return;
-            if (event.target.closest?.('input, textarea, select, [contenteditable]')) return;
+            if (event.target.closest?.(
+                'input, textarea, select, [contenteditable]',
+            )) return;
             if (event.key === 'Escape') {
                 held?.release();
                 return;
             }
-            const space = event.key === ' ' && !event.target.closest?.('button, a, summary, [role="button"]');
-            let delta = steps[event.key];
-            if (delta === undefined && (event.key in pages || space)) {
-                delta = (event.key in pages ? pages[event.key] : event.shiftKey ? -1 : 1) * window.innerHeight * 0.85;
-            }
+            const delta = keyDelta(event);
             if (delta === undefined) return;
-            hand(INPUT);
+            hand(HAND_WINDOW_MS);
             if (held) {
                 event.preventDefault();
                 held.nudge(delta, true);
@@ -357,17 +387,21 @@
         let touchY = 0;
         window.addEventListener('touchstart', (event) => {
             touchY = event.touches[0].clientY;
-            hand(INPUT);
+            hand(HAND_WINDOW_MS);
         }, { passive: true });
         window.addEventListener('touchmove', (event) => {
-            hand(INPUT);
+            hand(HAND_WINDOW_MS);
             const y = event.touches[0].clientY;
             const delta = touchY - y;
             touchY = y;
             if (held && !taken(event, delta)) held.nudge(delta);
         }, { passive: true });
         ['touchend', 'touchcancel'].forEach((name) => {
-            window.addEventListener(name, () => hand(GLIDE), { passive: true });
+            window.addEventListener(
+                name,
+                () => hand(TOUCH_GLIDE_MS),
+                { passive: true },
+            );
         });
     }
 
@@ -388,16 +422,18 @@
             })
             : [];
         const texts = drafts.map((rows) => {
-            return rows.map((row) => row.querySelector('.km-code-explain__src').textContent);
+            return rows.map((row) => (
+                row.querySelector('.km-code-explain__source').textContent
+            ));
         });
         host.querySelectorAll('img[loading="lazy"]').forEach((image) => {
             image.loading = 'eager';
         });
         let carry = 0;
-        const owned = blocks.map((_, at) => {
+        const owned = Array.from(blocks.keys(), (noteIndex) => {
             const own = [];
             steps.forEach((step, n) => {
-                if (step.note === at) own.push(n);
+                if (step.note === noteIndex) own.push(n);
             });
             if (!own.length) return [carry];
             carry = own[own.length - 1];
@@ -410,13 +446,28 @@
             printed.push(text.length);
         });
         if (versions) {
-            text = steps.reduce((most, step) => ((step.out || '').length > most.length ? step.out : most), '');
+            text = steps.reduce((most, step) => (
+                (step.out || '').length > most.length ? step.out : most
+            ), '');
         }
-        const paced = (note) => owned[note].reduce((sum, at) => sum + (steps[at].pace || payload.pace), 0);
+        const paced = (note) => owned[note].reduce(
+            (sum, stepIndex) => sum + (steps[stepIndex].pace || payload.pace),
+            0,
+        );
 
         const opened = new Set();
-        const walk = {
-            host, pane, track, shaped: '', update, measure, shape, nudge, release, recentre, fillAll,
+        const explainer = {
+            host,
+            pane,
+            track,
+            shaped: '',
+            update,
+            measure,
+            shape,
+            nudge,
+            release,
+            recentre,
+            fillAll,
         };
         let snaps = [];
         const holds = new Map();
@@ -434,7 +485,7 @@
         let heldAt = 0;
         let heldY = 0;
         let focusedAt = 0;
-        let armed = false;
+        let armed = true;
         let unseen = true;
         let atTop = false;
         let lastAway = null;
@@ -452,15 +503,20 @@
                 host.getClientRects().length > 0,
                 host.closest('.km-page--clamped') !== null,
                 pane.clientWidth,
-                versions ? getComputedStyle(code).lineHeight : code.offsetHeight,
+                versions
+                    ? getComputedStyle(code).lineHeight
+                    : code.offsetHeight,
                 headerHeight(),
-                mode === 'stack' ? '' : blocks.map((block) => block.offsetHeight).join(','),
+                mode === 'stack'
+                    ? ''
+                    : blocks.map((block) => block.offsetHeight).join(','),
             ].join(' ');
         }
 
         function annotate(step) {
             const focused = stage.contains(document.activeElement)
-                ? document.activeElement.closest('[data-km-long]')?.dataset.kmKey
+                ? document.activeElement.closest('[data-km-long]')
+                    ?.dataset.kmKey
                 : undefined;
             annotateLines(main, step, payload.comment, opened);
             if (focused === undefined) return;
@@ -481,7 +537,11 @@
             const below = loose
                 ? stage.scrollHeight - stage.clientHeight - top
                 : code.offsetHeight - room - shift;
-            markEdges(main, mode === 'stage' ? top : 0, mode === 'stage' ? below : 0);
+            markEdges(
+                main,
+                mode === 'stage' ? top : 0,
+                mode === 'stage' ? below : 0,
+            );
         }
 
         function showOutput(view, step) {
@@ -490,13 +550,13 @@
             else view.out.removeAttribute('data-km-verdict');
         }
 
-        function print(at) {
+        function print(stepIndex) {
             if (!out || !text) return;
             if (versions) {
-                showOutput(main, steps[at]);
+                showOutput(main, steps[stepIndex]);
             } else {
-                const end = printed[at];
-                const start = end - (steps[at].out || '').length;
+                const end = printed[stepIndex];
+                const start = end - (steps[stepIndex].out || '').length;
                 out.replaceChildren();
                 if (start > 0) out.append(text.slice(0, start));
                 if (end > start) {
@@ -518,9 +578,9 @@
         }
 
         function renumber(staying, to) {
-            staying.forEach(([line, at]) => {
-                line.dataset.kmLine = String(at + 1);
-                line.dataset.kmNumber = drafts[to][at].dataset.kmNumber;
+            staying.forEach(([line, rowIndex]) => {
+                line.dataset.kmLine = String(rowIndex + 1);
+                line.dataset.kmNumber = drafts[to][rowIndex].dataset.kmNumber;
             });
         }
 
@@ -569,7 +629,9 @@
             code.replaceChildren(...rows);
             main.lines.clear();
             run.staying.forEach(([line, now]) => main.lines.set(now + 1, line));
-            run.coming.forEach((line) => main.lines.set(Number(line.dataset.kmLine), line));
+            run.coming.forEach((line) => (
+                main.lines.set(Number(line.dataset.kmLine), line)
+            ));
             renumber(run.staying, to);
             const first = run.coming[0] || null;
             if (!animate || to < from) {
@@ -583,9 +645,11 @@
                 signLine(line, 'removed');
             });
             run.coming.forEach((line) => signLine(line, 'added'));
-            const swap = getDurationMs('--km-code-explain-swap');
-            const later = (delay, then) => run.timers.push(window.setTimeout(then, delay));
-            later(swap * SEE_SWAPS, () => {
+            const swap = TIMING.codeSwap();
+            const scheduleSwap = (delay, then) => (
+                run.timers.push(window.setTimeout(then, delay))
+            );
+            scheduleSwap(swap * DIFF_VISIBLE_SWAPS, () => {
                 run.going.forEach((line) => line.remove());
                 run.going = [];
                 run.coming.forEach((line) => {
@@ -595,7 +659,7 @@
                 follow();
                 edge();
             });
-            later(swap * (SEE_SWAPS + 1.2), () => {
+            scheduleSwap(swap * (DIFF_VISIBLE_SWAPS + 1.2), () => {
                 run.coming.forEach((line) => {
                     line.removeAttribute('data-km-settling');
                     line.querySelector('.km-code-version__sign')?.remove();
@@ -642,7 +706,9 @@
         function rest() {
             rejoin();
             if (versions) swapNow(0);
-            main.marked.forEach((line) => line.removeAttribute('data-km-current'));
+            main.marked.forEach((line) => (
+                line.removeAttribute('data-km-current')
+            ));
             main.marked = [];
             main.filled.forEach((slot) => slot.replaceChildren());
             main.filled = [];
@@ -664,26 +730,34 @@
             shift = 0;
         }
 
-        function mark(at) {
-            if (at === active) return;
+        function mark(noteIndex) {
+            if (noteIndex === active) return;
             blocks[active]?.removeAttribute('data-km-active');
             blocks[active]?.removeAttribute('aria-current');
-            active = at;
-            blocks[at].setAttribute('data-km-active', '');
-            blocks[at].setAttribute('aria-current', 'step');
+            active = noteIndex;
+            blocks[noteIndex].setAttribute('data-km-active', '');
+            blocks[noteIndex].setAttribute('aria-current', 'step');
         }
 
-        function paint(at) {
-            const next = clamp(at, 0, steps.length - 1);
+        function paint(stepIndex) {
+            const next = clamp(stepIndex, 0, steps.length - 1);
             if (next === index) return;
             const animate = index !== -1
-                && Math.abs(next - index) <= ANIMATE_NEAR
+                && Math.abs(next - index) <= ANIMATE_WITHIN_STEPS
                 && !prefersReducedMotion();
             index = next;
             rejoin();
             const step = steps[index];
             const fresh = versions ? morph(step.version, animate) : null;
             markLines(main, step);
+            if (morphing) {
+                morphing.coming.forEach((line) => (
+                    line.removeAttribute('data-km-current')
+                ));
+                main.marked = main.marked.filter(
+                    (line) => !morphing.coming.includes(line),
+                );
+            }
             if (fresh && !main.current) main.current = fresh;
             annotate(step);
             print(index);
@@ -694,9 +768,16 @@
         function locate(value) {
             const into = clamp(value, 0, total);
             const found = keys.findIndex((item) => into <= item.to);
-            const at = found < 0 ? keys.length - 1 : found;
-            const key = keys[at];
-            return { at, through: clamp((into - key.from) / Math.max(1, key.to - key.from), 0, 1) };
+            const keyIndex = found < 0 ? keys.length - 1 : found;
+            const key = keys[keyIndex];
+            return {
+                keyIndex,
+                through: clamp(
+                    (into - key.from) / Math.max(1, key.to - key.from),
+                    0,
+                    1,
+                ),
+            };
         }
 
         function placeTrack(y) {
@@ -717,11 +798,12 @@
                 const seconds = Math.min((now - last) / 1000, 0.05);
                 last = now;
                 const away = trackY - goal;
-                const push = (trackSpeed + STIFFNESS * away) * seconds;
-                const decay = Math.exp(-STIFFNESS * seconds);
-                trackSpeed = (trackSpeed - STIFFNESS * push) * decay;
+                const push = (trackSpeed + TRACK_STIFFNESS * away) * seconds;
+                const decay = Math.exp(-TRACK_STIFFNESS * seconds);
+                trackSpeed = (trackSpeed - TRACK_STIFFNESS * push) * decay;
                 placeTrack(goal + (away + push) * decay);
-                if (Math.abs(trackY - goal) < 0.25 && Math.abs(trackSpeed) < 2) {
+                if (Math.abs(trackY - goal) < 0.25
+                    && Math.abs(trackSpeed) < 2) {
                     trackSpeed = 0;
                     placeTrack(goal);
                     trackFrame = 0;
@@ -734,29 +816,29 @@
 
         function render(smooth) {
             if (mode !== 'stage' || !keys.length) return;
-            const { at: slot, through } = locate(progress);
+            const { keyIndex: slot, through } = locate(progress);
             const key = keys[slot];
             glideTrack(key.a + (key.b - key.a) * through, smooth);
             let note = key.note;
             const own = owned[note];
             const length = paced(note);
             let run = 0;
-            let at = own[own.length - 1];
+            let stepIndex = own[own.length - 1];
             for (const each of own) {
                 run += steps[each].pace || payload.pace;
                 if (through * length < run) {
-                    at = each;
+                    stepIndex = each;
                     break;
                 }
             }
             if (key.kind === 'move' && through >= 0.5) {
                 note += 1;
-                at = owned[note][0];
+                stepIndex = owned[note][0];
             } else if (key.kind === 'move') {
-                at = own[own.length - 1];
+                stepIndex = own[own.length - 1];
             }
             mark(note);
-            paint(at);
+            paint(stepIndex);
         }
 
         function centre() {
@@ -775,13 +857,13 @@
             const bar = window.innerWidth - root.clientWidth;
             root.style.overflow = 'hidden';
             if (bar > 0) root.style.paddingRight = `${bar}px`;
-            held = walk;
+            held = explainer;
             heldAt = performance.now();
             render();
         }
 
         function release() {
-            if (held !== walk) return;
+            if (held !== explainer) return;
             held = null;
             root.style.removeProperty('overflow');
             root.style.removeProperty('padding-right');
@@ -790,8 +872,9 @@
         }
 
         function nudge(delta, smooth) {
-            if (performance.now() - heldAt < HOLD) return;
-            if ((delta > 0 && progress >= total) || (delta < 0 && progress <= 0)) {
+            if (performance.now() - heldAt < LOCK_GRACE_MS) return;
+            if ((delta > 0 && progress >= total)
+                || (delta < 0 && progress <= 0)) {
                 release();
                 return;
             }
@@ -799,12 +882,24 @@
             render(smooth);
         }
 
+        function keepHeld() {
+            if (Math.abs(window.scrollY - heldY) <= 2) return;
+            if (performance.now() - focusedAt < FOCUS_SCROLL_WINDOW_MS) {
+                jumpTo(heldY);
+            } else release();
+        }
+
+        function crossed(away) {
+            const byHand = performance.now() < handUntil;
+            if (!armed || !byHand || held || lastAway === null) return;
+            if (lastAway > 0 && away <= 0) lock(1);
+            else if (lastAway < 0 && away >= 0) lock(-1);
+        }
+
         function update() {
             if (mode !== 'stage') return;
-            if (held === walk) {
-                if (Math.abs(window.scrollY - heldY) <= 2) return;
-                if (performance.now() - focusedAt < FOCUS) jumpTo(heldY);
-                else release();
+            if (held === explainer) {
+                keepHeld();
                 return;
             }
             const away = centre() - focusLine();
@@ -814,19 +909,15 @@
                 progress = away > 0 || atTop ? 0 : total;
                 render();
             }
-            if (Math.abs(away) > ARM || atTop) armed = true;
-            const byHand = performance.now() < handUntil;
-            if (armed && byHand && !held && lastAway !== null) {
-                if (lastAway > 0 && away <= 0) lock(1);
-                else if (lastAway < 0 && away >= 0) lock(-1);
-            }
+            if (Math.abs(away) > REARM_DISTANCE_PX || atTop) armed = true;
+            crossed(away);
             lastAway = atTop ? 1 : away;
         }
 
         function clearStack() {
             watcher?.disconnect();
             watcher = null;
-            holds.forEach((_, hold) => hold.remove());
+            for (const hold of holds.keys()) hold.remove();
             holds.clear();
             snaps.forEach((view) => view.frame.remove());
             snaps = [];
@@ -845,16 +936,20 @@
 
         function fill(batch) {
             const { most, whole, heights } = fit;
-            const rooms = batch.map(({ at }) => {
-                const step = steps[owned[at][owned[at].length - 1]];
+            const rooms = batch.map(({ blockIndex }) => {
+                const step = steps[
+                    owned[blockIndex][owned[blockIndex].length - 1]
+                ];
                 return versions ? Math.min(most, heights[step.version]) : most;
             });
-            const totals = batch.map(({ at }) => {
-                const step = steps[owned[at][owned[at].length - 1]];
+            const totals = batch.map(({ blockIndex }) => {
+                const step = steps[
+                    owned[blockIndex][owned[blockIndex].length - 1]
+                ];
                 return versions ? heights[step.version] : whole;
             });
-            batch.forEach(({ view, at }, n) => {
-                const upto = owned[at][owned[at].length - 1];
+            batch.forEach(({ view, blockIndex }, n) => {
+                const upto = owned[blockIndex][owned[blockIndex].length - 1];
                 const step = steps[upto];
                 if (versions) showVersion(view, drafts[step.version]);
                 markLines(view, step);
@@ -864,31 +959,49 @@
                     else view.out.textContent = text.slice(0, printed[upto]);
                     view.out.hidden = !view.out.textContent;
                 }
-                view.frame.style.setProperty('--km-code-explain-stage', `${rooms[n]}px`);
+                view.frame.style.setProperty(
+                    '--km-code-explain-stage',
+                    `${rooms[n]}px`,
+                );
             });
-            const shifts = batch.map(({ view }, n) => followLine(view, rooms[n], 0));
+            const shifts = batch.map(({ view }, n) => (
+                followLine(view, rooms[n], 0)
+            ));
             const reach = batch.map(({ view }) => hasMore(view));
             batch.forEach(({ view }, n) => {
-                view.frame.style.setProperty('--km-code-explain-shift', `${shifts[n]}px`);
-                markEdges(view, shifts[n], totals[n] - rooms[n] - shifts[n], reach[n]);
+                view.frame.style.setProperty(
+                    '--km-code-explain-shift',
+                    `${shifts[n]}px`,
+                );
+                markEdges(
+                    view,
+                    shifts[n],
+                    totals[n] - rooms[n] - shifts[n],
+                    reach[n],
+                );
             });
         }
 
         function reveal(targets) {
             const batch = targets
                 .filter((hold) => holds.has(hold))
-                .map((hold) => ({ hold, at: holds.get(hold) }));
+                .map((hold) => ({ hold, blockIndex: holds.get(hold) }));
             if (!batch.length) return;
             host.setAttribute('data-km-measuring', '');
-            const passed = batch.map(({ hold }) => hold.getBoundingClientRect().bottom <= 0);
+            const passed = batch.map(({ hold }) => (
+                hold.getBoundingClientRect().bottom <= 0
+            ));
+            const sizes = batch.map(({ hold }) => hold.offsetHeight);
             batch.forEach((item) => {
                 watcher.unobserve(item.hold);
                 holds.delete(item.hold);
-                item.view = snapshot(blocks[item.at], item.hold);
+                item.view = snapshot(blocks[item.blockIndex], item.hold);
             });
             fill(batch);
             const drift = batch.reduce(
-                (sum, { view }, n) => sum + (passed[n] ? view.frame.offsetHeight - fit.size : 0),
+                (sum, { view }, n) => (
+                    sum + (passed[n] ? view.frame.offsetHeight - sizes[n] : 0)
+                ),
                 0,
             );
             if (Math.abs(drift) > 0.5) window.scrollBy(0, drift);
@@ -898,7 +1011,8 @@
 
         function stack() {
             const first = snapshot(blocks[0]);
-            const line = first.lines.get(1)?.getBoundingClientRect().height || 20;
+            const line = first.lines.get(1)?.getBoundingClientRect().height
+                || 20;
             let whole = first.code.offsetHeight;
             let count = first.lines.size;
             let heights = [];
@@ -911,21 +1025,48 @@
                 count = Math.max(...drafts.map((rows) => rows.length));
             }
             const pad = Math.max(0, whole - line * count);
-            const most = Math.min(whole, pad + line * STACK_LINES);
+            const most = Math.min(whole, pad + line * STACK_MAX_LINES);
             fit = { most, whole, heights, size: 0 };
-            fill([{ view: first, at: 0 }]);
+            fill([{ view: first, blockIndex: 0 }]);
             fit.size = first.frame.offsetHeight;
             if (blocks.length < 2) return;
             watcher = new IntersectionObserver((entries) => {
-                reveal(entries.filter((entry) => entry.isIntersecting).map((entry) => entry.target));
+                reveal(entries
+                    .filter((entry) => entry.isIntersecting)
+                    .map((entry) => entry.target));
             }, { rootMargin: '150% 0px' });
-            blocks.forEach((block, at) => {
-                if (!at) return;
+            const roomOf = (blockIndex) => {
+                const last = owned[blockIndex][owned[blockIndex].length - 1];
+                return versions
+                    ? Math.min(fit.most, fit.heights[steps[last].version])
+                    : fit.most;
+            };
+            const look = first.out ? getComputedStyle(first.out) : null;
+            const paneOf = (blockIndex) => {
+                if (!look) return 0;
+                const last = owned[blockIndex][owned[blockIndex].length - 1];
+                const said = versions
+                    ? steps[last].out || ''
+                    : text.slice(0, printed[last]);
+                if (!said) return 0;
+                return Math.min(
+                    said.split('\n').length * parseFloat(look.lineHeight)
+                        + parseFloat(look.paddingTop)
+                        + parseFloat(look.paddingBottom),
+                    parseFloat(look.maxHeight),
+                );
+            };
+            const paneFirst = first.out && !first.out.hidden
+                ? first.out.offsetHeight : 0;
+            blocks.forEach((block, blockIndex) => {
+                if (!blockIndex) return;
                 const hold = document.createElement('div');
                 hold.className = 'km-code-explain__snap';
-                hold.style.height = `${fit.size}px`;
+                const extra = roomOf(blockIndex) - roomOf(0)
+                    + paneOf(blockIndex) - paneFirst;
+                hold.style.height = `${fit.size + extra}px`;
                 block.prepend(hold);
-                holds.set(hold, at);
+                holds.set(hold, blockIndex);
                 watcher.observe(hold);
             });
             if (window.matchMedia('print').matches) fillAll();
@@ -935,8 +1076,126 @@
             reveal(Array.from(holds.keys()));
         }
 
+        function pickMode() {
+            if (!host.getClientRects().length) return '';
+            if (prefersReducedMotion()
+                || host.closest('.km-page--clamped') !== null) {
+                return 'stack';
+            }
+            host.setAttribute('data-km-mode', 'stage');
+            return host.clientWidth >= STAGE_MIN_WIDTH_PX ? 'stage' : 'stack';
+        }
+
+        function sizeStage() {
+            const top = headerHeight();
+            const space = window.innerHeight - top;
+            if (out && text) {
+                out.textContent = text;
+                out.style.height = 'auto';
+            }
+            const full = out && text ? out.offsetHeight : 0;
+            let whole = code.offsetHeight;
+            let count = main.lines.size;
+            if (versions) {
+                whole = Math.max(...Array.from(drafts.keys(), (n) => {
+                    swapNow(n);
+                    return code.offsetHeight;
+                }));
+                count = Math.max(...drafts.map((rows) => rows.length));
+                swapNow(0);
+            }
+            const line = main.lines.get(1)?.getBoundingClientRect().height
+                || 20;
+            const pad = Math.max(0, whole - line * count);
+            const least = Math.min(whole, pad + line * STAGE_MIN_LINES);
+            const caption = frame.offsetHeight - stage.offsetHeight - full;
+            const most = Math.min(
+                whole,
+                Math.max(
+                    least,
+                    Math.min(
+                        space * STAGE_SPACE_SHARE,
+                        space - 2 * (full + STAGE_MARGIN_PX),
+                    ) - caption,
+                ),
+            );
+            room = most < whole
+                ? Math.max(least, pad + line * Math.floor((most - pad) / line))
+                : most;
+            host.style.setProperty('--km-code-explain-stage', `${room}px`);
+            height = caption + room;
+            host.style.setProperty('--km-code-explain-notes', `${height}px`);
+            pane.style.minHeight = `${pane.offsetHeight}px`;
+            if (out) {
+                out.replaceChildren();
+                out.style.removeProperty('height');
+            }
+        }
+
+        function planNotes() {
+            const starts = [];
+            const ends = [];
+            blocks.forEach((block) => {
+                const size = block.offsetHeight;
+                const tall = size > height - 2 * STAGE_PADDING_PX;
+                const from = tall
+                    ? block.offsetTop - STAGE_PADDING_PX
+                    : block.offsetTop + size / 2 - height / 2;
+                starts.push(from);
+                ends.push(tall
+                    ? block.offsetTop + size - height + STAGE_PADDING_PX
+                    : from);
+            });
+            let travelled = 0;
+            for (let note = 0; note < blocks.length; note += 1) {
+                const hold = Math.max(
+                    paced(note),
+                    ends[note] - starts[note],
+                );
+                keys.push({
+                    kind: 'hold',
+                    note,
+                    from: travelled,
+                    to: travelled + hold,
+                    a: starts[note],
+                    b: ends[note],
+                });
+                travelled += hold;
+                if (note === blocks.length - 1) continue;
+                const move = Math.max(
+                    1,
+                    Math.abs(starts[note + 1] - ends[note]),
+                );
+                keys.push({
+                    kind: 'move',
+                    note,
+                    from: travelled,
+                    to: travelled + move,
+                    a: ends[note],
+                    b: starts[note + 1],
+                });
+                travelled += move;
+            }
+            total = travelled;
+            progress = clamp(progress, 0, total);
+        }
+
+        function reachable() {
+            const target = window.scrollY + centre() - focusLine();
+            const spare = root.scrollHeight - window.innerHeight - target;
+            return Math.min(target, spare) >= REARM_DISTANCE_PX;
+        }
+
+        function useStack() {
+            mode = 'stack';
+            rest();
+            pane.style.removeProperty('min-height');
+            host.setAttribute('data-km-mode', mode);
+            if (out) out.hidden = true;
+        }
+
         function measure() {
-            const wasHeld = held === walk;
+            const wasHeld = held === explainer;
             const where = wasHeld && keys.length ? locate(progress) : null;
             clearStack();
             rejoin();
@@ -945,94 +1204,18 @@
             mode = '';
             rest();
             pane.style.removeProperty('min-height');
-            if (host.getClientRects().length) {
-                mode = 'stack';
-                if (!prefersReducedMotion() && host.closest('.km-page--clamped') === null) {
-                    host.setAttribute('data-km-mode', 'stage');
-                    if (host.clientWidth >= WIDE) mode = 'stage';
-                }
-                host.setAttribute('data-km-mode', mode);
-            }
+            mode = pickMode();
+            if (mode) host.setAttribute('data-km-mode', mode);
             if (out) out.hidden = mode !== 'stage' || !text;
             if (mode === 'stage') {
-                const top = headerHeight();
-                const space = window.innerHeight - top;
-                if (out && text) {
-                    out.textContent = text;
-                    out.style.height = 'auto';
-                }
-                const full = out && text ? out.offsetHeight : 0;
-                let whole = code.offsetHeight;
-                let count = main.lines.size;
-                if (versions) {
-                    whole = Math.max(...drafts.map((_, n) => {
-                        swapNow(n);
-                        return code.offsetHeight;
-                    }));
-                    count = Math.max(...drafts.map((rows) => rows.length));
-                    swapNow(0);
-                }
-                const line = main.lines.get(1)?.getBoundingClientRect().height || 20;
-                const pad = Math.max(0, whole - line * count);
-                const least = Math.min(whole, pad + line * MIN_LINES);
-                const caption = frame.offsetHeight - stage.offsetHeight - full;
-                const most = Math.min(
-                    whole,
-                    Math.max(
-                        least,
-                        Math.min(
-                            space * SHARE,
-                            space - 2 * (full + ROOM),
-                        ) - caption,
-                    ),
-                );
-                room = most < whole
-                    ? Math.max(least, pad + line * Math.floor((most - pad) / line))
-                    : most;
-                host.style.setProperty('--km-code-explain-stage', `${room}px`);
-                height = caption + room;
-                host.style.setProperty('--km-code-explain-notes', `${height}px`);
-                pane.style.minHeight = `${pane.offsetHeight}px`;
-                if (out) {
-                    out.replaceChildren();
-                    out.style.removeProperty('height');
-                }
-                const starts = [];
-                const ends = [];
-                blocks.forEach((block) => {
-                    const size = block.offsetHeight;
-                    const tall = size > height - 2 * PAD;
-                    const from = tall
-                        ? block.offsetTop - PAD
-                        : block.offsetTop + size / 2 - height / 2;
-                    starts.push(from);
-                    ends.push(tall ? block.offsetTop + size - height + PAD : from);
-                });
-                let at = 0;
-                blocks.forEach((_, note) => {
-                    const hold = Math.max(
-                        paced(note),
-                        ends[note] - starts[note],
-                    );
-                    keys.push({
-                        kind: 'hold', note, from: at, to: at + hold, a: starts[note], b: ends[note],
-                    });
-                    at += hold;
-                    if (note === blocks.length - 1) return;
-                    const move = Math.max(1, Math.abs(starts[note + 1] - ends[note]));
-                    keys.push({
-                        kind: 'move', note, from: at, to: at + move, a: ends[note], b: starts[note + 1],
-                    });
-                    at += move;
-                });
-                total = at;
-                progress = clamp(progress, 0, total);
-            } else if (mode === 'stack') {
-                stack();
+                sizeStage();
+                planNotes();
+                if (!reachable()) useStack();
             }
+            if (mode === 'stack') stack();
             void host.offsetHeight;
             host.removeAttribute('data-km-measuring');
-            walk.shaped = shape();
+            explainer.shaped = shape();
             unseen = true;
             lastAway = null;
             edge();
@@ -1042,36 +1225,44 @@
                 return;
             }
             if (where) {
-                const key = keys[where.at];
+                const key = keys[where.keyIndex];
                 progress = key.from + (key.to - key.from) * where.through;
             }
             recentre();
             render();
         }
 
-        function go(at) {
-            const key = keys.find((item) => item.kind === 'hold' && item.note === at);
-            if (!key || held !== walk) return;
+        function goToNote(noteIndex) {
+            const key = keys.find((item) => (
+                item.kind === 'hold' && item.note === noteIndex
+            ));
+            if (!key || held !== explainer) return;
             progress = key.from + 1;
             render();
         }
 
         let copiedTimer = 0;
         let copiedButton = null;
-        const later = (wait, then) => {
+        const scheduleCopy = (wait, then) => {
             copiedTimer = window.setTimeout(then, wait);
         };
         const copied = (button, done) => {
+            announce(say(done ? 'copied' : 'failed'));
             window.clearTimeout(copiedTimer);
-            copiedButton?.classList.remove('km-is-fading', 'success');
+            copiedButton?.classList.remove(
+                'km-code-explain__copy--fading',
+                'success',
+            );
             copiedButton = button;
             button.classList.toggle('success', done);
             if (!done) return;
-            later(TIMING.tooltipHold(), () => {
-                button.classList.add('km-is-fading');
-                later(TIMING.fast(), () => {
+            scheduleCopy(TIMING.tooltipHold(), () => {
+                button.classList.add('km-code-explain__copy--fading');
+                scheduleCopy(TIMING.fast(), () => {
                     button.classList.remove('success');
-                    later(TIMING.fast() * 2, () => button.classList.remove('km-is-fading'));
+                    scheduleCopy(TIMING.fast() * 2, () => (
+                        button.classList.remove('km-code-explain__copy--fading')
+                    ));
                 });
             });
         };
@@ -1083,7 +1274,9 @@
             if (value) unfold(value);
             const button = event.target.closest?.('[data-km-copy]');
             if (button) {
-                const source = versions ? { ...payload, code: versions[version] } : payload;
+                const source = versions
+                    ? { ...payload, code: versions[version] }
+                    : payload;
                 copyText(sourceOf(source)).then((done) => copied(button, done));
             }
         });
@@ -1116,24 +1309,24 @@
             const block = event.target.closest?.('[data-km-note]');
             if (mode !== 'stage' || !block) return;
             if (!held) lock(centre() >= focusLine() ? 1 : -1);
-            else if (held !== walk) return;
-            if (!block.hasAttribute('data-km-active')) go(Number(block.dataset.kmNote));
+            else if (held !== explainer) return;
+            if (!block.hasAttribute('data-km-active')) {
+                goToNote(Number(block.dataset.kmNote));
+            }
         });
 
         host.addEventListener('load', () => {
-            walk.shaped = '';
+            explainer.shaped = '';
             settleSoon();
         }, true);
 
         wireInput();
-        return walk;
+        return explainer;
     }
 
-    ready(() => {
-        try {
-            initCodeExplains();
-        } catch (error) {
-            console.error(error);
-        }
-    });
+    try {
+        initCodeExplains();
+    } catch (error) {
+        console.error(error);
+    }
 })();

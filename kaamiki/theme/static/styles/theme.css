@@ -2337,7 +2337,8 @@ html:not(.km-document--scripted) .km-sidebar:target {
             height: 2.1538em;
             font-size: 0.875em;
             line-height: 1;
-            color: hsl(var(--km-colour-grey-93));
+            color: hsl(var(--km-colour-grey-63));
+            font-weight: 900;
         }
 
         &:is(ol) {
@@ -2383,6 +2384,10 @@ html:not(.km-document--scripted) .km-sidebar:target {
 
     & .admonition .km-list {
         --km-list-space: 0.75rem;
+
+        &>li>.km-list__tick {
+            color: hsl(var(--km-colour-admonition-fg));
+        }
     }
 
     & :is(ul:not(.search), ol):where(:not(.km-list), .km-release__body *) {
@@ -3169,7 +3174,7 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
 
 .admonition {
     font-size: var(--km-font-size-md);
-    --km-colour-admonition-fg: var(--km-colour-grey-93);
+    --km-colour-admonition-fg: var(--km-colour-grey-63);
     --km-colour-admonition-bg: var(--km-colour-grey-11);
     --km-adm-line: calc(var(--km-font-size-md) * 1.625);
     --km-colour-admonition-bg-alpha: 0.5;
@@ -3199,6 +3204,10 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
     & code {
         background-color: transparent;
         border-color: var(--km-colour-admonition-border);
+    }
+
+    & :not(pre) > code {
+        color: inherit;
     }
 
     & a code {

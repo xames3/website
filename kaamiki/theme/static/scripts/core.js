@@ -2,19 +2,49 @@
 // this order: core, animations, theme, explainer. Each takes what it
 // needs from the ones before it, and theme starts everything. Explainer
 // is only on pages with a code-explain or code-version and starts its own.
+// The order is set in the scripts tuple of
+// https://github.com/xames3/website/blob/main/kaamiki/__init__.py
 (() => {
     'use strict';
 
     const HASH_SETTLE_MS = 2600;
     const FETCH_TIMEOUT_MS = 8000;
-    const FOCUSABLE = 'a[href], button, input, select, textarea, summary, iframe, [tabindex]';
+    const GLIDE_STOPS = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
+    const GLIDE_KEYS = new Set([
+        'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ',
+    ]);
+    const GLIDE_BASE_MS = 380;
+    const GLIDE_PX_FACTOR = 0.12;
+    const GLIDE_MIN_MS = 520;
+    const GLIDE_MAX_MS = 1100;
+    const FOCUSABLE = 'a[href], button, input, select, textarea, summary, '
+        + 'iframe, [tabindex]';
+    const ICON_ONLY = '.km-header__menu-toggle > i, .km-search__submit > i, '
+        + '.km-scrolltop > i';
     const REVEAL_WAITING = 'km-page-reveal-item';
     const REVEAL_SHOWN = 'km-page-reveal-item--shown';
     const root = document.documentElement;
     const STRINGS = JSON.parse(root.dataset.kmStrings);
+    const MARKS = JSON.parse(root.dataset.kmIcons);
 
-    function say(key, values = {}) {
-        return STRINGS[key].replace(/\{(\w+)\}/g, (match, name) => (name in values ? values[name] : match));
+    function say(key) {
+        return STRINGS[key];
+    }
+
+    function makeIcon(key, ...classes) {
+        if (!MARKS[key]) return null;
+        const mark = document.createElement('i');
+        mark.className = [MARKS[key], ...classes].join(' ');
+        mark.setAttribute('aria-hidden', 'true');
+        return mark;
+    }
+
+    function attempt(fn) {
+        try {
+            return fn();
+        } catch {
+            return undefined;
+        }
     }
 
     function decodeId(value) {
@@ -62,20 +92,32 @@
     function getDurationMs(name) {
         if (durationCache.has(name)) return durationCache.get(name);
         const raw = getCssVar(name);
-        const value = raw.endsWith('ms') ? parseFloat(raw) : parseFloat(raw) * 1000;
+        const value = raw.endsWith('ms')
+            ? parseFloat(raw)
+            : parseFloat(raw) * 1000;
         durationCache.set(name, value);
         return value;
     }
 
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function/cubic-bezier
+    const SMOOTH_CURVE = [0.32, 0.72, 0, 1];
+
     function springProgress() {
-        const raw = getCssVar('--km-spring-smooth');
-        const points = raw.startsWith('linear(') ? raw.slice(7, -1).split(',').map(Number) : null;
-        const last = points ? points.length - 3 : 0;
+        const [x1, y1, x2, y2] = SMOOTH_CURVE;
+        const axis = (a, b, t) => (
+            3 * a * (1 - t) ** 2 * t + 3 * b * (1 - t) * t ** 2 + t ** 3
+        );
         return (time) => {
-            if (!points) return 1 - (1 - time) ** 4;
-            const at = time * last;
-            const low = Math.min(Math.floor(at), last - 1);
-            return (points[low] + (points[low + 1] - points[low]) * (at - low)) / points[last];
+            if (time <= 0) return 0;
+            if (time >= 1) return 1;
+            let low = 0;
+            let high = 1;
+            for (let i = 0; i < 32; i += 1) {
+                const middle = (low + high) / 2;
+                if (axis(x1, x2, middle) < time) low = middle;
+                else high = middle;
+            }
+            return axis(y1, y2, (low + high) / 2);
         };
     }
 
@@ -83,13 +125,82 @@
         accordionMin: () => getDurationMs('--km-duration-accordion-min'),
         accordionMax: () => getDurationMs('--km-duration-accordion-max'),
         revealStep: () => getDurationMs('--km-reveal-step'),
+        revealDuration: () => getDurationMs('--km-reveal-duration'),
+        titleStep: () => getDurationMs('--km-title-step'),
         tooltipHold: () => getDurationMs('--km-tooltip-hold'),
         fast: () => getDurationMs('--km-duration-fast'),
+        normal: () => getDurationMs('--km-duration-normal'),
+        slow: () => getDurationMs('--km-duration-slow'),
+        clamp: () => getDurationMs('--km-duration-clamp'),
         showMoreHold: () => getDurationMs('--km-show-more-hold'),
         tickerDuration: () => getDurationMs('--km-ticker-duration'),
         rotateHold: () => getDurationMs('--km-rotate-hold'),
         rotateResize: () => getDurationMs('--km-rotate-resize'),
+        codeSwap: () => getDurationMs('--km-code-explain-swap'),
     };
+
+    let glideStop = null;
+
+    function glideTo(targetY) {
+        const startY = window.scrollY;
+        const endY = clamp(
+            targetY,
+            0,
+            Math.max(0, root.scrollHeight - window.innerHeight),
+        );
+        if (Math.abs(endY - startY) < 1) return Promise.resolve(true);
+        if (prefersReducedMotion()) {
+            window.scrollTo(0, endY);
+            return Promise.resolve(true);
+        }
+        glideStop?.();
+        const distance = endY - startY;
+        const duration = clamp(
+            GLIDE_BASE_MS + Math.abs(distance) * GLIDE_PX_FACTOR,
+            GLIDE_MIN_MS,
+            GLIDE_MAX_MS,
+        );
+        const spring = springProgress();
+        return new Promise((resolve) => {
+            let frame = 0;
+            const began = performance.now();
+            const finish = (arrived) => {
+                cancelAnimationFrame(frame);
+                GLIDE_STOPS.forEach((type) => (
+                    window.removeEventListener(type, stop, true)
+                ));
+                glideStop = null;
+                resolve(arrived);
+            };
+            const stop = (event) => {
+                if (event?.type === 'keydown'
+                    && !GLIDE_KEYS.has(event.key)) return;
+                if (event?.type === 'wheel'
+                    && !event.deltaX && !event.deltaY) return;
+                finish(false);
+            };
+            const step = (now) => {
+                const time = clamp((now - began) / duration, 0, 1);
+                window.scrollTo({
+                    top: startY + distance * spring(time),
+                    behavior: 'instant',
+                });
+                if (time === 1) finish(true);
+                else frame = requestAnimationFrame(step);
+            };
+            glideStop = stop;
+            GLIDE_STOPS.forEach((type) => window.addEventListener(
+                type,
+                stop,
+                { capture: true, passive: true },
+            ));
+            frame = requestAnimationFrame(step);
+        });
+    }
+
+    function stopGlide() {
+        glideStop?.();
+    }
 
     function headerHeight() {
         const header = document.querySelector('.km-header');
@@ -98,7 +209,9 @@
 
     function afterReveal(node, fn) {
         const block = node.closest(`.${REVEAL_WAITING}:not(.${REVEAL_SHOWN})`);
-        if (block) block.addEventListener('km:reveal', () => fn(node), { once: true });
+        if (block) {
+            block.addEventListener('km:reveal', () => fn(node), { once: true });
+        }
         else fn(node);
     }
 
@@ -131,9 +244,13 @@
     function anchorHost(element) {
         const previous = element.previousElementSibling;
         if (previous) {
-            if (previous.classList.contains('km-text-pre-section')) return previous;
+            if (previous.classList.contains('km-text--pre-section')) {
+                return previous;
+            }
             const last = previous.lastElementChild;
-            if (last && last.classList.contains('km-text-pre-section')) return last;
+            if (last && last.classList.contains('km-text--pre-section')) {
+                return last;
+            }
         }
         return element;
     }
@@ -162,7 +279,9 @@
 
     function settleHash() {
         if (location.hash.length <= 1) return;
-        const target = document.getElementById(decodeId(location.hash.slice(1)));
+        const target = document.getElementById(
+            decodeId(location.hash.slice(1)),
+        );
         if (!target) return;
 
         let cancelled = false;
@@ -199,10 +318,11 @@
         const active = document.activeElement;
         field.value = text;
         field.setAttribute('readonly', '');
-        field.style.cssText = 'position: fixed; top: 0; left: 0; opacity: 0; pointer-events: none;';
+        field.style.cssText = 'position: fixed; top: 0; left: 0; opacity: 0; '
+            + 'pointer-events: none;';
         document.body.append(field);
         field.select();
-        let copied = false;
+        let copied;
         try {
             copied = document.execCommand('copy');
         } catch {
@@ -215,22 +335,47 @@
 
     function copyText(text) {
         if (window.isSecureContext && navigator.clipboard?.writeText) {
-            return navigator.clipboard.writeText(text).then(() => true, () => copyByHand(text));
+            return navigator.clipboard.writeText(text)
+                .then(() => true, () => copyByHand(text));
         }
         return Promise.resolve(copyByHand(text));
+    }
+
+    const liveRegion = document.createElement('div');
+    liveRegion.className = 'sr-only';
+    liveRegion.setAttribute('role', 'status');
+    document.body.append(liveRegion);
+    let announcing = 0;
+
+    function announce(message) {
+        window.clearTimeout(announcing);
+        liveRegion.textContent = message;
+        announcing = window.setTimeout(() => {
+            liveRegion.textContent = '';
+        }, TIMING.tooltipHold());
     }
 
     function clamp(value, low, high) {
         return Math.max(low, Math.min(high, value));
     }
 
-    function ready(fn) {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', fn, { once: true });
-        } else {
-            fn();
-        }
+    function markMissingIcons() {
+        const icons = Array.from(document.querySelectorAll(ICON_ONLY))
+            .filter((icon) => icon.getClientRects().length);
+        const bare = icons.length > 0 && icons.every((icon) => (
+            ['none', 'normal'].includes(
+                getComputedStyle(icon, '::before').content,
+            )
+        ));
+        document.fonts.ready.then(() => {
+            const failed = Array.from(document.fonts).some((face) => (
+                face.status === 'error' && /Font Awesome/.test(face.family)
+            ));
+            root.classList.toggle('km-document--no-icons', bare || failed);
+        });
     }
+
+    window.addEventListener('load', markMissingIcons, { once: true });
 
     window.Kaamiki = {
         codeExplains: [],
@@ -239,22 +384,25 @@
         REVEAL_WAITING,
         TIMING,
         anchorTargetY,
+        announce,
+        attempt,
         clamp,
         copyText,
         decodeId,
         fetchJson,
         getCssVar,
-        getDurationMs,
+        glideTo,
         headerHeight,
         isModifiedClick,
         layoutTop,
+        makeIcon,
         onScroll,
         onVisible,
         prefersReducedMotion,
         rafThrottle,
-        ready,
         say,
         settleHash,
         springProgress,
+        stopGlide,
     };
 })();
