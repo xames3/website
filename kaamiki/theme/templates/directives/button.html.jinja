@@ -4,33 +4,35 @@ Button Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
-Last updated on: 25 October 2026
+Last updated on: 05 November 2026
 #}
+{%- from "components/helpers.html.jinja" import km_id with context %}
+{%- from "components/chevron.html.jinja" import km_chevron_icon -%}
+{%- from "components/anchors.html.jinja" import km_anchors -%}
+{%- set km_parts = ["km-button", km_look, km_extra, "reference external"] -%}
+{%- set km_icon = [km_faicon, "km-button__icon"] -%}
+{%- set km_after = km_icon + ["km-button__icon--icon-position-after"] -%}
+{%- set km_side = "km-button-row--align-" ~ km_align -%}
+{%- set km_row = ["km-button-row", km_side if km_align != "center"] -%}
 {% block km_button %}
-    <p class="km-button-row km-button-row--{{ km_align }}"
-       {% if km_ids %}id="{{ km_ids[0] }}"{% endif %}>
-        <a class="km-button {{ km_look }}{% if km_extra %} {{ km_extra }}{% endif %} reference external"
+    <p class="{{ km_row|select|join(' ') }}">
+        {{- km_anchors(km_ids) -}}
+        <a class="{{ km_parts|select|join(' ') }}"
+           {{ km_id(km_ids) }}
            href="{{ km_url }}"
            {{ km_anchor|xmlattr }}>
             <span>
                 {%- if km_faicon and not km_faicon_after -%}
-                    <span class="{{ km_faicon }}"
+                    <span class="{{ km_icon|join(' ') }}"
                           aria-hidden="true"></span>
                 {%- endif -%}
                 {{ km_text }}
                 {%- if km_faicon and km_faicon_after -%}
-                    <span class="{{ km_faicon }} km-icon-after"
+                    <span class="{{ km_after|join(' ') }}"
                           aria-hidden="true"></span>
                 {%- endif -%}
                 {%- if km_chevron -%}
-                    <svg class="km-chevron"
-                         viewBox="0 0 16 16"
-                         aria-hidden="true">
-                        <g class="km-chevron-arrow">
-                        <path class="km-chevron-shaft" d="M13 8H3" pathLength="1" />
-                        <path d="M9 4l4 4-4 4" />
-                        </g>
-                    </svg>
+                    {{ km_chevron_icon() }}
                 {%- endif -%}
             </span>
         </a>

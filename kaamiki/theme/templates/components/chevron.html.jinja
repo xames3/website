@@ -1,0 +1,18 @@
+{#
+Chevron Macro
+=============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 02 November 2026
+Last updated on: 02 November 2026
+#}
+{%- macro km_chevron_icon() -%}
+    <svg class="km-chevron"
+         viewBox="0 0 16 16"
+         aria-hidden="true">
+        <g class="km-chevron__arrow">
+        <path class="km-chevron__shaft" d="M13 8H3" pathLength="1" />
+        <path d="M9 4l4 4-4 4" />
+        </g>
+    </svg>
+{%- endmacro -%}

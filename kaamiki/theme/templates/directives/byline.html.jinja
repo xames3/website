@@ -1,0 +1,96 @@
+{#
+Byline Template
+===============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 22 February 2025
+Last updated on: 07 November 2026
+#}
+{%- from "components/helpers.html.jinja"
+import km_glyph, km_id, km_tab with context %}
+{%- from "components/anchors.html.jinja" import km_anchors -%}
+{%- set km_side = "km-byline--align-" ~ km_align -%}
+{%- set km_base = ["km-byline", km_side if km_align != "center"] -%}
+{%- macro km_ticker(minutes) -%}
+    {%- set km_ms = ([3, 2 + 0.7 * minutes]|min * 1000)|round|int -%}
+    <span class="km-ticker"
+          style="--km-ticker-duration: {{ km_ms }}ms">{{- minutes -}}</span>
+{%- endmacro -%}
+{%- macro km_reading() -%}
+    <p class="km-byline__reading-time">
+        {{ km_glyph(km_fa_icons.reading_time, "km-byline__reading-time-icon") }}
+        {{- _("%(num)s min read", num=km_ticker(km_minutes) ) -}}
+    </p>
+{%- endmacro -%}
+{%- macro km_lang() -%}
+    <span class="km-byline__language">
+        {{ km_glyph(km_fa_icons.language) }}
+        <span lang="{{ km_language.code }}">{{ km_language.name }}</span>
+    </span>
+{%- endmacro -%}
+{%- macro km_copy() -%}
+    <button type="button"
+            class="km-byline__copy km-tooltip"
+            data-km-copy-url>
+        {{ km_glyph(km_fa_icons.copy_url) }}
+        <span>{{ _("Copy") }}</span>
+    </button>
+{%- endmacro -%}
+{%- macro km_source() -%}
+    <div class="km-byline__meta-group km-byline__meta-group--end">
+        <a href="{{ km_page_source }}"
+           class="km-byline__source">
+            {{ km_glyph(km_fa_icons.page_source) }}
+            <span>{{- _("Show") -}}</span>
+        </a>
+    </div>
+{%- endmacro -%}
+{% block km_byline %}
+    {%- set km_who = km_name|d(km_project.author) %}
+    {%- set km_items = [
+        km_reading() if km_reading_time,
+        km_lang() if km_language,
+        km_copy() if km_copy_url
+        ]|select|list %}
+    <div class="{{ (km_base + (km_classes or []))|select|join(' ') }}"
+         {{ km_id(km_ids) }}
+         {{ km_data|xmlattr }}
+         data-km-search-skip>
+        {%- set km_href = km_target|d(km_project.source) %}
+        {%- set km_linked = km_href and km_href != "#" %}
+        <{{ "a" if km_linked else "div" }}
+        {%- if km_linked %}
+            href="{{ km_href }}"
+            {{ km_tab(km_new_tab) }}
+            aria-label="{{ _('Check out %(name)s', name=km_who|striptags) }}"
+        {%- endif %}
+        class="km-byline__profile">
+        {%- if km_avatar %}
+            <img class="km-byline__avatar"
+                 src="{{ km_avatar }}"
+                 width="{{ km_avatar_size|d(20) }}"
+                 height="{{ km_avatar_size|d(20) }}"
+                 loading="lazy"
+                 alt="" />
+        {%- endif %}
+        <p class="km-byline__name">
+            {{- km_anchors(km_ids) -}}
+            {{- km_who -}}
+        </p>
+        </{{ "a" if km_linked else "div" }}>
+        {%- if km_items or km_page_source %}
+            <div class="km-byline__meta">
+                {%- if km_items %}
+                    <div class="km-byline__meta-group">
+                        {%- for km_item in km_items %}
+                            <span class="km-byline__separator"
+                                  aria-hidden="true"></span>
+                            {{ km_item }}
+                        {%- endfor %}
+                    </div>
+                {%- endif %}
+                {%- if km_page_source %}{{ km_source() }}{%- endif %}
+                </div>
+            {%- endif %}
+        </div>
+    {% endblock km_byline %}

@@ -4,220 +4,399 @@ Base Layout Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 26 October 2026
+Last updated on: 07 November 2026
 #}
-{%- set km_lang_attr = "en" if language == None else (language|replace('_','-')) -%}
-{%- set km_strings = {"copied": _("Copied!"), "failed": _("Copy failed"), "copy": _("Copy"), "more": _("Show more"), "less": _("Show less"), "returns": _("returns:"), "error": _("error:"), "setup": _("Setup")} -%}
-<!DOCTYPE html>
-<html lang="{{ km_lang_attr }}"
-      data-content_root="{{ content_root }}"
-      data-km-fa-style="{{ km_fa_style|default('solid') }}"
-      data-km-strings="{{ km_strings|tojson|forceescape }}"
-      data-km-more-icon="{{ km_fa_icons.show_more }}"
-      {% if km_add_copy_to_headerlinks %}data-km-copy-links{% endif %}>
-    <head>
-        <meta charset="utf-8" />
-        {%- if 'name="viewport"' not in metatags %}
-            <meta name="viewport"
-                  content="width=device-width, initial-scale=1" />
-        {%- endif %}
-        <meta name="color-scheme"
-              content="dark" />
-        <meta name="theme-color"
-              content="#000000" />
-        <script>
-            (function() {
-                var root = document.documentElement;
-                var shown = false;
-                root.classList.add('km-js', 'km-page-loading', 'km-no-transitions');
+{%- from "components/helpers.html.jinja" import km_glyph, km_tab with context %}
+{%- from "components/logo.html.jinja" import km_logo, km_title with context -%}
+{%- macro km_noscript() -%}
+    <noscript>
+        <p class="km-noscript">
+            {%- trans trimmed -%}
+            JavaScript is off, so some parts of this site may not work.
+        {%- endtrans -%}
+    </p>
+</noscript>
+{%- endmacro -%}
+{%- macro km_brand() -%}
+    <a href="{{ pathto(master_doc) }}"
+       class="km-header__logo">
+        {{- km_logo() -}}
+        <span class="km-header__title">{{ km_title() }}</span>
+    </a>
+{%- endmacro -%}
+{%- macro km_header_search() -%}
+    <div class="km-header__search">
+        {%- include "components/searchbox.html.jinja" %}
+    </div>
+{%- endmacro -%}
+{%- macro km_menu_button() -%}
+    <button class="km-header__menu-toggle"
+            type="button"
+            aria-controls="km-sidebar"
+            aria-expanded="false">
+        {{ km_glyph(km_fa_icons.menu) }}
+        <span class="sr-only">{{ _("Toggle navigation menu") }}</span>
+    </button>
+    <noscript>
+        <a class="km-header__menu-toggle"
+           href="#km-sidebar">
+            {{ km_glyph(km_fa_icons.menu) }}
+            <span class="sr-only">{{ _("Open navigation menu") }}</span>
+        </a>
+    </noscript>
+{%- endmacro -%}
+{%- macro km_icon_links() -%}
+    <nav class="km-header__icon-list"
+         aria-label="{{ _('External links') }}">
+        {%- for text, button in km_header_buttons.items() %}
+            {%- if button is mapping %}
+                <a href="{{ button.url }}"
+                   title="{{ text|e }}"
+                   aria-label="{{ text|e }}"
+                   {{ km_tab(button.new_tab) }}
+                   class="km-header__icon-link"
+                   {{ button.extras or '' }}>
+                    {%- if button.icon %}
+                        {{ km_glyph(button.icon) }}
+                    {%- else %}
+                        <span>{{ text|e }}</span>
+                    {%- endif %}
+                </a>
+            {%- endif %}
+        {%- endfor %}
+    </nav>
+{%- endmacro -%}
+{%- macro km_primary_nav() -%}
+    {%- set km_nav = km_header_toctree or toctree -%}
+    <nav class="km-header__nav"
+         aria-label="{{ _('Primary navigation') }}">
+        <div class="km-header__nav-tree">
+            {{ km_nav(titles_only=km_toctree_titles_only,
+                        collapse=true,
+                        **km_toctree_args) }}
+        </div>
+    </nav>
+{%- endmacro -%}
+{%- macro km_footer_text() -%}
+    <div class="km-footer__content">
+        {%- if show_copyright and copyright|length %}
+            <p class="km-footer__text">
+                {%- if hasdoc('copyright') -%}
+                    {%- trans path=pathto('copyright'),
+                    copyright=copyright|e -%}
+                    <a href="{{ path }}">Copyright</a> {{ copyright }}
+                {%- endtrans -%}
+            {%- else -%}
+                {{ copyright|e }}
+            {%- endif -%}
+        </p>
+    {%- endif %}
+    {%- if last_updated %}
+        <p class="km-footer__text">
+            {%- trans updated_on=last_updated|e -%}
+            Last updated on {{ updated_on }}
+        {%- endtrans -%}
+    </p>
+{%- endif %}
+{%- if show_sphinx %}
+    <p class="km-footer__text">
+        {%- trans trimmed -%}
+        Built with <a href="https://www.sphinx-doc.org"
+    rel="noreferrer">Sphinx</a>.
+    {%- endtrans -%}
+</p>
+{%- endif %}
+{%- if km_show_credit|tobool %}
+    {%- set km_theme -%}
+        <a href="{{ km_credit }}"
+           {{ km_tab(km_credit_new_tab) }}>Kaamiki</a>
+    {%- endset %}
+    <p class="km-footer__text">
+        {%- trans km_theme=km_theme -%}
+        Styled with the {{ km_theme }} theme.
+    {%- endtrans -%}
+</p>
+{%- endif %}
+{%- if km_license.name %}
+    {%- set km_license_link -%}
+        {%- if km_license.url -%}
+            <a href="{{ km_license.url|e }}"
+               {{ km_tab(km_license.new_tab) }}>
+                {{- km_license.name|e -}}
+            </a>
+        {%- else -%}
+            {{ km_license.name|e }}
+        {%- endif -%}
+    {%- endset %}
+    <p class="km-footer__text">
+        {%- trans km_license=km_license_link -%}
+        Content licensed under {{ km_license }}.
+    {%- endtrans -%}
+</p>
+{%- endif %}
+</div>
+{%- endmacro -%}
+{%- set km_loading = km_embed_js_loading|replace("normal", "") -%}
+{%- macro km_scripts() -%}
+    {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
+        {%- for name in km_embed_js %}
+            <script src="{{ pathto('_static/' + name, 1)|e }}"
+                    {{ km_loading }}></script>
+        {%- endfor %}
+    {%- endmacro -%}
+    {%- set km_menu = "sections/sidebar.html.jinja" in sidebars -%}
+    {%- set km_search = hasdoc("search") and km_show_searchbox|tobool -%}
+    {%- set km_top = km_toctree_in_header|tobool -%}
+    {%- set km_icons = km_header_buttons|tobool -%}
+    {%- set km_nested = " km-layout--nav-in-header" if km_top else "" -%}
+    {%- set km_pages = "components/previous_next_pages.html.jinja" -%}
+    {%- set km_lang_attr = (language or "en")|replace("_", "-") -%}
+    {%- set km_image = km_social and km_social.image -%}
+    {%- set km_card = km_social.card if km_image else "summary" -%}
+    {%- set km_strings = {
+        "copied": _("Copied"),
+        "failed": _("Copy failed"),
+        "copy": _("Copy"),
+        "more": _("Show more"),
+        "less": _("Show less"),
+        "returns": _("returns:"),
+        "error": _("error:"),
+        "setup": _("Setup"),
+        "code": _("Code"),
+        "table": _("Table"),
+        } -%}
+    {%- set km_marks = {
+        "nav_arrow": km_fa_icons.nav_arrow,
+        "copy": km_fa_icons["copy"],
+        "copied": km_fa_icons.copied,
+        } -%}
+    <!DOCTYPE html>
+    <html lang="{{ km_lang_attr }}"
+          class="km-document"
+          data-content_root="{{ content_root }}"
+          data-km-fa-style="{{ km_fa_style }}"
+          data-km-strings="{{ km_strings|tojson|forceescape }}"
+          data-km-more-icon="{{ km_fa_icons.show_more }}"
+          data-km-icons="{{ km_marks|tojson|forceescape }}"
+          {% if km_copy_headerlinks %}data-km-copy-links{% endif %}>
+        <head>
+            <meta charset="utf-8" />
+            {%- if 'name="viewport"' not in metatags %}
+                <meta name="viewport"
+                      content="width=device-width, initial-scale=1" />
+            {%- endif %}
+            <meta name="color-scheme"
+                  content="dark" />
+            <meta name="theme-color"
+                  content="#000000" />
+            <script>
+                (function() {
+                    const root = document.documentElement;
+                    const timer = window.setTimeout(show, 2000);
+                    root.classList.add(
+                        'km-document--scripted',
+                        'km-document--loading',
+                        'km-document--no-transitions'
+                    );
 
-                function reveal() {
-                    if (shown) return;
-                    shown = true;
-                    requestAnimationFrame(function() {
-                        root.classList.remove('km-page-loading', 'km-no-transitions');
-                        root.classList.add('km-page-loaded');
+                    function show() {
+                        window.clearTimeout(timer);
+                        root.classList.remove(
+                            'km-document--loading',
+                            'km-document--no-transitions'
+                        );
+                    }
+
+                    function ready() {
+                        const fonts = document.fonts.ready;
+                        requestAnimationFrame(() => fonts.then(show));
+                    }
+
+                    function folded() {
+                        const classes = root.classList;
+                        if (classes.contains('km-document--fold-ready')) return;
+                        if (!document.querySelector('.km-page--clamped')) return;
+                        classes.add('km-document--fold-failed');
+                    }
+
+                    function loaded() {
+                        window.setTimeout(folded, 1000);
+                    }
+
+                    document.addEventListener('DOMContentLoaded', ready, {
+                        once: true
                     });
-                }
-                if (document.readyState !== 'loading') reveal();
-                else document.addEventListener('DOMContentLoaded', reveal, {
-                    once: true
-                });
-                window.addEventListener('pageshow', function(e) {
-                    if (e.persisted) reveal();
-                });
-                window.addEventListener('load', function() {
-                    window.setTimeout(function() {
-                        if (!root.classList.contains('km-fold-ready') && document.querySelector('.km-page--clamped')) {
-                            root.classList.add('km-fold-failed');
-                        }
-                    }, 1000);
-                });
-            })();
-        </script>
-        {{ metatags }}
-        {%- if km_author %}
-            <meta name="author"
-                  content="{{ km_author|e }}" />
-        {%- endif %}
-        {%- set km_robots = meta.get('km-pg-robots') if meta else '' %}
-        {%- if km_robots %}
-            <meta name="robots"
-                  content="{{ km_robots|e }}" />
-        {%- endif %}
-        {%- block km_social %}
-            {%- if km_social %}
-                {%- if km_social.description %}
+                    window.addEventListener('load', loaded);
+                })();
+            </script>
+            {{ metatags }}
+            {%- if km_author %}
+                <meta name="author"
+                      content="{{ km_author|e }}" />
+            {%- endif %}
+            {%- set km_robots = (meta or {}).get('km-page-robots') %}
+            {%- if km_robots and 'name="robots"' not in metatags %}
+                <meta name="robots"
+                      content="{{ km_robots|e }}" />
+            {%- endif %}
+            {%- block km_social %}
+                {%- set km_described = 'name="description"' in metatags %}
+                {%- if km_social and km_social.description and not km_described %}
                     <meta name="description"
                           content="{{ km_social.description|e }}" />
-                {% endif %}
-            {%- endif %}
-            {%- if km_social and km_social.enable %}
-                <meta property="og:title"
-                      content="{{ km_social.title|e }}" />
-                <meta property="og:type"
-                      content="{{ km_social.type|e }}" />
-                {%- if km_social.site_name %}
-                    <meta property="og:site_name"
-                          content="{{ km_social.site_name|e }}" />
-                {% endif %}
-                {%- if pageurl %}
-                    <meta property="og:url"
-                          content="{{ pageurl|e }}" />
-                {% endif %}
-                {%- if km_social.description %}
-                    <meta property="og:description"
-                          content="{{ km_social.description|e }}" />
-                {% endif %}
-                {%- if km_social.locale %}
-                    <meta property="og:locale"
-                          content="{{ km_social.locale|e }}" />
-                {% endif %}
-                {%- if km_social.image %}
-                    <meta property="og:image"
-                          content="{{ km_social.image|e }}" />
-                    {%- if km_social.image_alt %}
-                        <meta property="og:image:alt"
-                              content="{{ km_social.image_alt|e }}" />
-                    {% endif %}
                 {%- endif %}
-                {%- if km_social.type == 'article' %}
-                    {%- if km_social.published %}
-                        <meta property="article:published_time"
-                              content="{{ km_social.published|e }}" />
+                {%- if km_social and km_social.enable %}
+                    <meta property="og:title"
+                          content="{{ km_social.title|e }}" />
+                    <meta property="og:type"
+                          content="{{ km_social.type|e }}" />
+                    {%- if km_social.site_name %}
+                        <meta property="og:site_name"
+                              content="{{ km_social.site_name|e }}" />
                     {%- endif %}
-                    {%- if km_social.modified %}
-                        <meta property="article:modified_time"
-                              content="{{ km_social.modified|e }}" />
+                    {%- if pageurl %}
+                        <meta property="og:url"
+                              content="{{ pageurl|e }}" />
                     {%- endif %}
-                    {%- if km_author %}
-                        <meta property="article:author"
-                              content="{{ km_author|e }}" />
+                    {%- if km_social.description %}
+                        <meta property="og:description"
+                              content="{{ km_social.description|e }}" />
+                    {%- endif %}
+                    {%- if km_social.locale %}
+                        <meta property="og:locale"
+                              content="{{ km_social.locale|e }}" />
+                    {%- endif %}
+                    {%- if km_social.image %}
+                        <meta property="og:image"
+                              content="{{ km_social.image|e }}" />
+                        {%- if km_social.image_alt %}
+                            <meta property="og:image:alt"
+                                  content="{{ km_social.image_alt|e }}" />
+                        {%- endif %}
+                    {%- endif %}
+                    {%- if km_social.type == 'article' %}
+                        {%- if km_social.published %}
+                            <meta property="article:published_time"
+                                  content="{{ km_social.published|e }}" />
+                        {%- endif %}
+                        {%- if km_social.modified %}
+                            <meta property="article:modified_time"
+                                  content="{{ km_social.modified|e }}" />
+                        {%- endif %}
+                        {%- if km_author %}
+                            <meta property="article:author"
+                                  content="{{ km_author|e }}" />
+                        {%- endif %}
+                    {%- endif %}
+                    <meta name="twitter:card"
+                          content="{{ km_card|e }}" />
+                    {%- if km_social.site %}
+                        <meta name="twitter:site"
+                              content="{{ km_social.site|e }}" />
                     {%- endif %}
                 {%- endif %}
-                <meta name="twitter:card"
-                      content="{{ km_social.card|e if km_social.image else 'summary' }}" />
-                {%- if km_social.site %}
-                    <meta name="twitter:site"
-                          content="{{ km_social.site|e }}" />
-                {% endif %}
-            {%- endif %}
-        {%- endblock km_social %}
-        {%- block htmltitle %}
-            <title>{{ title|striptags|e if title else docstitle|e }}</title>
-        {%- endblock htmltitle %}
-        {%- block km_thirdparty %}
-            {%- if km_fa_kit %}
-                <script src="{{ km_fa_kit }}"
-                        crossorigin="anonymous"
-                        async></script>
-            {%- endif %}
-        {%- endblock km_thirdparty %}
-        {%- for css in css_files %}
-            {%- if css|attr("filename") %}
-                {{ css_tag(css) }}
-            {%- else -%}
+            {%- endblock km_social %}
+            {# djlint:off H023 #}
+            {%- block htmltitle %}
+                <title>
+                    {{- km_site|e -}}
+                    {%- if title and pagename != master_doc %}
+                        {{- " &middot; "|safe ~ title|striptags|e -}}
+                    {%- endif -%}
+                </title>
+            {%- endblock htmltitle %}
+            {# djlint:on #}
+            {%- block km_thirdparty %}
+                {%- if km_fa_kit %}
+                    <link rel="preconnect"
+                          href="{{ km_fa_kit.split("/")[:3] |join('/') }}"
+                          crossorigin />
+                    <script src="{{ km_fa_kit }}"
+                            crossorigin="anonymous"
+                            async></script>
+                {%- elif km_fa_css %}
+                    <link rel="preconnect"
+                          href="{{ km_fa_css.split("/")[:3] |join('/') }}"
+                          crossorigin />
+                {%- endif %}
+            {%- endblock km_thirdparty %}
+            {%- for css in css_files %}
+                {%- if css|attr("filename") %}
+                    {{ css_tag(css) }}
+                {%- else -%}
+                    <link rel="stylesheet"
+                          href="{{ pathto(css, 1) |e }}" />
+                {%- endif %}
+            {%- endfor %}
+            {%- for name in km_embed_css %}
                 <link rel="stylesheet"
-                      href="{{ pathto(css, 1) |e }}" />
-            {%- endif %}
-        {%- endfor %}
-        {%- for name in km_embed_css %}
-            <link rel="stylesheet"
-                  href="{{ pathto('_static/' + name, 1) |e }}" />
-        {%- endfor %}
-        {%- block km_icons %}
-            {%- if km_fa_kit %}
-                {%- if km_fa_kit.endswith('.js') %}
-                    <noscript>
-                        <link rel="stylesheet"
-                              href="{{ km_fa_kit[:-3] }}.css"
-                              crossorigin="anonymous" />
-                    </noscript>
-                {%- endif %}
-            {%- elif km_fa_css %}
-                <link rel="stylesheet"
-                      href="{{ km_fa_css }}"
-                      crossorigin="anonymous"
-                      media="print"
-                      onload="this.media='all'" />
-                <noscript>
+                      href="{{ pathto('_static/' + name, 1) |e }}" />
+            {%- endfor %}
+            {%- block km_icons %}
+                {%- if km_fa_kit %}
+                    <link rel="stylesheet"
+                          href="{{ km_fa_kit[:-3] }}.css"
+                          crossorigin="anonymous" />
+                {%- elif km_fa_css %}
+                    {%- set km_sri = km_fa_integrity or none %}
                     <link rel="stylesheet"
                           href="{{ km_fa_css }}"
+                          {{ {"integrity": km_sri}|xmlattr }}
                           crossorigin="anonymous" />
-                </noscript>
+                {%- endif %}
+            {%- endblock km_icons %}
+            {%- if km_favicons and km_favicons.size_96 %}
+                <link rel="icon"
+                      type="image/png"
+                      href="{{ pathto('_static/' + km_favicons.size_96, 1) }}"
+                      sizes="96x96" />
             {%- endif %}
-        {%- endblock km_icons %}
-        {%- if km_favicons and km_favicons.size_96 %}
-            <link rel="icon"
-                  type="image/png"
-                  href="{{ pathto('_static/' + km_favicons.size_96, 1) }}"
-                  sizes="96x96" />
-        {%- endif %}
-        {%- if km_favicons and km_favicons.size_svg %}
-            <link rel="icon"
-                  type="image/svg+xml"
-                  href="{{ pathto('_static/' + km_favicons.size_svg, 1) }}" />
-        {%- endif %}
-        {%- if favicon_url %}
-            <link rel="shortcut icon"
-                  href="{{ favicon_url }}" />
-        {%- endif %}
-        {%- if km_favicons and km_favicons.size_180 %}
-            <link rel="apple-touch-icon"
-                  sizes="180x180"
-                  href="{{ pathto('_static/' + km_favicons.size_180, 1) }}" />
-            <meta name="apple-mobile-web-app-title"
-                  content="{{ (docstitle or title)|striptags|e }}" />
-        {%- endif %}
-        {%- if km_favicons and km_favicons.manifest %}
-            <link rel="manifest"
-                  href="{{ pathto('_static/' + km_favicons.manifest, 1) }}" />
-        {%- endif %}
-        {%- block linktags %}
-            {%- if pageurl %}
-                <link rel="canonical"
-                      href="{{ pageurl|e }}" />
+            {%- if km_favicons and km_favicons.size_svg %}
+                <link rel="icon"
+                      type="image/svg+xml"
+                      href="{{ pathto('_static/' + km_favicons.size_svg, 1) }}" />
             {%- endif %}
-            {%- if hasdoc('search') %}
-                <link rel="search"
-                      title="{{ _('Search') }}"
-                      href="{{ pathto('search') }}" />
+            {%- if favicon_url %}
+                <link rel="shortcut icon"
+                      href="{{ favicon_url }}" />
             {%- endif %}
-            {%- if next %}
-                <link rel="next"
-                      title="{{ next.title|striptags|e }}"
-                      href="{{ next.link|e }}" />
+            {%- if km_favicons and km_favicons.size_180 %}
+                <link rel="apple-touch-icon"
+                      sizes="180x180"
+                      href="{{ pathto('_static/' + km_favicons.size_180, 1) }}" />
+                <meta name="apple-mobile-web-app-title"
+                      content="{{ (docstitle or title)|striptags|e }}" />
             {%- endif %}
-            {%- if prev %}
-                <link rel="prev"
-                      title="{{ prev.title|striptags|e }}"
-                      href="{{ prev.link|e }}" />
+            {%- if km_favicons and km_favicons.manifest %}
+                <link rel="manifest"
+                      href="{{ pathto('_static/' + km_favicons.manifest, 1) }}" />
             {%- endif %}
-        {%- endblock linktags %}
-        {%- block extrahead %}{%- endblock extrahead %}
+            {%- block linktags %}
+                {%- if pageurl %}
+                    <link rel="canonical"
+                          href="{{ pageurl|e }}" />
+                {%- endif %}
+                {%- if hasdoc('search') %}
+                    <link rel="search"
+                          title="{{ _('Search') }}"
+                          href="{{ pathto('search') }}" />
+                {%- endif %}
+                {%- if next %}
+                    <link rel="next"
+                          title="{{ next.title|striptags|e }}"
+                          href="{{ next.link|e }}" />
+                {%- endif %}
+                {%- if prev %}
+                    <link rel="prev"
+                          title="{{ prev.title|striptags|e }}"
+                          href="{{ prev.link|e }}" />
+                {%- endif %}
+            {%- endblock linktags %}
+            {%- block extrahead %}
+            {%- endblock extrahead %}
         </head>
         <body class="km-body">
-            {%- if sidebars|length > 0 %}
+            {%- if km_menu %}
                 <div class="km-sidebar__backdrop"
                      hidden></div>
             {%- endif %}
@@ -225,43 +404,70 @@ Last updated on: 26 October 2026
                  class="km-shell">
                 <a href="#km-content"
                    class="km-shell__skip-link">{{ _("Skip to content") }}</a>
-                <noscript>
-                    <p class="km-noscript">
-                        {{ _("JavaScript is off, so some parts of this site may not work.") }}
-                    </p>
-                </noscript>
+                <div id="searchbox"></div>
+                {{ km_noscript() }}
                 {%- block header %}
-                    {%- include "sections/header.html.jinja" %}
+                    <header class="km-header">
+                        {%- block km_header_before %}
+                        {%- endblock km_header_before %}
+                        <div class="km-header__inner">
+                            {%- block km_header_left %}
+                                <div class="km-header__primary">
+                                    {%- block km_website_logo %}
+                                        {{ km_brand() }}
+                                    {%- endblock km_website_logo %}
+                                </div>
+                            {%- endblock km_header_left %}
+                            {{ km_primary_nav() if km_top }}
+                            {%- block km_header_right %}
+                                <div class="km-header__utilities">
+                                    {%- block km_mobile_menu %}
+                                        {{ km_menu_button() if km_menu }}
+                                    {%- endblock km_mobile_menu %}
+                                    {%- block km_header_buttons %}
+                                        {{ km_icon_links() if km_icons }}
+                                    {%- endblock km_header_buttons %}
+                                    {{ km_header_search() if km_search }}
+                                </div>
+                            {%- endblock km_header_right %}
+                        </div>
+                        {%- block km_header_after %}
+                        {%- endblock km_header_after %}
+                    </header>
                 {%- endblock header %}
                 <div class="km-shell__main">
-                    <div class="km-layout km-container {% if km_toctree_in_header|tobool %}km-layout--nav-in-header{% endif %}">
+                    <div class="km-layout km-container{{ km_nested }}">
                         {%- block km_sidebar %}
-                            {%- if sidebars|length > 0 %}
-                                {%- include "sections/sidebar.html.jinja" %}
-                            {%- endif %}
+                            {%- for km_each in sidebars %}
+                                {%- include km_each %}
+                            {%- endfor %}
                         {%- endblock km_sidebar %}
                         {%- block km_main %}
-                            <div class="km-layout__content">{%- block body %}{%- endblock body %}</div>
-                                {%- if km_show_previous_next_pages|tobool %}
-                                    {%- include "components/previous_next_pages.html.jinja" %}
-                                {%- endif %}
-                            {%- endblock km_main %}
-                            {%- block km_aside %}{%- endblock km_aside %}
+                            <div class="km-layout__content">
+                                {%- block body %}
+                                {%- endblock body %}
                             </div>
-                        </div>
-                        {%- if km_show_scrolltop|tobool %}
-                            {%- include "components/scrolltop.html.jinja" %}
-                        {%- endif %}
-                        {%- block footer %}
-                            {%- include "sections/footer.html.jinja" %}
-                        {%- endblock footer %}
+                            {%- include km_pages %}
+                        {%- endblock km_main %}
+                        {%- block km_aside %}
+                        {%- endblock km_aside %}
                     </div>
-                    {%- block scripts %}
-                        {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
-                            {%- for name in km_embed_js %}
-                                <script src="{{ pathto('_static/' + name, 1)|e }}"
-                                        {% if km_embed_js_loading != 'normal' %}{{ km_embed_js_loading }}{% endif %}></script>
-                            {%- endfor %}
-                        {%- endblock scripts %}
-                    </body>
-                </html>
+                </div>
+                {%- if km_show_scrolltop|tobool %}
+                    {%- include "components/scrolltop.html.jinja" %}
+                {%- endif %}
+                {%- block footer %}
+                    <footer class="km-footer km-container">
+                        {%- block km_footer_before %}
+                        {%- endblock km_footer_before %}
+                        <div class="km-footer__inner">{{ km_footer_text() }}</div>
+                        {%- block km_footer_after %}
+                        {%- endblock km_footer_after %}
+                    </footer>
+                {%- endblock footer %}
+            </div>
+            {%- block scripts %}
+                {{ km_scripts() }}
+            {%- endblock scripts %}
+        </body>
+    </html>

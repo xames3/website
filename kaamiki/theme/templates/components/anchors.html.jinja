@@ -1,0 +1,12 @@
+{#
+Anchors Macro
+=============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 02 November 2026
+Last updated on: 02 November 2026
+#}
+{%- macro km_anchors(ids) -%}
+    {%- for km_id in ids[1:] %}<span id="{{ km_id }}"></span>
+{% endfor -%}
+{%- endmacro -%}

@@ -1,29 +1,90 @@
 {#
-Previous and Next Page Buttons Template
-=======================================
+Previous and Next Pages Template
+================================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 29 September 2026
+Last updated on: 07 November 2026
 #}
-{%- if prev or next %}
+{%- from "components/chevron.html.jinja" import km_chevron_icon -%}
+{%- macro km_related_section(km_related) -%}
+    {%- set km_head = km_related.header -%}
+    {%- set km_classes = ["km-related", "km-carousel", "km-carousel--titled" if km_head] -%}
+    <div class="{{ km_classes|select|join(' ') }}"
+         role="group"
+         aria-roledescription="carousel"
+         data-km-carousel
+         {% if km_head %}aria-labelledby="km-related-title"{% else %}aria-label="{{ _('Related pages') }}"{% endif %}>
+        {%- if km_head %}
+            <p class="km-carousel__title"
+               id="km-related-title">{{ km_head|e }}</p>
+        {%- endif %}
+        <div class="km-carousel__track">
+            {%- for km_card in km_related.cards %}
+                <a class="km-related__card"
+                   href="{{ km_card.link|e }}">
+                    <span class="km-related__image">
+                        {%- if km_card.image %}
+                            <img src="{{ km_card.image|e }}"
+                                 alt=""
+                                 width="1280"
+                                 height="720"
+                                 loading="lazy"
+                                 decoding="async" />
+                        {%- else %}
+                            <span class="km-related__waves"
+                                  aria-hidden="true">
+                                {%- for km_wave in ["a", "b", "c"] %}
+                                    <span class="km-byline__wave km-byline__wave--{{ km_wave }}"></span>
+                                {%- endfor %}
+                            </span>
+                        {%- endif %}
+                    </span>
+                    <span class="km-related__meta">
+                        {%- if km_card.section %}<span>{{ km_card.section|e }}</span>{%- endif %}
+                        {%- if km_card.section and km_card.date %}
+                            <span class="km-byline__separator"
+                                  aria-hidden="true"></span>
+                        {%- endif %}
+                        {%- if km_card.date %}<span>{{ km_card.date|e }}</span>{%- endif %}
+                    </span>
+                    <span class="km-related__title">
+                        {%- for km_part in km_card.parts -%}
+                            {%- if km_part.glyph -%}
+                                <span aria-hidden="true"
+                                      class="{{ km_part.glyph|e }}"></span>
+                            {%- else -%}
+                                {{ km_part.text|e }}
+                            {%- endif -%}
+                        {%- endfor -%}
+                    </span>
+                </a>
+            {%- endfor %}
+        </div>
+        {%- include "directives/carousel.html.jinja" %}
+    </div>
+{%- endmacro -%}
+{%- set km_link = "km-pagination__link" -%}
+{%- if km_related %}
+    {{ km_related_section(km_related) }}
+{%- elif km_show_previous_next_pages|tobool and (prev or next) %}
     <nav class="km-pagination"
          aria-label="{{ _('Pagination') }}">
-        {%- for page, modifier, label in [
-            (prev, 'prev', _('Previous page')),
-            (next, 'next', _('Next page'))
+        {%- for page, classes, label in [
+            (prev, km_link ~ " " ~ km_link ~ "--prev", _('Previous page')),
+            (next, km_link, _('Next page'))
             ] %}
             {%- if page %}
                 <a href="{{ page.link|e }}"
-                   class="km-pagination__link km-pagination__link--{{ modifier }}">
-                    <svg class="km-chevron"
-                         viewBox="0 0 16 16"
-                         aria-hidden="true">
-                        <g class="km-chevron-arrow">
-                        <path class="km-chevron-shaft" d="M13 8H3" pathLength="1" />
-                        <path d="M9 4l4 4-4 4" />
-                        </g>
-                    </svg>
+                   class="{{ classes }}">
+                    {{- km_chevron_icon() -}}
+                    <span class="sr-only">{{ label }}</span>
+                </a>
+            {%- else %}
+                <a role="link"
+                   class="{{ classes }}"
+                   aria-disabled="true">
+                    {{- km_chevron_icon() -}}
                     <span class="sr-only">{{ label }}</span>
                 </a>
             {%- endif %}

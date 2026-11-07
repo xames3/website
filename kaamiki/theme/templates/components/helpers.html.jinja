@@ -1,0 +1,29 @@
+{#
+Helper Macros
+=============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 03 November 2026
+Last updated on: 03 November 2026
+
+The few bits of markup that many templates write the same way.
+#}
+{%- macro km_glyph(classes, extra="") -%}
+    {%- if classes -%}
+        <i class="{{ classes }}{{ " " ~ extra if extra }}"
+           aria-hidden="true"></i>
+    {%- endif -%}
+{%- endmacro -%}
+{%- macro km_tab(enabled) -%}
+    {%- if enabled -%}
+        {{ {"rel": km_rel, "target": "_blank"}|xmlattr }}
+    {%- endif -%}
+{%- endmacro -%}
+{%- macro km_id(ids) -%}
+    {%- if ids -%}
+        id="{{ ids[0] }}"
+    {%- endif -%}
+{%- endmacro -%}
+{%- macro km_class(base, more) -%}
+    {{ ([base] + (more or []))|join(" ") }}
+{%- endmacro -%}
