@@ -3267,15 +3267,9 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
     --km-colour-admonition-bg: var(--km-colour-admonition-hint-bg);
 }
 
-.admonition.important {
-}
-
 .admonition:is(.danger, .error) {
     --km-colour-admonition-fg: var(--km-colour-admonition-danger-fg);
     --km-colour-admonition-bg: var(--km-colour-admonition-danger-bg);
-}
-
-.admonition.error {
 }
 
 .admonition:is(.warning, .caution, .attention) {
