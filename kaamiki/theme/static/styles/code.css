@@ -1,5 +1,5 @@
 :root {
-    --km-colour-code-object: 208.4 100.8% 73.79%;
+    --km-colour-code-object: 208.4 100% 73.79%;
     --km-colour-code-string: 207.33 100% 82.35%;
     --km-colour-code-function: 268.97 100% 82.94%;
     --km-colour-code-comment: 212 10% 58%;
@@ -21,12 +21,6 @@
     --km-colour-code-error-current: 357 92% 70%;
 }
 
-td.linenos .special,
-span.linenos.special {
-    color: hsl(var(--km-colour-grey-93));
-    background-color: hsl(var(--km-colour-black));
-}
-
 .highlight .hll {
     background-color: hsl(var(--km-colour-highlight));
     box-shadow: var(--km-code-bar-offset) 0 0 hsl(var(--km-colour-highlight));
@@ -41,7 +35,38 @@ span.linenos.special {
     left: calc(var(--km-code-bar-offset) * -1);
     width: var(--km-code-bar-offset);
     height: var(--km-code-bar-height);
-    background: linear-gradient(to right, hsl(var(--km-colour-code-marker)), hsl(var(--km-colour-code-marker)) var(--km-code-bar-stop), hsl(var(--km-colour-highlight)) var(--km-code-bar-stop));
+    background:
+        linear-gradient(
+            to right,
+            hsl(var(--km-colour-code-marker)),
+            hsl(var(--km-colour-code-marker)) var(--km-code-bar-stop),
+            hsl(var(--km-colour-highlight)) var(--km-code-bar-stop)
+        );
+}
+
+.highlight .hll:has(> .gi) {
+    --km-code-bar-colour: var(--km-colour-green);
+    --km-code-bar-tint: var(--km-colour-diff-added-bg);
+}
+
+.highlight .hll:has(> .gd) {
+    --km-code-bar-colour: var(--km-colour-red);
+    --km-code-bar-tint: var(--km-colour-diff-removed-bg);
+}
+
+.highlight .hll:has(> :is(.gi, .gd))::before {
+    background:
+        linear-gradient(
+            to right,
+            hsl(var(--km-code-bar-colour)),
+            hsl(var(--km-code-bar-colour)) var(--km-code-bar-stop),
+            transparent var(--km-code-bar-stop)
+        ),
+        linear-gradient(
+            hsl(var(--km-code-bar-tint)),
+            hsl(var(--km-code-bar-tint))
+        ),
+        hsl(var(--km-colour-highlight));
 }
 
 .highlight .c,
@@ -61,6 +86,7 @@ span.linenos.special {
 
 .highlight .err {
     color: hsl(var(--km-colour-code-error));
+    background-color: transparent;
     border: 0;
 }
 
@@ -168,11 +194,6 @@ span.linenos.special {
 .highlight .gs {
     color: hsl(var(--km-colour-grey-93));
     font-weight: 500;
-}
-
-.highlight .g-Underline {
-    color: hsl(var(--km-colour-grey-93));
-    text-decoration: underline;
 }
 
 .highlight .gr {
