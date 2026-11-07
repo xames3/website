@@ -4,27 +4,42 @@ GitHub Repository Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October 2025
-Last updated on: 06 October 2026
+Last updated on: 05 November 2026
 #}
+{%- from "components/helpers.html.jinja"
+import km_class, km_glyph, km_id, km_tab with context %}
+{%- from "components/anchors.html.jinja" import km_anchors -%}
+{%- macro km_count(name, label, field, icon) -%}
+    <p class="km-repository__{{ name }}"
+       hidden>
+        {{- km_glyph(icon) }}
+        <span class="sr-only">{{ label }}</span>
+        <span data-km-repository-count="{{ field }}"></span>
+    </p>
+{%- endmacro -%}
 {% block km_repository %}
-    <div class="km-github-repository"
+    <div class="{{ km_class('km-repository', km_classes) }}"
+         {{ km_id(km_ids) }}
          data-km-repository="{{ km_project }}">
-        <a href="https://github.com/{{ km_project }}"
-           {% if km_new_tab %}rel="{{ km_rel }}" target="_blank"{% endif %}
-           class="km-github-repository__name">{{ km_project }}</a>
-        <div class="km-github-repository__details">
-            {% if km_stars %}
-                <p class="km-github-repository__stars">
-                    <span class="sr-only">{{ _("Stars") }}</span>
-                    <span data-km-repository-count="stargazers_count">0</span>
-                </p>
-            {% endif %}
-            {% if km_forks %}
-                <p class="km-github-repository__forks">
-                    <span class="sr-only">{{ _("Forks") }}</span>
-                    <span data-km-repository-count="forks_count">0</span>
-                </p>
-            {% endif %}
+        <div class="km-repository__header">
+            <a href="https://github.com/{{ km_project }}"
+               {{ km_tab(km_new_tab) }}
+               class="km-repository__name">
+                {{- km_anchors(km_ids) -}}
+                {{- km_glyph(km_fa_icons.repository_mark) -}}
+                {{- km_project -}}
+            </a>
+            <div class="km-repository__details">
+                {% if km_stars %}
+                    {{ km_count("stars", _("Stars") , "stargazers_count",
+                    km_fa_icons.repository_stars) }}
+                {% endif %}
+                {% if km_forks %}
+                    {{ km_count("forks", _("Forks") , "forks_count",
+                    km_fa_icons.repository_forks) }}
+                {% endif %}
+            </div>
         </div>
+        {% if km_text %}<p class="km-repository__text">{{ km_text }}</p>{% endif %}
     </div>
 {% endblock km_repository %}

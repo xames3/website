@@ -1,25 +1,31 @@
 {#
-Logo Macro
-==========
+Logo Macros
+===========
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 10 September 2026
-Last updated on: 14 October 2026
+Last updated on: 07 November 2026
 #}
+{%- from "components/helpers.html.jinja" import km_glyph with context %}
 {%- macro km_logo() -%}
+    {%- set km_size = "--km-logo-size: " ~ km_logo_size ~ "px" -%}
+    {%- set km_style = {"style": km_size if km_logo_size} -%}
     {%- if logo_url -%}
         <img class="km-logo km-logo--single"
              src="{{ logo_url }}"
              alt=""
              width="16"
              height="16"
-             {% if km_logo_size %}style="--km-logo-size: {{ km_logo_size }}px"{% endif %} />
+             {{ km_style|xmlattr }} />
     {%- elif theme_logo -%}
         <img class="km-logo"
              src="{{ pathto('_static/' + theme_logo, 1) }}"
              alt=""
              width="16"
              height="16"
-             {% if km_logo_size %}style="--km-logo-size: {{ km_logo_size }}px"{% endif %} />
+             {{ km_style|xmlattr }} />
     {%- endif -%}
+{%- endmacro -%}
+{%- macro km_title() -%}
+    {{- (docstitle or title)|e -}}
 {%- endmacro -%}

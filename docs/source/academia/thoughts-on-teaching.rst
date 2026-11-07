@@ -1,35 +1,37 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April 2026
-.. Last updated on: 30 September 2026
+.. Last updated on: 29 October 2026
 
-:km-pg-title: Thoughts on teaching
-:km-pg-description: Teaching the same courses, but differently every single
+:km-page-title: Thoughts on teaching
+:km-page-description: Teaching the same courses, but differently every single
     time!
-:km-pg-type: article
-:km-fb-title: These were my thoughts on teaching. What about you?
-:km-fb-description: If you have any new ideas or suggestions about teaching,
-    please share. I'm always on the lookout for better ways to teach my
-    students.
-:km-fb-button: Share your ways
+:km-page-type: article
+:km-page-image: https://i.imgur.com/83ZcICa.jpg
+:km-feedback-title: These were my thoughts on teaching. What about you?
+:km-feedback-description: If you have any new ideas or suggestions about
+    teaching, please share. I'm always on the lookout for better ways to
+    teach my students.
+:km-feedback-button: Share your ways
+:km-feedback-split:
 
 .. _academia-thoughts-on-teaching:
 
 ===============================================================================
-:far-icon:`seedling` Thoughts on teaching
+:fa-icon:regular:`seedling` Thoughts on teaching.
 ===============================================================================
 
-.. rst-class:: km-lead
+.. rst-class:: km-text-lead
 
     Lessons I didn't plan on teaching, but I re-learnt them along the way.
 
-.. author:: @xames3
-    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :url: https://github.com/xames3
-    :background: https://i.imgur.com/83ZcICa.jpg
+.. byline:: @xames3
+    :avatar: https://i.imgur.com/hUhxigb.jpeg
+    :target: https://github.com/xames3
+    :backdrop: https://i.imgur.com/83ZcICa.jpg
 
-A year ago, as of writing this article in April of 2026, I walked into the 4024
-classroom on our Chicago campus. I wasn't sure what kind of teacher I'd be, but
-I knew I wanted to be the best one.
+In April of :ticker:`2025`, I walked into the 4024 classroom on our Chicago
+campus at NLU. I wasn't sure what kind of teacher I'd be, but I knew I wanted
+to be the best one.
 
 .. _repetition-but-never-the-same:
 
@@ -38,7 +40,7 @@ Repetition, but never the same.
 -------------------------------------------------------------------------------
 
 .. rubric:: Teaching the same courses, but differently every single time!
-    :class: km-subtitle-text
+    :class: km-text-subsection
 
 What came next was a whole year of teaching
 `CSS 225 Introduction to Applied Programming <https://nl.smartcatalogiq.com/en/
@@ -68,8 +70,8 @@ lectures were conducted exactly as planned and sometimes they were simply
 And somewhere in that strange unpredictability, I found the part I enjoyed the
 most my students!
 
-.. rubric:: :far-icon:`backward-fast` Looking back
-    :class: km-pre-title-text
+.. rubric:: :fa-icon:regular:`backward-fast` Looking back
+    :class: km-text-pre-section
 
 .. _students-who-made-it-memorable:
 
@@ -80,13 +82,13 @@ Students who made it memorable.
 .. rubric:: They brought their **humour**, their **hobbies**, their **side
     comments** and some of their perfectly timed jokes that derailed the whole
     class in the best way possible.
-    :class: km-subtitle-text
+    :class: km-text-subsection
 
 Some students brought in their questions. Ooh, those questions?!
 
 Questions ranged from unrealistic assignment extensions or the topics covered
 to sometimes unexpectedly personal. Like I said, every quarter was different,
-yet every single time, someone would ask what I would do in their place, as if
+yet every single time, someone would ask what I'd do in their place, as if
 I had everything figured out. I never knew how to respond to some of those
 "what-if" scenarios and I still don't!
 
@@ -110,19 +112,19 @@ students and that's what made them all very special! I started seeing a
 younger, more cocky version of me and my friends in them. Over time, I started
 picking up new things and new perspectives. Things like new games I've never
 heard of, music I wouldn't have found on my own, hobbies like baking that
-reminded me of how much there is to learn outside my comfort zone.
+reminded me of how much there's to learn outside my comfort zone.
 
 The learning and teaching happened in both directions. Every time I learned
 something new, I felt like I was able to teach and explain things more
 effectively from both my successes and failures.
 
-.. rubric:: :far-icon:`seedling` Growth, gratitude and moments
-    :class: km-pre-title-text
+.. rubric:: :fa-icon:regular:`seedling` Growth, gratitude and moments
+    :class: km-text-pre-section
 
 .. _a-year-shaped-by-people:
 
 -------------------------------------------------------------------------------
-A year shaped by people.
+A year shaped by :rotate:`students|mentors|friends|colleagues`.
 -------------------------------------------------------------------------------
 
 Again, looking back, I'm seeing my lectures and classrooms in a much different
@@ -134,11 +136,11 @@ memories!
 
 I'm super-duper grateful to all my students for making me a much better teacher
 than I started last year. I'm especially grateful to
-:ref:`Charlotte <charlotte-parks>`, who first saw something in me I hadn't
+Charlotte, who first saw something in me I hadn't
 fully seen in myself and planted the very idea that I could even teach at all.
 
 I can't possibly wrap up this yearly reflection without mentioning of my actual
-mentors, :ref:`Dr Tovar <antonio-tovar>` and Dr Robyn. Both, Dr Tovar and
+mentors, Dr Tovar and Dr Robyn. Both, Dr Tovar and
 Dr Robyn presented me with loads of wonderful opportunities and the rest of the
 CSIS department who supported me through all. I've so many moments and lessons
 to share, but for now I'll end my yearly rewind here.
@@ -150,7 +152,7 @@ future self, be kind and grateful to all the people who made you who you are.
 
 .. epigraph::
 
-    Always remember these words: Work hard, study well and eat and sleep
-    plenty! That is the Turtle Hermit way!
+    Work hard, study well and eat and sleep plenty. That's the Turtle Hermit
+    way to learn.
 
-    -- Master Roshi, *Dragon Ball Super, 2017*
+    -- Master Roshi, *Dragon Ball (1986)*

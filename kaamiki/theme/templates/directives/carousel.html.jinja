@@ -1,0 +1,23 @@
+{#
+Carousel Template
+=================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 04 November 2026
+Last updated on: 04 November 2026
+#}
+{%- from "components/chevron.html.jinja" import km_chevron_icon -%}
+{%- set km_link = "km-pagination__link" -%}
+{% block km_carousel_arrows %}
+    <div class="km-carousel__nav">
+        {%- for classes, label, step in [
+            (km_link ~ " " ~ km_link ~ "--prev", _('Previous'), -1),
+            (km_link, _('Next'), 1)
+            ] %}
+            <button type="button"
+                    class="{{ classes }}"
+                    data-km-carousel-step="{{ step }}"
+                    aria-label="{{ label }}">{{- km_chevron_icon() -}}</button>
+        {%- endfor %}
+    </div>
+{% endblock km_carousel_arrows %}

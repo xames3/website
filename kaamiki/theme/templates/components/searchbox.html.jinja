@@ -6,6 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
 Last updated on: 29 September 2026
 #}
+{%- from "components/helpers.html.jinja" import km_glyph with context %}
 <form action="{{ pathto('search') }}"
       method="get"
       class="km-search">
@@ -19,8 +20,7 @@ Last updated on: 29 September 2026
     </label>
     <button class="km-search__submit"
             type="submit">
-        <i class="{{ km_fa_icons.search }}"
-           aria-hidden="true"></i>
+        {{ km_glyph(km_fa_icons.search) }}
         <span class="sr-only">{{ _("Submit search") }}</span>
     </button>
 </form>

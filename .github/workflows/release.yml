@@ -1,0 +1,89 @@
+# Release Workflow
+# ================
+#
+# Author: Akshay Mestry <xa@mes3.dev>
+# Created on: 27 October 2026
+# Last updated on: 07 November 2026
+#
+# Runs every check of the CI workflow first, then builds the sdist and the
+# wheel and checks them. Publishing a GitHub release then uploads them to PyPI
+# through trusted publishing, with no token stored, and only when every check
+# was green.
+
+name: Release
+run-name: Started ${{ github.workflow }} workflow
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Run the CI checks
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Build the distributions
+    needs: ci
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.14"
+      - name: Check the tag matches the version
+        if: github.event_name == 'release'
+        run: |
+          version=$(sed -n 's/^__version__: str = "\(.*\)"$/\1/p' \
+            kaamiki/__init__.py)
+          test "${GITHUB_REF_NAME#v}" = "$version" || {
+            echo "The tag ${GITHUB_REF_NAME} does not match version ${version}"
+            exit 1
+          }
+      - name: Build the sdist and the wheel
+        run: |
+          SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+          export SOURCE_DATE_EPOCH
+          python -m pip install -Uq build check-wheel-contents twine
+          python -m build
+      - name: Check the distributions
+        run: |
+          twine check --strict dist/*
+          check-wheel-contents dist
+      - name: Keep the distributions
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: distributions
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/p/kaamiki-sphinx-theme
+    permissions:
+      id-token: write
+    steps:
+      - name: Fetch the distributions
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: distributions
+          path: dist/
+      - name: Upload to PyPI
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1

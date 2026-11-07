@@ -4,10 +4,10 @@ Search Result Page Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 12 October 2026
+Last updated on: 02 November 2026
 #}
 {%- extends "page.html" -%}
-{%- set title = _('Search Results') -%}
+{%- set title = _('Search results') -%}
 {%- block extrahead %}
     <meta name="robots"
           content="noindex" />
@@ -16,27 +16,24 @@ Last updated on: 12 October 2026
     {{ super() }}
     <script src="{{ pathto('_static/searchtools.js', 1) }}"
             defer></script>
+    <script src="{{ pathto('_static/scripts/search.js', 1) }}"
+            defer></script>
     <script src="{{ pathto('_static/language_data.js', 1) }}"
             defer></script>
     <script src="{{ pathto('searchindex.js', 1) }}"
             defer></script>
 {%- endblock scripts %}
 {%- block body %}
-    <div class="km-page km-page--wide">
+    <div class="km-page">
         {%- if km_show_breadcrumbs|tobool %}
             {%- include "components/breadcrumbs.html.jinja" %}
         {%- endif %}
-        <div id="km-content"
-             role="main"
-             class="km-page__content km-search-page">
-            <h1 id="search-documentation">{{ _("Search Results") }}</h1>
-            <noscript>
-                <p class="km-search-page__fallback">
-                    {%- trans %}Please activate JavaScript to enable searching the documentation.{% endtrans -%}
-                </p>
-            </noscript>
+        <main id="km-content"
+              class="km-page__content km-search-page"
+              role="main">
+            <h1 id="search-documentation">{{ _("Search results") }}</h1>
             <div id="search-results"
                  class="km-search-page__results"></div>
-        </div>
+        </main>
     </div>
 {%- endblock body %}

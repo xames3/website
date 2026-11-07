@@ -1,14 +1,16 @@
 """\
-Explainer Tracer
-================
+Walkthrough Tracer
+==================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 October 2026
+Last updated on: 07 November 2026
 
 Running a snippet and writing down what it did, one line at a time.
 """
 
+import contextlib
+import ctypes
 import functools
 import hashlib
 import json
@@ -21,7 +23,8 @@ import typing as t
 
 short: t.Final[int] = 28
 full: t.Final[int] = 480
-kinds: t.Final[frozenset[str]] = frozenset({"call", "line", "return"})
+# https://github.com/torvalds/linux/blob/master/include/uapi/linux/prctl.h
+PR_SET_CHILD_SUBREAPER: t.Final[int] = 36
 exhausted: t.Final[frozenset[int]] = frozenset(
     -getattr(signal, _) for _ in ("SIGXCPU",) if hasattr(signal, _)
 )
@@ -34,7 +37,7 @@ oversized: t.Final[frozenset[int]] = frozenset(
 
 
 class Trace(t.TypedDict):
-    """What the tracer saw, before any of it's turned into steps."""
+    """What the tracer saw, before any of it is turned into steps."""
 
     events: list[dict[str, t.Any]]
     error: dict[str, t.Any] | None
@@ -57,6 +60,7 @@ import io
 import json
 import os
 import re
+import signal
 import sys
 import sysconfig
 
@@ -67,21 +71,25 @@ try:
     import resource
 except ImportError:
     resource = None
-for limit_name, value in (
-    ("RLIMIT_AS", job["memory"]),
-    ("RLIMIT_CPU", job["cpu"]),
-    ("RLIMIT_FSIZE", job["written"]),
+
+for limit_name, soft, hard in (
+    ("RLIMIT_AS", job["memory"], job["memory"]),
+    ("RLIMIT_CPU", job["cpu"], job["cpu"] + 1),
+    ("RLIMIT_FSIZE", job["written"], job["written"]),
+    ("RLIMIT_CORE", 0, 0),
 ):
     if resource is not None and hasattr(resource, limit_name):
         try:
-            resource.setrlimit(getattr(resource, limit_name), (value, value))
+            resource.setrlimit(getattr(resource, limit_name), (soft, hard))
         except (ValueError, OSError):
             pass
+if hasattr(signal, "SIGXFSZ"):
+    signal.signal(signal.SIGXFSZ, signal.SIG_DFL)
 
 for entry in job["pythonpath"]:
     sys.path.insert(0, entry)
 
-filename = "<walkthrough>"
+filename = "<code-explain>"
 watch = job["watch"]
 limit = job["limit"]
 events = []
@@ -161,13 +169,36 @@ def describe(exc):
     return exc.__class__.__name__ + (": " + text if text else "")
 
 
+PART = re.compile(r"\.([A-Za-z_]\w*)|\[([^\]]+)\]")
+
+
+def reach(scope, name):
+    head = re.match(r"[A-Za-z_]\w*", name).group(0)
+    if head not in scope:
+        return False, None
+    value = scope[head]
+    for attr, key in PART.findall(name[len(head):]):
+        try:
+            if attr:
+                value = getattr(value, attr)
+                continue
+            try:
+                key = ast.literal_eval(key)
+            except (ValueError, SyntaxError):
+                key = scope[key]
+            value = value[key]
+        except Exception:
+            return False, None
+    return True, value
+
+
 def snapshot(frame):
     scope = frame.f_locals
     rows = []
     for key in watch:
-        if key in scope:
+        found, value = reach(scope, key)
+        if found:
             seen.add(key)
-            value = scope[key]
             rows.append([key] + show(value) + [id(value)])
     return rows
 
@@ -253,8 +284,6 @@ def record(frame, event, arg, ident, resumed=False):
         "vars": snapshot(frame),
         "out": drain(),
     }
-    # NOTE(xames3): A class body runs once, as its class is defined, so it
-    # gets the same treatment as a module: no step for its call or return.
     scope = frame.f_locals
     if frame.f_code.co_name == "<module>" or (
         "__qualname__" in scope and "__module__" in scope
@@ -338,10 +367,10 @@ finish(error)
 """
 
 
-def clip(text: str, width: int) -> str:
+def shorten(text: str, width: int) -> str:
     """Cut a value down to its two ends.
 
-    :param text: The value, as it would be printed.
+    :param text: The value, as it'd be printed.
     :param width: How many characters it may take, ellipsis included.
     :return: The value, whole when it fits and cut when it doesn't.
     """
@@ -355,12 +384,12 @@ def clip(text: str, width: int) -> str:
 def show(text: str) -> tuple[str, str | None]:
     """Give a value in its two lengths, the way the runner does.
 
-    :param text: The value, as it would be printed.
+    :param text: The value, as it'd be printed.
     :return: The value whole, clipped to `full` and cut down to
         `short` or `None` when it didn't need cutting.
     """
-    whole = clip(" ".join(text.split()), full)
-    cut = clip(whole, short)
+    whole = shorten(" ".join(text.split()), full)
+    cut = shorten(whole, short)
     return whole, None if cut == whole else cut
 
 
@@ -400,7 +429,15 @@ def execute(
     It runs in a subprocess of its own, so a snippet that leaks state,
     rebinds `sys.stdout` or runs away can't hurt the main build. The
     answer comes back through a file, which leaves `stdout` to the
-    snippet.
+    snippet, and what the snippet prints goes to a file too, held to
+    `output_limit`, so it never fills the build's memory. When the run
+    ends or runs out of time, whatever the snippet left running is
+    killed, children that went off on their own included (see `reap`).
+
+    These are limits and not a sandbox. The snippet runs as the user
+    running the build, so it can read what that user can, the build's
+    environment too (on Linux through `/proc`), write elsewhere and
+    reach the network.
 
     :param code: The snippet to trace.
     :param setup: Code to run first, untraced.
@@ -408,14 +445,16 @@ def execute(
     :param watch: The names to keep, in the order they're shown.
         Empty keeps none.
     :param limit: How many events to collect before stopping.
-    :param timeout: How long the snippet may run, in seconds.
+    :param timeout: How long the snippet may run, in seconds of the
+        processor and of the clock.
     :param pythonpath: Directories to put on `sys.path` first.
     :param comprehensions: Whether to step into comprehensions, which
         each carry a frame of their own.
+    :param memory_limit: Bytes of memory each of its processes may use.
+    :param output_limit: Bytes any file it writes may take, what it
+        prints included.
     :param python: The interpreter to run it with, the one the build
         runs on when unset.
-    :param memory_limit: Bytes of memory it may use.
-    :param output_limit: Bytes of files it may write.
     :param cache: A folder to keep the trace in. The same snippet,
         options, interpreter and packages get it back from there, so
         long as the files it imported are as they were. A snippet that
@@ -448,39 +487,75 @@ def execute(
     with tempfile.TemporaryDirectory(prefix="kaamiki-") as here:
         path = os.path.join(here, "job.json")
         answer = os.path.join(here, "answer.json")
+        printed = os.path.join(here, "printed.txt")
         with open(path, "w") as fd:
             json.dump(job, fd)
+        command = [
+            python or sys.executable,
+            "-s",
+            "-P",
+            "-c",
+            RUNNER,
+            path,
+            answer,
+        ]
         try:
-            finished = subprocess.run(  # noqa: S603
-                [
-                    python or sys.executable,
-                    "-s",
-                    "-P",
-                    "-c",
-                    RUNNER,
-                    path,
-                    answer,
-                ],
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                check=False,
-                cwd=here,
-                env=sandbox(here),
-                stdin=subprocess.DEVNULL,
-            )
-        except subprocess.TimeoutExpired:
-            return failed(f"ran past its {timeout}s")
+            status = launch(command, here, printed, timeout)
         except OSError as exc:
-            return failed(f"could not start {python or sys.executable}: {exc}")
+            return failed(f"couldn't start {python or sys.executable}: {exc}")
+        if status is None:
+            return failed(f"ran past its {timeout}s")
         try:
             with open(answer) as fd:
                 result = t.cast("Trace", json.load(fd))
         except OSError, json.JSONDecodeError:
-            return failed(verdict(finished, timeout, output_limit))
+            return failed(verdict(status, printed, timeout, output_limit))
     if cache and key and result["error"] is None:
         remember(cache, key, result)
     return result
+
+
+def launch(
+    command: list[str], here: str, printed: str, timeout: int
+) -> int | None:
+    """Start the runner, hold it to its time and clear up after it.
+
+    Its output goes to a file, where `RLIMIT_FSIZE` caps it, and not to
+    a pipe the build would have to hold in memory.
+
+    :param command: The runner's command line.
+    :param here: The scratch directory, which is the runner's working
+        directory too.
+    :param printed: The file the runner's output goes to.
+    :param timeout: How long it may run, in seconds.
+    :return: How it ended, which is negative for a signal, or `None`
+        when it ran out of time.
+    :raises OSError: When it can't be started.
+    """
+    before = children(processes(), {os.getpid()})
+    adopt(on=True)
+    try:
+        with (
+            open(printed, "wb") as log,
+            subprocess.Popen(  # noqa: S603
+                command,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                cwd=here,
+                env=sandbox(here),
+                stdin=subprocess.DEVNULL,
+                start_new_session=True,
+            ) as process,
+        ):
+            try:
+                status = process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                return None
+            finally:
+                reap(process, before)
+    finally:
+        adopt(on=False)
+    return status
 
 
 @functools.cache
@@ -569,6 +644,112 @@ def remember(folder: str, key: str, trace: Trace) -> None:
         return
 
 
+def adopt(*, on: bool) -> None:
+    """Have the build adopt the orphans of the snippet's processes.
+
+    A process whose parent has gone is handed to the nearest ancestor
+    that adopts orphans, or to `init` when there's none, which is out
+    of the build's reach. While the build is that ancestor, a child
+    that went off on its own and lost its parent is still the build's
+    to find and kill. Only Linux does this, anywhere else it does
+    nothing.
+
+    https://man7.org/linux/man-pages/man2/PR_SET_CHILD_SUBREAPER.2const.html
+
+    :param on: Whether to adopt them.
+    """
+    if sys.platform == "linux":
+        with contextlib.suppress(AttributeError, OSError):
+            ctypes.CDLL(None).prctl(PR_SET_CHILD_SUBREAPER, int(on), 0, 0, 0)
+
+
+def processes() -> dict[int, int]:
+    """Map every process to its parent, as `/proc` lists them.
+
+    :return: The ids, each with its parent's, or nothing on a system
+        without `/proc`.
+    """
+    table: dict[int, int] = {}
+    with contextlib.suppress(OSError):
+        for entry in os.listdir("/proc"):
+            if not entry.isdigit():
+                continue
+            with (
+                contextlib.suppress(OSError, ValueError, IndexError),
+                open(f"/proc/{entry}/stat") as fd,
+            ):
+                table[int(entry)] = int(fd.read().rpartition(")")[2].split()[1])
+    return table
+
+
+def children(table: dict[int, int], parents: set[int]) -> set[int]:
+    """Pick out the children of some processes.
+
+    :param table: Every process with its parent, from `processes`.
+    :param parents: The processes whose children to find.
+    :return: The processes whose parent is one of them.
+    """
+    return {pid for pid, parent in table.items() if parent in parents}
+
+
+def descendants(table: dict[int, int], roots: set[int]) -> set[int]:
+    """Gather some processes and everything descended from them.
+
+    :param table: Every process with its parent, from `processes`.
+    :param roots: The processes to start from.
+    :return: The roots, their children, those children's and so on.
+    """
+    found = set(roots)
+    while more := children(table, found) - found:
+        found |= more
+    return found
+
+
+def send(pid: int, number: int) -> None:
+    """Signal a process, if it's still there and ours to signal.
+
+    :param pid: The process.
+    :param number: The signal.
+    """
+    with contextlib.suppress(ProcessLookupError, PermissionError):
+        os.kill(pid, number)
+
+
+def reap(process: subprocess.Popen[bytes], before: set[int]) -> None:
+    """Stop whatever the snippet left running, its children too.
+
+    The runner leads a process group of its own and the group is
+    killed, but a child can leave it by starting a session of its own,
+    and one whose parent has gone belongs to the build by then (see
+    `adopt`). So the process table is walked down from the build's new
+    children, and everything found is stopped before any of it is
+    killed, so that none starts another meanwhile. Where there's no
+    `/proc` only the group is killed.
+
+    :param process: The runner.
+    :param before: The build's own children from before the runner
+        started, which are none of the snippet's.
+    """
+    me = os.getpid()
+    stopped: set[int] = set()
+    while True:
+        table = processes()
+        found = descendants(table, children(table, {me}) - before) - stopped
+        if not found:
+            break
+        for pid in found:
+            send(pid, signal.SIGSTOP)
+        stopped |= found
+    for pid in stopped:
+        send(pid, signal.SIGKILL)
+    with contextlib.suppress(ProcessLookupError, PermissionError):
+        os.killpg(process.pid, signal.SIGKILL)
+    for pid in stopped - {process.pid}:
+        with contextlib.suppress(ChildProcessError):
+            os.waitpid(pid, 0)
+    process.wait()
+
+
 def sandbox(home: str) -> dict[str, str]:
     """Build the little environment a snippet runs in.
 
@@ -590,25 +771,42 @@ def sandbox(home: str) -> dict[str, str]:
     }
 
 
-def verdict(
-    finished: subprocess.CompletedProcess[str], timeout: int, output_limit: int
-) -> str:
+def verdict(status: int, printed: str, timeout: int, output_limit: int) -> str:
     """Say why a snippet left no answer behind.
 
-    :param finished: The runner's process.
+    :param status: How the runner ended, which is negative for a
+        signal.
+    :param printed: The file its output went to.
     :param timeout: How long it was allowed, in seconds.
-    :param output_limit: Bytes of files it was allowed to write.
+    :param output_limit: Bytes any file it wrote was allowed to take,
+        what it printed included.
     :return: The reason, in a line.
     """
-    code = finished.returncode
-    if code in exhausted:
-        return f"used more than its {timeout}s of processor time"
-    if code in oversized:
-        return f"wrote a file past {output_limit >> 20} MB"
-    if code in killed:
+    if status in exhausted:
+        return f"ran past its {timeout}s"
+    if status in oversized:
+        return f"printed or wrote more than {output_limit >> 20} MB"
+    if status in killed:
         return "was killed, most likely for running out of memory"
-    detail = (finished.stderr or finished.stdout).strip()
-    return detail[-400:] or "the snippet produced nothing"
+    return tail(printed, 400) or "the snippet produced nothing"
+
+
+def tail(path: str, width: int) -> str:
+    """Read the end of a file.
+
+    :param path: The file.
+    :param width: How many characters to keep.
+    :return: The end of its text, trimmed, or an empty string when it
+        can't be read.
+    """
+    try:
+        with open(path, "rb") as fd:
+            fd.seek(0, os.SEEK_END)
+            fd.seek(max(0, fd.tell() - width * 4))
+            end = fd.read()
+    except OSError:
+        return ""
+    return end.decode(errors="replace").strip()[-width:]
 
 
 def replay(trace: Trace, wanted: frozenset[str]) -> list[dict[str, t.Any]]:
@@ -707,7 +905,7 @@ def fault(
         if frame["values"].get(name) != (row[1], row[3])
     }
     text = error["text"]
-    short = clip(text, 60)
+    short = shorten(text, 60)
     return {
         "line": error["line"],
         "frame": ident,
@@ -723,7 +921,7 @@ def fault(
         ],
         "out": out,
         "ret": None,
-        "error": [clip(text, 480), None if short == text else short],
+        "error": [shorten(text, 480), None if short == text else short],
     }
 
 
@@ -731,8 +929,8 @@ def collapse(steps: list[dict[str, t.Any]]) -> list[dict[str, t.Any]]:
     """Drop the steps that wouldn't change the page.
 
     A step that only moves the highlight within a note that's already
-    showing, or that no note covers, has nothing new to say, so the step
-    before it stands for it.
+    showing, or that no note covers, has nothing new to say, so the
+    step before it stands for it.
 
     :param steps: The steps as replayed, in order.
     :return: The steps worth stepping through.

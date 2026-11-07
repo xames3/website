@@ -1,13 +1,13 @@
 """\
-Explainer Block Grammar
-=======================
+Walkthrough Block Grammar
+=========================
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 October 2026
+Last updated on: 07 November 2026
 
-The block grammar the explainers carry in their bodies and the readers
-for the options beside it.
+The block grammar the walkthroughs carry in their bodies and the
+readers for the options beside it.
 """
 
 import re
@@ -16,8 +16,10 @@ from docutils.statemachine import StringList
 
 BLOCK: re.Pattern[str] = re.compile(r"^\.\.[ \t]+([a-z][\w-]*)::[ \t]*(.*)$")
 COMMENT: re.Pattern[str] = re.compile(r"^\.\.(?:[ \t]|$)")
-OPTION: re.Pattern[str] = re.compile(r"^:([\w-]+):(?:[ \t]+(.*))?$")
-RANGE: re.Pattern[str] = re.compile(r"^(\d+)(?:\s*[-\u2013]\s*(\d+))?$")
+OPTION_LINE: re.Pattern[str] = re.compile(r"^:([\w-]+):(?:[ \t]+(.*))?$")
+RANGE: re.Pattern[str] = re.compile(
+    r"^([0-9]{1,15})(?:\s*[-\u2013]\s*([0-9]{1,15}))?$"
+)
 
 
 class chunk:
@@ -150,7 +152,9 @@ def read_options(
     cursor = blanks(raw, 0)
     while allowed is not None:
         ahead = blanks(raw, cursor)
-        hit = OPTION.match(raw[ahead].strip()) if ahead < len(raw) else None
+        hit = (
+            OPTION_LINE.match(raw[ahead].strip()) if ahead < len(raw) else None
+        )
         if hit is None:
             break
         key = hit.group(1)
@@ -272,9 +276,9 @@ def linerange(line: str) -> tuple[int, int] | None:
     :return: The range as a low/high pair or `None` when the argument
         isn't a pair of line numbers.
     """
-    match = RANGE.match(line.strip())
+    match = RANGE.fullmatch(line.strip())
     if match is None:
         return None
     low = int(match.group(1))
     high = int(match.group(2)) if match.group(2) else low
-    return min(low, high), max(low, high)
+    return low, high

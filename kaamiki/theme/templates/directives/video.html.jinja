@@ -4,28 +4,40 @@ Video Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 08 October 2026
+Last updated on: 02 November 2026
 #}
+{%- from "components/helpers.html.jinja" import km_glyph, km_id with context %}
+{%- from "components/anchors.html.jinja" import km_anchors -%}
+{%- set km_figure = ["km-media", "km-media--video"] + (km_classes or []) -%}
 {% block km_video %}
-    <figure class="km-media km-media--video">
+    <figure class="{{ km_figure|join(' ') }}"
+            {{ km_id(km_ids) }}>
         <div class="km-media__frame">
+            {{- km_anchors(km_ids) -}}
             <video class="km-media__video"
                    {{ km_player|xmlattr }}>
                 {%- for source in km_sources %}
                     <source src="{{ source.url }}"
-                            {% if source.type %}type="{{ source.type }}"{% endif %}>
+                            {{ {"type": source.type or none}|xmlattr }} />
                 {%- endfor %}
                 {%- for track in km_tracks %}
                     <track kind="captions"
                            src="{{ track.url }}"
                            srclang="{{ track.lang }}"
-                           label="{{ track.label }}">
+                           label="{{ track.label }}" />
                 {%- endfor %}
-                {{ _("Your browser doesn't support the video tag.") }}
-            </video>
-        </div>
-        {%- if km_caption %}
-            <figcaption class="km-media__caption">{{ km_caption }}</figcaption>
-        {%- endif -%}
-    </figure>
+                {%- set km_download -%}
+                    <a href="{{ km_sources[0].url }}"
+                       download>{{- _("Download it") -}}</a>
+                {%- endset %}
+                {%- trans trimmed download=km_download %}
+                This video won't play in your browser. {{ download }}.
+            {%- endtrans %}
+        </video>
+        {{ km_glyph(km_fa_icons.play, "km-media__facade-icon km-media__play") }}
+    </div>
+    {%- if km_caption %}
+        <figcaption class="km-media__caption">{{ km_caption }}</figcaption>
+    {%- endif -%}
+</figure>
 {% endblock km_video %}

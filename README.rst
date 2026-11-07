@@ -1,32 +1,27 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 21 February 2025
-.. Last updated on: 02 October 2026
+.. Last updated on: 02 November 2026
 
-Akshay's Corner (Website + Kaamiki Sphinx Theme)
+Akshay Mestry (Website + Kaamiki Sphinx Theme)
 ===============================================================================
 
-This repository holds the code for custom
-`Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ Theme, Kaamiki and
+This repository holds the code for a custom
+`Sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ theme, Kaamiki and
 the content for my personal portfolio website,
-`Akshay's Corner <https://xa.mes3.dev>`_,
+`Akshay Mestry <https://xa.mes3.dev>`_,
 which I intend to use as my primary source of teaching and sharing thoughts and
 experiments.
 
-The website and this complementary repository serves as:
+The website and this repository hold:
 
-- **Digital Portfolio.** Showcasing my projects in AI, ML and Software
-  Development.
-- **Pedagogy.** Mostly with blogs, references and tutorial posts sharing
-  insights into AI and Open Science.
-
-To learn more about this, visit `here <https://xa.mes3.dev>`_.
+- My projects in AI, ML and Software Development.
+- Blogs, references and tutorial posts on AI and Open Science.
 
 Contributions
 -------------------------------------------------------------------------------
 
-Contributions and/or suggestions for improving Kaamiki (theme) and content are
-welcomed! If you find a bug or want to contribute/suggest improvements,
-please open an issue or submit a pull request on GitHub.
+If you find a bug or want to suggest improvements, please open an issue or
+submit a pull request on GitHub.
 
 Licence
 -------------------------------------------------------------------------------

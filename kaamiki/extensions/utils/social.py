@@ -4,11 +4,15 @@ Social Metadata
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 October 2026
+Last updated on: 27 October 2026
 
 The handler that works out a page's Open Graph and Twitter values.
 """
 
+from __future__ import annotations
+
+import html
+import re
 import typing as t
 
 from sphinx.locale import _
@@ -27,6 +31,9 @@ if t.TYPE_CHECKING:
     from docutils import nodes
     from sphinx.application import Sphinx
 
+META: re.Pattern[str] = re.compile(r"<meta\s[^>]*>")
+ATTRIBUTE: re.Pattern[str] = re.compile(r'([\w:-]+)="([^"]*)"')
+
 
 def generated(pagename: str) -> tuple[str, str] | None:
     """Name and describe a page Sphinx writes without a source file.
@@ -42,18 +49,28 @@ def generated(pagename: str) -> tuple[str, str] | None:
         NOT_FOUND: (
             _("Page not found"),
             _(
-                "There is nothing at this address. It may have moved or it"
+                "There's nothing at this address. It may've moved or it"
                 " may never have been here."
             ),
         ),
-        "genindex": (
-            _("Index"),
-            _("Every term indexed on this site, from A to Z."),
-        ),
-        "search": (_("Search Results"), _("Search every page on this site.")),
+        "search": (_("Search results"), _("Search every page on this site.")),
     }
     found = pages.get(pagename)
     return (str(found[0]), str(found[1])) if found else None
+
+
+def written(context: dict[str, t.Any]) -> str:
+    """Find the description the page's own `.. meta::` gives.
+
+    :param context: The page's rendering context, whose `metatags` hold
+        the tags `.. meta::` wrote, as HTML.
+    :return: The description, or an empty string when there isn't one.
+    """
+    for tag in META.findall(context.get("metatags") or ""):
+        found = dict(ATTRIBUTE.findall(tag))
+        if found.get("name") == "description":
+            return tidy(html.unescape(found.get("content", "")))
+    return ""
 
 
 def social_metadata(
@@ -65,12 +82,15 @@ def social_metadata(
 ) -> None:
     """Work out the Open Graph and Twitter values for a page.
 
-    Each prefers the page's own `:km-pg-*:` field, then the
-    `html_context` default, then whatever the page offers. Only the
-    title arrives as rendered HTML, so only it's stripped of tags.
+    The title is the page's `:km-page-title:` field, or else its own
+    title. The description is the one the page's own `.. meta::` gives,
+    then the `:km-page-description:` field, the page's lead, the words
+    of a generated page, the site's `description` and last the page's
+    first paragraph. Only the title arrives as rendered HTML, so only
+    it's stripped of tags.
 
-    The image goes the page's `:km-pg-image:` field first, then the
-    first `:background:` of its `author` directive and last the site's
+    The image goes the page's `:km-page-image:` field first, then the
+    first `:backdrop:` of its `byline` directive and last the site's
     `image`.
 
     Relative image paths are made absolute, since link previews ignore
@@ -88,24 +108,25 @@ def social_metadata(
     meta: dict[str, str] = context.get("meta") or {}
     limit = int(options.get("description_length", DESCRIPTION_LENGTH))
     made = generated(pagename) if doctree is None else None
-    title = tidy(meta.get("km-pg-title", "")) or plain(
+    title = tidy(meta.get("km-page-title", "")) or plain(
         made[0]
         if made
         else context.get("title") or context.get("docstitle") or ""
     )
     description = (
-        meta.get("km-pg-description")
+        written(context)
+        or meta.get("km-page-description")
         or standfirst(doctree, limit)
         or (made[1] if made else "")
         or options.get("description", "")
         or summarise(doctree, limit)
     )
     image = (
-        meta.get("km-pg-image")
-        or meta.get("km-pg-background")
+        meta.get("km-page-image")
+        or meta.get("km-page-backdrop")
         or options.get("image", "")
     )
-    alt = meta.get("km-pg-image-alt") or (
+    alt = meta.get("km-page-image-alt") or (
         options.get("image_alt", "") if image == options.get("image") else ""
     )
     context["km_social"] = {
@@ -118,9 +139,9 @@ def social_metadata(
         "site_name": options.get("site_name")
         or context.get("docstitle")
         or context.get("title", ""),
-        "type": meta.get("km-pg-type") or options.get("type", "website"),
-        "locale": meta.get("km-pg-locale") or options.get("locale", ""),
-        "card": meta.get("km-pg-card")
+        "type": meta.get("km-page-type") or options.get("type", "website"),
+        "locale": meta.get("km-page-locale") or options.get("locale", ""),
+        "card": meta.get("km-page-card")
         or options.get("card", "summary_large_image"),
         "site": options.get("twitter_site", ""),
         "enable": options.get("enable") is not False,

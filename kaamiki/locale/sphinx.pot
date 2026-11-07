@@ -1,14 +1,14 @@
-# Translations template for kaamiki.
+# Translations template for Kaamiki.
 # Copyright (C) 2026 Akshay Mestry
-# This file is distributed under the same license as the kaamiki project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+# This file is distributed under the same licence as the Kaamiki project.
+# Akshay Mestry <xa@mes3.dev>, 2026.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: kaamiki VERSION\n"
+"Project-Id-Version: Kaamiki 2026.11.8\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-10-15 08:28-0500\n"
+"POT-Creation-Date: 2026-11-07 06:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,9 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
+
+msgid "Carousel"
+msgstr ""
 
 msgid "Added"
 msgstr ""
@@ -38,16 +41,19 @@ msgstr ""
 msgid "View release"
 msgstr ""
 
-msgid "Broke"
-msgstr ""
-
-msgid "Worked"
+msgid "Code"
 msgstr ""
 
 msgid "Copy the snippet"
 msgstr ""
 
 msgid "Nothing printed yet"
+msgstr ""
+
+msgid "Broke"
+msgstr ""
+
+msgid "Worked"
 msgstr ""
 
 #, python-format
@@ -63,6 +69,9 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
+msgid "More to read."
+msgstr ""
+
 #, python-format
 msgid "%d %B %Y"
 msgstr ""
@@ -71,17 +80,11 @@ msgid "Page not found"
 msgstr ""
 
 msgid ""
-"There is nothing at this address. It may have moved or it may never have "
+"There's nothing at this address. It may've moved or it may never have "
 "been here."
 msgstr ""
 
-msgid "Index"
-msgstr ""
-
-msgid "Every term indexed on this site, from A to Z."
-msgstr ""
-
-msgid "Search Results"
+msgid "Search results"
 msgstr ""
 
 msgid "Search every page on this site."
@@ -93,13 +96,43 @@ msgstr ""
 msgid "Take me home"
 msgstr ""
 
-msgid "Jump to letter"
+msgid "JavaScript is off, so some parts of this site may not work."
 msgstr ""
 
-msgid "Index shortcuts"
+msgid "Toggle navigation menu"
 msgstr ""
 
-msgid "Copied!"
+msgid "Open navigation menu"
+msgstr ""
+
+msgid "External links"
+msgstr ""
+
+msgid "Primary navigation"
+msgstr ""
+
+#, python-format
+msgid "<a href=\"%(path)s\">Copyright</a> %(copyright)s"
+msgstr ""
+
+#, python-format
+msgid "Last updated on %(updated_on)s"
+msgstr ""
+
+msgid ""
+"Built with <a href=\"https://www.sphinx-doc.org\" "
+"rel=\"noreferrer\">Sphinx</a>."
+msgstr ""
+
+#, python-format
+msgid "Styled with the %(km_theme)s theme."
+msgstr ""
+
+#, python-format
+msgid "Content licensed under %(km_license)s."
+msgstr ""
+
+msgid "Copied"
 msgstr ""
 
 msgid "Copy failed"
@@ -123,26 +156,19 @@ msgstr ""
 msgid "Setup"
 msgstr ""
 
+msgid "Table"
+msgstr ""
+
 msgid "Search"
 msgstr ""
 
 msgid "Skip to content"
 msgstr ""
 
-msgid "JavaScript is off, so some parts of this site may not work."
-msgstr ""
-
-msgid "Please activate JavaScript to enable searching the documentation."
-msgstr ""
-
 msgid "Breadcrumbs"
 msgstr ""
 
-msgid "Home"
-msgstr ""
-
-#, python-format
-msgid "Last updated on %(updated_on)s"
+msgid "Related pages"
 msgstr ""
 
 msgid "Pagination"
@@ -161,16 +187,20 @@ msgid "Submit search"
 msgstr ""
 
 #, python-format
-msgid "Check out %(name)s"
+msgid "%(num)s min read"
+msgstr ""
+
+msgid "Show"
 msgstr ""
 
 #, python-format
-msgid "%(num)d min read"
-msgid_plural "%(num)d mins read"
-msgstr[0] ""
-msgstr[1] ""
+msgid "Check out %(name)s"
+msgstr ""
 
-msgid "Copy article URL to clipboard"
+msgid "Previous"
+msgstr ""
+
+msgid "Next"
 msgstr ""
 
 msgid "Stars"
@@ -185,43 +215,15 @@ msgstr ""
 msgid "Watch on YouTube"
 msgstr ""
 
-msgid "Your browser doesn't support the video tag."
-msgstr ""
-
-msgid "Play video"
+msgid "Download it"
 msgstr ""
 
 #, python-format
-msgid "<a href=\"%(path)s\">Copyright</a> %(copyright)s"
+msgid "This video won't play in your browser. %(download)s."
 msgstr ""
 
 #, python-format
-msgid "Last updated on %(updated_on)s."
-msgstr ""
-
-msgid ""
-"Built with <a href=\"https://www.sphinx-doc.org\" "
-"rel=\"noreferrer\">Sphinx</a>."
-msgstr ""
-
-#, python-format
-msgid "Styled with the %(km_theme)s theme."
-msgstr ""
-
-#, python-format
-msgid "Content licensed under %(km_licence)s."
-msgstr ""
-
-msgid "Primary navigation"
-msgstr ""
-
-msgid "Toggle navigation menu"
-msgstr ""
-
-msgid "Open navigation menu"
-msgstr ""
-
-msgid "External links"
+msgid "Play video: %(title)s"
 msgstr ""
 
 msgid "Close menu"

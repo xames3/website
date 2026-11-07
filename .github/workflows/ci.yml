@@ -3,12 +3,13 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 26 August 2025
-# Last updated on: 15 October 2026
+# Last updated on: 07 November 2026
 
 name: Continuous Integration
 run-name: Started ${{ github.workflow }} (CI) workflow
 
 on:
+  workflow_call:
   workflow_dispatch:
   push:
     branches:
@@ -17,12 +18,12 @@ on:
     paths:
       - ".github/**"
       - "LICENSE*"
+      - "MANIFEST.in"
       - "README.rst"
       - "babel.cfg"
       - "docs/**"
       - "kaamiki/**"
       - "pyproject.toml"
-      - "requirements.txt"
 
 permissions:
   contents: read
@@ -37,170 +38,99 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  prepare:
-    name: Prepare Environment
-    runs-on: ubuntu-24.04
-    outputs:
-      requirements-cache-key: ${{ steps.cache-key.outputs.key }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: Compute requirements cache key
-        id: cache-key
-        run: echo "key=${{ runner.os }}-pip-$(cat requirements.txt pyproject.toml | sha256sum | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-
   lint:
     name: Lint Python code
-    needs: prepare
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v7
+          persist-credentials: false
+      - name: Set up Python and tox
+        uses: ./.github/actions/setup
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cache pip dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/pip
-          key: ${{ needs.prepare.outputs.requirements-cache-key }}
-          restore-keys: ${{ runner.os }}-pip-
-      - name: Install project dependencies
-        run: python -m pip install -Uq pip tox
       - name: Run linting (ruff)
-        run: tox -e lint -- --no-fix
+        run: tox -e lint
 
   format:
-    name: Format Python code
-    needs: prepare
+    name: Check Python formatting
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v7
+          persist-credentials: false
+      - name: Set up Python and tox
+        uses: ./.github/actions/setup
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cache pip dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/pip
-          key: ${{ needs.prepare.outputs.requirements-cache-key }}
-          restore-keys: ${{ runner.os }}-pip-
-      - name: Install project dependencies
-        run: python -m pip install -Uq pip tox
-      - name: Run formatting (ruff)
-        run: tox -e format -- --check
+      - name: Check formatting (ruff)
+        run: tox -e format
 
   typecheck:
-    name: Typecheck Python code
-    needs: prepare
+    name: Check Python types
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v7
+          persist-credentials: false
+      - name: Set up Python and tox
+        uses: ./.github/actions/setup
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cache pip dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/pip
-          key: ${{ needs.prepare.outputs.requirements-cache-key }}
-          restore-keys: ${{ runner.os }}-pip-
-      - name: Install project dependencies
-        run: python -m pip install -Uq pip tox
-      - name: Run typechecking (mypy)
+      - name: Check types (mypy)
         run: tox -e typecheck
 
   templates:
     name: Check HTML and Jinja templates
-    needs: prepare
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v7
+          persist-credentials: false
+      - name: Set up Python and tox
+        uses: ./.github/actions/setup
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cache pip dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/pip
-          key: ${{ needs.prepare.outputs.requirements-cache-key }}
-          restore-keys: ${{ runner.os }}-pip-
-      - name: Install project dependencies
-        run: python -m pip install -Uq pip tox
       - name: Run template checks (djlint)
         run: tox -e website-check
 
   translations:
-    name: Check translation catalogs
-    needs: prepare
+    name: Check translation catalogues
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v7
+          persist-credentials: false
+      - name: Set up Python and tox
+        uses: ./.github/actions/setup
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cache pip dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/pip
-          key: ${{ needs.prepare.outputs.requirements-cache-key }}
-          restore-keys: ${{ runner.os }}-pip-
-      - name: Install project dependencies
-        run: python -m pip install -Uq pip tox
-      - name: Run catalog checks (babel)
+      - name: Run catalogue checks (babel)
         run: tox -e translations-check
 
   sphinxlint:
     name: Lint rST files
-    needs: prepare
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v7
+          persist-credentials: false
+      - name: Set up Python and tox
+        uses: ./.github/actions/setup
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cache pip dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/pip
-          key: ${{ needs.prepare.outputs.requirements-cache-key }}
-          restore-keys: ${{ runner.os }}-pip-
-      - name: Install documentation dependencies
-        run: |
-          python -m pip install -Uq pip
-          python -m pip install -Uq -e . --group dev
-      - name: Run Sphinx linting
-        run: make --directory docs check
+      - name: Lint the rST (sphinx-lint)
+        run: tox -e sphinxlint
 
   build:
     name: Build website pages
     needs:
-      - prepare
       - lint
       - format
       - typecheck
@@ -211,26 +141,23 @@ jobs:
     outputs:
       artifact: ${{ env.ARTIFACT_NAME }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v7
+          persist-credentials: false
+      - name: Set up Python
+        uses: ./.github/actions/setup
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cache pip dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/pip
-          key: ${{ needs.prepare.outputs.requirements-cache-key }}
-          restore-keys: ${{ runner.os }}-pip-
-      - name: Install documentation dependencies
+      - name: Build the wheel
         run: |
-          python -m pip install -Uq pip
-          python -m pip install -Uq -e . --group dev
+          python -m pip install -q build
+          python -m build --wheel
+      - name: Install the wheel
+        run: python -m pip install -q dist/*.whl
       - name: Restore intersphinx inventories
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: docs/.cache/intersphinx
           key: intersphinx-${{ github.run_id }}
@@ -238,20 +165,26 @@ jobs:
       - name: Fetch intersphinx inventories
         run: make --directory docs inventories
       - name: Build HTML pages with Sphinx
-        run: make --directory docs html
-      - name: Leave Sphinx's build state out of the site
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        run: rm -rf "${OUTPUT_DIR}.doctrees" "${OUTPUT_DIR}".buildinfo*
+        run: make --directory docs html CHECK=
+      - name: Leave Sphinx's build record out of the site
+        if: >-
+          github.event_name != 'pull_request'
+          && github.ref == 'refs/heads/main'
+        run: rm -f "${OUTPUT_DIR}".buildinfo*
       - name: Upload built documentation as artifact
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v5
+        if: >-
+          github.event_name != 'pull_request'
+          && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.OUTPUT_DIR }}
 
   deploy:
     name: Deploy built website
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name != 'pull_request'
+      && github.ref == 'refs/heads/main'
     needs: build
     permissions:
       contents: read

@@ -1,0 +1,204 @@
+{#
+Greetings widget
+================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 20 October 2026
+Last updated on: 21 October 2026
+#}
+<div class="greetings"
+     data-source="{{ source }}">
+    <p class="greetings__text">
+        <span class="greetings__word"></span>
+    </p>
+</div>
+<style>
+    .greetings {
+        margin: calc(92px / 1.5) 0 0;
+    }
+
+    .greetings__text {
+        font-size: 1.875rem;
+        font-weight: var(--km-weight-h2);
+        letter-spacing: var(--km-tracking-h2);
+        line-height: 1.25;
+        min-height: 1.25em;
+        color: hsl(var(--km-colour-grey-93));
+    }
+
+    @media (width >=640px) {
+        .greetings__text {
+            font-size: 2.25rem;
+        }
+    }
+
+    .greetings__word {
+        display: inline-block;
+        position: relative;
+        height: 1.25em;
+        vertical-align: top;
+        white-space: pre;
+    }
+
+    .greetings__slot {
+        position: absolute;
+        top: 0;
+        height: 1.25em;
+        perspective: 6em;
+    }
+
+    .greetings__cube {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        transform: translateZ(-0.625em);
+    }
+
+    .greetings__face {
+        position: absolute;
+        top: 0;
+        left: 0;
+        white-space: pre;
+        backface-visibility: hidden;
+    }
+
+    .greetings__face--front {
+        transform: translateZ(0.625em);
+    }
+
+    .greetings__face--back {
+        transform: rotateX(-90deg) translateZ(0.625em);
+    }
+</style>
+{# djlint:off #}
+<script>
+    (function() {
+        var box = document.currentScript && document.currentScript.previousElementSibling;
+        while (box && !box.classList.contains("greetings")) box = box.previousElementSibling;
+        var text = box && box.querySelector(".greetings__text");
+        var word = box && box.querySelector(".greetings__word");
+        var greetings = [];
+        var interval = {{ interval }};
+        var duration = {{ duration }};
+        var stagger = {{ stagger }};
+        var still = !window.matchMedia
+            || window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            || !Element.prototype.animate;
+        var index = 0;
+        var segmenter = window.Intl && Intl.Segmenter
+            ? new Intl.Segmenter(undefined, {granularity: "grapheme"})
+            : null;
+
+        if (!word) return;
+
+        fetch(box.getAttribute("data-source"))
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                greetings = data.map(function(item) { return item.name; });
+                if (!greetings.length) return;
+                word.textContent = greetings[0];
+                if (greetings.length > 1) setTimeout(next, interval);
+            })
+            .catch(function() {});
+
+        function make(name, content) {
+            var element = document.createElement("span");
+            element.className = "greetings__" + name;
+            if (content !== undefined) element.textContent = content;
+            return element;
+        }
+
+        function split(word) {
+            if (!segmenter) return Array.from(word);
+            return Array.from(segmenter.segment(word), function(part) {
+                return part.segment;
+            });
+        }
+
+        function next() {
+            var from = greetings[index];
+            index = (index + 1) % greetings.length;
+            var to = greetings[index];
+            if (still) {
+                word.textContent = to;
+                setTimeout(next, interval);
+                return;
+            }
+            roll(from, to, function() {
+                word.textContent = to;
+                text.removeAttribute("aria-hidden");
+                setTimeout(next, interval);
+            });
+        }
+
+        function measure(text, parts) {
+            var at = 0;
+            var base;
+
+            word.textContent = text;
+            base = word.getBoundingClientRect().left;
+            return parts.map(function(part) {
+                var range = document.createRange();
+                range.setStart(word.firstChild, at);
+                range.setEnd(word.firstChild, at + part.length);
+                at += part.length;
+                var box = range.getBoundingClientRect();
+                return {x: box.left - base, w: box.width};
+            });
+        }
+
+        function roll(from, to, done) {
+            var before = split(from);
+            var after = split(to);
+            var count = Math.max(before.length, after.length);
+            var easing = "cubic-bezier(0.4, 0, 0.2, 1)";
+            var width = word.offsetWidth;
+            var old = measure(from, before);
+            var now = measure(to, after);
+            var last;
+
+            width = Math.max(width, word.offsetWidth);
+            text.setAttribute("aria-hidden", "true");
+            word.textContent = "";
+            word.style.width = width + "px";
+            for (var i = 0; i < count; i++) {
+                var edges = [old[i], now[i]].filter(Boolean);
+                var left = Math.min.apply(null, edges.map(function(_) { return _.x; }));
+                var right = Math.max.apply(null, edges.map(function(_) { return _.x + _.w; }));
+                var cube = make("cube");
+                var front = make("face greetings__face--front", before[i] || "");
+                var back = make("face greetings__face--back", after[i] || "");
+                var slot = make("slot");
+                var timing = {
+                    duration: duration,
+                    delay: i * stagger,
+                    easing: easing,
+                    fill: "both"
+                };
+                slot.style.left = left + "px";
+                slot.style.width = (right - left) + "px";
+                if (old[i]) front.style.left = (old[i].x - left) + "px";
+                if (now[i]) back.style.left = (now[i].x - left) + "px";
+                cube.appendChild(front);
+                cube.appendChild(back);
+                slot.appendChild(cube);
+                word.appendChild(slot);
+                cube.animate([
+                    {transform: "translateZ(-0.625em) rotateX(0deg)"},
+                    {transform: "translateZ(-0.625em) rotateX(90deg)"}
+                ], timing);
+                front.animate(
+                    [{filter: "blur(0px)"}, {filter: "blur(2px)"}], timing
+                );
+                last = back.animate(
+                    [{filter: "blur(2px)"}, {filter: "blur(0px)"}], timing
+                );
+            }
+            last.onfinish = function() {
+                word.style.width = "";
+                done();
+            };
+        }
+    })();
+</script>
+{# djlint:on #}
