@@ -9,6 +9,8 @@ Last updated on: 23 October 2026
 Kaamiki's Jinja environment and the helpers that read its templates.
 """
 
+from __future__ import annotations
+
 import os.path as p
 import typing as t
 
@@ -30,10 +32,12 @@ environment: jinja2.Environment = jinja2.Environment(
     keep_trailing_newline=False,
     extensions=["jinja2.ext.i18n"],
 )
-environment.install_null_translations(newstyle=True)  # type: ignore[attr-defined]
+environment.install_null_translations(  # type: ignore[attr-defined]
+    newstyle=True
+)
 
 
-def render(template: str, /, **context: t.Any) -> str:
+def render(template: str, /, **context: object) -> str:
     """Render a theme directive template with the given context.
 
     Context values are exposed to the template with a `km_` prefix.
@@ -50,9 +54,8 @@ def bridge(app: Sphinx) -> None:
     """Bridge Kaamiki's directive templates with Sphinx's template
     loader.
 
-    Directive templates can be overridden by the site or a child theme,
-    while keeping Kaamiki's Jinja environment, translations and
-    filters.
+    Directive templates can be overridden by the site, while keeping
+    Kaamiki's Jinja environment, translations and filters.
 
     :param app: The Sphinx application instance.
     """
@@ -69,15 +72,3 @@ def bridge(app: Sphinx) -> None:
     sphinx = getattr(templates, "environment", None)
     for name, value in getattr(sphinx, "filters", {}).items():
         environment.filters.setdefault(name, value)
-
-
-def themed(builder: object) -> bool:
-    """Say whether a builder writes its pages with this theme.
-
-    :param builder: The builder, of any kind.
-    :return: `True` when this theme's templates are among its theme's.
-    """
-    theme = getattr(builder, "theme", None)
-    if theme is None:
-        return False
-    return any(p.realpath(_) == TEMPLATES for _ in theme.get_theme_dirs())

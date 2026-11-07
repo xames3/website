@@ -4,10 +4,12 @@ Link Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 25 October 2026
+Last updated on: 07 November 2026
 
 The helpers that work out where a link goes.
 """
+
+from __future__ import annotations
 
 import re
 import typing as t
@@ -28,8 +30,13 @@ if t.TYPE_CHECKING:
 # NOTE(xames3): What every link that opens in a new tab says in `rel`.
 # `noopener` keeps the new tab from reaching back into this one and
 # `noreferrer` keeps it from seeing which page the reader came from.
+# https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel
 REL: t.Final[str] = "noopener noreferrer"
+SLASHES: re.Pattern[str] = re.compile(r"^/{2,}")
 YOUTUBE_ID: re.Pattern[str] = re.compile(r"[A-Za-z0-9_-]{11}")
+YOUTUBE_START: re.Pattern[str] = re.compile(
+    r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?"
+)
 YOUTUBE_HOSTS: t.Final[frozenset[str]] = frozenset(
     {"youtube.com", "youtube-nocookie.com", "music.youtube.com"}
 )
@@ -42,12 +49,18 @@ def youtube_id(url: str) -> str | None:
     """Find the video id in a YouTube link.
 
     Watch, `youtu.be`, `embed`, `shorts`, `live` and `v` links work, as
-    does a bare id.
+    does a bare id. A link has to be `http` or `https`, and one urllib
+    can't read has no id.
 
     :param url: The link, as written.
     :return: The eleven character id or `None` when there isn't one.
     """
-    parts = urlsplit(url.strip())
+    try:
+        parts = urlsplit(url.strip())
+    except ValueError:
+        return None
+    if parts.scheme not in ("", "http", "https"):
+        return None
     host = (parts.hostname or "").removeprefix("www.").removeprefix("m.")
     segments = [_ for _ in parts.path.split("/") if _]
     found = ""
@@ -60,6 +73,27 @@ def youtube_id(url: str) -> str | None:
     return found if YOUTUBE_ID.fullmatch(found) else None
 
 
+def youtube_start(url: str) -> int | None:
+    """Find the second a YouTube link starts at.
+
+    A link copied at the current time writes it as `t=42`, `t=42s` or
+    `t=1h2m3s` and an embed link as `start=42`.
+
+    :param url: The link, as written.
+    :return: The seconds or `None` when the link names none.
+    """
+    try:
+        query = parse_qs(urlsplit(url.strip()).query)
+    except ValueError:
+        return None
+    for key in ("t", "start"):
+        found = YOUTUBE_START.fullmatch(query.get(key, [""])[0])
+        if found and any(found.groups()):
+            hours, minutes, seconds = (int(_ or 0) for _ in found.groups())
+            return hours * 3600 + minutes * 60 + seconds
+    return None
+
+
 def hostnames(entries: Iterable[str], *, www: bool = False) -> set[str]:
     """Read the host names out of a list a site wrote.
 
@@ -70,7 +104,10 @@ def hostnames(entries: Iterable[str], *, www: bool = False) -> set[str]:
     found: set[str] = set()
     for entry in entries:
         text = entry.strip()
-        name = urlsplit(text if "//" in text else f"//{text}").hostname
+        try:
+            name = urlsplit(text if "//" in text else f"//{text}").hostname
+        except ValueError:
+            continue
         if name:
             found.add(name if www else name.removeprefix("www."))
     return found
@@ -81,7 +118,8 @@ def hosts(config: Config) -> set[str]:
 
     :param config: The Sphinx configuration.
     :return: The host in `html_baseurl` and the ones in
-        `internal_hosts`, lowercase and without `www.`.
+        `kaamiki.conf.links.internal_hosts`, lowercase and without
+        `www.`.
     """
     return hostnames([config.html_baseurl]) | hostnames(
         setting(config, "internal_hosts")
@@ -91,41 +129,52 @@ def hosts(config: Config) -> set[str]:
 def elsewhere(url: str, own: t.Collection[str]) -> bool:
     """Say whether a link leaves the site.
 
-    Only a host other than the site's own counts, `www.` aside.
+    Only a host other than the site's own counts, `www.` aside. A
+    browser reads a backslash as a slash, so a link that opens with two
+    of them goes to another site just as one that opens with `//` does.
+    A link urllib can't read is taken to stay on the site.
 
     :param url: The link, as written.
     :param own: The site's own hosts, as `hosts` returns them.
     :return: Whether the link goes to another site.
     """
-    host = urlsplit(url).hostname
+    text = SLASHES.sub("//", url.strip().replace("\\", "/"))
+    try:
+        host = urlsplit(text).hostname
+    except ValueError:
+        return False
     if not host:
         return False
     return host.removeprefix("www.") not in own
 
 
+def guarded(rel: str | None) -> str:
+    """Add the words a link that opens in a new tab needs to its `rel`.
+
+    :param rel: What the link says in `rel`, as written.
+    :return: Those words and `REL`'s, each once.
+    """
+    return " ".join(dict.fromkeys([*(rel or "").split(), *REL.split()]))
+
+
 def opens_new_tab(url: str, config: Config) -> bool:
     """Say whether a link should open in a new tab.
 
-    It has to leave the site, `internal_hosts` aside, and
-    `open_links_in_new_tab` mustn't be off.
+    It has to leave the site, `kaamiki.conf.links.internal_hosts`
+    aside, and `kaamiki.conf.links.new_tab` mustn't be off.
 
     :param url: The link, as written.
     :param config: The Sphinx configuration.
     :return: Whether the link gets `target="_blank"`.
     """
-    if not setting(config, "open_links_in_new_tab"):
+    if not setting(config, "links_in_new_tab"):
         return False
     return elsewhere(url, hosts(config))
 
 
-def rooted(translator: HTMLTranslator, url: str) -> str:
+def relative_to_page(translator: HTMLTranslator, url: str) -> str:
     """Make a path written in an option an address that works from the
     page it's on.
-
-    A path counts from the top of the site, with or without a leading
-    `/`, so `_static/cover.png` is the same picture from every page and
-    from a site under a sub-path. A full address, a `//` one and a
-    `data:` one are left as written.
 
     :param translator: The HTML translator writing the page.
     :param url: The path or address, as written.
@@ -151,6 +200,4 @@ def absolute(url: str, home: str) -> str:
     """
     if not url or not home or urlsplit(url).scheme:
         return url
-    if url.startswith("//"):
-        return f"{urlsplit(home).scheme}:{url}"
     return home.rstrip("/") + "/" + quote(url.lstrip("/"), safe="/%?=&#:")
