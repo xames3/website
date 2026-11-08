@@ -155,7 +155,7 @@ def buried(paragraph: nodes.Element) -> bool:
     """Say whether a paragraph sits anywhere but directly in a section.
 
     Lifted out of a note, a table, a fold, a tab, a card, a footnote or
-    a quote, a line reads as a non-sequitur, and a page's description
+    a quote, a line reads as a non-sequitur. A page's description
     shouldn't come from one a reader can't see when the page opens.
 
     :param paragraph: The paragraph to place.

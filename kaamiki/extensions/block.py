@@ -308,7 +308,7 @@ def unrow(app: Sphinx, doctree: nodes.document) -> None:
     """Take the blocks out of the rows that sit in a column.
 
     A column decides where its blocks go, however deep they are in it,
-    so they are not put side by side. A row is made as the blocks are
+    so they aren't put side by side. A row is made as the blocks are
     parsed, when what they are in isn't known yet.
 
     :param app: The Sphinx application instance (unused).

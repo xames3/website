@@ -135,7 +135,7 @@ def titled(directive: Directive, argument: str) -> str:
     :param directive: The directive that has the title.
     :param argument: The title as written.
     :return: The title, trimmed.
-    :raises rst.DirectiveError: When it is blank or too long.
+    :raises rst.DirectiveError: When it's blank or too long.
     """
     try:
         return checks.text(argument)

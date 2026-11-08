@@ -169,7 +169,7 @@ def context_defaults(app: Sphinx) -> None:
     if "html_use_index" in named and config.html_use_index:
         logger.warning(
             "html_use_index is True, but Kaamiki has no page for the"
-            " general index, so it is left off. Leave html_use_index out of"
+            " general index, so it's left off. Leave html_use_index out of"
             " conf.py",
             type="kaamiki",
             subtype="settings",
@@ -290,8 +290,8 @@ def page_title(app: Sphinx, doctree: nodes.document) -> None:
     """Stop for a page that has no title with words in it.
 
     A page's title names it in the tab, the navigation, the cards, the
-    search and the link preview, so one that is missing, or is only an
-    icon, leaves each of them with nothing to say.
+    search and the link preview, so one that is missing or is only an
+    icon leaves each of them with nothing to say.
 
     :param app: The Sphinx application instance.
     :param doctree: The page, just read.
@@ -388,7 +388,7 @@ def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
         site = setting(app.config, "feedback").get("url")
         if not (email or site or found.get("km-feedback-url")):
             fail(
-                "field :km-show-feedback: is on but there is nowhere to send"
+                "field :km-show-feedback: is on but there's nowhere to send"
                 " feedback: set an email in kaamiki.conf.site.project, a url in"
                 " kaamiki.conf.site.feedback or :km-feedback-url: on the page",
                 places.get("km-show-feedback", where),
@@ -507,7 +507,7 @@ def feedback(
     if "km-feedback-split" in meta and not url:
         fail(
             "field :km-feedback-split: needs somewhere to send feedback,"
-            " there is no email or :km-feedback-url: for a button",
+            " there's no email or :km-feedback-url: for a button",
             str(app.env.doc2path(pagename)),
         )
     if url and setting(app.config, "show_feedback") is None:
@@ -633,7 +633,7 @@ def header_leads(builder: StandaloneHTMLBuilder) -> dict[str, str]:
     A page's own `:km-header-subtitle:` wins over everything, then its
     lead and last its `:km-page-description:`. A page with none of them is
     left out, as is one with `:km-header-no-subtitle:` and no subtitle.
-    It is done once for the whole site and kept for the build.
+    It's done once for the whole site and kept for the build.
 
     :param builder: The HTML builder.
     :return: Each page's words as the `km-header__lead` span that goes in
@@ -671,7 +671,7 @@ def toctrees(
 ) -> None:
     """Give the page its two navigations, the header's and the sidebar's.
 
-    Both are the site's toctree, so it is worked out and drawn once for
+    Both are the site's toctree, so it's worked out and drawn once for
     the page and the header's copy gets each page's lead, as a
     `km-header__lead` span, under its title. The captions of the sidebar
     are given a heading level.
@@ -774,7 +774,7 @@ def related_docs(docname: str, meta: dict[str, str]) -> list[str]:
     :param docname: The page that lists them.
     :param meta: The page's fields.
     :return: Their document names, as `:doc:` would write them, or none
-        when the field is missing or is not one `pages` reads.
+        when the field is missing or isn't one `pages` reads.
     """
     try:
         names = pages(meta.get("km-related-docs") or "")
@@ -857,7 +857,7 @@ def captions(app: Sphinx) -> dict[str, str]:
 
     :param app: The Sphinx application instance.
     :return: Each page a captioned toctree of the front page lists, with
-        that caption. It is read once for a build.
+        that caption. It's read once for a build.
     """
     found: dict[str, str] | None = app.builder.__dict__.get("km_captions")
     if found is None:
@@ -874,7 +874,7 @@ def captions(app: Sphinx) -> dict[str, str]:
 def section_of(app: Sphinx, docname: str) -> str:
     """Name the part of the site a page is in, the way the header does.
 
-    That is the caption of the front page's toctree that lists the page
+    That's the caption of the front page's toctree that lists the page
     or the nearest page above it that one lists.
 
     :param app: The Sphinx application instance.
@@ -1027,7 +1027,7 @@ def follow(
     A page that names another with `:km-page-prev:`, `:km-page-next:` or
     `:km-related-docs:`, or is the article of a release, has that page's
     title written into it,
-    so it is stale once the other is changed, moved or gone. Neighbours
+    so it's stale once the other is changed, moved or gone. Neighbours
     in a toctree are `retitled`.
 
     :param app: The Sphinx application instance.
@@ -1064,7 +1064,7 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
     into a page, so a page is stale once any of them is changed, moved or
     gone. A page's related cards, the ones it lists and the ones it gets
     from the pages around it, show each page's title, picture and date
-    and say which part of the site it is in, so it is stale once any of
+    and say which part of the site it is in, so it's stale once any of
     them changes. Sphinx only rewrites the
     pages whose own source changed.
 
@@ -1072,8 +1072,8 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
     :param env: The build environment, whose pages are all read.
     :return: Every page when a page's title, lead, header subtitle or
         description isn't what it was at the last build, otherwise the
-        pages whose previous or next page, or whose related cards,
-        aren't what they were, the pages no toctree holds any more and
+        pages whose previous or next page or related cards aren't what
+        they were, the pages no toctree holds any more and
         the pages that list a page whose part of the site changed. None
         at the first build.
     """

@@ -113,7 +113,7 @@ class directive(rst.Directive):
                 self,
                 parsed,
                 f"a {field}",
-                "which the script does not run inside a link",
+                "which the script doesn't run inside a link",
             )
             element.append(parsed)
             messages.extend(reported)

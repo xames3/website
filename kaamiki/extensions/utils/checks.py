@@ -190,7 +190,7 @@ def slug(argument: str | None) -> str:
 
 
 def reference_name(argument: str | None) -> str:
-    """Read a `:name:` the way docutils does and check it is a name.
+    """Read a `:name:` the way docutils does and check it's a name.
 
     Any text is a name, as with docutils' own directives: spaces and
     capitals are fine and docutils makes the id (`My Note` is the id
@@ -419,12 +419,12 @@ def lengths(value: str) -> tuple[str, str]:
 def icon(argument: str | None) -> str:
     """Read a Font Awesome icon the way an option or a role writes it.
 
-    It is `plus`, `fa-plus` or a style and a name, `far fa-plus`, with
+    It's `plus`, `fa-plus` or a style and a name, `far fa-plus`, with
     a family ahead of the style for Pro, `fa-sharp fa-solid fa-plus`.
     Font Awesome's sizes and animations, like `fa-lg` and `fa-spin`
     and Kaamiki's `km-tone--red`, `km-tone--yellow`, `km-tone--blue`
     and `km-tone--green` may follow, but only after a style or a
-    family: `far fa-plus fa-spin` is read and `fa-plus fa-spin` is not.
+    family: `far fa-plus fa-spin` is read and `fa-plus fa-spin` isn't.
     An icon has `ICON_WORDS` words at most.
 
     :param argument: The icon as written.

@@ -238,9 +238,9 @@ def _visit(self: HTMLTranslator, node: ink) -> None:
 def _moves(node: ink) -> bool:
     """Tell whether an inked text keeps its style here or is plain.
 
-    It's plain inside a link, which is a toctree, a `:ref:` or a
-    `:doc:`, and in a title rendered on its own, which is what the
-    breadcrumbs, the page's tab and the previous and next pages get.
+    It's plain inside a link (a toctree, a `:ref:` or a `:doc:`) and in
+    a title rendered on its own, which is what the breadcrumbs, the
+    page's tab and the previous and next pages get.
     The rotating words show their first one there.
 
     :param node: The inked text or the rotating words.

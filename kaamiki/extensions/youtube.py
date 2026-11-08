@@ -86,7 +86,7 @@ class directive(rst.Directive):
         - `no-privacy`: Embed from `youtube.com`, even though the
           site's `kaamiki.conf.youtube.privacy` is on.
         - `hide-controls`: Hide the player controls, which are shown
-          without it. It needs `autoplay`, or there is no way to play
+          without it. It needs `autoplay`, or there's no way to play
           the video.
         - `loop`: Play it over and over.
         - `muted`: Start with the sound off. `autoplay` does that

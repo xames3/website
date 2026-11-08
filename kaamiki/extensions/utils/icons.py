@@ -286,8 +286,9 @@ def free_classes(style: str, name: str) -> str | None:
     :param style: The style it was asked for, by its plain name.
     :param name: The icon's name without `fa-`.
     :return: The Free icon's classes, in the asked style when Free has
-        it and in the nearest it does have when it hasn't, or its
-        stand-in, or `None` when Free draws nothing like it.
+        it and in the nearest it does have when it hasn't. Without that
+        icon it gives the stand-in the name has or `None` when Free
+        draws nothing like it.
     """
     if style == "brands":
         return f"fa-brands fa-{name}" if name in FREE_BRANDS else None
@@ -349,7 +350,7 @@ class Icons:
             site's. Without one, the Free icon that draws it, in the
             site's style where Free has both and in the one it has
             where it has only one.
-        :raises ValueError: When there is no kit and Free has no icon
+        :raises ValueError: When there's no kit and Free has no icon
             of that name nor a stand-in for it.
         """
         families, style, name, extras = split(spec)

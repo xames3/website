@@ -55,7 +55,7 @@ STACKS: t.Final[tuple[str, ...]] = ("left", "center")
 
 
 class Columns(nodes.container):
-    """The columns and what is in them, waiting for `visit`."""
+    """The columns and what's in them, waiting for `visit`."""
 
 
 class item(nodes.container):
@@ -89,9 +89,9 @@ class directive(rst.Directive):
     Options::
 
         - `gap`: The space between columns. `small`, the default,
-          `medium` or `large`, or lengths in `rem` that replace them,
-          up to 4rem: one for both directions, like `1.5rem`, or two as
-          the row gap then the column gap, like `1rem 2rem`.
+          `medium` or `large`. Lengths in `rem` replace them, up to
+          4rem: one for both directions, like `1.5rem`, or two as the
+          row gap then the column gap, like `1rem 2rem`.
         - `valign`: Where columns of different heights line up, `top`,
           `middle`, the default or `bottom`.
         - `flush`: Take off the space above the first thing in each
@@ -99,18 +99,19 @@ class directive(rst.Directive):
           the spacing. A column with a `padding`, `border` or
           `background` already does.
         - `padding`: The space inside each column. `small`, `medium` or
-          `large`, or lengths in `rem` like `gap`, as the space above
-          and below then at the sides when there are two. A column with
-          a `border` or a `background` has `1rem` without it.
+          `large`. Lengths in `rem` like `gap` replace them, as the
+          space above and below then at the sides when there are two. A
+          column with a `border` or a `background` has `1rem` without
+          it.
         - `border`: Draw a 1px border and rounded corners around each
           column.
         - `background`: Fill each column, with rounded corners.
         - `margin`: The space above and below the columns. `small`,
-          `medium`, the default, or `large`, or lengths in `rem` up to
-          8rem: one for both, or two as above then below, like
-          `5rem 2rem`.
+          `medium`, the default or `large`. Lengths in `rem` replace
+          them, up to 8rem: one for both, or two as above then below,
+          like `5rem 2rem`.
         - `stack-align`: How the text in the columns lines up when they
-          stack on a phone, `left`, the default, or `center`.
+          stack on a phone, `left`, the default or `center`.
         - `class-column`: More classes for every column in them.
         - `name`: A name to link to.
         - `class`: More classes for the columns.

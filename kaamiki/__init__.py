@@ -211,7 +211,7 @@ away = (skip, None)
 
 
 def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
-    """Swap Kaamiki's nodes for ordinary ones where there is no HTML.
+    """Swap Kaamiki's nodes for ordinary ones where there's no HTML.
 
     The text, LaTeX, man and texinfo builders can't write Kaamiki's
     nodes, so a directive that has a `plain` function gets its node

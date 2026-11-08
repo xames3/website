@@ -167,9 +167,9 @@ class directive(rst.Directive):
         - `align`: Where the button sits, `left`, `center` or `right`.
           Defaults to `left`.
         - `scheme`: `light`, `dark`, `chevron`, `red`, `yellow`, `blue`
-          or `green`, or a colour named in
-          `kaamiki.conf.button.colours`. `chevron` is `light` with a
-          chevron on the right that turns into an arrow on hover.
+          or `green`. A colour named in `kaamiki.conf.button.colours`
+          works too. `chevron` is `light` with a chevron on the right
+          that turns into an arrow on hover.
         - `new-tab`: Open the link in a new tab, even on this site. It
           stops the build for a link that opens in one already.
         - `same-tab`: Open the link in this tab, even off this site.
@@ -261,7 +261,7 @@ class directive(rst.Directive):
         chevron = look == "km-button--scheme-chevron"
         if chevron and ("fa-icon" in options or "icon-position" in options):
             raise self.error(
-                "button: the chevron scheme is not allowed with :fa-icon: or "
+                "button: the chevron scheme isn't allowed with :fa-icon: or "
                 ":icon-position:"
             )
         side = options.pop("icon-position", None)
@@ -304,7 +304,7 @@ class directive(rst.Directive):
             self,
             label,
             "a label",
-            "which the script does not run inside a link",
+            "which the script doesn't run inside a link",
         )
         element = Button("", label, **attributes)
         named(self, element)
@@ -315,7 +315,7 @@ class directive(rst.Directive):
 
         :param scheme: The scheme as written or `None` for the site's.
         :param iconic: Whether the button has an icon, which a site's
-            `chevron` doesn't suit, so it is `light` there.
+            `chevron` doesn't suit, so it's `light` there.
         :return: The classes and the inline style holding the colour,
             if the scheme is one the site named. The `dark` scheme is
             how a button looks without one and has no class.

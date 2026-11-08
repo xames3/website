@@ -86,7 +86,7 @@ class directive(rst.Directive):
 
     Options::
 
-        - `version`: The release's version, like `2026.10.5`. It is
+        - `version`: The release's version, like `2026.10.5`. It's
           needed and a site uses each once.
         - `article`: A page telling the story behind the release, as
           `:doc:` would name it. It's linked under the notes.
@@ -108,9 +108,9 @@ class directive(rst.Directive):
 
     The definition lists in the content are the change groups. Each
     term is one of `Added`, `Changed`, `Deprecated`, `Fixed` and
-    `Removed`, or a group in the site's `kaamiki.conf.release.kinds`,
-    wherever the list sits in the content, and a list inside a group is
-    left alone.
+    `Removed`. A group in the site's `kaamiki.conf.release.kinds` works
+    too. The list can sit anywhere in the content and a list inside a
+    group is left alone.
 
     The site's `kaamiki.conf.release.version_fmt` says how a version
     spells its date, `%Y.%m.%d` by default. A version that doesn't and

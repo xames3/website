@@ -21,7 +21,7 @@ An `embed` directive that drops a block of HTML into the page.
 Every other option is a placeholder, so `{{ expected-count }}` is
 replaced by the option's value, escaped for where it lands. In markup
 and in a `<style>` the value is written as it was written. In a
-`<script>` it is read as a Python literal first, so `10` is a number
+`<script>` it's read as a Python literal first, so `10` is a number
 there and `'10'` a string.
 
 A larger embed can live in a file of its own, named as the argument,
@@ -192,7 +192,7 @@ class Fragment(HTMLParser):
         """Keep a tag written with a slash.
 
         A browser ignores the slash on a script or a style, which then
-        go on to their end tag, so it is read as a start tag here.
+        go on to their end tag, so it's read as a start tag here.
 
         :param tag: The tag's name.
         :param attrs: Its attributes, a list of names and values.
@@ -458,14 +458,14 @@ class directive(rst.Directive):
             if kind == "script" and "iframe" in markup[start:end].lower():
                 raise self.error(
                     "embed: expected a script that builds no iframe, got one,"
-                    " which kaamiki.conf.embed.iframe_hosts cannot check"
+                    " which kaamiki.conf.embed.iframe_hosts can't check"
                 )
         for tag, attributes in fragment.tags:
             banned = "srcdoc" if "srcdoc" in attributes else f"<{tag}>"
             if tag in FRAMES or "srcdoc" in attributes:
                 raise self.error(
                     f"embed: expected no {banned}, got one, which "
-                    "kaamiki.conf.embed.iframe_hosts cannot check"
+                    "kaamiki.conf.embed.iframe_hosts can't check"
                 )
             src = attributes.get("src")
             if (

@@ -50,7 +50,7 @@ jobs:
           version=$(sed -n 's/^__version__: str = "\(.*\)"$/\1/p' \
             kaamiki/__init__.py)
           test "${GITHUB_REF_NAME#v}" = "$version" || {
-            echo "The tag ${GITHUB_REF_NAME} does not match version ${version}"
+            echo "The tag ${GITHUB_REF_NAME} doesn't match version ${version}"
             exit 1
           }
       - name: Build the sdist and the wheel

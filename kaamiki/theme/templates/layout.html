@@ -356,7 +356,10 @@ Last updated on: 07 November 2026
                       type="image/svg+xml"
                       href="{{ pathto('_static/' + km_favicons.size_svg, 1) }}" />
             {%- endif %}
-            {%- if favicon_url %}
+            {%- if km_favicons and km_favicons.ico %}
+                <link rel="shortcut icon"
+                      href="{{ pathto('_static/' + km_favicons.ico, 1) }}" />
+            {%- elif favicon_url %}
                 <link rel="shortcut icon"
                       href="{{ favicon_url }}" />
             {%- endif %}

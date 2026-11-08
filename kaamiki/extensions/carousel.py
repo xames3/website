@@ -76,7 +76,7 @@ SKIPPED: t.Final[tuple[type[nodes.Node], ...]] = (
 
 
 class Carousel(nodes.container):
-    """The carousel and what is in it, waiting for `visit`."""
+    """The carousel and what's in it, waiting for `visit`."""
 
 
 class carouseltext(phrase):
@@ -110,7 +110,7 @@ def is_item(found: nodes.Node) -> bool:
 
     :param found: The node to look at.
     :return: `True` for a block, a button, a figure, a picture, a
-        repository or a thumbnail, and for a picture that links.
+        repository or a thumbnail. A picture that links counts too.
     """
     if isinstance(found, ITEMS):
         return True
@@ -132,9 +132,9 @@ class directive(rst.Directive):
         - `subsection`: A dimmer line under the title, set the way a
           section's is. It needs a title.
         - `gap`: The space between items. `small`, the default,
-          `medium` or `large`, or a length in `rem` that replaces them,
-          up to 4rem, like `1.5rem`. Two lengths, as `columns` takes,
-          use the second.
+          `medium` or `large`. A length in `rem` replaces them, up to
+          4rem, like `1.5rem`. Two lengths, as `columns` takes, use the
+          second.
         - `hide-arrows`: Leave out the arrows. A reader still swipes or
           scrolls.
         - `auto-run`: Move on by itself, pausing while a reader hovers,
@@ -148,7 +148,7 @@ class directive(rst.Directive):
         - `class`: More classes for the carousel.
 
     The argument is the title, which is optional and is set the way a
-    section's is. It is read as reStructuredText, so roles work in it,
+    section's is. It's read as reStructuredText, so roles work in it,
     and so they do in `header` and `subsection`. The arrows sit on the
     title's line when it and they fit on one and below the items when
     they don't, and always below on a phone.

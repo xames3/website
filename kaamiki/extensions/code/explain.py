@@ -554,7 +554,7 @@ class directive(CodeBlock):
         if traced["truncated"]:
             raise self.error(
                 f"{self.name}: expected a snippet of at most {budget} steps,"
-                " got more, so it is long or never ends; trim it or raise"
+                " got more, so it's long or never ends; trim it or raise"
                 " kaamiki.conf.code_explain.budget"
             )
         if len(steps) > most:
@@ -757,7 +757,7 @@ class directive(CodeBlock):
         if error is not None and not raises:
             raise self.error(
                 f"{self.name}: expected a snippet that runs to the end, got"
-                f" {error['text']}; add :raises: if that is meant"
+                f" {error['text']}; add :raises: if that's meant"
             )
         if error is None and raises:
             raise self.error(

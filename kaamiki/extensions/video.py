@@ -108,11 +108,11 @@ class directive(rst.Directive):
           or a path of a `.jpg`, `.png`, `.webp`, `.avif`, `.gif` or
           `.svg`.
         - `preload`: How much the browser fetches ahead: `none`,
-          `metadata` or `auto`. `none` is not allowed with `autoplay`.
+          `metadata` or `auto`. `none` isn't allowed with `autoplay`.
         - `loop`: Play it over and over.
         - `muted`: Start with the sound off.
         - `hide-controls`: Hide the player controls, which are shown
-          without it. It needs `autoplay`, or there is no way to play
+          without it. It needs `autoplay`, or there's no way to play
           the video.
         - `track`: Captions, as `language=file` and comma-separated, up
           to 8. A language or a file can be in it once.
@@ -265,7 +265,7 @@ class directive(rst.Directive):
         if not FILES.fullmatch(urlsplit(found).path) and not kind:
             raise self.error(
                 f"video: expected a .mp4, .m4v, .webm, .ogv, .ogg or .mov file,"
-                f" got {found!r}; give its :type: if it is a video"
+                f" got {found!r}; give its :type: if it's a video"
             )
         return shipped(self, found, where)
 

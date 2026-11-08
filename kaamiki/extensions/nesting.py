@@ -203,9 +203,9 @@ def article(name: str) -> str:
 def describe(node: nodes.Node) -> str:
     """Say what a node is, the way a message names it.
 
-    A directive is named after itself, an admonition after its kind, so
-    a warning isn't a note, and a block after its size when it isn't
-    large, and after its link when it has one.
+    A directive is named after itself and an admonition after its kind,
+    so a warning isn't a note. A block is named after its size when it
+    isn't large and after its link when it has one.
 
     :param node: The node to look at.
     :return: Its name with an article, `an accordion`.

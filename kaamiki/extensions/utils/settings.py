@@ -380,6 +380,7 @@ UNREAD_OPTIONS: t.Final[tuple[str, ...]] = (
 CARDS: t.Final[tuple[str, ...]] = ("summary", "summary_large_image")
 FAVICONS: t.Final[tuple[str, ...]] = (
     "manifest",
+    "ico",
     "size_96",
     "size_180",
     "size_svg",
@@ -481,7 +482,7 @@ def shape(**fields: Rule) -> Rule:
         for name, each in value.items():
             if name not in fields:
                 raise ValueError(
-                    f"{name!r} is not one of {', '.join(sorted(fields))}"
+                    f"{name!r} isn't one of {', '.join(sorted(fields))}"
                 )
             try:
                 fields[name](each)
@@ -701,7 +702,7 @@ RULES: t.Final[dict[str, Rule]] = {
 def stored[V](env: BuildEnvironment, key: str, default: V) -> V:
     """Hold something Kaamiki keeps on the build environment.
 
-    It is pickled with the environment, so it is there for the next
+    It's pickled with the environment, so it's there for the next
     build, and it is prefixed `km_` so it can't be mistaken for
     Sphinx's.
 
@@ -1073,7 +1074,7 @@ def _read(config: Config, conf: str) -> dict[str, t.Any]:
         ):
             given[key] = config[name]
             continue
-        fail(f"{name} is not a Kaamiki setting", conf)
+        fail(f"{name} isn't a Kaamiki setting", conf)
     for key in CONF.given:
         if flat(key) not in config.overrides:
             given[key] = config[flat(key)]
@@ -1081,7 +1082,7 @@ def _read(config: Config, conf: str) -> dict[str, t.Any]:
         if not name.startswith(PREFIX):
             continue
         if name not in FLAT:
-            fail(f"{name} is not a Kaamiki setting", conf)
+            fail(f"{name} isn't a Kaamiki setting", conf)
         given[FLAT[name]] = config[name]
     for key, value in given.items():
         _check_value(key, value, conf)
@@ -1199,7 +1200,7 @@ def _check_pairs(config: Config, given: dict[str, t.Any], conf: str) -> None:
         given.get("project", {}).get("email") or feedback.get("url")
     ):
         fail(
-            "kaamiki.conf.show.feedback is True but there is nowhere to send"
+            "kaamiki.conf.show.feedback is True but there's nowhere to send"
             " feedback: set an email in kaamiki.conf.site.project or a url in"
             " kaamiki.conf.site.feedback",
             conf,
@@ -1290,7 +1291,7 @@ def _check_static(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
             fail(f"html_theme_options['logo']: {error}", conf)
         if not present(logo):
             fail(
-                f"html_theme_options['logo']: {logo!r} is not in"
+                f"html_theme_options['logo']: {logo!r} isn't in"
                 " html_static_path",
                 conf,
             )
@@ -1301,9 +1302,7 @@ def _check_static(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
     ):
         for name in found:
             if not present(name):
-                fail(
-                    f"{option(key)}: {name!r} is not in html_static_path", conf
-                )
+                fail(f"{option(key)}: {name!r} isn't in html_static_path", conf)
 
 
 def _check_theme(config: Config, conf: str) -> None:
@@ -1325,7 +1324,7 @@ def _check_code_explain(
     for entry in given.get("code_explain_pythonpath", []):
         if not p.isdir(p.join(app.srcdir, entry)):
             fail(
-                f"kaamiki.conf.code_explain.pythonpath: {entry!r} is not a"
+                f"kaamiki.conf.code_explain.pythonpath: {entry!r} isn't a"
                 " directory",
                 conf,
             )
@@ -1337,9 +1336,7 @@ def _check_code_explain(
             conf,
         )
     if python is not None and not p.isfile(python):
-        fail(
-            f"kaamiki.conf.code_explain.python: {python!r} is not a file", conf
-        )
+        fail(f"kaamiki.conf.code_explain.python: {python!r} isn't a file", conf)
 
 
 def _check_dates(given: dict[str, t.Any], conf: str) -> None:
@@ -1356,7 +1353,7 @@ def _check_dates(given: dict[str, t.Any], conf: str) -> None:
         except ValueError, re.error:
             fail(
                 "kaamiki.conf.release.version_fmt: expected a format that reads"
-                " back what it writes, got one that does not",
+                " back what it writes, got one that doesn't",
                 conf,
             )
 
