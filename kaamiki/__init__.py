@@ -215,7 +215,7 @@ def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
 
     The text, LaTeX, man and texinfo builders can't write Kaamiki's
     nodes, so a directive that has a `plain` function gets its node
-    swapped for what that returns, and they write words and links.
+    swapped for what that returns. They then write words and links.
 
     :param app: The Sphinx application instance.
     :param doctree: The page, about to be written.

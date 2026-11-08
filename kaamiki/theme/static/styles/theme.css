@@ -4938,12 +4938,6 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+.km-tabs__label {
     margin-top: 0;
 }
 
-.km-badge--new,
-.km-badge {
-    margin-left: 0.25em;
-    color: hsl(var(--km-colour-yellow));
-}
-
 .km-tone--green,
 .km-tone--green>p {
     color: hsl(var(--km-colour-green));
@@ -6578,10 +6572,6 @@ sidebar is the navigation from 768px and the header holds no list.
 
     & > .km-release__more {
         margin-top: var(--km-space-8);
-    }
-
-    & li .km-badge {
-        display: inline;
     }
 
 }
