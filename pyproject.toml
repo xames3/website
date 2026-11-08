@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "kaamiki-sphinx-theme"
 dynamic = ["version"]
 authors = [{ name = "Akshay Mestry", email = "xa@mes3.dev" }]
-description = "Sphinx theme and extension utility for Akshay Mestry's website."
+description = "Sphinx theme and extension utility."
 readme = "README.rst"
 requires-python = ">=3.14"
 dependencies = [
@@ -15,6 +15,7 @@ dependencies = [
     "docutils>=0.21",
     "jinja2>=3.1.6",
     "lightningcss>=0.3.1",
+    "markupsafe>=2.1",
     "pygments>=2.18.0",
     "sphinx>=9.1,<11",
     "sphinx-copybutton>=0.5.0",
@@ -28,9 +29,10 @@ keywords = [
     "sphinx-extension",
     "sphinx-theme",
 ]
-license = "MIT"
+license = "MIT AND OFL-1.1"
 license-files = [
     "LICENSE-CODE",
+    "kaamiki/theme/static/fonts/OFL-*.txt",
     "kaamiki/theme/static/styles/MIT-tailwindcss.txt",
 ]
 classifiers = [
@@ -84,8 +86,8 @@ kaamiki = [
 version = { attr = "kaamiki.__version__" }
 
 [tool.check-wheel-contents]
-# The Tailwind licence ships twice on purpose, as package data beside theme.css
-# and as a licence file.
+# The licence texts of Inter, Geist Mono and Tailwind ship twice on purpose, as
+# package data beside the files they cover and as licence files.
 # https://peps.python.org/pep-0639/#add-license-file-field
 ignore = ["W002"]
 
