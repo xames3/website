@@ -4,7 +4,7 @@ Reading Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The helpers that work out how long a page takes to read.
 """
@@ -104,7 +104,7 @@ def show_more(
     """
     del pagename, templatename
     config = app.config
-    after = int(config.html_context["km_show_more_after"])
+    after = setting(config, "show_more_after")
     meta: dict[str, str] = context.get("meta") or {}
     on = (
         toggle(meta["km-show-more"])

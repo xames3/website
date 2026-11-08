@@ -4,13 +4,13 @@ Release Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 September 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `release` directive that writes one entry of a changelog::
 
-    .. release:: Loads through Sphinx alone
-       :version: 2026.10.5
-       :article: changelogs/october-2026
+    .. release:: The first release
+       :version: 2026.11.8
+       :article: changelogs/november-2026
 
        The first paragraph sums the release up.
 
@@ -73,11 +73,13 @@ def release_version(argument: str | None) -> str:
 
     :param argument: The version as written.
     :return: The version, trimmed.
-    :raises ValueError: When it isn't written like 2026.10.5.
+    :raises ValueError: When it isn't a version like 2026.11.8 or v1.2.0.
     """
     found = (argument or "").strip()
     if not VERSION.fullmatch(found):
-        raise ValueError(f"expected a version like 2026.10.5, got {argument!r}")
+        raise ValueError(
+            f"expected a version like 2026.11.8 or v1.2.0, got {argument!r}"
+        )
     return found
 
 
@@ -86,8 +88,9 @@ class directive(rst.Directive):
 
     Options::
 
-        - `version`: The release's version, like `2026.10.5`. It's
-          needed and a site uses each once.
+        - `version`: The release's version, like `2026.11.8` or
+          `v1.2.0`, up to 64 letters, numbers and `._+-`. It's needed
+          and a site uses each once.
         - `article`: A page telling the story behind the release, as
           `:doc:` would name it. It's linked under the notes.
         - `article-label`: What the article's link says, up to 60
@@ -95,7 +98,7 @@ class directive(rst.Directive):
           notes".
         - `date`: The day it went out, as `5 October 2026` or
           `2026-10-05`. It wins over the version.
-        - `target`: The release elsewhere, a GitHub release say. It's
+        - `target`: The release elsewhere, like a GitHub release. It's
           linked next to the article.
         - `name`: Another name to link to, beside the version.
         - `class`: More classes for the release.
@@ -133,17 +136,17 @@ class directive(rst.Directive):
     def run(self) -> list[nodes.Node]:
         """Build the release's section and return it.
 
-        The section's id is the version with dashes for dots. Its date
-        is written when the page is, so it reads like the
-        "Last updated" line. The section and its names are in the page
-        before the content is read, so a directive in the content that
-        takes a name the release has is the one refused.
+        The section's id is the version with dashes for anything that
+        isn't a letter, a number, `_` or `-`. Its date is formatted when
+        the page is written. A directive in the content that takes a
+        name the release has is the one refused.
 
         :return: The section, followed by anything its title reported.
         """
         if "version" not in self.options:
             raise self.error(
-                "release: :version: expected a version like 2026.10.5, got none"
+                "release: :version: expected a version like 2026.11.8 or"
+                " v1.2.0, got none"
             )
         version = self.options["version"]
         env = self.state.document.settings.env
@@ -257,20 +260,19 @@ class directive(rst.Directive):
         """Mark the groups a release sorts its notes into.
 
         Each term in a definition list of the release, wherever it sits
-        in the content, gets a class named after it, `Added` becoming
-        `km-release__kind--added`, for the stylesheet to colour. A
-        definition list inside another is left alone.
+        in the content, gets the class `km-release__kind`. A definition
+        list inside another is left alone.
 
         A term in the site's own language is matched against Kaamiki's
         translation of each name. A group the site named in
-        `kaamiki.conf.release.kinds` also gets the colour it was given.
+        `kaamiki.conf.release.kinds` is allowed too.
 
         :param body: The release's parsed content, changed in place.
         """
         env = self.state.document.settings.env
-        tones = {
-            str(key).strip().lower(): str(value).strip().lower()
-            for key, value in setting(env.config, "release_kinds").items()
+        own = {
+            str(key).strip().lower()
+            for key in setting(env.config, "release_kinds")
         }
         # NOTE(xames3): Translated here and not at import, as Kaamiki's
         # words only join Sphinx's catalogue once it has set up.
@@ -296,32 +298,20 @@ class directive(rst.Directive):
                 if term is None:
                     continue
                 said = term.astext().strip().lower()
-                kind = next(
-                    (
-                        key
-                        for key, word in kinds.items()
-                        if said in {key, word.lower()}
-                    ),
-                    None,
+                known = any(
+                    said in {key, word.lower()} for key, word in kinds.items()
                 )
-                if kind is None and said not in tones:
+                if not known and said not in own:
+                    names = list(kinds.values())
                     raise self.error(
-                        f"release: expected a group of"
-                        f" {', '.join(kinds.values())}, or one in"
+                        f"release: expected a group of {', '.join(names[:-1])}"
+                        f" or {names[-1]}, or one in"
                         f" kaamiki.conf.release.kinds, got {term.astext()!r}"
                     )
-                term["classes"].extend(
-                    [
-                        "km-release__kind",
-                        f"km-release__kind--{kind or nodes.make_id(said)}",
-                    ]
-                )
-                if kind is None:
-                    term["classes"].append(f"km-release__tone--{tones[said]}")
+                term["classes"].append("km-release__kind")
 
     def more(self) -> nodes.paragraph | None:
-        """Link the article and the release elsewhere, if there are
-        any.
+        """Link the article and the release elsewhere, if there are any.
 
         :return: A paragraph holding the links or `None` without any.
         """
@@ -370,8 +360,7 @@ class directive(rst.Directive):
 
 
 def plain(node: Release) -> list[nodes.Node]:
-    """Write a release's date and version as words, for a builder that
-    draws no HTML.
+    """Write a release's date and version as words, with no HTML.
 
     :param node: The `release` node and its attributes.
     :return: A paragraph with the version, when a title has taken
@@ -388,8 +377,7 @@ def plain(node: Release) -> list[nodes.Node]:
 
 
 def visit(self: HTMLTranslator, node: Release) -> None:
-    """Write the date and version out when the HTML writer reaches
-    them.
+    """Write the date and version out as the HTML writer reaches them.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The `release` node and its attributes.
@@ -404,8 +392,9 @@ def visit(self: HTMLTranslator, node: Release) -> None:
 
 
 def ensure_versions(env: BuildEnvironment) -> dict[str, dict[str, str]]:
-    """Hold the places each release version is written, making the
-    store the first time it's asked for.
+    """Hold the places each release version is written.
+
+    The store is made the first time it's asked for.
 
     :param env: The build environment.
     :return: Every version a `release` names, with each page it is on
@@ -417,12 +406,6 @@ def ensure_versions(env: BuildEnvironment) -> dict[str, dict[str, str]]:
 def clear(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
     """Forget every page that's about to be read before the first is.
 
-    Sphinx's serial reader forgets a page just before it reads it, in
-    name order, so a release moved to a page that sorts earlier is
-    still held by the page it came from and its version is reported as
-    a duplicate label. The parallel reader forgets all of them first,
-    which is what this does for the serial one, so both agree.
-
     :param app: The Sphinx application instance (unused).
     :param env: The build environment.
     :param docnames: The pages to be read.
@@ -433,8 +416,7 @@ def clear(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
 
 
 def purge(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
-    """Forget the articles and versions a page's releases had, as it's
-    re-read.
+    """Forget the articles and versions a page's releases had.
 
     :param app: The Sphinx application instance.
     :param env: The build environment.
@@ -480,10 +462,7 @@ def merge(
 def settle(app: Sphinx, env: BuildEnvironment) -> None:
     """Stop the build when two pages wrote the same version.
 
-    It waits until every page is read, since a page that is read again
-    may be the one that gave a version up. A serial reader purges a
-    page just before it reads it, in name order, so the page a release
-    was moved from still has it when the page it moved to is read.
+    It waits until every page is read.
 
     :param app: The Sphinx application instance.
     :param env: The build environment.
@@ -495,20 +474,18 @@ def settle(app: Sphinx, env: BuildEnvironment) -> None:
         if len(pages) > 1:
             first, last = sorted(pages)[:2]
             fail(
-                f"release: version {version!r} is on the page {first!r}"
-                f" already, at {pages[first]}",
+                "release: :version: expected a version not on the page"
+                f" {first!r} yet, got {version!r}, which is at {pages[first]}",
                 pages[last],
             )
 
 
 def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
-    """Put the site's `release_notes` icon on the link to a release's
-    article.
+    """Put the site's `release_notes` icon on a release's article link.
 
-    Sphinx writes a link to a page out of its text alone, so the icon
-    goes in once the link has been resolved. An empty icon leaves the
-    link bare. The class that marks the link goes once it's been used,
-    as no style asks for it.
+    The icon goes in once the link has been resolved. An empty icon
+    leaves the link bare, and the class that marks the link is taken
+    off.
 
     :param app: The Sphinx application instance.
     :param doctree: The page's resolved doctree.

@@ -4,7 +4,7 @@ Nesting Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 Stops a page that puts a directive where it makes no sense.
 """
@@ -67,8 +67,9 @@ def is_embed(node: nodes.Node) -> bool:
 
 
 def is_raw(node: nodes.Node) -> bool:
-    """Say whether a node is a block of HTML an author wrote, which can
-    hold anything.
+    """Say whether a node is a block of HTML an author wrote.
+
+    Such a block can hold anything.
 
     :param node: The node to look at.
     :return: `True` for a `raw` block with something in it.
@@ -178,8 +179,9 @@ def kind(node: nodes.Node) -> str:
 
 
 def open_to_page(node: nodes.Node) -> bool:
-    """Say whether a node is part of the page itself, where the page's
-    own directives go.
+    """Say whether a node is part of the page itself.
+
+    That's where the page's own directives go.
 
     :param node: The node to look at.
     :return: `True` for the document, a section that isn't a release
@@ -254,8 +256,9 @@ def holder(node: nodes.Node) -> nodes.Node | None:
 
 
 def narrow(host: nodes.Node) -> bool:
-    """Say whether a host is narrower than the page's text, so a set of
-    columns has no room in it.
+    """Say whether a host is narrower than the page's text.
+
+    A set of columns has no room in a host like that.
 
     :param host: One of the nodes above the columns.
     :return: `True` for a column that doesn't span its set and for a

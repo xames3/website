@@ -4,7 +4,7 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 Kaamiki's custom inline roles.
 """
@@ -48,7 +48,7 @@ if t.TYPE_CHECKING:
     from sphinx.config import Config
     from sphinx.writers.html import HTMLTranslator
 
-DECLARATION: re.Pattern[str] = re.compile(
+DECLARATION: t.Final[re.Pattern[str]] = re.compile(
     r"[a-z][a-z-]{1,40}: ?[A-Za-z0-9#%.,() /_+-]{1,100}"
 )
 TEXT: t.Final[frozenset[str]] = frozenset(
@@ -75,8 +75,12 @@ TEXT: t.Final[frozenset[str]] = frozenset(
     }
 )
 SIZE_LIMITS: t.Final[dict[str, int]] = {"em": 4, "px": 64, "rem": 4, "%": 400}
-SIZE: re.Pattern[str] = re.compile(r"([0-9]+(?:\.[0-9]+)?)(em|px|rem|%)")
-DURATION: re.Pattern[str] = re.compile(r"([0-9]{1,5}(?:\.[0-9]{1,3})?)(ms|s)")
+SIZE: t.Final[re.Pattern[str]] = re.compile(
+    r"([0-9]+(?:\.[0-9]+)?)(em|px|rem|%)"
+)
+DURATION: t.Final[re.Pattern[str]] = re.compile(
+    r"([0-9]{1,5}(?:\.[0-9]{1,3})?)(ms|s)"
+)
 UNITS: t.Final[tuple[tuple[int, str], ...]] = (
     (10**9, "b"),
     (10**6, "m"),
@@ -104,10 +108,12 @@ SYSTEMS: t.Final[dict[str, tuple[str, ...]]] = {
     "windows": ("km-key--windows",),
     "linux": ("km-key--linux",),
 }
-GLYPH: re.Pattern[str] = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
-BAR: re.Pattern[str] = re.compile(r"(?<!\x00)\|")
-VALUE: re.Pattern[str] = re.compile(r"(?:^|(?<=\s))<([^<]*)(?<!\x00)>\Z")
-OPENED: re.Pattern[str] = re.compile(r"(?:^|(?<=\s))<(?=\S)[^>]*\Z")
+GLYPH: t.Final[re.Pattern[str]] = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+BAR: t.Final[re.Pattern[str]] = re.compile(r"(?<!\x00)\|")
+VALUE: t.Final[re.Pattern[str]] = re.compile(
+    r"(?:^|(?<=\s))<([^<]*)(?<!\x00)>\Z"
+)
+OPENED: t.Final[re.Pattern[str]] = re.compile(r"(?:^|(?<=\s))<(?=\S)[^>]*\Z")
 Reply = tuple[list[nodes.Node], list[nodes.system_message]]
 
 
@@ -188,18 +194,11 @@ def _classes(options: dict[str, t.Any]) -> list[str]:
 
 
 class ink(nodes.inline):
-    """Text wearing a style, a sharpie or a pencil underline.
-
-    It stays a text node, so the reading time, search index and page
-    description see the words and not the markup.
-    """
+    """Text wearing a style, a sharpie or a pencil underline."""
 
 
 class rotor(ink):
-    """The first of some words, which take turns in its place.
-
-    Like an inked text it stays a text node, holding the first word.
-    """
+    """The first of some words, which take turns in its place."""
 
 
 def steady(
@@ -224,9 +223,8 @@ def steady(
             )
 
 
-def _visit(self: HTMLTranslator, node: ink) -> None:
-    """Open the span that carries the style, if the text is in the page
-    itself.
+def visit(self: HTMLTranslator, node: ink) -> None:
+    """Open the span that carries the style, unless the text is plain.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The inked text.
@@ -258,7 +256,7 @@ def _moves(node: ink) -> bool:
     return True
 
 
-def _visit_rotor(self: HTMLTranslator, node: rotor) -> None:
+def visit_rotor(self: HTMLTranslator, node: rotor) -> None:
     """Open the span the words take turns in, if they do here.
 
     :param self: The HTML translator, whose body this appends to.
@@ -269,7 +267,7 @@ def _visit_rotor(self: HTMLTranslator, node: rotor) -> None:
         self.body.append(self.starttag(node, "span", "", **attributes))
 
 
-def _depart_rotor(self: HTMLTranslator, node: rotor) -> None:
+def depart_rotor(self: HTMLTranslator, node: rotor) -> None:
     """Close the span, if one was opened.
 
     :param self: The HTML translator, whose body this appends to.
@@ -279,7 +277,7 @@ def _depart_rotor(self: HTMLTranslator, node: rotor) -> None:
         self.body.append("</span>")
 
 
-def _visit_glyph(self: HTMLTranslator, node: glyph) -> None:
+def visit_glyph(self: HTMLTranslator, node: glyph) -> None:
     """Open the span that carries the icon.
 
     :param self: The HTML translator, whose body this appends to.
@@ -289,7 +287,7 @@ def _visit_glyph(self: HTMLTranslator, node: glyph) -> None:
     self.body.append(self.starttag(node, "span", "", **attributes))
 
 
-def _depart(self: HTMLTranslator, node: ink | glyph) -> None:
+def depart(self: HTMLTranslator, node: ink | glyph) -> None:
     """Close the span, if one was opened.
 
     :param self: The HTML translator, whose body this appends to.
@@ -329,7 +327,7 @@ def _split(text: str, what: str) -> tuple[str, str | None]:
 def _placed(inliner: states.Inliner, rawtext: str, lineno: int) -> int:
     """Find the line a role is on.
 
-    docutils gives a role the line its paragraph starts on, so a role
+    Docutils gives a role the line its paragraph starts on, so a role
     further down is looked for in the source from there.
 
     :param inliner: The docutils inliner that called the role.
@@ -451,10 +449,7 @@ def _short(number: int) -> str:
 def _underline_svg(
     colour: str, seed: str, width: float, wobble: float
 ) -> tuple[str, str]:
-    """Draw two wobbly strokes for a (fake) hand-drawn underline.
-
-    The wobble is seeded, so the same underline comes out the same on
-    every build.
+    """Draw two wobbly strokes that look like a hand-drawn underline.
 
     :param colour: The stroke colour, already checked.
     :param seed: What the wobble is drawn from, so the same underline
@@ -468,7 +463,12 @@ def _underline_svg(
     step = 500 / segments
 
     def stroke(start: float, stop: float) -> str:
-        """Generate a wobbly path between two y anchors."""
+        """Draw a wobbly path between two heights.
+
+        :param start: The height the stroke starts at.
+        :param stop: The height the stroke stops at.
+        :return: The path.
+        """
         x0 = uniform(1.5, 2.5)
         y0 = start + uniform(-0.4, 0.4) * wobble
         points = [f"M{x0:.1f} {y0:.1f}"]
@@ -553,7 +553,7 @@ def stylise(
     presets the `style`. Only properties that style text are allowed,
     `color`, `font-size` up to 4rem and `text-decoration` among them::
 
-        Text is normal, but now it's :stylise:`red <color: red;>`.
+        Some :stylise:`red <color: red;>` text.
 
     :param name: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
@@ -626,9 +626,9 @@ def email(
     `subject`. Without a label the address is the label, with the angle
     brackets or without them::
 
-        Send me an :email:`email <xa@mes3.dev>`.
-        Send me an :email:`email <xa@mes3.dev?subject=Hello hello!!>`.
-        Write to :email:`xa@mes3.dev` or :email:`<xa@mes3.dev>`.
+        Send me an :email:`email <you@example.com>`.
+        Send me an :email:`email <you@example.com?subject=Hello>`.
+        Write to :email:`you@example.com` or :email:`<you@example.com>`.
 
     :param name: The role name, as written (unused).
     :param rawtext: The whole role, markup and all.
@@ -954,7 +954,7 @@ def rotate(
     shown for something else, in the navbar, the sidebar, the
     breadcrumbs, a toctree or a link, the first word stays as text::
 
-        Rebuilding NumPy to :rotate:`understand|learn|rebuild` it.
+        Docs you can :rotate:`read|search|share` with anyone.
 
     A word is at most 45 characters long, counted as code points, and
     holds no `|`. The words keep the quotes they were written with.
@@ -1062,8 +1062,8 @@ def _icon(
                 inliner,
                 rawtext,
                 lineno,
-                f"fa-icon: expected a Font Awesome size or animation or a km-"
-                f" colour, got {found!r}",
+                "fa-icon: expected a Font Awesome size or animation, or a"
+                f" class like km-tone--red, got {found!r}",
             )
     spec = " ".join(filter(None, [style, f"fa-{name}"]))
     try:
@@ -1105,7 +1105,7 @@ def _keys(
     :param inliner: The docutils inliner that called this.
     :param options: The classes of a custom role.
     :param content: Role content (unused).
-    :return: The keys and the error messages, which are none.
+    :return: The keys, and no error messages.
     """
     del content
     classes = [*SYSTEMS[system], *_classes(options)]
@@ -1119,10 +1119,9 @@ icon = base(functools.partial(_icon, None))
 class role(misc.Role):
     """The `role` directive, which also checks the colour a role presets.
 
-    docutils checks the other presets as it reads them. A colour is
-    only a name until the site's `kaamiki.conf.roles.colours` are
-    known, so this checks it where the role is made and the line is the
-    right one.
+    Docutils checks the other presets as it reads them. This checks a
+    colour where the role is made, as it's only a name until the site's
+    `kaamiki.conf.roles.colours` are known.
     """
 
     def run(self) -> Sequence[nodes.Node]:
@@ -1158,9 +1157,7 @@ class role(misc.Role):
 def subjects(app: Sphinx, doctree: nodes.document) -> None:
     """Give an email link with no subject the page's title for one.
 
-    The role can't, since the title isn't known while a page is read,
-    and in a translated paragraph or a `rst_prolog` substitution it
-    never is. Once the page is read, the title is in the tree.
+    The title is read from the tree once the page is read.
 
     :param app: The Sphinx application instance (unused).
     :param doctree: The page, just read.
@@ -1177,16 +1174,14 @@ def subjects(app: Sphinx, doctree: nodes.document) -> None:
 
 
 class quiet(Domain):
-    """A domain that holds no data, so a parallel build has nothing to
-    merge.
+    """A domain that holds no data, so a parallel build merges nothing.
 
     Its roles are `base` ones, so a custom role can be built on any of
     them.
     """
 
     def role(self, name: str) -> base | None:
-        """Hand docutils a role that knows its full name and its
-        options.
+        """Hand docutils a role that knows its full name and options.
 
         :param name: The role's name inside the domain.
         :return: The role, or `None` when the domain has none by that

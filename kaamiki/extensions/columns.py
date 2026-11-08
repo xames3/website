@@ -4,7 +4,7 @@ Columns Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `columns` directive that sets `column` directives side by side::
 
@@ -88,17 +88,17 @@ class directive(rst.Directive):
 
     Options::
 
-        - `gap`: The space between columns. `small`, the default,
-          `medium` or `large`. Lengths in `rem` replace them, up to
-          4rem: one for both directions, like `1.5rem`, or two as the
-          row gap then the column gap, like `1rem 2rem`.
+        - `gap`: The space between columns, `small`, `medium` or
+          `large`. Defaults to `small`. Lengths in `rem` replace them,
+          up to 4rem: one for both directions, like `1.5rem`, or two as
+          the row gap then the column gap, like `1rem 2rem`.
         - `valign`: Where columns of different heights line up, `top`,
-          `middle`, the default or `bottom`.
+          `middle` or `bottom`. Defaults to `middle`.
         - `flush`: Take off the space above the first thing in each
           column and below the last, so the gap and the margin decide
           the spacing. A column with a `padding`, `border` or
           `background` already does.
-        - `padding`: The space inside each column. `small`, `medium` or
+        - `padding`: The space inside each column, `small`, `medium` or
           `large`. Lengths in `rem` like `gap` replace them, as the
           space above and below then at the sides when there are two. A
           column with a `border` or a `background` has `1rem` without
@@ -106,12 +106,12 @@ class directive(rst.Directive):
         - `border`: Draw a 1px border and rounded corners around each
           column.
         - `background`: Fill each column, with rounded corners.
-        - `margin`: The space above and below the columns. `small`,
-          `medium`, the default or `large`. Lengths in `rem` replace
-          them, up to 8rem: one for both, or two as above then below,
-          like `5rem 2rem`.
+        - `margin`: The space above and below the columns, `small`,
+          `medium` or `large`. Defaults to `medium`. Lengths in `rem`
+          replace them, up to 8rem: one for both, or two as above then
+          below, like `5rem 2rem`.
         - `stack-align`: How the text in the columns lines up when they
-          stack on a phone, `left`, the default or `center`.
+          stack on a phone, `left` or `center`. Defaults to `left`.
         - `class-column`: More classes for every column in them.
         - `name`: A name to link to.
         - `class`: More classes for the columns.
@@ -198,9 +198,8 @@ class directive(rst.Directive):
         if "flush" in options and any(_ in options for _ in padded):
             raise self.error(
                 "columns: :flush: not allowed with :padding:, :border: or"
-                " :background:, which flush each column already"
+                " :background:, since a column with one is flush already"
             )
-
         return [element]
 
 
@@ -248,7 +247,7 @@ def visit(self: HTMLTranslator, node: Columns) -> None:
     :param self: The HTML translator, whose body this appends to.
     :param node: The columns' node.
     """
-    styles = []
+    styles: list[str] = []
     gap, padding = node["gap"], node["padding"]
     classes = ["km-columns", f"km-columns--count-{node['columns']}"]
     if node["valign"] != "middle":

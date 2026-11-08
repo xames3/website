@@ -4,7 +4,7 @@ Social Metadata
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 27 October 2026
+Last updated on: 08 November 2026
 
 The handler that works out a page's Open Graph and Twitter values.
 """
@@ -31,8 +31,8 @@ if t.TYPE_CHECKING:
     from docutils import nodes
     from sphinx.application import Sphinx
 
-META: re.Pattern[str] = re.compile(r"<meta\s[^>]*>")
-ATTRIBUTE: re.Pattern[str] = re.compile(r'([\w:-]+)="([^"]*)"')
+META: t.Final[re.Pattern[str]] = re.compile(r"<meta\s[^>]*>")
+ATTRIBUTE: t.Final[re.Pattern[str]] = re.compile(r'([\w:-]+)="([^"]*)"')
 
 
 def generated(pagename: str) -> tuple[str, str] | None:
@@ -89,9 +89,9 @@ def social_metadata(
     first paragraph. Only the title arrives as rendered HTML, so only
     it's stripped of tags.
 
-    The image goes the page's `:km-page-image:` field first, then the
-    first `:backdrop:` of its `byline` directive and last the site's
-    `image`.
+    The image is the page's `:km-page-image:` field, then its
+    `:km-page-backdrop:`, which the first `:backdrop:` of a `byline`
+    sets, and last the site's `image`.
 
     Relative image paths are made absolute, since link previews ignore
     them.

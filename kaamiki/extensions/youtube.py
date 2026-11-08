@@ -4,11 +4,11 @@ YouTube Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `youtube` directive that embeds a video in the page::
 
-    .. youtube:: https://www.youtube.com/watch?v=PhabJpIPONI
+    .. youtube:: https://www.youtube.com/watch?v=jNQXAC9IVRw
        :start: 90
        :caption: What it's about.
 
@@ -18,6 +18,8 @@ The player loads when it's clicked and comes from
 `kaamiki.conf.youtube.privacy` say otherwise. The picture it shows
 until then is the video's own either way.
 """
+
+from __future__ import annotations
 
 import typing as t
 import urllib.parse as urlparse
@@ -43,6 +45,7 @@ from kaamiki.extensions.utils.settings import BOUNDS
 name: t.Final[str] = "youtube"
 template: t.Final[str] = "directives/youtube.html.jinja"
 RATIOS: t.Final[tuple[str, ...]] = ("16:9", "4:3", "21:9", "1:1", "9:16")
+SECONDS: t.Final[tuple[float, float]] = BOUNDS["start"]
 
 
 def language(argument: str | None) -> str:
@@ -67,6 +70,8 @@ class Youtube(nodes.Element):
 
 class directive(rst.Directive):
     """The `youtube` directive.
+
+    The argument is a YouTube video link or just its id.
 
     Options::
 
@@ -111,8 +116,8 @@ class directive(rst.Directive):
         "autoplay": rst.directives.flag,
         "closed-captions": rst.directives.flag,
         "caption": checks.text,
-        "start": checks.integer(*map(int, BOUNDS["start"])),
-        "end": checks.integer(*map(int, BOUNDS["start"])),
+        "start": checks.integer(*map(int, SECONDS)),
+        "end": checks.integer(*map(int, SECONDS)),
         "privacy": rst.directives.flag,
         "no-privacy": rst.directives.flag,
         "hide-controls": rst.directives.flag,
@@ -124,14 +129,15 @@ class directive(rst.Directive):
         "auto-load": rst.directives.flag,
     }
 
-    def switch(self, on: str, off: str, site: object, name: str) -> bool:
-        """Work out whether something a site can set is on for a
-        player.
+    def switch(
+        self, on: str, off: str, site: object, setting_name: str
+    ) -> bool:
+        """Work out whether a setting a site can set is on for a player.
 
         :param on: The option that turns it on, like `privacy`.
         :param off: The option that turns it off, like `no-privacy`.
         :param site: Whether the site has it on.
-        :param name: The site's setting, for the message.
+        :param setting_name: The site's setting, for the message.
         :return: Whether it's on for this player.
         :raises rst.DirectiveError: For both options at once and for
             one that changes nothing, as the site has it that way
@@ -142,11 +148,11 @@ class directive(rst.Directive):
             raise self.error(f"youtube: :{on}: not allowed with :{off}:")
         if turned_on and site:
             raise self.error(
-                f"youtube: :{on}: does nothing, {name} is on already"
+                f"youtube: :{on}: does nothing, {setting_name} is on already"
             )
         if turned_off and not site:
             raise self.error(
-                f"youtube: :{off}: does nothing, {name} is off already"
+                f"youtube: :{off}: does nothing, {setting_name} is off already"
             )
         return turned_on or (bool(site) and not turned_off)
 
@@ -160,13 +166,13 @@ class directive(rst.Directive):
         vid = youtube_id(src)
         if vid is None:
             raise self.error(
-                f"youtube: expected a YouTube video link, got {src!r}"
+                f"youtube: expected a YouTube video link or id, got {src!r}"
             )
         if not urlparse.urlsplit(src).netloc:
             src = f"https://www.youtube.com/watch?v={vid}"
         options = self.options
         if "start" not in options and (found := youtube_start(src)):
-            low, high = BOUNDS["start"]
+            low, high = SECONDS
             if not low <= found <= high:
                 raise self.error(
                     f"youtube: expected a start time in the link from {low:g}"

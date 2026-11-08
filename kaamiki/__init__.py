@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 Kaamiki's entry point.
 """
@@ -108,9 +108,9 @@ logger = logging.getLogger(__name__)
 def env_version(version: str) -> int:
     """Turn a version into the number Sphinx compares the cache with.
 
-    The first four numbers in it, two digits each, so `2026.11.8` is
-    `20261108` and a same day fix (`2026.11.8.1`) or a pre-release
-    (`2026.11.8rc1`) is another.
+    Each of the first four numbers in it moves up two digits for the
+    next, so `2026.11.8` is `20261108` and `2026.11.8.1` is
+    `2026110801`. Only digits count.
 
     :param version: Kaamiki's version.
     :return: The number, which changes with every release.
@@ -122,9 +122,10 @@ def env_version(version: str) -> int:
 
 
 def add_theme_assets(app: Sphinx) -> None:
-    """Add Kaamiki's static files, stylesheets and scripts to the HTML
-    builders that write their pages with Kaamiki's theme, which leaves
-    out `epub` and the help builders.
+    """Add Kaamiki's static files, stylesheets and scripts to a build.
+
+    Only the HTML builders that write their pages with Kaamiki's theme
+    get them, which leaves out `epub` and the help builders.
 
     :param app: The Sphinx application instance.
     """
@@ -243,11 +244,11 @@ def add_roles(app: Sphinx) -> None:
     app.add_role("fa-icon", roles.icon)
     app.add_domain(roles.fa_icon)
     app.add_domain(roles.kbd)
-    app.add_node(roles.ink, html=(roles._visit, roles._depart))
-    app.add_node(roles.rotor, html=(roles._visit_rotor, roles._depart_rotor))
+    app.add_node(roles.ink, html=(roles.visit, roles.depart))
+    app.add_node(roles.rotor, html=(roles.visit_rotor, roles.depart_rotor))
     app.add_node(
         glyph,
-        html=(roles._visit_glyph, roles._depart),
+        html=(roles.visit_glyph, roles.depart),
         latex=away,
         man=away,
         texinfo=away,

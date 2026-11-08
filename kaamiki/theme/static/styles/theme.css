@@ -5,7 +5,6 @@
  */
 
 :root {
-    --km-icon-font: var(--fa-font-solid);
     --km-colour-black: 0 0% 0%;
     --km-colour-grey-4: 0 0% 4%;
     --km-colour-grey-7: 0 0% 7%;
@@ -13,7 +12,7 @@
     --km-colour-grey-11: 0 0% 11%;
     --km-colour-grey-19: 0 0% 19%;
     --km-colour-grey-23: 0 0% 23%;
-    --km-colour-grey-44: 0 0% 44%;
+    --km-colour-grey-48: 0 0% 48%;
     --km-colour-grey-60: 0 0% 60%;
     --km-colour-grey-63: 0 0% 63%;
     --km-colour-grey-72: 0 0% 72%;
@@ -32,7 +31,7 @@
     --km-colour-block-bg-hover: var(--km-colour-grey-11);
     --km-colour-block-bg-active: var(--km-colour-grey-19);
     --km-colour-border: var(--km-colour-grey-19);
-    --km-colour-focus: var(--km-colour-grey-9);
+    --km-colour-focus: var(--km-colour-grey-63);
     --km-colour-link: var(--km-colour-grey-93);
     --km-colour-button-dark-bg: var(--km-colour-grey-11);
     --km-colour-button-dark-bg-hover: var(--km-colour-grey-19);
@@ -47,7 +46,7 @@
     --km-colour-nav-fg-current: var(--km-colour-grey-93);
     --km-colour-title: var(--km-colour-grey-93);
     --km-colour-secondary: var(--km-colour-grey-63);
-    --km-colour-meta: var(--km-colour-grey-44);
+    --km-colour-meta: var(--km-colour-grey-48);
     --km-colour-diff-added-bg: 142.1 70.6% 45.3% / 0.3;
     --km-colour-diff-added-fg: 141 78.9% 85.1%;
     --km-colour-diff-removed-bg: 0 84.2% 60.2% / 0.3;
@@ -89,7 +88,7 @@
     --km-tooltip-hold: 1800ms;
     --km-show-more-hold: 3000ms;
     --km-code-explain-swap: 600ms;
-    --km-ticker-duration: 2600ms;
+    --km-ticker-duration: 2000ms;
     --km-rotate-hold: 4000ms;
     --km-rotate-resize: 400ms;
     --km-ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -209,18 +208,6 @@
         --km-duration-clamp: 0.01ms;
         --km-code-explain-swap: 0.01ms;
     }
-}
-
-.km-document[data-km-fa-style="regular"] {
-    --km-icon-font: var(--fa-font-regular);
-}
-
-.km-document[data-km-fa-style="light"] {
-    --km-icon-font: var(--fa-font-light);
-}
-
-.km-document[data-km-fa-style="thin"] {
-    --km-icon-font: var(--fa-font-thin);
 }
 
 .km-logo--invert {
@@ -2014,7 +2001,7 @@ html:not(.km-document--scripted) .km-sidebar:target {
 .km-sidebar--primary {
     & .caption {
         font-size: var(--km-font-size-xs);
-        color: hsl(var(--km-colour-grey-63) / 0.5);
+        color: hsl(var(--km-colour-meta));
         text-transform: uppercase;
     }
 
@@ -2901,7 +2888,7 @@ table.docutils caption {
     transition: scale var(--km-duration-hover) var(--km-spring-snappy);
 }
 
-.km-media__facade-icon.fa-solid::before {
+.km-media__facade-icon::before {
     translate: 0.06em;
 }
 
@@ -3373,7 +3360,7 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--km-space-2);
+    gap: var(--km-glyph-gap);
     border-radius: var(--km-radius-round);
 }
 
@@ -3392,7 +3379,7 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
 .km-byline--align-left {
     flex-flow: row wrap;
     align-items: center;
-    gap: var(--km-space-2);
+    gap: var(--km-glyph-gap);
     padding-bottom: var(--km-space-16);
     text-align: left;
 }
@@ -3517,38 +3504,22 @@ button.copybtn:has(.icon-tabler-check):not(.success) {
         km-byline-bg-zoom calc(8 * var(--km-duration-slow)) ease-in-out
             infinite alternate;
     transition: opacity var(--km-duration-slow) var(--km-ease-standard);
-    mask-image:
-        linear-gradient(
-            to right,
-            transparent 0%,
-            hsl(var(--km-colour-black)) 50%,
-            hsl(var(--km-colour-black)) 50%,
-            transparent 100%
-        ),
-        linear-gradient(
-            to bottom,
-            transparent 0%,
-            hsl(var(--km-colour-black)) 50%,
-            hsl(var(--km-colour-black)) 50%,
-            transparent 100%
-        );
-    mask-composite: intersect;
-    -webkit-mask-image:
-        linear-gradient(
-            to right,
-            transparent 0%,
-            hsl(var(--km-colour-black)) 50%,
-            hsl(var(--km-colour-black)) 50%,
-            transparent 100%
-        ),
-        linear-gradient(
-            to bottom,
-            transparent 0%,
-            hsl(var(--km-colour-black)) 50%,
-            hsl(var(--km-colour-black)) 50%,
-            transparent 100%
-        );
-    -webkit-mask-composite: destination-in;
+    --km-byline-feather: radial-gradient(
+        ellipse closest-side at 50% 50%,
+        hsl(var(--km-colour-black)) 0%,
+        hsl(var(--km-colour-black) / 0.956) 10%,
+        hsl(var(--km-colour-black) / 0.835) 20%,
+        hsl(var(--km-colour-black) / 0.667) 30%,
+        hsl(var(--km-colour-black) / 0.487) 40%,
+        hsl(var(--km-colour-black) / 0.325) 50%,
+        hsl(var(--km-colour-black) / 0.198) 60%,
+        hsl(var(--km-colour-black) / 0.11) 70%,
+        hsl(var(--km-colour-black) / 0.056) 80%,
+        hsl(var(--km-colour-black) / 0.026) 90%,
+        transparent 100%
+    );
+    mask-image: var(--km-byline-feather);
+    -webkit-mask-image: var(--km-byline-feather);
 }
 
 .km-byline__bg--waves {
@@ -6557,7 +6528,7 @@ sidebar is the navigation from 768px and the header holds no list.
 
 .km-release__version {
     background-color: hsl(var(--km-colour-grey-11));
-    border-radius: 0.375rem;
+    border-radius: var(--km-radius-round);
     font-family: var(--km-font-mono);
     letter-spacing: normal;
     font-size: var(--km-font-size-xs);
@@ -6580,58 +6551,15 @@ sidebar is the navigation from 768px and the header holds no list.
     margin-top: var(--km-space-7);
 
     & .km-release__kind {
-        display: flex;
-        align-items: center;
-        gap: var(--km-space-2);
         line-height: 1.25rem;
-        font-size: var(--km-font-size-xl);
-        font-weight: var(--km-weight-h3);
+        font-size: var(--km-font-size-lg);
+        font-weight: var(--km-weight-lead);
         letter-spacing: var(--km-tracking-brand);
         margin-bottom: var(--km-space-2);
-
-        & > .km-release__icon {
-            --fa-width: auto;
-            line-height: 1;
-            flex: none;
-            margin-right: var(--km-space-1);
-        }
     }
 
     & .km-release__kind + dd {
         margin: var(--km-space-3) 0 0;
-    }
-
-    & .km-release__kind--added > .km-release__icon {
-        color: hsl(var(--km-colour-green));
-    }
-
-    & .km-release__kind--changed > .km-release__icon {
-        color: hsl(var(--km-colour-yellow));
-    }
-
-    & .km-release__kind--fixed > .km-release__icon {
-        color: hsl(var(--km-colour-blue));
-    }
-
-    & :is(.km-release__kind--removed, .km-release__kind--deprecated)
-        > .km-release__icon {
-        color: hsl(var(--km-colour-red));
-    }
-
-    & .km-release__tone--red > .km-release__icon {
-        color: hsl(var(--km-colour-red));
-    }
-
-    & .km-release__tone--yellow > .km-release__icon {
-        color: hsl(var(--km-colour-yellow));
-    }
-
-    & .km-release__tone--blue > .km-release__icon {
-        color: hsl(var(--km-colour-blue));
-    }
-
-    & .km-release__tone--green > .km-release__icon {
-        color: hsl(var(--km-colour-green));
     }
 }
 

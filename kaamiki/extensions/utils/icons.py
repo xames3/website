@@ -4,7 +4,7 @@ Font Awesome Icons
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 Every icon Kaamiki draws, as a Pro icon and the Free one that stands in
 for it.
@@ -70,7 +70,7 @@ def brand_pair(name: str) -> IconPair:
 
 
 def solid(name: str) -> IconPair:
-    """Pair an icon that is always drawn solid, with a kit or without.
+    """Pair an icon that's always drawn solid, with a kit or without.
 
     :param name: The icon's name, as `chevron-down`.
     :return: The pair.
@@ -101,7 +101,7 @@ ROLE_ICONS: t.Final[Mapping[str, IconPair]] = MappingProxyType(
         "play": IconPair("play", "fa-solid fa-play"),
         "reading_time": IconPair("clock", "fa-regular fa-clock"),
         "release_date": IconPair("calendar", "fa-regular fa-calendar"),
-        "release_notes": IconPair("tag", "fa-solid fa-tag"),
+        "release_notes": solid("tag"),
         "scrolltop": IconPair("arrow-up", "fa-solid fa-arrow-up"),
         "search": IconPair("magnifying-glass", "fa-solid fa-magnifying-glass"),
         "show_more": IconPair("chevron-down", "fa-solid fa-chevron-down"),
@@ -124,13 +124,6 @@ ROLE_ICONS: t.Final[Mapping[str, IconPair]] = MappingProxyType(
         "repository_mark": brand_pair("github"),
         "repository_stars": solid("star"),
         "repository_forks": solid("code-fork"),
-        "release_added": IconPair(
-            "code-pull-request", "fa-solid fa-code-pull-request"
-        ),
-        "release_changed": IconPair("code-branch", "fa-solid fa-code-branch"),
-        "release_fixed": IconPair("code-merge", "fa-solid fa-code-merge"),
-        "release_removed": IconPair("ban", "fa-solid fa-ban"),
-        "release_other": IconPair("circle", "fa-solid fa-circle"),
     }
 )
 BLANK_ROLES: t.Final[tuple[str, ...]] = ("release_notes",)
@@ -329,15 +322,6 @@ class Icons:
             style=setting(config, "fa_style"),
         )
 
-    @property
-    def font_style(self) -> str:
-        """The style the stylesheet draws its icons in.
-
-        A kit has every style. Free's `solid` is the one that has every
-        icon the stylesheet draws.
-        """
-        return self.style if self.kit else "solid"
-
     def classes(self, spec: str) -> str:
         """Spell out an icon in full, the way the site can draw it.
 
@@ -387,7 +371,7 @@ class Icons:
         """Say why a site with no kit can't draw an icon.
 
         :param name: The icon's name without `fa-`.
-        :return: The sentence, with the nearest Free name when there is
+        :return: The sentence, with the nearest Free name when there's
             one.
         """
         near = difflib.get_close_matches(
@@ -397,10 +381,10 @@ class Icons:
         )
         hint = f" Did you mean fa-{near[0]}?" if near else ""
         return (
-            f"fa-{name} isn't a Font Awesome Free icon and Kaamiki has no"
-            f" Free stand-in for it, so a site with no kit can't draw it."
-            f" Set kaamiki.conf.icons.kit or {KIT_VARIABLE} for Pro icons or"
-            f" pick a Free one.{hint}"
+            "expected a Font Awesome Free icon or one Kaamiki has a Free"
+            f" stand-in for, got {f'fa-{name}'!r}; a site with no kit can't"
+            f" draw it. Set kaamiki.conf.icons.kit or {KIT_VARIABLE} for Pro"
+            f" icons or pick a Free one.{hint}"
         )
 
     def pair(self, pair: IconPair) -> str:
@@ -481,9 +465,9 @@ def _names(listed: str) -> frozenset[str]:
     return frozenset(listed.split())
 
 
-# HACK(xames3): This is possibly a shittiest approach to handle things,
-# but for now, I think this'll work without installing and bloating
-# the environment and slowing the build times.
+# HACK(xames3): The names below are copied from Font Awesome Free 7.3.1,
+# so the build doesn't have to install or read the package. Copy them
+# again when `FA_FREE` points at another release.
 FREE_BRANDS: t.Final[frozenset[str]] = _names(
     """
     11ty 42-group 500px a11y-project accessible-icon accusoft adn adversal

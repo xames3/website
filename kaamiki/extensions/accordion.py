@@ -4,17 +4,17 @@ Accordion Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 An `accordion` directive that folds its content away under a title::
 
-    .. accordion:: How do you pronounce XAMES3 or XA?
-       :subsection: Asked on 02 November 2025
+    .. accordion:: What's an accordion?
+       :subsection: A short answer
        :marker: down
        :marker-position: before
        :open:
 
-       It's not "ex-ay-meez-three".
+       It's a box that folds its content away under a title.
 """
 
 from __future__ import annotations
@@ -80,8 +80,7 @@ class directive(rst.Directive):
         - `marker`: What shows that an accordion opens, `plus`, a `down`
           chevron or a `right` one. A plus turns 45 degrees as it opens,
           a right chevron turns 90 degrees to point down and a down
-          chevron turns over. It's the site's `kaamiki.conf.accordion.marker`
-          without one.
+          chevron turns over.
         - `marker-position`: The marker's side of the title, `before`
           it or `after` it.
         - `hide-show-more`: Show a long body in full. One taller than
@@ -98,8 +97,8 @@ class directive(rst.Directive):
     option that's written wrong, out of range or at odds with another.
 
     The site's `kaamiki.conf.accordion.marker` and
-    `kaamiki.conf.accordion.marker_position` settle the marker and its side for
-    an accordion that doesn't say.
+    `kaamiki.conf.accordion.marker_position` settle the marker and its
+    side for an accordion that doesn't say.
     """
 
     has_content = True
@@ -233,8 +232,7 @@ def depart(self: HTMLTranslator, node: Accordion) -> None:
 
 
 def visit_summary(self: HTMLTranslator, node: summary) -> None:
-    """Open the title, with the marker ahead of the text if it goes
-    there.
+    """Open the title and put the marker first if it goes there.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The title's node.
@@ -286,9 +284,7 @@ def marker(self: HTMLTranslator, node: summary) -> str:
 
     :param self: The HTML translator.
     :param node: The title's node.
-    :return: The accordion's marker. A plus turns 45 degrees, a right
-        chevron turns 90 degrees and a down chevron turns over like the
-        header's dropdowns do. Nothing else moves.
+    :return: The marker's HTML.
     """
     icons = Icons.of(self.builder.config)
     classes = icons.pair(ACCORDION_MARKERS[node.parent["marker"]])

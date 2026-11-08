@@ -4,11 +4,11 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `button` directive that renders a link as a button::
 
-    .. button:: https://www.w3schools.com/tags/movie.mp4
+    .. button:: https://example.com/demo.mp4
        :fa-icon: video
        :scheme: dark
 
@@ -18,9 +18,9 @@ A page of the site is named with `:doc:` or `:ref:` in place of the
 address, so the link works under every builder::
 
     .. button::
-       :doc: install
+       :doc: index
 
-       Install it
+       Back to the start
 """
 
 from __future__ import annotations
@@ -158,12 +158,12 @@ class directive(rst.Directive):
         - `ref`: A label the button links to, as `:ref:` names it,
           capitals and spaces aside.
         - `fa-icon`: A Font Awesome icon, as `video`, `fa-video` or
-          `far fa-video`. One without a style is drawn in the site's
-          `kaamiki.conf.icons.style`, `regular` unless it says
-          otherwise and `solid` where Font Awesome Free has no icon of
+          `fa-regular fa-video`. One without a style is drawn in the
+          site's `kaamiki.conf.icons.style`, `regular` unless it says
+          otherwise, and `solid` where Font Awesome Free has no icon of
           that name in that style.
-        - `icon-position`: `before` the label, the default or
-          `after` it.
+        - `icon-position`: `before` the label or `after` it. Defaults
+          to `before`.
         - `align`: Where the button sits, `left`, `center` or `right`.
           Defaults to `left`.
         - `scheme`: `light`, `dark`, `chevron`, `red`, `yellow`, `blue`
@@ -329,9 +329,9 @@ class directive(rst.Directive):
             if scheme == "chevron" and iconic:
                 scheme = "light"
         if scheme in colours:
-            named = nodes.make_id(scheme)
+            slug = nodes.make_id(scheme)
             return (
-                f"km-button--scheme-custom km-button--scheme-{named}",
+                f"km-button--scheme-custom km-button--scheme-{slug}",
                 f"--km-colour-button-scheme: {hsl(str(colours[scheme]))}",
             )
         if scheme not in SCHEMES:

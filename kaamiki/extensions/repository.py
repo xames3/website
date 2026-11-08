@@ -4,15 +4,17 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October 2025
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
-A `repository` directive that renders a GitHub project as a block::
+A `repository` directive that shows a GitHub project with its counts::
 
-    .. repository:: xames3/website
+    .. repository:: octocat/Hello-World
        :hide-forks:
 
-       The source of this website.
+       My first repository on GitHub.
 """
+
+from __future__ import annotations
 
 import re
 import typing as t
@@ -50,9 +52,9 @@ class directive(rst.Directive):
         - `hide-stars`: Leave out the stargazer count.
         - `hide-forks`: Leave out the fork count.
         - `name`: A name to link to.
-        - `class`: More classes for the block.
+        - `class`: More classes for the repository.
 
-    Both counts are shown without them. Any text written below the
+    Both counts are shown without the options. Any text written below the
     directive is shown under the name and counts.
     """
 
@@ -68,8 +70,7 @@ class directive(rst.Directive):
     def run(self) -> list[nodes.Node]:
         """Parse the text and return the repository's node.
 
-        The argument is a GitHub `owner/name`, since the block asks
-        GitHub's API for it.
+        The argument is a GitHub `owner/name`.
 
         :return: The node, followed by the `raw` node for the link
             checker and anything the text reported.
@@ -84,8 +85,8 @@ class directive(rst.Directive):
             or repo.endswith(".git")
         ):
             raise self.error(
-                f"repository: expected owner/name like xames3/website, got "
-                f"{project!r}"
+                "repository: expected owner/name like octocat/Hello-World, got"
+                f" {project!r}"
             )
         source = f"https://github.com/{owner}/{repo}"
         config = self.state.document.settings.env.config

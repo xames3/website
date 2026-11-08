@@ -1,3 +1,12 @@
+/*
+Explainer Script
+================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 17 October 2026
+Last updated on: 08 November 2026
+*/
+
 (() => {
     'use strict';
 
@@ -196,7 +205,7 @@
             resizing = window.setTimeout(() => {
                 const moved = Math.abs(window.innerHeight - height);
                 if (window.innerWidth === width && moved < RESIZE_JITTER_PX) {
-                    held?.recentre();
+                    held?.recenter();
                     return;
                 }
                 width = window.innerWidth;
@@ -466,7 +475,7 @@
             shape,
             nudge,
             release,
-            recentre,
+            recenter,
             fillAll,
         };
         let snaps = [];
@@ -641,7 +650,6 @@
             morphing = run;
             run.going.forEach((line) => {
                 line.setAttribute('aria-hidden', 'true');
-                line.setAttribute('data-km-going', '');
                 signLine(line, 'removed');
             });
             run.coming.forEach((line) => signLine(line, 'added'));
@@ -841,19 +849,19 @@
             paint(stepIndex);
         }
 
-        function centre() {
+        function center() {
             return frame.getBoundingClientRect().top + height / 2;
         }
 
-        function recentre() {
-            jumpTo(window.scrollY + centre() - focusLine());
+        function recenter() {
+            jumpTo(window.scrollY + center() - focusLine());
             heldY = window.scrollY;
         }
 
         function lock(side) {
             if (held) return;
             progress = side > 0 ? 0 : total;
-            recentre();
+            recenter();
             const bar = window.innerWidth - root.clientWidth;
             root.style.overflow = 'hidden';
             if (bar > 0) root.style.paddingRight = `${bar}px`;
@@ -902,7 +910,7 @@
                 keepHeld();
                 return;
             }
-            const away = centre() - focusLine();
+            const away = center() - focusLine();
             if (unseen || Math.abs(away) > window.innerHeight) {
                 atTop = unseen && window.scrollY + away < 0;
                 unseen = false;
@@ -1181,7 +1189,7 @@
         }
 
         function reachable() {
-            const target = window.scrollY + centre() - focusLine();
+            const target = window.scrollY + center() - focusLine();
             const spare = root.scrollHeight - window.innerHeight - target;
             return Math.min(target, spare) >= REARM_DISTANCE_PX;
         }
@@ -1228,7 +1236,7 @@
                 const key = keys[where.keyIndex];
                 progress = key.from + (key.to - key.from) * where.through;
             }
-            recentre();
+            recenter();
             render();
         }
 
@@ -1308,7 +1316,7 @@
         box.addEventListener('focusin', (event) => {
             const block = event.target.closest?.('[data-km-note]');
             if (mode !== 'stage' || !block) return;
-            if (!held) lock(centre() >= focusLine() ? 1 : -1);
+            if (!held) lock(center() >= focusLine() ? 1 : -1);
             else if (held !== explainer) return;
             if (!block.hasAttribute('data-km-active')) {
                 goToNote(Number(block.dataset.kmNote));

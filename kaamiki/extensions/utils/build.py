@@ -4,7 +4,7 @@ Build Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The utilities that write the 404 page and the sitemap after a build.
 """
@@ -72,9 +72,8 @@ def not_found(app: Sphinx) -> bool:
     Hosts serve `404.html` from the root and `html_additional_pages`
     can't put it there under `dirhtml`.
 
-    ..  note:: Set `kaamiki.conf.show.not_found` to `False` in
-        `conf.py` to skip it. A site with a page of its own called
-        `404` keeps it.
+    Set `kaamiki.conf.show.not_found` to `False` in `conf.py` to skip
+    it. A site with a page of its own called `404` keeps it.
 
     :param app: The Sphinx application instance.
     :return: `True` when the page was written.
@@ -213,8 +212,7 @@ def forget(app: Sphinx, kept: tuple[str, ...]) -> None:
 
 
 def build_finished(app: Sphinx, exc: Exception | None) -> None:
-    """Write Kaamiki's 404 page and the sitemap once the build has
-    worked.
+    """Write Kaamiki's 404 page and the sitemap once the build worked.
 
     :param app: The Sphinx application instance.
     :param exc: Whatever went wrong during the build or `None`.

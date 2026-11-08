@@ -4,17 +4,16 @@ Block Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `block` directive that frames a title and some content, which
 can link somewhere::
 
-    .. block:: Why write xsNumPy?
-       :subsection: A story from January 2025
-       :doc: xsnumpy
+    .. block:: Getting started
+       :subsection: A short guide
+       :target: https://example.com/guide
 
-       An experimental re-implementation of a few of the core NumPy
-       features in pure Python.
+       Everything you need to set up and start writing.
 """
 
 from __future__ import annotations
@@ -55,9 +54,7 @@ class Block(nodes.container):
 
 
 class shelf(nodes.container):
-    """A run of same-sized blocks, written one after another, in a
-    row.
-    """
+    """A row of blocks of the same size."""
 
 
 class part(nodes.container):
@@ -90,8 +87,8 @@ class directive(rst.Directive):
 
     The argument is the title and everything below is the content. A
     block takes one of `target`, `doc` and `ref`, and is one link as a
-    whole, so an accordion, tabs, a video, a player, an embed or a
-    walkthrough in it stops the build. A block holds no other block and
+    whole, so an `accordion`, `carousel`, `embed`, `tabs`, `video` or
+    `youtube` in it stops the build. A block holds no other block and
     one that isn't `large` holds no columns. Blocks of the same `size`
     written one after another form rows. Blocks inside a column, at any
     depth, form no rows, each is as wide as the column. A `large` block
@@ -117,7 +114,7 @@ class directive(rst.Directive):
     ) -> tuple[blocktext, list[nodes.system_message]]:
         """Parse a line of text the way a paragraph is parsed.
 
-        :param role: The part of the block it is as its class knows it.
+        :param role: The part of the block, like `title` or `footer`.
         :param text: The text, as written.
         :param linked: Whether the whole block is a link, which the
             text can't hold another of.
@@ -209,12 +206,12 @@ class directive(rst.Directive):
 
 
 def address(
-    self: HTMLTranslator, name: str, kind: str, link: str, where: str
+    self: HTMLTranslator, caller: str, kind: str, link: str, where: str
 ) -> tuple[str, bool]:
     """Work out where a block or a button goes.
 
     :param self: The HTML translator.
-    :param name: The directive, for the message.
+    :param caller: The directive, for the message.
     :param kind: `target` for an address, `doc` for a document or `ref`
         for a label.
     :param link: The address, the document or the label.
@@ -233,7 +230,7 @@ def address(
     labels = builder.env.domains.standard_domain.labels
     label = labels.get(nodes.fully_normalize_name(link))
     if label is None:
-        fail(f"{name}: :ref: expected a label, got {link!r}", where)
+        fail(f"{caller}: :ref: expected a label, got {link!r}", where)
     page = label[0]
     base = "" if page == here else builder.get_relative_uri(here, page)
     return f"{base}#{label[1]}", False
@@ -307,9 +304,7 @@ def visit_piece(self: HTMLTranslator, node: part | blocktext) -> None:
 def unrow(app: Sphinx, doctree: nodes.document) -> None:
     """Take the blocks out of the rows that sit in a column.
 
-    A column decides where its blocks go, however deep they are in it,
-    so they aren't put side by side. A row is made as the blocks are
-    parsed, when what they are in isn't known yet.
+    A column lays out its blocks, however deep they are in it.
 
     :param app: The Sphinx application instance (unused).
     :param doctree: The page, just read.

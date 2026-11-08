@@ -4,30 +4,63 @@ Walkthrough Block Grammar
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The block grammar the walkthroughs carry in their bodies and the
 readers for the options beside it.
 """
 
 import re
+import typing as t
 
 from docutils.statemachine import StringList
 
-BLOCK: re.Pattern[str] = re.compile(r"^\.\.[ \t]+([a-z][\w-]*)::[ \t]*(.*)$")
-COMMENT: re.Pattern[str] = re.compile(r"^\.\.(?:[ \t]|$)")
-OPTION_LINE: re.Pattern[str] = re.compile(r"^:([\w-]+):(?:[ \t]+(.*))?$")
-RANGE: re.Pattern[str] = re.compile(
+BLOCK: t.Final[re.Pattern[str]] = re.compile(
+    r"^\.\.[ \t]+([a-z][\w-]*)::[ \t]*(.*)$"
+)
+COMMENT: t.Final[re.Pattern[str]] = re.compile(r"^\.\.(?:[ \t]|$)")
+OPTION_LINE: t.Final[re.Pattern[str]] = re.compile(
+    r"^:([\w-]+):(?:[ \t]+(.*))?$"
+)
+RANGE: t.Final[re.Pattern[str]] = re.compile(
     r"^([0-9]{1,15})(?:\s*[-\u2013]\s*([0-9]{1,15}))?$"
 )
+
+
+class OptionError(Exception):
+    """An option a block doesn't take or takes twice."""
+
+    def __init__(self, line: int, key: str, block: str) -> None:
+        """Hold what the message quotes.
+
+        :param line: The document line the option is on.
+        :param key: The option's name.
+        :param block: The block's name.
+        """
+        super().__init__(line, key, block)
+        self.line = line
+        self.key = key
+        self.block = block
+
+
+class StrayError(Exception):
+    """A line that belongs to no block."""
+
+    def __init__(self, line: int, text: str) -> None:
+        """Hold what the message quotes.
+
+        :param line: The document line.
+        :param text: What's written on it.
+        """
+        super().__init__(line, text)
+        self.line = line
+        self.text = text
 
 
 class chunk:
     """One `.. name:: argument` block pulled out of a directive's body.
 
-    `docutils` won't nest an unregistered directive inside another, so
-    the walkthrough carries a little block grammar of its own. `split`
-    returns one of these per block.
+    `split` returns one of these per block.
     """
 
     def __init__(
@@ -105,8 +138,7 @@ def blanks(lines: list[str] | StringList, index: int) -> int:
 def gather(
     content: StringList, first: int, last: int, pad: int = 0
 ) -> StringList:
-    """Copy lines out of the content, each one still knowing where it
-    came from.
+    """Copy lines out of the content, keeping where each came from.
 
     :param content: The directive's content.
     :param first: The first line to copy.
@@ -145,7 +177,7 @@ def read_options(
     :param line: The document line `raw` starts on.
     :param name: The block's name.
     :return: The options and the line in `raw` the body starts on.
-    :raises KeyError: For an option the block doesn't take or takes
+    :raises OptionError: For an option the block doesn't take or takes
         twice, with its line number, its name and the block's name.
     """
     options: dict[str, str] = {}
@@ -159,7 +191,7 @@ def read_options(
             break
         key = hit.group(1)
         if key not in allowed or key in options:
-            raise KeyError(line + ahead + 1, key, name)
+            raise OptionError(line + ahead + 1, key, name)
         depth = len(raw[ahead]) - len(raw[ahead].lstrip())
         value = [(hit.group(2) or "").strip()]
         cursor = ahead + 1
@@ -243,9 +275,9 @@ def split(
     :param loose: Keep the prose between blocks as nameless chunks
         instead of raising.
     :return: One `chunk` per block found, in the order written.
-    :raises ValueError: For the first line belonging to no block, with
+    :raises StrayError: For the first line belonging to no block, with
         its line number and its text. Never raised when `loose`.
-    :raises KeyError: For an option its block doesn't take or takes
+    :raises OptionError: For an option its block doesn't take or takes
         twice, with its line number, its name and the block's name.
     """
     found: list[chunk] = []
@@ -264,7 +296,7 @@ def split(
             block, end = read_prose(content, index, offset, own)
             found.append(block)
         else:
-            raise ValueError(offset + index + 1, line.strip())
+            raise StrayError(offset + index + 1, line.strip())
         index = blanks(content, end)
     return found
 

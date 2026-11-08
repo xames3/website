@@ -4,7 +4,7 @@ Directive Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The helpers Kaamiki's directives are built from.
 """
@@ -32,7 +32,7 @@ if t.TYPE_CHECKING:
     from docutils.parsers.rst import Directive
     from sphinx.writers.html import HTMLTranslator
 
-LINKCHECK_OPTIONS: tuple[str, ...] = ("avatar", "backdrop", "target")
+LINKCHECK_OPTIONS: t.Final[tuple[str, ...]] = ("avatar", "backdrop", "target")
 LINKS: t.Final[tuple[type[nodes.Node], ...]] = (
     nodes.reference,
     nodes.footnote_reference,
@@ -55,7 +55,7 @@ def toggle(argument: str | None) -> bool:
 
     :param argument: The value written in the rST or `None` when bare.
     :return: Whether it's on.
-    :raises ValueError: For anything but nothing, `true` and `false`.
+    :raises ValueError: For any value but none, `true` or `false`.
     """
     if argument in (None, "", "true"):
         return True
@@ -92,7 +92,7 @@ def unlinked(
     found: Iterable[nodes.Node] | nodes.Node,
     part: str,
 ) -> None:
-    """Refuse a link in a text that is a link already or a control.
+    """Refuse a link in a text that's a link already or a control.
 
     :param directive: The directive that has the text.
     :param found: The parsed text or the nodes it came to.
@@ -164,8 +164,7 @@ def document(directive: Directive, name: str, option: str) -> str:
 
 
 def shipped(directive: Directive, value: str, where: str) -> str:
-    """Check that a path from the top of the site is a file the build
-    puts there.
+    """Check that a path from the top of the site is a file that ships.
 
     A full address or a `#` fragment is left alone. A path under
     `_static` has to be in one of `html_static_path` and any other path
@@ -285,8 +284,9 @@ class phrase(nodes.TextElement):
 
 
 def located[N: nodes.Node](directive: Directive, node: N) -> N:
-    """Give a node the place in the source it was written, which
-    `gettext` needs to collect the text.
+    """Give a node the place in the source it was written.
+
+    `gettext` needs it to collect the text.
 
     :param directive: The directive the node's text belongs to.
     :param node: The node.
@@ -427,7 +427,7 @@ def visitor(
 
 
 def what(found: nodes.Node) -> str:
-    """Say what a node is, the way a message names what author wrote.
+    """Say what a node is, the way a message names it.
 
     :param found: The node.
     :return: Its name with an article, `a paragraph` or `an accordion`.
@@ -438,8 +438,7 @@ def what(found: nodes.Node) -> str:
 
 
 def listed(value: str) -> list[str]:
-    """Split a comma-separated option into its trimmed, non-empty
-    parts.
+    """Split a comma-separated option into its trimmed parts.
 
     :param value: The option's value.
     :return: The parts, in the order written.

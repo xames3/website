@@ -4,7 +4,7 @@ Link Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The helpers that work out where a link goes.
 """
@@ -32,9 +32,9 @@ if t.TYPE_CHECKING:
 # `noreferrer` keeps it from seeing which page the reader came from.
 # https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel
 REL: t.Final[str] = "noopener noreferrer"
-SLASHES: re.Pattern[str] = re.compile(r"^/{2,}")
-YOUTUBE_ID: re.Pattern[str] = re.compile(r"[A-Za-z0-9_-]{11}")
-YOUTUBE_START: re.Pattern[str] = re.compile(
+SLASHES: t.Final[re.Pattern[str]] = re.compile(r"^/{2,}")
+YOUTUBE_ID: t.Final[re.Pattern[str]] = re.compile(r"[A-Za-z0-9_-]{11}")
+YOUTUBE_START: t.Final[re.Pattern[str]] = re.compile(
     r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?"
 )
 YOUTUBE_HOSTS: t.Final[frozenset[str]] = frozenset(
@@ -173,8 +173,7 @@ def opens_new_tab(url: str, config: Config) -> bool:
 
 
 def relative_to_page(translator: HTMLTranslator, url: str) -> str:
-    """Make a path written in an option an address that works from the
-    page it's on.
+    """Make a path written in an option work from the page it's on.
 
     :param translator: The HTML translator writing the page.
     :param url: The path or address, as written.

@@ -4,9 +4,9 @@ Embed Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 11 August 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
-An `embed` directive that drops a block of HTML into the page.
+An `embed` directive that drops a block of HTML into the page::
 
     .. embed:: iframe
        :expected-count: 10
@@ -19,18 +19,22 @@ An `embed` directive that drops a block of HTML into the page.
        </iframe>
 
 Every other option is a placeholder, so `{{ expected-count }}` is
-replaced by the option's value, escaped for where it lands. In markup
-and in a `<style>` the value is written as it was written. In a
-`<script>` it's read as a Python literal first, so `10` is a number
-there and `'10'` a string.
+replaced by the option's value, escaped for where it lands. Markup gets
+it HTML-escaped and a `<style>` gets it CSS-escaped. A `<script>` reads
+it as a Python literal first and gets it as a JSON literal, so `10` is a
+number there and `'10'` a string. A placeholder no option fills stops
+the build, and so does an option no placeholder asks for. A
+`{# note #}` in the fragment is left out of the page.
 
 A larger embed can live in a file of its own, named as the argument,
 relative to the document or to the source directory with a leading `/`.
 The `:css:` and `:js:` options are for the files under
 `html_static_path`, which load in order on the pages that use the
-directive::
+directive. Here `embed.html` is a file of yours next to the document
+and `embed.css` and `embed.js` sit in `html_static_path`::
 
-    .. embed:: ../assets/html/embed.html
+
+    .. embed:: embed.html
        :css: embed.css
        :js: embed.js
 """
@@ -67,19 +71,19 @@ if t.TYPE_CHECKING:
 
 
 name: t.Final[str] = "embed"
-PLACEHOLDER: re.Pattern[str] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
+PLACEHOLDER: t.Final[re.Pattern[str]] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
 # NOTE(xames3): Keeps a value from closing its `<script>` early and
 # U+2028/2029 from ending a JavaScript string line.
 # https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
 # https://github.com/tc39/proposal-json-superset
-ESCAPES: dict[str, str] = {
+ESCAPES: t.Final[dict[str, str]] = {
     "<": "\\u003c",
     ">": "\\u003e",
     "&": "\\u0026",
     "\u2028": "\\u2028",
     "\u2029": "\\u2029",
 }
-STYLE_ESCAPES: frozenset[str] = frozenset("<>&\"'\\\n\r{};")
+STYLE_ESCAPES: t.Final[frozenset[str]] = frozenset("<>&\"'\\\n\r{};")
 ASSETS: t.Final[frozenset[str]] = frozenset(
     {"css", "js", "encoding", "class", "name"}
 )
@@ -94,9 +98,9 @@ def encode(value: str, kind: str) -> str:
 
     :param value: The option's value, as written.
     :param kind: `script`, `style` or anything else for markup.
-    :return: The value, escaped so it can't break out of its place. A
-        script gets it as a literal, a number for `3`, and markup and
-        style get it as written.
+    :return: The value, escaped so it can't break out of its place.
+        Markup gets it HTML-escaped, a style CSS-escaped and a script as
+        a JSON literal, a number for `3`.
     """
     if kind == "script":
         encoded = json.dumps(literal(value), default=str)
@@ -113,9 +117,7 @@ def encode(value: str, kind: str) -> str:
 def strip_notes(source: str) -> str:
     """Take the `{# ... #}` notes out of a fragment.
 
-    The spaces after a note and one line break go with it. Each note is
-    found by looking for its end, so a fragment of openings and no end
-    costs no more than any other of its length.
+    The spaces after a note and one line break go with it.
 
     :param source: The fragment.
     :return: The fragment without its notes. A note that never ends is
@@ -313,8 +315,11 @@ class directive(rst.Directive):
 
     Every other option is a placeholder's value. Option names are
     lowercase, as docutils reads them, and so are the placeholders. A
-    value is written as it was written, except in a `<script>`, where
-    it's read as a Python literal.
+    value is HTML-escaped in markup, CSS-escaped in a `<style>` and
+    written as a JSON literal in a `<script>`, where it's read as a
+    Python literal first. A placeholder no option fills stops the build,
+    and so does an option no placeholder asks for. A `{# note #}` in the
+    fragment is left out of the page.
     """
 
     has_content = True
@@ -441,9 +446,7 @@ class directive(rst.Directive):
         order of the attributes, a `>` in a quoted one or a backslash
         in the address won't get a frame past the list.
 
-        It catches a mistake and not an author set on getting round it:
-        a script can build a frame in ways no check can read, so one
-        that says `iframe` is refused and the rest are let through.
+        A `<script>` with `iframe` in it is refused.
 
         :param markup: The embedded HTML, placeholders filled in.
         :raises rst.DirectiveError: When an iframe comes from a host
@@ -529,7 +532,8 @@ class directive(rst.Directive):
             )
         if any(ord(_) < 32 for _ in file):
             raise self.error(
-                "embed: expected a file name without control characters"
+                "embed: expected a file name without control characters, got"
+                f" {file!r}"
             )
         env = self.state.document.settings.env
         relative, path = env.relfn2path(file, env.docname)

@@ -4,7 +4,7 @@ Input Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 Kaamiki takes what it's given or stops the build. Nothing is clamped,
 guessed or quietly dropped. Every option, role, page field and setting
@@ -26,6 +26,7 @@ from babel import Locale
 from babel import UnknownLocaleError
 from docutils import nodes
 from docutils.transforms import Transform
+from docutils.utils import Reporter
 from sphinx.errors import SphinxError
 from sphinx.errors import SphinxParallelError
 
@@ -36,8 +37,10 @@ if t.TYPE_CHECKING:
 
     from sphinx.application import Sphinx
 
+ERROR_LEVEL: t.Final[int] = Reporter.ERROR_LEVEL
 TEXT_LENGTH: t.Final[int] = 300
 URL_LENGTH: t.Final[int] = 2048
+HOST_LENGTH: t.Final[int] = 253
 SLUG: t.Final[re.Pattern[str]] = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}")
 NAME_LENGTH: t.Final[int] = 64
 CLASS_COUNT: t.Final[int] = 8
@@ -194,13 +197,12 @@ def reference_name(argument: str | None) -> str:
 
     Any text is a name, as with docutils' own directives: spaces and
     capitals are fine and docutils makes the id (`My Note` is the id
-    `my-note`). The checks are for what docutils would let through
-    that no link could use. A name in any script will do, and docutils
-    makes an id of its own (`id1`) for one it can't spell in ASCII.
+    `my-note`). A name in any script will do, and docutils makes an id
+    of its own (`id1`) for one it can't spell in ASCII.
 
     :param argument: The value as written.
     :return: The name, its spaces collapsed to one each.
-    :raises ValueError: For none, one that is empty, has a control
+    :raises ValueError: For none, one that's empty, has a control
         character, has no letter in it or is longer than `NAME_LENGTH`.
     :raises TypeError: For a value that isn't text.
     """
@@ -239,7 +241,7 @@ def classes(argument: str | None) -> list[str]:
     :param argument: The names as written.
     :return: The names, in the order written and each once.
     :raises ValueError: For none, a name that can't be made into a
-        class, one that is too long or too many.
+        class, one that's too long or too many.
     :raises TypeError: For a value that isn't text.
     """
     if argument is None or (isinstance(argument, str) and not argument.strip()):
@@ -330,7 +332,8 @@ def integer(low: int, high: int) -> Callable[[str | None], int]:
     :param low: The least it may be.
     :param high: The most it may be.
     :return: The check, which takes digits only: no sign, no `_`, no
-        spaces, no other scripts and no leading zeros.
+        other scripts and no leading zeros. Spaces around them are
+        trimmed.
     """
 
     def read(argument: str | None) -> int:
@@ -404,13 +407,12 @@ def spacing(presets: Sequence[str], high: float) -> Callable[[str | None], str]:
 
 
 def lengths(value: str) -> tuple[str, str]:
-    """Split a space `spacing` handed back into its first and last
-    length.
+    """Split a space `spacing` handed back into two lengths.
 
     :param value: One or two lengths, as `spacing` returns them.
-    :return: The first and the last, the same one for a single length.
-        What a vertical and a horizontal gap are made of, or an edge
-        above and one below.
+    :return: The first and the last length, the same one for a single
+        length. They're what a vertical and a horizontal gap are made
+        of, or an edge above and one below.
     """
     words = value.split()
     return words[0], words[-1]
@@ -455,7 +457,11 @@ def icon(argument: str | None) -> str:
             f"expected a style, {', '.join(sorted(STYLES | FAMILIES))}, before"
             f" the name, got {argument!r}"
         )
-    if not ICON_NAME.fullmatch(rest[0]) or rest[0] in STYLES | FAMILIES:
+    if (
+        not ICON_NAME.fullmatch(rest[0])
+        or rest[0] in STYLES | FAMILIES
+        or MODIFIERS.fullmatch(rest[0])
+    ):
         raise ValueError(f"expected an icon name like fa-plus, got {rest[0]!r}")
     for each in rest[1:]:
         if not MODIFIERS.fullmatch(each):
@@ -534,8 +540,10 @@ def web(argument: str | None) -> str:
 
 
 def kit(argument: str | None) -> str:
-    """Read the address of a Font Awesome kit,
-    `https://kit.fontawesome.com/` and the kit's name, ending in `.js`.
+    """Read the address of a Font Awesome kit.
+
+    It's `https://kit.fontawesome.com/` and the kit's name, ending in
+    `.js`.
 
     :param argument: The address as written.
     :return: The address.
@@ -558,8 +566,10 @@ def kit(argument: str | None) -> str:
 
 
 def site(argument: str | None) -> str:
-    """Read the address of a site, an `http` or `https` one with a host
-    and no query, fragment or login.
+    """Read the address of a site.
+
+    It's an `http` or `https` one with a host and no query, fragment or
+    login.
 
     :param argument: The address as written.
     :return: The address.
@@ -582,8 +592,10 @@ def site(argument: str | None) -> str:
 
 
 def picture(argument: str | None) -> str:
-    """Read the address of a picture, an `http` or `https` one or a
-    path on the site, ending in an image's extension.
+    """Read the address of a picture.
+
+    It's an `http` or `https` one or a path on the site, ending in an
+    image's extension.
 
     :param argument: The address as written.
     :return: The address, as written.
@@ -593,15 +605,17 @@ def picture(argument: str | None) -> str:
     value = link(argument, schemes=("http", "https"))
     if not IMAGES.fullmatch(urlsplit(value).path):
         raise ValueError(
-            f"expected a .jpg, .png, .webp, .avif, .gif or .svg picture, got "
-            f"{argument!r}"
+            "expected a .jpg, .jpeg, .png, .webp, .avif, .gif or .svg picture,"
+            f" got {argument!r}"
         )
     return value
 
 
 def colour(argument: str | None, names: Collection[str] = ()) -> str:
-    """Read a colour: one of the names given, `#abc`, `#aabbcc` or the
-    three numbers of `hsl`, as `262 83% 58%`.
+    """Read a colour.
+
+    It's one of the names given, `#abc`, `#aabbcc` or the three numbers
+    of `hsl`, as `262 83% 58%`.
 
     :param argument: The colour as written.
     :param names: The colour names that are known.
@@ -620,10 +634,10 @@ def colour(argument: str | None, names: Collection[str] = ()) -> str:
         and float(found[3]) <= 100
     ):
         return value
+    known = "".join(f"{_}, " for _ in sorted(names))
     raise ValueError(
-        f"expected {', '.join(sorted(names)) + ', ' if names else ''}a "
-        f"hex colour"
-        f" like #7c3aed or hsl numbers like 262 83% 58%, got {argument!r}"
+        f"expected {known}a hex colour like #7c3aed or hsl numbers like"
+        f" 262 83% 58%, got {argument!r}"
     )
 
 
@@ -646,7 +660,7 @@ def language(argument: str | None) -> str:
     return code
 
 
-def host(argument: str) -> str:
+def host(argument: str | None) -> str:
     """Read a host name, as `example.com`.
 
     A host stands for itself. There are no wildcards, so a site lists
@@ -656,8 +670,8 @@ def host(argument: str) -> str:
     :return: The host, in lowercase.
     :raises ValueError: For anything else, `*.example.com` included.
     """
-    value = argument.strip().lower()
-    if not HOST.fullmatch(value) or len(value) > 253:
+    value = (argument or "").strip().lower()
+    if not HOST.fullmatch(value) or len(value) > HOST_LENGTH:
         raise ValueError(
             f"expected a host name like example.com, got {argument!r}"
         )
@@ -742,13 +756,10 @@ class Plain(Transform):
 
 
 class Promoted(logging.Filter):
-    """Keep the error `promote` stops the build on from being printed
-    twice.
+    """Keep the error `promote` stops the build on from printing twice.
 
-    docutils logs an error the moment it finds it and Sphinx prints it
-    once the pages are read, by which time `promote` has stopped the
-    build with the same error in one line. From then on the errors
-    docutils logged aren't printed.
+    Once `promote` has stopped the build, the errors docutils logged
+    aren't printed.
     """
 
     def __init__(self) -> None:
@@ -757,8 +768,7 @@ class Promoted(logging.Filter):
         self.stopped = False
 
     def filter(self, record: logging.LogRecord) -> bool:
-        """Drop an error from docutils once `promote` has stopped the
-        build.
+        """Drop an error from docutils once `promote` stopped the build.
 
         :param record: The log record.
         :return: `False` for an error from docutils after that and
@@ -783,12 +793,10 @@ def hush(app: Sphinx) -> None:
 
 
 PROMOTED: t.Final[Promoted] = Promoted()
-ERROR_LEVEL: t.Final[int] = 3
 
 
 def promote(app: Sphinx, doctree: nodes.document) -> None:
-    """Make an error docutils reported while reading a page stop the
-    build.
+    """Make an error docutils reported while reading a page stop the build.
 
     docutils writes a mistake in a directive, a role or the markup as
     a message in the page and carries on. Kaamiki stops at the first,
@@ -813,7 +821,7 @@ def locate(message: str) -> tuple[str, str, str] | None:
     """Split a message into the file, the line and what's wrong.
 
     The message is `file:line: what` or `file: what`. The file is the
-    start of it that is a file that exists, so a folder with a space in
+    start of it that's a file that exists, so a folder with a space in
     its name, or a drive letter, doesn't get in the way.
 
     :param message: What `fail` was given, with its `where` in front.

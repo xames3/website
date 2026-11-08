@@ -1,3 +1,12 @@
+/*
+Animations Script
+=================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 17 October 2026
+Last updated on: 08 November 2026
+*/
+
 (() => {
     'use strict';
 
@@ -775,14 +784,14 @@
                 || marks.find((mark) => revealHidden(mark));
             if (!first) return;
             first.dispatchEvent(new Event('km:match', { bubbles: true }));
-            const centre = () => first.scrollIntoView({
+            const center = () => first.scrollIntoView({
                 block: 'center',
                 behavior: 'instant',
             });
-            centre();
+            center();
             const at = window.scrollY;
             document.fonts.ready.then(() => {
-                if (window.scrollY === at) centre();
+                if (window.scrollY === at) center();
             });
         });
         watch.observe(document.body, { childList: true, subtree: true });

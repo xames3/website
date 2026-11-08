@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 Kaamiki's settings, their defaults and the helpers that read them.
 """
@@ -16,6 +16,7 @@ import json
 import os
 import os.path as p
 import re
+import sys
 import typing as t
 from datetime import datetime as dt
 
@@ -51,6 +52,7 @@ PALETTE: t.Final[dict[str, str]] = {
     "green": "131.25 41.03% 45.88%",
 }
 CREDIT: t.Final[str] = "https://github.com/xames3/website"
+CONTACT: t.Final[str] = "xa@mes3.dev"
 BOUNDS: t.Final[dict[str, tuple[float, float]]] = {
     "avatar_size": (16, 64),
     "description_length": (50, 300),
@@ -124,13 +126,13 @@ DEFAULTS: t.Final[dict[str, t.Any]] = {
     "feedback": {},
     "header_buttons": {},
     "internal_hosts": [],
-    "last_updated_on_fmt": "",
+    "last_updated_fmt": "",
     "license": {},
     "links_in_new_tab": True,
     "logo_size": None,
     "open_graph": {},
     "project": {},
-    "release_kinds": {},
+    "release_kinds": [],
     "release_version_fmt": "%Y.%m.%d",
     "role_colours": {},
     "sharpie_colour": "yellow",
@@ -259,7 +261,7 @@ GROUPS: t.Final[dict[str, dict[str, str]]] = {
         "feedback": "feedback",
         "header_buttons": "header_buttons",
         "sidebar_buttons": "sidebar_buttons",
-        "last_updated_fmt": "last_updated_on_fmt",
+        "last_updated_fmt": "last_updated_fmt",
         "copy_headerlinks": "copy_headerlinks",
         "words_per_minute": "words_per_minute",
     },
@@ -389,13 +391,22 @@ TIME_DIRECTIVES: t.Final[re.Pattern[str]] = re.compile(r"%[aAbBdHIjmMpSyYZz%]")
 
 
 def boolean(value: object) -> None:
-    """Check a setting is `True` or `False` and nothing like them."""
+    """Check a setting is `True` or `False` and nothing like them.
+
+    :param value: What the site gave.
+    :raises TypeError: For anything else.
+    """
     if type(value) is not bool:
         raise TypeError(f"expected True or False, got {value!r}")
 
 
 def whole(low: float, high: float) -> Rule:
-    """Make a check for a whole number from `low` to `high`."""
+    """Make a check for a whole number from `low` to `high`.
+
+    :param low: The least it may be.
+    :param high: The most it may be.
+    :return: The check.
+    """
 
     def rule(value: t.Any) -> None:
         """Check the whole number."""
@@ -408,7 +419,12 @@ def whole(low: float, high: float) -> Rule:
 
 
 def real(low: float, high: float) -> Rule:
-    """Make a check for a number from `low` to `high`."""
+    """Make a check for a number from `low` to `high`.
+
+    :param low: The least it may be.
+    :param high: The most it may be.
+    :return: The check.
+    """
 
     def rule(value: t.Any) -> None:
         """Check the number."""
@@ -421,7 +437,11 @@ def real(low: float, high: float) -> Rule:
 
 
 def string(read: Callable[[str], t.Any]) -> Rule:
-    """Make a check for a string that `read` accepts."""
+    """Make a check for a string that `read` accepts.
+
+    :param read: The check for the text.
+    :return: The check.
+    """
 
     def rule(value: t.Any) -> None:
         """Check the string and read it."""
@@ -433,10 +453,14 @@ def string(read: Callable[[str], t.Any]) -> Rule:
 
 
 def many(read: Callable[[str], t.Any]) -> Rule:
-    """Make a check for a list of strings that `read` accepts."""
+    """Make a check for a list of strings that `read` accepts.
+
+    :param read: The check for each string.
+    :return: The check.
+    """
 
     def rule(value: t.Any) -> None:
-        """Check each string in the list, and that none is twice."""
+        """Check each string in the list and that none repeats."""
         if not isinstance(value, (list, tuple)):
             raise TypeError(f"expected a list, got {value!r}")
         for each in value:
@@ -450,8 +474,11 @@ def many(read: Callable[[str], t.Any]) -> Rule:
 
 
 def table(key: Callable[[str], t.Any], read: Rule) -> Rule:
-    """Make a check for a dict whose keys `key` and values `read`
-    accept.
+    """Make a check for a dict whose keys and values are readable.
+
+    :param key: The check for each name.
+    :param read: The check for each value.
+    :return: The check.
     """
 
     def rule(value: t.Any) -> None:
@@ -473,7 +500,11 @@ def table(key: Callable[[str], t.Any], read: Rule) -> Rule:
 
 
 def shape(**fields: Rule) -> Rule:
-    """Make a check for a dict that has only the fields named."""
+    """Make a check for a dict that has only the fields named.
+
+    :param fields: The check for each field, by its name.
+    :return: The check.
+    """
 
     def rule(value: t.Any) -> None:
         """Check each field of the dict."""
@@ -482,7 +513,7 @@ def shape(**fields: Rule) -> Rule:
         for name, each in value.items():
             if name not in fields:
                 raise ValueError(
-                    f"{name!r} isn't one of {', '.join(sorted(fields))}"
+                    f"expected one of {', '.join(sorted(fields))}, got {name!r}"
                 )
             try:
                 fields[name](each)
@@ -493,19 +524,30 @@ def shape(**fields: Rule) -> Rule:
 
 
 def lower(read: Callable[[str | None], t.Any]) -> Callable[[str], t.Any]:
-    """Make a check for a name that has to be written in lowercase."""
+    """Make a check for a name that has to be written in lowercase.
+
+    :param read: The check for the name.
+    :return: The check.
+    """
 
     def rule(value: str) -> t.Any:
         """Check the name is lowercase and read it."""
         if value != value.lower():
-            raise ValueError(f"expected {value.lower()!r}, names are lowercase")
+            raise ValueError(
+                f"expected a lowercase name like {value.lower()!r}, got"
+                f" {value!r}"
+            )
         return read(value)
 
     return rule
 
 
 def moment(directives: re.Pattern[str]) -> Callable[[str], None]:
-    """Make a check for a date format that only has known directives."""
+    """Make a check for a date format that only has known directives.
+
+    :param directives: The directives the format may have.
+    :return: The check.
+    """
 
     def rule(value: str) -> None:
         """Check the format has only known date directives."""
@@ -513,14 +555,19 @@ def moment(directives: re.Pattern[str]) -> Callable[[str], None]:
         if "%" in left:
             raise ValueError(
                 f"expected a date format with %a %A %b %B %d %H %I %j %m %M"
-                f" %p %S %y %Y %Z %z, got {value!r}"
+                f" %p %S %y %Y %Z %z %%, got {value!r}"
             )
 
     return rule
 
 
 def ending(suffix: str, read: Callable[[str], t.Any]) -> Callable[[str], str]:
-    """Make a check for an address or a file name ending a certain way."""
+    """Make a check for an address or a file name ending a certain way.
+
+    :param suffix: What it ends with.
+    :param read: The check for the address or the file name.
+    :return: The check.
+    """
 
     def check(value: str) -> str:
         """Check the value and what it ends with."""
@@ -535,7 +582,12 @@ def ending(suffix: str, read: Callable[[str], t.Any]) -> Callable[[str], str]:
 def listed_in(
     allowed: tuple[str, ...], separator: str
 ) -> Callable[[str], None]:
-    """Make a check for a string of words joined by `separator`."""
+    """Make a check for a string of words joined by `separator`.
+
+    :param allowed: The words it may have.
+    :param separator: What joins them.
+    :return: The check.
+    """
 
     def read(value: str) -> None:
         """Check each word of the string."""
@@ -590,9 +642,7 @@ def role_icon(value: t.Any) -> None:
 
 
 def site_icons(value: t.Any) -> None:
-    """Check the icons a site sets, which only `BLANK_ROLES` may leave
-    empty.
-    """
+    """Check the icons a site sets, where only `BLANK_ROLES` may be empty."""
     if isinstance(value, dict):
         value = {
             key: each
@@ -609,7 +659,7 @@ def button(value: t.Any) -> None:
     shape(
         url=string(checks.link),
         icon=string(checks.icon),
-        extras=string(lambda _: ATTRIBUTES(_.strip())),
+        extras=string(lambda each: ATTRIBUTES(each.strip())),
     )(value)
 
 
@@ -649,7 +699,7 @@ RULES: t.Final[dict[str, Rule]] = {
     "sharpie_colour": string(checks.text),
     "underline_colour": string(checks.text),
     "fa_kit": string(checks.kit),
-    "last_updated_on_fmt": string(moment(TIME_DIRECTIVES)),
+    "last_updated_fmt": string(moment(TIME_DIRECTIVES)),
     "release_version_fmt": string(moment(TIME_DIRECTIVES)),
     "code_explain_events": string(listed_in(TRACE_EVENTS, ", ")),
     "youtube_allow": string(listed_in(PERMISSIONS, "; ")),
@@ -662,7 +712,7 @@ RULES: t.Final[dict[str, Rule]] = {
     "code_explain_python": string(checks.text),
     "button_colours": table(lower(checks.slug), string(checks.colour)),
     "role_colours": table(lower(checks.slug), string(checks.colour)),
-    "release_kinds": table(lower(checks.slug), checks.word(*TONES)),
+    "release_kinds": many(lower(checks.slug)),
     "fa_icons": site_icons,
     "favicons": shape(**dict.fromkeys(FAVICONS, string(STATIC_NAME))),
     "header_buttons": table(checks.text, button),
@@ -694,7 +744,7 @@ RULES: t.Final[dict[str, Rule]] = {
         author=string(checks.text),
         avatar=string(checks.link),
         email=string(EMAIL_ONLY),
-        source=string(lambda _: _ if _ == "#" else checks.web(_)),
+        source=string(lambda each: each if each == "#" else checks.web(each)),
     ),
 }
 
@@ -703,12 +753,11 @@ def stored[V](env: BuildEnvironment, key: str, default: V) -> V:
     """Hold something Kaamiki keeps on the build environment.
 
     It's pickled with the environment, so it's there for the next
-    build, and it is prefixed `km_` so it can't be mistaken for
-    Sphinx's.
+    build, and it's prefixed `km_` so it can't be mistaken for Sphinx's.
 
     :param env: The build environment.
     :param key: What it's called, without the prefix.
-    :param default: What to hold when nothing is yet.
+    :param default: What to hold when nothing's held yet.
     :return: What is held, which the caller may change.
     """
     held: V = env.__dict__.setdefault(f"km_{key}", default)
@@ -774,9 +823,9 @@ def site_values(config: Config) -> dict[str, t.Any]:
 
     Sphinx has no public way to read what `conf.py` wrote as opposed to
     what it knows, so this reaches for `_raw_config`. Every check of a
-    setting starts from the names found here, and so does Sphinx's
-    credit, so a Sphinx that moves it stops the build and doesn't let
-    wrong settings through.
+    setting starts from the names found here, and so do the reads of
+    `html_show_sphinx` and `html_use_index`. A Sphinx that moves
+    `_raw_config` stops the build and doesn't let wrong settings through.
 
     :param config: The Sphinx configuration.
     :return: The names and their values, a `-D` over what `conf.py` said.
@@ -787,7 +836,7 @@ def site_values(config: Config) -> dict[str, t.Any]:
         fail(
             "this Sphinx has no Config._raw_config, which Kaamiki reads to"
             " check what conf.py wrote; use a Sphinx that Kaamiki supports"
-            f" or report it at {CREDIT}/issues"
+            f" or report it to {CONTACT}"
         )
     return {**raw, **config.overrides}
 
@@ -847,9 +896,9 @@ def overrides(app: Sphinx, config: Config) -> None:
     point arrives as text. A number is read the way an option's is, by
     `checks.integer` or `checks.number`, and a switch is `0` or `1`.
 
-    A `-D name.key=value` has been moved into the setting's dictionary
-    by now, as text, so the entries of `ENTRIES` that are switches or
-    numbers are read there.
+    Sphinx moves a `-D name.key=value` into the setting's dictionary,
+    as text, so the entries of `ENTRIES` that are switches or numbers
+    are read there and put back as a switch or a number.
 
     :param app: The Sphinx application instance.
     :param config: The Sphinx configuration.
@@ -884,11 +933,10 @@ def overrides(app: Sphinx, config: Config) -> None:
                 fail(f"-D {flat(key)}.{entry}={value}: {error}")
 
 
+# NOTE(xames3): A float's plain default makes Sphinx drop a `-D` for it
+# with a warning, where a function's lets the text through.
 def _constant(value: t.Any) -> Callable[[Config], t.Any]:
     """Wrap a default in a function, which Sphinx calls for the value.
-
-    A float's plain default makes Sphinx drop a `-D` for it with a
-    warning, where a function's lets the text through.
 
     :param value: The default.
     :return: A function that returns it.
@@ -900,8 +948,10 @@ class Group:
     """One group of Kaamiki's settings, `kaamiki.conf.icons` for one."""
 
     def __init__(self, name: str, given: dict[str, t.Any]) -> None:
-        """Make the group, which shares what a site set with the
-        others.
+        """Make the group, which shares what a site set with the others.
+
+        :param name: The group's name, as `icons`.
+        :param given: What the site set, shared by every group.
         """
         object.__setattr__(self, "_name", name)
         object.__setattr__(self, "_given", given)
@@ -950,8 +1000,7 @@ class IconSettings(Group):
     def update(
         self, names: Mapping[str, str] | None = None, /, **more: str
     ) -> None:
-        """Add to Kaamiki's icon names, so a site lists the ones it
-        changes.
+        """Add to Kaamiki's icon names.
 
         :param names: Icon names and the icons they take.
         :param more: The same, as keywords.
@@ -960,9 +1009,7 @@ class IconSettings(Group):
 
 
 class Conf:
-    """Every setting of Kaamiki, which `conf.py` sets with
-    `kaamiki.conf`.
-    """
+    """Every setting of Kaamiki, which `conf.py` sets on `kaamiki.conf`."""
 
     given: dict[str, t.Any]
     icons: IconSettings
@@ -1011,15 +1058,22 @@ def apply(app: Sphinx, config: Config) -> None:
     """Hand what `conf.py` set on `kaamiki.conf` to Sphinx.
 
     A `-D` on the command line wins over `conf.py`, as it does for
-    Sphinx's own settings.
+    Sphinx's own settings. A `-D name.key=value` wins entry by entry
+    over the dictionary `conf.py` gave.
 
     :param app: The Sphinx application instance.
     :param config: The Sphinx configuration.
     """
     del app
     for key, value in CONF.given.items():
-        if flat(key) not in config.overrides:
-            config[flat(key)] = copy.deepcopy(value)
+        name = flat(key)
+        if name in config.overrides:
+            continue
+        value = copy.deepcopy(value)
+        entries = config[name]
+        if isinstance(value, dict) and isinstance(entries, dict):
+            value = {**value, **entries}
+        config[name] = value
 
 
 def validate(app: Sphinx) -> None:
@@ -1027,15 +1081,16 @@ def validate(app: Sphinx) -> None:
 
     :param app: The Sphinx application instance.
     :raises KaamikiError: For the first thing wrong. `_read` refuses a
-        `kaamiki_` name written in `conf.py`, a `-D` for a name that
-        isn't one of Kaamiki's and a value that is `None` or of the
-        wrong type, spelling or range. The other `_check_` helpers
-        refuse an icon or a colour Kaamiki can't draw, Sphinx's own
-        `html_baseurl` and `html_last_updated_fmt` written wrongly, the
-        `KAAMIKI_FA_KIT` environment variable, settings that contradict
-        each other, a file that isn't in `html_static_path`, a folder
-        or a Python that isn't there, a date format that can't be read
-        back and a theme option the sidebar doesn't read.
+        plain `kaamiki_` name written in `conf.py` (a dictionary under
+        one is a `-D name.key=value`), a `-D` for a name that isn't one
+        of Kaamiki's and a value that's `None` or of the wrong type,
+        spelling or range. The other `_check_` helpers refuse an icon or
+        a colour Kaamiki can't draw, Sphinx's own `html_baseurl` and
+        `html_last_updated_fmt` written wrongly, the `KAAMIKI_FA_KIT`
+        environment variable, settings that contradict each other, a
+        file that isn't in `html_static_path`, a folder or a Python
+        that isn't there, a date format that can't be read back and a
+        theme option the sidebar doesn't read.
     """
     config = app.config
     conf = p.join(app.confdir, "conf.py")
@@ -1054,27 +1109,34 @@ def validate(app: Sphinx) -> None:
 
 
 def _read(config: Config, conf: str) -> dict[str, t.Any]:
-    """Read the settings a site gave, refusing the ones that aren't
-    right.
+    """Read the settings a site gave and refuse the ones that aren't right.
 
     Settings are set on `kaamiki.conf`, which `apply` has handed to
-    Sphinx by now, or with a `-D`. A `kaamiki_` name written in
-    `conf.py` is none of them.
+    Sphinx by now, or with a `-D`. A plain `kaamiki_` name written in
+    `conf.py` is neither. A dictionary under one is what Sphinx makes
+    of a `-D name.key=value`, so it's read and checked like the rest.
+
+    :param config: The Sphinx configuration.
+    :param conf: The path to `conf.py`, for the messages.
+    :return: The settings given, by key.
     """
     given: dict[str, t.Any] = {}
     for name, value in site_values(config).items():
         if not name.startswith(PREFIX) or name in config.overrides:
             continue
         key = FLAT.get(name)
-        if (
-            key is not None
-            and isinstance(DEFAULTS[key], dict)
-            and isinstance(value, dict)
-            and all(isinstance(_, str) for _ in value.values())
-        ):
+        if key is None:
+            fail(
+                f"{name}: expected a Kaamiki setting, got an unknown name",
+                conf,
+            )
+        if isinstance(DEFAULTS[key], dict) and isinstance(value, dict):
             given[key] = config[name]
             continue
-        fail(f"{name} isn't a Kaamiki setting", conf)
+        fail(
+            f"{name}: expected {option(key)}, got a plain name in conf.py",
+            conf,
+        )
     for key in CONF.given:
         if flat(key) not in config.overrides:
             given[key] = config[flat(key)]
@@ -1082,7 +1144,10 @@ def _read(config: Config, conf: str) -> dict[str, t.Any]:
         if not name.startswith(PREFIX):
             continue
         if name not in FLAT:
-            fail(f"{name} isn't a Kaamiki setting", conf)
+            fail(
+                f"{name}: expected a Kaamiki setting, got an unknown name",
+                conf,
+            )
         given[FLAT[name]] = config[name]
     for key, value in given.items():
         _check_value(key, value, conf)
@@ -1090,10 +1155,19 @@ def _read(config: Config, conf: str) -> dict[str, t.Any]:
 
 
 def _check_value(key: str, value: t.Any, conf: str) -> None:
-    """Check one setting against its rule."""
+    """Check one setting against its rule.
+
+    :param key: The setting's name without the prefix.
+    :param value: What it was given.
+    :param conf: The path to `conf.py`, for the messages.
+    """
     if value is None:
         if DEFAULTS[key] is not None:
-            fail(f"{option(key)} is None, leave it out for the default", conf)
+            fail(
+                f"{option(key)}: expected a value, got None; leave it out for"
+                " the default",
+                conf,
+            )
         return
     try:
         RULES[key](value)
@@ -1145,9 +1219,7 @@ def _check_colours(given: dict[str, t.Any], conf: str) -> None:
 
 
 def _check_site(config: Config, conf: str) -> None:
-    """Check the Sphinx values Kaamiki reads, the address and the
-    date.
-    """
+    """Check the Sphinx values Kaamiki reads, the address and the date."""
     base = config.html_baseurl
     if base:
         try:
@@ -1192,31 +1264,31 @@ def _check_pairs(config: Config, given: dict[str, t.Any], conf: str) -> None:
     feedback = given.get("feedback", {})
     if feedback and given.get("show_feedback") is False:
         fail(
-            "kaamiki.conf.site.feedback is set but"
-            " kaamiki.conf.show.feedback is False",
+            "kaamiki.conf.show.feedback: expected True or nothing as"
+            " kaamiki.conf.site.feedback is set, got False",
             conf,
         )
     if given.get("show_feedback") is True and not (
         given.get("project", {}).get("email") or feedback.get("url")
     ):
         fail(
-            "kaamiki.conf.show.feedback is True but there's nowhere to send"
-            " feedback: set an email in kaamiki.conf.site.project or a url in"
-            " kaamiki.conf.site.feedback",
+            "kaamiki.conf.show.feedback: expected an email in"
+            " kaamiki.conf.site.project or a url in kaamiki.conf.site.feedback"
+            " to send feedback to, got neither",
             conf,
         )
     if feedback.get("split") and not (
         given.get("project", {}).get("email") or feedback.get("url")
     ):
         fail(
-            "kaamiki.conf.site.feedback: split needs a button, set an email in"
-            " kaamiki.conf.site.project or a url",
+            "kaamiki.conf.site.feedback: split expected an email in"
+            " kaamiki.conf.site.project or a url for its button, got neither",
             conf,
         )
     if "show_more_after" in given and given.get("show_more") is False:
         fail(
-            "kaamiki.conf.show.more_after is set but"
-            " kaamiki.conf.show.more is False",
+            "kaamiki.conf.show.more: expected True or nothing as"
+            " kaamiki.conf.show.more_after is set, got False",
             conf,
         )
     if (
@@ -1224,35 +1296,43 @@ def _check_pairs(config: Config, given: dict[str, t.Any], conf: str) -> None:
         and given.get("show_previous_next_cards") is False
     ):
         fail(
-            "kaamiki.conf.show.previous_next_cards_count is set but"
-            " kaamiki.conf.show.previous_next_cards is False",
+            "kaamiki.conf.show.previous_next_cards: expected True or nothing"
+            " as kaamiki.conf.show.previous_next_cards_count is set, got"
+            " False",
             conf,
         )
     if "show_previous_next_cards_count" in given and given.get(
         "show_previous_next_pages"
     ):
         fail(
-            "kaamiki.conf.show.previous_next_cards_count is set but"
-            " kaamiki.conf.show.previous_next_pages is True, which shows the"
-            " buttons and no cards",
+            "kaamiki.conf.show.previous_next_pages: expected False or nothing"
+            " as kaamiki.conf.show.previous_next_cards_count is set, got"
+            " True, which shows the buttons and no cards",
             conf,
         )
     if given.get("show_previous_next_cards") is False and not given.get(
         "show_previous_next_pages"
     ):
         fail(
-            "kaamiki.conf.show.previous_next_cards and"
-            " kaamiki.conf.show.previous_next_pages are both off, a page"
-            " needs one of them to lead on, so turn the buttons on",
+            "kaamiki.conf.show.previous_next_pages: expected True with"
+            " kaamiki.conf.show.previous_next_cards off, got False; a page"
+            " needs one of them to lead on",
             conf,
         )
     if feedback.get("type") == "link" and "url" not in feedback:
-        fail("kaamiki.conf.site.feedback: type 'link' needs a url", conf)
+        fail(
+            "kaamiki.conf.site.feedback: type 'link' expected a url, got none",
+            conf,
+        )
     if "url" in feedback and feedback.get("type") != "link":
-        fail("kaamiki.conf.site.feedback: a url needs type 'link'", conf)
+        fail(
+            "kaamiki.conf.site.feedback: url expected type 'link', got"
+            f" {feedback.get('type')!r}",
+            conf,
+        )
     terms = given.get("license", {})
     if "url" in terms and "name" not in terms:
-        fail("kaamiki.conf.site.license: a url needs a name", conf)
+        fail("kaamiki.conf.site.license: url expected a name, got none", conf)
     style = given.get("fa_style")
     if style in ("light", "thin") and not icons.Icons.of(config).kit:
         fail(
@@ -1263,19 +1343,26 @@ def _check_pairs(config: Config, given: dict[str, t.Any], conf: str) -> None:
     drawn = config.html_theme_options.get("logo") or config.html_logo
     if given.get("logo_size") is not None and not drawn:
         fail(
-            "kaamiki.conf.site.logo_size is set but the site has no logo, set"
-            " html_theme_options['logo'] or html_logo",
+            "kaamiki.conf.site.logo_size: expected a site with a logo, got"
+            " none; set html_theme_options['logo'] or html_logo",
             conf,
         )
 
 
 def _check_static(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
-    """Check the files a site names are in `html_static_path`."""
-    statics = [p.join(app.confdir, _) for _ in app.config.html_static_path]
+    """Check the files a site names are in `html_static_path`.
+
+    :param app: The Sphinx application instance.
+    :param given: The settings given.
+    :param conf: The path to `conf.py`, for the messages.
+    """
+    statics = [
+        p.join(app.confdir, each) for each in app.config.html_static_path
+    ]
 
     def present(name: str) -> bool:
         """Say whether a static folder has the file."""
-        return any(p.isfile(p.join(_, name)) for _ in statics)
+        return any(p.isfile(p.join(each, name)) for each in statics)
 
     logo = app.config.html_theme_options.get("logo")
     if logo not in (None, ""):
@@ -1291,8 +1378,8 @@ def _check_static(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
             fail(f"html_theme_options['logo']: {error}", conf)
         if not present(logo):
             fail(
-                f"html_theme_options['logo']: {logo!r} isn't in"
-                " html_static_path",
+                "html_theme_options['logo']: expected a file in"
+                f" html_static_path, got {logo!r}",
                 conf,
             )
     for key, found in (
@@ -1302,7 +1389,11 @@ def _check_static(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
     ):
         for name in found:
             if not present(name):
-                fail(f"{option(key)}: {name!r} isn't in html_static_path", conf)
+                fail(
+                    f"{option(key)}: expected a file in html_static_path, got"
+                    f" {name!r}",
+                    conf,
+                )
 
 
 def _check_theme(config: Config, conf: str) -> None:
@@ -1310,9 +1401,10 @@ def _check_theme(config: Config, conf: str) -> None:
     for name in UNREAD_OPTIONS:
         if name in config.html_theme_options:
             fail(
-                f"html_theme_options[{name!r}]: Kaamiki's sidebar is fixed,"
-                " so this changes nothing, and the navigation is set with the"
-                " kaamiki.conf.toctree settings",
+                f"html_theme_options[{name!r}]: expected nothing, got"
+                f" {config.html_theme_options[name]!r}; Kaamiki's sidebar is"
+                " fixed, so this changes nothing, and the navigation is set"
+                " with the kaamiki.conf.toctree settings",
                 conf,
             )
 
@@ -1320,30 +1412,54 @@ def _check_theme(config: Config, conf: str) -> None:
 def _check_code_explain(
     app: Sphinx, given: dict[str, t.Any], conf: str
 ) -> None:
-    """Check the folders and Python a `code-explain` is run with."""
+    """Check the folders and Python a `code-explain` is run with.
+
+    :param app: The Sphinx application instance.
+    :param given: The settings given.
+    :param conf: The path to `conf.py`, for the messages.
+    """
     for entry in given.get("code_explain_pythonpath", []):
         if not p.isdir(p.join(app.srcdir, entry)):
             fail(
-                f"kaamiki.conf.code_explain.pythonpath: {entry!r} isn't a"
-                " directory",
+                "kaamiki.conf.code_explain.pythonpath: expected a directory,"
+                f" got {entry!r}",
                 conf,
             )
     python = given.get("code_explain_python")
     if python is not None and not given.get("code_explain_run"):
         fail(
-            "kaamiki.conf.code_explain.python is set but"
-            " kaamiki.conf.code_explain.run is False, so nothing runs with it",
+            "kaamiki.conf.code_explain.run: expected True as"
+            " kaamiki.conf.code_explain.python is set, got False, so nothing"
+            " runs with it",
             conf,
         )
     if python is not None and not p.isfile(python):
-        fail(f"kaamiki.conf.code_explain.python: {python!r} isn't a file", conf)
+        fail(
+            "kaamiki.conf.code_explain.python: expected a file, got"
+            f" {python!r}",
+            conf,
+        )
+    if given.get("code_explain_run") and os.name != "posix":
+        fail(
+            "kaamiki.conf.code_explain.run: expected a POSIX system like"
+            f" Linux or macOS to run python on, got {sys.platform!r}",
+            conf,
+        )
 
 
 def _check_dates(given: dict[str, t.Any], conf: str) -> None:
-    """Check the date formats a site wrote."""
-    for key in ("release_version_fmt", "last_updated_on_fmt"):
+    """Check the date formats a site wrote.
+
+    :param given: The settings given.
+    :param conf: The path to `conf.py`, for the messages.
+    """
+    for key in ("release_version_fmt", "last_updated_fmt"):
         if given.get(key) and "%" not in given[key]:
-            fail(f"{option(key)}: {given[key]!r} has no date directive", conf)
+            fail(
+                f"{option(key)}: expected a date format with a directive like"
+                f" %Y, got {given[key]!r}",
+                conf,
+            )
     if given.get("release_version_fmt"):
         sample = dt.fromisoformat("2026-01-02").strftime(
             given["release_version_fmt"]
@@ -1362,8 +1478,12 @@ def _check_translation(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
     """Check the date format a language's catalogue gives.
 
     It only counts when the site sets no format of its own.
+
+    :param app: The Sphinx application instance.
+    :param given: The settings given.
+    :param conf: The path to `conf.py`, for the messages.
     """
-    if app.config.html_last_updated_fmt or given.get("last_updated_on_fmt"):
+    if app.config.html_last_updated_fmt or given.get("last_updated_fmt"):
         return
     try:
         moment(TIME_DIRECTIVES)(str(_("%d %B %Y")))
@@ -1418,7 +1538,7 @@ def setting(
         "code_explain_events",
         "embed_js_loading",
         "fa_style",
-        "last_updated_on_fmt",
+        "last_updated_fmt",
         "release_version_fmt",
         "sharpie_colour",
         "tab_icon_position",
@@ -1471,6 +1591,7 @@ def setting(
         "embed_iframe_hosts",
         "embed_js",
         "internal_hosts",
+        "release_kinds",
     ],
 ) -> list[str]: ...
 
@@ -1478,9 +1599,7 @@ def setting(
 @t.overload
 def setting(
     config: Config,
-    key: t.Literal[
-        "button_colours", "favicons", "release_kinds", "role_colours"
-    ],
+    key: t.Literal["button_colours", "favicons", "role_colours"],
 ) -> dict[str, str]: ...
 
 
@@ -1528,11 +1647,10 @@ def reread(
     changed: set[str],
     removed: set[str],
 ) -> list[str]:
-    """Send every page back through reading when the kit or the address
-    changes.
+    """Send every page back through reading when the kit or address changes.
 
     Sphinx reads every page again by itself when a setting in
-    `PARSE_TIME` changes, as they are all `env` values. It can't see
+    `PARSE_TIME` changes, as they're all `env` values. It can't see
     two things that end up in the pages: the Font Awesome kit the
     `KAAMIKI_FA_KIT` environment variable names and `html_baseurl`,
     which Sphinx only registers for the HTML builders.

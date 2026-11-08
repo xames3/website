@@ -4,7 +4,7 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 What Kaamiki changes in the HTML Sphinx writes, as it writes it.
 """
@@ -48,19 +48,12 @@ ADMONITIONS: t.Final[dict[str, str]] = {
     "caution": "warning",
     "attention": "warning",
 }
-RELEASE_KINDS: t.Final[dict[str, str]] = {
-    "added": "release_added",
-    "changed": "release_changed",
-    "fixed": "release_fixed",
-    "removed": "release_removed",
-    "deprecated": "release_removed",
-}
 NO_TICK: t.Final[frozenset[str]] = frozenset(
     {"km-release__body", "contents", "toctree-wrapper"}
 )
 PILCROW: t.Final[frozenset[str]] = frozenset({"", "\u00b6"})
 LONG_LITERAL: t.Final[int] = 40
-BACKREF: re.Pattern[str] = re.compile(
+BACKREF: t.Final[re.Pattern[str]] = re.compile(
     r'</a><a class="headerlink" href="([^"]*)" title="([^"]*)">(.*)',
     re.DOTALL,
 )
@@ -79,8 +72,8 @@ class translator(base):
         :param title: The title Sphinx gives the anchor.
         :return: The label's attribute and the anchor's content.
             Sphinx's pilcrow is dropped, since a click anywhere on the
-            heading follows the anchor. A site that
-            set `html_permalinks_icon` of its own keeps it.
+            heading follows the anchor. A site that sets
+            `html_permalinks_icon` of its own keeps it.
         """
         icon: str = self.config.html_permalinks_icon
         if icon.strip() in PILCROW:
@@ -181,8 +174,7 @@ class translator(base):
 
     @t.override
     def visit_paragraph(self, node: nodes.paragraph) -> None:
-        """Open a quote's first paragraph with an opening quotation
-        mark.
+        """Open a quote's first paragraph with an opening mark.
 
         :param node: The paragraph being opened.
         """
@@ -192,8 +184,7 @@ class translator(base):
 
     @t.override
     def depart_paragraph(self, node: nodes.paragraph) -> None:
-        """Close a quote's first paragraph with a closing quotation
-        mark.
+        """Close a quote's first paragraph with a closing mark.
 
         :param node: The paragraph being closed.
         """
@@ -203,27 +194,13 @@ class translator(base):
 
     @staticmethod
     def opens_quote(node: nodes.paragraph) -> bool:
-        """Say whether a paragraph is the first one of a block
-        quote.
+        """Say whether a paragraph is the first one of a block quote.
+
+        :param node: The paragraph.
+        :return: Whether it's the first one in a block quote.
         """
         parent = node.parent
         return isinstance(parent, nodes.block_quote) and parent.index(node) == 0
-
-    @t.override
-    def visit_term(self, node: nodes.Element) -> None:
-        """Open a release's group with the icon of its kind.
-
-        :param node: The term being opened.
-        """
-        super().visit_term(node)
-        classes: list[str] = node.get("classes", [])
-        if "km-release__kind" not in classes:
-            return
-        key = "release_other"
-        for name, role in RELEASE_KINDS.items():
-            if f"km-release__kind--{name}" in classes:
-                key = role
-        self.body.append(self.icon(key, "km-release__icon"))
 
     @t.override
     def visit_title(self, node: nodes.title) -> None:
@@ -364,8 +341,10 @@ class translator(base):
 
     @t.override
     def visit_topic(self, node: nodes.topic) -> None:
-        """Open a topic as a `div`, since an `aside` inside the page's
-        text is a landmark nested in another one.
+        """Open a topic as a `div`.
+
+        An `aside` inside the page's text would be a landmark nested in
+        another one.
 
         :param node: The topic being opened.
         """
@@ -394,8 +373,7 @@ class translator(base):
 
     @t.override
     def visit_caption(self, node: nodes.caption) -> None:
-        """Open a code block's caption with its language's icon in
-        front.
+        """Open a code block's caption with its language's icon first.
 
         :param node: The caption being opened.
         """
@@ -421,8 +399,7 @@ class translator(base):
 
     @t.override
     def visit_compound(self, node: nodes.compound) -> None:
-        """Open a compound, unless it's a hidden toctree's empty
-        shell.
+        """Open a compound, unless it's an empty toctree wrapper.
 
         :param node: The compound being opened.
         :raises nodes.SkipNode: For a `toctree-wrapper` with nothing

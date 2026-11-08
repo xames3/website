@@ -4,7 +4,7 @@ Date Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The helpers that date a page, from its comments or from git.
 """
@@ -34,7 +34,7 @@ if t.TYPE_CHECKING:
     from sphinx.config import Config
     from sphinx.environment import BuildEnvironment
 
-HEADER_RE: re.Pattern[str] = re.compile(
+HEADER_RE: t.Final[re.Pattern[str]] = re.compile(
     r"^\.\.\s+(Author|Created on|Last updated on):\s*(.+)$", re.IGNORECASE
 )
 MONTHS: t.Final[tuple[str, ...]] = (
@@ -60,9 +60,9 @@ WRITTEN: t.Final[re.Pattern[str]] = re.compile(
 ISO: t.Final[re.Pattern[str]] = re.compile(
     r"([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})"
 )
-HISTORY: weakref.WeakKeyDictionary[Sphinx, dict[str, tuple[dt, dt]]] = (
-    weakref.WeakKeyDictionary()
-)
+HISTORY: t.Final[
+    weakref.WeakKeyDictionary[Sphinx, dict[str, tuple[dt, dt]]]
+] = weakref.WeakKeyDictionary()
 
 
 def updated_on(
@@ -93,10 +93,10 @@ def updated_on(
 def header(source: str) -> dict[str, str]:
     """Read the comments heading a page.
 
-    Only comments before the first other line count, so a date quoted
-    further down isn't taken for the page's own.
-
-    .. note:: It's mostly for my edits and how I write my rST files.
+    A page opens with `.. Author:`, `.. Created on:` and
+    `.. Last updated on:` comments. Only comments before the first
+    other line count, so a date quoted further down isn't taken for the
+    page's own.
 
     :param source: The page's source.
     :return: What they say, keyed `author`, `created on` and
@@ -115,8 +115,7 @@ def header(source: str) -> dict[str, str]:
 
 
 def read_history(srcdir: str) -> dict[str, tuple[dt, dt]]:
-    """Ask git, once, when every file under a folder was first and last
-    committed.
+    """Ask git when every file under a folder was first and last committed.
 
     One `git log` walks the history from the newest commit back, and a
     file that was renamed keeps the history it had under its old name.
@@ -147,7 +146,7 @@ def read_history(srcdir: str) -> dict[str, tuple[dt, dt]]:
     named: dict[str, str | None] = {}
     found: dict[str, tuple[dt, dt]] = {}
     for commit in out.split("\x01")[1:]:
-        stamp, _, rest = commit.partition("\0")
+        stamp, _gap, rest = commit.partition("\0")
         when = dt.fromisoformat(stamp)
         entries = iter(filter(None, rest.lstrip("\n").split("\0")))
         for status in entries:
@@ -219,7 +218,7 @@ def dated(when: dt, config: Config) -> str:
     """
     form = (
         config.html_last_updated_fmt
-        or setting(config, "last_updated_on_fmt")
+        or setting(config, "last_updated_fmt")
         or str(_("%d %B %Y"))
     )
     return format_date(form, date=when, language=config.language or "en")
@@ -285,9 +284,9 @@ def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
             iso = day(found[key])
             if not iso or not within(iso):
                 fail(
-                    f"{key.capitalize()}: expected a date like 5 October"
-                    f" 2026 or 2026-10-05, from 2000 to a year ahead, got"
-                    f" {found[key]!r}",
+                    f"comment {key.capitalize()!r}: expected a date like 5"
+                    " October 2026 or 2026-10-05, from 2000 to a year ahead,"
+                    f" got {found[key]!r}",
                     where,
                 )
     if (
@@ -296,8 +295,8 @@ def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
         and (day(found["last updated on"]) < day(found["created on"]))
     ):
         fail(
-            "comment 'Last updated on' expected after 'Created on', got"
-            " it before",
+            "comment 'Last updated on': expected after 'Created on', got it"
+            " before",
             where,
         )
     first, last = committed(app, docname)

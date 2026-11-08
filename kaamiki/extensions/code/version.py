@@ -4,7 +4,7 @@ Code Version Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 28 September 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `code-version` directive that steps a reader through the versions a
 piece of code went through on its way to what it is now::
@@ -51,6 +51,7 @@ from kaamiki.extensions.code import explain
 from kaamiki.extensions.code.chrome import known
 from kaamiki.extensions.code.chrome import label
 from kaamiki.extensions.code.chrome import notes_pane
+from kaamiki.extensions.code.grammar import StrayError
 from kaamiki.extensions.code.grammar import linerange
 from kaamiki.extensions.code.grammar import split
 from kaamiki.extensions.utils import NATIVE
@@ -187,11 +188,10 @@ class directive(explain.directive):
         """
         try:
             found = split(self.content, self.content_offset, ATTEMPT, {})
-        except ValueError as exc:
-            line, text = exc.args
+        except StrayError as exc:
             raise self.error(
                 "code-version: expected text inside an `.. attempt::`, got"
-                f" {text!r} on line {line}"
+                f" {exc.text!r} on line {exc.line}"
             ) from exc
         if not found:
             raise self.error(

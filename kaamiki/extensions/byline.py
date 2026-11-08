@@ -4,7 +4,7 @@ Byline Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `byline` directive that draws the byline under a page title::
 
@@ -131,14 +131,14 @@ class directive(rst.Directive):
           Only `left` puts the author, the reading time, the language
           and the copy button in one row, which phones cut to the
           author and the reading time. Defaults to `left`.
-        - `hide-reading-time`: Hides the reading time, which is shown
+        - `hide-reading-time`: Hide the reading time, which is shown
           without it.
-        - `hide-copy-url`: Hides the copy button, which is shown
-          without it.
-        - `hide-source`: Hides the link to the page's plain-text
-          source, which is shown without it while `html_copy_source`
-          and `html_show_sourcelink` are on.
-        - `show-language`: Shows the page's language, which is hidden
+        - `hide-copy-url`: Hide the copy button, which is shown without
+          it.
+        - `hide-source`: Hide the link to the page's plain-text source,
+          which is shown without it while `html_copy_source` and
+          `html_show_sourcelink` are on.
+        - `show-language`: Show the page's language, which is hidden
           without it: the page's `:km-page-language:` field, or the
           `language` in Sphinx's configuration when it has none.
         - `name`: A name to link to.
@@ -217,8 +217,8 @@ def plain(node: Byline) -> list[nodes.Node]:
     :param node: The byline's node.
     :return: A paragraph with the author's name.
     """
-    name = next(_ for _ in node.children if isinstance(_, phrase))
-    return [nodes.paragraph("", "", *name.children)]
+    author = next(_ for _ in node.children if isinstance(_, phrase))
+    return [nodes.paragraph("", "", *author.children)]
 
 
 def visit(self: HTMLTranslator, node: Byline) -> None:

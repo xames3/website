@@ -4,7 +4,7 @@ Code Explain Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `code-explain` directive that steps a reader through a snippet, line
 by line, with the values it held at each one... telling a story::
@@ -37,10 +37,15 @@ by line, with the values it held at each one... telling a story::
 
     Python is only run when a site sets `kaamiki.conf.code_explain.run`
     to `True` in `conf.py`, and then it runs for every page the site
-    builds. Without it a Python walkthrough stops the build.
+    builds. Without it a Python walkthrough stops the build. It needs a
+    POSIX system, Linux or macOS.
     The Python runs in a scratch directory with a bare environment,
-    1GB of memory for each process where the system keeps to the limit,
-    10 seconds and 64MB for any file it writes or prints.
+    1GB of memory for all its processes together, 10 seconds and 64MB
+    for any file it writes or prints.
+
+    The system holds each process to the memory where it takes the
+    limit and the build always watches the resident size of the
+    processes as well, stopping a run that uses more than it's given.
 
     The directory goes when it finishes and so does anything the
     snippet left running, children that went off on their own included
@@ -78,6 +83,8 @@ from kaamiki.extensions.code.chrome import lexer_for
 from kaamiki.extensions.code.chrome import notes_pane
 from kaamiki.extensions.code.chrome import output
 from kaamiki.extensions.code.chrome import visit_explanation
+from kaamiki.extensions.code.grammar import OptionError
+from kaamiki.extensions.code.grammar import StrayError
 from kaamiki.extensions.code.grammar import linerange
 from kaamiki.extensions.code.grammar import split
 from kaamiki.extensions.code.tracer import collapse
@@ -122,7 +129,6 @@ BLOCKS: t.Final[frozenset[str]] = frozenset({"code", "setup", "stdin", "lines"})
 OPTIONS: t.Final[dict[str, frozenset[str]]] = {
     "lines": frozenset({"at", "clear", "output", "values"}),
 }
-DEFAULT_EVENTS: t.Final[frozenset[str]] = frozenset({"line", "return"})
 SCRIPT: t.Final[str] = "scripts/explainer.js"
 PYTHON: t.Final[frozenset[str]] = frozenset({"py", "py3", "python", "python3"})
 TRACED: t.Final[tuple[str, ...]] = (
@@ -134,8 +140,10 @@ TRACED: t.Final[tuple[str, ...]] = (
     "timeout",
     "watch",
 )
-VALUE: re.Pattern[str] = re.compile(r"^\s*([^=:]+?)\s*[:=]\s*(.*?)\s*$")
-ENTRIES: re.Pattern[str] = re.compile(
+VALUE: t.Final[re.Pattern[str]] = re.compile(
+    r"^\s*([^=:]+?)\s*[:=]\s*(.*?)\s*$"
+)
+ENTRIES: t.Final[re.Pattern[str]] = re.compile(
     r"\n|;\s*(?=[A-Za-z_][\w.\[\]]*\s*[:=](?!=))"
 )
 PACE: t.Final[int] = 72
@@ -154,18 +162,14 @@ class CodeExplain(annotated):
     """
 
 
+# NOTE(xames3): docutils already has a `caption` node and finds visitors
+# by class name, so the heading can't borrow that one.
 class heading(nodes.paragraph):
-    """The caption, parsed as rST and the language's icon.
-
-    docutils already has a `caption` node and finds visitors by class
-    name, so this can't borrow that one.
-    """
+    """The caption, parsed as rST, and the language's icon."""
 
 
 class plain_code(nodes.literal_block):
-    """The snippet as a plain code block, for every builder
-    except HTML.
-    """
+    """The snippet as a plain code block, for every builder but HTML."""
 
 
 class explanations(nodes.container):
@@ -181,8 +185,8 @@ def names(argument: str | None) -> str:
 
     :param argument: The names as written, comma-separated.
     :return: The names.
-    :raises ValueError: For one that isn't a Python name, or a
-        dotted name or an index of one.
+    :raises ValueError: For a name that isn't a Python name, a dotted
+        name or an index.
     """
     found = checks.text(argument)
     for each in listed(found):
@@ -234,7 +238,8 @@ class directive(CodeBlock):
           and relative to the document. One that isn't there stops the
           build.
         - `events`: Which of `call`, `line` and `return` make a step.
-          Defaults to `line` and `return`.
+          Defaults to the site's `kaamiki.conf.code_explain.events`,
+          which is `line` and `return` unless it says otherwise.
         - `comprehensions`: Step into comprehensions too, which a site
           can do for every snippet with
           `kaamiki.conf.code_explain.comprehensions`.
@@ -339,13 +344,12 @@ class directive(CodeBlock):
         return [element]
 
     def cache(self) -> str | None:
-        """Name the folder traces are kept in, unless the site turned
-        that off.
+        """Name the folder traces are kept in.
 
         It sits with the doctrees, so a build that starts over with
         `-E` and `-a` keeps it and deleting the build takes it away.
 
-        :return: The folder or `None` for no cache.
+        :return: The folder, or `None` when the site turned the cache off.
         """
         env = self.state.document.settings.env
         if not setting(env.config, "code_explain_cache"):
@@ -353,8 +357,7 @@ class directive(CodeBlock):
         return p.join(str(env.doctreedir), "kaamiki-code-explain")
 
     def capped(self, option: str, key: str) -> int:
-        """Read a number the snippet asks for, up to what the site
-        allows.
+        """Read a number the snippet asks for, up to what the site allows.
 
         :param option: The directive's option.
         :param key: The setting that holds the most it may ask for.
@@ -379,19 +382,17 @@ class directive(CodeBlock):
         """
         try:
             found = split(self.content, self.content_offset, BLOCKS, OPTIONS)
-        except KeyError as exc:
-            line, key, block = exc.args
-            takes = ", ".join(f":{_}:" for _ in sorted(OPTIONS[block]))
+        except OptionError as exc:
+            takes = ", ".join(f":{_}:" for _ in sorted(OPTIONS[exc.block]))
             raise self.error(
-                f"{self.name}: `.. {block}::` on line {line} expected one of"
-                f" {takes}, each once, got :{key}:"
+                f"{self.name}: `.. {exc.block}::` on line {exc.line} expected"
+                f" one of {takes}, each once, got :{exc.key}:"
             ) from exc
-        except ValueError as exc:
-            line, text = exc.args
+        except StrayError as exc:
             raise self.error(
                 "code-explain: expected text inside a `.. code::`,"
                 " `.. setup::`, `.. stdin::` or `.. lines::`, got"
-                f" {text!r} on line {line}"
+                f" {exc.text!r} on line {exc.line}"
             ) from exc
         for block in ("code", "setup", "stdin"):
             if sum(_.name == block for _ in found) > 1:
@@ -473,8 +474,9 @@ class directive(CodeBlock):
             )
         for block, (low, high) in zip(notes, ranges, strict=True):
             if block.options:
+                given = ", ".join(f":{_}:" for _ in sorted(block.options))
                 raise self.error(
-                    f"{self.name}: expected no :values: in a python"
+                    f"{self.name}: expected no {given} in a python"
                     f" walkthrough, got them in the note for {label(low, high)}"
                 )
         events = frozenset(
@@ -484,10 +486,10 @@ class directive(CodeBlock):
             )
         )
         unknown = events - set(TRACE_EVENTS)
-        if unknown:
+        if unknown or not events:
             raise self.error(
                 f"{self.name}: :events: expected {', '.join(TRACE_EVENTS)},"
-                f" got {', '.join(sorted(unknown))}"
+                f" got {', '.join(sorted(unknown)) or 'none'}"
             )
         watch = list(dict.fromkeys(listed(self.options.get("watch", ""))))
         here = p.dirname(str(self.state.document.current_source))
@@ -530,11 +532,7 @@ class directive(CodeBlock):
                 f"{self.name}: expected a snippet that runs, got"
                 f" {error['text']}"
             )
-        steps = [
-            _
-            for _ in replay(traced, events or DEFAULT_EVENTS)
-            if _["line"] >= 1
-        ]
+        steps = [_ for _ in replay(traced, events) if _["line"] >= 1]
         for step in steps:
             line = step["line"] + start - 1
             step["note"] = next(
@@ -681,8 +679,9 @@ class directive(CodeBlock):
         return {"open": "#", "close": ""}
 
     def caption(self, language: str) -> heading:
-        """Build the header, with the caption parsed as rST and the
-        icon of the snippet's language.
+        """Build the header, with the caption parsed as rST.
+
+        It wears the icon of the snippet's language.
 
         The caption keeps its place in the source, so `gettext` can
         collect it.
@@ -918,8 +917,7 @@ def visit_heading(self: HTMLTranslator, node: heading) -> None:
 
 
 def depart_heading(self: HTMLTranslator, node: heading) -> None:
-    """Close the caption, then write the snippet and close the code's
-    side.
+    """Close the caption, then write the snippet and the code's side.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The header node.
@@ -979,9 +977,9 @@ def html_page_context(
 ) -> None:
     """Load the explainer script only on the pages that use it.
 
-    A page without a walkthrough or attempts has nothing for it to
-    start. Only Kaamiki's own script is left out, whatever else a site
-    loads with a name that ends the same way.
+    A page without a walkthrough has nothing for it to start. Only
+    Kaamiki's own script is left out, whatever else a site loads with a
+    name that ends the same way.
 
     :param app: The Sphinx application instance.
     :param pagename: The page being rendered.

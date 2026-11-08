@@ -1,3 +1,12 @@
+/*
+Search Script
+=============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 07 November 2026
+Last updated on: 08 November 2026
+*/
+
 /* global Search */
 (() => {
     'use strict';

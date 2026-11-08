@@ -4,7 +4,7 @@ Template Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 23 October 2026
+Last updated on: 08 November 2026
 
 Kaamiki's Jinja environment and the helpers that read its templates.
 """
@@ -51,8 +51,7 @@ def render(template: str, /, **context: object) -> str:
 
 
 def bridge(app: Sphinx) -> None:
-    """Bridge Kaamiki's directive templates with Sphinx's template
-    loader.
+    """Bridge Kaamiki's directive templates with Sphinx's loader.
 
     Directive templates can be overridden by the site, while keeping
     Kaamiki's Jinja environment, translations and filters.

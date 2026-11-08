@@ -1,3 +1,12 @@
+/*
+Core Script
+===========
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 17 October 2026
+Last updated on: 08 November 2026
+*/
+
 // NOTE(xames3): The four scripts share one `window.Kaamiki` and load in
 // this order: core, animations, theme, explainer. Each takes what it
 // needs from the ones before it, and theme starts everything. Explainer

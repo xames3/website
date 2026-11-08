@@ -4,7 +4,7 @@ Code Directives
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 02 November 2026
+Last updated on: 07 November 2026
 
 The code-explain and code-version directives, the code walkthroughs.
 A `code-explain` walks through one snippet and, for Python, runs it to

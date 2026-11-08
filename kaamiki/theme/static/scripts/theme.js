@@ -1,3 +1,12 @@
+/*
+Theme Script
+============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 15 October 2026
+Last updated on: 08 November 2026
+*/
+
 (() => {
     'use strict';
 
@@ -986,13 +995,13 @@
         const parts = '.km-byline__profile, .km-byline__reading-time, '
             + '.km-byline__language, .km-byline__copy, .km-byline__source';
         const wraps = () => {
-            const centres = Array.from(byline.querySelectorAll(parts))
+            const centers = Array.from(byline.querySelectorAll(parts))
                 .filter((part) => part.getClientRects().length)
                 .map((part) => {
                     const box = part.getBoundingClientRect();
                     return box.top + box.height / 2;
                 });
-            return Math.max(...centres) - Math.min(...centres) > 12;
+            return Math.max(...centers) - Math.min(...centers) > 12;
         };
         const fit = () => {
             byline.classList.remove('km-byline--tight');
@@ -1326,7 +1335,6 @@
                 trigger.setAttribute('role', 'button');
                 trigger.removeAttribute('aria-level');
             }
-            trigger.setAttribute('aria-haspopup', 'true');
             trigger.setAttribute('aria-controls', list.id);
             trigger.setAttribute('aria-expanded', 'false');
 

@@ -4,7 +4,7 @@ Doctree Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The helpers that walk a doctree and pick prose out of it.
 """
@@ -256,8 +256,7 @@ def dress(key: nodes.literal, *, icons: Icons) -> None:
     word, as it does in a plain `kbd`.
 
     The `kbd:windows` and `kbd:linux` roles mark their keys with
-    `SYSTEM_KEYS`, which this reads and takes off again, since nothing
-    in the stylesheet or the scripts does.
+    `SYSTEM_KEYS`, which this reads and takes off again.
 
     :param key: The key.
     :param icons: The icons the site draws.
@@ -358,8 +357,7 @@ def keycaps(app: Sphinx, doctree: nodes.document) -> None:
 
 
 def _spaced(line: nodes.Element, icons: set[int]) -> None:
-    """Mark the icons in a line that start or end it and trim the space
-    beside them.
+    """Mark the icons that start or end a line and trim the space by them.
 
     The line is walked once. Each icon's words before and after it come
     from running flags, and the whitespace goes in two passes, so the

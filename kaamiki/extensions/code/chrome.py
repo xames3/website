@@ -4,7 +4,7 @@ Walkthrough Chrome
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The markup a walkthrough wraps itself in.
 """
@@ -192,6 +192,7 @@ def comment(language: str) -> dict[str, str] | None:
     :param language: The language named on the directive.
     :return: What opens a comment and what closes it or `None` for a
         language `COMMENTS` doesn't know.
+    :raises ClassNotFound: When Pygments has no lexer for the language.
     """
     names = {language.lower(), *lexer_for(language).aliases}
     for opens, closes, languages in COMMENTS:
@@ -224,7 +225,7 @@ def notes_pane(
     linenos: bool,
     digits: int = 0,
 ) -> str:
-    """Write the highlighted snippet the stepper walks through.
+    """Write the highlighted snippet a walkthrough steps through.
 
     :param code: The snippet.
     :param language: The language to highlight it as.
@@ -252,7 +253,7 @@ def notes_pane(
     digits = digits or len(str(start + max(len(rows), 1) - 1))
     return (
         '<div class="km-code-explain__stage" data-km-stage tabindex="0"'
-        f' role="group" aria-label="{_("Code")}">'
+        f' role="group" aria-label="{html.escape(str(_("Code")))}">'
         f'<pre class="highlight km-code-explain__code{gutter}"'
         f' style="--km-code-explain-gutter: {digits}ch">'
         + "".join(rows)
@@ -264,8 +265,8 @@ def controls(icons: Mapping[str, str]) -> str:
     """Write what sits at the end of a walkthrough's caption.
 
     Without a caption, the same markup sits in the snippet's top
-    corner. The button holds both its icons, the stylesheet shows the
-    one that fits its state.
+    corner. The button holds both its icons and the stylesheet shows
+    the one that fits its state.
 
     :param icons: The site's named icons.
     :return: The markup.

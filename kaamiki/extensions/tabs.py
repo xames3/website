@@ -4,7 +4,7 @@ Tabs Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `tabs` directive that holds `tab` directives and shows one at a
 time::
@@ -68,9 +68,7 @@ class pane(nodes.container):
 
 
 class tablabel(nodes.paragraph):
-    """A tab's title, parsed as rST, with its icon and the icon's
-    side.
-    """
+    """A tab's title, parsed as rST, with its icon and the icon's side."""
 
 
 class directive(rst.Directive):
@@ -90,8 +88,8 @@ class directive(rst.Directive):
 
     A `tab` goes inside, one for each title, and can sit in an `only`.
     A set needs at least two written, as one tab has nothing to switch
-    to. A builder an `only` leaves a tab out of shows the tabs that are
-    left, and the first of them if the checked one went.
+    to. When an `only` leaves a tab out for a builder, the tabs that are
+    left show, and the first of them is checked if the checked one went.
     """
 
     has_content = True
@@ -164,8 +162,8 @@ class tab(rst.Directive):
           drawn in the site's `kaamiki.conf.icons.style`, `regular`
           unless it says otherwise, and `solid` where Font Awesome Free
           has no icon of that name in that style.
-        - `icon-position`: `before` the title, the default or
-          `after` it.
+        - `icon-position`: `before` the title or `after` it. Defaults
+          to `before`.
         - `selected`: Show this tab first. The first one is shown
           without it.
         - `key`: What a `group` matches this tab by, for tabs that
@@ -248,10 +246,6 @@ class tab(rst.Directive):
 def visit(self: HTMLTranslator, node: Tabs) -> None:
     """Open the tab set, numbering it among the sets on the page.
 
-    A page being written is every page at once for `singlehtml`, so the
-    number comes from the sets this translator has opened and not from
-    the source file, or two files would give the same ids.
-
     :param self: The HTML translator, whose body this appends to.
     :param node: The tab set's node.
     """
@@ -317,8 +311,7 @@ def tab_icon(self: HTMLTranslator, node: tablabel) -> str:
 
 
 def visit_tablabel(self: HTMLTranslator, node: tablabel) -> None:
-    """Open a tab's title, with the icon ahead of the text if it goes
-    there.
+    """Open a tab's title and put the icon first if it goes there.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The title's node.

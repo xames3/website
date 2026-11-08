@@ -4,7 +4,7 @@ Walkthrough Tracer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 Running a snippet and writing down what it did, one line at a time.
 """
@@ -19,19 +19,27 @@ import signal
 import subprocess
 import sys
 import tempfile
+import time
 import typing as t
 
-short: t.Final[int] = 28
-full: t.Final[int] = 480
+SHORT: t.Final[int] = 28
+FULL: t.Final[int] = 480
+POLL: t.Final[float] = 0.1
+POSIX: t.Final[bool] = (
+    os.name == "posix"
+    and hasattr(os, "killpg")
+    and hasattr(signal, "SIGKILL")
+    and hasattr(signal, "SIGSTOP")
+)
 # https://github.com/torvalds/linux/blob/master/include/uapi/linux/prctl.h
 PR_SET_CHILD_SUBREAPER: t.Final[int] = 36
-exhausted: t.Final[frozenset[int]] = frozenset(
+EXHAUSTED: t.Final[frozenset[int]] = frozenset(
     -getattr(signal, _) for _ in ("SIGXCPU",) if hasattr(signal, _)
 )
-killed: t.Final[frozenset[int]] = frozenset(
+KILLED: t.Final[frozenset[int]] = frozenset(
     -getattr(signal, _) for _ in ("SIGKILL",) if hasattr(signal, _)
 )
-oversized: t.Final[frozenset[int]] = frozenset(
+OVERSIZED: t.Final[frozenset[int]] = frozenset(
     -getattr(signal, _) for _ in ("SIGXFSZ",) if hasattr(signal, _)
 )
 
@@ -45,6 +53,7 @@ class Trace(t.TypedDict):
     truncated: bool
     seen: list[str]
     deps: list[str]
+    peak: int
 
 
 # NOTE(xames3): The runner is a script of its own, run with `-s -P`
@@ -228,6 +237,16 @@ def imported():
     return sorted(found)
 
 
+def peak():
+    if resource is None:
+        return 0
+    most = max(
+        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+        resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,
+    )
+    return most if sys.platform == "darwin" else most * 1024
+
+
 def finish(error):
     with open(sys.argv[2], "w") as fd:
         json.dump(
@@ -238,6 +257,7 @@ def finish(error):
                 "truncated": state["truncated"],
                 "seen": sorted(seen),
                 "deps": imported(),
+                "peak": peak(),
             },
             fd,
         )
@@ -341,7 +361,8 @@ if job["setup"]:
     try:
         exec(compile(job["setup"], "<setup>", "exec"), scope)
     except BaseException as exc:
-        error = {"text": "setup failed, " + describe(exc), "line": None}
+        text = "a setup that failed with " + describe(exc)
+        error = {"text": text, "line": None}
 
 if error is None:
     stdout, stderr = sys.stdout, sys.stderr
@@ -385,12 +406,21 @@ def show(text: str) -> tuple[str, str | None]:
     """Give a value in its two lengths, the way the runner does.
 
     :param text: The value, as it'd be printed.
-    :return: The value whole, clipped to `full` and cut down to
-        `short` or `None` when it didn't need cutting.
+    :return: The value whole, clipped to `FULL` and cut down to
+        `SHORT` or `None` when it didn't need cutting.
     """
-    whole = shorten(" ".join(text.split()), full)
-    cut = shorten(whole, short)
+    whole = shorten(" ".join(text.split()), FULL)
+    cut = shorten(whole, SHORT)
     return whole, None if cut == whole else cut
+
+
+def overuse(memory_limit: int) -> str:
+    """Say a run used more memory than it was given.
+
+    :param memory_limit: Bytes of memory it was given.
+    :return: The reason, in a line.
+    """
+    return f"a run that used more than {memory_limit >> 20} MB of memory"
 
 
 def failed(reason: str) -> Trace:
@@ -406,6 +436,7 @@ def failed(reason: str) -> Trace:
         "truncated": False,
         "seen": [],
         "deps": [],
+        "peak": 0,
     }
 
 
@@ -431,13 +462,14 @@ def execute(
     answer comes back through a file, which leaves `stdout` to the
     snippet, and what the snippet prints goes to a file too, held to
     `output_limit`, so it never fills the build's memory. When the run
-    ends or runs out of time, whatever the snippet left running is
-    killed, children that went off on their own included (see `reap`).
+    ends, runs out of time or uses more memory than it's given,
+    whatever the snippet left running is killed, children that went off
+    on their own included (see `reap`).
 
     These are limits and not a sandbox. The snippet runs as the user
     running the build, so it can read what that user can, the build's
     environment too (on Linux through `/proc`), write elsewhere and
-    reach the network.
+    reach the network. It needs a POSIX system, Linux or macOS.
 
     :param code: The snippet to trace.
     :param setup: Code to run first, untraced.
@@ -450,7 +482,11 @@ def execute(
     :param pythonpath: Directories to put on `sys.path` first.
     :param comprehensions: Whether to step into comprehensions, which
         each carry a frame of their own.
-    :param memory_limit: Bytes of memory each of its processes may use.
+    :param memory_limit: Bytes of memory its processes may use between
+        them. The system holds each process to it where it takes the
+        limit. The build also watches the resident size of them all
+        while the snippet runs and checks the runner's peak when it
+        ends, whether the system took the limit or not.
     :param output_limit: Bytes any file it writes may take, what it
         prints included.
     :param python: The interpreter to run it with, the one the build
@@ -469,12 +505,17 @@ def execute(
         "limit": limit,
         "pythonpath": pythonpath,
         "comprehensions": comprehensions,
-        "short": short,
-        "full": full,
+        "short": SHORT,
+        "full": FULL,
         "memory": memory_limit,
         "cpu": timeout,
         "written": output_limit,
     }
+    if not POSIX:
+        return failed(
+            f"a run on {sys.platform}, which isn't a POSIX system like"
+            " Linux or macOS"
+        )
     key = ""
     if cache:
         seen = fingerprint(python)
@@ -500,25 +541,37 @@ def execute(
             answer,
         ]
         try:
-            status = launch(command, here, printed, timeout)
+            status, overused = launch(
+                command, here, printed, timeout, memory_limit
+            )
         except OSError as exc:
-            return failed(f"couldn't start {python or sys.executable}: {exc}")
+            return failed(
+                f"a run that couldn't start {python or sys.executable}: {exc}"
+            )
+        if overused:
+            return failed(overuse(memory_limit))
         if status is None:
-            return failed(f"ran past its {timeout}s")
+            return failed(f"a run that went past its {timeout}s")
         try:
             with open(answer) as fd:
                 result = t.cast("Trace", json.load(fd))
         except OSError, json.JSONDecodeError:
             return failed(verdict(status, printed, timeout, output_limit))
+        if result["peak"] > memory_limit:
+            return failed(overuse(memory_limit))
     if cache and key and result["error"] is None:
         remember(cache, key, result)
     return result
 
 
 def launch(
-    command: list[str], here: str, printed: str, timeout: int
-) -> int | None:
-    """Start the runner, hold it to its time and clear up after it.
+    command: list[str],
+    here: str,
+    printed: str,
+    timeout: int,
+    memory_limit: int,
+) -> tuple[int | None, bool]:
+    """Start the runner, hold it to its limits and clear up after it.
 
     Its output goes to a file, where `RLIMIT_FSIZE` caps it, and not to
     a pipe the build would have to hold in memory.
@@ -528,9 +581,13 @@ def launch(
         directory too.
     :param printed: The file the runner's output goes to.
     :param timeout: How long it may run, in seconds.
+    :param memory_limit: Bytes of memory the runner and everything
+        started from it may use between them.
     :return: How it ended, which is negative for a signal, or `None`
-        when it ran out of time.
-    :raises OSError: When it can't be started.
+        when it ran out of time, and whether it was stopped for using
+        more memory than it's given.
+    :raises OSError: When it can't be started or its memory can't be
+        read.
     """
     before = children(processes(), {os.getpid()})
     adopt(on=True)
@@ -542,20 +599,56 @@ def launch(
                 stdout=log,
                 stderr=subprocess.STDOUT,
                 cwd=here,
-                env=sandbox(here),
+                env=bare_environment(here),
                 stdin=subprocess.DEVNULL,
                 start_new_session=True,
             ) as process,
         ):
             try:
-                status = process.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
-                return None
+                outcome = supervise(process, before, timeout, memory_limit)
             finally:
                 reap(process, before)
     finally:
         adopt(on=False)
-    return status
+    return outcome
+
+
+def supervise(
+    process: subprocess.Popen[bytes],
+    before: set[int],
+    timeout: int,
+    memory_limit: int,
+) -> tuple[int | None, bool]:
+    """Wait for the runner, watching the clock and its memory.
+
+    The resident size of the runner and everything descended from it is
+    read every `POLL` seconds and a run over `memory_limit` is stopped,
+    whether or not the system took `RLIMIT_AS`, which macOS doesn't. A
+    run that ends between two reads is caught by the peak it reports.
+
+    :param process: The runner.
+    :param before: The build's own children from before the runner
+        started, which are none of the snippet's.
+    :param timeout: How long it may run, in seconds.
+    :param memory_limit: Bytes of memory it may use with its children.
+    :return: How it ended, which is negative for a signal, or `None`
+        when it ran out of time or memory, and whether it was memory.
+    :raises OSError: When the memory of a process can't be read.
+    """
+    me = os.getpid()
+    deadline = time.monotonic() + timeout
+    while True:
+        left = deadline - time.monotonic()
+        try:
+            return process.wait(timeout=max(0.0, min(POLL, left))), False
+        except subprocess.TimeoutExpired:
+            pass
+        if time.monotonic() >= deadline:
+            return None, False
+        table = processes()
+        family = descendants(table, children(table, {me}) - before)
+        if resident(family) > memory_limit:
+            return None, True
 
 
 @functools.cache
@@ -580,7 +673,7 @@ def fingerprint(python: str | None) -> str:
             text=True,
             timeout=60,
             check=False,
-            env=sandbox(tempfile.gettempdir()),
+            env=bare_environment(tempfile.gettempdir()),
             stdin=subprocess.DEVNULL,
         )
     except OSError, subprocess.TimeoutExpired:
@@ -616,6 +709,8 @@ def recall(folder: str, key: str) -> Trace | None:
         for path, was in kept["deps"].items():
             if digest(path) != was:
                 return None
+        if set(kept["trace"]) != Trace.__required_keys__:
+            return None
         return t.cast("Trace", kept["trace"])
     except OSError, ValueError, KeyError, TypeError, AttributeError:
         return None
@@ -634,6 +729,7 @@ def remember(folder: str, key: str, trace: Trace) -> None:
         if was is None:
             return
         deps[path] = was
+    temp = ""
     try:
         os.makedirs(folder, exist_ok=True)
         fd, temp = tempfile.mkstemp(dir=folder, suffix=".tmp")
@@ -641,7 +737,9 @@ def remember(folder: str, key: str, trace: Trace) -> None:
             json.dump({"trace": trace, "deps": deps}, out)
         os.replace(temp, os.path.join(folder, f"{key}.json"))
     except OSError:
-        return
+        if temp:
+            with contextlib.suppress(OSError):
+                os.unlink(temp)
 
 
 def adopt(*, on: bool) -> None:
@@ -663,13 +761,48 @@ def adopt(*, on: bool) -> None:
             ctypes.CDLL(None).prctl(PR_SET_CHILD_SUBREAPER, int(on), 0, 0, 0)
 
 
+def ps(*arguments: str) -> tuple[int, str] | None:
+    """Ask `ps` about the processes, where there's no `/proc`.
+
+    :param arguments: What to pass `ps`.
+    :return: The id of the `ps` that ran and what it printed, or `None`
+        when it couldn't be run.
+    """
+    try:
+        with subprocess.Popen(  # noqa: S603
+            ["ps", *arguments],  # noqa: S607
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            env=bare_environment(tempfile.gettempdir()),
+            stdin=subprocess.DEVNULL,
+        ) as process:
+            try:
+                printed, _ = process.communicate(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                return None
+            return process.pid, printed
+    except OSError:
+        return None
+
+
 def processes() -> dict[int, int]:
-    """Map every process to its parent, as `/proc` lists them.
+    """Map every process to its parent, as `/proc` or `ps` lists them.
 
     :return: The ids, each with its parent's, or nothing on a system
-        without `/proc`.
+        with neither.
     """
     table: dict[int, int] = {}
+    if not os.path.isdir("/proc/self"):
+        asked = ps("-A", "-o", "pid=,ppid=")
+        for line in (asked[1] if asked else "").splitlines():
+            with contextlib.suppress(ValueError):
+                pid, parent = line.split()
+                table[int(pid)] = int(parent)
+        if asked:
+            table.pop(asked[0], None)
+        return table
     with contextlib.suppress(OSError):
         for entry in os.listdir("/proc"):
             if not entry.isdigit():
@@ -680,6 +813,35 @@ def processes() -> dict[int, int]:
             ):
                 table[int(entry)] = int(fd.read().rpartition(")")[2].split()[1])
     return table
+
+
+def resident(pids: set[int]) -> int:
+    """Add up the memory some processes hold in RAM.
+
+    :param pids: The processes.
+    :return: Their resident size together, in bytes.
+    :raises OSError: When the system has neither `/proc` nor a `ps`
+        that tells it.
+    """
+    if not pids:
+        return 0
+    total = 0
+    if os.path.isdir("/proc/self"):
+        page = os.sysconf("SC_PAGE_SIZE")
+        for pid in pids:
+            with (
+                contextlib.suppress(OSError, ValueError, IndexError),
+                open(f"/proc/{pid}/statm") as fd,
+            ):
+                total += int(fd.read().split()[1]) * page
+        return total
+    asked = ps("-o", "rss=", "-p", ",".join(map(str, sorted(pids))))
+    if asked is None:
+        raise OSError(
+            "can't read the memory a process holds, expected /proc or ps,"
+            " got neither"
+        )
+    return sum(int(_) for _ in asked[1].split() if _.isdigit()) * 1024
 
 
 def children(table: dict[int, int], parents: set[int]) -> set[int]:
@@ -723,8 +885,9 @@ def reap(process: subprocess.Popen[bytes], before: set[int]) -> None:
     and one whose parent has gone belongs to the build by then (see
     `adopt`). So the process table is walked down from the build's new
     children, and everything found is stopped before any of it is
-    killed, so that none starts another meanwhile. Where there's no
-    `/proc` only the group is killed.
+    killed, so that none starts another meanwhile. That includes any
+    other child the build started since the runner did. Where `ps` and
+    `/proc` both fail only the group is killed.
 
     :param process: The runner.
     :param before: The build's own children from before the runner
@@ -750,7 +913,7 @@ def reap(process: subprocess.Popen[bytes], before: set[int]) -> None:
     process.wait()
 
 
-def sandbox(home: str) -> dict[str, str]:
+def bare_environment(home: str) -> dict[str, str]:
     """Build the little environment a snippet runs in.
 
     :param home: The temporary directory.
@@ -782,13 +945,16 @@ def verdict(status: int, printed: str, timeout: int, output_limit: int) -> str:
         what it printed included.
     :return: The reason, in a line.
     """
-    if status in exhausted:
-        return f"ran past its {timeout}s"
-    if status in oversized:
-        return f"printed or wrote more than {output_limit >> 20} MB"
-    if status in killed:
-        return "was killed, most likely for running out of memory"
-    return tail(printed, 400) or "the snippet produced nothing"
+    if status in EXHAUSTED:
+        return f"a run that went past its {timeout}s"
+    if status in OVERSIZED:
+        return f"a run that printed or wrote more than {output_limit >> 20} MB"
+    if status in KILLED:
+        return "a run that was killed, most likely for running out of memory"
+    ended = tail(printed, 400)
+    if ended:
+        return f"a run that ended with: {ended}"
+    return "a run that produced nothing"
 
 
 def tail(path: str, width: int) -> str:
@@ -905,7 +1071,7 @@ def fault(
         if frame["values"].get(name) != (row[1], row[3])
     }
     text = error["text"]
-    short = shorten(text, 60)
+    cut = shorten(text, 60)
     return {
         "line": error["line"],
         "frame": ident,
@@ -921,7 +1087,7 @@ def fault(
         ],
         "out": out,
         "ret": None,
-        "error": [shorten(text, 480), None if short == text else short],
+        "error": [shorten(text, FULL), None if cut == text else cut],
     }
 
 

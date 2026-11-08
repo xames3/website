@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 The utilities that fill a page's context for the templates.
 """
@@ -39,6 +39,7 @@ from kaamiki.extensions.utils.doctree import standfirst
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.links import REL
 from kaamiki.extensions.utils.links import opens_new_tab
+from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import CARDS
 from kaamiki.extensions.utils.settings import CREDIT
 from kaamiki.extensions.utils.settings import FA_FREE
@@ -102,14 +103,18 @@ TEMPLATE_KEYS: t.Final[tuple[str, ...]] = (
 def context_defaults(app: Sphinx) -> None:
     """Fill in the `html_context` keys the templates expect.
 
-    The settings the templates read are copied with a `km_` prefix, so
-    one that's missing is its default and not an `UndefinedError`.
-    `show_more_after` is there for `show_more`. The ones that need
-    more than a copy are worked out after: `km_fa_icons`, `km_fa_kit`,
-    `km_fa_style`, `km_fa_integrity`, `km_project`, `km_license`,
-    `km_header_buttons`, `km_sidebar_buttons`, `km_toctree_args`,
-    `km_credit`, `km_credit_new_tab`, `km_rel` and `km_site`. Those and
-    the ones a handler sets for each page (`km_author`, `km_feedback`,
+    It checks every setting a site gave with `validate` first and
+    records the folder `conf.py` is in. The settings the templates read
+    are copied with a `km_` prefix, so one that's missing is its default
+    and not an `UndefinedError`. `show_more_after` is there for
+    `show_more` and `km_show_feedback` is worked out from the project's
+    email and the feedback link when the site leaves `show_feedback`
+    unset. The ones that need more than a copy are worked out after:
+    `km_fa_icons`, `km_fa_kit`, `km_fa_css`, `km_fa_integrity`,
+    `km_project`, `km_license`, `km_header_buttons`,
+    `km_sidebar_buttons`, `km_toctree_args`, `km_credit`,
+    `km_credit_new_tab`, `km_rel` and `km_site`. Those and the ones a
+    handler sets for each page (`km_author`, `km_feedback`,
     `km_header_toctree`, `km_social` and `km_updated_on`) are the only
     names the templates are promised, a site's own templates that read
     another setting have to read it themselves.
@@ -133,8 +138,10 @@ def context_defaults(app: Sphinx) -> None:
     icons = Icons.of(config)
     context["km_fa_icons"] = icons.roles(setting(config, "fa_icons"))
     context["km_fa_kit"] = icons.kit
-    context["km_fa_style"] = icons.font_style
-    project = {**PROJECT, "author": config.author, **setting(config, "project")}
+    author = config.author
+    if author == config.values["author"].default:
+        author = ""
+    project = {**PROJECT, "author": author, **setting(config, "project")}
     context["km_project"] = project
     if context["km_show_feedback"] is None:
         context["km_show_feedback"] = bool(
@@ -168,9 +175,9 @@ def context_defaults(app: Sphinx) -> None:
     context["km_site"] = str(named.get("html_title") or config.project)
     if "html_use_index" in named and config.html_use_index:
         logger.warning(
-            "html_use_index is True, but Kaamiki has no page for the"
-            " general index, so it's left off. Leave html_use_index out of"
-            " conf.py",
+            "html_use_index: expected False or nothing, got True; Kaamiki"
+            " has no page for the general index, so it's left off. Leave"
+            " html_use_index out of conf.py",
             type="kaamiki",
             subtype="settings",
         )
@@ -201,7 +208,7 @@ ROBOTS: t.Final[frozenset[str]] = frozenset(
         "nosnippet",
     }
 )
-RELATED_MOST: t.Final[int] = 7
+RELATED_MOST: t.Final[int] = int(BOUNDS["show_previous_next_cards_count"][1])
 
 
 def pages(argument: str) -> list[str]:
@@ -252,14 +259,11 @@ FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
 
 
 def field_lists(app: Sphinx, doctree: nodes.document) -> None:
-    """Stop for a `:km-*:` field that is written twice or isn't one of
-    the fields a page opens with.
+    """Stop for a `:km-*:` field that's written twice or below the title.
 
     It runs on `doctree-read` at priority 300, ahead of Sphinx's metadata
-    collector at 500, which takes the field list out of the page.
-    Moved after it, there would be no field list left to look at and
-    nothing would be refused. It keeps where each field is, for
-    `page_fields` to quote.
+    collector at 500, which takes the field list out of the page. It
+    keeps where each field is, for `page_fields` to quote.
 
     :param app: The Sphinx application instance.
     :param doctree: The page, just read.
@@ -290,7 +294,7 @@ def page_title(app: Sphinx, doctree: nodes.document) -> None:
     """Stop for a page that has no title with words in it.
 
     A page's title names it in the tab, the navigation, the cards, the
-    search and the link preview, so one that is missing or is only an
+    search and the link preview, so one that's missing or only an
     icon leaves each of them with nothing to say.
 
     :param app: The Sphinx application instance.
@@ -314,7 +318,7 @@ def page_title(app: Sphinx, doctree: nodes.document) -> None:
 def admonition_title(app: Sphinx, doctree: nodes.document) -> None:
     """Stop for a custom admonition whose title has no words.
 
-    The `admonition` directive is the one admonition that is named by its
+    The `admonition` directive is the one admonition that's named by its
     title, so an icon alone is no name. The ones docutils draws for
     themselves (`note`, `tip`, `warning` and the others) are named by
     their kind and may show only their icon.
@@ -341,8 +345,7 @@ def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
 
     It runs on `doctree-read` at priority 600, after Sphinx's metadata
     collector at 500 has filled `env.metadata`, which is where it reads
-    the fields. Moved ahead of the collector, there would be nothing to
-    read and nothing would be refused.
+    the fields.
 
     A page marked `noindex` or `none` in `:km-page-robots:` is kept out
     of the site's own search too, through Sphinx's `nosearch`.
@@ -388,9 +391,10 @@ def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
         site = setting(app.config, "feedback").get("url")
         if not (email or site or found.get("km-feedback-url")):
             fail(
-                "field :km-show-feedback: is on but there's nowhere to send"
-                " feedback: set an email in kaamiki.conf.site.project, a url in"
-                " kaamiki.conf.site.feedback or :km-feedback-url: on the page",
+                "field :km-show-feedback: expected an email in"
+                " kaamiki.conf.site.project, a url in"
+                " kaamiki.conf.site.feedback or :km-feedback-url: on the page"
+                " to send feedback to, got none",
                 places.get("km-show-feedback", where),
             )
     kind = found.get("km-feedback-type")
@@ -416,24 +420,24 @@ def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
         )
     if "km-related-docs" in found and skipped(app.env, docname):
         fail(
-            "field :km-related-docs: not allowed with :km-related-skip-page:,"
-            " which gives the page no cards",
+            "field :km-related-docs: expected without"
+            " :km-related-skip-page:, which gives the page no cards, got both",
             places.get("km-related-docs", where),
         )
     if "km-related-docs" in found:
         field = "km-show-previous-next-cards"
         if field in found and not toggle(found[field]):
             fail(
-                "field :km-related-docs: not allowed with"
-                f" :{field}: false, which turns the cards off",
+                "field :km-related-docs: expected without"
+                f" :{field}: false, which turns the cards off, got both",
                 places.get("km-related-docs", where),
             )
         if field not in found and not setting(
             app.config, "show_previous_next_cards"
         ):
             fail(
-                "field :km-related-docs: needs"
-                " kaamiki.conf.show.previous_next_cards, which is False",
+                "field :km-related-docs: expected"
+                " kaamiki.conf.show.previous_next_cards to be True, got False",
                 places.get("km-related-docs", where),
             )
     listed: set[str] = set()
@@ -521,7 +525,7 @@ def feedback(
         or str(_("Feedback")),
         "description": tidy(meta.get("km-feedback-description", ""))
         or site.get("description")
-        or str(_("Let me know how this can be improved.")),
+        or str(_("Tell us how this page can be improved.")),
         "button": tidy(meta.get("km-feedback-button", ""))
         or site.get("button")
         or str(_("Submit")),
@@ -806,8 +810,8 @@ def reading_order(env: BuildEnvironment, docname: str) -> list[str]:
     they do for the buttons, then the toctree. The pages after it come
     first, nearest first, then the pages before it, nearest first, up to
     `kaamiki.conf.show.previous_next_cards_count` in all. So a page with
-    none after it gets the five before it, and a small site gets the pages
-    it has. The front page is never one of them, nor is a page with
+    none after it gets that many before it, and a small site gets the
+    pages it has. The front page is never one of them, nor is a page with
     `:km-related-skip-page:`.
 
     :param env: The build environment.
@@ -966,11 +970,10 @@ def related(
     if not isinstance(builder, StandaloneHTMLBuilder):
         return
     env = app.env
+    context["km_related"] = None
     if skipped(env, pagename):
-        context["km_related"] = None
         return
     meta: dict[str, str] = context.get("meta") or {}
-    context["km_related"] = None
     cards: list[dict[str, t.Any]] = []
     names = related_docs(pagename, meta)
     if (
@@ -1056,8 +1059,7 @@ def follow(
 
 
 def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
-    """Send pages back to be written when what the navigation says
-    changes.
+    """Send pages back to be written when the navigation changes.
 
     Every page's header lists every page with its title, its lead and its
     subtitle, and the previous and the next page's titles are written
@@ -1078,6 +1080,7 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
         at the first build.
     """
     app.builder.__dict__.pop("km_captions", None)
+    app.builder.__dict__.pop("km_header_leads", None)
     seen: dict[str, tuple[t.Any, ...]] = {}
     for docname, (_parent, before, after) in env.collect_relations().items():
         seen[docname] = tuple(

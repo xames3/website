@@ -4,16 +4,16 @@ Video Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
 A `video` directive that embeds a video in the page::
 
-    .. video:: https://www.w3schools.com/tags/movie.mp4
+    .. video:: https://example.com/clip.mp4
        :autoplay:
        :caption: A short clip.
 
 The caption is parsed as rST. More sources, a poster and subtitles
-go in options::
+go in options. Here the files are yours, in `html_static_path`::
 
     .. video:: _static/clip.mp4
        :sources: _static/clip.webm
@@ -99,9 +99,8 @@ class directive(rst.Directive):
           `muted` is on already.
         - `caption`: A line of text under the video, parsed as rST.
         - `type`: The video's MIME type, when its extension doesn't
-          say. It overrides the type each extension stands for, which
-          is `video/mp4` for `.mov` too, and it can't disagree with an
-          extension Kaamiki knows.
+          say. It can't disagree with an extension Kaamiki knows. A
+          `.mov` is `video/mp4` without it and can be `video/quicktime`.
         - `sources`: More files of the same video, comma-separated, for
           browsers that can't play the first.
         - `poster`: The picture shown until the video plays, an address
@@ -152,14 +151,21 @@ class directive(rst.Directive):
         if given and known and given not in known:
             raise self.error(
                 f"video: :type: expected {' or '.join(known)} for {url!r},"
-                f" got {given}"
+                f" got {given!r}"
             )
         sources = [{"url": url, "type": given or "".join(known[:1])}]
         more = listed(options.pop("sources", ""))
-        if len(more) > SOURCES or len({url, *more}) != len(more) + 1:
+        if len(more) > SOURCES:
             raise self.error(
                 f"video: :sources: expected at most {SOURCES} besides the"
                 f" video, got {len(more)}"
+            )
+        files = [url, *more]
+        if len(set(files)) != len(files):
+            repeated = next(_ for _ in files if files.count(_) > 1)
+            raise self.error(
+                f"video: :sources: expected each file once, got {repeated!r}"
+                " more than once"
             )
         for each in more:
             found = self.address(each, where=":sources:")
@@ -211,8 +217,8 @@ class directive(rst.Directive):
             )
         if "autoplay" in options and options.get("preload") == "none":
             raise self.error(
-                "video: :preload: none not allowed with :autoplay:, which"
-                " fetches the video at once"
+                "video: :preload: expected metadata or auto with :autoplay:,"
+                " got 'none'"
             )
         if "autoplay" in options and "muted" in options:
             raise self.error(
@@ -264,8 +270,8 @@ class directive(rst.Directive):
             raise self.error(f"video: {error}") from error
         if not FILES.fullmatch(urlsplit(found).path) and not kind:
             raise self.error(
-                f"video: expected a .mp4, .m4v, .webm, .ogv, .ogg or .mov file,"
-                f" got {found!r}; give its :type: if it's a video"
+                "video: expected a .mp4, .m4v, .webm, .ogv, .ogg or .mov file"
+                f" or a :type: for it, got {found!r}"
             )
         return shipped(self, found, where)
 

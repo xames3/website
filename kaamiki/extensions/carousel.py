@@ -4,20 +4,23 @@ Carousel Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 04 November 2026
-Last updated on: 07 November 2026
+Last updated on: 08 November 2026
 
-A `carousel` directive that lays blocks, pictures, repositories,
-thumbnails and buttons out in a row a reader swipes through::
+A `carousel` directive that lays blocks, buttons, figures, pictures,
+repositories and thumbnails out in a row a reader swipes through::
 
-    .. carousel:: What to do next.
-       :header: :fa-icon:regular:`comments` Keep it stupid simple
+    .. carousel:: What to read next
+       :header: :fa-icon:regular:`comments` Guides
        :gap: medium
        :auto-run:
        :direction: left
 
-       .. thumbnail:: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+       .. block:: Getting started
+          :target: https://example.com/start
 
-       .. thumbnail:: https://www.youtube.com/watch?v=9bZkp7q19f0
+          A short guide to set things up.
+
+       .. thumbnail:: https://www.youtube.com/watch?v=jNQXAC9IVRw
 """
 
 from __future__ import annotations
@@ -80,14 +83,13 @@ class Carousel(nodes.container):
 
 
 class carouseltext(phrase):
-    """A line of the carousel's heading, parsed and waiting for
-    `visit`.
-    """
+    """A line of the carousel's heading, waiting for `visit`."""
 
 
 def is_trail(found: nodes.Node) -> bool:
-    """Say whether a node is the empty `raw` a directive leaves for the
-    link checker.
+    """Say whether a node is the empty `raw` a directive leaves behind.
+
+    The link checker reads that node.
 
     :param found: The node to look at.
     :return: `True` for a `raw` node with nothing in it.
@@ -96,8 +98,9 @@ def is_trail(found: nodes.Node) -> bool:
 
 
 def is_pending(found: nodes.Node) -> bool:
-    """Say whether a node is a `pending` instruction, which is what
-    `rst-class` leaves for the element after it.
+    """Say whether a node is a `pending` instruction.
+
+    That's what `rst-class` leaves for the element after it.
 
     :param found: The node to look at.
     :return: `True` for a `pending` node.
@@ -131,10 +134,10 @@ class directive(rst.Directive):
           `:fa-icon:regular:`heart` Love`. It needs a title.
         - `subsection`: A dimmer line under the title, set the way a
           section's is. It needs a title.
-        - `gap`: The space between items. `small`, the default,
-          `medium` or `large`. A length in `rem` replaces them, up to
-          4rem, like `1.5rem`. Two lengths, as `columns` takes, use the
-          second.
+        - `gap`: The space between items, `small`, `medium` or
+          `large`. Defaults to `small`. A length in `rem` replaces
+          them, up to 4rem, like `1.5rem`. Two lengths, as `columns`
+          takes, use the second.
         - `hide-arrows`: Leave out the arrows. A reader still swipes or
           scrolls.
         - `auto-run`: Move on by itself, pausing while a reader hovers,
@@ -142,8 +145,8 @@ class directive(rst.Directive):
           their device for less motion.
         - `interval`: Seconds between moves, from 2 to 15. Defaults to
           4. It needs `auto-run`.
-        - `direction`: Which way `auto-run` moves, `right`, the
-          default or `left`. It needs `auto-run`.
+        - `direction`: Which way `auto-run` moves, `right` or `left`.
+          Defaults to `right`. It needs `auto-run`.
         - `name`: A name to link to.
         - `class`: More classes for the carousel.
 
@@ -337,8 +340,7 @@ def plain(node: Carousel) -> list[nodes.Node]:
 
 
 def register(app: Sphinx) -> None:
-    """Register the heading's node and check each carousel again once its
-    page is resolved.
+    """Register the heading's node and the check on each carousel.
 
     :param app: The Sphinx application instance.
     """
