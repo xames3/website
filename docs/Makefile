@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 22 February 2025
-# Last updated on: 02 November 2026
+# Last updated on: 08 November 2026
 #
 # The commands I use to build, check and serve the site. Run make for the list.
 # =============================================================================
@@ -44,7 +44,10 @@ URL             := $(PROTOCOL)://$(LOCALHOST):$(PORT)
 SPHINX_BUILD    ?= sphinx-build
 CHECK           ?= check
 LOCAL           ?=
+DEVTOOLS        ?= 1
+SHOW_LOG        ?= 1
 HTTP_SERVER     ?= python3 -m http.server
+DEVTOOLS_BUILD  := ../devtools/build.py
 TOX             ?= tox
 CURL            ?= curl
 
@@ -56,6 +59,8 @@ SPHINX_BUILD_FLAGS := \
 	--fresh-env \
 	--quiet \
 	--color
+
+PANEL := $(and $(LOCAL),$(filter 1,$(DEVTOOLS)),$(wildcard $(DEVTOOLS_BUILD)))
 
 CURL_FLAGS := \
 	--fail \
@@ -112,7 +117,7 @@ define spin
 	fi; \
 	if [ -n "$(4)" ] && [ -s "$(4)" ]; then \
 		sed 's/^/    /' "$(4)"; \
-	elif [ $$status -ne 0 ] && [ -s $(LOG_FILE) ]; then \
+	elif [ $$status -ne 0 ] && [ "$(SHOW_LOG)" = 1 ] && [ -s $(LOG_FILE) ]; then \
 		sed 's/^/    /' $(LOG_FILE); \
 	fi; \
 	exit $$status
@@ -169,7 +174,9 @@ check: ## Lint the rST with sphinx-lint.
 html: ## Build HTML files from the source directory.
 	@$(if $(CHECK),$(MAKE) $(CHECK) --no-print-directory)
 	$(call spin,[  BUILD],Building HTML pages,\
-		$(SPHINX_BUILD) $(SPHINX_BUILD_FLAGS) $(if $(LOCAL),--tag local) \
+		$(if $(PANEL),KAAMIKI_DEVTOOLS=1 python3 $(PANEL),\
+			rm -rf $(OUTPUT_DIR)/_static/devtools; $(SPHINX_BUILD)) \
+		$(SPHINX_BUILD_FLAGS) $(if $(LOCAL),--tag local) \
 		$(SOURCE_DIR) $(OUTPUT_DIR))
 
 inventories: ## Fetch the intersphinx inventories the build falls back on.
@@ -186,7 +193,7 @@ lint: ## Lint Python code with ruff, through tox.
 format: ## Check Python formatting with ruff, through tox.
 	$(call spin,[  STYLE],Checking code format,$(TOX) $(TOX_FLAGS) -e format)
 
-reformat: ## Fix lint and reformat Python, TOML, HTML and Jinja, through tox.
+reformat: ## Fix lint and reformat Python, HTML and Jinja, through tox.
 	$(call spin,[ REFORM],Reformatting sources,$(TOX) $(TOX_FLAGS) -e reformat)
 
 typecheck: ## Typecheck Python code with mypy, through tox.
@@ -248,8 +255,11 @@ devserver:
 		exit 1; \
 	fi
 
-all: ## Rebuild, run the tox checks and serve the site.
+all: ## Rebuild, run the tox checks (reformatting once on failure) and serve.
 	@$(MAKE) stop --no-print-directory
 	@$(MAKE) rebuild --no-print-directory
-	@$(MAKE) tox --no-print-directory
+	@$(MAKE) tox SHOW_LOG=0 --no-print-directory 2>/dev/null || { \
+		$(MAKE) reformat --no-print-directory && \
+		$(MAKE) tox --no-print-directory; \
+	}
 	@$(MAKE) serve --no-print-directory
