@@ -4,7 +4,7 @@ Byline Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 A `byline` directive that draws the byline under a page title::
 
@@ -24,10 +24,12 @@ import docutils.parsers.rst as rst
 from babel import Locale
 from babel import UnknownLocaleError
 
+from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import fields
 from kaamiki.extensions.utils import located
+from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import parse
@@ -141,6 +143,10 @@ class directive(rst.Directive):
         - `show-language`: Show the page's language, which is hidden
           without it: the page's `:km-page-language:` field, or the
           `language` in Sphinx's configuration when it has none.
+        - `speed`: How quick its motion is next to the site's, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
+          `2` is twice as quick.
+        - `no-motion`: Keep it still.
         - `name`: A name to link to.
         - `class`: More classes for the byline.
     """
@@ -149,6 +155,7 @@ class directive(rst.Directive):
     final_argument_whitespace = True
     option_spec = {  # noqa: RUF012
         **NATIVE,
+        **MOTION,
         "avatar": checks.link,
         "target": checks.link,
         "backdrop": backdrops,
@@ -195,7 +202,7 @@ class directive(rst.Directive):
         options["copy_url"] = "hide-copy-url" not in options
         options["page_source"] = "hide-source" not in options
         options["language"] = "show-language" in options
-        options["classes"] = options.pop("class", [])
+        options["classes"] = [*options.pop("class", []), *moving(options)]
         if "avatar-size" in options:
             options["avatar_size"] = options["avatar-size"]
         words, messages = parse(self, text, "name")
@@ -208,7 +215,7 @@ class directive(rst.Directive):
             metadata.setdefault("km-page-backdrop", pictures[0])
         element = located(self, Byline("", words, **self.options))
         named(self, element)
-        return [element, *trail(self.options), *messages]
+        return [element, *trail(self, self.options), *messages]
 
 
 def plain(node: Byline) -> list[nodes.Node]:

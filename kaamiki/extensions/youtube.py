@@ -4,7 +4,7 @@ YouTube Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 A `youtube` directive that embeds a video in the page::
 
@@ -38,6 +38,7 @@ from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils import youtube_id
+from kaamiki.extensions.utils import youtube_still
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.links import youtube_start
 from kaamiki.extensions.utils.settings import BOUNDS
@@ -71,7 +72,9 @@ class Youtube(nodes.Element):
 class directive(rst.Directive):
     """The `youtube` directive.
 
-    The argument is a YouTube video link or just its id.
+    The argument is a YouTube video link or just its id. The link
+    checker is given the video's picture, so `linkcheck` fails and names
+    a video that's been deleted or made private.
 
     Options::
 
@@ -245,9 +248,7 @@ class directive(rst.Directive):
         self.options["facade"] = facade
         self.options["private"] = private
         self.options["play"] = Icons.of(config).classes("fa-solid fa-play")
-        self.options["still"] = (
-            f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
-        )
+        self.options["still"] = youtube_still(vid)
         self.options["ratio"] = self.options.get("ratio", "").replace(
             ":", " / "
         )
@@ -269,7 +270,7 @@ class directive(rst.Directive):
             worded(self, caption, "a caption")
         element = located(self, Youtube("", caption, **self.options))
         named(self, element)
-        return [element, *trail(self.options, ("src",)), *messages]
+        return [element, *trail(self, self.options, ("still",)), *messages]
 
 
 def plain(node: Youtube) -> list[nodes.Node]:

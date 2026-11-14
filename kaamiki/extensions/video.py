@@ -4,7 +4,7 @@ Video Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 A `video` directive that embeds a video in the page::
 
@@ -246,7 +246,7 @@ class directive(rst.Directive):
                 ]
             )
         }
-        return [element, *trail(urls, ("urls",)), *messages]
+        return [element, *trail(self, urls, ("urls",)), *messages]
 
     def address(
         self,

@@ -4,7 +4,7 @@ Release Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 September 2026
-Last updated on: 08 November 2026
+Last updated on: 11 November 2026
 
 A `release` directive that writes one entry of a changelog::
 
@@ -31,6 +31,7 @@ import docutils.parsers.rst as rst
 from sphinx import addnodes
 from sphinx.locale import _
 
+from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import dated
@@ -41,6 +42,7 @@ from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import located
+from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import setting
@@ -100,6 +102,10 @@ class directive(rst.Directive):
           `2026-10-05`. It wins over the version.
         - `target`: The release elsewhere, like a GitHub release. It's
           linked next to the article.
+        - `speed`: How quick its motion is next to the site's, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
+          `2` is twice as quick.
+        - `no-motion`: Keep it still.
         - `name`: Another name to link to, beside the version.
         - `class`: More classes for the release.
 
@@ -126,6 +132,7 @@ class directive(rst.Directive):
     final_argument_whitespace = True
     option_spec = {  # noqa: RUF012
         **NATIVE,
+        **MOTION,
         "version": release_version,
         "article": checks.text,
         "article-label": lambda _: checks.text(_, 60),
@@ -159,7 +166,12 @@ class directive(rst.Directive):
         section = located(
             self,
             nodes.section(
-                "", classes=["km-release", *self.options.get("class", [])]
+                "",
+                classes=[
+                    "km-release",
+                    *self.options.get("class", []),
+                    *moving(self.options),
+                ],
             ),
         )
         pages[env.docname] = location(section)

@@ -4,7 +4,7 @@ Code Explain Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 08 November 2026
+Last updated on: 11 November 2026
 
 A `code-explain` directive that steps a reader through a snippet, line
 by line, with the values it held at each one... telling a story::
@@ -92,6 +92,7 @@ from kaamiki.extensions.code.tracer import execute
 from kaamiki.extensions.code.tracer import replay
 from kaamiki.extensions.code.tracer import show
 from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import NO_MOTION
 from kaamiki.extensions.utils import annotated
 from kaamiki.extensions.utils import caption_icon
 from kaamiki.extensions.utils import checks
@@ -99,6 +100,7 @@ from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import located
+from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import skip
@@ -255,6 +257,7 @@ class directive(CodeBlock):
         - `lineno-start`: The number the first line is given, from 0 to
           10000.
         - `emphasize-lines`: Lines to highlight, as `1, 3-5`.
+        - `no-motion`: Keep it stacked and still.
         - `name`: A name to link the `code-explain` by.
         - `class`: More classes for the `code-explain`.
 
@@ -291,6 +294,7 @@ class directive(CodeBlock):
         "raises": rst.directives.flag,
         "comment": comment_marks,
         **NATIVE,
+        **NO_MOTION,
         "emphasize-lines": checks.text,
     }
 
@@ -319,7 +323,10 @@ class directive(CodeBlock):
         else:
             steps = self.recite(setup, stdin, notes, ranges, start, total)
         attributes: dict[str, t.Any] = {}
-        attributes["classes"] = self.options.get("class", [])
+        attributes["classes"] = [
+            *self.options.get("class", []),
+            *moving(self.options, timed=False),
+        ]
         attributes["position"] = self.options.get("code-position", "right")
         attributes["payload"] = {
             "steps": [compact(_) for _ in steps],

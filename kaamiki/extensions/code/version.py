@@ -4,7 +4,7 @@ Code Version Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 28 September 2026
-Last updated on: 08 November 2026
+Last updated on: 11 November 2026
 
 A `code-version` directive that steps a reader through the versions a
 piece of code went through on its way to what it is now::
@@ -55,9 +55,11 @@ from kaamiki.extensions.code.grammar import StrayError
 from kaamiki.extensions.code.grammar import linerange
 from kaamiki.extensions.code.grammar import split
 from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import NO_MOTION
 from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import located
+from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 
 if t.TYPE_CHECKING:
@@ -117,6 +119,7 @@ class directive(explain.directive):
         - `linenos`: Number the lines.
         - `lineno-start`: The number the first line is given, from 0 to
           10000.
+        - `no-motion`: Keep it stacked and still.
         - `name`: A name to link the `code-version` by.
         - `class`: More classes for the `code-version`.
     """
@@ -129,6 +132,7 @@ class directive(explain.directive):
         },
         **explain.SHARED,
         **NATIVE,
+        **NO_MOTION,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -159,6 +163,7 @@ class directive(explain.directive):
         attributes["classes"] = [
             "km-code-version",
             *self.options.get("class", []),
+            *moving(self.options, timed=False),
         ]
         attributes["position"] = self.options.get("code-position", "right")
         attributes["payload"] = {

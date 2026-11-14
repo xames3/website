@@ -4,13 +4,13 @@ Carousel Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 04 November 2026
-Last updated on: 08 November 2026
+Last updated on: 12 November 2026
 
 A `carousel` directive that lays blocks, buttons, figures, pictures,
 repositories and thumbnails out in a row a reader swipes through::
 
     .. carousel:: What to read next
-       :header: :fa-icon:regular:`comments` Guides
+       :preheader: :fa-icon:regular:`comments` Guides
        :gap: medium
        :auto-run:
        :direction: left
@@ -35,11 +35,13 @@ from kaamiki.extensions import block
 from kaamiki.extensions import button
 from kaamiki.extensions import repository
 from kaamiki.extensions import thumbnail
+from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import fields
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import located
+from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
@@ -62,6 +64,7 @@ if t.TYPE_CHECKING:
 name: t.Final[str] = "carousel"
 template: t.Final[str] = "directives/carousel.html.jinja"
 DIRECTIONS: t.Final[tuple[str, ...]] = ("right", "left")
+CARDS: t.Final[int] = 2
 ITEMS: t.Final[tuple[type[nodes.Node], ...]] = (
     block.Block,
     button.Button,
@@ -124,22 +127,41 @@ def is_item(found: nodes.Node) -> bool:
     )
 
 
+def few(cards: int, count: int) -> str:
+    """Word the message for a carousel with fewer items than `cards`.
+
+    :param cards: How many cards the carousel was asked to show.
+    :param count: How many items it has.
+    :return: The message, which names the option.
+    """
+    return (
+        f"carousel: :cards: {cards} needs at least {cards} items, got {count}"
+    )
+
+
 class directive(rst.Directive):
     """The `carousel` directive.
 
     Options::
 
-        - `header`: A small line above the title, set the way a
-          section's pre-section text is, with roles like
+        - `preheader`: A small line above the title, set the way a
+          section's preheader text is, with roles like
           `:fa-icon:regular:`heart` Love`. It needs a title.
-        - `subsection`: A dimmer line under the title, set the way a
+        - `subheader`: A dimmer line under the title, set the way a
           section's is. It needs a title.
         - `gap`: The space between items, `small`, `medium` or
           `large`. Defaults to `small`. A length in `rem` replaces
           them, up to 4rem, like `1.5rem`. Two lengths, as `columns`
           takes, use the second.
+        - `cards`: How many items show in full, from 1 to 4, with a
+          quarter of the next one beside them. Defaults to 2. It needs
+          at least that many items. A phone shows about one and a bit
+          whatever it says.
         - `hide-arrows`: Leave out the arrows. A reader still swipes or
           scrolls.
+        - `dots`: Put a dot for each item under the row in place of the
+          arrows, with a pill that stretches from one dot to the next.
+          It can't go with `hide-arrows`.
         - `auto-run`: Move on by itself, pausing while a reader hovers,
           touches or focuses it. It stays still for a reader who asks
           their device for less motion.
@@ -147,14 +169,18 @@ class directive(rst.Directive):
           4. It needs `auto-run`.
         - `direction`: Which way `auto-run` moves, `right` or `left`.
           Defaults to `right`. It needs `auto-run`.
+        - `speed`: How quick its motion is next to the site's, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
+          `2` is twice as quick.
+        - `no-motion`: Keep it still.
         - `name`: A name to link to.
         - `class`: More classes for the carousel.
 
     The argument is the title, which is optional and is set the way a
     section's is. It's read as reStructuredText, so roles work in it,
-    and so they do in `header` and `subsection`. The arrows sit on the
+    and so they do in `preheader` and `subheader`. The arrows sit on the
     title's line when it and they fit on one and below the items when
-    they don't, and always below on a phone.
+    they don't, and always below under 768px wide.
 
     A `block`, a `button`, a `figure`, an `image`, a `repository` and a
     `thumbnail` go inside, an item each.
@@ -166,10 +192,13 @@ class directive(rst.Directive):
     final_argument_whitespace = True
     option_spec = {  # noqa: RUF012
         **NATIVE,
-        "header": checks.text,
-        "subsection": checks.text,
+        **MOTION,
+        "preheader": checks.text,
+        "subheader": checks.text,
         "gap": checks.spacing(SIZES, GAPS),
+        "cards": checks.integer(*map(int, BOUNDS["cards"])),
         "hide-arrows": rst.directives.flag,
+        "dots": rst.directives.flag,
         "auto-run": rst.directives.flag,
         "interval": checks.number(*BOUNDS["interval"]),
         "direction": checks.word(*DIRECTIONS),
@@ -181,19 +210,27 @@ class directive(rst.Directive):
         :return: The carousel's node.
         """
         options = self.options
-        for option in ("header", "subsection"):
+        for option in ("preheader", "subheader"):
             if option in options and not self.arguments:
                 raise self.error(f"carousel: :{option}: needs a title")
+        if "dots" in options and "hide-arrows" in options:
+            raise self.error(
+                "carousel: :dots: replaces the arrows, so :hide-arrows: has"
+                " nothing to hide"
+            )
         if "auto-run" not in options:
             for option in ("interval", "direction"):
                 if option in options:
                     raise self.error(f"carousel: :{option}: needs :auto-run:")
         element = located(
-            self, Carousel("", classes=list(options.get("class", [])))
+            self,
+            Carousel("", classes=[*options.get("class", []), *moving(options)]),
         )
         element["titled"] = bool(self.arguments)
         element["gap"] = options.get("gap", "small")
-        element["arrows"] = "hide-arrows" not in options
+        element["cards"] = options.get("cards")
+        element["arrows"] = not ({"hide-arrows", "dots"} & set(options))
+        element["dots"] = "dots" in options
         element["auto"] = "auto-run" in options
         element["interval"] = options.get("interval", 4)
         element["direction"] = options.get("direction", "right")
@@ -217,15 +254,18 @@ class directive(rst.Directive):
                 )
         if hollow(_ for _ in found if not is_trail(_) and not is_pending(_)):
             raise self.error("carousel: expected at least 1 item, got none")
+        count = sum(map(is_item, found))
+        if element["cards"] and count < element["cards"]:
+            raise self.error(few(element["cards"], count))
         messages: list[nodes.system_message] = []
         if self.arguments:
             pieces: list[tuple[str, str]] = [
                 ("title", titled(self, self.arguments[0]))
             ]
-            if "header" in options:
-                pieces.insert(0, ("header", options["header"]))
-            if "subsection" in options:
-                pieces.append(("subsection", options["subsection"]))
+            if "preheader" in options:
+                pieces.insert(0, ("preheader", options["preheader"]))
+            if "subheader" in options:
+                pieces.append(("subheader", options["subheader"]))
             for place, (field, text) in enumerate(pieces):
                 words, found_messages = parse(self, text, field)
                 worded(self, words, f"a {field}")
@@ -255,6 +295,8 @@ def visit(self: HTMLTranslator, node: Carousel) -> None:
             classes.append(f"km-carousel--gap-{node['gap']}")
     else:
         styles.append(f"--km-carousel-gap: {checks.lengths(node['gap'])[1]}")
+    if node["cards"] not in (None, CARDS):
+        classes.append(f"km-carousel--cards-{node['cards']}")
     attributes: dict[str, t.Any] = {
         "CLASS": " ".join(classes),
         "role": "group",
@@ -276,10 +318,10 @@ def visit(self: HTMLTranslator, node: Carousel) -> None:
     self.body.append(self.starttag(node, "div", "", **attributes))
     if node["titled"]:
         lines = fields(self, node)
-        for field in ("header", "title", "subsection"):
+        for field in ("preheader", "title", "subheader"):
             if field in lines:
                 label = f' id="{ident}"' if field == "title" else ""
-                more = " km-text--pre-section" if field == "header" else ""
+                more = " km-text--preheader" if field == "preheader" else ""
                 self.body.append(
                     f'<p class="km-carousel__{field}{more}"{label}>'
                     f"{lines[field]}</p>"
@@ -288,7 +330,7 @@ def visit(self: HTMLTranslator, node: Carousel) -> None:
 
 
 def depart(self: HTMLTranslator, node: Carousel) -> None:
-    """Close the track, write the arrows and close the carousel.
+    """Close the track, write the arrows or the dots and close the carousel.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The carousel's node.
@@ -296,29 +338,37 @@ def depart(self: HTMLTranslator, node: Carousel) -> None:
     self.body.append("</div>")
     if node["arrows"]:
         self.body.append(render(template))
+    if node["dots"]:
+        self.body.append('<div class="km-carousel__dots" aria-hidden="true">')
+        self.body.append("</div>")
     self.body.append("</div>")
 
 
 def emptied(app: Sphinx, doctree: nodes.document, docname: str) -> None:
-    """Stop the build for a carousel with nothing left to show.
+    """Stop the build for a carousel with too few items left to show.
 
     A carousel whose items are all in an `only` for another builder
-    passes the directive's check and has nothing in it once the page is
-    resolved.
+    passes the directive's checks and has nothing in it once the page is
+    resolved. One that has some of them there can fall short of its
+    `cards` the same way.
 
     :param app: The Sphinx application instance.
     :param doctree: The page, about to be written.
     :param docname: The page's name (unused).
-    :raises KaamikiError: For the first carousel without an item.
+    :raises KaamikiError: For the first carousel without an item or
+        with fewer than its `cards`.
     """
     del docname
     if app.builder.format != "html":
         return
     for found in doctree.findall(Carousel):
-        if not any(is_item(_) for _ in through(found.children)):
+        count = sum(map(is_item, through(found.children)))
+        if not count:
             fail(
                 "carousel: expected at least 1 item, got none", location(found)
             )
+        if found["cards"] and count < found["cards"]:
+            fail(few(found["cards"], count), location(found))
 
 
 def plain(node: Carousel) -> list[nodes.Node]:

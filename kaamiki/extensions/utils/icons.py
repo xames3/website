@@ -4,7 +4,7 @@ Font Awesome Icons
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 08 November 2026
+Last updated on: 11 November 2026
 
 Every icon Kaamiki draws, as a Pro icon and the Free one that stands in
 for it.
@@ -89,6 +89,10 @@ ROLE_ICONS: t.Final[Mapping[str, IconPair]] = MappingProxyType(
         "breadcrumb_separator_parent": IconPair(
             "angles-right", "fa-solid fa-angles-right"
         ),
+        "colour_dark": IconPair("lightbulb-slash", "fa-solid fa-moon"),
+        "colour_light": IconPair("lightbulb", "fa-solid fa-sun"),
+        "colour_system": IconPair("hard-drive", "fa-solid fa-hard-drive"),
+        "close": IconPair("xmark", "fa-solid fa-xmark"),
         "copy_url": IconPair("link", "fa-solid fa-link"),
         "external_link": IconPair(
             "arrow-up-right-from-square",

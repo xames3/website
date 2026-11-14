@@ -97,7 +97,7 @@ TRANSLATED: t.Final[frozenset[str]] = frozenset(
         "km-feedback-description",
         "km-feedback-title",
         "km-page-description",
-        "km-header-subtitle",
+        "km-header-subheader",
         "km-page-image-alt",
         "km-page-title",
         "km-related-header",

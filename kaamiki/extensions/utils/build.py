@@ -4,9 +4,10 @@ Build Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
-The utilities that write the 404 page and the sitemap after a build.
+The utilities that write the 404 page and the sitemap after a build and
+the link checker that names a video that's gone.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from __future__ import annotations
 import os
 import os.path as p
 import posixpath
+import re
 import typing as t
 from html import escape
 from urllib.parse import quote
@@ -22,13 +24,16 @@ from urllib.parse import urlsplit
 
 import bs4
 from sphinx.builders.html import StandaloneHTMLBuilder
+from sphinx.builders.linkcheck import CheckExternalLinksBuilder
 from sphinx.util import logging
 
 from kaamiki.extensions.utils.dates import day
+from kaamiki.extensions.utils.links import youtube_still_id
 from kaamiki.extensions.utils.settings import setting
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
+    from sphinx.builders.linkcheck import CheckResult
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +46,8 @@ ROOTED_ATTRIBUTES: t.Final[tuple[str, ...]] = (
     "src",
 )
 ROOTED_SKIP: t.Final[tuple[str, ...]] = ("#", "/", "data:", "mailto:", "tel:")
+GONE: t.Final[re.Pattern[str]] = re.compile(r"(?:404|410) Client Error")
+GONE_MESSAGE: t.Final[str] = "the video is deleted or private"
 
 
 def root_urls(tree: bs4.BeautifulSoup, base: str, root: str) -> None:
@@ -227,3 +234,28 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
         if sitemap(app):
             kept += ("sitemap.xml", "robots.txt")
         forget(app, kept)
+
+
+class linkcheck(CheckExternalLinksBuilder):
+    """The link checker, naming a video rather than its picture.
+
+    `thumbnail` and `youtube` give it the picture, since YouTube serves
+    the page of a video that's gone all the same. A picture that isn't
+    found is reported as the video's own link, with the reason. The rest
+    of what it reports is Sphinx's. Sphinx keeps no code for a broken
+    link, so a 404 or a 410 is read off the start of its message.
+    """
+
+    def process_result(self, result: CheckResult) -> None:
+        """Report a result, the video's link standing in for its picture.
+
+        :param result: What the checker found out about one link.
+        """
+        vid = youtube_still_id(result.uri)
+        if vid is not None:
+            result = result._replace(
+                uri=f"https://www.youtube.com/watch?v={vid}"
+            )
+            if result.status == "broken" and GONE.match(result.message):
+                result = result._replace(message=GONE_MESSAGE)
+        super().process_result(result)

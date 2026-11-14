@@ -4,7 +4,7 @@ Tabs Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 08 November 2026
+Last updated on: 11 November 2026
 
 A `tabs` directive that holds `tab` directives and shows one at a
 time::
@@ -32,11 +32,13 @@ import docutils.parsers.rst as rst
 from sphinx import addnodes
 
 from kaamiki.extensions.roles import steady
+from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import located
+from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import through
@@ -95,6 +97,7 @@ class directive(rst.Directive):
     has_content = True
     option_spec = {  # noqa: RUF012
         **NATIVE,
+        **MOTION,
         "group": checks.slug,
         "align": checks.word(*ALIGNMENTS),
         "class-bar": checks.classes,
@@ -107,7 +110,8 @@ class directive(rst.Directive):
         """
         options = self.options
         element = located(
-            self, Tabs("", classes=list(options.get("class", [])))
+            self,
+            Tabs("", classes=[*options.get("class", []), *moving(options)]),
         )
         element["group"] = options.get("group", "")
         element["align"] = options.get("align", "center")
@@ -171,6 +175,10 @@ class tab(rst.Directive):
           without it.
         - `class-title`: More classes for the title.
         - `class-body`: More classes for the content.
+        - `speed`: How quick its motion is next to the site's, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
+          `2` is twice as quick.
+        - `no-motion`: Keep it still.
         - `name`: A name to link to. A link to it, or to anything
           inside it, shows the tab.
         - `class`: More classes for the title and the content.

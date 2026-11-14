@@ -4,7 +4,7 @@ Link Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 The helpers that work out where a link goes.
 """
@@ -34,6 +34,9 @@ if t.TYPE_CHECKING:
 REL: t.Final[str] = "noopener noreferrer"
 SLASHES: t.Final[re.Pattern[str]] = re.compile(r"^/{2,}")
 YOUTUBE_ID: t.Final[re.Pattern[str]] = re.compile(r"[A-Za-z0-9_-]{11}")
+YOUTUBE_STILL: t.Final[re.Pattern[str]] = re.compile(
+    r"https://img\.youtube\.com/vi/([A-Za-z0-9_-]{11})/hqdefault\.jpg"
+)
 YOUTUBE_START: t.Final[re.Pattern[str]] = re.compile(
     r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?"
 )
@@ -71,6 +74,25 @@ def youtube_id(url: str) -> str | None:
     elif host in YOUTUBE_HOSTS and len(segments) > 1:
         found = segments[1] if segments[0] in YOUTUBE_PATHS else ""
     return found if YOUTUBE_ID.fullmatch(found) else None
+
+
+def youtube_still(vid: str) -> str:
+    """Name the address of a video's picture.
+
+    :param vid: The eleven character video id.
+    :return: The address of the video's picture on YouTube.
+    """
+    return f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
+
+
+def youtube_still_id(url: str) -> str | None:
+    """Find the video id in the address of a video's picture.
+
+    :param url: The address, as `youtube_still` writes it.
+    :return: The eleven character id or `None` for any other address.
+    """
+    found = YOUTUBE_STILL.fullmatch(url)
+    return found[1] if found else None
 
 
 def youtube_start(url: str) -> int | None:

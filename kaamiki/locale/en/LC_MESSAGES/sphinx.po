@@ -112,6 +112,18 @@ msgstr ""
 msgid "Primary navigation"
 msgstr ""
 
+msgid "Light"
+msgstr ""
+
+msgid "Dark"
+msgstr ""
+
+msgid "System"
+msgstr ""
+
+msgid "Colour mode"
+msgstr ""
+
 #, python-format
 msgid "<a href=\"%(path)s\">Copyright</a> %(copyright)s"
 msgstr ""
@@ -158,6 +170,15 @@ msgid "Setup"
 msgstr ""
 
 msgid "Table"
+msgstr ""
+
+msgid "Enlarge image"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Image"
 msgstr ""
 
 msgid "Search"

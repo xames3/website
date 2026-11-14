@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 12 November 2026
 
 The utilities that fill a page's context for the templates.
 """
@@ -45,8 +45,8 @@ from kaamiki.extensions.utils.settings import CREDIT
 from kaamiki.extensions.utils.settings import FA_FREE
 from kaamiki.extensions.utils.settings import FA_FREE_INTEGRITY
 from kaamiki.extensions.utils.settings import HEADER_LEAD_LENGTH
-from kaamiki.extensions.utils.settings import HEADER_NO_SUBTITLE_FIELD
-from kaamiki.extensions.utils.settings import HEADER_SUBTITLE_FIELD
+from kaamiki.extensions.utils.settings import HEADER_NO_SUBHEADER_FIELD
+from kaamiki.extensions.utils.settings import HEADER_SUBHEADER_FIELD
 from kaamiki.extensions.utils.settings import OG_LOCALE
 from kaamiki.extensions.utils.settings import OG_TYPE
 from kaamiki.extensions.utils.settings import PAGE_SWITCHES
@@ -80,10 +80,16 @@ def confdir(env: BuildEnvironment) -> str:
 
 
 TEMPLATE_KEYS: t.Final[tuple[str, ...]] = (
+    "colour_mode",
     "copy_headerlinks",
     "embed_js_loading",
     "favicons",
     "logo_size",
+    "logos",
+    "media_enlarge",
+    "motion_page_transitions",
+    "motion_prefetch",
+    "motion_speed",
     "show_breadcrumbs",
     "show_credit",
     "show_feedback",
@@ -191,7 +197,7 @@ def context_defaults(app: Sphinx) -> None:
 SWITCHES: t.Final[frozenset[str]] = frozenset(
     {
         "km-feedback-split",
-        "km-header-no-subtitle",
+        "km-header-no-subheader",
         "km-related-skip-page",
         *("km-" + _.replace("_", "-") for _ in PAGE_SWITCHES),
     }
@@ -238,7 +244,7 @@ FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
     "km-feedback-title": checks.text,
     "km-feedback-type": checks.word("mail", "link"),
     "km-feedback-url": checks.link,
-    "km-header-subtitle": lambda _: checks.text(_, 120),
+    "km-header-subheader": lambda _: checks.text(_, 120),
     "km-page-backdrop": checks.picture,
     "km-page-card": checks.word(*CARDS),
     "km-page-description": lambda _: checks.text(_, 300),
@@ -542,7 +548,10 @@ def page_switches(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Let a page turn a `show_*` setting on or off for itself.
+    """Let a page turn a setting on or off for itself.
+
+    That's the `show_*` switches, `toctree_in_header` and
+    `media_enlarge`, each with the `:km-*:` field of the same name.
 
     :param app: The Sphinx application instance.
     :param pagename: The page being rendered.
@@ -634,9 +643,9 @@ LINK: t.Final[re.Pattern[str]] = re.compile(
 def header_leads(builder: StandaloneHTMLBuilder) -> dict[str, str]:
     """Work out what each page says under its title in the header.
 
-    A page's own `:km-header-subtitle:` wins over everything, then its
+    A page's own `:km-header-subheader:` wins over everything, then its
     lead and last its `:km-page-description:`. A page with none of them is
-    left out, as is one with `:km-header-no-subtitle:` and no subtitle.
+    left out, as is one with `:km-header-no-subheader:` and no subheader.
     It's done once for the whole site and kept for the build.
 
     :param builder: The HTML builder.
@@ -649,10 +658,10 @@ def header_leads(builder: StandaloneHTMLBuilder) -> dict[str, str]:
         found = {}
         for name in env.found_docs:
             fields = env.metadata.get(name, {})
-            words = tidy(fields.get(HEADER_SUBTITLE_FIELD, ""))
+            words = tidy(fields.get(HEADER_SUBHEADER_FIELD, ""))
             if not words and not (
-                HEADER_NO_SUBTITLE_FIELD in fields
-                and toggle(fields[HEADER_NO_SUBTITLE_FIELD])
+                HEADER_NO_SUBHEADER_FIELD in fields
+                and toggle(fields[HEADER_NO_SUBHEADER_FIELD])
             ):
                 words = clip(
                     ensure_leads(env).get(name)
@@ -1062,7 +1071,7 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
     """Send pages back to be written when the navigation changes.
 
     Every page's header lists every page with its title, its lead and its
-    subtitle, and the previous and the next page's titles are written
+    subheader, and the previous and the next page's titles are written
     into a page, so a page is stale once any of them is changed, moved or
     gone. A page's related cards, the ones it lists and the ones it gets
     from the pages around it, show each page's title, picture and date
@@ -1072,7 +1081,7 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
 
     :param app: The Sphinx application instance.
     :param env: The build environment, whose pages are all read.
-    :return: Every page when a page's title, lead, header subtitle or
+    :return: Every page when a page's title, lead, header subheader or
         description isn't what it was at the last build, otherwise the
         pages whose previous or next page or related cards aren't what
         they were, the pages no toctree holds any more and
@@ -1106,8 +1115,8 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
             *(
                 env.metadata.get(name, {}).get(key)
                 for key in (
-                    HEADER_SUBTITLE_FIELD,
-                    HEADER_NO_SUBTITLE_FIELD,
+                    HEADER_SUBHEADER_FIELD,
+                    HEADER_NO_SUBHEADER_FIELD,
                     "km-page-description",
                 )
             ),

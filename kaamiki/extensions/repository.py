@@ -4,7 +4,7 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October 2025
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 A `repository` directive that shows a GitHub project with its counts::
 
@@ -22,8 +22,10 @@ import typing as t
 import docutils.nodes as nodes
 from docutils.parsers import rst
 
+from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import located
+from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import paragraph
@@ -51,6 +53,10 @@ class directive(rst.Directive):
 
         - `hide-stars`: Leave out the stargazer count.
         - `hide-forks`: Leave out the fork count.
+        - `speed`: How quick its motion is next to the site's, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
+          `2` is twice as quick.
+        - `no-motion`: Keep it still.
         - `name`: A name to link to.
         - `class`: More classes for the repository.
 
@@ -63,6 +69,7 @@ class directive(rst.Directive):
     final_argument_whitespace = False
     option_spec = {  # noqa: RUF012
         **NATIVE,
+        **MOTION,
         "hide-stars": rst.directives.flag,
         "hide-forks": rst.directives.flag,
     }
@@ -94,7 +101,10 @@ class directive(rst.Directive):
         attributes["project"] = project
         attributes["stars"] = "hide-stars" not in self.options
         attributes["forks"] = "hide-forks" not in self.options
-        attributes["classes"] = self.options.get("class", [])
+        attributes["classes"] = [
+            *self.options.get("class", []),
+            *moving(self.options),
+        ]
         attributes["new_tab"] = opens_new_tab(source, config)
         text = "\n".join(self.content).strip()
         body, messages = paragraph(self, text, "text")
@@ -102,7 +112,7 @@ class directive(rst.Directive):
             worded(self, body, "a text")
         element = located(self, Repository("", body, **attributes))
         named(self, element)
-        return [element, *trail({"url": source}, ("url",)), *messages]
+        return [element, *trail(self, {"url": source}, ("url",)), *messages]
 
 
 def plain(node: Repository) -> list[nodes.Node]:

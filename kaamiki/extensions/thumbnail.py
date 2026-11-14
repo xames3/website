@@ -4,7 +4,7 @@ YouTube Thumbnail Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September 2025
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 A `thumbnail` directive that shows a YouTube video's still and links to it::
 
@@ -34,6 +34,7 @@ from kaamiki.extensions.utils import unlinked
 from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils import youtube_id
+from kaamiki.extensions.utils import youtube_still
 
 name: t.Final[str] = "thumbnail"
 template: t.Final[str] = "directives/thumbnail.html.jinja"
@@ -52,7 +53,9 @@ class directive(rst.Directive):
     `https` one. The page's script asks YouTube for the title and the
     channel of any the thumbnail isn't given, and the thumbnail shows
     "YouTube video" and "Watch on YouTube" until they arrive or when
-    they don't.
+    they don't. The link checker is given the video's picture, so
+    `linkcheck` fails and names a video that's been deleted or made
+    private.
     The site's `kaamiki.conf.youtube.privacy` is for players, so it
     changes nothing here.
 
@@ -102,9 +105,7 @@ class directive(rst.Directive):
         self.options["new_tab"] = opens_new_tab(src, config)
         self.options["greyscale"] = "greyscale" in self.options
         self.options["video_id"] = vid
-        self.options["thumbnail"] = (
-            f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
-        )
+        self.options["thumbnail"] = youtube_still(vid)
         element = located(self, Thumbnail("", **self.options))
         named(self, element)
         messages: list[nodes.Node] = []
@@ -120,7 +121,7 @@ class directive(rst.Directive):
             )
             element.append(parsed)
             messages.extend(reported)
-        return [element, *trail(self.options, ("src",)), *messages]
+        return [element, *trail(self, self.options, ("thumbnail",)), *messages]
 
 
 def plain(node: Thumbnail) -> list[nodes.Node]:

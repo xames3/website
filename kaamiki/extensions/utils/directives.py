@@ -4,7 +4,7 @@ Directive Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 The helpers Kaamiki's directives are built from.
 """
@@ -16,6 +16,7 @@ import typing as t
 from urllib.parse import urlsplit
 
 from docutils import nodes
+from docutils.parsers import rst
 from markupsafe import Markup
 from sphinx import addnodes
 from sphinx.util import docname_join
@@ -27,6 +28,7 @@ if t.TYPE_CHECKING:
     from collections.abc import Callable
     from collections.abc import Iterable
     from collections.abc import Iterator
+    from collections.abc import Mapping
     from collections.abc import Sequence
 
     from docutils.parsers.rst import Directive
@@ -46,6 +48,41 @@ NATIVE: t.Final[dict[str, Callable[[str | None], t.Any]]] = {
     "class": checks.classes,
     "name": checks.reference_name,
 }
+SPEEDS: t.Final[tuple[str, ...]] = (
+    "0.25",
+    "0.5",
+    "0.75",
+    "1",
+    "1.5",
+    "2",
+    "3",
+    "4",
+)
+NO_MOTION: t.Final[dict[str, Callable[[str | None], t.Any]]] = {
+    "no-motion": rst.directives.flag,
+}
+MOTION: t.Final[dict[str, Callable[[str | None], t.Any]]] = {
+    "speed": checks.word(*SPEEDS),
+    **NO_MOTION,
+}
+
+
+def moving(options: Mapping[str, t.Any], *, timed: bool = True) -> list[str]:
+    """Name the classes that carry a directive's own speed and stillness.
+
+    :param options: The directive's options.
+    :param timed: Whether the directive's `:speed:` is the speed of its
+        motion. It's not an option of `code-explain` and `code-version`,
+        which scroll by `:pace:` instead.
+    :return: `km-speed--2` for a `:speed:` of 2 (a point is a dash, as in
+        `km-speed--0-5`) and `km-motion--off` for `:no-motion:`.
+    """
+    found: list[str] = []
+    if timed and "speed" in options:
+        found.append(f"km-speed--{options['speed'].replace('.', '-')}")
+    if "no-motion" in options:
+        found.append("km-motion--off")
+    return found
 
 
 def toggle(argument: str | None) -> bool:
@@ -255,6 +292,7 @@ def skip(self: nodes.NodeVisitor, node: nodes.Element) -> None:
 
 
 def trail(
+    directive: Directive,
     options: dict[str, t.Any],
     keys: Sequence[str] = LINKCHECK_OPTIONS,
 ) -> list[nodes.Node]:
@@ -262,8 +300,9 @@ def trail(
 
     Sphinx only reads URLs off `reference`, `image` and `raw` nodes, so
     each one is returned as an empty `raw` node to sit beside the
-    directive's own.
+    directive's own, on the line the directive is written.
 
+    :param directive: The directive the URLs were written in.
     :param options: The directive's options, as written in the rST.
     :param keys: The options holding URLs, the byline's by default.
     :return: One empty `raw` node per URL found, ready to sit beside
@@ -272,7 +311,7 @@ def trail(
     found: list[nodes.Node] = []
     for option in keys:
         found += [
-            nodes.raw("", "", format="html", source=uri)
+            located(directive, nodes.raw("", "", format="html", source=uri))
             for uri in options.get(option, "").split()
             if "://" in uri
         ]

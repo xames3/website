@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 A `button` directive that renders a link as a button::
 
@@ -308,7 +308,7 @@ class directive(rst.Directive):
         )
         element = Button("", label, **attributes)
         named(self, element)
-        return [element, *trail(attributes, ("url",)), *messages]
+        return [element, *trail(self, attributes, ("url",)), *messages]
 
     def look(self, scheme: str | None, *, iconic: bool) -> tuple[str, str]:
         """Work out the classes and the colour a scheme stands for.

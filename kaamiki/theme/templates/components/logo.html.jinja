@@ -10,7 +10,16 @@ Last updated on: 07 November 2026
 {%- macro km_logo() -%}
     {%- set km_size = "--km-logo-size: " ~ km_logo_size ~ "px" -%}
     {%- set km_style = {"style": km_size if km_logo_size} -%}
-    {%- if logo_url -%}
+    {%- if km_logos -%}
+        {%- for km_mode in ["light", "dark"] -%}
+            <img class="km-logo km-logo--{{ km_mode }}"
+                 src="{{ pathto('_static/' + km_logos[km_mode], 1) }}"
+                 alt=""
+                 width="16"
+                 height="16"
+                 {{ km_style|xmlattr }} />
+        {%- endfor -%}
+    {%- elif logo_url -%}
         <img class="km-logo km-logo--single"
              src="{{ logo_url }}"
              alt=""

@@ -77,6 +77,33 @@ Last updated on: 08 November 2026
         </div>
     </nav>
 {%- endmacro -%}
+{%- macro km_colour_modes() -%}
+    {%- if km_colour_mode == 'system' -%}
+        {%- set km_labels = {
+                "light": _("Light"),
+                "dark": _("Dark"),
+                "system": _("System"),
+                } -%}
+        <div class="km-footer__modes"
+             data-km-colour-modes>
+            <button type="button"
+                    class="km-footer__mode"
+                    data-km-colour-cycle
+                    data-km-colour-name="{{ _('Colour mode') }}"
+                    aria-label="{{ _('Colour mode') }}: {{ km_labels[km_colour_mode] }}"
+                    title="{{ _('Colour mode') }}: {{ km_labels[km_colour_mode] }}">
+                {%- for km_choice in ["light", "dark", "system"] %}
+                    <span class="km-footer__mode-icon"
+                          data-km-colour-mode="{{ km_choice }}"
+                          data-km-label="{{ km_labels[km_choice] }}"
+                          {{ "hidden" if km_choice != km_colour_mode else "" }}>
+                        {{- km_glyph(km_fa_icons["colour_" ~ km_choice]) -}}
+                    </span>
+                {%- endfor %}
+            </button>
+        </div>
+    {%- endif -%}
+{%- endmacro -%}
 {%- macro km_footer_text() -%}
     <div class="km-footer__content">
         {%- if show_copyright and copyright|length %}
@@ -164,11 +191,15 @@ Last updated on: 08 November 2026
         "setup": _("Setup"),
         "code": _("Code"),
         "table": _("Table"),
+        "enlarge": _("Enlarge image"),
+        "close": _("Close"),
+        "image": _("Image"),
         } -%}
     {%- set km_marks = {
         "nav_arrow": km_fa_icons.nav_arrow,
         "copy": km_fa_icons["copy"],
         "copied": km_fa_icons.copied,
+        "close": km_fa_icons.close,
         } -%}
     <!DOCTYPE html>
     <html lang="{{ km_lang_attr }}"
@@ -177,22 +208,186 @@ Last updated on: 08 November 2026
           data-km-strings="{{ km_strings|tojson|forceescape }}"
           data-km-more-icon="{{ km_fa_icons.show_more }}"
           data-km-icons="{{ km_marks|tojson|forceescape }}"
-          {% if km_copy_headerlinks %}data-km-copy-links{% endif %}>
+          {%- if km_colour_mode != 'dark' %} data-km-mode="{{ km_colour_mode }}" {%- endif %} {%- if km_motion_speed != 1 %} style="--km-motion-speed: {{ km_motion_speed }}" {%- endif %} {% if km_copy_headerlinks %}data-km-copy-links{% endif %}
+          {% if km_motion_prefetch|tobool %}data-km-prefetch{% endif %}
+          {% if km_media_enlarge|tobool %}data-km-media-enlarge{% endif %}>
         <head>
             <meta charset="utf-8" />
             {%- if 'name="viewport"' not in metatags %}
                 <meta name="viewport"
                       content="width=device-width, initial-scale=1" />
             {%- endif %}
-            <meta name="color-scheme"
-                  content="dark" />
-            <meta name="theme-color"
-                  content="#000000" />
+            {%- if km_colour_mode == 'light' %}
+                <meta name="color-scheme"
+                      content="only light" />
+                <meta name="theme-color"
+                      content="#ffffff" />
+            {%- elif km_colour_mode == 'system' %}
+                <meta name="color-scheme"
+                      content="light dark" />
+                <meta name="theme-color"
+                      media="(prefers-color-scheme: light)"
+                      content="#ffffff" />
+                <meta name="theme-color"
+                      media="(prefers-color-scheme: dark)"
+                      content="#000000" />
+            {%- else %}
+                <meta name="color-scheme"
+                      content="dark" />
+                <meta name="theme-color"
+                      content="#000000" />
+            {%- endif %}
+            {%- if km_colour_mode == 'system' %}
+                <script>
+                    (function() {
+                        try {
+                            const saved = window.localStorage
+                                .getItem('km-colour-mode');
+                            if (['dark', 'light', 'system'].includes(saved)) {
+                                document.documentElement
+                                    .setAttribute('data-km-mode', saved);
+                            }
+                        } catch (error) {}
+                    })();
+                </script>
+            {%- endif %}
+            {%- if km_motion_page_transitions|tobool %}
+                <style>
+                    @media (prefers-reduced-motion: no-preference) {
+                        @view-transition {
+                            navigation: auto;
+                        }
+                    }
+                </style>
+                <script>
+                    (function() {
+                        const root = document.documentElement;
+                        const classes = root.classList;
+                        let revealed = false;
+                        let timer = 0;
+
+                        function release() {
+                            revealed = true;
+                            window.clearTimeout(timer);
+                            root.removeAttribute('data-km-handing');
+                        }
+
+                        function hold() {
+                            window.clearTimeout(timer);
+                            timer = window.setTimeout(release, 4500);
+                        }
+
+                        if ('PageRevealEvent' in window) {
+                            root.setAttribute('data-km-handing', '');
+                            hold();
+                        }
+
+                        // The old page names its content so it can be pictured
+                        // as it was, and gives the name up if it's shown again
+                        // from the back and forward cache.
+                        window.addEventListener('pageswap', (event) => {
+                            if (!event.viewTransition) return;
+                            const content = document.querySelector(
+                                '.km-layout__content'
+                            );
+                            const header = document.querySelector('.km-header');
+                            if (content && header) {
+                                const box = content.getBoundingClientRect();
+                                const top = header.getBoundingClientRect()
+                                    .bottom - box.top;
+                                const bottom = box.bottom - window.innerHeight;
+                                content.style.clipPath = 'inset(' +
+                                    `${Math.max(0, top)}px -100vmax ` +
+                                    `${Math.max(0, bottom)}px -100vmax)`;
+                            }
+                            classes.add('km-document--leaving');
+                        });
+
+                        window.addEventListener('pageshow', (event) => {
+                            if (!event.persisted) return;
+                            classes.remove('km-document--leaving');
+                            document.querySelector('.km-layout__content')
+                                ?.style.removeProperty('clip-path');
+                        });
+
+                        // Fires with the first frame, after deferred scripts
+                        // have run, and has a transition when the reader came
+                        // from another page of the site.
+                        window.addEventListener('pagereveal', (event) => {
+                            const change = event.viewTransition;
+                            // A page shown again from the back and forward
+                            // cache is whole already, with no content to show
+                            // in once the old one has left.
+                            if (revealed && change) change.skipTransition();
+                            if (revealed || !change) return release();
+                            revealed = true;
+                            let back = false;
+                            try {
+                                const move = window.navigation.activation;
+                                back = move.navigationType === 'traverse' &&
+                                    move.entry.index < move.from.index;
+                            } catch (error) {}
+                            root.setAttribute(
+                                'data-km-nav',
+                                back ? 'back' : 'forward'
+                            );
+                            hold();
+                            const loaded = new Promise((resolve) => {
+                                if (document.readyState === 'complete') {
+                                    resolve();
+                                } else {
+                                    window.addEventListener('load', resolve, {
+                                        once: true
+                                    });
+                                }
+                            }).then(() => document.fonts.ready);
+                            const picture = (move, name) => (
+                                move.effect &&
+                                move.effect.pseudoElement === name
+                            );
+                            const nearly = (move) => new Promise((resolve) => {
+                                const check = () => {
+                                    const length = move.effect
+                                        .getComputedTiming().duration;
+                                    if (move.playState === 'finished' ||
+                                        move.currentTime >= length * 0.95) {
+                                        resolve();
+                                    } else {
+                                        window.requestAnimationFrame(check);
+                                    }
+                                };
+                                check();
+                            });
+                            change.ready.then(() => {
+                                const moving = document.getAnimations();
+                                return Promise.all([
+                                    loaded,
+                                    ...moving
+                                    .filter((move) => picture(
+                                        move,
+                                        '::view-transition-old(km-content)'
+                                    ))
+                                    .map(nearly),
+                                ]).then(() => moving
+                                    .filter((move) => picture(
+                                        move,
+                                        '::view-transition-old(root)'
+                                    ))
+                                    .forEach((move) => move.finish()));
+                            }).catch(() => {}).then(release);
+                            change.finished.catch(() => {}).then(release);
+                        });
+                    })();
+                </script>
+            {%- endif %}
             <script>
                 (function() {
                     const root = document.documentElement;
-                    const timer = window.setTimeout(show, 2000);
-                    root.classList.add(
+                    const classes = root.classList;
+                    const held = () => root.hasAttribute('data-km-handing');
+                    let fonts = false;
+                    let timer = window.setTimeout(show, held() ? 5000 : 2000);
+                    classes.add(
                         'km-document--scripted',
                         'km-document--loading',
                         'km-document--no-transitions'
@@ -200,19 +395,25 @@ Last updated on: 08 November 2026
 
                     function show() {
                         window.clearTimeout(timer);
-                        root.classList.remove(
+                        classes.remove(
                             'km-document--loading',
                             'km-document--no-transitions'
                         );
                     }
 
+                    function settle() {
+                        if (fonts && !held()) show();
+                    }
+
                     function ready() {
-                        const fonts = document.fonts.ready;
-                        requestAnimationFrame(() => fonts.then(show));
+                        const loaded = document.fonts.ready;
+                        requestAnimationFrame(() => loaded.then(() => {
+                            fonts = true;
+                            settle();
+                        }));
                     }
 
                     function folded() {
-                        const classes = root.classList;
                         if (classes.contains('km-document--fold-ready')) return;
                         if (!document.querySelector('.km-page--clamped')) return;
                         classes.add('km-document--fold-failed');
@@ -222,6 +423,15 @@ Last updated on: 08 November 2026
                         window.setTimeout(folded, 1000);
                     }
 
+                    new MutationObserver(() => {
+                        if (held()) return;
+                        window.clearTimeout(timer);
+                        timer = window.setTimeout(show, 2000);
+                        settle();
+                    }).observe(root, {
+                        attributes: true,
+                        attributeFilter: ['data-km-handing']
+                    });
                     document.addEventListener('DOMContentLoaded', ready, {
                         once: true
                     });
@@ -462,7 +672,10 @@ Last updated on: 08 November 2026
                     <footer class="km-footer km-container">
                         {%- block km_footer_before %}
                         {%- endblock km_footer_before %}
-                        <div class="km-footer__inner">{{ km_footer_text() }}</div>
+                        <div class="km-footer__inner">
+                            {{ km_footer_text() }}
+                            {{ km_colour_modes() }}
+                        </div>
                         {%- block km_footer_after %}
                         {%- endblock km_footer_after %}
                     </footer>

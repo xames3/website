@@ -91,7 +91,7 @@
 }
 
 .highlight {
-    color: hsl(var(--km-colour-grey-93));
+    color: hsl(var(--km-colour-text-baseline));
 }
 
 .highlight :is(.c1, .cpf) {
@@ -111,7 +111,7 @@
 .highlight .na,
 .highlight .nx,
 .highlight .bp {
-    color: hsl(var(--km-colour-grey-93));
+    color: hsl(var(--km-colour-text-baseline));
 }
 
 .highlight .k,
@@ -181,18 +181,18 @@
 }
 
 .highlight .ge {
-    color: hsl(var(--km-colour-grey-93));
+    color: hsl(var(--km-colour-text-baseline));
     font-style: italic;
 }
 
 .highlight .ges {
-    color: hsl(var(--km-colour-grey-93));
+    color: hsl(var(--km-colour-text-baseline));
     font-weight: 500;
     font-style: italic;
 }
 
 .highlight .gs {
-    color: hsl(var(--km-colour-grey-93));
+    color: hsl(var(--km-colour-text-baseline));
     font-weight: 500;
 }
 
@@ -223,7 +223,7 @@
 }
 
 .highlight .nn {
-    color: hsl(var(--km-colour-grey-93));
+    color: hsl(var(--km-colour-text-baseline));
     font-weight: 500;
 }
 

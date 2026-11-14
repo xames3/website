@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 12 November 2026
 
 Kaamiki's settings, their defaults and the helpers that read them.
 """
@@ -55,11 +55,13 @@ CREDIT: t.Final[str] = "https://github.com/xames3/website"
 CONTACT: t.Final[str] = "xa@mes3.dev"
 BOUNDS: t.Final[dict[str, tuple[float, float]]] = {
     "avatar_size": (16, 64),
+    "cards": (1, 4),
     "description_length": (50, 300),
     "gap": (0, 4),
     "interval": (2, 15),
     "logo_size": (8, 64),
     "margin": (0, 8),
+    "motion_speed": (0.25, 4),
     "pace": (24, 240),
     "show_more_after": (3, 8),
     "show_previous_next_cards_count": (1, 7),
@@ -83,8 +85,8 @@ SHOW_MORE_AFTER: t.Final[int] = 5
 RELATED_PAGES: t.Final[int] = 5
 DESCRIPTION_LENGTH: t.Final[int] = 200
 HEADER_LEAD_LENGTH: t.Final[int] = 90
-HEADER_SUBTITLE_FIELD: t.Final[str] = "km-header-subtitle"
-HEADER_NO_SUBTITLE_FIELD: t.Final[str] = "km-header-no-subtitle"
+HEADER_SUBHEADER_FIELD: t.Final[str] = "km-header-subheader"
+HEADER_NO_SUBHEADER_FIELD: t.Final[str] = "km-header-no-subheader"
 PROJECT: t.Final[dict[str, str]] = {
     "author": "",
     "avatar": "",
@@ -114,6 +116,7 @@ DEFAULTS: t.Final[dict[str, t.Any]] = {
     "button_colours": {},
     "button_icon_position": "before",
     "button_scheme": "light",
+    "colour_mode": "dark",
     "copy_headerlinks": True,
     "embed_css": [],
     "embed_iframe_hosts": [],
@@ -130,6 +133,11 @@ DEFAULTS: t.Final[dict[str, t.Any]] = {
     "license": {},
     "links_in_new_tab": True,
     "logo_size": None,
+    "logos": {},
+    "media_enlarge": True,
+    "motion_page_transitions": False,
+    "motion_prefetch": True,
+    "motion_speed": 0.625,
     "open_graph": {},
     "project": {},
     "release_kinds": [],
@@ -199,6 +207,14 @@ GROUPS: t.Final[dict[str, dict[str, str]]] = {
         "searchbox": "show_searchbox",
         "sitemap": "show_sitemap",
     },
+    "media": {
+        "enlarge": "media_enlarge",
+    },
+    "motion": {
+        "page_transitions": "motion_page_transitions",
+        "prefetch": "motion_prefetch",
+        "speed": "motion_speed",
+    },
     "toctree": {
         "in_header": "toctree_in_header",
         "includehidden": "toctree_includehidden",
@@ -258,6 +274,7 @@ GROUPS: t.Final[dict[str, dict[str, str]]] = {
         "open_graph": "open_graph",
         "favicons": "favicons",
         "logo_size": "logo_size",
+        "logos": "logos",
         "feedback": "feedback",
         "header_buttons": "header_buttons",
         "sidebar_buttons": "sidebar_buttons",
@@ -266,10 +283,14 @@ GROUPS: t.Final[dict[str, dict[str, str]]] = {
         "words_per_minute": "words_per_minute",
     },
 }
+ROOT: t.Final[dict[str, str]] = {"mode": "colour_mode"}
 PATHS: t.Final[dict[str, str]] = {
-    key: f"{NAME}.conf.{group}.{attr}"
-    for group, members in GROUPS.items()
-    for attr, key in members.items()
+    **{
+        key: f"{NAME}.conf.{group}.{attr}"
+        for group, members in GROUPS.items()
+        for attr, key in members.items()
+    },
+    **{key: f"{NAME}.conf.{attr}" for attr, key in ROOT.items()},
 }
 FLAT: t.Final[dict[str, str]] = {
     path.replace(".conf.", "_").replace(".", "_"): key
@@ -312,6 +333,7 @@ PARSE_TIME: t.Final[tuple[str, ...]] = (
     "youtube_referrer_policy",
 )
 PAGE_SWITCHES: t.Final[tuple[str, ...]] = (
+    "media_enlarge",
     "show_breadcrumbs",
     "show_credit",
     "show_feedback",
@@ -335,13 +357,18 @@ WHOLE_NUMBERS: t.Final[tuple[str, ...]] = (
     "code_explain_output_limit",
     "code_explain_timeout",
 )
-REAL_NUMBERS: t.Final[tuple[str, ...]] = ("underline_width", "underline_wobble")
+REAL_NUMBERS: t.Final[tuple[str, ...]] = (
+    "motion_speed",
+    "underline_width",
+    "underline_wobble",
+)
 ALIGNMENTS: t.Final[tuple[str, ...]] = ("left", "center", "right")
 SIZES: t.Final[tuple[str, ...]] = ("small", "medium", "large")
 CHOICES: t.Final[dict[str, tuple[str, ...]]] = {
     "accordion_marker": ("plus", "down", "right"),
     "accordion_marker_position": ("before", "after"),
     "button_icon_position": ("before", "after"),
+    "colour_mode": ("dark", "light", "system"),
     "embed_js_loading": ("defer", "async", "normal"),
     "fa_style": ("solid", "regular", "light", "thin"),
     "tab_icon_position": ("before", "after"),
@@ -387,6 +414,7 @@ FAVICONS: t.Final[tuple[str, ...]] = (
     "size_180",
     "size_svg",
 )
+LOGOS: t.Final[tuple[str, ...]] = ("light", "dark")
 TIME_DIRECTIVES: t.Final[re.Pattern[str]] = re.compile(r"%[aAbBdHIjmMpSyYZz%]")
 
 
@@ -669,10 +697,14 @@ RULES: t.Final[dict[str, Rule]] = {
         *CHOICES["accordion_marker_position"]
     ),
     "button_icon_position": checks.word(*CHOICES["button_icon_position"]),
+    "colour_mode": checks.word(*CHOICES["colour_mode"]),
     "copy_headerlinks": boolean,
     "embed_js_loading": checks.word(*CHOICES["embed_js_loading"]),
     "fa_style": checks.word(*CHOICES["fa_style"]),
     "links_in_new_tab": boolean,
+    "media_enlarge": boolean,
+    "motion_page_transitions": boolean,
+    "motion_prefetch": boolean,
     "tab_icon_position": checks.word(*CHOICES["tab_icon_position"]),
     "show_404": boolean,
     "show_breadcrumbs": boolean,
@@ -715,6 +747,7 @@ RULES: t.Final[dict[str, Rule]] = {
     "release_kinds": many(lower(checks.slug)),
     "fa_icons": site_icons,
     "favicons": shape(**dict.fromkeys(FAVICONS, string(STATIC_NAME))),
+    "logos": shape(**dict.fromkeys(LOGOS, string(STATIC_NAME))),
     "header_buttons": table(checks.text, button),
     "sidebar_buttons": table(checks.text, button),
     "license": shape(name=string(checks.text), url=string(checks.web)),
@@ -979,6 +1012,11 @@ class Group:
 
     def __setattr__(self, attr: str, value: t.Any) -> None:
         """Check a setting the moment a site sets it."""
+        if attr not in GROUPS[self._name]:
+            fail(
+                f"{NAME}.conf.{self._name}.{attr}: expected a Kaamiki "
+                "setting, got an unknown name"
+            )
         key = self._key(attr)
         _check_value(key, value, "")
         self._given[key] = value
@@ -1012,8 +1050,11 @@ class Conf:
     """Every setting of Kaamiki, which `conf.py` sets on `kaamiki.conf`."""
 
     given: dict[str, t.Any]
+    mode: str
     icons: IconSettings
     show: Group
+    media: Group
+    motion: Group
     toctree: Group
     code_explain: Group
     youtube: Group
@@ -1034,21 +1075,38 @@ class Conf:
             made = IconSettings if name == "icons" else Group
             object.__setattr__(self, name, made(name, given))
 
+    def __getattr__(self, name: str) -> t.Any:
+        """Read a setting that isn't in a group, `mode`."""
+        if name not in ROOT:
+            raise AttributeError(
+                f"{type(self).__name__!r} object has no attribute {name!r}",
+                name=name,
+                obj=self,
+            )
+        return self.given.get(ROOT[name], DEFAULTS[ROOT[name]])
+
     def __setattr__(self, name: str, value: t.Any) -> None:
-        """Refuse a group that isn't there and a group set as a whole."""
+        """Check a setting that isn't in a group, refuse any other name."""
+        if name in ROOT:
+            _check_value(ROOT[name], value, "")
+            self.given[ROOT[name]] = value
+            return
         if name in GROUPS:
             raise AttributeError(
                 f"{NAME}.conf.{name} is a group, set one of its settings"
             )
-        raise AttributeError(f"{NAME}.conf has no group {name!r}")
+        fail(
+            f"{NAME}.conf.{name}: expected a Kaamiki setting, got an "
+            "unknown name"
+        )
 
     def __dir__(self) -> list[str]:
-        """List the groups."""
-        return list(GROUPS)
+        """List the settings of no group and the groups."""
+        return [*ROOT, *GROUPS]
 
     def __repr__(self) -> str:
-        """Show the groups."""
-        return f"<{NAME}.conf: {', '.join(GROUPS)}>"
+        """Show the settings of no group and the groups."""
+        return f"<{NAME}.conf: {', '.join([*ROOT, *GROUPS])}>"
 
 
 CONF: t.Final[Conf] = Conf()
@@ -1340,7 +1398,20 @@ def _check_pairs(config: Config, given: dict[str, t.Any], conf: str) -> None:
             f" kit, set kaamiki.conf.icons.kit or {icons.KIT_VARIABLE}",
             conf,
         )
-    drawn = config.html_theme_options.get("logo") or config.html_logo
+    logos = given.get("logos", {})
+    if logos and set(logos) != set(LOGOS):
+        fail(
+            "kaamiki.conf.site.logos: expected both light and dark, got"
+            f" {', '.join(sorted(logos))}",
+            conf,
+        )
+    if logos and (config.html_theme_options.get("logo") or config.html_logo):
+        fail(
+            "kaamiki.conf.site.logos: expected html_logo and"
+            " html_theme_options['logo'] unset, got one of them set",
+            conf,
+        )
+    drawn = logos or config.html_theme_options.get("logo") or config.html_logo
     if given.get("logo_size") is not None and not drawn:
         fail(
             "kaamiki.conf.site.logo_size: expected a site with a logo, got"
@@ -1386,6 +1457,7 @@ def _check_static(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
         ("embed_css", given.get("embed_css", [])),
         ("embed_js", given.get("embed_js", [])),
         ("favicons", given.get("favicons", {}).values()),
+        ("logos", given.get("logos", {}).values()),
     ):
         for name in found:
             if not present(name):
@@ -1504,6 +1576,9 @@ def setting(
         "code_explain_run",
         "copy_headerlinks",
         "links_in_new_tab",
+        "media_enlarge",
+        "motion_page_transitions",
+        "motion_prefetch",
         "show_404",
         "show_breadcrumbs",
         "show_credit",
@@ -1599,7 +1674,7 @@ def setting(
 @t.overload
 def setting(
     config: Config,
-    key: t.Literal["button_colours", "favicons", "role_colours"],
+    key: t.Literal["button_colours", "favicons", "logos", "role_colours"],
 ) -> dict[str, str]: ...
 
 

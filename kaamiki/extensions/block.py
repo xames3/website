@@ -4,13 +4,13 @@ Block Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 08 November 2026
+Last updated on: 13 November 2026
 
 A `block` directive that frames a title and some content, which
 can link somewhere::
 
     .. block:: Getting started
-       :subsection: A short guide
+       :subheader: A short guide
        :target: https://example.com/guide
 
        Everything you need to set up and start writing.
@@ -70,10 +70,10 @@ class directive(rst.Directive):
 
     Options::
 
-        - `subsection`: A smaller line under the title.
-        - `header`: Text above the title, with roles like
+        - `preheader`: A small line above the title, with roles like
           `:fa-icon:regular:`heart` Love`.
-        - `footer`: Text at the bottom, written like `header`.
+        - `subheader`: A smaller line under the title.
+        - `footer`: Text at the bottom, written like `preheader`.
         - `target`: An address the whole block links to.
         - `doc`: A document the whole block links to, as `:doc:` names
           it.
@@ -100,8 +100,8 @@ class directive(rst.Directive):
     final_argument_whitespace = True
     option_spec = {  # noqa: RUF012
         **NATIVE,
-        "subsection": checks.text,
-        "header": checks.text,
+        "preheader": checks.text,
+        "subheader": checks.text,
         "footer": checks.text,
         "target": checks.link,
         "doc": checks.text,
@@ -153,11 +153,11 @@ class directive(rst.Directive):
         element["kind"] = kind
         named(self, element)
         messages: list[nodes.system_message] = []
-        if "header" in options:
-            header, found = self.inline(
-                "header", options["header"], linked=bool(kind)
+        if "preheader" in options:
+            preheader, found = self.inline(
+                "preheader", options["preheader"], linked=bool(kind)
             )
-            element += header
+            element += preheader
             messages += found
         content = part("", role="body")
         title, found = self.inline(
@@ -166,18 +166,18 @@ class directive(rst.Directive):
         element["label"] = title.astext()
         content += title
         messages += found
-        subsection_node = None
-        if "subsection" in options:
-            subsection_node, found = self.inline(
-                "subsection", options["subsection"], linked=bool(kind)
+        subheader_node = None
+        if "subheader" in options:
+            subheader_node, found = self.inline(
+                "subheader", options["subheader"], linked=bool(kind)
             )
-            content += subsection_node
+            content += subheader_node
             messages += found
         self.state.nested_parse(self.content, self.content_offset, content)
         if hollow(
             c
             for c in content.children
-            if c is not title and c is not subsection_node
+            if c is not title and c is not subheader_node
         ):
             raise self.error("block: expected some content, got none")
         element += content
@@ -188,7 +188,7 @@ class directive(rst.Directive):
             element += footer
             messages += found
         if kind == "target":
-            for reference in trail({"target": link}, ("target",)):
+            for reference in trail(self, {"target": link}, ("target",)):
                 element += reference
         parent = self.state.parent
         previous = parent.children[-1] if parent.children else None

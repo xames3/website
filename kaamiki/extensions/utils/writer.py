@@ -4,7 +4,7 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 08 November 2026
+Last updated on: 12 November 2026
 
 What Kaamiki changes in the HTML Sphinx writes, as it writes it.
 """
@@ -249,9 +249,13 @@ class translator(base):
     def visit_table(self, node: nodes.table) -> None:
         """Open a table inside a box that scrolls when it's too wide.
 
+        The box takes `km-wide` from its table, as it's the box that
+        the page's width is given to.
+
         :param node: The table being opened.
         """
-        self.body.append('<div class="km-table">')
+        wide = " km-wide" if "km-wide" in node["classes"] else ""
+        self.body.append(f'<div class="km-table{wide}">')
         super().visit_table(node)
 
     @t.override
@@ -316,11 +320,17 @@ class translator(base):
     def visit_image(self, node: nodes.image) -> None:
         """Open an image, loading it lazily unless told otherwise.
 
+        Every image an author wrote, alone or in a figure, gets
+        `km-image`, which is how the page's script tells it from the
+        pictures Kaamiki draws itself, and one with a size gets
+        `km-image--sized` too.
+
         :param node: The image being written.
         """
         default = getattr(self, "image_loading", "")
         if "loading" not in node and default == "link":
             node["loading"] = "lazy"
+        node["classes"].append("km-image")
         sized = any(_ in node for _ in ("width", "height", "scale"))
         if sized:
             node["classes"].append("km-image--sized")

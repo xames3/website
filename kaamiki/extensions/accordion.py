@@ -4,12 +4,12 @@ Accordion Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 08 November 2026
+Last updated on: 11 November 2026
 
 An `accordion` directive that folds its content away under a title::
 
     .. accordion:: What's an accordion?
-       :subsection: A short answer
+       :subheader: A short answer
        :marker: down
        :marker-position: before
        :open:
@@ -28,10 +28,12 @@ from sphinx.writers.manpage import ManualPageTranslator
 from sphinx.writers.texinfo import TexinfoTranslator
 from sphinx.writers.text import TextTranslator
 
+from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import located
+from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import titled
@@ -61,8 +63,8 @@ class summary(nodes.paragraph):
     """The title, parsed as rST, with the marker's icon and side."""
 
 
-class subhead(nodes.TextElement):
-    """The line under the title."""
+class headline(nodes.TextElement):
+    """A line above or under the title, by its `role`."""
 
 
 class directive(rst.Directive):
@@ -71,12 +73,15 @@ class directive(rst.Directive):
     Options::
 
         - `open`: Start unfolded. Only one accordion of a `group` may.
-        - `subsection`: A dimmer line under the title.
-        - `nested-subsection`: Put the subsection at the top of the
+        - `preheader`: A small line above the title.
+        - `class-preheader`: More classes for the preheader, which
+          always has `km-text--preheader`. It needs `preheader`.
+        - `subheader`: A dimmer line under the title.
+        - `nested-subheader`: Put the subheader at the top of the
           content, so it shows once the accordion is open, instead of
-          under the title. It needs `subsection`.
-        - `class-subsection`: More classes for the subsection, which
-          always has `km-text--subsection`. It needs `subsection`.
+          under the title. It needs `subheader`.
+        - `class-subheader`: More classes for the subheader, which
+          always has `km-text--subheader`. It needs `subheader`.
         - `marker`: What shows that an accordion opens, `plus`, a `down`
           chevron or a `right` one. A plus turns 45 degrees as it opens,
           a right chevron turns 90 degrees to point down and a down
@@ -89,6 +94,10 @@ class directive(rst.Directive):
           Opening one folds the rest of its group.
         - `class-title`: More classes for the title.
         - `class-body`: More classes for the content.
+        - `speed`: How quick its motion is next to the site's, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
+          `2` is twice as quick.
+        - `no-motion`: Keep it still.
         - `name`: A name to link to. A link to it, or to anything inside
           it, opens the accordion.
         - `class`: More classes for the accordion.
@@ -106,10 +115,13 @@ class directive(rst.Directive):
     final_argument_whitespace = True
     option_spec = {  # noqa: RUF012
         **NATIVE,
+        **MOTION,
         "open": rst.directives.flag,
-        "subsection": checks.text,
-        "nested-subsection": rst.directives.flag,
-        "class-subsection": checks.classes,
+        "preheader": checks.text,
+        "class-preheader": checks.classes,
+        "subheader": checks.text,
+        "nested-subheader": rst.directives.flag,
+        "class-subheader": checks.classes,
         "marker": checks.word(*MARKERS),
         "marker-position": checks.word(*MARKER_POSITIONS),
         "hide-show-more": rst.directives.flag,
@@ -122,14 +134,17 @@ class directive(rst.Directive):
         """Parse the title and the content and return the accordion.
 
         :return: The accordion's node, followed by whatever the title
-            and the subsection reported.
+            and the lines around it reported.
         """
         config = self.state.document.settings.env.config
         options = self.options
-        if "subsection" not in options:
-            for each in ("nested-subsection", "class-subsection"):
-                if each in options:
-                    raise self.error(f"accordion: :{each}: needs :subsection:")
+        for need, each in (
+            ("preheader", "class-preheader"),
+            ("subheader", "nested-subheader"),
+            ("subheader", "class-subheader"),
+        ):
+            if need not in options and each in options:
+                raise self.error(f"accordion: :{each}: needs :{need}:")
         if "group" in options and "open" in options:
             group = self.state.document.settings.env.temp_data.setdefault(
                 "km_open_groups", set()
@@ -145,7 +160,10 @@ class directive(rst.Directive):
             side = setting(config, "accordion_marker_position")
         shape = options.get("marker") or setting(config, "accordion_marker")
         element = located(
-            self, Accordion("", classes=list(options.get("class", [])))
+            self,
+            Accordion(
+                "", classes=[*options.get("class", []), *moving(options)]
+            ),
         )
         element["open"] = "open" in options
         element["group"] = options.get("group", "")
@@ -159,34 +177,36 @@ class directive(rst.Directive):
         title, messages = self.state.inline_text(words, self.lineno)
         unlinked(self, title, "a title")
         worded(self, title, "a title")
+        lines: dict[str, headline] = {}
+        for role in ("preheader", "subheader"):
+            if role in options:
+                lead, more = self.state.inline_text(options[role], self.lineno)
+                unlinked(self, lead, f"a {role}")
+                worded(self, lead, f"a {role}")
+                lines[role] = located(
+                    self,
+                    headline(
+                        options[role],
+                        "",
+                        *lead,
+                        role=role,
+                        classes=list(options.get(f"class-{role}", [])),
+                    ),
+                )
+                messages += more
         head = located(
             self,
             summary(
                 words,
                 "",
+                *([lines["preheader"]] if "preheader" in lines else []),
                 *title,
                 classes=list(options.get("class-title", [])),
             ),
         )
         head["after"] = side == "after"
-        under = None
-        if "subsection" in options:
-            lead, more = self.state.inline_text(
-                options["subsection"], self.lineno
-            )
-            unlinked(self, lead, "a subsection")
-            worded(self, lead, "a subsection")
-            under = located(
-                self,
-                subhead(
-                    options["subsection"],
-                    "",
-                    *lead,
-                    classes=list(options.get("class-subsection", [])),
-                ),
-            )
-            messages += more
-        nested = "nested-subsection" in options
+        under = lines.get("subheader")
+        nested = "nested-subheader" in options
         if under is not None and not nested:
             head += under
         element += head
@@ -194,7 +214,9 @@ class directive(rst.Directive):
             element += under
         self.state.nested_parse(self.content, self.content_offset, element)
         if hollow(
-            _ for _ in element.children if not isinstance(_, (summary, subhead))
+            _
+            for _ in element.children
+            if not isinstance(_, (summary, headline))
         ):
             raise self.error("accordion: expected some content, got none")
         for para in element.children:
@@ -257,23 +279,24 @@ def depart_summary(self: HTMLTranslator, node: summary) -> None:
     self.body.append(f'</summary><div class="{self.attval(classes)}">')
 
 
-def visit_subhead(self: HTMLTranslator, node: subhead) -> None:
-    """Open the line under the title.
+def visit_headline(self: HTMLTranslator, node: headline) -> None:
+    """Open the line above or under the title.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The subsection's node.
+    :param node: The line's node.
     """
+    role = node["role"]
     classes = " ".join(
-        ["km-accordion__subsection", "km-text--subsection", *node["classes"]]
+        [f"km-accordion__{role}", f"km-text--{role}", *node["classes"]]
     )
     self.body.append(f'<span class="{self.attval(classes)}">')
 
 
-def depart_subhead(self: HTMLTranslator, node: subhead) -> None:
-    """Close the line under the title.
+def depart_headline(self: HTMLTranslator, node: headline) -> None:
+    """Close the line above or under the title.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The subsection's node (unused).
+    :param node: The line's node (unused).
     """
     del node
     self.body.append("</span>")
@@ -302,8 +325,8 @@ def register(app: Sphinx) -> None:
     """
     app.add_node(summary, html=(visit_summary, depart_summary))
     app.add_node(
-        subhead,
-        html=(visit_subhead, depart_subhead),
+        headline,
+        html=(visit_headline, depart_headline),
         latex=(LaTeXTranslator.visit_inline, LaTeXTranslator.depart_inline),
         man=(
             ManualPageTranslator.visit_inline,

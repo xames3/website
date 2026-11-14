@@ -4,7 +4,7 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 08 November 2026
+Last updated on: 11 November 2026
 
 Kaamiki's custom inline roles.
 """
@@ -86,12 +86,14 @@ UNITS: t.Final[tuple[tuple[int, str], ...]] = (
     (10**6, "m"),
     (10**3, "k"),
 )
-ROTATE_LENGTH: t.Final[int] = 45
+SWAP_LENGTH: t.Final[int] = 45
+SWEEP_LENGTH: t.Final[int] = 120
 ROLES: t.Final[tuple[str, ...]] = (
     "email",
-    "rotate",
     "sharpie",
     "stylise",
+    "swap",
+    "sweep",
     "ticker",
     "underline",
 )
@@ -197,8 +199,8 @@ class ink(nodes.inline):
     """Text wearing a style, a sharpie or a pencil underline."""
 
 
-class rotor(ink):
-    """The first of some words, which take turns in its place."""
+class swapper(ink):
+    """The first of some words or titles, which take turns in its place."""
 
 
 def steady(
@@ -207,19 +209,21 @@ def steady(
     part: str,
     why: str,
 ) -> None:
-    """Refuse `:rotate:` in a text that has to stay where it is.
+    """Refuse `:swap:` and `:sweep:` in a text that has to stay put.
 
     :param directive: The directive that has the text.
     :param found: The parsed text or the nodes it came to.
     :param part: What the text is, `a title` for one.
     :param why: Why it can't move, for the message.
-    :raises rst.DirectiveError: When the text holds rotating words.
+    :raises rst.DirectiveError: When the text holds swapping words.
     """
     for each in [found] if isinstance(found, nodes.Node) else found:
-        if any(isinstance(_, rotor) for _ in each.findall()):
+        moving = next(each.findall(swapper), None)
+        if moving is not None:
+            role = "sweep" if "km-sweep" in moving["classes"] else "swap"
             raise directive.error(
                 f"{directive.name}: expected {part} that stays put, got"
-                f" :rotate:, {why}"
+                f" :{role}:, {why}"
             )
 
 
@@ -230,7 +234,8 @@ def visit(self: HTMLTranslator, node: ink) -> None:
     :param node: The inked text.
     """
     if _moves(node):
-        self.body.append(self.starttag(node, "span", "", style=node["style"]))
+        style = {"style": node["style"]} if node["style"] else {}
+        self.body.append(self.starttag(node, "span", "", **style))
 
 
 def _moves(node: ink) -> bool:
@@ -239,9 +244,9 @@ def _moves(node: ink) -> bool:
     It's plain inside a link (a toctree, a `:ref:` or a `:doc:`) and in
     a title rendered on its own, which is what the breadcrumbs, the
     page's tab and the previous and next pages get.
-    The rotating words show their first one there.
+    The swapping words show their first one there.
 
-    :param node: The inked text or the rotating words.
+    :param node: The inked text or the swapping words.
     :return: `True` for text in the page itself.
     """
     parent = node.parent
@@ -256,22 +261,22 @@ def _moves(node: ink) -> bool:
     return True
 
 
-def visit_rotor(self: HTMLTranslator, node: rotor) -> None:
+def visit_swapper(self: HTMLTranslator, node: swapper) -> None:
     """Open the span the words take turns in, if they do here.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The rotating words.
+    :param node: The swapping words.
     """
     if _moves(node):
         attributes: dict[str, t.Any] = {"data-km-words": node["words"]}
         self.body.append(self.starttag(node, "span", "", **attributes))
 
 
-def depart_rotor(self: HTMLTranslator, node: rotor) -> None:
+def depart_swapper(self: HTMLTranslator, node: swapper) -> None:
     """Close the span, if one was opened.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The rotating words.
+    :param node: The swapping words.
     """
     if _moves(node):
         self.body.append("</span>")
@@ -916,7 +921,7 @@ def ticker(
             f"ticker: expected short with no value, got {given['short']!r}",
         )
     short = given.pop("short", None) is not None or "short" in options
-    seconds = options.get("duration", 2.0)
+    seconds = options.get("duration")
     if "duration" in given:
         try:
             seconds = _duration(given.pop("duration"))
@@ -930,13 +935,76 @@ def ticker(
             f"ticker: expected short or duration, got {', '.join(given)}",
         )
     label = _short(count) if short else str(count)
-    style = f"--km-ticker-duration: {round(seconds * 1000)}ms;"
+    style = (
+        f"--km-ticker-duration: {round(seconds * 1000)}ms;"
+        if seconds is not None
+        else ""
+    )
     classes = ["km-ticker", *_classes(options)]
     return [ink(rawtext, label, classes=classes, style=style)], []
 
 
+def _turns(
+    role: str,
+    noun: str,
+    limit: int,
+    classes: list[str],
+    rawtext: str,
+    text: str,
+    lineno: int,
+    inliner: states.Inliner,
+) -> Reply:
+    """Read what takes turns in a role like `:swap:` or `:sweep:`.
+
+    :param role: The role's name, for the messages.
+    :param noun: What it takes turns with, for the messages.
+    :param limit: The most characters one of them may have, counted as
+        code points.
+    :param classes: The classes the text gets.
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role's paragraph starts on, for error
+        reporting.
+    :param inliner: The docutils inliner that called this.
+    :return: The first of them and the error messages if there aren't
+        two or one is empty, too long or holds a `|`.
+    """
+    words = [tidy(unescape(_)) for _ in BAR.split(text)]
+    if len(words) < 2 or not all(words):
+        return _reject(
+            inliner,
+            rawtext,
+            lineno,
+            f"{role}: expected two or more {noun} split by |, got"
+            f" {unescape(text)!r}",
+        )
+    barred = next((_ for _ in words if "|" in _), None)
+    if barred is not None:
+        return _reject(
+            inliner,
+            rawtext,
+            lineno,
+            f"{role}: expected {noun} without |, got {barred!r}",
+        )
+    longest = max(words, key=len)
+    if len(longest) > limit:
+        return _reject(
+            inliner,
+            rawtext,
+            lineno,
+            f"{role}: expected {noun} up to {limit} characters, got"
+            f" {longest!r} with {len(longest)}",
+        )
+    attributes = {
+        "classes": classes,
+        "words": "|".join(words),
+        "support_smartquotes": False,
+    }
+    return [swapper(rawtext, words[0], **attributes)], []
+
+
 @accepts()
-def rotate(
+def swap(
     name: str,
     rawtext: str,
     text: str,
@@ -950,11 +1018,13 @@ def rotate(
     The text lists the words, split by `|`. The first one is what the
     page, its search and a reader without scripts get. In the page the
     rest take its place one by one while the words are on screen, in
-    the font, size and colour of the text around them. Where a title is
-    shown for something else, in the navbar, the sidebar, the
-    breadcrumbs, a toctree or a link, the first word stays as text::
+    the font, size and colour of the text around them. Every letter of
+    the old word rolls over to the letter of the new one, from the left.
+    Where a title is shown for something else, in the navbar, the
+    sidebar, the breadcrumbs, a toctree or a link, the first word stays
+    as text::
 
-        Docs you can :rotate:`read|search|share` with anyone.
+        Docs you can :swap:`read|search|share` with anyone.
 
     A word is at most 45 characters long, counted as code points, and
     holds no `|`. The words keep the quotes they were written with.
@@ -971,38 +1041,70 @@ def rotate(
         words or one of them is empty, too long or holds a `|`.
     """
     del name, content
-    words = [tidy(unescape(_)) for _ in BAR.split(text)]
-    if len(words) < 2 or not all(words):
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"rotate: expected two or more words split by |, got"
-            f" {unescape(text)!r}",
-        )
-    barred = next((_ for _ in words if "|" in _), None)
-    if barred is not None:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"rotate: expected words without |, got {barred!r}",
-        )
-    longest = max(words, key=len)
-    if len(longest) > ROTATE_LENGTH:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"rotate: expected words up to {ROTATE_LENGTH} characters, got"
-            f" {longest!r} with {len(longest)}",
-        )
-    attributes = {
-        "classes": ["km-rotate", *_classes(options)],
-        "words": "|".join(words),
-        "support_smartquotes": False,
-    }
-    return [rotor(rawtext, words[0], **attributes)], []
+    classes = ["km-swap", *_classes(options)]
+    return _turns(
+        "swap",
+        "words",
+        SWAP_LENGTH,
+        classes,
+        rawtext,
+        text,
+        lineno,
+        inliner,
+    )
+
+
+@accepts()
+def sweep(
+    name: str,
+    rawtext: str,
+    text: str,
+    lineno: int,
+    inliner: states.Inliner,
+    options: dict[str, t.Any],
+    content: list[t.Any],
+) -> Reply:
+    """Wipe a title or a word out and the next one in, again and again.
+
+    It reads like `swap`, but a light sweeps across the text: the old
+    one fades out behind it and the new one comes in the same way. The
+    text lists the phrases, split by `|`, and each is a whole title or
+    only a word. The first one is what the page, its search and a reader
+    without scripts get. In the page the rest take its place one by one
+    while they are on screen, in the font, size and colour of the text
+    around them. Where a title is shown for something else, in the
+    navbar, the sidebar, the breadcrumbs, a toctree or a link, the
+    first phrase stays as text::
+
+        :sweep:`Your favourite sites|Start with a design you love`
+        Docs you can :sweep:`read|search|share` with anyone.
+
+    A phrase is at most 120 characters long, counted as code points, and
+    holds no `|`. The phrases keep the quotes they were written with.
+
+    :param name: The role name, as written (unused).
+    :param rawtext: The whole role, markup and all.
+    :param text: What was written inside it.
+    :param lineno: The line the role's paragraph starts on, for error
+        reporting.
+    :param inliner: The docutils inliner that called this.
+    :param options: The classes of a custom role.
+    :param content: Role content (unused).
+    :return: The first phrase and the error messages if there aren't two
+        phrases or one of them is empty, too long or holds a `|`.
+    """
+    del name, content
+    classes = ["km-swap", "km-sweep", *_classes(options)]
+    return _turns(
+        "sweep",
+        "phrases",
+        SWEEP_LENGTH,
+        classes,
+        rawtext,
+        text,
+        lineno,
+        inliner,
+    )
 
 
 def _icon(

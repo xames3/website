@@ -4,7 +4,7 @@ Class Aliases
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 07 November 2026
+Last updated on: 12 November 2026
 
 The classes an author writes in rST and the BEM classes they become.
 """
@@ -30,8 +30,8 @@ ALIASES: t.Final[Mapping[str, str]] = MappingProxyType(
         "km-figure-pixelated-blur": "km-figure--pixelated-blur",
         "km-figure-zoom": "km-figure--zoom",
         "km-text-lead": "km-text--lead",
-        "km-text-pre-section": "km-text--pre-section",
-        "km-text-subsection": "km-text--subsection",
+        "km-text-preheader": "km-text--preheader",
+        "km-text-subheader": "km-text--subheader",
         "km-tone-blue": "km-tone--blue",
         "km-tone-green": "km-tone--green",
         "km-tone-red": "km-tone--red",

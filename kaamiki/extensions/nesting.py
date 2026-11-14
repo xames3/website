@@ -4,9 +4,10 @@ Nesting Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 October 2026
-Last updated on: 08 November 2026
+Last updated on: 12 November 2026
 
-Stops a page that puts a directive where it makes no sense.
+Stops a page that puts a directive where it makes no sense, or a class
+that only works on the page itself.
 """
 
 from __future__ import annotations
@@ -107,6 +108,8 @@ PAGE: t.Final[dict[str, str]] = {
     "code-version": "on the page itself",
     "release": "directly in a section",
 }
+WIDE: t.Final[str] = "km-wide"
+FIXED: t.Final[tuple[str, ...]] = ("embed", "thumbnail")
 EXPLAINERS: t.Final[tuple[str, ...]] = ("code-explain", "code-version")
 CLICKABLE: t.Final[tuple[str, ...]] = (
     "accordion",
@@ -166,6 +169,26 @@ def is_part(node: nodes.Node) -> bool:
     if isinstance(node, PARTS):
         return True
     return type(node) is nodes.container and is_release(node.parent)
+
+
+def is_wrapper(node: nodes.Node) -> bool:
+    """Say whether a node only wraps something that sits on the page.
+
+    A block comes in a row of blocks, a code block with a caption in a
+    box of its own and a picture that links in its link, so the class
+    that's on what's inside is on the page.
+
+    :param node: The node to look at.
+    :return: `True` for a row of blocks, a captioned code block's box
+        and a link that holds nothing but a picture.
+    """
+    if isinstance(node, block.shelf):
+        return True
+    if isinstance(node, nodes.reference):
+        return bool(node.children) and all(
+            isinstance(_, nodes.image) for _ in node.children
+        )
+    return type(node) is nodes.container and bool(node.get("literal_block"))
 
 
 def kind(node: nodes.Node) -> str:
@@ -284,15 +307,41 @@ def refused(name: str, host: nodes.Node) -> bool:
         return True
     if isinstance(host, block.node) and host["link"] and name in CLICKABLE:
         return True
+    if name == "carousel" and isinstance(host, columns.item):
+        return True
     return name == "columns" and narrow(host)
+
+
+def unplaced(node: nodes.Node) -> nodes.Element | None:
+    """Find what keeps a node from being part of the page itself.
+
+    :param node: The node to look at.
+    :return: The nearest node above it that isn't part of the page, a
+        wrapper or a part of a directive, or `None` for a node on the
+        page.
+    """
+    return next(
+        (
+            _
+            for _ in ancestors(node)
+            if isinstance(_, nodes.Element)
+            and not (open_to_page(_) or is_part(_) or is_wrapper(_))
+        ),
+        None,
+    )
 
 
 def nested(app: Sphinx, doctree: nodes.document) -> None:
     """Stop the build for a directive that sits where it can't.
 
+    A `km-wide` goes on the page itself, since a block in a tab, a column
+    or a list has no room to widen into. It doesn't go on an embed or a
+    thumbnail either, as their iframe and still keep the size they have.
+
     :param app: The Sphinx application instance (unused).
     :param doctree: The page, just read.
-    :raises KaamikiError: For the first directive in the wrong place.
+    :raises KaamikiError: For the first directive or `km-wide` in the
+        wrong place.
     """
     del app
     for node in doctree.findall(nodes.Element):
@@ -301,6 +350,26 @@ def nested(app: Sphinx, doctree: nodes.document) -> None:
             if isinstance(node, part) and not isinstance(holder(node), whole):
                 checks.fail(
                     f"{one}: expected inside {many}, got it on its own", where
+                )
+        if WIDE in node["classes"]:
+            outside = unplaced(node)
+            if outside is not None:
+                advice = (
+                    ", use :figclass: instead"
+                    if isinstance(outside, nodes.figure)
+                    and isinstance(node, nodes.image)
+                    else ""
+                )
+                checks.fail(
+                    f"{WIDE}: expected directly on the page, got it in"
+                    f" {describe(outside)}{advice}",
+                    where if node.line else checks.location(outside),
+                )
+            if kind(node) in FIXED:
+                checks.fail(
+                    f"{WIDE}: expected something it can widen, got"
+                    f" {describe(node)}",
+                    where,
                 )
         name = kind(node)
         if not name:
