@@ -1,304 +1,111 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 02 October 2026
-.. Last updated on: 15 October 2026
+.. Last updated on: 11 November 2026
 
-:orphan:
-:km-pg-title: Kaamiki Changelog
-:km-pg-description: Evolution of Kaamiki Sphinx Theme since its inception
-:km-pg-type: website
-:km-pg-image: https://avatars.githubusercontent.com/u/90549089?v=4
+:km-page-title: Changelog
+:km-page-description: Every Kaamiki release, newest first.
+:km-page-type: article
+:km-feedback-title: Have you tried Kaamiki yet?
+:km-feedback-description: I know it's a long list of changes and updates, but
+    if you've any feature in mind or noticed any bugs...
+:km-feedback-button: Let me know
 
 .. _changelog:
 
 ===============================================================================
-:far-icon:`list-ul` Changelog
+:fa-icon:`list-ul` Changelog
 ===============================================================================
 
-.. rst-class:: km-lead
+.. rst-class:: km-text-lead
 
-    Updates, improvements and changes happening to Kaamiki.
+    Every Kaamiki release, newest first.
 
-.. author:: @xames3
-    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
-    :url: https://github.com/xames3/website
+.. byline:: @xames3
+    :avatar: https://i.imgur.com/hUhxigb.jpeg
+    :target: https://github.com/xames3
 
-.. release:: 2026.10.28
-    :title: Loads through Sphinx alone
-    :article: changelogs/october-2026
+.. release:: Kaamiki stops borrowing now!
+    :version: v2026.11.8
+    :article: changelogs/november-2026
 
-    The biggest release yet. Kaamiki loads through Sphinx natively.
+    The first release on PyPI. Two directives that show code instead of
+    describing it, building blocks of my own, a carousel, cards that lead a
+    reader on and a theme that loads the way Sphinx expects.
 
     Added
-        - A ``walkthrough`` directive, which scrolls a reader through a
-          snippet a line at a time, with the values it held at each one
-          written beside the code. |new|
-        - An ``attempts`` directive, which shows the versions a piece of code
-          went through on its way to what it is now, the lines on their way
-          out going red and the new ones coming in green. |new|
-        - A ``release`` directive, which writes a changelog entry like the
-          ones on this page, with its date and version beside it. |new|
-        - ``button`` takes ``:fa-icon-position: after`` to put its icon after
-          the label, rather than before it.
-        - A dropdown taller than the screen folds down to about a screenful,
-          with a Show more button under it. While one is unfolded, Show less
-          waits at the bottom of the screen, so folding it back never means
-          scrolling all the way up.
-        - The build writes ``sitemap.xml`` and a ``robots.txt`` pointing at
-          it, unless ``show_sitemap`` is off.
-        - A site without a ``fa_kit`` gets Font Awesome Free, so its icons
-          still draw.
-        - ``button`` takes a colour for its ``:scheme:``, ``red``,
-          ``yellow``, ``blue`` or ``green``: the label and a faint outline in
-          that colour, the outline filling in on hover.
-        - A ``km-radius-normal-bg`` class sets a block on the code background,
-          with rounded corners, the width of the text.
-        - ``license`` names the content's licence in the footer, with a link
-          when given one: ``{"name": "CC BY 4.0", "url": "https://..."}``.
-        - ``show_kaamiki_theme`` adds a line naming the theme to the footer,
-          the way ``html_show_sphinx`` names Sphinx.
-        - ``button`` takes ``:new-tab:``, ``:no-new-tab:``, ``:rel:``,
-          ``:title:``, ``:download:`` and ``:class:``. ``button_scheme`` and
-          ``button_icon_position`` set the ones a button does not say and
-          ``button_colours`` names colours for ``:scheme:``, like
-          ``{"purple": "#7c3aed"}``.
-        - ``author`` takes ``:avatar-size:``, ``:interval:``,
-          ``:hide-reading-time:`` and ``:hide-copy-url:``, which hide what
-          the byline shows without them.
-        - ``release`` takes ``:date:``, ``:url:`` and ``:article-label:``.
-          ``release_version_fmt`` says how a version spells its date and
-          ``release_kinds`` gives a group of its own a colour.
-        - ``video`` takes ``:sources:``, ``:poster:``, ``:preload:``,
-          ``:loop:``, ``:muted:``, ``:hide-controls:`` and ``:track:``.
-        - ``youtube`` takes ``:endat:``, ``:loop:``, ``:muted:``,
-          ``:hide-controls:``, ``:privacy:``, ``:language:``, ``:ratio:`` and
-          ``:click-to-load:``, which shows
-          the video's picture and loads the player once it is clicked.
-          ``youtube_privacy``, ``youtube_allow`` and
-          ``youtube_referrer_policy`` set the rest for the site.
-        - ``embed_iframe_hosts`` names the hosts an ``<iframe>`` may come
-          from and ``embed_css``, ``embed_js`` and ``embed_js_loading`` load
-          files on every page with an embed.
-        - ``thumbnail`` takes ``:grayscale:``.
-        - ``repository`` takes ``:hide-stars:`` and ``:hide-forks:``.
-        - An option says what the author wants by being there. A bare
-          ``:grayscale:`` or ``:new-tab:`` turns on what is off without it,
-          and ``:hide-*:`` or ``:no-*:`` turns off what is on without it. No
-          option takes ``true`` or ``false``.
-        - ``show_page_last_updated`` puts the day a page was last updated in
-          the feedback box. It is on once feedback is, and a page turns it
-          off with ``:km-show-page-last-updated: false``.
-        - A setting the theme cannot use stops the build with Python's own
-          error, rather than being worked around. A few settings take only
-          certain words or numbers (``fa_style``, ``embed_js_loading``,
-          ``button_icon_position``, ``logo_size``, ``show_more_after`` and
-          ``words_per_minute``), and the build says which. The warnings left
-          are ``kaamiki.pages``, ``kaamiki.embed`` and
-          ``kaamiki.walkthrough`` for ``suppress_warnings``.
-        - The paths in ``author`` and ``video`` count from the top of the
-          site, ``_static/cover.png`` or ``/_static/cover.png``, so they
-          reach the same file from every page.
-        - ``:km-fb-subject:`` sets the feedback mail's subject for a page.
-        - ``sharpie_colour``, ``underline_colour``, ``underline_width``,
-          ``underline_wobble`` and ``role_colours`` set what the ``sharpie``
-          and ``underline`` roles draw, and ``underline`` takes its width
-          and wobble after the colour, ``<red; width=3; wobble=0>``.
-        - ``walkthrough_limit``, ``walkthrough_timeout``,
-          ``walkthrough_memory``, ``walkthrough_output_limit``,
-          ``walkthrough_budget``, ``walkthrough_python``,
-          ``walkthrough_pythonpath``, ``walkthrough_events`` and
-          ``walkthrough_comprehensions`` say what a snippet may run with. A
-          snippet's own ``:limit:`` and ``:timeout:`` can lower them, never
-          go past them.
-        - ``walkthrough_cache`` keeps a trace next to the doctrees and uses
-          it again while the snippet, its options, the interpreter and the
-          installed packages stay the same.
-        - ``last_updated_on_fmt`` spells every date the theme shows, after
-          ``html_last_updated_fmt``. ``internal_hosts`` names hosts that count
-          as the site, ``logo_size`` sizes the logo and ``words_per_minute``
-          and the ``toctree_*`` settings replace what the templates had
-          written in.
-        - A page in no toctree, an orphan, names its own previous and next
-          pages with ``:km-pg-prev:`` and ``:km-pg-next:``. Sphinx works those
-          out from the toctree, so an orphan got no buttons at the bottom. An
-          article a ``release`` links to goes back to the release's page on
-          its own.
-        - ``feedback`` sets the feedback box's defaults and a page turns
-          any ``show_*`` setting on or off for itself with a field,
-          ``:km-show-feedback: false``. The page's field wins.
-        - Everything the theme writes reads in the site's ``language``. Its
-          own words come in a catalogue that joins Sphinx's, so a site's own
-          translation of one still wins and ``gettext`` now collects a
-          directive's text, a release's title and a page's ``:km-pg-*:``
-          and ``:km-fb-*:`` words.
+        - ``code-explain``, which scrolls a reader through a snippet a line at
+          a time with the values it held written beside it. Python is run at
+          build time, within limits on time, memory and the files it
+          writes. |new|
+        - ``code-version``, which shows the versions a piece of code went
+          through, the lines on their way out going red and the new ones
+          green. |new|
+        - ``carousel``, a scrolling row of blocks, figures, repositories,
+          thumbnails and buttons, with arrows and an optional auto-run. |new|
+        - ``accordion``, ``tabs``, ``columns`` and ``block``, which are
+          Kaamiki's own. |new|
+        - ``release``, which writes an entry like this one, with its date and
+          a link to the story behind it. |new|
+        - ``:swap:``, a role that swaps a word for the next one while it's on
+          screen. |new|
+        - A picture that's shown smaller than it is opens when you press it,
+          flying out from where it sits and back to where it is when it's
+          closed. ``kaamiki.conf.media.enlarge`` turns it off for a site,
+          ``:km-media-enlarge:`` for a page and ``km-no-enlarge`` for one
+          picture. |new|
+        - Cards at the end of every page for the pages around it, in place of
+          the previous and next buttons. A page names its own with
+          ``:km-related-docs:`` and ``:km-related-header:``. |new|
+        - A page loads in order: the title block first and then each section,
+          once. |new|
+        - ``kaamiki.conf`` settings for ``conf.py``, with fields that switch
+          the page-level ones for a single page. |new|
+        - An option says what you want by being there, so ``:new-tab:`` opens
+          a link in a new tab and ``:same-tab:`` keeps it in this one. |new|
+        - Roles of your own, built on Kaamiki's: ``.. role:: warn(sharpie)``.
+          |new|
+        - Icons that draw from Font Awesome Pro with a kit and from Free
+          without one. |new|
+        - ``sitemap.xml``, ``robots.txt`` and a ``404.html``, written by the
+          build. |new|
+        - Install it from PyPI as ``kaamiki-sphinx-theme`` on Python 3.14 or
+          newer. |new|
 
     Changed
-        - Every link that opens in a new tab says ``rel="noopener
-          noreferrer"``, the footer's too, and the footer's Kaamiki link
-          follows ``internal_hosts`` like the rest.
-        - ``show_last_updated_on`` is ``show_page_last_updated`` and
-          ``show_show_more`` is ``show_more``. The old names are no
-          longer read.
-        - The drawer lists what ``toctree_titles_only`` says, as the header
-          does, rather than the reverse.
-        - ``open_graph: {"enable": False}`` keeps the page's plain
-          ``<meta name="description">``.
-        - ``release_kinds`` names groups the theme does not colour itself,
-          and says so when it is given ``added`` or another it does.
-        - ``:km-fb-fa-icon:`` is ``:km-fb-icon:``, as ``feedback`` calls it.
-        - ``embed_iframe_hosts`` lets ``about:blank`` through.
-        - A feedback box with nowhere to send the reader is not drawn.
-        - ``Copied!!`` is ``Copied!``. The walkthrough's ``returns:`` and
-          ``error:`` marks, the repository's counts and an attempt's
-          ``Broke`` or ``Worked`` are words a catalogue can translate.
-        - ``header_buttons``, ``sidebar_buttons``, ``license`` and
-          ``feedback`` take ``url`` where some of them took ``link``, so
-          every setting that names an address names it the same way. Change
-          yours, as the old name is no longer read.
-        - ``mark`` is now ``sharpie``, as is its class and the
-          ``--sharpie-color`` it draws with.
-        - The thumbnail card is drawn in colour, unless ``:grayscale:`` asks
-          for grey. It used to be grey until hovered.
-        - sphinx-design's success colour is Kaamiki's green, with dark text
-          on it, so a ``bdg-success`` badge keeps 4.5:1.
-        - A setting that is read while pages are read, ``button_scheme`` and
-          ``walkthrough_limit`` among them, sends every page back through
-          reading when it changes. Sphinx only does that for settings it knows
-          about, so the old buttons stayed in the saved pages until a build
-          with ``-E``.
-        - What a page writes in ``author`` wins over ``html_context``, which
-          used to be poured over the options.
-        - A date may be written ``2026-10-05`` as well as ``5 October 2026``.
-        - A version that does not read as a date, ``v1.2.0`` say, no longer
-          fails ``release``. It shows without a date, unless ``:date:`` gives
-          one.
-        - The theme loads through Sphinx alone. A site that runs builders
-          other than HTML lists ``"kaamiki"`` in ``extensions``.
-        - A page shows as soon as the document is ready, so a stalled Font
-          Awesome kit, a slow image or a video cannot keep it blank.
-        - Every class the theme owns starts with ``km-`` and a page's own
-          fields are ``:km-pg-*:`` and ``:km-fb-*:``.
-        - A click anywhere on a heading copies its link and brings the
-          heading to the top, with the same "Copied!" the byline shows. The
-          link icon is gone, so a heading on a phone no longer breaks onto
-          another line for it.
-        - With ``add_copy_to_headerlinks`` on, a heading under a ``contents``
-          table no longer links back to it, so the click copies instead.
-        - Numbered and bullet lists draw each marker in a ring, with a line
-          running from one ring to the next. A list written in raw HTML keeps
-          its own look.
-        - Secondary buttons on a card or a ``km-radius-normal-bg`` block take
-          the muted fill, so they still stand out in the dark.
-        - The header is a little taller and its tint and blur fade out only
-          below its links, so the page scrolls under it without a line and
-          the links stay clear of it.
-        - The footer keeps to the 800px column. Its lines wrap on a wide
-          screen rather than squeezing up and stack on a phone.
-        - Buttons fade between their colours on hover rather than switching
-          at once.
-        - Links within a page, Show less and the back to top button glide
-          with the browser's own smooth scrolling and give way the moment you
-          scroll.
-        - The stylesheets go through ``lightningcss`` as the build finishes,
-          so nesting reaches Safari 15 as rules it can read.
-        - ``sphinx_design``'s stylesheet and tab script only go to pages that
-          use them, which saves the rest about 50 KB.
-        - Links in prose carry a faint underline, which darkens on hover.
-        - Reloading a folded page finds it as it was left: opened if it had
-          been and where it had been read to.
-        - A site's ``templates_path`` can replace ``author.html.jinja`` and
-          the rest, the way it replaces ``layout.html``.
-        - The text in ``button``, ``video``, ``youtube``, ``thumbnail`` and
-          ``author`` is read as rST, so a substitution or a role in a label
-          or a caption shows the way it would in a paragraph.
-        - Dates read in the site's ``language`` and the same way everywhere,
-          ``05 October 2026`` in English, under a page and beside a release.
-        - Dropdowns open and close smoothly however long they are and the
-          plus turns back the moment one starts to close.
-        - The header's menus and a newly picked tab fade in rather than
-          popping up and Show more glides down with the page it unfolds.
-        - Tab titles sit on one line in a rounded strip, which scrolls
-          sideways on a phone rather than wrapping and the picked tab's
-          fill slides across to it.
-        - A card's link is a round button with an arrow. Its text is left
-          for screen readers.
-        - The 404 page is a plain one, a line and a button home. A
-          ``404.html`` in the site's ``templates_path`` replaces it.
-        - The title badge only shows when ``fa_icons`` names one.
-        - A release's groups keep their colours when their headings are
-          written in the site's ``language``.
-        - A page fades in block by block a little more slowly, so each part
-          can be seen arriving.
-        - The stylesheets are 814 lines lighter: what was left of the
-          Tailwind build they started as, rules for markup the theme no
-          longer writes and declarations a later rule always overrode.
-        - Borders are gone, except on the byline, the release timeline, the
-          phone menu's edge, inline code, the header's menus, table rows and
-          the strip of tab titles. Everything else stands apart by its fill,
-          lighter in the dark, so nothing sinks into an OLED screen's black.
-        - Text, code and tables sit in an 800px column, while pictures and
-          videos keep the wider 861px.
-
-    Fixed
-        - In Firefox, a jump past a walkthrough lands where it was asked to.
-        - Tabs work from the keyboard.
-        - The copy buttons work on a plain HTTP address, where the clipboard
-          API is missing.
-        - A ``mailto:`` link no longer opens an empty tab.
-        - A ``thumbnail`` with both ``:title:`` and ``:channel:`` keeps them,
-          rather than having YouTube's written over them.
-        - A heading's "Copied!" fades out where it showed, rather than
-          jumping aside as it goes.
-        - Back after a link within the page returns to where you clicked it.
-        - Tabbing back up a page no longer leaves the focused link hidden
-          under the header.
-        - On a phone, tapping the page you are on in the menu closes the menu
-          and goes to the top.
-        - The back to top button jumps rather than glides when the system
-          asks for less motion.
-        - Admonition text keeps 4.5:1 against its box.
-        - On a wide screen, the sidebar and a release's date stay clear of
-          the header instead of slipping under it as the page scrolls.
-        - A lexer error in a code block no longer gets a red box around it.
-        - A code block's "Copied!" shows in green again. Kaamiki's grey had
-          covered it.
-        - A centred heading sits in the middle, not 2px to the left of it.
-        - A hand-drawn underline comes out the same wherever the site is
-          built. It used to depend on the folder the build ran in.
+        - Kaamiki loads the way Sphinx expects: name ``kaamiki`` in
+          ``extensions`` and in ``html_theme``. One without the other stops
+          the build with an error that says what to change.
+        - Kaamiki is dark by default, with a light side and the device's own
+          setting, and set in Inter, with fills instead of borders.
+        - The title, the lead and the byline are left aligned, the byline in
+          one row, with the page's language only when you ask with
+          ``:show-language:`` and a faint glow behind the title of a page
+          without a ``:backdrop:``.
+        - Breadcrumbs show only on a page inside another: the pages above it
+          and then its own name, with no home link, since the logo goes home.
+        - A page shows as soon as its fonts are ready and never waits more than
+          two seconds.
+        - A YouTube player shows the video's picture with a play button and
+          loads on a click, from ``youtube-nocookie.com``.
+        - A directive in the wrong place stops the build, and so does a link
+          inside a link or ``:swap:`` inside one. Options and settings
+          outside their bounds stop it too, naming the line.
+        - The header's menus and a phone's menu list the branch you're in, so
+          a site of hundreds of pages builds quickly and its pages stay light.
+        - No page scrolls sideways. A table wider than the page scrolls inside
+          its own box and long inline code wraps.
+        - Pictures, figures, videos and the YouTube player stop at the text's
+          675px and sit in the middle of it. Only ``code-explain`` and
+          ``code-version`` are wider.
+        - The site's search leaves out the byline.
 
     Removed
-        - Light mode. Kaamiki is dark only: ``colour_mode``,
-          ``show_colour_modes``, the switch in the footer, its
-          ``:km-show-colour-modes:`` field, the ``dark_mode`` and
-          ``light_mode`` icons and the light colours are gone.
-          ``dark_logo`` is ``logo`` now,
-          ``light_logo`` is gone and a page prints as it shows.
-        - ``thumbnail_grayscale``. Write ``:grayscale:`` on the thumbnails
-          that need it.
-        - ``:same-tab:``, ``:controls:``, ``:mute:`` and the ``false`` that
-          ``:privacy:``, ``:comprehensions:``, ``:reading-time:`` and
-          ``:copy-url:`` once took.
-        - ``base.js``, a minified bundle of Alpine and clipboard.js with no
-          source behind it. ``theme.js`` does its work now.
-        - The ``picture`` directive, which no page used any more.
-        - ``--km-scroll-min`` and ``--km-scroll-max``, which timed the script
-          the browser's own scrolling replaced.
-        - The frame and dashed rules around the content and the line under
-          the header once a page has scrolled.
-        - ``youtube``'s ``:modestbranding:`` and ``:playsinline:``, which did
-          nothing and the ``modestbranding`` parameter YouTube stopped
-          reading in 2023.
-        - The undocumented ``km-no-zoom`` class. A picture zooms only when
-          it asks to, with ``km-zoom``.
-        - A colour picked under the September release is no longer read
-          back. That release stored one for every visitor, chosen or not.
-        - The footer's own "Content licensed under CC BY 4.0", which every
-          site using the theme showed. ``license`` puts one back.
-        - The ``permalink`` icon in ``fa_icons``, with the icon it named.
-        - The cal.com loader. A site booking calls through cal.com loads
-          its own script, through ``html_js_files``.
+        - The dependency on ``sphinx-design``, whose ``dropdown``, ``grid``,
+          ``card`` and ``tab-set`` are replaced by ``accordion``,
+          ``columns``, ``block`` and ``tabs``.
 
-.. release:: 2026.9.10
-    :title: Previews, folds and a 404 of its own
+.. release:: Previews, folds and a 404 of its own
+    :version: v2026.9.10
 
     Pages describe themselves to social sites, long pages fold up and the
     theme writes its own 404.
@@ -306,12 +113,12 @@
     Added
         - Open Graph and Twitter metadata, worked out from the page itself. A
           page's own fields win.
-        - A page longer than ``show_more_after`` minutes folds down to one
-          screenful, with a Show more button under it.
-        - ``fa_kit`` names the Font Awesome kit. It used to be hardcoded, so
-          every site using the theme loaded my kit off my quota.
+        - A page longer than ``kaamiki.conf.show.more_after`` minutes folds
+          down to one screenful, with a Show more button under it.
+        - ``kaamiki.conf.icons.kit`` names the Font Awesome kit. It used to be
+          hardcoded, so every site using the theme loaded the same kit.
         - The theme writes a ``404.html`` the site's host can serve, under
-          ``show_404``.
+          ``kaamiki.conf.show.not_found``.
 
     Changed
         - Every directive renders with escaping on, so a title carrying an
@@ -326,8 +133,8 @@
           draw social cards.
         - The "On this page" rail.
 
-.. release:: 2026.8.31
-    :title: ``iframe`` is now ``embed``
+.. release:: ``iframe`` is now ``embed``
+    :version: v2026.8.31
 
     Changed
         - The ``iframe`` directive is now ``embed``, since it covers inline
@@ -335,28 +142,28 @@
           ``iframe`` or the fragment's path, replacing ``:file:``.
         - An option's value may run over several indented lines.
 
-.. release:: 2026.6.27
-    :title: Backgrounds behind the byline
+.. release:: Backgrounds behind the byline
+    :version: v2026.6.27
 
     Added
-        - ``author`` takes ``:background:``, one or more pictures that fade
+        - ``byline`` takes ``:backdrop:``, one or more pictures that fade
           through behind the page's title.
 
-.. release:: 2026.4.24
-    :title: A byline that links anywhere
+.. release:: A byline that links anywhere
+    :version: v2026.4.24
 
     Changed
         - The byline's link is no longer tied to GitHub, so it can point at
           any profile.
 
-.. release:: 2026.3.17
-    :title: No more timestamps
+.. release:: No more timestamps
+    :version: v2026.3.17
 
     Removed
-        - ``author``'s ``:timestamp:`` option, which nothing ever rendered.
+        - ``byline``'s ``:timestamp:`` option, which nothing ever rendered.
 
-.. release:: 2026.2.14
-    :title: Kaamiki gets its name
+.. release:: Kaamiki gets its name
+    :version: v2026.2.14
 
     Changed
         - The theme has a name of its own, Kaamiki.
@@ -364,14 +171,14 @@
     Removed
         - Support for Algolia's DocSearch.
 
-.. release:: 2026.1.15
-    :title: A leaner byline
+.. release:: A leaner byline
+    :version: v2026.1.15
 
     Removed
-        - The email, bio and LinkedIn details from ``author``.
+        - The email, bio and LinkedIn details from ``byline``.
 
-.. release:: 2025.11.2
-    :title: Templates in a folder of their own
+.. release:: Templates in a folder of their own
+    :version: v2025.11.2
 
     Changed
         - The theme registers from ``base/templates`` rather than ``base``,
@@ -381,8 +188,8 @@
         - Kaamiki's overriding stylesheets load at priority 800 rather
           than 900.
 
-.. release:: 2025.10.19
-    :title: Settings through ``html_context``
+.. release:: Settings through ``html_context``
+    :version: v2025.10.19
 
     Changed
         - Everything the templates read comes through ``html_context`` and
@@ -398,8 +205,8 @@
           ``html_context``.
         - The ``tagged`` directive, which no page put to any real use.
 
-.. release:: 2025.9.8
-    :title: Thumbnails without scraping
+.. release:: Thumbnails without scraping
+    :version: v2025.9.8
 
     Changed
         - ``thumbnail`` reads a video's details from YouTube's oEmbed
@@ -409,8 +216,8 @@
         - Scraping YouTube with ``requests`` and BeautifulSoup, which broke
           whenever YouTube changed its markup and made builds very slow.
 
-.. release:: 2025.8.27
-    :title: Face tags
+.. release:: Face tags?!
+    :version: v2025.8.27
 
     Added
         - A ``tagged`` directive, which lays clickable face tags over an
@@ -419,16 +226,16 @@
     Changed
         - The "Last updated" date sits above the footer.
 
-.. release:: 2025.3.2
-    :title: A look for sphinx-design
+.. release:: A look for ``sphinx-design``
+    :version: v2025.3.2
 
     Added
         - Stylesheets that restyle ``sphinx_design``'s components to match
           the theme and ``sphinx_docsearch``'s too, until DocSearch went in
           February 2026.
 
-.. release:: 2025.2.21
-    :title: The first release
+.. release:: The very first release!
+    :version: v2025.2.21
 
     Added
         - Support for ``sphinxext-opengraph``, out of the box.
