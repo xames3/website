@@ -1,5 +1,5 @@
 .. role:: strike
-    :class: site-strikethrough
+    :class: am-strikethrough
 
 .. role:: html(raw)
     :format: html
@@ -13,14 +13,10 @@
 .. role:: python(code)
     :language: python3
 
-.. |bb| replace:: :html:`<span class="site-blinking-cursor"></span>`
-.. |recent| replace:: :html:`<span class="site-recent-post"></span>`
+.. |new| replace:: :html:`<span class="am-badge am-badge--new"
+   ><i class="fa-solid fa-sparkles" aria-hidden="true"></i
+   ><span class="sr-only">New</span></span>`
 
-.. |br| replace:: :html:`<br/>`
-
-.. |exp| replace:: :html:`<span class="km-badge km-badge--beta"
-   ><i class="fa-solid fa-flask"></i></span>`
-.. |new| replace:: :html:`<span class="km-badge km-badge--new"
-   ><i class="fa-solid fa-sparkles"></i></span>`
-.. |pop| replace:: :html:`<span class="km-badge"
-   ><i class="fa-solid fa-star"></i></span>`
+.. |pop| replace:: :html:`<span class="am-badge"
+   ><i class="fa-solid fa-star" aria-hidden="true"></i
+   ><span class="sr-only">Easter egg</span></span>`

@@ -1,28 +1,28 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April 2026
-.. Last updated on: 29 October 2026
+.. Last updated on: 08 November 2026
 
 :km-page-title: Thoughts on teaching
-:km-page-description: Teaching the same courses, but differently every single
-    time!
+:km-page-description: Lessons I didn't plan on teaching, but I re-learnt them
+    along the way.
 :km-page-type: article
 :km-page-image: https://i.imgur.com/83ZcICa.jpg
-:km-feedback-title: These were my thoughts on teaching. What about you?
+:km-feedback-title: These were my thoughts on teaching.
 :km-feedback-description: If you have any new ideas or suggestions about
-    teaching, please share. I'm always on the lookout for better ways to
-    teach my students.
-:km-feedback-button: Share your ways
+    teaching, please share.
+:km-feedback-button: Do tell
 :km-feedback-split:
+:km-related-docs: /changelog
 
 .. _academia-thoughts-on-teaching:
 
 ===============================================================================
-:fa-icon:regular:`seedling` Thoughts on teaching.
+:fa-icon:`seedling` Thoughts on teaching
 ===============================================================================
 
 .. rst-class:: km-text-lead
 
-    Lessons I didn't plan on teaching, but I re-learnt them along the way.
+    Teaching the same courses, but differently every single time!
 
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
@@ -40,7 +40,7 @@ Repetition, but never the same.
 -------------------------------------------------------------------------------
 
 .. rubric:: Teaching the same courses, but differently every single time!
-    :class: km-text-subsection
+    :class: km-text-subheader
 
 What came next was a whole year of teaching
 `CSS 225 Introduction to Applied Programming <https://nl.smartcatalogiq.com/en/
@@ -59,7 +59,7 @@ section gave me a new learning experience.
     I was involved in other courses too. But these two courses in specific
     stood out the most.
 
-The content (more of less) stayed the same. I mean, how often do you expect a
+The content (more or less) stayed the same. I mean, how often do you expect a
 programming language curriculum to change? But the classes were yet different.
 Every quarter, the pacing was different, the questions were different, the
 amount of time spent on some topics was different, the assignments were
@@ -68,10 +68,10 @@ lectures were conducted exactly as planned and sometimes they were simply
 "strange"?!
 
 And somewhere in that strange unpredictability, I found the part I enjoyed the
-most my students!
+most was my students!
 
-.. rubric:: :fa-icon:regular:`backward-fast` Looking back
-    :class: km-text-pre-section
+.. rubric:: :fa-icon:`backward-fast` Looking back
+    :class: km-text-preheader
 
 .. _students-who-made-it-memorable:
 
@@ -82,7 +82,7 @@ Students who made it memorable.
 .. rubric:: They brought their **humour**, their **hobbies**, their **side
     comments** and some of their perfectly timed jokes that derailed the whole
     class in the best way possible.
-    :class: km-text-subsection
+    :class: km-text-subheader
 
 Some students brought in their questions. Ooh, those questions?!
 
@@ -114,17 +114,17 @@ picking up new things and new perspectives. Things like new games I've never
 heard of, music I wouldn't have found on my own, hobbies like baking that
 reminded me of how much there's to learn outside my comfort zone.
 
-The learning and teaching happened in both directions. Every time I learned
+The learning and teaching happened in both directions. Every time I learnt
 something new, I felt like I was able to teach and explain things more
 effectively from both my successes and failures.
 
-.. rubric:: :fa-icon:regular:`seedling` Growth, gratitude and moments
-    :class: km-text-pre-section
+.. rubric:: :fa-icon:`seedling` Growth, gratitude and moments
+    :class: km-text-preheader
 
 .. _a-year-shaped-by-people:
 
 -------------------------------------------------------------------------------
-A year shaped by :rotate:`students|mentors|friends|colleagues`.
+A year shaped by :swap:`students|mentors|friends|people`.
 -------------------------------------------------------------------------------
 
 Again, looking back, I'm seeing my lectures and classrooms in a much different

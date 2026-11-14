@@ -1,0 +1,1462 @@
+.. Author: Akshay Mestry <xa@mes3.dev>
+.. Created on: 12 November 2026
+.. Last updated on: 12 November 2026
+
+:km-page-title: CSS 225 learning outcomes, draft 4
+:km-page-description: Draft 4 of the course and module learning
+    outcomes for CSS 225 Introduction to Applied Programming, with PRIMM
+    and a gentle start built in.
+:km-header-subheader: Draft 4, staged weeks, six course outcomes
+:km-feedback-title: Does an outcome need changing?
+:km-feedback-description: Tell me which outcome and what you'd change.
+:km-feedback-button: Tell me
+
+.. _css225-draft-4:
+
+===============================================================================
+:fa-icon:regular:`map` CSS 225 learning outcomes: draft 4
+===============================================================================
+
+.. rst-class:: km-text-lead
+
+    Staged weeks: the module outcomes climb PRIMM.
+
+.. byline:: Akshay Mestry
+    :avatar: https://i.imgur.com/hUhxigb.jpeg
+    :target: https://github.com/xames3
+    :hide-source:
+
+.. admonition:: :fa-icon:solid:`badge-check km-tone--red` Status: **Draft**
+    :class: site-unusual-one note
+
+    Draft for instructor critique. Assessments are intentionally not included
+    yet.
+
+Draft 4 builds on draft 2. It keeps the six course learning outcomes (CLOs),
+with the IDE and the AI assistant kept out of them, and adds what draft 2
+lacked: PRIMM as the way every week works, a gentler way into programming, and
+a clear line from each week's goal to its module learning outcomes (MLOs) and
+CLOs.
+
+This is the Staged weeks version. The MLOs are rewritten so that each module's
+four climb PRIMM: x.1 predict and run, x.2 investigate, x.3 modify, x.4 make. A
+week is one arc.
+
+Drafts 3, 4, and 5 are three versions of the same idea, to choose between or
+borrow from. They share the CLOs, the toolkit, and the weekly hooks, and differ
+in how PRIMM is arranged; the comparison near the end sets them side by side.
+Each of the 10 weekly modules has four MLOs, 40 in all, and every MLO names the
+earlier MLOs it builds on.
+
+Worked examples for every module are on the draft 4 examples page, linked under
+each module below. Assessments come later, once the outcomes are agreed.
+
+.. rubric:: Reading the tables
+
+- **Builds on** lists the earlier MLOs a student needs first. "Prior math"
+  means the algebra students bring from school.
+
+- **CLO** lists the course learning outcomes the MLO serves. Each CLO is
+  explained in "MLOs by course outcome" below.
+
+- **PRIMM step** is the stage the MLO is: predict and run, investigate, modify,
+  or make.
+
+- **AI assistant** means the one built into the IDE: JetBrains AI Assistant in
+  PyCharm, or GitHub Copilot in VS Code.
+
+.. _css225-draft-4-clos:
+
+-------------------------------------------------------------------------------
+The course learning outcomes.
+-------------------------------------------------------------------------------
+
+Six CLOs, unchanged from draft 2. Each maps to PLO-1 and PLO-2, as in the
+proposal.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 12 60 20
+
+    * - CLO
+      - Name
+      - Outcome
+      - PLO
+    * - CLO-1
+      - Basics
+      - Write and run Python programs that compute with variables, expressions,
+        and built-in types, take input, and produce exact output.
+      - PLO-1, PLO-2
+    * - CLO-2
+      - Control
+      - Write programs that make decisions and repeat actions using Boolean
+        logic, selection, and loops.
+      - PLO-1, PLO-2
+    * - CLO-3
+      - Functions
+      - Write functions that break a problem into reusable parts, and organize
+        code for reuse in modules and simple classes.
+      - PLO-1, PLO-2
+    * - CLO-4
+      - Data
+      - Store, retrieve, and process data using lists, dictionaries, tuples,
+        sets, and text files, and choose the structure that fits the task.
+      - PLO-1, PLO-2
+    * - CLO-5
+      - Evaluate
+      - Evaluate programs by predicting and tracing how they run, testing them
+        with typical and boundary cases, debugging defects, and comparing
+        alternative implementations.
+      - PLO-1, PLO-2
+    * - CLO-6
+      - Solve
+      - Solve an unfamiliar problem by combining functions, data structures,
+        and files, and make the solution handle errors and bad input safely.
+      - PLO-1, PLO-2
+
+.. rubric:: Why these six
+
+- They follow the catalog description: data types and expressions (CLO-1),
+  conditions and loops (CLO-2), procedures and modularity (CLO-3), and methods
+  of program design (CLO-6), plus data (CLO-4) and evaluating programs (CLO-5).
+
+- Each CLO names one kind of thing a student can do by the end of the course,
+  so each can be assessed and reported on its own.
+
+- Tools and AI are not CLOs. Students use PyCharm and an AI assistant all term,
+  but they are the means, not the outcome. The MLOs that involve them serve the
+  CLOs they help with.
+
+- The old CLO-2 named three topics and left out functions, selection, strings,
+  and files, so it is split into CLO-2 (control), CLO-3 (functions and
+  classes), and CLO-4 (data).
+
+- Python compiles a file to bytecode by itself, so "compile" isn't something
+  students do. CLO-1 says write and run instead, and the compile-then-run idea
+  is something students explain, under CLO-5.
+
+.. _css225-draft-4-plos:
+
+-------------------------------------------------------------------------------
+How the CLOs reach the PLOs.
+-------------------------------------------------------------------------------
+
+The proposal asks for the PLOs a course serves to be in bold, and only PLO-1
+and PLO-2 are. So every CLO maps to those two, as in the proposal. This table
+shows which part of each PLO each CLO serves. PLO-2's "software tools" is
+served through CLO-3 and CLO-5, since the IDE and the AI assistant are not CLOs
+of their own.
+
+**PLO-1.** Identify, explain, analyze, and apply fundamental computer
+information systems concepts such as hardware, networking, software,
+programming, security, and data management.
+
+**PLO-2.** Use software tools and techniques such as application programming,
+web development, database development, information systems security
+development, and analysis techniques.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 45 45
+
+    * - CLO
+      - PLO-1: fundamental concepts
+      - PLO-2: software tools and techniques
+    * - CLO-1
+      - Programming. Hardware: why ``0.1 + 0.2`` isn't ``0.3``, which is how a
+        computer stores numbers.
+      - Application programming: writing and running programs.
+    * - CLO-2
+      - Programming: the logic every language shares.
+      - Application programming.
+    * - CLO-3
+      - Software: how it is built from functions, modules, and classes, and how
+        it reuses libraries.
+      - Application programming. Software tools: modules, packages, and the
+        package manager.
+    * - CLO-4
+      - Data management: lists, dictionaries, and files as ways to store data.
+      - Application programming with stored data.
+    * - CLO-5
+      - Analyze: explain what code does, and how Python compiles and runs it.
+      - Analysis techniques: tracing, testing, and timing. Software tools: the
+        debugger and the AI assistant, whose output is checked.
+    * - CLO-6
+      - Security: validating input and failing safely (Week 9).
+      - Application programming: a complete program for an unfamiliar problem.
+
+Not claimed: networking, web development, and database development, which later
+courses cover, and PLO-3 to PLO-6, which the proposal doesn't mark for this
+course.
+
+.. _css225-draft-4-primm:
+
+-------------------------------------------------------------------------------
+PRIMM in this course.
+-------------------------------------------------------------------------------
+
+Every week follows PRIMM (Sentance, Waite and Kallia, 2019): students Predict
+what code will do, Run it to check, Investigate why it behaved that way, Modify
+it in small steps, and finally Make something of their own. Reading and tracing
+come before writing, so students are never asked to produce code they haven't
+first understood. The MLO says what students can do; the PRIMM stages are how
+they get there.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 12 36 24 28
+
+    * - Stage
+      - What students do
+      - What it builds
+      - How it eases in
+    * - Predict
+      - Write down what given code will do before running it, alone and then
+        with a partner.
+      - Predicting and tracing.
+      - The code is short, and already works.
+    * - Run
+      - Run it and compare with the prediction.
+      - Checking, and reading output and errors.
+      - A wrong prediction is expected, and never graded.
+    * - Investigate
+      - Explain why it behaved that way: trace it, annotate it, experiment with
+        it.
+      - Explaining and comparing.
+      - Guiding questions are given.
+    * - Modify
+      - Change the working code in small steps, predicting each change.
+      - Fixing and extending.
+      - One change at a time.
+    * - Make
+      - Write something new from the same ideas.
+      - Writing, building, and solving.
+      - Help fades from Complete it to Design it.
+
+In this version the PRIMM stages are the MLOs. A module's four MLOs are x.1
+predict and run, x.2 investigate, x.3 modify, and x.4 make, so a week is one
+PRIMM arc and the MLO table itself shows the climb from reading to writing. The
+MLOs are rewritten to fit.
+
+.. _css225-draft-4-ease:
+
+-------------------------------------------------------------------------------
+Easing in.
+-------------------------------------------------------------------------------
+
+The target is the same for everyone. What changes is how gently students get
+there.
+
+- **One new idea at a time.** Each MLO is met on its own, with a hook that
+  raises a question rather than adding content.
+
+- **Read before you write.** Students predict, run, and investigate code that
+  already works before they change it, and change it before they write their
+  own. The first thing they write is half-finished.
+
+- **Help fades on a ramp.** The Make step starts as Complete it in Weeks 1 and
+  2 and ends as Design it in Week 10, so nobody meets a blank page before they
+  can use it.
+
+- **Mistakes are data.** Students keep a prediction log for the first four
+  weeks, a wrong prediction is never marked down, and each week names an error
+  to meet on purpose.
+
+- **Setup comes before Week 1.** A setup checklist (Python 3.12 or newer,
+  PyCharm, the ``css225`` project, AI code completion off) goes out a week
+  early, and the first 15 minutes of Week 1 help anyone who hasn't finished it.
+
+- **Core and stretch.** Every cycle has one stretch task for students who have
+  programmed before. The core is all an MLO needs.
+
+.. rubric:: The Make ramp
+
+Help with the Make step fades over the term, in four levels:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 80
+
+    * - Level
+      - What it means
+    * - Complete it
+      - A nearly finished program with a few gaps, or shuffled lines to put in
+        order.
+    * - Extend it
+      - A working starter file, with comments saying where each new piece goes.
+    * - Build it
+      - A plain-language spec and checks to pass; you write the code.
+    * - Design it
+      - The problem only; you choose the structure and write your own checks.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 16 44 32
+
+    * - Week
+      - Make
+      - What is given
+      - Students decide
+    * - 1
+      - Complete it
+      - The variable names and the print lines. Students fill in the two
+        conversion expressions.
+      - The conversions.
+    * - 2
+      - Complete it
+      - A badge template with the frame drawn and gaps for the values.
+      - What the badge says.
+    * - 3
+      - Extend it
+      - The toolkit functions and an outline of the questions and the summary.
+      - How the functions fit together.
+    * - 4
+      - Extend it
+      - A skeleton with a docstring and one ``assert`` as a model.
+      - The rule and the conditions.
+    * - 5
+      - Extend it
+      - A starter file with ``import random`` and a comment marking each
+        missing piece.
+      - The loop and when it stops.
+    * - 6
+      - Extend it
+      - The data, and the shape of the report.
+      - The loops and the lookups.
+    * - 7
+      - Build it
+      - A plain-language spec and checks for each command.
+      - The code.
+    * - 8
+      - Build it
+      - Last week's to-do list and its checks.
+      - Which standard-library tools to use.
+    * - 9
+      - Build it
+      - A spec and checks for each helper, including the bad-input cases.
+      - How and where to handle each error.
+    * - 10
+      - Design it
+      - The problem statement only.
+      - The structure, the checks, and which suggestions to keep.
+
+.. _css225-draft-4-align:
+
+-------------------------------------------------------------------------------
+From goal to CLO.
+-------------------------------------------------------------------------------
+
+Every week starts from a goal in a student's words, and every activity points
+back to an MLO and a CLO.
+
+- **Course to week.** Each CLO is served by MLOs in at least two modules (see
+  Coverage).
+
+- **Week to activity.** Every PRIMM step on the examples page sits under one
+  MLO, and every Make lists the MLOs it uses.
+
+- **Activity to evidence.** Every goal names what students have at the end,
+  which shows they reached it. None of it is graded yet; assessments come
+  later.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 6 40 10 20 24
+
+    * - Week
+      - Goal
+      - MLOs
+      - CLOs
+      - Students show it by
+    * - 1
+      - Run Python, predict what a few lines of code will do, and check your
+        prediction.
+      - 1.1-1.4
+      - CLO-1, CLO-5
+      - A unit converter
+    * - 2
+      - Control exactly what a program prints, find out what built-in functions
+        take and give back, and read an error message well enough to fix the
+        mistake.
+      - 2.1-2.4
+      - CLO-1, CLO-5
+      - A name badge
+    * - 3
+      - Turn repeated code into a function, say what a call gives back, and use
+        the debugger to follow a call.
+      - 3.1-3.4
+      - CLO-3, CLO-5, CLO-6
+      - A tip-and-split calculator
+    * - 4
+      - Write a function that makes a decision, and check it with tests that
+        include the boundaries.
+      - 4.1-4.4
+      - CLO-1, CLO-2, CLO-3, CLO-5
+      - A "can I?" checker
+    * - 5
+      - Make a program repeat, know when it will stop, and write your own
+        ``range``.
+      - 5.1-5.4
+      - CLO-2, CLO-5
+      - FizzBuzz or a times-table quiz
+    * - 6
+      - Keep many values in a list or a dictionary, pick the structure that
+        fits, and spot two names for one list.
+      - 6.1-6.4
+      - CLO-4, CLO-5
+      - A gradebook
+    * - 7
+      - Write functions that work on collections, build a stack and a queue
+        from a list, and test the empty, one-item and many-item cases.
+      - 7.1-7.4
+      - CLO-3, CLO-4, CLO-5
+      - A console to-do list
+    * - 8
+      - Use what Python already provides, compare it fairly with your own
+        versions, and check code you didn't write.
+      - 8.1-8.4
+      - CLO-3, CLO-5
+      - The to-do list rewritten with ``deque`` and ``Counter``
+    * - 9
+      - Make a program survive bad input, remember things in a file, and make a
+        function fail clearly instead of giving a wrong answer.
+      - 9.1-9.4
+      - CLO-2, CLO-4, CLO-5, CLO-6
+      - The finished game
+    * - 10
+      - Read a class, use a package someone else wrote, and solve a problem you
+        haven't seen with everything you've built.
+      - 10.1-10.4
+      - CLO-3, CLO-5, CLO-6
+      - An unfamiliar problem, solved
+
+.. _css225-draft-4-ai:
+
+-------------------------------------------------------------------------------
+AI across the term.
+-------------------------------------------------------------------------------
+
+The AI assistant comes in step by step, and it is used inside the outcomes it
+helps with rather than being an outcome itself. Every MLO that involves it asks
+students to check what it says: the assistant suggests, and the trace and the
+tests decide. 4.2, 7.2, 8.2, 9.2, and 10.4 serve CLO-5, and 9.2 and 10.4 also
+serve CLO-6.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 10 80
+
+    * - Week
+      - MLO
+      - What students do with the AI assistant
+    * - 1-3
+      - 1.1
+      - Nothing: AI completion is turned off at setup, so students type every
+        line themselves.
+    * - 4
+      - 4.2
+      - Ask it to explain a failing test, then check the explanation by tracing
+        the code.
+    * - 7
+      - 7.2
+      - Ask it for test cases, and keep only the ones that add something.
+    * - 8
+      - 8.2
+      - Test and fix code an AI wrote.
+    * - 9
+      - 9.2
+      - Ask it for fixes, and accept them only when the tests pass.
+    * - 10
+      - 10.4
+      - Judge its suggestions while solving an unfamiliar problem.
+
+In person, the assistant is used only in instructor-led moments: the instructor
+asks it on the projector and the class judges the answer. Online students may
+use it freely from Week 4, and the same MLOs ask them to check its answers.
+Weeks 5 and 6 have no AI MLO.
+
+.. _css225-draft-4-module-1:
+
+-------------------------------------------------------------------------------
+Module 1: The interpreter, PyCharm, and expressions.
+-------------------------------------------------------------------------------
+
+By the end of the week you can run Python, predict what a few lines of code
+will do, and check your prediction. This module has MLOs 1.1 to 1.4, serving
+CLO-1 and CLO-5.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 1.1
+      - Set up a PyCharm project with a Python 3.12+ interpreter and AI code
+        completion turned off, then predict and check, in the Python Console
+        and in a saved script, the results of arithmetic expressions involving
+        precedence, ``/`` and ``//``, ``%``, ``**``, and floats such as
+        ``0.1 + 0.2``.
+      - prior math
+      - CLO-1, CLO-5
+      - Predict and run
+    * - 1.2
+      - Investigate surprising results (``-7 // 2``, ``round(2.5)``,
+        ``x = x + 1``) by tracing a sequence of assignments in a table of
+        variable values, and explain each one in your own words.
+      - 1.1, prior math
+      - CLO-1, CLO-5
+      - Investigate
+    * - 1.3
+      - Modify a short script by changing its values, expressions, and variable
+        names, predicting each change's effect before running it and explaining
+        any difference.
+      - 1.1, 1.2
+      - CLO-1, CLO-5
+      - Modify
+    * - 1.4
+      - Write a short script that stores values in variables and computes new
+        ones, such as converting temperature and distance units, and compare
+        its output with a prediction made first.
+      - 1.1, 1.2, 1.3
+      - CLO-1
+      - Make
+
+.. _css225-draft-4-module-2:
+
+-------------------------------------------------------------------------------
+Module 2: Output, strings, and function calls.
+-------------------------------------------------------------------------------
+
+By the end of the week you can control exactly what a program prints, find out
+what built-in functions take and give back, and read an error message well
+enough to fix the mistake. This module has MLOs 2.1 to 2.4, serving CLO-1 and
+CLO-5.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 2.1
+      - Predict, then run, what ``print`` shows when given ``sep``, ``end``,
+        f-strings, and escape sequences (``\n``, ``\t``, ``\\``, ``\"``),
+        character by character.
+      - 1.3, 1.4
+      - CLO-1, CLO-5
+      - Predict and run
+    * - 2.2
+      - Investigate, by experimenting in the Python Console, what goes into and
+        what comes back from built-in functions and string methods (``print``,
+        ``input``, ``len``, ``type``, ``int``, ``.upper()``), including that
+        ``print`` returns ``None`` and ``input`` returns a string.
+      - 1.2, 2.1
+      - CLO-1, CLO-5
+      - Investigate
+    * - 2.3
+      - Fix defects in given programs using Python's error messages and
+        PyCharm's error highlighting, and explain why a ``SyntaxError`` stops a
+        file before any line runs while a ``NameError`` or ``TypeError``
+        appears partway through.
+      - 1.3, 2.2
+      - CLO-5
+      - Modify
+    * - 2.4
+      - Write a program that asks for input and prints formatted output, such
+        as a receipt or a name badge, using f-strings, escape sequences, and
+        ``int``.
+      - 1.4, 2.1, 2.2, 2.3
+      - CLO-1
+      - Make
+
+.. _css225-draft-4-module-3:
+
+-------------------------------------------------------------------------------
+Module 3: Writing functions.
+-------------------------------------------------------------------------------
+
+By the end of the week you can turn repeated code into a function, say what a
+call gives back, and use the debugger to follow a call. This module has MLOs
+3.1 to 3.4, serving CLO-3, CLO-5, and CLO-6.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 3.1
+      - Predict what a call to a given function evaluates to, telling printing
+        from returning and parameters from arguments.
+      - 2.2, 2.3
+      - CLO-3, CLO-5
+      - Predict and run
+    * - 3.2
+      - Step through calls to a given function with PyCharm's debugger
+        (breakpoints, Step Into, Step Over, the Variables pane) to explain
+        control flow and local variables and find the cause of a wrong result.
+      - 1.2, 2.3, 3.1
+      - CLO-5
+      - Investigate
+    * - 3.3
+      - Modify given functions by adding a parameter, a default value, or a
+        ``return``, and compose them, passing one function's return value to
+        another, to solve a multi-step problem such as splitting a bill with
+        tax and tip.
+      - 3.1, 3.2
+      - CLO-3, CLO-6
+      - Modify
+    * - 3.4
+      - Define functions with parameters, default values, and ``return`` that
+        turn repeated calculations from Weeks 1 and 2 (a tip, bill splitting,
+        temperature conversion) into reusable functions.
+      - 1.4, 2.4, 3.3
+      - CLO-3
+      - Make
+
+.. _css225-draft-4-module-4:
+
+-------------------------------------------------------------------------------
+Module 4: Booleans and selection.
+-------------------------------------------------------------------------------
+
+By the end of the week you can write a function that makes a decision, and
+check it with tests that include the boundaries. This module has MLOs 4.1 to
+4.4, serving CLO-1, CLO-2, CLO-3, and CLO-5.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 4.1
+      - Predict, then run, the values of Boolean expressions and the results of
+        given ``if``/``elif``/``else`` code, including chained comparisons,
+        short-circuiting, and truthiness.
+      - 2.2, 3.1
+      - CLO-1, CLO-2, CLO-5
+      - Predict and run
+    * - 4.2
+      - Investigate a failing check: choose typical and boundary test cases for
+        a given function, check them with ``assert``, trace the code to find
+        the defect, and compare your explanation with an AI assistant's.
+      - 3.2, 4.1
+      - CLO-5
+      - Investigate
+    * - 4.3
+      - Modify given selection code by reordering its conditions, adding an
+        ``elif``, or turning a condition into a predicate that returns ``True``
+        or ``False``, and recheck it with the same tests.
+      - 4.1, 4.2
+      - CLO-2, CLO-3
+      - Modify
+    * - 4.4
+      - Write functions that choose between actions, including predicates such
+        as ``is_leap_year``, together with their own typical and boundary
+        tests.
+      - 3.4, 4.2, 4.3
+      - CLO-2, CLO-3
+      - Make
+
+.. _css225-draft-4-module-5:
+
+-------------------------------------------------------------------------------
+Module 5: Iteration.
+-------------------------------------------------------------------------------
+
+By the end of the week you can make a program repeat, know when it will stop,
+and write your own ``range``. This module has MLOs 5.1 to 5.4, serving CLO-2
+and CLO-5.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 5.1
+      - Predict, then run, the values produced by ``for`` loops over
+        ``range(start, stop, step)`` and the path a ``while`` loop takes
+        through a given guessing game.
+      - 3.1, 4.1
+      - CLO-2, CLO-5
+      - Predict and run
+    * - 5.2
+      - Investigate loops by tracing their variables to show that they end, and
+        explain what ``break``, ``continue``, and ``pass`` change.
+      - 3.2, 4.3, 5.1
+      - CLO-2, CLO-5
+      - Investigate
+    * - 5.3
+      - Modify the guessing game by adding a counter, quitting early with
+        ``break``, and skipping invalid guesses with ``continue``.
+      - 4.3, 5.2
+      - CLO-2
+      - Modify
+    * - 5.4
+      - Write ``my_range(start, stop, step)`` with a ``while`` loop, and test
+        it against the built-in ``range`` for positive, negative, and empty
+        cases.
+      - 3.4, 4.4, 5.2
+      - CLO-2, CLO-5
+      - Make
+
+.. _css225-draft-4-module-6:
+
+-------------------------------------------------------------------------------
+Module 6: Data structures.
+-------------------------------------------------------------------------------
+
+By the end of the week you can keep many values in a list or a dictionary, pick
+the structure that fits, and spot two names for one list. This module has MLOs
+6.1 to 6.4, serving CLO-4 and CLO-5.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 6.1
+      - Predict, then run, what indexing, slicing, and methods do to a list,
+        and what a lookup does in a dictionary, including when the key is
+        missing.
+      - 2.2, 5.1
+      - CLO-4, CLO-5
+      - Predict and run
+    * - 6.2
+      - Investigate, by testing in the console, which of a list, tuple, set,
+        and dictionary can change, keep their order, or allow duplicates, and
+        explain why ``b = a`` gives one list two names.
+      - 1.2, 3.2, 6.1
+      - CLO-4, CLO-5
+      - Investigate
+    * - 6.3
+      - Modify given programs to fix aliasing and missing-key bugs, and swap in
+        the data structure that fits the task.
+      - 5.3, 6.1, 6.2
+      - CLO-4, CLO-5
+      - Modify
+    * - 6.4
+      - Write a program that stores key-value data and lists, such as a
+        gradebook, and loops over it to report results.
+      - 5.1, 6.1, 6.3
+      - CLO-4
+      - Make
+
+.. _css225-draft-4-module-7:
+
+-------------------------------------------------------------------------------
+Module 7: Building with functions and data structures.
+-------------------------------------------------------------------------------
+
+By the end of the week you can write functions that work on collections, build
+a stack and a queue from a list, and test the empty, one-item and many-item
+cases. This module has MLOs 7.1 to 7.4, serving CLO-3, CLO-4, and CLO-5.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 7.1
+      - Predict, then run, what given functions on lists and dictionaries
+        return, including a ``my_enumerate`` that returns (index, item) tuples
+        and the push and pop of a stack.
+      - 3.1, 5.4, 6.1, 6.3
+      - CLO-4, CLO-5
+      - Predict and run
+    * - 7.2
+      - Investigate empty, single-item, and many-item inputs for given
+        collection functions, and judge the test cases an AI assistant
+        suggests, keeping the ones that add coverage.
+      - 4.2, 6.3, 7.1
+      - CLO-5
+      - Investigate
+    * - 7.3
+      - Modify given collection functions to fix the failures those tests find,
+        and turn a repeated loop into a function that takes and returns a
+        collection.
+      - 6.3, 7.1, 7.2
+      - CLO-3, CLO-4
+      - Modify
+    * - 7.4
+      - Write stack and queue operations as functions on a list (push, pop,
+        peek, enqueue, dequeue) and use them to build an undo feature and a
+        ticket line.
+      - 5.4, 7.1, 7.3
+      - CLO-3, CLO-4
+      - Make
+
+.. _css225-draft-4-module-8:
+
+-------------------------------------------------------------------------------
+Module 8: Modules, built-ins, and code you didn't write.
+-------------------------------------------------------------------------------
+
+By the end of the week you can use what Python already provides, compare it
+fairly with your own versions, and check code you didn't write. This module has
+MLOs 8.1 to 8.4, serving CLO-3 and CLO-5.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 8.1
+      - Predict, then run, what unfamiliar standard-library functions do
+        (``random``, ``math``, ``time``, ``collections``), checking each
+        against its documentation.
+      - 2.2, 5.1, 6.2
+      - CLO-3, CLO-5
+      - Predict and run
+    * - 8.2
+      - Investigate code you didn't write: compare your toolkit functions with
+        Python's built-ins and ``collections`` by running the same tests and
+        timing both, and test code an AI tool wrote to find where and why it
+        fails.
+      - 5.4, 7.2, 7.4, 8.1
+      - CLO-5
+      - Investigate
+    * - 8.3
+      - Modify your toolkit into a module that other files can import without
+        running its checks (``if __name__ == "__main__":``), and look at the
+        bytecode Python compiles it into.
+      - 3.4, 4.2, 8.1
+      - CLO-3, CLO-5
+      - Modify
+    * - 8.4
+      - Write a program that imports your toolkit and Python's ``collections``
+        to do last week's job in less code, such as a to-do list with ``deque``
+        and ``Counter``.
+      - 7.4, 8.1, 8.3
+      - CLO-3
+      - Make
+
+.. _css225-draft-4-module-9:
+
+-------------------------------------------------------------------------------
+Module 9: Errors and files.
+-------------------------------------------------------------------------------
+
+By the end of the week you can make a program survive bad input, remember
+things in a file, and make a function fail clearly instead of giving a wrong
+answer. This module has MLOs 9.1 to 9.4, serving CLO-2, CLO-4, CLO-5, and
+CLO-6.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 9.1
+      - Predict, then run, what a program does with bad input or a missing
+        file, and name the exception it raises.
+      - 2.3, 4.1, 5.1
+      - CLO-5
+      - Predict and run
+    * - 9.2
+      - Investigate how ``try``/``except`` (with ``else`` and ``finally``)
+        changes a program's flow, why ``max([])`` raises ``ValueError``, and
+        whether an AI assistant's suggested fix for ``my_max([])`` passes the
+        tests.
+      - 4.2, 5.2, 9.1
+      - CLO-5, CLO-6
+      - Investigate
+    * - 9.3
+      - Modify the guessing game and the toolkit so that they survive bad
+        input: use ``try``/``except`` inside a loop that keeps asking, and make
+        functions raise clear errors.
+      - 5.3, 7.3, 9.2
+      - CLO-2, CLO-6
+      - Modify
+    * - 9.4
+      - Write programs that keep asking until the input is valid and that read
+        and write text files with ``with open(..., encoding="utf-8")``, such as
+        ``read_int``, high scores, and word counts for a book, handling the
+        first run when the file doesn't exist.
+      - 6.4, 7.1, 8.3, 9.3
+      - CLO-4, CLO-6
+      - Make
+
+.. _css225-draft-4-module-10:
+
+-------------------------------------------------------------------------------
+Module 10: Objects, packages, and putting it together.
+-------------------------------------------------------------------------------
+
+By the end of the week you can read a class, use a package someone else wrote,
+and solve a problem you haven't seen with everything you've built. This module
+has MLOs 10.1 to 10.4, serving CLO-3, CLO-5, and CLO-6.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 8 50 14 16 12
+
+    * - MLO
+      - Outcome
+      - Builds on
+      - CLO
+      - PRIMM step
+    * - 10.1
+      - Predict, then run, what ``type()`` and ``dir()`` show for built-in
+        values, and read a simple ``Stack`` class, naming its ``__init__``,
+        attributes, and methods.
+      - 2.2, 6.1, 7.4
+      - CLO-3, CLO-5
+      - Predict and run
+    * - 10.2
+      - Investigate how a ``Stack`` class differs from the list-based stack of
+        Week 7, and how a third-party package such as ``rich`` is installed and
+        used from its documentation.
+      - 7.4, 8.3, 10.1
+      - CLO-3
+      - Investigate
+    * - 10.3
+      - Modify a provided ``Stack`` skeleton into a working class that passes
+        the Week 7 tests, and rebuild the Week 2 receipt with a third-party
+        package.
+      - 2.4, 7.3, 10.1, 10.2
+      - CLO-3
+      - Modify
+    * - 10.4
+      - Solve an unfamiliar problem by combining functions, collections, files,
+        and error handling, judging an AI assistant's suggestions along the
+        way, then test and debug the solution.
+      - 7.2, 8.2, 9.2, 9.3, 9.4
+      - CLO-5, CLO-6
+      - Make
+
+Examples
+
+.. _css225-draft-4-by-clo:
+
+-------------------------------------------------------------------------------
+MLOs by course outcome.
+-------------------------------------------------------------------------------
+
+The same MLOs grouped by course outcome. An MLO appears under every CLO it
+serves, with what it contributes to that CLO.
+
+.. rubric:: CLO-1: basics
+
+*Write and run Python programs that compute with variables, expressions, and
+built-in types, take input, and produce exact output.*
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 12 78
+
+    * - MLO
+      - Week
+      - How it serves this CLO
+    * - 1.1
+      - Week 1
+      - Runs code in the console and as a script, and meets numbers and
+        operators.
+    * - 1.2
+      - Week 1
+      - Variables and assignment.
+    * - 1.3
+      - Week 1
+      - Changes working code with confidence.
+    * - 1.4
+      - Week 1
+      - Writes a first script with variables and arithmetic.
+    * - 2.1
+      - Week 2
+      - Output formatting and strings.
+    * - 2.2
+      - Week 2
+      - Input, types, and what functions and string methods give back.
+    * - 2.4
+      - Week 2
+      - Writes a program that takes input and produces exact output.
+    * - 4.1
+      - Week 4
+      - Booleans as values: comparisons and logical operators.
+
+.. rubric:: CLO-2: control
+
+*Write programs that make decisions and repeat actions using Boolean logic,
+selection, and loops.*
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 12 78
+
+    * - MLO
+      - Week
+      - How it serves this CLO
+    * - 4.1
+      - Week 4
+      - The conditions that selection depends on.
+    * - 4.3
+      - Week 4
+      - Changes branching code.
+    * - 4.4
+      - Week 4
+      - Writes branching code and predicate functions.
+    * - 5.1
+      - Week 5
+      - Loops: what ``for`` and ``while`` repeat.
+    * - 5.2
+      - Week 5
+      - Loop control and counters.
+    * - 5.3
+      - Week 5
+      - Changes a working loop.
+    * - 5.4
+      - Week 5
+      - Writes a loop-based function to a specification.
+    * - 9.3
+      - Week 9
+      - Uses a loop and ``try``/``except`` to keep asking until the input is
+        valid.
+
+.. rubric:: CLO-3: functions
+
+*Write functions that break a problem into reusable parts, and organize code
+for reuse in modules and simple classes.*
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 12 78
+
+    * - MLO
+      - Week
+      - How it serves this CLO
+    * - 3.1
+      - Week 3
+      - Knows what a call gives back: printing versus returning.
+    * - 3.3
+      - Week 3
+      - Changes functions and builds a multi-step program from them.
+    * - 3.4
+      - Week 3
+      - Writes reusable functions.
+    * - 4.3
+      - Week 4
+      - Turns a condition into a predicate function.
+    * - 4.4
+      - Week 4
+      - Writes functions that other code relies on for decisions.
+    * - 7.3
+      - Week 7
+      - Turns repeated loops into functions.
+    * - 7.4
+      - Week 7
+      - Writes functions that other code builds on.
+    * - 8.1
+      - Week 8
+      - Reuses the standard library.
+    * - 8.3
+      - Week 8
+      - Organizes functions into a module and imports it.
+    * - 8.4
+      - Week 8
+      - Reuses your own module and the standard library together.
+    * - 10.1
+      - Week 10
+      - Meets objects and reads a simple class.
+    * - 10.2
+      - Week 10
+      - Compares a class with functions on a list, and meets a third-party
+        package.
+    * - 10.3
+      - Week 10
+      - Writes the methods of a class, and reuses a third-party package.
+
+.. rubric:: CLO-4: data
+
+*Store, retrieve, and process data using lists, dictionaries, tuples, sets, and
+text files, and choose the structure that fits the task.*
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 12 78
+
+    * - MLO
+      - Week
+      - How it serves this CLO
+    * - 6.1
+      - Week 6
+      - Lists and dictionaries.
+    * - 6.2
+      - Week 6
+      - Choosing the right data structure, and mutability.
+    * - 6.3
+      - Week 6
+      - Fixes and improves programs that store data.
+    * - 6.4
+      - Week 6
+      - Stores and reports on data with lists and dictionaries.
+    * - 7.1
+      - Week 7
+      - Collections inside functions, and tuples.
+    * - 7.3
+      - Week 7
+      - Fixes functions that process collections.
+    * - 7.4
+      - Week 7
+      - Stacks and queues, built from lists.
+    * - 9.4
+      - Week 9
+      - Text files, read and written, and the data in them.
+
+.. rubric:: CLO-5: evaluate
+
+*Evaluate programs by predicting and tracing how they run, testing them with
+typical and boundary cases, debugging defects, and comparing alternative
+implementations.*
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 12 78
+
+    * - MLO
+      - Week
+      - How it serves this CLO
+    * - 1.1
+      - Week 1
+      - Predicts a result, then checks it.
+    * - 1.2
+      - Week 1
+      - Traces variable values line by line and explains the surprises.
+    * - 1.3
+      - Week 1
+      - Compares every prediction with the result.
+    * - 2.1
+      - Week 2
+      - Predicts exactly what appears on the screen.
+    * - 2.2
+      - Week 2
+      - Finds out by experiment, then explains.
+    * - 2.3
+      - Week 2
+      - Reads error messages to locate and fix defects, and explains when
+        Python finds each kind.
+    * - 3.1
+      - Week 3
+      - Predicts what a function call evaluates to.
+    * - 3.2
+      - Week 3
+      - Debugs a wrong result by stepping through calls.
+    * - 4.1
+      - Week 4
+      - Predicts Boolean results and which branch runs.
+    * - 4.2
+      - Week 4
+      - Designs test cases, and traces the code to check an AI assistant's
+        explanation of a failing test.
+    * - 5.1
+      - Week 5
+      - Predicts exactly which values a loop produces.
+    * - 5.2
+      - Week 5
+      - Traces a loop to show that it ends.
+    * - 5.4
+      - Week 5
+      - Tests a function against a reference implementation.
+    * - 6.1
+      - Week 6
+      - Predicts results, including the errors.
+    * - 6.2
+      - Week 6
+      - Finds out by experiment, then explains.
+    * - 6.3
+      - Week 6
+      - Diagnoses mutation and aliasing bugs.
+    * - 7.1
+      - Week 7
+      - Predicts what collection functions return.
+    * - 7.2
+      - Week 7
+      - Tests edge cases, and judges which AI-suggested tests are worth
+        keeping.
+    * - 8.1
+      - Week 8
+      - Predicts from names and documentation, then checks.
+    * - 8.2
+      - Week 8
+      - Compares implementations, and finds where code someone else, or an AI,
+        wrote fails.
+    * - 8.3
+      - Week 8
+      - Sees how Python compiles a file to bytecode before running it.
+    * - 9.1
+      - Week 9
+      - Predicts failures, and reads the exception that results.
+    * - 9.2
+      - Week 9
+      - Explains how errors travel, and accepts an AI fix only when the tests
+        pass.
+    * - 10.1
+      - Week 10
+      - Predicts what ``type()`` and ``dir()`` show.
+    * - 10.4
+      - Week 10
+      - Judges AI suggestions, then tests and debugs the whole solution.
+
+.. rubric:: CLO-6: solve
+
+*Solve an unfamiliar problem by combining functions, data structures, and
+files, and make the solution handle errors and bad input safely.*
+
+.. list-table::
+    :header-rows: 1
+    :widths: 10 12 78
+
+    * - MLO
+      - Week
+      - How it serves this CLO
+    * - 3.3
+      - Week 3
+      - The first multi-step problem, solved by combining functions.
+    * - 9.2
+      - Week 9
+      - Decides how a function should fail.
+    * - 9.3
+      - Week 9
+      - Makes the game survive bad input, and makes functions fail with clear
+        errors.
+    * - 9.4
+      - Week 9
+      - Combines files, dictionaries, and functions to answer a question about
+        a real text.
+    * - 10.4
+      - Week 10
+      - Solves an unfamiliar problem with everything from the course.
+
+.. _css225-draft-4-coverage:
+
+-------------------------------------------------------------------------------
+Coverage.
+-------------------------------------------------------------------------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 16 6 6 6 6 6 6 6 6 6 6 8
+
+    * -
+      - M1
+      - M2
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+      - M10
+      - MLOs
+    * - CLO-1 (basics)
+      - X
+      - X
+      -
+      - X
+      -
+      -
+      -
+      -
+      -
+      -
+      - 8
+    * - CLO-2 (control)
+      -
+      -
+      -
+      - X
+      - X
+      -
+      -
+      -
+      - X
+      -
+      - 8
+    * - CLO-3 (functions)
+      -
+      -
+      - X
+      - X
+      -
+      -
+      - X
+      - X
+      -
+      - X
+      - 13
+    * - CLO-4 (data)
+      -
+      -
+      -
+      -
+      -
+      - X
+      - X
+      -
+      - X
+      -
+      - 8
+    * - CLO-5 (evaluate)
+      - X
+      - X
+      - X
+      - X
+      - X
+      - X
+      - X
+      - X
+      - X
+      - X
+      - 25
+    * - CLO-6 (solve)
+      -
+      -
+      - X
+      -
+      -
+      -
+      -
+      -
+      - X
+      - X
+      - 5
+
+Every CLO is served in at least two modules, as the course map template
+requires, and CLO-5 is served in every module. Every MLO serves at least one
+CLO, and the 40 MLOs carry 67 CLO tags in all.
+
+.. _css225-draft-4-compare:
+
+-------------------------------------------------------------------------------
+How the three versions compare.
+-------------------------------------------------------------------------------
+
+Drafts 3, 4, and 5 share the CLOs, the weekly hooks, the toolkit, the setup
+checklist, and the Make ramp. They differ in where PRIMM sits.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 14 24 24 20 18
+
+    * - Version
+      - PRIMM sits in
+      - A week looks like
+      - Strength
+      - Watch for
+    * - Draft 3: Cycles
+      - One PRIMM cycle per MLO. The MLOs are draft 2's, unchanged.
+      - Four cycles of about 25 minutes, then a Make that combines them.
+      - The closest to draft 2, so the safest to adopt. Students meet one idea
+        at a time.
+      - Four ideas in one session is a quick pace for novices.
+    * - Draft 4: Staged weeks
+      - PRIMM is in the MLOs themselves: x.1 predict and run, x.2 investigate,
+        x.3 modify, x.4 make.
+      - One arc: predict and run the week's ideas, investigate them, modify
+        them, then make.
+      - The clearest alignment. The MLO table shows the climb, and every week
+        has the same shape.
+      - Students read for the first hour of a session before they write, and
+        the MLOs are less specific.
+    * - Draft 5: Meet then own
+      - Students meet an idea one week and own it the next. The MLOs are draft
+        2's, unchanged.
+      - Own last week's ideas (modify, make), then meet this week's (predict,
+        run, investigate).
+      - The strongest on pacing: a week of settling sits between reading and
+        writing.
+      - Depends on students attending week after week, and Week 10 needs care.
+
+.. _css225-draft-4-changes:
+
+-------------------------------------------------------------------------------
+What changed from draft 2.
+-------------------------------------------------------------------------------
+
+.. list-table::
+    :header-rows: 1
+    :widths: 18 82
+
+    * - Where
+      - What changed
+    * - CLOs
+      - Unchanged from draft 2.
+    * - MLOs
+      - Rewritten so that x.1 is predict and run, x.2 investigate, x.3 modify,
+        and x.4 make, with each week's four ideas spread across them. Still
+        four MLOs a week, 40 in all.
+    * - AI
+      - Unchanged in what students do. The AI MLOs are now 4.2, 7.2, 8.2, 9.2,
+        and 10.4.
+    * - PRIMM
+      - A week is one PRIMM arc on the examples page: predict and run all four
+        ideas, investigate them, modify, then make.
+    * - Easing in, alignment
+      - The same Make ramp, setup checklist, prediction log, error of the week,
+        and goal tables as the other versions.
+    * - Look-backs
+      - The look-back questions keep their wording and are retagged to the new
+        MLO numbers.
+
+.. _css225-draft-4-provisional:
+
+-------------------------------------------------------------------------------
+Provisional choices to confirm or overturn.
+-------------------------------------------------------------------------------
+
+1. The proposal form showed "Reached max" after four CLOs. Check that it
+   accepts six before relying on this set.
+
+2. Neither the IDE nor AI literacy is a CLO. The proposal's rationale promises
+   AI literacy, and the catalog description says students "explore integrated
+   development environments (IDE)". Both now show up only in MLOs, so a
+   course-level report can't show them. The description ("write and compile
+   code") and the major topics list also need rewording to match.
+
+3. The setup checklist before Week 1 asks for about 30 minutes before the term.
+   If that isn't allowed, the first 15 minutes of Week 1 have to carry setup
+   alone.
+
+4. CLO-5 carries 25 of 40 MLOs, because the predict and investigate steps are
+   evaluating code. That is the cost of putting PRIMM in the MLOs. It stays in
+   every module, and the other five CLOs keep their spread.
+
+5. The staged MLOs are less specific than draft 2's, and 8.2 joins two ideas
+   (built-ins and AI-written code) because both are code you didn't write.
+
+6. Still open from before: where the final exam goes (10.4's kind of problem
+   could be its model), and which AI assistant licenses NLU covers.

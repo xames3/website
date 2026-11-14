@@ -1,21 +1,19 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February 2025
-.. Last updated on: 07 November 2026
+.. Last updated on: 08 November 2026
 
-:orphan:
 :km-page-title: Akshay Mestry
 :km-page-description: Stories from what I build, explainers and notes from
     the classroom.
 :km-page-type: website
-:km-page-image: https://avatars.githubusercontent.com/u/90549089?v=4
 :km-feedback-title: So... what do you think?
 :km-feedback-description: Got a question about teaching or a great film
-    I've somehow missed? Let me know.
+    I've somehow missed?
 :km-feedback-button: Say hello
 :km-feedback-icon: fa-solid fa-paper-plane
 :km-feedback-split:
 
-.. _home-page:
+.. _index:
 
 ===============================================================================
 Akshay Mestry
@@ -31,14 +29,15 @@ Akshay Mestry
     :backdrop: https://i.imgur.com/JOBRcgT.jpg,
         https://i.imgur.com/hUhxigb.jpeg,
         https://i.imgur.com/gcGHqxi.jpg,
-        https://i.imgur.com/weM4qDW.jpg
-    :hide-language:
+        https://i.imgur.com/weM4qDW.jpg,
+        https://i.imgur.com/aIQD5Bx.jpeg
 
 .. embed:: ./assets/html/greetings.html
-    :source: _static/greetings.json
+    :source: /_static/data/greetings.json
     :interval: 2800
     :duration: 700
     :stagger: 45
+    :js: styles/site.js
 
 I'm Akshay, an educator, engineer, avid cook and currently an Assistant
 Professor at `National Louis University`_. Before getting into academia, I
@@ -47,26 +46,21 @@ cheeky corner of the internet is where I dump all that: the wins and the
 mistakes, one story at a time.
 
 .. rubric:: :fa-icon:`compass-drafting` Build and share
-    :class: km-text-pre-section
+    :class: km-text-preheader
 
-.. _open-source:
+.. _love-for-open-source:
 
 -------------------------------------------------------------------------------
 Love for open source.
 -------------------------------------------------------------------------------
 
-I :fa-icon:solid:`heart km-tone--red` Open source!
+I :fa-icon:solid:`heart km-tone--red` open source!
 
 I fell into it by accident and I bloody loved it. It was and still is a
 personal reminder to share my struggles and achievements with everyone and
 invite collaboration. That naive belief in sharing took me into some brilliant
 research labs and projects, working under the guidance of some super-duper
 talented people in the industry.
-
-.. embed:: ./assets/html/contributed.html
-    :source: _static/contributed.json
-    :data-speed: slow
-    :data-direction: left
 
 In those labs I worked on machine learning models and optimised their
 user-facing libraries. These projects and sometimes our clients (big and/or
@@ -103,7 +97,7 @@ actually work under the hood.
     .. column::
         :span: 2
 
-        .. rubric:: Not on social media, but let's connect.
+        .. rubric:: Not on social media, but let's connect
 
     .. column::
         :span: auto
@@ -122,8 +116,8 @@ actually work under the hood.
 
             LinkedIn
 
-.. rubric:: :fa-icon:regular:`comments` Keep it simple, stupid
-    :class: km-text-pre-section
+.. rubric:: :fa-icon:`comments` Keep it simple, stupid
+    :class: km-text-preheader
 
 .. _teaching-philosophy:
 
@@ -152,7 +146,7 @@ credited to Dr Richard Feynman:
     If you want to master something, teach it.
 
 I went looking for where he actually said it and couldn't find a source, so
-take the credit with a pinch of salt. But I still think, he's right. You can't
+take the credit with a pinch of salt. But I still think he's right. You can't
 really call yourself an :abbr:`SME (Subject-matter expert)` until you can
 teach a concept to someone who knows nothing about it and still put up with
 their questions without getting cocky about how much you know.
@@ -160,12 +154,13 @@ their questions without getting cocky about how much you know.
 So far, I've taught...
 
 .. embed:: ./assets/html/currently-teaching.html
-    :source: _static/courses.json
+    :source: /_static/data/currently-teaching.json
     :prefix-text:
     :typing-speed: 120
     :deleting-speed: 80
     :pause-after-typing: 2000
     :pause-after-deleting: 1000
+    :js: styles/site.js
 
 My approach to teaching and mentoring has changed loads over the years. You
 can read the long versions in future blogs.
@@ -179,11 +174,14 @@ can read the long versions in future blogs.
     :titlesonly:
 
     academia/thoughts-on-teaching
+    css225
 
 .. toctree::
     :caption: Journal
     :hidden:
     :maxdepth: 1
+
+    journal/rebuilding-xsnumpy
 
 .. toctree::
     :caption: Explained
@@ -195,10 +193,16 @@ can read the long versions in future blogs.
     :hidden:
     :maxdepth: 1
 
+    docs/kaamiki/index
+
 .. toctree::
     :caption: Extras
     :hidden:
     :maxdepth: 1
+
+    extras/best-of-youtube
+    extras/guiding-stars
+    extras/questions-i-get-asked
 
 .. toctree::
     :hidden:
