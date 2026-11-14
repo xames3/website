@@ -4,7 +4,7 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 02 November 2026
+Last updated on: 08 November 2026
 
 The Sphinx configuration for my website. Sphinx is a documentation
 generator; I use it as a teaching and learning platform instead.
@@ -27,9 +27,9 @@ author: t.Final[str] = "Akshay Mestry"
 # https://reproducible-builds.org/specs/source-date-epoch/
 epoch: t.Final[str | None] = os.environ.get("SOURCE_DATE_EPOCH")
 year: t.Final[int] = (
-    dt.fromtimestamp(int(epoch), UTC) if epoch else dt.now()
+    dt.fromtimestamp(int(epoch), UTC) if epoch else dt.now(UTC)
 ).year
-project_copyright: str = f"© 2025-{year} {author}."
+project_copyright: str = f"\u00a9 2025-{year} {author}."
 source: t.Final[str] = "https://github.com/xames3/website"
 email: t.Final[str] = "xa@mes3.dev"
 
@@ -44,22 +44,26 @@ with open("prolog.rst", encoding="utf-8") as f:
 nitpicky: bool = True
 smartquotes: bool = False
 exclude_patterns: Sequence[str] = ["_static", "prolog.rst"]
+templates_path: list[str] = ["_templates"]
 
 html_theme: t.Final[str] = "kaamiki"
 html_title: str = "AM"
 html_baseurl: t.Final[str] = "https://xa.mes3.dev/"
 
+kaamiki.conf.motion.page_transitions = True
 kaamiki.conf.code_explain.run = True
+kaamiki.conf.mode = "system"
+kaamiki.conf.release.version_fmt = "v%Y.%m.%d"
 kaamiki.conf.icons.update(
     {
         "search": "fa-regular fa-magnifying-glass",
-        "title_badge": "fa-solid fa-badge-check",
     }
 )
 kaamiki.conf.icons.style = "regular"
 kaamiki.conf.icons.kit = "https://kit.fontawesome.com/8bcdaaff4d.js"
 kaamiki.conf.site.favicons = {
     "manifest": "favicons/site.webmanifest",
+    "ico": "favicons/favicon.ico",
     "size_96": "favicons/favicon-96x96.png",
     "size_180": "favicons/apple-touch-icon.png",
     "size_svg": "favicons/favicon.svg",
@@ -85,9 +89,8 @@ kaamiki.conf.site.sidebar_buttons = {
         "icon": "fa-solid fa-heart km-tone--red",
     },
 }
-html_favicon: t.Final[str] = "_static/favicons/favicon.ico"
 html_static_path: list[str] = ["_static"]
-html_css_files: list[str] = ["site.css"]
+html_css_files: list[str] = ["styles/site.css"]
 html_use_index: bool = False
 
 inventories: t.Final[dict[str, str]] = {
