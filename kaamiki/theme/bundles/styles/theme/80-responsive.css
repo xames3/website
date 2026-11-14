@@ -1,0 +1,410 @@
+@media (width < 768px) {
+    :root {
+        --km-weight-lead: 414;
+        --km-tracking-h2: -0.03em;
+    }
+
+    .km-breadcrumbs {
+        margin-top: var(--km-space-24);
+    }
+
+    .km-block__title {
+        line-height: 1.375;
+    }
+
+    .km-container {
+        padding-inline: var(--km-space-6);
+    }
+
+    .km-page {
+        --km-show-more-fade: min(7rem, 25svh);
+    }
+
+    .km-layout__content {
+        margin-bottom: var(--km-space-8);
+    }
+
+    .km-sidebar--visible,
+    html:not(.km-document--scripted) .km-sidebar:target {
+        width: min(100%, 24rem);
+        border-left: 1px solid hsl(var(--km-colour-border));
+    }
+
+    .km-sidebar--primary .caption {
+        color: hsl(var(--km-colour-secondary));
+    }
+
+    .km-sidebar__brand-title,
+    .km-header__title {
+        margin-bottom: 0;
+    }
+
+    .km-page__content {
+        & .km-columns {
+            justify-content: center;
+        }
+
+        & .km-columns--stack-align-center>.km-columns__column {
+            text-align: center;
+        }
+
+        & .km-columns>.km-columns__column--span-auto {
+            width: auto;
+            margin-inline: 0;
+        }
+    }
+
+    .km-feedback-section__title,
+    .km-carousel__title,
+    .km-page__content :where(h2) {
+        margin-top: var(--km-space-12);
+    }
+
+    .admonition {
+
+        &:is(
+            .note, .seealso, .tip, .hint, .important, .danger, .error, .warning,
+            .caution, .attention
+        ) {
+            padding-left: var(--km-space-10);
+
+            & > .km-admonition__icon {
+                left: 0.5rem;
+            }
+        }
+    }
+
+    blockquote {
+        padding: var(--km-space-8) 0;
+
+        & p:first-child::before,
+        & p:first-child::after {
+            line-height: 0;
+        }
+    }
+
+    .km-text--subheader,
+    .km-carousel__subheader,
+    .km-feedback-section__description,
+    .km-release__body > :where(p):first-child:not(.km-release__more) {
+        width: 100%;
+    }
+
+    .km-feedback-section--split {
+        & .km-feedback-section__header--split {
+            display: contents;
+        }
+
+        & .km-feedback-section__description {
+            order: 1;
+            margin-bottom: var(--km-space-4);
+        }
+
+        & .km-feedback-section__button {
+            order: 2;
+        }
+    }
+
+    .km-columns>.km-columns__column {
+        width: 100%;
+    }
+
+    .km-thumbnail {
+        max-width: 100%;
+    }
+
+    .km-header__search,
+    .km-header__icon-list {
+        display: none;
+    }
+
+    .km-sidebar__search {
+        display: block;
+    }
+}
+
+@media (width < 640px) {
+    .km-header__utilities {
+        justify-content: flex-end;
+    }
+
+    .km-search__input::placeholder {
+        font-size: var(--km-font-size-down-1);
+    }
+
+    .km-byline__meta {
+        align-items: stretch;
+        text-align: left;
+    }
+
+    .km-byline__meta-group {
+        position: relative;
+    }
+
+    .km-byline--align-left .km-byline__meta-group {
+        display: contents;
+    }
+
+    .km-byline--align-left :is(
+        .km-byline__copy,
+        .km-byline__separator:has(+ .km-byline__copy),
+        .km-byline__meta-group--end
+    ) {
+        display: none;
+    }
+
+    .km-byline__copy[data-tooltip] {
+        position: static;
+
+        &::after {
+            width: max-content;
+            max-width: 100%;
+            white-space: normal;
+            text-align: center;
+        }
+    }
+
+    .literal-block-wrapper button.copybtn {
+        right: 0.35rem;
+    }
+
+    :not(pre) > code,
+    :not(pre) > code .pre {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    table :is(td, th):first-child :not(pre) > code,
+    table :is(td, th):first-child :not(pre) > code .pre {
+        white-space: nowrap;
+        overflow-wrap: normal;
+    }
+
+    .km-notfound__title {
+        text-align: left;
+        margin: var(--km-space-4) 0 0 0;
+    }
+}
+
+@media (width >= 768px) {
+    .km-layout:not(.km-layout--nav-in-header) {
+        display: grid;
+        align-items: start;
+        gap: var(--km-space-8);
+        grid-template-columns: var(--km-layout-sidebar) minmax(0, 1fr);
+
+        &:not(:has(> .km-sidebar--primary)) {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    .km-pagination,
+    .km-related {
+        grid-column: -2 / -1;
+    }
+
+    :where(.km-layout:not(.km-layout--nav-in-header)) .km-sidebar {
+        position: sticky;
+        top: calc(var(--km-header-height) + var(--km-layout-anchor-offset));
+        right: auto;
+        height:
+            calc(100dvh - var(--km-header-height) -
+                var(--km-layout-anchor-offset) - 8rem);
+        width: 100%;
+        max-width: none;
+        padding: 0;
+        gap: var(--km-space-6);
+        visibility: visible;
+        transform: none;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    :where(.km-layout:not(.km-layout--nav-in-header)) .km-sidebar__content {
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    :where(html:not(:has(.km-layout--nav-in-header))) :is(
+        .km-header__menu-toggle,
+        .km-sidebar__close,
+        .km-sidebar__brand,
+        .km-sidebar__backdrop
+    ) {
+        display: none;
+    }
+
+    .km-footer {
+        padding-block: 0;
+    }
+
+    .km-footer__content {
+        flex-direction: row;
+        flex-wrap: wrap;
+        text-align: left;
+        gap: 0 var(--km-space-1);
+    }
+
+    .km-feedback-section__header--split {
+        position: relative;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--km-space-6);
+        padding-top: var(--km-space-12);
+        margin-top: var(--km-space-16);
+
+        & .km-feedback-section__title {
+            flex: 1;
+            min-width: 0;
+            margin-top: 0;
+
+            &::before {
+                display: none;
+            }
+        }
+
+        & .km-feedback-section__button {
+            flex: none;
+            white-space: nowrap;
+        }
+    }
+}
+
+/*
+A site with its navigation in the header keeps the sidebar as a drawer and the
+menu button until the header has room for every menu on one row. The script
+adds `km-document--nav-wrapped` when they still wrap at this width. Without
+the script there are no dropdowns, only a flat list of every page, so the
+sidebar is the navigation from 768px and the header holds no list.
+*/
+@media (width >= 960px) {
+    html.km-document--scripted:not(.km-document--nav-wrapped) {
+        & .km-layout--nav-in-header {
+            display: grid;
+            align-items: start;
+            gap: var(--km-space-8);
+            grid-template-columns: minmax(0, 1fr);
+
+            & .km-sidebar--primary {
+                display: none;
+            }
+        }
+
+        &:has(.km-layout--nav-in-header) :is(
+            .km-header__menu-toggle,
+            .km-sidebar__close,
+            .km-sidebar__brand,
+            .km-sidebar__backdrop
+        ) {
+            display: none;
+        }
+
+        & .km-header__nav {
+            display: flex;
+            justify-content: center;
+        }
+    }
+}
+
+@media (width >= 768px) {
+    html:not(.km-document--scripted) {
+        & .km-layout--nav-in-header {
+            display: grid;
+            align-items: start;
+            gap: var(--km-space-8);
+            grid-template-columns: minmax(0, 1fr);
+
+            &:has(> .km-sidebar--primary) {
+                grid-template-columns: var(--km-layout-sidebar) minmax(0, 1fr);
+            }
+
+            & .km-sidebar {
+                position: sticky;
+                top: calc(
+                    var(--km-header-height) + var(--km-layout-anchor-offset)
+                );
+                right: auto;
+                height:
+                    calc(100dvh - var(--km-header-height) -
+                        var(--km-layout-anchor-offset) - 8rem);
+                width: 100%;
+                max-width: none;
+                padding: 0;
+                gap: var(--km-space-6);
+                visibility: visible;
+                transform: none;
+                background: transparent;
+                box-shadow: none;
+            }
+
+            & .km-sidebar__content {
+                overflow: visible;
+                padding-right: 0;
+            }
+        }
+
+        &:has(.km-layout--nav-in-header) :is(
+            .km-header__menu-toggle,
+            .km-sidebar__close,
+            .km-sidebar__brand,
+            .km-sidebar__backdrop
+        ) {
+            display: none;
+        }
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .km-figure--greyscale:is(:hover, :focus-within) {
+        filter: grayscale(0%);
+    }
+
+    .km-figure--zoom:is(:hover, :focus-within) .km-figure__scale {
+        transform: scale(1.03);
+    }
+
+    .km-figure--fuzzy-blur:is(:hover, :focus-within) .km-figure__clip
+        :where(img) {
+        filter: blur(0);
+    }
+
+    .km-figure--pixelated-blur:is(:hover, :focus-within)
+        .km-figure__pixelated-canvas.km-figure__pixelated-canvas--drawn {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .km-document--loading :is(.km-header,
+        .km-breadcrumbs,
+        .km-page__content,
+        .km-feedback-section,
+        .km-page__updated,
+        .km-page__more-button,
+        .km-pagination,
+        .km-related,
+        .km-footer) {
+        opacity: 1;
+    }
+
+    .km-page-reveal-item--shown {
+        animation: none;
+    }
+
+    .km-byline__bg,
+    .km-byline__bg::before,
+    .km-byline__wave,
+    .km-sharpie,
+    .km-pencil {
+        animation: none;
+    }
+
+    .km-byline__bg,
+    .km-page__more::before,
+    .km-accordion__more::before {
+        transition: none;
+    }
+}
+

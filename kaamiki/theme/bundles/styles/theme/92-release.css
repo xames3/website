@@ -1,0 +1,185 @@
+.km-release {
+    --km-release-dot: 1.75rem;
+    --km-release-rail: calc(var(--km-release-dot) / 2);
+    --km-release-mark: 0.75rem;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: calc(var(--km-release-dot) + var(--km-space-2));
+    padding-bottom: var(--km-space-18);
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: calc(var(--km-release-rail) - 0.5px);
+        width: 1px;
+        background-color: hsl(var(--km-colour-list-ring) / 0.75);
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: calc(var(--km-release-mark) - var(--km-release-dot) / 2);
+        left: calc(var(--km-release-rail) - var(--km-release-dot) / 2);
+        width: var(--km-release-dot);
+        height: var(--km-release-dot);
+        border: 1px solid hsl(var(--km-colour-list-ring));
+        border-radius: 50%;
+        color: hsl(var(--km-colour-text-down-2));
+        background:
+            radial-gradient(
+                circle,
+                currentColor 0 0.1875rem,
+                transparent calc(0.1875rem + 0.5px)
+            ),
+            hsl(var(--km-colour-surface-baseline));
+        box-shadow: 0 0 0 0.25rem hsl(var(--km-colour-surface-baseline));
+    }
+
+    &:not(.km-release + .km-release) {
+        margin-top: var(--km-space-16);
+
+        &::before {
+            top: var(--km-release-mark);
+        }
+
+        &::after {
+            color: hsl(var(--km-colour-text-baseline));
+        }
+    }
+
+    &:not(:has(+ .km-release))::before {
+        mask-image:
+            linear-gradient(to bottom, #000 calc(100% - 6rem), transparent);
+    }
+
+    &:has(> .km-page-reveal-item--shown:first-child)::before {
+        transform-origin: top;
+        animation: km-rail-draw var(--km-reveal-duration) var(--km-ease-title);
+    }
+
+    &:has(> .km-page-reveal-item--shown:first-child)::after {
+        animation:
+            km-reveal-in var(--km-reveal-duration) var(--km-ease-title);
+    }
+}
+
+.km-release[id] {
+    scroll-margin-top: calc(var(--km-header-height) + 3rem);
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+
+    .km-release:has(
+        > .km-page-reveal-item:first-child:not(.km-page-reveal-item--shown)
+    )::before,
+    .km-release:has(
+        > .km-page-reveal-item:first-child:not(.km-page-reveal-item--shown)
+    )::after {
+        opacity: 0;
+    }
+}
+
+.km-release__title {
+    grid-column: 1;
+    grid-row: 2;
+    margin: var(--km-space-2) 0 0;
+    text-wrap: balance;
+
+    &::before {
+        display: none;
+    }
+
+    & code {
+        font-size: 0.85em;
+    }
+}
+
+.km-release__meta {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--km-space-2) var(--km-space-3);
+}
+
+.km-release__date {
+    display: flex;
+    align-items: center;
+    height: 1.25rem;
+    color: hsl(var(--km-colour-meta));
+    font-size: var(--km-font-size-down-1);
+    line-height: 1.25rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.km-release__date-icon {
+    margin-right: var(--km-glyph-gap);
+}
+
+.km-release__version {
+    background-color: hsl(var(--km-colour-release__version-bg));
+    border-radius: var(--km-radius-round);
+    font-family: var(--km-font-mono);
+    --km-tracking: normal;
+    font-size: var(--km-font-size-down-3);
+    line-height: 1.25rem;
+    padding: 1px calc(var(--km-space-2) + 1px);
+}
+
+.km-release__body {
+    grid-column: 1;
+    grid-row: 3;
+    min-width: 0;
+
+    & > .km-release__more {
+        margin-top: var(--km-space-8);
+    }
+
+}
+
+.km-release__changes {
+    margin-top: var(--km-space-7);
+
+    & .km-release__kind {
+        line-height: 1.25rem;
+        font-size: var(--km-font-size-up-1);
+        font-weight: var(--km-weight-lead);
+        --km-tracking: var(--km-tracking-lead);
+        margin-bottom: var(--km-space-2);
+    }
+
+    & .km-release__kind + dd {
+        margin: var(--km-space-3) 0 0;
+    }
+}
+
+@media (width < 640px) {
+    .km-release {
+        --km-release-dot: 1.25rem;
+        padding-bottom: var(--km-space-14);
+
+        &:not(.km-release + .km-release) {
+            margin-top: var(--km-space-12);
+        }
+    }
+
+    .km-release__title {
+        font-size: var(--km-font-size-up-2);
+        line-height: 1.75rem;
+    }
+}
+
+@keyframes km-rail-draw {
+    from {
+        transform: scaleY(0);
+    }
+
+    to {
+        transform: scaleY(1);
+    }
+}

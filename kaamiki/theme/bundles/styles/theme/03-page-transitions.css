@@ -1,0 +1,138 @@
+/*
+Page to page. When a reader follows a link to another page of the site, a
+browser that can (Chrome and Safari today) keeps the old page on screen while
+the new one loads and then hands over to it, one thing at a time and never two
+at once. The old content eases out first, a little way in the direction the
+reader's going. Nothing of the new content shows until it's gone, and then the
+new page plays its own entrance, the one a page plays when it loads, from its
+first frame. The header, the sidebar and the footer don't animate at all,
+they're the same on both pages, and the new page's content isn't pictured by
+the transition: it's the page itself, kept hidden by `km-document--loading`
+until the old content has left.
+The script in the head marks the page being left (`km-document--leaving`) so
+its content can be pictured, and the page arrived at (`data-km-nav`, which says
+which way the reader went) so the header and the footer stay as they are. The
+`@view-transition` rule is only written when the site asks for it
+(`kaamiki.conf.motion.page_transitions`).
+*/
+@keyframes km-nav-fade {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes km-nav-chrome-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes km-nav-drift {
+    to {
+        transform: translateY(
+            calc(var(--km-motion-rise-small) * var(--km-nav-dir) * -1)
+        );
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    :root {
+        --km-nav-dir: 1;
+        --km-nav-out: calc(var(--km-motion-fade) * 0.6);
+        --km-nav-hold: calc(var(--km-motion-enter) * 1.5);
+    }
+
+    :root[data-km-nav="back"] {
+        --km-nav-dir: -1;
+    }
+
+    .km-document--leaving .km-layout__content {
+        view-transition-name: km-content;
+    }
+
+    :root:not(.km-document--revealing)::view-transition-group(root) {
+        animation: none;
+    }
+
+    /* The rest of the page, the header, the sidebar and the footer, is the old
+       page's until the old content has gone, and the new page's from then on. */
+    :root:not(.km-document--revealing)::view-transition-old(root),
+    :root:not(.km-document--revealing)::view-transition-new(root) {
+        mix-blend-mode: normal;
+        animation: none;
+    }
+
+    :root:not(.km-document--revealing)::view-transition-new(root) {
+        z-index: 0;
+    }
+
+    :root:not(.km-document--revealing)::view-transition-old(root) {
+        z-index: 1;
+        animation: km-nav-chrome-out var(--km-nav-hold) steps(1, end) both;
+    }
+
+    /* A change of colours: the old page stays on top and a hole with a soft
+       edge grows in it from the toggle (the script sets its size and place),
+       so the new page shows through, and nothing blends. */
+    .km-document--revealing::view-transition-old(root),
+    .km-document--revealing::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+    }
+
+    .km-document--revealing::view-transition-new(root) {
+        z-index: 0;
+    }
+
+    .km-document--revealing::view-transition-old(root) {
+        z-index: 1;
+        opacity: 1;
+        -webkit-mask-image:
+            linear-gradient(#000, #000),
+            radial-gradient(
+            circle closest-side,
+            #000 calc(100% - var(--km-reveal-feather, 400px) * 1.0),
+            rgb(0 0 0 / 0.956) calc(100% - var(--km-reveal-feather, 400px) * 0.9),
+            rgb(0 0 0 / 0.835) calc(100% - var(--km-reveal-feather, 400px) * 0.8),
+            rgb(0 0 0 / 0.667) calc(100% - var(--km-reveal-feather, 400px) * 0.7),
+            rgb(0 0 0 / 0.487) calc(100% - var(--km-reveal-feather, 400px) * 0.6),
+            rgb(0 0 0 / 0.325) calc(100% - var(--km-reveal-feather, 400px) * 0.5),
+            rgb(0 0 0 / 0.198) calc(100% - var(--km-reveal-feather, 400px) * 0.4),
+            rgb(0 0 0 / 0.11) calc(100% - var(--km-reveal-feather, 400px) * 0.3),
+            rgb(0 0 0 / 0.056) calc(100% - var(--km-reveal-feather, 400px) * 0.2),
+            rgb(0 0 0 / 0.026) calc(100% - var(--km-reveal-feather, 400px) * 0.1),
+            transparent 100%
+        );
+        mask-image:
+            linear-gradient(#000, #000),
+            radial-gradient(
+            circle closest-side,
+            #000 calc(100% - var(--km-reveal-feather, 400px) * 1.0),
+            rgb(0 0 0 / 0.956) calc(100% - var(--km-reveal-feather, 400px) * 0.9),
+            rgb(0 0 0 / 0.835) calc(100% - var(--km-reveal-feather, 400px) * 0.8),
+            rgb(0 0 0 / 0.667) calc(100% - var(--km-reveal-feather, 400px) * 0.7),
+            rgb(0 0 0 / 0.487) calc(100% - var(--km-reveal-feather, 400px) * 0.6),
+            rgb(0 0 0 / 0.325) calc(100% - var(--km-reveal-feather, 400px) * 0.5),
+            rgb(0 0 0 / 0.198) calc(100% - var(--km-reveal-feather, 400px) * 0.4),
+            rgb(0 0 0 / 0.11) calc(100% - var(--km-reveal-feather, 400px) * 0.3),
+            rgb(0 0 0 / 0.056) calc(100% - var(--km-reveal-feather, 400px) * 0.2),
+            rgb(0 0 0 / 0.026) calc(100% - var(--km-reveal-feather, 400px) * 0.1),
+            transparent 100%
+        );
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 100% 100%, 0 0;
+        mask-size: 100% 100%, 0 0;
+        -webkit-mask-position: 0 0, 0 0;
+        mask-position: 0 0, 0 0;
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+    }
+
+    ::view-transition-old(km-content) {
+        animation:
+            km-nav-fade var(--km-nav-out) linear both,
+            km-nav-drift var(--km-nav-out) ease-in both;
+        mix-blend-mode: normal;
+    }
+}

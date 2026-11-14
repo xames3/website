@@ -1,0 +1,189 @@
+.km-columns {
+    --km-columns-count: 1;
+    --km-columns-gap-x: var(--km-space-1-5);
+    --km-columns-gap-y: var(--km-space-2);
+    --km-columns-width:
+        calc((100% - (var(--km-columns-count) - 1) * var(--km-columns-gap-x)) /
+            var(--km-columns-count));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--km-columns-gap-y) var(--km-columns-gap-x);
+    width: 100%;
+    margin:
+        var(--km-columns-margin-top, var(--km-space-8)) 0
+            var(--km-columns-margin-bottom, var(--km-space-8));
+    padding-inline: 0;
+}
+
+.km-columns--count-2 {
+    --km-columns-count: 2;
+}
+
+.km-columns--count-3 {
+    --km-columns-count: 3;
+}
+
+.km-columns--count-4 {
+    --km-columns-count: 4;
+}
+
+.km-columns--count-5 {
+    --km-columns-count: 5;
+}
+
+.km-columns--count-6 {
+    --km-columns-count: 6;
+}
+
+.km-columns:where(:has(> .km-columns__column > .km-thumbnail)) {
+    --km-columns-gap-x: var(--km-space-12);
+    --km-columns-gap-y: var(--km-space-10);
+}
+
+.km-columns--gap-medium {
+    --km-columns-gap-x: var(--km-space-4);
+    --km-columns-gap-y: var(--km-space-4);
+}
+
+.km-columns--gap-large {
+    --km-columns-gap-x: var(--km-space-8);
+    --km-columns-gap-y: var(--km-space-8);
+}
+
+.km-columns--margin-small {
+    --km-columns-margin-top: var(--km-space-4);
+    --km-columns-margin-bottom: var(--km-space-4);
+}
+
+.km-columns--margin-medium {
+    --km-columns-margin-top: var(--km-space-8);
+    --km-columns-margin-bottom: var(--km-space-8);
+}
+
+.km-columns--margin-large {
+    --km-columns-margin-top: var(--km-space-12);
+    --km-columns-margin-bottom: var(--km-space-12);
+}
+
+.km-columns--padding-small {
+    --km-columns-padding: var(--km-space-2);
+}
+
+.km-columns--padding-medium {
+    --km-columns-padding: var(--km-space-4);
+}
+
+.km-columns--padding-large {
+    --km-columns-padding: var(--km-space-6);
+}
+
+.km-page__content :is(.km-accordion__body, .km-tabs__panel)
+    > :is(:first-child, :where(:empty[id]:first-child + *)) {
+    margin-top: 0;
+}
+
+.km-page__content :is(.km-accordion__body, .km-tabs__panel)>:last-child {
+    margin-bottom: 0;
+}
+
+.km-page__content :is(.km-accordion__body, .km-tabs__panel)
+    > :is(:first-child, :where(:empty[id]:first-child + *)) > .highlight > pre {
+    margin-top: 0;
+}
+
+.km-page__content .km-columns .km-columns__column
+    > :has(+ :is([class*="highlight-"], .literal-block-wrapper)) {
+    margin-bottom: 0;
+}
+
+.km-page__content .km-columns .km-columns__column
+    > :is([class*="highlight-"], .literal-block-wrapper):not(:first-child) {
+    margin-top: var(--km-space-6);
+}
+
+.km-page__content .km-columns .km-columns__column > [class*="highlight-"]
+    > .highlight > pre {
+    margin-top: 0;
+}
+
+.km-page__content .km-columns__column figcaption {
+    margin-bottom: 0;
+}
+
+.km-columns--flush>.km-columns__column {
+    &>:first-child {
+        margin-top: 0;
+    }
+
+    &>:last-child {
+        margin-bottom: 0;
+    }
+
+    &>:first-child>.highlight>pre {
+        margin-top: 0;
+    }
+}
+
+.km-columns--padded>.km-columns__column {
+    padding: var(--km-columns-padding, 1rem);
+}
+
+.km-columns--border>.km-columns__column {
+    border: 1px solid hsl(var(--km-colour-border));
+    border-radius: var(--km-radius-normal);
+}
+
+.km-columns--background>.km-columns__column {
+    background-color: hsl(var(--km-colour-code-bg));
+    border-radius: var(--km-radius-normal);
+}
+
+.km-columns--valign-top {
+    align-items: flex-start;
+}
+
+.km-columns--valign-bottom {
+    align-items: flex-end;
+}
+
+.km-columns__column {
+    --km-columns-span: 1;
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    width:
+        calc(var(--km-columns-width) * var(--km-columns-span) +
+            var(--km-columns-gap-x) * (var(--km-columns-span) - 1));
+
+    &>.km-tabs {
+        width: 100%;
+    }
+}
+
+.km-columns__column--span-2 {
+    --km-columns-span: 2;
+}
+
+.km-columns__column--span-3 {
+    --km-columns-span: 3;
+}
+
+.km-columns__column--span-4 {
+    --km-columns-span: 4;
+}
+
+.km-columns__column--span-5 {
+    --km-columns-span: 5;
+}
+
+.km-columns__column--span-6 {
+    --km-columns-span: 6;
+}
+
+.km-columns__column--span-auto {
+    width: auto;
+}
+

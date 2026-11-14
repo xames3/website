@@ -1,0 +1,238 @@
+/*!
+ * The reset in @layer km-reset comes from tailwindcss v3.4.14 (preflight).
+ * MIT License, Copyright (c) Tailwind Labs, Inc. https://tailwindcss.com
+ * The licence text is in MIT-tailwindcss.txt, next to this file.
+ */
+
+:root {
+    --km-colour-black: 0 0% 0%;
+    --km-colour-white: 0 0% 100%;
+    --km-colour-surface-baseline: 0 0% 0%;
+    --km-colour-surface-up-1: 0 0% 4%;
+    --km-colour-surface-up-2: 0 0% 7%;
+    --km-colour-surface-up-3: 0 0% 11%;
+    --km-colour-surface-up-4: 0 0% 19%;
+    --km-colour-surface-up-5: 0 0% 23%;
+    --km-colour-text-down-4: 0 0% 48%;
+    --km-colour-text-down-3: 0 0% 60%;
+    --km-colour-text-down-2: 0 0% 63%;
+    --km-colour-text-down-1: 0 0% 72%;
+    --km-colour-text-baseline: 0 0% 93%;
+    --km-colour-text-up-1: 0 0% 100%;
+    --km-colour-green: 131.25 41.03% 45.88%;
+    --km-colour-blue: 205.88 100% 50%;
+    --km-colour-orange: 22 100% 52%;
+    --km-colour-red: 357.87 68.98% 57%;
+    --km-colour-yellow: 38.9 100% 57.06%;
+    --km-colour-highlight: 211.25 97.96% 19.22%;
+    --km-byline-wave-filter: none;
+    --km-colour-header-bg:
+        color-mix(
+            in srgb,
+            hsl(var(--km-colour-surface-baseline)) 85%,
+            transparent
+        );
+    --km-colour-dropdown-bg: var(--km-colour-surface-up-1);
+    --km-colour-enlarge-bg: var(--km-colour-surface-baseline);
+    --km-colour-code-bg: var(--km-colour-surface-up-2);
+    --km-colour-block-bg-hover: var(--km-colour-surface-up-3);
+    --km-colour-block-bg-active: var(--km-colour-surface-up-4);
+    --km-colour-menuselection-bg: var(--km-colour-surface-up-3);
+    --km-colour-search-bg: var(--km-colour-surface-up-3);
+    --km-colour-search__input-bg: var(--km-colour-surface-up-3);
+    --km-colour-noscript-bg: var(--km-colour-surface-up-3);
+    --km-colour-media__frame-bg: var(--km-colour-surface-up-4);
+    --km-colour-media__facade-bg: var(--km-colour-surface-up-4);
+    --km-colour-code-caption-bg: var(--km-colour-surface-up-3);
+    --km-colour-admonition-base-bg: var(--km-colour-surface-up-3);
+    --km-colour-tooltip-bg: var(--km-colour-surface-up-3);
+    --km-colour-code-explain__emphasis-bg: var(--km-colour-surface-up-4);
+    --km-colour-code-explain__output-bg: var(--km-colour-surface-up-4);
+    --km-colour-release__version-bg: var(--km-colour-surface-up-3);
+    --km-colour-border: var(--km-colour-surface-up-4);
+    --km-colour-focus: 0 0% 9%;
+    --km-colour-link: var(--km-colour-text-baseline);
+    --km-colour-button-dark-bg: var(--km-colour-surface-up-3);
+    --km-colour-button-dark-bg-hover: var(--km-colour-surface-up-4);
+    --km-colour-button-dark-bg-active: var(--km-colour-surface-up-5);
+    --km-colour-button-dark-fg: var(--km-colour-text-baseline);
+    --km-colour-button-bg: var(--km-colour-text-baseline);
+    --km-colour-button-bg-hover: var(--km-colour-text-down-1);
+    --km-colour-button-bg-active: var(--km-colour-text-down-3);
+    --km-colour-button-fg: var(--km-colour-surface-baseline);
+    --km-colour-nav-fg: var(--km-colour-text-down-2);
+    --km-colour-nav-fg-hover: var(--km-colour-text-baseline);
+    --km-colour-nav-fg-current: var(--km-colour-text-baseline);
+    --km-colour-title: var(--km-colour-text-baseline);
+    --km-colour-secondary: var(--km-colour-text-down-2);
+    --km-colour-meta: var(--km-colour-text-down-4);
+    --km-colour-diff-added-bg: 142.1 70.6% 45.3% / 0.3;
+    --km-colour-diff-added-fg: 141 78.9% 85.1%;
+    --km-colour-diff-removed-bg: 0 84.2% 60.2% / 0.3;
+    --km-colour-diff-removed-fg: 0 96.3% 89.8%;
+    --km-colour-version-added: 142.1 70.6% 45.3%;
+    --km-colour-version-changed: 45.4 93.4% 47.5%;
+    --km-colour-version-deprecated: 0 90.6% 70.8%;
+    --km-colour-admonition-danger-bg: 0 54.44% 12.95%;
+    --km-colour-admonition-danger-fg: 5.6 76.17% 57.5%;
+    --km-colour-admonition-hint-bg: 285.39 73.16% 19.06%;
+    --km-colour-admonition-hint-fg: 296.58 100% 73.25%;
+    --km-colour-admonition-tip-bg: 141.89 55.64% 21.2%;
+    --km-colour-admonition-tip-fg: 123.11 65.98% 42.78%;
+    --km-colour-admonition-warning-bg: 28.89 100% 10.59%;
+    --km-colour-admonition-warning-fg: 34.59 100% 50%;
+    --km-colour-admonition-seealso-bg: 213.21 94% 15%;
+    --km-colour-admonition-seealso-fg: 208.46 100% 64%;
+    --km-show-more-clamp: max(20rem, calc(100dvh - 18rem));
+    --km-show-more-fade: min(11rem, 25svh);
+    --km-show-more-dock: 2rem;
+    --km-ease-swift: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --km-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --km-spring-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+    --km-spring-snappy: cubic-bezier(0.34, 1.3, 0.64, 1);
+    --km-duration-hover: calc(500ms / var(--km-motion-speed));
+    --km-duration-fast: calc(250ms / var(--km-motion-speed));
+    --km-duration-drawer: calc(520ms / var(--km-motion-speed));
+    --km-duration-normal: calc(750ms / var(--km-motion-speed));
+    --km-duration-slow: calc(1000ms / var(--km-motion-speed));
+    --km-duration-clamp: calc(420ms / var(--km-motion-speed));
+    --km-title-step: calc(100ms / var(--km-motion-speed));
+    --km-title-blur: 10px;
+    --km-title-rise: 20%;
+    --km-title-reach: 2rem;
+    --km-reveal-duration: calc(500ms / var(--km-motion-speed));
+    --km-reveal-step: calc(150ms / var(--km-motion-speed));
+    --km-reveal-blur: 4px;
+    --km-reveal-rise: 0.75rem;
+    --km-tooltip-hold: 1800ms;
+    --km-show-more-hold: 3000ms;
+    --km-code-explain-swap: calc(600ms / var(--km-motion-speed));
+    --km-ticker-duration: calc(2000ms / var(--km-motion-speed));
+    --km-swap-hold: 4000ms;
+    --km-sweep-hold: 5500ms;
+    --km-sweep-duration: calc(1900ms / var(--km-motion-speed));
+    --km-sweep-colours: #0af 41.22%, #e1e1fe 45.71%, #ffcb5c 50.2%,
+        #f40 54.68%, #f384ff 59.17%;
+    --km-ease-title: cubic-bezier(0.25, 0.1, 0.25, 1);
+    --km-radius-round: 500px;
+    --km-radius-normal: 1.15rem;
+    --km-radius-tiny: 0.5rem;
+    --km-layout-sidebar: 250px;
+    --km-layout-container: 675px;
+    --km-layout-explainer: 1080px;
+    --km-code-pad: var(--km-space-4);
+    --km-code-bar: 3px;
+    --km-code-line-height: 1.7;
+    --km-layout-shell: 1080px;
+    --km-space-0-5: 0.125rem;
+    --km-space-1: 0.25rem;
+    --km-space-1-5: 0.375rem;
+    --km-space-2: 0.5rem;
+    --km-space-2-5: 0.625rem;
+    --km-space-3: 0.75rem;
+    --km-space-3-5: 0.875rem;
+    --km-space-4: 1rem;
+    --km-space-5: 1.25rem;
+    --km-space-6: 1.5rem;
+    --km-space-7: 1.75rem;
+    --km-space-8: 2rem;
+    --km-space-9: 2.25rem;
+    --km-space-10: 2.5rem;
+    --km-space-11: 2.75rem;
+    --km-space-12: 3rem;
+    --km-space-14: 3.5rem;
+    --km-space-16: 4rem;
+    --km-space-18: 4.5rem;
+    --km-space-20: 5rem;
+    --km-space-24: 6rem;
+    --km-glyph-gap: var(--km-space-2-5);
+    --km-layout-header-height: 4rem;
+    --km-header-height: var(--km-layout-header-height);
+    --km-layout-anchor-offset: 0.75rem;
+    --km-backdrop-blur: 0.5rem;
+    --km-backdrop-alpha: 0.38;
+    --km-enlarge-alpha: 0.86;
+    --km-colour-backdrop:
+        color-mix(
+            in srgb,
+            hsl(var(--km-colour-black)) calc(var(--km-backdrop-alpha) * 100%),
+            transparent
+        );
+    --km-colour-list-ring: 0 0% 29%;
+    --km-font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --km-font-mono: "Geist Mono", ui-monospace, monospace;
+    --km-font-size-down-3: 0.75rem;
+    --km-font-size-down-2: 0.85rem;
+    --km-font-size-down-1: 0.95rem;
+    --km-font-size-baseline: 1rem;
+    --km-font-size-up-1: 1.125rem;
+    --km-font-size-up-2: 1.25rem;
+    --km-font-size-up-3: 1.5rem;
+    --km-font-size-up-4: 2rem;
+    --km-font-size-up-5: 2.5rem;
+    --km-weight-h1: 478;
+    --km-weight-h2: 515;
+    --km-weight-h3: 496;
+    --km-weight-medium: 490;
+    --km-weight-button: 490;
+    --km-weight-lead: 450;
+    --km-weight-body: 419;
+    --km-tracking-h1: var(--km-tracking-h2);
+    --km-tracking-h2: -0.035em;
+    --km-tracking-h3: -0.017em;
+    --km-tracking-brand: -0.05em;
+    --km-tracking-lead: -0.014em;
+    --km-tracking-body: -0.011em;
+    --km-tracking-strong: -0.014em;
+    --km-tracking-small: -0.003em;
+    --km-layer-scrolltop: 10;
+    --km-layer-header: 40;
+    --km-layer-skip-link: 100;
+    --km-layer-backdrop: 1000;
+    --km-layer-sidebar: 1100;
+    --km-layer-dropdown: 2000;
+    --km-layer-enlarge: 3000;
+    --km-font-keys: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+    :root {
+        --km-spring-smooth: linear(
+            0, 0.035, 0.074, 0.116, 0.16, 0.205, 0.251, 0.296, 0.34, 0.384,
+            0.425, 0.465, 0.503, 0.539, 0.574, 0.606, 0.637, 0.665, 0.692,
+            0.716, 0.74, 0.761, 0.781, 0.799, 0.816, 0.832, 0.847, 0.86, 0.872,
+            0.883, 0.894, 0.903, 0.912, 0.92, 0.927, 0.934, 0.94, 0.945, 0.95,
+            0.955, 0.959, 0.963, 0.966, 0.97, 0.972, 0.975, 0.977, 0.98, 0.981,
+            0.983, 0.985, 0.986, 0.988, 0.989, 0.99, 0.991, 0.992, 0.993, 0.993,
+            0.994, 0.995, 0.995, 0.996, 1
+        );
+        --km-spring-snappy: linear(
+            0, 0.035, 0.075, 0.12, 0.167, 0.217, 0.269, 0.321, 0.373, 0.424,
+            0.475, 0.523, 0.571, 0.616, 0.659, 0.7, 0.738, 0.773, 0.807, 0.837,
+            0.865, 0.891, 0.914, 0.935, 0.953, 0.97, 0.984, 0.997, 1.008, 1.017,
+            1.025, 1.032, 1.037, 1.041, 1.044, 1.047, 1.048, 1.049, 1.049,
+            1.048, 1.047, 1.046, 1.044, 1.043, 1.041, 1.038, 1.036, 1.034,
+            1.031, 1.029, 1.027, 1.024, 1.022, 1.02, 1.018, 1.016, 1.014, 1.012,
+            1.01, 1.009, 1.008, 1.006, 1.005, 1
+        );
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        /* A reader who asks for less motion gets things fading in and out,
+           briefly, and nothing that moves or changes size. */
+        --km-duration-hover: 150ms;
+        --km-duration-fast: 150ms;
+        --km-duration-drawer: 0.01ms;
+        --km-duration-normal: 0.01ms;
+        --km-duration-slow: 0.01ms;
+        --km-duration-clamp: 0.01ms;
+        --km-code-explain-swap: 0.01ms;
+    }
+}
+
+.km-logo--invert {
+    filter: invert(1);
+}
+

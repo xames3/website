@@ -1,0 +1,34 @@
+.km-notfound {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--km-space-3);
+    min-height: max(24rem, calc(100dvh - 22rem));
+    justify-content: center;
+    margin-block-end: var(--km-space-12);
+}
+
+.km-notfound__code {
+    font-size: clamp(4rem, 18vw, 7rem);
+    font-weight: var(--km-weight-h1);
+    line-height: 1;
+    color: hsl(var(--km-colour-text-down-2) / 0.3);
+    --km-tracking: var(--km-tracking-h1);
+}
+
+.km-notfound__title {
+    margin: var(--km-space-8) 0 0 0;
+}
+
+.km-notfound__message {
+    color: hsl(var(--km-colour-secondary));
+}
+
+.km-notfound__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--km-space-5);
+    margin: var(--km-space-3) 0 0;
+}
+

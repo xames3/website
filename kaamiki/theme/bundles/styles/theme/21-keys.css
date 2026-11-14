@@ -1,0 +1,194 @@
+.km-key {
+    align-items: var(--km-key-align, flex-end);
+    flex-direction: column;
+    font-size: 0;
+    min-width: var(--km-key-width, 2.35rem)
+}
+
+.km-key::before {
+    align-self: var(--km-key-symbol-align, auto);
+    color: var(--km-colour-key-symbol, currentcolor);
+    content: var(--km-key-symbol, none);
+    font-size: var(--km-key-symbol-size, var(--km-font-size-down-2));
+    line-height: 1;
+    margin: 0 0 auto
+}
+
+.km-key::after {
+    align-self: var(--km-key-label-align, auto);
+    content: var(--km-key-label, none);
+    font-family: inherit;
+    font-size: 0.5625rem;
+    letter-spacing: 0.02em;
+    margin: auto 0 0
+}
+
+.km-key .km-key__icon {
+    align-self: var(--km-key-icon-align, center);
+    font-size: var(--km-key-icon-size, var(--km-font-size-down-2));
+    line-height: 1;
+    margin: var(--km-key-icon-margin, auto)
+}
+
+.km-key--space {
+    align-items: center;
+    flex-direction: row;
+    font-size: 0;
+    min-width: 12rem
+}
+
+.km-key--text {
+    align-items: center;
+    flex-direction: row;
+    font-size: var(--km-font-size-down-2)
+}
+
+.km-key--cmd {
+    --km-key-label: "command";
+    --km-key-symbol: "\2318";
+    --km-key-width: 3.4rem
+}
+
+.km-key--option {
+    --km-key-label: "option";
+    --km-key-symbol: "\2325";
+    --km-key-width: 2.4rem
+}
+
+.km-key--control {
+    --km-key-label: "control";
+    --km-key-symbol: "\2303";
+    --km-key-width: 2.6rem
+}
+
+.km-key--shift {
+    --km-key-label: "shift";
+    --km-key-label-align: flex-start;
+    --km-key-symbol: "\21E7";
+    --km-key-width: 4rem
+}
+
+.km-key--caps {
+    --km-key-label: "caps lock";
+    --km-key-label-align: flex-start;
+    --km-key-symbol: "\25CF";
+    --km-colour-key-symbol: #39ff14;
+    --km-key-symbol-size: 0.3rem;
+    --km-key-width: 4rem
+}
+
+.km-key--caps::before {
+    text-shadow: 0 0 4px var(--km-colour-key-symbol);
+    align-self: baseline;
+    line-height: 2
+}
+
+.km-key--tab {
+    --km-key-label: "tab";
+    --km-key-label-align: flex-start;
+    --km-key-symbol: "\21E5";
+    --km-key-width: 3.5rem
+}
+
+.km-key--esc {
+    --km-key-label: "esc";
+    --km-key-label-align: flex-start;
+    --km-key-width: 3rem
+}
+
+.km-key--enter {
+    --km-key-label: "return";
+    --km-key-width: 4rem
+}
+
+:is(.km-key--backspace, .km-key--delete) {
+    --km-key-label: "delete";
+    --km-key-width: 3.5rem
+}
+
+.km-key--globe {
+    --km-key-icon-align: flex-start;
+    --km-key-icon-margin: auto 0 0;
+    --km-key-symbol: "fn";
+    --km-key-symbol-size: 0.625rem;
+    --km-key-width: 2.5rem
+}
+
+.km-key--super {
+    --km-key-icon-size: 1rem
+}
+
+.km-key--pc {
+    --km-key-align: center;
+    --km-key-symbol-align: center;
+    --km-colour-key-symbol: currentcolor
+}
+
+.km-key--pc::before {
+    font-size: var(--km-font-size-down-2);
+    margin: var(--km-key-pc-margin, auto);
+    text-shadow: none
+}
+
+.km-key--pc::after {
+    content: none
+}
+
+.km-key--pc.km-key--shift {
+    --km-key-pc-margin: auto 0 auto auto;
+    --km-key-symbol: "Shift \21E7";
+    --km-key-width: 4rem
+}
+
+.km-key--pc.km-key--caps {
+    --km-key-pc-margin: auto auto auto 0;
+    --km-key-symbol: "Caps";
+    --km-key-width: 3.25rem
+}
+
+.km-key--pc.km-key--tab {
+    --km-key-symbol: "Tab";
+    --km-key-width: 3rem
+}
+
+.km-key--pc.km-key--esc {
+    --km-key-symbol: "Esc";
+    --km-key-width: 2.75rem
+}
+
+.km-key--pc.km-key--enter {
+    --km-key-symbol: "Enter \21B5";
+    --km-key-width: 4.5rem
+}
+
+.km-key--pc.km-key--backspace {
+    --km-key-symbol: "\232B";
+    --km-key-width: 3rem
+}
+
+.km-key--pc.km-key--delete {
+    --km-key-symbol: "Del";
+    --km-key-width: 2.75rem
+}
+
+.km-key--pc.km-key--globe {
+    --km-key-symbol: "Fn";
+    --km-key-width: 2.5rem
+}
+
+.km-combo {
+    white-space: nowrap
+}
+
+@media (width < 768px) {
+    .km-combo {
+        display: inline-block;
+        max-width: 100%;
+        white-space: normal
+    }
+}
+
+.km-combo__separator {
+    font-size: 0
+}
+

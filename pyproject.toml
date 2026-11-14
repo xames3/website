@@ -77,6 +77,7 @@ namespaces = true
 kaamiki = [
     "py.typed",
     "theme/static/**/*",
+    "theme/bundles/**/*",
     "theme/templates/**/*",
     "locale/*.pot",
     "locale/*/LC_MESSAGES/*",
