@@ -91,9 +91,9 @@ from kaamiki.extensions.code.tracer import collapse
 from kaamiki.extensions.code.tracer import execute
 from kaamiki.extensions.code.tracer import replay
 from kaamiki.extensions.code.tracer import show
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import NO_MOTION
-from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import annotated
 from kaamiki.extensions.utils import caption_icon
 from kaamiki.extensions.utils import checks
@@ -117,8 +117,8 @@ if t.TYPE_CHECKING:
     from kaamiki.extensions.code.tracer import Trace
 
 name: t.Final[str] = "code-explain"
-code_explain: t.Final[Bem] = Bem("code-explain")
-lang_icon: t.Final[Bem] = Bem("lang-icon")
+code_explain: t.Final[BEM] = BEM("code-explain")
+lang_icon: t.Final[BEM] = BEM("lang-icon")
 CODE_POSITIONS: t.Final[tuple[str, str]] = ("right", "left")
 SHARED: t.Final[dict[str, t.Any]] = {
     "code-position": checks.word(*CODE_POSITIONS),

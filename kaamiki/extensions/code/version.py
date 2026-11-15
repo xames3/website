@@ -54,9 +54,9 @@ from kaamiki.extensions.code.chrome import notes_pane
 from kaamiki.extensions.code.grammar import StrayError
 from kaamiki.extensions.code.grammar import linerange
 from kaamiki.extensions.code.grammar import split
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import NO_MOTION
-from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
@@ -71,7 +71,7 @@ if t.TYPE_CHECKING:
     type Pieces = tuple[chunk, chunk | None, list[chunk]]
 
 name: t.Final[str] = "code-version"
-code_version: t.Final[Bem] = Bem("code-version")
+code_version: t.Final[BEM] = BEM("code-version")
 ATTEMPT: t.Final[frozenset[str]] = frozenset({"attempt"})
 PARTS: t.Final[frozenset[str]] = frozenset({"code", "lines", "output"})
 VERDICTS: t.Final[frozenset[str]] = frozenset({"broke", "worked"})

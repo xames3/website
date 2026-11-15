@@ -29,8 +29,8 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 from sphinx import addnodes
 
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import NATIVE
-from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
@@ -49,7 +49,7 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "columns"
-columns: t.Final[Bem] = Bem("columns")
+columns: t.Final[BEM] = BEM("columns")
 COLUMNS: t.Final[int] = 6
 VALIGNS: t.Final[tuple[str, ...]] = ("top", "middle", "bottom")
 STACKS: t.Final[tuple[str, ...]] = ("left", "center")

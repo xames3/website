@@ -20,7 +20,6 @@ import shutil
 import tempfile
 import typing as t
 
-import docutils.nodes as nodes
 from sphinx import locale
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util import logging
@@ -71,6 +70,7 @@ from kaamiki.extensions.utils.settings import NAME
 if t.TYPE_CHECKING:
     from collections.abc import Sequence
 
+    import docutils.nodes as nodes
     from sphinx.application import Sphinx
 
 __version__: str = "2026.11.8"

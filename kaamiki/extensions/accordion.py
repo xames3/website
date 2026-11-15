@@ -24,9 +24,9 @@ import typing as t
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
-from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
@@ -43,7 +43,6 @@ from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import CHOICES
 
 if t.TYPE_CHECKING:
-    from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "accordion"
@@ -51,8 +50,8 @@ MARKER_POSITIONS: t.Final[tuple[str, ...]] = CHOICES[
     "accordion_marker_position"
 ]
 MARKERS: t.Final[tuple[str, ...]] = CHOICES["accordion_marker"]
-accordion: t.Final[Bem] = Bem("accordion")
-text: t.Final[Bem] = Bem("text")
+accordion: t.Final[BEM] = BEM("accordion")
+text: t.Final[BEM] = BEM("text")
 
 
 class Accordion(nodes.container):

@@ -11,7 +11,6 @@ The helpers Kaamiki's directives are built from.
 
 from __future__ import annotations
 
-import functools
 import os.path as p
 import typing as t
 from urllib.parse import urlsplit
@@ -314,12 +313,12 @@ class Renderer:
 
     def __init__(self) -> None:
         """Make an empty record."""
-        self.visitors: dict[type[nodes.Element], list[Visitor]] = {}
+        self.visitors: dict[type[nodes.Element], list[t.Any]] = {}
         self.elsewhere: dict[type[nodes.Element], str] = {}
 
-    def opens(
+    def opens[V: Callable[..., None]](
         self, node: type[nodes.Element], *, elsewhere: str = ""
-    ) -> Callable[[Visitor], Visitor]:
+    ) -> Callable[[V], V]:
         """Record the function under this decorator as the node's visitor.
 
         :param node: The node that the function writes.
@@ -329,11 +328,19 @@ class Renderer:
         """
         if elsewhere:
             self.elsewhere[node] = elsewhere
-        return functools.partial(self._record, node, 0)
+        return self._recorder(node, 0)
+
+    @t.overload
+    def closes(self, node: type[nodes.Element], tag: str) -> None: ...
+
+    @t.overload
+    def closes[V: Callable[..., None]](
+        self, node: type[nodes.Element]
+    ) -> Callable[[V], V]: ...
 
     def closes(
         self, node: type[nodes.Element], tag: str = ""
-    ) -> Callable[[Visitor], Visitor] | None:
+    ) -> Callable[[t.Any], t.Any] | None:
         """Record the function under this decorator as the node's depart.
 
         :param node: The node that the function closes.
@@ -342,9 +349,9 @@ class Renderer:
         :return: The decorator, or `None` when `tag` is given.
         """
         if tag:
-            self._record(node, 1, closer(tag))
+            self._recorder(node, 1)(closer(tag))
             return None
-        return functools.partial(self._record, node, 1)
+        return self._recorder(node, 1)
 
     def draws(
         self,
@@ -360,14 +367,14 @@ class Renderer:
         :param prepare: The function that changes the node's attributes
             before the template gets them, as `visitor` takes it.
         """
-        self._record(node, 0, visitor(template, prepare))
+        self._recorder(node, 0)(visitor(template, prepare))
 
     def skips(self, node: type[nodes.Element]) -> None:
         """Record that the HTML builder does not write a node.
 
         :param node: The node that the HTML builder leaves out.
         """
-        self._record(node, 0, skip)
+        self._recorder(node, 0)(skip)
 
     def register(self, app: Sphinx) -> None:
         """Give Sphinx each node in the record and how each builder writes it.
@@ -377,22 +384,23 @@ class Renderer:
         for node, (visit, leave) in self.visitors.items():
             app.add_node(node, html=(visit, leave), **self._others(node))
 
-    def _record(
-        self, node: type[nodes.Element], index: int, function: Visitor
-    ) -> Visitor:
-        """Keep a visitor or a depart of a node.
+    def _recorder[V: Callable[..., None]](
+        self, node: type[nodes.Element], index: int
+    ) -> Callable[[V], V]:
+        """Make the decorator that keeps a visitor or a depart of a node.
 
         :param node: The node.
         :param index: `0` for the visitor and `1` for the depart.
-        :param function: The visitor or the depart.
-        :return: The same function.
+        :return: The decorator, which gives back the same function.
         """
-        self.visitors.setdefault(node, [depart, depart])[index] = function
-        return function
 
-    def _others(
-        self, node: type[nodes.Element]
-    ) -> dict[str, tuple[t.Any, t.Any]]:
+        def record(function: V) -> V:
+            self.visitors.setdefault(node, [depart, depart])[index] = function
+            return function
+
+        return record
+
+    def _others(self, node: type[nodes.Element]) -> dict[str, t.Any]:
         """Find how the builders that are not HTML write a node.
 
         :param node: The node.
@@ -415,7 +423,7 @@ class Renderer:
 html: t.Final[Renderer] = Renderer()
 
 
-class Bem:
+class BEM:
     """A BEM class name of Kaamiki, as `km-accordion__title`."""
 
     __slots__ = ("block", "element")
@@ -429,7 +437,7 @@ class Bem:
         self.block = block
         self.element = element
 
-    def __getattr__(self, element: str) -> Bem:
+    def __getattr__(self, element: str) -> BEM:
         """Name an element of the block, `accordion.title` for one.
 
         :param element: The element. An underscore becomes a dash.
@@ -439,7 +447,7 @@ class Bem:
         """
         if element.startswith("_") or self.element:
             raise AttributeError(element)
-        return Bem(self.block, element.replace("_", "-"))
+        return BEM(self.block, element.replace("_", "-"))
 
     def __getitem__(self, modifier: str) -> str:
         """Name only a modifier, `text["preheader"]` for one.

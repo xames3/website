@@ -36,10 +36,10 @@ from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.dates import provenance
 from kaamiki.extensions.utils.dates import updated_on
 from kaamiki.extensions.utils.dates import warm
+from kaamiki.extensions.utils.directives import BEM
 from kaamiki.extensions.utils.directives import MOTION
 from kaamiki.extensions.utils.directives import NATIVE
 from kaamiki.extensions.utils.directives import NO_MOTION
-from kaamiki.extensions.utils.directives import Bem
 from kaamiki.extensions.utils.directives import closer
 from kaamiki.extensions.utils.directives import document
 from kaamiki.extensions.utils.directives import fields
@@ -91,7 +91,7 @@ from kaamiki.extensions.utils.templates import bridge
 from kaamiki.extensions.utils.templates import render
 
 __all__: list[str] = [
-    "Bem",
+    "BEM",
     "CONF",
     "MOTION",
     "NATIVE",

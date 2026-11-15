@@ -35,9 +35,9 @@ from kaamiki.extensions import block
 from kaamiki.extensions import button
 from kaamiki.extensions import repository
 from kaamiki.extensions import thumbnail
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
-from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import fields
 from kaamiki.extensions.utils import hollow
@@ -63,8 +63,8 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "carousel"
-carousel: t.Final[Bem] = Bem("carousel")
-text: t.Final[Bem] = Bem("text")
+carousel: t.Final[BEM] = BEM("carousel")
+text: t.Final[BEM] = BEM("text")
 template: t.Final[str] = "directives/carousel.html.jinja"
 DIRECTIONS: t.Final[tuple[str, ...]] = ("right", "left")
 CARDS: t.Final[int] = 2
@@ -345,9 +345,7 @@ def depart(self: HTMLTranslator, node: Carousel) -> None:
     if node["arrows"]:
         self.body.append(render(template))
     if node["dots"]:
-        self.body.append(
-            f'<div class="{carousel.dots()}" aria-hidden="true">'
-        )
+        self.body.append(f'<div class="{carousel.dots()}" aria-hidden="true">')
         self.body.append("</div>")
     self.body.append("</div>")
 

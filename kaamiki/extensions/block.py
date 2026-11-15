@@ -24,8 +24,8 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
 from kaamiki.extensions import columns
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import NATIVE
-from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import document
 from kaamiki.extensions.utils import hollow
@@ -47,8 +47,8 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "block"
-block: t.Final[Bem] = Bem("block")
-row: t.Final[Bem] = Bem("block-row")
+block: t.Final[BEM] = BEM("block")
+row: t.Final[BEM] = BEM("block-row")
 LINKS: t.Final[tuple[str, ...]] = ("target", "doc", "ref")
 
 

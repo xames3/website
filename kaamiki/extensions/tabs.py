@@ -32,9 +32,9 @@ import docutils.parsers.rst as rst
 from sphinx import addnodes
 
 from kaamiki.extensions.roles import steady
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
-from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
@@ -58,8 +58,8 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "tabs"
-tabs: t.Final[Bem] = Bem("tabs")
-glyph: t.Final[Bem] = Bem("glyph")
+tabs: t.Final[BEM] = BEM("tabs")
+glyph: t.Final[BEM] = BEM("glyph")
 ICON_POSITIONS: t.Final[tuple[str, ...]] = CHOICES["tab_icon_position"]
 
 
