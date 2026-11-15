@@ -240,35 +240,33 @@ fixed and the ``kaamiki.conf.toctree`` settings set the navigation.
 
 .. accordion:: What a template can read
 
-    A template is promised these names and no others, so one that wants
-    another setting reads it itself. A setting comes with ``km_`` in front
-    and a page's own fields already applied, so a template reads
-    ``km_toctree_in_header`` and not ``kaamiki.conf.toctree.in_header``.
+    A template reads one name, ``kaamiki``, with the same paths as
+    ``kaamiki.conf`` in ``conf.py``: ``kaamiki.show.breadcrumbs`` is
+    ``kaamiki.conf.show.breadcrumbs``. Each setting is there, with its default
+    when the site sets none and with a page's own fields already applied. The
+    values are read only, and a name that isn't one stops the build with the
+    nearest name, so a typo can't hide.
 
-    - The settings as they are: ``km_copy_headerlinks``,
-      ``km_embed_js_loading``, ``km_favicons``, ``km_logo_size``,
-      ``km_show_breadcrumbs``, ``km_show_credit``, ``km_show_more``,
-      ``km_show_more_after``, ``km_show_page_last_updated``,
-      ``km_show_previous_next_cards``, ``km_show_previous_next_cards_count``,
-      ``km_show_previous_next_pages``, ``km_show_scrolltop``,
-      ``km_show_searchbox``, ``km_toctree_in_header`` and
-      ``km_toctree_titles_only``.
-    - ``km_show_feedback`` is the setting, or ``True`` or ``False`` worked out
-      from the email and the feedback address when it's ``None``.
-      ``km_embed_css`` and ``km_embed_js`` are the files the page's embeds
-      load, the site's first.
-    - Worked out from settings: ``km_fa_icons``, ``km_fa_kit``,
-      ``km_fa_css``, ``km_fa_integrity``, ``km_project``,
-      ``km_license``, ``km_header_buttons``, ``km_sidebar_buttons``,
-      ``km_toctree_args``,
-      ``km_credit``, ``km_credit_new_tab``, ``km_rel`` and ``km_site``, which
-      is ``html_title`` or the project's name.
-    - Set for each page: ``km_author``, the page's author, which is empty when
-      neither the page nor the site names one; ``km_updated_on``, the day it
-      was last updated; ``km_header_toctree``, the navigation with each page's
-      lead; ``km_feedback``, the feedback box's words; ``km_social``, the link
-      preview tags; ``km_related``, the row of cards that takes the place of
-      the previous and next buttons, or ``None`` when a page has none.
+    - Worked out in place of the setting: ``kaamiki.show.feedback`` is
+      ``True`` or ``False`` from the email and the feedback address when the
+      setting is ``None``; ``kaamiki.icons.kit`` is the kit the build uses;
+      ``kaamiki.site.project`` has its defaults and the author;
+      ``kaamiki.site.license``, ``kaamiki.site.header_buttons`` and
+      ``kaamiki.site.sidebar_buttons`` also say if each link opens a new tab.
+    - Worked out next to the settings: ``kaamiki.icons.roles``, the class of
+      each icon; ``kaamiki.toctree.args``; ``kaamiki.links.rel``;
+      ``kaamiki.site.title``, which is ``html_title`` or the project's name;
+      ``kaamiki.credit.url`` and ``kaamiki.credit.new_tab``;
+      ``kaamiki.fa_free.css`` and ``kaamiki.fa_free.integrity``.
+    - Set for each page: ``kaamiki.site.feedback``, the feedback box's words;
+      ``kaamiki.site.open_graph``, the link preview tags;
+      ``kaamiki.embed.css`` and ``kaamiki.embed.js``, the files the page's
+      embeds load, the site's first; ``kaamiki.toctree.header``, the
+      navigation with each page's lead; ``kaamiki.page.author``, the page's
+      author, which is empty when neither the page nor the site names one;
+      ``kaamiki.page.updated_on``, the day it was last updated; and
+      ``kaamiki.page.related``, the row of cards that takes the place of the
+      previous and next buttons, or ``None`` when a page has none.
 
     The directive templates also get the values of their own options, as
     ``km_url``, ``km_text``, ``km_look`` and so on. Read the shipped template
