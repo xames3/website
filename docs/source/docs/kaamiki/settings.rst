@@ -1080,9 +1080,9 @@ Icons.
 Kaamiki draws its icons with `Font Awesome`_ and works with the Free set out
 of the box. Add a Pro kit and every icon switches to its Pro version. If Font
 Awesome doesn't load, because it's blocked, you're offline or a kit refuses the
-address, the menu, search and back-to-top buttons show text labels in place of
-icons. A kit only answers the addresses on its allow-list in your Font Awesome
-account, so a preview from another address gets no kit.
+address, the icons stay empty and show when Font Awesome loads. A kit only
+answers the addresses on its allow-list in your Font Awesome account, so a
+preview from another address gets no kit.
 
 .. accordion:: Every setting here
 

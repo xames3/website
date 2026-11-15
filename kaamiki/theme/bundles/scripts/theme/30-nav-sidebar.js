@@ -9,7 +9,6 @@
             )).map((item) => Math.round(item.getBoundingClientRect().top)));
             return tops.size > 1;
         };
-        let icons = root.classList.contains('km-document--no-icons');
         const fit = () => {
             root.classList.remove(NAV_WRAPPED);
             if (window.innerWidth >= NAV_WIDE_PX && wraps()) {
@@ -25,13 +24,6 @@
         window.addEventListener('resize', later, { passive: true });
         window.addEventListener('load', later, { once: true });
         document.fonts.ready.then(later);
-        new MutationObserver(() => {
-            const now = root.classList.contains('km-document--no-icons');
-            if (now !== icons) {
-                icons = now;
-                later();
-            }
-        }).observe(root, { attributes: true, attributeFilter: ['class'] });
     }
 
     function initSidebar() {

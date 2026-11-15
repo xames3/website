@@ -29,8 +29,10 @@
     color: hsl(var(--km-colour-blue));
 }
 
-.km-document--no-icons :is(.km-header__title, .km-sidebar__brand-title)::after {
-    content: none;
+:root:not(.km-document--icons-loaded) :is(
+    .km-header__title, .km-sidebar__brand-title
+)::after {
+    visibility: hidden;
 }
 
 .km-columns__column.am-align-right {

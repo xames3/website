@@ -28,8 +28,6 @@ pages with a code-explain or code-version, and it starts itself. The
     const GLIDE_MAX_MS = 1100;
     const FOCUSABLE = 'a[href], button, input, select, textarea, summary, '
         + 'iframe, [tabindex]';
-    const ICON_ONLY = '.km-header__menu-toggle > i, .km-search__submit > i, '
-        + '.km-scrolltop > i';
     const REVEAL_WAITING = 'km-page-reveal-item';
     const REVEAL_SHOWN = 'km-page-reveal-item--shown';
     const root = document.documentElement;
