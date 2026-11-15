@@ -18,6 +18,20 @@ A `release` directive that writes one entry of a changelog::
            - What's new, a line each.
        Fixed
            - What works now.
+
+The argument is the title, which tells what the release is about. It
+is optional. Without it, the version is the title. A release is a
+section, so it goes directly in a section: on the page or below a
+heading. An `only` is permitted around it. It cannot go in an
+accordion, a tab, a block, a column, a list or a note.
+
+The definition lists in the content are the groups of changes. Each
+term is `Added`, `Changed`, `Deprecated`, `Fixed`, `Removed`, or a
+group in `kaamiki.conf.release.kinds` of the site. A list can be
+anywhere in the content, and a list in a group does not change.
+`kaamiki.conf.release.version_fmt` tells how a version writes its
+date, and the default is `%Y.%m.%d`. A version that does not use it,
+without a `:date:`, shows no date.
 """
 
 from __future__ import annotations
@@ -69,7 +83,8 @@ def release_version(argument: str | None) -> str:
 
     :param argument: The version as written.
     :return: The version, trimmed.
-    :raises ValueError: When it isn't a version like 2026.11.8 or v1.2.0.
+    :raises ValueError: When it is not a version, as 2026.11.8 or
+        v1.2.0.
     """
     found = (argument or "").strip()
     if not VERSION.fullmatch(found):
@@ -84,40 +99,25 @@ class Release(KaamikiDirective, motion=True):
 
     Options::
 
-        - `version`: The version of the release, as `2026.11.8` or
-          `v1.2.0`, with a maximum of 64 letters, numbers and `._+-`.
-          It is necessary, and a site uses each version only one time.
-        - `article`: A page with the story of the release, named as
-          `:doc:` names it. Its link is below the notes.
-        - `article-label`: The text of the link to the article, with a
-          maximum of 60 characters. It needs `article`. The default is
-          "Read release notes".
+        - `version`: The version of the release, as `2026.11.8`
+          or `v1.2.0`, with a maximum of 64 letters, numbers and
+          `._+-`. It is necessary, and a site uses each version
+          only one time.
+        - `article`: A page with the story of the release, named
+          as `:doc:` names it. Its link is below the notes.
+        - `article-label`: The text of the link to the article,
+          with a maximum of 60 characters. It needs `article`.
+          The default is "Read release notes".
         - `date`: The day of the release, as `5 October 2026` or
           `2026-10-05`. It has priority over the version.
         - `target`: The release on a different site, as a GitHub
           release. Its link is next to the article.
-        - `speed`: The speed of its motion, relative to the site, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
-          two times as fast.
+        - `speed`: The speed of its motion, relative to the site,
+          one of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or
+          `4`. `2` is two times as fast.
         - `no-motion`: Do not move it.
         - `name`: One more name for links, next to the version.
         - `class`: More classes for the release.
-
-    The argument is the title, which tells what the release is about.
-    It is optional. Without it, the version is the title. A release is
-    a section, so it goes directly in a section: on the page or below a
-    heading. An `only` is permitted around it. It cannot go in an
-    accordion, a tab, a block, a column, a list or a note.
-
-    The definition lists in the content are the groups of changes. Each
-    term is one of `Added`, `Changed`, `Deprecated`, `Fixed` and
-    `Removed`. A group in `kaamiki.conf.release.kinds` of the site is
-    also correct. The list can be anywhere in the content, and a list in
-    a group does not change.
-
-    `kaamiki.conf.release.version_fmt` of the site tells how a version
-    writes its date. The default is `%Y.%m.%d`. A version that does not
-    use it, and has no `:date:`, shows no date.
     """
 
     has_content = True
@@ -133,24 +133,26 @@ class Release(KaamikiDirective, motion=True):
     target = Option(checks.link)
 
     class Node(nodes.Element):
-        """The date and the version of the release, which `visit` writes."""
+        """The date and the version of the release."""
 
     @classmethod
     def made(cls, node: nodes.Node | None) -> bool:
         """Say whether a node is a release, which is a section.
 
-        A release holds the node of its version and date. A section that
-        an author writes does not, whatever its classes are.
-
         :param node: The node to look at.
-        :return: `True` for a release.
+        :return: `True` for a release, which holds the node of its
+            version and date. A section from an author does not hold
+            it.
         """
         return isinstance(node, nodes.section) and any(
             isinstance(each, cls.Node) for each in node.children
         )
 
     def check(self) -> None:
-        """Make sure that the release has a version."""
+        """Make sure that the release has a version.
+
+        :raises rst.DirectiveError: When it has no `version`.
+        """
         if self.version is None:
             self.fail(
                 ":version: expected a version like 2026.11.8 or v1.2.0, got"
@@ -160,13 +162,11 @@ class Release(KaamikiDirective, motion=True):
     def build(self) -> list[nodes.Node]:
         """Make the section of the release.
 
-        The id of the section is the version, with a dash for each
-        character that is not a letter, a number, `_` or `-`. The date
-        gets its format when the page is written. When a directive in
-        the content takes a name that the release has, the build refuses
-        that directive.
-
-        :return: The section and what its title reported.
+        :return: The section and what its title reported. The id of the
+            section is the version, with a dash for each character that
+            is not a letter, a number, `_` or `-`. The date gets its
+            format when the page is written. The build refuses a
+            directive in the content that takes a name of the release.
         """
         version = self.version
         docname = self.env.docname
@@ -221,14 +221,12 @@ class Release(KaamikiDirective, motion=True):
         return [section, *messages]
 
     def released(self, version: str) -> dt | None:
-        """Work out the day a release went out.
-
-        The `:date:` option says it, failing that the version does when
-        it's spelt like `kaamiki.conf.release.version_fmt`.
+        """Find the day of the release.
 
         :param version: The version, as written.
-        :return: The day or `None` when nothing says.
-        :raises rst.DirectiveError: When `:date:` isn't a date.
+        :return: The day from `:date:`, else from the version when it
+            follows `kaamiki.conf.release.version_fmt`, else `None`.
+        :raises rst.DirectiveError: When `:date:` is not a date.
         """
         if "date" in self.options:
             iso = day(self.options["date"].strip())
@@ -255,12 +253,12 @@ class Release(KaamikiDirective, motion=True):
     def heading(
         self, version: str
     ) -> tuple[nodes.title, list[nodes.system_message]]:
-        """Make the release's title, inline markup and all.
+        """Make the title of the release, with its inline markup.
 
-        :param version: The version, which stands in for a title the
-            release hasn't got and is written as it is, since it's a
+        :param version: The version, which is the title when the
+            release has none. It is written as it is, because it is a
             name and not text with markup.
-        :return: The title and whatever parsing it reported.
+        :return: The title and what the parser reported.
         """
         text = " ".join(self.arguments).strip() or version
         words: list[nodes.Node] = [nodes.Text(text)]
@@ -274,17 +272,14 @@ class Release(KaamikiDirective, motion=True):
         return title, messages
 
     def label(self, body: nodes.container) -> None:
-        """Mark the groups a release sorts its notes into.
+        """Mark the groups of the notes of a release.
 
-        Each term in a definition list of the release, wherever it sits
-        in the content, gets the class `km-release__kind`. A definition
-        list inside another is left alone.
-
-        A term in the site's own language is matched against Kaamiki's
-        translation of each name. A group the site named in
-        `kaamiki.conf.release.kinds` is allowed too.
-
-        :param body: The release's parsed content, changed in place.
+        :param body: The parsed content of the release, changed in
+            place. Each term in a definition list of the release gets
+            `km-release__kind`, but not a list in a different list. A
+            term in the language of the site is compared with the
+            translation of each name. A group in
+            `kaamiki.conf.release.kinds` is also correct.
         """
         own = {
             str(key).strip().lower()
@@ -327,9 +322,9 @@ class Release(KaamikiDirective, motion=True):
                 term["classes"].append("km-release__kind")
 
     def more(self) -> nodes.paragraph | None:
-        """Link the article and the release elsewhere, if there are any.
+        """Link the article and the release on a different site.
 
-        :return: A paragraph holding the links or `None` without any.
+        :return: A paragraph with the links, or `None` without links.
         """
         urls: list[nodes.Node] = []
         if self.article:
@@ -373,12 +368,12 @@ class Release(KaamikiDirective, motion=True):
 
     @staticmethod
     def plain(node: Release.Node) -> list[nodes.Node]:
-        """Write a release's date and version as words, with no HTML.
+        """Write the date and the version of a release as words.
 
         :param node: The `release` node and its attributes.
-        :return: A paragraph with the version, when a title has taken
-            its place as the heading, and the date. A release with neither
-            has a comment, which writes nothing.
+        :return: A paragraph with the version, when a title replaces it
+            as the heading, and the date. A release without them gets a
+            comment, which writes nothing.
         """
         iso = node["datetime"]
         config = node.document.settings.env.config if node.document else None
@@ -393,7 +388,7 @@ class Release(KaamikiDirective, motion=True):
 
 @html.opens(Release.Node)
 def visit(self: HTMLTranslator, node: Release.Node) -> None:
-    """Write the date and version out as the HTML writer reaches them.
+    """Write the date and the version.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The `release` node and its attributes.
@@ -408,24 +403,23 @@ def visit(self: HTMLTranslator, node: Release.Node) -> None:
 
 
 def ensure_versions(env: BuildEnvironment) -> dict[str, dict[str, str]]:
-    """Hold the places each release version is written.
-
-    The store is made the first time it's asked for.
+    """Hold where each version of a release is written.
 
     :param env: The build environment.
-    :return: Every version a `release` names, with each page it is on
-        and the `source:line` it is written at there.
+    :return: Each version that a `release` names, with each page that
+        has it and its `source:line` there. The store is made when it
+        is first used.
     """
     return stored(env, "versions", {})
 
 
 @on("env-before-read-docs")
 def clear(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
-    """Forget every page that's about to be read before the first is.
+    """Forget each page that is read again, before the first is read.
 
     :param app: The Sphinx application instance (unused).
     :param env: The build environment.
-    :param docnames: The pages to be read.
+    :param docnames: The pages that are read.
     """
     del app
     for docname in docnames:
@@ -434,11 +428,11 @@ def clear(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
 
 @on("env-purge-doc")
 def purge(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
-    """Forget the articles and versions a page's releases had.
+    """Forget the articles and the versions of the releases of a page.
 
     :param app: The Sphinx application instance.
     :param env: The build environment.
-    :param docname: The page about to be read again.
+    :param docname: The page that is read again.
     """
     del app
     found = ensure_articles(env)
@@ -460,12 +454,12 @@ def merge(
     docnames: set[str],
     other: BuildEnvironment,
 ) -> None:
-    """Take in the articles and versions a parallel reader found.
+    """Take the articles and the versions that a parallel reader found.
 
     :param app: The Sphinx application instance.
     :param env: The build environment.
-    :param docnames: The pages the reader read.
-    :param other: The reader's build environment.
+    :param docnames: The pages that the reader read.
+    :param other: The build environment of the reader.
     """
     del app
     for article, pages in ensure_articles(other).items():
@@ -480,14 +474,12 @@ def merge(
 
 @on("env-updated")
 def settle(app: Sphinx, env: BuildEnvironment) -> None:
-    """Stop the build when two pages wrote the same version.
-
-    It waits until every page is read.
+    """Stop the build when two pages have the same version.
 
     :param app: The Sphinx application instance.
-    :param env: The build environment.
-    :raises KaamikiError: For the first version on two pages, named at
-        the later page.
+    :param env: The build environment, with each page read.
+    :raises KaamikiError: For the first version on two pages, at the
+        later page.
     """
     del app
     for version, pages in sorted(ensure_versions(env).items()):
@@ -502,15 +494,13 @@ def settle(app: Sphinx, env: BuildEnvironment) -> None:
 
 @on("doctree-resolved")
 def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
-    """Put the site's `release_notes` icon on a release's article link.
-
-    The icon goes in once the link has been resolved. An empty icon
-    leaves the link bare, and the class that marks the link is taken
-    off.
+    """Put the `release_notes` icon on the link to the article.
 
     :param app: The Sphinx application instance.
-    :param doctree: The page's resolved doctree.
-    :param docname: The page being resolved (unused).
+    :param doctree: The resolved doctree of the page. The icon goes in
+        after the link is resolved. An empty icon leaves the link
+        without an icon, and the class that marks the link goes.
+    :param docname: The page that is resolved (unused).
     """
     del docname
     if app.builder.format != "html":
