@@ -36,6 +36,13 @@ next to the document, and `embed.css` and `embed.js` are in
     .. embed:: embed.html
        :css: embed.css
        :js: embed.js
+
+`ESCAPES` keeps a value from closing its `<script>` early, and keeps
+U+2028 and U+2029 from ending a line of a JavaScript string.
+
+https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
+
+https://github.com/tc39/proposal-json-superset
 """
 
 from __future__ import annotations
@@ -70,10 +77,6 @@ if t.TYPE_CHECKING:
 
 
 PLACEHOLDER: t.Final[re.Pattern[str]] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
-# NOTE(xames3): Keeps a value from closing its `<script>` early and
-# U+2028/2029 from ending a JavaScript string line.
-# https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
-# https://github.com/tc39/proposal-json-superset
 ESCAPES: t.Final[dict[str, str]] = {
     "<": "\\u003c",
     ">": "\\u003e",

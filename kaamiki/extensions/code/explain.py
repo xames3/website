@@ -68,6 +68,9 @@ note, in the sequence written.
     not higher. A trace is kept next to the doctrees, and it is used
     again while the snippet, its options, the interpreter, the
     installed packages and the files that it imported do not change.
+
+The caption node is `Heading`, because docutils has a `caption` node
+already and finds visitors by the name of the class.
 """
 
 from __future__ import annotations
@@ -157,8 +160,6 @@ PACES: t.Final[tuple[tuple[int, frozenset[str]], ...]] = (
 )
 
 
-# NOTE(xames3): docutils already has a `caption` node and finds
-# visitors by class name, so the heading can't borrow that one.
 class Heading(nodes.paragraph):
     """The caption, parsed as rST, and the icon of the language."""
 

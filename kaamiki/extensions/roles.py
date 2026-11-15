@@ -780,6 +780,8 @@ def underline(
     :param content: The content of the role (unused).
     :return: The underlined text, and the error messages when the
         colour looks like markup, or the width or the wobble is wrong.
+        A `#` and a `%` in the SVG are percent-encoded, as a data URI
+        needs (RFC 2397).
     """
     del name, content
     config = inliner.document.settings.env.config
@@ -812,9 +814,6 @@ def underline(
             f" {', '.join(given) or unescape(text)!r}",
         )
     seed = f"{inliner.document.settings.env.docname}:{lineno}:{rawtext}"
-    # NOTE(xames3): A `#` and a `%` have to be percent-encoded inside a
-    # data URI.
-    # https://datatracker.ietf.org/doc/html/rfc2397
     ltr, rtl = (
         quote(_, safe="/:=,.' <>-")
         for _ in _underline_svg(colour, seed, width, wobble)

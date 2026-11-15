@@ -279,15 +279,14 @@ class Release(KaamikiDirective, motion=True):
             `km-release__kind`, but not a list in a different list. A
             term in the language of the site is compared with the
             translation of each name. A group in
-            `kaamiki.conf.release.kinds` is also correct.
+            `kaamiki.conf.release.kinds` is also correct. The names are
+            translated here and not at import, because the words of
+            Kaamiki join the catalogue of Sphinx only after setup.
         """
         own = {
             str(key).strip().lower()
             for key in values(self.config).release.kinds
         }
-        # NOTE(xames3): Translated here and not at import, as Kaamiki's
-        # words only join Sphinx's catalogue once it has set up.
-        # https://www.sphinx-doc.org/en/master/extdev/appapi.html#sphinx.application.Sphinx.add_message_catalog
         kinds = {
             "added": str(_("Added")),
             "changed": str(_("Changed")),
