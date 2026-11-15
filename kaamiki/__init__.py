@@ -48,6 +48,7 @@ from kaamiki.extensions.utils import merge_leads
 from kaamiki.extensions.utils import neighbours
 from kaamiki.extensions.utils import note_lead
 from kaamiki.extensions.utils import offer
+from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import overrides
 from kaamiki.extensions.utils import page_fields
 from kaamiki.extensions.utils import page_switches
@@ -438,6 +439,7 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     add_directives(app)
     app.add_builder(linkcheck, override=True)
     connect_hooks(app)
+    on.connect(app)
     return {
         "version": __version__,
         "env_version": env_version(__version__),

@@ -62,6 +62,7 @@ from kaamiki.extensions.utils.doctree import glyph
 from kaamiki.extensions.utils.doctree import glyph_edges
 from kaamiki.extensions.utils.doctree import keycaps
 from kaamiki.extensions.utils.doctree import offer
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import guarded
 from kaamiki.extensions.utils.links import hostnames
 from kaamiki.extensions.utils.links import opens_new_tab
@@ -127,6 +128,7 @@ __all__: list[str] = [
     "neighbours",
     "note_lead",
     "offer",
+    "on",
     "opens_new_tab",
     "overrides",
     "page_fields",
