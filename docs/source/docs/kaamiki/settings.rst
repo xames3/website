@@ -583,7 +583,12 @@ or ``False``, and a page can override all of them except the ones marked
           - ``""``
           - A date format for every date Kaamiki shows. Sphinx's
             ``html_last_updated_fmt`` wins when set. Without either you get
-            ``05 October 2026``, in your site's ``language``. *Site-wide*.
+            ``05 October 2026``, in your site's ``language``. The date
+            comments at the top of each page must follow this format, with
+            English month names; ``html_last_updated_fmt`` counts only when
+            this is empty, and without either it's ``%d %B %Y``. A comment
+            that doesn't follow it stops the build with its file and line.
+            *Site-wide*.
         * - ``kaamiki.conf.site.copy_headerlinks``
           - ``True``
           - Clicking a heading copies its link. *Site-wide*.

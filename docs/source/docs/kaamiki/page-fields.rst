@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 15 November 2026
 
 :km-page-title: Kaamiki page fields
 :km-page-description: The fields you can put at the top of a page to change its
@@ -138,6 +138,12 @@ comes from git, from the first commit for *created* and the latest for
 page's ``byline`` directive and then from your ``kaamiki.conf.site.project``
 setting. Only the comments before the first line of the page count, so a date
 quoted further down is ignored.
+
+The dates follow ``kaamiki.conf.site.last_updated_fmt``, then
+``html_last_updated_fmt``, and without either ``%d %B %Y``, as above. Month and
+day names are in English and a day has two digits, so it's ``05 October 2026``
+and not ``5 October 2026`` or ``2026-10-05``. A date in another form stops the
+build with the file, the line and the setting.
 
 .. _kaamiki-page-fields-preview:
 
