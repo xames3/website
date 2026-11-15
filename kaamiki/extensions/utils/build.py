@@ -6,8 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The utilities that write the 404 page and the sitemap after a build and
-the link checker that names a video that's gone.
+The utilities that write the 404 page and the sitemap after a build,
+and the link checker that names a missing video.
 """
 
 from __future__ import annotations
@@ -52,14 +52,13 @@ GONE_MESSAGE: t.Final[str] = "the video is deleted or private"
 
 
 def root_urls(tree: bs4.BeautifulSoup, base: str, root: str) -> None:
-    """Rewrite a page's relative URLs to start at the site root.
+    """Change the relative URLs of a page to the root.
 
-    The 404 page is served for any address, so a relative URL would
-    resolve against whatever was asked for.
-
-    :param tree: Parsed HTML tree, edited in place.
-    :param base: The directory the page was rendered as being in.
-    :param root: The path the site is served under, with its slashes.
+    :param tree: The parsed HTML tree, changed in place. The 404 page
+        is served for each address, so a relative URL would resolve
+        against the requested address.
+    :param base: The directory of the rendered page.
+    :param root: The path of the site, with its slashes.
     """
     for tag in tree.find_all(True):
         for attribute in ROOTED_ATTRIBUTES:
@@ -75,15 +74,12 @@ def root_urls(tree: bs4.BeautifulSoup, base: str, root: str) -> None:
 
 
 def not_found(app: Sphinx) -> bool:
-    """Write Kaamiki's 404 page to the top of the output.
+    """Write the 404 page at the top of the output.
 
-    Hosts serve `404.html` from the root and `html_additional_pages`
-    can't put it there under `dirhtml`.
-
-    Set `kaamiki.conf.show.not_found` to `False` in `conf.py` to skip
-    it. A site with a page of its own called `404` keeps it.
-
-    :param app: The Sphinx application instance.
+    :param app: The Sphinx application instance. Hosts serve `404.html`
+        from the root, and `html_additional_pages` cannot put it there
+        with `dirhtml`. Set `kaamiki.conf.show.not_found` to `False` to
+        skip it. A site with its own page `404` keeps it.
     :return: `True` when the page was written.
     """
     builder = app.builder
@@ -131,9 +127,10 @@ def not_found(app: Sphinx) -> bool:
 
 
 def is_noindex(robots: str) -> bool:
-    """Say whether a page asks to be kept out of search engines' reach.
+    """Say whether a page asks to stay out of search engines.
 
-    :param robots: The page's `:km-page-robots:` field, as written.
+    :param robots: The `:km-page-robots:` field of the page, as
+        written.
     :return: `True` for `noindex` or `none`, which is `noindex` and
         `nofollow` together.
     """
@@ -142,14 +139,13 @@ def is_noindex(robots: str) -> bool:
 
 
 def sitemap(app: Sphinx) -> bool:
-    """Write `sitemap.xml` and `robots.txt` at the top of the output.
+    """Write `sitemap.xml` and `robots.txt`.
 
-    Pages marked `noindex` or `none` in `:km-page-robots:` are left
-    out. Nothing is written without `html_baseurl` or with
-    `kaamiki.conf.show.sitemap` off. A `robots.txt` in
-    `html_extra_path` is kept.
-
-    :param app: The Sphinx application instance.
+    :param app: The Sphinx application instance. Pages with `noindex`
+        or `none` in `:km-page-robots:` are not included. Nothing is
+        written without `html_baseurl`, or with
+        `kaamiki.conf.show.sitemap` off. A `robots.txt` in
+        `html_extra_path` is kept.
     :return: `True` when the sitemap was written.
     """
     home = app.config.html_baseurl
@@ -194,14 +190,12 @@ def sitemap(app: Sphinx) -> bool:
 
 
 def forget(app: Sphinx, kept: tuple[str, ...]) -> None:
-    """Remove the files an earlier build wrote that this one doesn't.
-
-    Only a file with Kaamiki's marker in it goes, so a `404.html` or a
-    `robots.txt` the site made itself stays. The log says once which
-    went.
+    """Remove the files of an earlier build.
 
     :param app: The Sphinx application instance.
-    :param kept: The files this build wrote.
+    :param kept: The files that this build wrote. Only a file with the
+        marker of Kaamiki goes, so a `404.html` or a `robots.txt` from
+        the site stays. The log tells one time which files went.
     """
     gone: list[str] = []
     for name in (f"{NOT_FOUND}.html", "sitemap.xml", "robots.txt"):
@@ -221,10 +215,10 @@ def forget(app: Sphinx, kept: tuple[str, ...]) -> None:
 
 @on("build-finished")
 def build_finished(app: Sphinx, exc: Exception | None) -> None:
-    """Write Kaamiki's 404 page and the sitemap once the build worked.
+    """Write the 404 page and the sitemap.
 
     :param app: The Sphinx application instance.
-    :param exc: Whatever went wrong during the build or `None`.
+    :param exc: What went wrong in the build, or `None`.
     """
     builder = app.builder
     if exc or not isinstance(builder, StandaloneHTMLBuilder):
@@ -239,19 +233,18 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
 
 
 class linkcheck(CheckExternalLinksBuilder):
-    """The link checker, naming a video rather than its picture.
-
-    `thumbnail` and `youtube` give it the picture, since YouTube serves
-    the page of a video that's gone all the same. A picture that isn't
-    found is reported as the video's own link, with the reason. The rest
-    of what it reports is Sphinx's. Sphinx keeps no code for a broken
-    link, so a 404 or a 410 is read off the start of its message.
-    """
+    """The link checker, which names a video, not its picture."""
 
     def process_result(self, result: CheckResult) -> None:
-        """Report a result, the video's link standing in for its picture.
+        """Report a result, with the video for its picture.
 
-        :param result: What the checker found out about one link.
+        :param result: What the checker found for one link. `thumbnail`
+            and `youtube` give the checker the picture, because YouTube
+            serves the page of a removed video. A missing picture is
+            reported as the link of the video, with the reason. Sphinx
+            keeps no code for a broken link, so a 404 or a 410 is read
+            from the start of its message. The other results are those
+            of Sphinx.
         """
         vid = youtube_still_id(result.uri)
         if vid is not None:

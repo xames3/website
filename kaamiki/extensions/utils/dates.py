@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The helpers that date a page, from its comments or from git.
+The helpers that give a page its dates, from its comments or from git.
 """
 
 from __future__ import annotations
@@ -74,14 +74,14 @@ def updated_on(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Write the day a page was last updated in the site's language.
+    """Write the last update of a page in its language.
 
     :param app: The Sphinx application instance.
-    :param pagename: The page being rendered.
-    :param templatename: The template rendering it.
-    :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
+    :param pagename: The page that is written.
+    :param templatename: The template that writes it.
+    :param context: The context of the page, changed in place.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del pagename, templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
@@ -93,16 +93,14 @@ def updated_on(
 
 
 def header(source: str) -> dict[str, str]:
-    """Read the comments heading a page.
+    """Read the comments at the top of a page.
 
-    A page opens with `.. Author:`, `.. Created on:` and
-    `.. Last updated on:` comments. Only comments before the first
-    other line count, so a date quoted further down isn't taken for the
-    page's own.
-
-    :param source: The page's source.
-    :return: What they say, keyed `author`, `created on` and
-        `last updated on`, for the ones the page has.
+    :param source: The source of the page. It starts with `.. Author:`,
+        `.. Created on:` and `.. Last updated on:` comments. Only
+        comments before the first other line count, so a date lower in
+        the page is not taken.
+    :return: What they say, as `author`, `created on` and `last updated
+        on`, for the comments that the page has.
     """
     found: dict[str, str] = {}
     for line in source.splitlines():
@@ -117,15 +115,13 @@ def header(source: str) -> dict[str, str]:
 
 
 def read_history(srcdir: str) -> dict[str, tuple[dt, dt]]:
-    """Ask git when every file under a folder was first and last committed.
+    """Ask git for the first and last commit of each file.
 
-    One `git log` walks the history from the newest commit back, and a
-    file that was renamed keeps the history it had under its old name.
-
-    :param srcdir: The folder the sources are in, inside the repo.
-    :return: Each file's path from `srcdir`, with the dates of the
-        commit that brought it in and of the latest one. Empty outside
-        a repository or without git.
+    :param srcdir: The folder of the sources, in the repository.
+    :return: The path of each file from `srcdir`, with the dates of its
+        first and its latest commit, or empty outside a repository or
+        without git. One `git log` walks the history from the newest
+        commit, and a renamed file keeps its history.
     """
     cmd = [
         "git",
@@ -183,11 +179,11 @@ def committed(app: Sphinx, docname: str) -> tuple[dt, dt] | tuple[None, None]:
 
 @on("env-before-read-docs")
 def warm(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
-    """Ask git before the pages are read, so a parallel reader doesn't.
+    """Ask git before the pages are read.
 
     :param app: The Sphinx application instance.
     :param env: The build environment.
-    :param docnames: The pages about to be read.
+    :param docnames: The pages that are read.
     """
     del env
     if docnames and app not in HISTORY:
@@ -195,29 +191,27 @@ def warm(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
 
 
 def written(when: dt | None) -> str:
-    """Write a date the way the header comments write it.
+    """Write a date as the header comments write it.
 
-    The month is always the English name, whatever language the machine
-    builds in, since `day` reads it back.
-
-    :param when: The date or `None` for the day the site is built.
-    :return: The date, as `04 May 2026`.
+    :param when: The date, or `None` for the day of the build.
+    :return: The date, as `04 May 2026`. The month is always in
+        English, in each language of the machine, because `day` reads
+        it again.
     """
     when = when or dt.now().astimezone()
     return f"{when:%d} {MONTHS[when.month - 1]} {when.year}"
 
 
 def dated(when: dt, config: Config) -> str:
-    """Write a date the way a reader wants it, in the site's language.
-
-    Every date Kaamiki shows follows `html_last_updated_fmt` when the
-    site sets it, then `kaamiki.conf.site.last_updated_fmt`. With
-    neither it's `04 May 2026` in English. `written` keeps the one
-    form the header comments use, since Kaamiki reads that back.
+    """Write a date for a reader, in the language of the site.
 
     :param when: The date.
     :param config: The Sphinx configuration.
-    :return: The date, in the site's `language` (English when unset).
+    :return: The date in the `language` of the site, or in English when
+        it is not set. Each date follows `html_last_updated_fmt` when
+        set, then `kaamiki.conf.site.last_updated_fmt`, else it is `04
+        May 2026`. `written` keeps the form of the header comments,
+        because Kaamiki reads that again.
     """
     form = (
         config.html_last_updated_fmt
@@ -228,14 +222,12 @@ def dated(when: dt, config: Config) -> str:
 
 
 def day(text: str) -> str:
-    """Turn a date written like the header comments write it into ISO.
+    """Change a date from the header comments into ISO.
 
-    The month is read by its English name, whatever language the
-    machine builds in. `2026-09-29` is read too.
-
-    :param text: The date, as `29 September 2026`.
-    :return: `2026-09-29` or an empty string when it doesn't read as a
-        date.
+    :param text: The date, as `29 September 2026` or `2026-09-29`. The
+        month is read by its English name, in each language of the
+        machine.
+    :return: `2026-09-29`, or an empty string when it is not a date.
     """
     if found := WRITTEN.fullmatch(text):
         month = NUMBERS.get(found[2].lower(), 0)
@@ -251,10 +243,10 @@ def day(text: str) -> str:
 
 
 def within(iso: str) -> bool:
-    """Say whether a day is from 2000 to a year ahead.
+    """Say whether a day is from 2000 to one year later.
 
     :param iso: The day, as `2026-09-29`.
-    :return: Whether it's one a page or a release could have.
+    :return: `True` when a page or a release can have it.
     """
     return (
         date(2000, 1, 1)
@@ -265,18 +257,19 @@ def within(iso: str) -> bool:
 
 @on("source-read")
 def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
-    """Work out who wrote a page and when it was created and updated.
-
-    The page's `.. Author:`, `.. Created on:` and `.. Last updated on:`
-    comments win. A missing date comes from git (first or latest
-    commit, read once for the whole build), then the build day. A
-    missing author comes from the `byline` directive, then the project.
+    """Find who wrote a page, and when.
 
     :param app: The Sphinx application instance.
-    :param docname: The document being read.
-    :param source: The document's source, as docutils hands it over.
-    :raises KaamikiError: For a date comment that isn't a date from
-        2000 to a year ahead, or a page updated before it was created.
+    :param docname: The document that is read.
+    :param source: The source of the document, from docutils. The `..
+        Author:`, `.. Created on:` and `.. Last updated on:` comments
+        come first. A missing date comes from git (the first or the
+        latest commit, read one time for the build), then the day of
+        the build. A missing author comes from the `byline` directive,
+        then the project.
+    :raises KaamikiError: For a date comment that is not a date from
+        2000 to one year later, or a page updated before it was
+        created.
     """
     metadata = app.env.metadata.setdefault(docname, {})
     found = header(source[0] if source else "")

@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The helpers that walk a doctree and pick prose out of it.
+The helpers that walk a doctree and take prose from it.
 """
 
 from __future__ import annotations
@@ -125,17 +125,15 @@ def caption_icon(
     *,
     icons: Icons,
 ) -> str:
-    """Pick the icon a code block's caption wears.
-
-    The language has the first say. A language with no icon of its own,
-    like a diff's, hands over to the caption's file name and a name no
-    icon knows gets a plain file.
+    """Select the icon of the caption of a code block.
 
     :param caption: The caption.
-    :param language: The language of the code under it.
-    :param icons: The icons the site draws.
-    :return: The icon's classes or an empty string when the caption
-        opens with an icon of its own.
+    :param language: The language of the code below it. It comes first.
+        A language without its own icon, as a diff, uses the file name
+        in the caption, and an unknown name gets a plain file.
+    :param icons: The icons of the site.
+    :return: The classes of the icon, or an empty string when the
+        caption starts with its own icon.
     """
     first = caption.children[0] if caption.children else None
     if isinstance(first, glyph):
@@ -153,15 +151,13 @@ def caption_icon(
 
 
 def buried(paragraph: nodes.Element) -> bool:
-    """Say whether a paragraph sits anywhere but directly in a section.
-
-    Lifted out of a note, a table, a fold, a tab, a card, a footnote or
-    a quote, a line reads as a non-sequitur. A page's description
-    shouldn't come from one a reader can't see when the page opens.
+    """Say whether a paragraph is not directly in a section.
 
     :param paragraph: The paragraph to place.
-    :return: `True` when something other than a section, an `only` or
-        the page itself is above it.
+    :return: `True` when a node other than a section, an `only` or the
+        page is above it. A line from a note, a table, a fold, a tab, a
+        card, a footnote or a quote does not make sense alone, so the
+        description of a page does not come from one.
     """
     parent: nodes.Element | None = paragraph.parent
     while parent is not None:
@@ -172,13 +168,12 @@ def buried(paragraph: nodes.Element) -> bool:
 
 
 def standfirst(doctree: nodes.document | None, limit: int) -> str:
-    """Pull the page's lead, the line right under the title.
+    """Take the lead of the page, the line directly below the title.
 
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
-    :param limit: Longest the result may be.
-    :return: The lead or an empty string when the page hasn't got
-        one.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
+    :param limit: The maximum length of the result.
+    :return: The lead, or an empty string when the page has none.
     """
     if doctree is None:
         return ""
@@ -194,12 +189,12 @@ def standfirst(doctree: nodes.document | None, limit: int) -> str:
 
 
 def summarise(doctree: nodes.document | None, limit: int) -> str:
-    """Fall back to a page's first usable paragraph.
+    """Use the first usable paragraph of a page.
 
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
-    :param limit: Longest the result may be.
-    :return: A single-line summary or an empty string when the page
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
+    :param limit: The maximum length of the result.
+    :return: A summary on one line, or an empty string when the page
         has no usable prose.
     """
     if doctree is None:
@@ -215,14 +210,13 @@ def summarise(doctree: nodes.document | None, limit: int) -> str:
 
 @on("doctree-read", priority=400)
 def offer(app: Sphinx, doctree: nodes.document) -> None:
-    """Hand the words in a page's own fields to `gettext`.
-
-    Sphinx lifts these fields out of the page before `gettext` sees
-    them, so a copy of each is left in a container only a `gettext`
-    build gets. This runs ahead of Sphinx's metadata collector.
+    """Give the words in the fields of a page to `gettext`.
 
     :param app: The Sphinx application instance.
-    :param doctree: The page, just read.
+    :param doctree: The page, just read. Sphinx removes these fields
+        before `gettext` sees them, so a copy of each goes in a
+        container that only a `gettext` build gets. This runs before
+        the metadata collector of Sphinx.
     """
     if not isinstance(app.builder, MessageCatalogBuilder):
         return
@@ -245,7 +239,7 @@ def is_key(node: nodes.Node) -> t.TypeGuard[nodes.literal]:
     """Say whether a node is a key, a `kbd` literal.
 
     :param node: The node to look at.
-    :return: `True` when it's a key.
+    :return: `True` when it is a key.
     """
     return isinstance(node, nodes.literal) and "kbd" in node["classes"]
 
@@ -253,15 +247,12 @@ def is_key(node: nodes.Node) -> t.TypeGuard[nodes.literal]:
 def dress(key: nodes.literal, *, icons: Icons) -> None:
     """Give a key the classes and the icon that draw it.
 
-    The arrows, the globe and, written for Windows or Linux, Super wear
-    a Font Awesome icon. A Mac has no Super key, so there it stays a
-    word, as it does in a plain `kbd`.
-
-    The `kbd:windows` and `kbd:linux` roles mark their keys with
-    `SYSTEM_KEYS`, which this reads and takes off again.
-
-    :param key: The key.
-    :param icons: The icons the site draws.
+    :param key: The key. The arrows, the globe, and Super for Windows
+        or Linux get a Font Awesome icon. A Mac has no Super key, so
+        there it stays a word, as in a plain `kbd`. The `kbd:windows`
+        and `kbd:linux` roles mark their keys with `SYSTEM_KEYS`, which
+        this reads and removes.
+    :param icons: The icons of the site.
     """
     classes = key["classes"]
     pc = bool(SYSTEM_KEYS & set(classes))
@@ -291,14 +282,13 @@ def dress(key: nodes.literal, *, icons: Icons) -> None:
 
 
 def combos(children: list[nodes.Node], *, icons: Icons) -> list[nodes.Node]:
-    """Dress the keys among some siblings and bind each combo.
-
-    A combo is two or more keys joined by `-`, `+` or `^`. It gets a
-    span of its own, which keeps it on one line when it fits.
+    """Dress the keys among some siblings, and join each combo.
 
     :param children: The siblings, some of which are keys.
-    :param icons: The icons the site draws.
-    :return: The siblings, with every combo in a span.
+    :param icons: The icons of the site.
+    :return: The siblings, with each combo in a span. A combo is two or
+        more keys joined by `-`, `+` or `^`, and its span keeps it on
+        one line when it fits.
     """
     result: list[nodes.Node] = []
     combo: list[nodes.Node] = []
@@ -360,14 +350,13 @@ def keycaps(app: Sphinx, doctree: nodes.document) -> None:
 
 
 def _spaced(line: nodes.Element, icons: set[int]) -> None:
-    """Mark the icons that start or end a line and trim the space by them.
+    """Mark the icons at the ends of a line, and trim spaces.
 
-    The line is walked once. Each icon's words before and after it come
-    from running flags, and the whitespace goes in two passes, so the
-    work grows with the line and not with its icons.
-
-    :param line: The nearest node above the icons that isn't inline.
-    :param icons: The `id` of each icon in it that wants spacing.
+    :param line: The nearest node above the icons that is not inline.
+        It is walked one time. The words before and after each icon
+        come from flags, and the whitespace goes in two passes, so the
+        work grows with the line, not with its icons.
+    :param icons: The `id` of each icon in it that needs spacing.
     """
     order = [
         _ for _ in line.findall() if isinstance(_, nodes.Text) or id(_) in icons
