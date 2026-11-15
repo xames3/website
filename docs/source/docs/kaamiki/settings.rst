@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 12 November 2026
+.. Last updated on: 15 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -1116,7 +1116,8 @@ Without a kit, Kaamiki keeps to what Font Awesome Free has. Free draws far
 fewer icons in the ``regular`` style than Pro does, so every icon is looked up
 in that order. An icon Free has in ``regular`` is drawn that way and one it has
 only in ``solid`` is drawn solid. ``light``, ``thin`` and ``duotone`` become
-the closest Free style. ``kaamiki.conf.icons.style = "solid"`` makes every icon
+the closest Free style, and a Pro+ pack like ``fa-jelly`` becomes the Free icon
+in its own style. ``kaamiki.conf.icons.style = "solid"`` makes every icon
 solid where Free has one. A Pro icon with no Free twin has a stand-in:
 ``badge-check``, ``brackets-curly``, ``file-xml``, ``link-simple``,
 ``sparkles`` and ``table-columns-merge-previous``. Any other name Free doesn't
@@ -1239,7 +1240,12 @@ one style, whatever ``kaamiki.conf.icons.style`` says.
 Write the icon in whichever way suits you. ``video``, ``fa-video`` and
 ``fa-solid fa-video`` all mean the same thing, and a bare name gets
 ``kaamiki.conf.icons.style``. A name that's only a brand, like ``github``, is
-drawn as the brand. To give a swapped icon one version for each plan, write a
+drawn as the brand. A family goes before the style, like
+``fa-sharp fa-solid fa-video``, and a :ref:`Pro+ pack
+<kaamiki-roles-fa-icon-packs>` needs no style, because it has only one, so
+``fa-jelly fa-video`` is ``fa-jelly fa-regular fa-video``. A family takes only
+its own styles, so ``fa-jelly fa-solid fa-video`` stops the build. To give a
+swapped icon one version for each plan, write a
 pair. Either half may be left out, and the other is used for both:
 
 .. code-block:: python

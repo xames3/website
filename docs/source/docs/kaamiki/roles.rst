@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 15 November 2026
 
 :km-page-title: Kaamiki roles
 :km-page-description: The inline roles Kaamiki adds for links, motion, colour,
@@ -384,10 +384,13 @@ fa-icon
 -------------------------------------------------------------------------------
 
 A Font Awesome icon. The text is an icon's name and then any classes, a space
-between each. The role names the style: ``fa-icon:brands``, ``fa-icon:light``,
-``fa-icon:regular``, ``fa-icon:solid``, ``fa-icon:thin`` or
-``fa-icon:duotone``. A plain ``fa-icon`` draws in the site's
-``kaamiki.conf.icons.style``, which is ``regular`` unless you change it. An
+between each. The role names the style or the family: ``fa-icon:brands``,
+``fa-icon:solid``, ``fa-icon:regular``, ``fa-icon:light`` or ``fa-icon:thin``
+for a style, ``fa-icon:duotone``, ``fa-icon:sharp`` or
+``fa-icon:sharp-duotone`` for a Pro family, and one role for each
+:ref:`Pro+ pack <kaamiki-roles-fa-icon-packs>`, like ``fa-icon:jelly``. A plain
+``fa-icon`` draws in the site's ``kaamiki.conf.icons.style``, which is
+``regular`` unless you change it. An
 icon in the middle of a sentence sits between its words like a word does, so
 the spaces you type around it are its spacing. One that starts or ends a line
 is held further from its text, and a full stop right after it still touches it.
@@ -436,6 +439,84 @@ Without a Font Awesome Pro kit, a name that isn't in Font Awesome Free stops
 the build and, when it can, suggests the nearest one. :ref:`Icons in settings
 <kaamiki-settings-icons>` explains the kit and the Free and Pro pairs, and
 :ref:`classes <kaamiki-classes>` lists the classes you can add.
+
+.. _kaamiki-roles-fa-icon-packs:
+
+.. rubric:: Pro+ packs
+
+A Pro+ pack has one style, and its role draws in it, so
+``:fa-icon:jelly:`house``` is ``fa-jelly fa-regular fa-house``. A pack holds
+about 200 of the most common icons, not the whole set, and your kit must have
+the pack turned on. Without a kit, each one becomes the Free icon in the
+nearest style.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 40 30 30
+
+    * - Role
+      - Style
+      - Short class
+    * - ``fa-icon:chisel``
+      - ``regular``
+      - ``facr``
+    * - ``fa-icon:etch``
+      - ``solid``
+      - ``faes``
+    * - ``fa-icon:graphite``
+      - ``thin``
+      - ``fagt``
+    * - ``fa-icon:jelly``
+      - ``regular``
+      - ``fajr``
+    * - ``fa-icon:jelly-fill``
+      - ``regular``
+      - ``fajfr``
+    * - ``fa-icon:jelly-duo``
+      - ``regular``
+      - ``fajdr``
+    * - ``fa-icon:mosaic``
+      - ``solid``
+      - ``fams``
+    * - ``fa-icon:notdog``
+      - ``solid``
+      - ``fans``
+    * - ``fa-icon:notdog-duo``
+      - ``solid``
+      - ``fands``
+    * - ``fa-icon:pixel``
+      - ``regular``
+      - ``fapr``
+    * - ``fa-icon:slab``
+      - ``regular``
+      - ``faslr``
+    * - ``fa-icon:slab-press``
+      - ``regular``
+      - ``faslpr``
+    * - ``fa-icon:slab-duo``
+      - ``regular``
+      - ``fasldr``
+    * - ``fa-icon:slab-press-duo``
+      - ``regular``
+      - ``faslpdr``
+    * - ``fa-icon:thumbprint``
+      - ``light``
+      - ``fatl``
+    * - ``fa-icon:utility``
+      - ``semibold``
+      - ``fausb``
+    * - ``fa-icon:utility-fill``
+      - ``semibold``
+      - ``faufsb``
+    * - ``fa-icon:utility-duo``
+      - ``semibold``
+      - ``faudsb``
+    * - ``fa-icon:vellum``
+      - ``solid``
+      - ``favs``
+    * - ``fa-icon:whiteboard``
+      - ``semibold``
+      - ``fawsb``
 
 .. _kaamiki-roles-kbd:
 
