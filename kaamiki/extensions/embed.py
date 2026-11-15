@@ -329,6 +329,22 @@ class Embed(KaamikiDirective, spec=placeholders):
     js = Option(rst.directives.unchanged)
     encoding = Option(checks.encoding)
 
+    @classmethod
+    def made(cls, node: nodes.Node | None) -> bool:
+        """Say whether a node is an embed, which is a container.
+
+        An embed holds the `raw` node of its styles and scripts. A
+        container that an author writes does not, whatever its classes
+        are.
+
+        :param node: The node to look at.
+        :return: `True` for an embed.
+        """
+        return type(node) is nodes.container and any(
+            isinstance(each, nodes.raw) and "css" in each
+            for each in node.children
+        )
+
     def build(self) -> list[nodes.Node]:
         """Read the markup, fill its placeholders and return it.
 

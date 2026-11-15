@@ -131,6 +131,20 @@ class Release(KaamikiDirective, motion=True):
     class Node(nodes.Element):
         """The date and the version of the release, which `visit` writes."""
 
+    @classmethod
+    def made(cls, node: nodes.Node | None) -> bool:
+        """Say whether a node is a release, which is a section.
+
+        A release holds the node of its version and date. A section that
+        an author writes does not, whatever its classes are.
+
+        :param node: The node to look at.
+        :return: `True` for a release.
+        """
+        return isinstance(node, nodes.section) and any(
+            isinstance(each, cls.Node) for each in node.children
+        )
+
     def check(self) -> None:
         """Make sure that the release has a version."""
         if self.version is None:

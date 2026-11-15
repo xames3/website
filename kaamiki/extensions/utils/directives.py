@@ -795,6 +795,15 @@ class KaamikiDirective(SphinxDirective):
             )
         KaamikiDirective.registry[name or cls.__name__.lower()] = cls
 
+    @classmethod
+    def made(cls, node: nodes.Node | None) -> bool:
+        """Say whether this directive wrote a node.
+
+        :param node: The node to look at.
+        :return: `True` when the node is exactly this directive's node.
+        """
+        return "Node" in vars(cls) and type(node) is cls.Node
+
     @property
     def title(self) -> str:
         """The title, which is the argument, trimmed."""

@@ -17,54 +17,19 @@ import typing as t
 import docutils.nodes as nodes
 from sphinx import addnodes
 
-from kaamiki.extensions import accordion
 from kaamiki.extensions import block
-from kaamiki.extensions import byline
-from kaamiki.extensions import carousel
 from kaamiki.extensions import columns
 from kaamiki.extensions import release
-from kaamiki.extensions import repository
 from kaamiki.extensions import tabs
-from kaamiki.extensions import thumbnail
-from kaamiki.extensions import video
-from kaamiki.extensions import youtube
 from kaamiki.extensions.code import explain
 from kaamiki.extensions.code import version
+from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import checks
 
 if t.TYPE_CHECKING:
-    from collections.abc import Callable
     from collections.abc import Iterator
 
     from sphinx.application import Sphinx
-
-
-def is_release(node: nodes.Node | None) -> bool:
-    """Say whether a node is a release, which is a section underneath.
-
-    A release holds the node that carries its version and date, which
-    no section an author writes does, whatever classes it has.
-
-    :param node: The node to look at.
-    :return: `True` for a release.
-    """
-    return isinstance(node, nodes.section) and any(
-        isinstance(_, release.Release.Node) for _ in node.children
-    )
-
-
-def is_embed(node: nodes.Node) -> bool:
-    """Say whether a node is an embed, which is a container underneath.
-
-    An embed holds the `raw` node that carries its styles and scripts,
-    which no container an author writes does, whatever classes it has.
-
-    :param node: The node to look at.
-    :return: `True` for an embed.
-    """
-    return type(node) is nodes.container and any(
-        isinstance(_, nodes.raw) and "css" in _ for _ in node.children
-    )
 
 
 def is_raw(node: nodes.Node) -> bool:
@@ -82,26 +47,6 @@ def is_raw(node: nodes.Node) -> bool:
     )
 
 
-KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
-    "accordion": lambda _: isinstance(_, accordion.Accordion.Node),
-    "block": lambda _: isinstance(_, block.Block.Node),
-    "byline": lambda _: isinstance(_, byline.Byline.Node),
-    "carousel": lambda _: isinstance(_, carousel.Carousel.Node),
-    "code-explain": lambda _: (
-        isinstance(_, explain.CodeExplain.Node)
-        and not isinstance(_, version.CodeVersion.Node)
-    ),
-    "code-version": lambda _: isinstance(_, version.CodeVersion.Node),
-    "columns": lambda _: isinstance(_, columns.Columns.Node),
-    "embed": is_embed,
-    "raw": is_raw,
-    "release": is_release,
-    "repository": lambda _: isinstance(_, repository.Repository.Node),
-    "tabs": lambda _: isinstance(_, tabs.Tabs.Node),
-    "thumbnail": lambda _: isinstance(_, thumbnail.Thumbnail.Node),
-    "video": lambda _: isinstance(_, video.Video.Node),
-    "youtube": lambda _: isinstance(_, youtube.Youtube.Node),
-}
 PLURAL: t.Final[frozenset[str]] = frozenset({"columns", "tabs"})
 PAGE: t.Final[dict[str, str]] = {
     "byline": "on the page itself",
@@ -169,7 +114,7 @@ def is_part(node: nodes.Node) -> bool:
     """
     if isinstance(node, PARTS):
         return True
-    return type(node) is nodes.container and is_release(node.parent)
+    return type(node) is nodes.container and release.Release.made(node.parent)
 
 
 def is_wrapper(node: nodes.Node) -> bool:
@@ -199,7 +144,10 @@ def kind(node: nodes.Node) -> str:
     :return: The directive's name or an empty string for any other
         node.
     """
-    return next((_ for _, is_it in KINDS.items() if is_it(node)), "")
+    for name, directive in KaamikiDirective.registry.items():
+        if directive.made(node):
+            return name
+    return "raw" if is_raw(node) else ""
 
 
 def open_to_page(node: nodes.Node) -> bool:
@@ -214,7 +162,7 @@ def open_to_page(node: nodes.Node) -> bool:
     """
     if isinstance(node, (nodes.document, addnodes.only)):
         return True
-    return isinstance(node, nodes.section) and not is_release(node)
+    return isinstance(node, nodes.section) and not release.Release.made(node)
 
 
 def article(name: str) -> str:
