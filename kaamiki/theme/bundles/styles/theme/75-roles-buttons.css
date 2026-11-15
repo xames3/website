@@ -121,10 +121,6 @@
     }
 }
 
-.far {
-    font: var(--fa-font-regular);
-}
-
 .km-button {
     display: inline-block;
     width: max-content;
