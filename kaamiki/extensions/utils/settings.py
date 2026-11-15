@@ -477,6 +477,37 @@ class Value:
         """
         self.attr = name
 
+    @t.overload
+    def __get__(self, group: None, owner: type) -> Value: ...
+
+    @t.overload
+    def __get__(self, group: Settings, owner: type) -> t.Any: ...
+
+    def __get__(self, group: Settings | None, owner: type) -> t.Any:
+        """Read what the site set, or the default of the setting.
+
+        :param group: The group, or `None` on its class.
+        :param owner: The class of the group.
+        :return: The value. A dictionary or a list default is copied
+            into what the site set, so a change to it is kept.
+        """
+        if group is None:
+            return self
+        if self.key in group.given:
+            return group.given[self.key]
+        if isinstance(self.default, dict | list):
+            return group.given.setdefault(self.key, copy.deepcopy(self.default))
+        return self.default
+
+    def __set__(self, group: Settings, value: t.Any) -> None:
+        """Check a value when the site sets it, then keep it.
+
+        :param group: The group.
+        :param value: The value from `conf.py`.
+        """
+        _check_value(self.key, value, "")
+        group.given[self.key] = value
+
 
 class Settings:
     """A group of Kaamiki's settings, as `kaamiki.conf.show`."""
@@ -484,6 +515,14 @@ class Settings:
     schema: t.ClassVar[dict[str, Value]] = {}
     groups: t.ClassVar[dict[str, type[Settings]]] = {}
     name: t.ClassVar[str]
+    given: dict[str, t.Any]
+
+    def __init__(self, given: dict[str, t.Any]) -> None:
+        """Make the group, which shares what the site set with the others.
+
+        :param given: What the site set, by key.
+        """
+        object.__setattr__(self, "given", given)
 
     def __init_subclass__(
         cls,
@@ -524,6 +563,42 @@ class Settings:
         """
         return [_ for _ in vars(cls).values() if isinstance(_, Value)]
 
+    @classmethod
+    def path(cls, attr: str = "") -> str:
+        """Write how `conf.py` names the group or one of its settings.
+
+        :param attr: The setting, or nothing for the group.
+        :return: The name, as `kaamiki.conf.show.more`.
+        """
+        return ".".join(filter(None, (f"{NAME}.conf", cls.name, attr)))
+
+    def __setattr__(self, attr: str, value: t.Any) -> None:
+        """Refuse a name that is not a setting of the group.
+
+        :param attr: The name that the site sets.
+        :param value: The value.
+        """
+        if not isinstance(getattr(type(self), attr, None), Value):
+            fail(
+                f"{self.path(attr)}: expected a Kaamiki setting, got an"
+                " unknown name"
+            )
+        object.__setattr__(self, attr, value)
+
+    def __dir__(self) -> list[str]:
+        """List the settings of the group.
+
+        :return: The names of the settings.
+        """
+        return [each.attr for each in self.values()]
+
+    def __repr__(self) -> str:
+        """Show the settings of the group.
+
+        :return: The name of the group and its settings.
+        """
+        return f"<{self.path()}: {', '.join(self.__dir__())}>"
+
 
 class Icons(Settings):
     """The `kaamiki.conf.icons` settings."""
@@ -536,6 +611,16 @@ class Icons(Settings):
     )
     kit = Value(None, string(checks.kit), key="fa_kit", reread=True)
     names = Value({}, site_icons, key="fa_icons")
+
+    def update(
+        self, names: Mapping[str, str] | None = None, /, **more: str
+    ) -> None:
+        """Add to Kaamiki's icon names.
+
+        :param names: Icon names and the icons that they take.
+        :param more: The same, as keywords.
+        """
+        self.names = {**self.names, **(names or {}), **more}
 
 
 class Show(Settings):
@@ -736,6 +821,52 @@ class Root(Settings, name=""):
     """The settings of no group, directly on `kaamiki.conf`."""
 
     mode = Value("dark", choices=("dark", "light", "system"), key="colour_mode")
+
+    icons: Icons
+    show: Show
+    media: Media
+    motion: Motion
+    toctree: Toctree
+    code_explain: CodeExplain
+    youtube: Youtube
+    accordion: Accordion
+    button: Button
+    tab: Tab
+    embed: Embed
+    links: Links
+    roles: Roles
+    release: Release
+    site: Site
+
+    def __init__(self, given: dict[str, t.Any]) -> None:
+        """Make `kaamiki.conf` with each group in it.
+
+        :param given: What the site set, by key, shared by each group.
+        """
+        super().__init__(given)
+        for name, group in Settings.groups.items():
+            if name:
+                object.__setattr__(self, name, group(given))
+
+    def __setattr__(self, attr: str, value: t.Any) -> None:
+        """Refuse a group, which cannot be set, and an unknown name.
+
+        :param attr: The name that the site sets.
+        :param value: The value.
+        :raises AttributeError: For the name of a group.
+        """
+        if attr in Settings.groups:
+            raise AttributeError(
+                f"{self.path(attr)} is a group, set one of its settings"
+            )
+        super().__setattr__(attr, value)
+
+    def __dir__(self) -> list[str]:
+        """List the settings of no group, then the groups.
+
+        :return: The names.
+        """
+        return [*super().__dir__(), *filter(None, Settings.groups)]
 
 
 DEFAULTS: t.Final[dict[str, t.Any]] = {
@@ -977,139 +1108,7 @@ def _constant(value: t.Any) -> Callable[[Config], t.Any]:
     return lambda _: value
 
 
-class Group:
-    """One group of Kaamiki's settings, `kaamiki.conf.icons` for one."""
-
-    def __init__(self, name: str, given: dict[str, t.Any]) -> None:
-        """Make the group, which shares what a site set with the others.
-
-        :param name: The group's name, as `icons`.
-        :param given: What the site set, shared by every group.
-        """
-        object.__setattr__(self, "_name", name)
-        object.__setattr__(self, "_given", given)
-
-    def _key(self, attr: str) -> str:
-        """Find the setting an attribute stands for."""
-        members = GROUPS[self._name]
-        if attr not in members:
-            raise AttributeError(
-                f"{type(self).__name__!r} object has no attribute {attr!r}",
-                name=attr,
-                obj=self,
-            )
-        return members[attr]
-
-    def __getattr__(self, attr: str) -> t.Any:
-        """Read what a site set, or Kaamiki's own default."""
-        key = self._key(attr)
-        if key in self._given:
-            return self._given[key]
-        value = DEFAULTS[key]
-        if isinstance(value, dict | list):
-            return self._given.setdefault(key, copy.deepcopy(value))
-        return value
-
-    def __setattr__(self, attr: str, value: t.Any) -> None:
-        """Check a setting the moment a site sets it."""
-        if attr not in GROUPS[self._name]:
-            fail(
-                f"{NAME}.conf.{self._name}.{attr}: expected a Kaamiki "
-                "setting, got an unknown name"
-            )
-        key = self._key(attr)
-        _check_value(key, value, "")
-        self._given[key] = value
-
-    def __dir__(self) -> list[str]:
-        """List the settings of the group."""
-        return list(GROUPS[self._name])
-
-    def __repr__(self) -> str:
-        """Show the settings the group has."""
-        return f"<{NAME}.conf.{self._name}: {', '.join(GROUPS[self._name])}>"
-
-
-class IconSettings(Group):
-    """The group of settings about icons."""
-
-    names: dict[str, str]
-
-    def update(
-        self, names: Mapping[str, str] | None = None, /, **more: str
-    ) -> None:
-        """Add to Kaamiki's icon names.
-
-        :param names: Icon names and the icons they take.
-        :param more: The same, as keywords.
-        """
-        self.names = {**self.names, **(names or {}), **more}
-
-
-class Conf:
-    """Every setting of Kaamiki, which `conf.py` sets on `kaamiki.conf`."""
-
-    given: dict[str, t.Any]
-    mode: str
-    icons: IconSettings
-    show: Group
-    media: Group
-    motion: Group
-    toctree: Group
-    code_explain: Group
-    youtube: Group
-    accordion: Group
-    button: Group
-    tab: Group
-    embed: Group
-    links: Group
-    roles: Group
-    release: Group
-    site: Group
-
-    def __init__(self) -> None:
-        """Make the object with every group in it."""
-        given: dict[str, t.Any] = {}
-        object.__setattr__(self, "given", given)
-        for name in GROUPS:
-            made = IconSettings if name == "icons" else Group
-            object.__setattr__(self, name, made(name, given))
-
-    def __getattr__(self, name: str) -> t.Any:
-        """Read a setting that isn't in a group, `mode`."""
-        if name not in ROOT:
-            raise AttributeError(
-                f"{type(self).__name__!r} object has no attribute {name!r}",
-                name=name,
-                obj=self,
-            )
-        return self.given.get(ROOT[name], DEFAULTS[ROOT[name]])
-
-    def __setattr__(self, name: str, value: t.Any) -> None:
-        """Check a setting that isn't in a group, refuse any other name."""
-        if name in ROOT:
-            _check_value(ROOT[name], value, "")
-            self.given[ROOT[name]] = value
-            return
-        if name in GROUPS:
-            raise AttributeError(
-                f"{NAME}.conf.{name} is a group, set one of its settings"
-            )
-        fail(
-            f"{NAME}.conf.{name}: expected a Kaamiki setting, got an "
-            "unknown name"
-        )
-
-    def __dir__(self) -> list[str]:
-        """List the settings of no group and the groups."""
-        return [*ROOT, *GROUPS]
-
-    def __repr__(self) -> str:
-        """Show the settings of no group and the groups."""
-        return f"<{NAME}.conf: {', '.join([*ROOT, *GROUPS])}>"
-
-
-CONF: t.Final[Conf] = Conf()
+CONF: t.Final[Root] = Root({})
 
 
 @on("config-inited")
