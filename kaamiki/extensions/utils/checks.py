@@ -4,7 +4,7 @@ Input Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 Kaamiki takes what it's given or stops the build. Nothing is clamped,
 guessed or quietly dropped. Every option, role, page field and setting
@@ -29,6 +29,8 @@ from docutils.transforms import Transform
 from docutils.utils import Reporter
 from sphinx.errors import SphinxError
 from sphinx.errors import SphinxParallelError
+
+from kaamiki.extensions.utils.hooks import on
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable
@@ -781,6 +783,7 @@ class Promoted(logging.Filter):
         )
 
 
+@on("builder-inited")
 def hush(app: Sphinx) -> None:
     """Stop Sphinx printing the errors `promote` reports.
 
@@ -795,6 +798,7 @@ def hush(app: Sphinx) -> None:
 PROMOTED: t.Final[Promoted] = Promoted()
 
 
+@on("doctree-read", priority=100)
 def promote(app: Sphinx, doctree: nodes.document) -> None:
     """Make an error docutils reported while reading a page stop the build.
 

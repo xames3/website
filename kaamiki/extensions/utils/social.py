@@ -4,7 +4,7 @@ Social Metadata
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 The handler that works out a page's Open Graph and Twitter values.
 """
@@ -21,6 +21,7 @@ from kaamiki.extensions.utils.build import NOT_FOUND
 from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.doctree import standfirst
 from kaamiki.extensions.utils.doctree import summarise
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import absolute
 from kaamiki.extensions.utils.settings import DESCRIPTION_LENGTH
 from kaamiki.extensions.utils.settings import setting
@@ -73,6 +74,7 @@ def written(context: dict[str, t.Any]) -> str:
     return ""
 
 
+@on("html-page-context")
 def social_metadata(
     app: Sphinx,
     pagename: str,

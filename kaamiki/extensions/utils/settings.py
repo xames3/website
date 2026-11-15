@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 12 November 2026
+Last updated on: 15 November 2026
 
 Kaamiki's settings, their defaults and the helpers that read them.
 """
@@ -26,6 +26,7 @@ from sphinx.util import logging
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import icons
 from kaamiki.extensions.utils.checks import fail
+from kaamiki.extensions.utils.hooks import on
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable
@@ -1715,6 +1716,7 @@ def setting(config: Config, key: str) -> t.Any:
     return copy.deepcopy(value)
 
 
+@on("env-get-outdated")
 def reread(
     app: Sphinx,
     env: BuildEnvironment,

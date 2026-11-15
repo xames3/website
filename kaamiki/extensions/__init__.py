@@ -4,7 +4,7 @@ Kaamiki Extension Manager
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 04 November 2026
+Last updated on: 15 November 2026
 
 All of Kaamiki's custom directives.
 """
@@ -20,6 +20,7 @@ from . import byline
 from . import carousel
 from . import columns
 from . import embed
+from . import nesting
 from . import release
 from . import repository
 from . import tabs
@@ -32,6 +33,8 @@ from .code import version
 if t.TYPE_CHECKING:
     import types
     from collections.abc import Sequence
+
+__all__: list[str] = ["directives", "nesting"]
 
 directives: Sequence[types.ModuleType] = (
     accordion,

@@ -4,7 +4,7 @@ Template Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 Kaamiki's Jinja environment and the helpers that read its templates.
 """
@@ -16,6 +16,7 @@ import typing as t
 
 import jinja2
 
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import REL
 
 if t.TYPE_CHECKING:
@@ -50,6 +51,7 @@ def render(template: str, /, **context: object) -> str:
     return environment.get_template(template).render(**values)
 
 
+@on("builder-inited")
 def bridge(app: Sphinx) -> None:
     """Bridge Kaamiki's directive templates with Sphinx's loader.
 

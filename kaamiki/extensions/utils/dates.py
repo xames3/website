@@ -4,7 +4,7 @@ Date Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 The helpers that date a page, from its comments or from git.
 """
@@ -26,6 +26,7 @@ from sphinx.locale import _
 from sphinx.util.i18n import format_date
 
 from kaamiki.extensions.utils.checks import fail
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.settings import setting
 
 if t.TYPE_CHECKING:
@@ -65,6 +66,7 @@ HISTORY: t.Final[
 ] = weakref.WeakKeyDictionary()
 
 
+@on("html-page-context")
 def updated_on(
     app: Sphinx,
     pagename: str,
@@ -179,6 +181,7 @@ def committed(app: Sphinx, docname: str) -> tuple[dt, dt] | tuple[None, None]:
     return HISTORY[app].get(path, (None, None))
 
 
+@on("env-before-read-docs")
 def warm(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
     """Ask git before the pages are read, so a parallel reader doesn't.
 
@@ -260,6 +263,7 @@ def within(iso: str) -> bool:
     )
 
 
+@on("source-read")
 def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
     """Work out who wrote a page and when it was created and updated.
 

@@ -31,6 +31,7 @@ from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import setting
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import PALETTE
@@ -1264,6 +1265,7 @@ class CustomRole(misc.Role):
         return found
 
 
+@on("doctree-read")
 def subjects(app: Sphinx, doctree: nodes.document) -> None:
     """Give an email link with no subject the page's title for one.
 
