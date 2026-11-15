@@ -767,7 +767,8 @@ class KaamikiDirective(SphinxDirective):
             directives. Then it is not recorded or checked.
         :param kwargs: What the parent class takes.
         :raises TypeError: When the docstring does not list each option
-            that the directive takes.
+            that the directive takes, or when another directive has the
+            name.
         """
         super().__init_subclass__(**kwargs)
         if abstract:
@@ -787,7 +788,13 @@ class KaamikiDirective(SphinxDirective):
             cls.Node.__name__ = cls.__name__
             cls.Node.__qualname__ = f"{cls.__qualname__}.Node"
         Option.documented(cls, cls.option_spec)
-        KaamikiDirective.registry[name or cls.__name__.lower()] = cls
+        name = name or cls.__name__.lower()
+        if other := KaamikiDirective.registry.get(name):
+            raise TypeError(
+                f"{cls.__qualname__}: expected a new directive name, got"
+                f" {name!r} of {other.__qualname__}"
+            )
+        KaamikiDirective.registry[name] = cls
 
     @classmethod
     def made(cls, node: nodes.Node | None) -> bool:
