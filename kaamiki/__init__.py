@@ -341,12 +341,11 @@ def add_roles(app: Sphinx) -> None:
 
     :param app: The Sphinx application instance.
     """
-    for key in roles.ROLES:
-        app.add_role(key, getattr(roles, key))
-    app.add_directive("role", roles.role, override=True)
-    app.add_role("fa-icon", roles.icon)
-    app.add_domain(roles.fa_icon)
-    app.add_domain(roles.kbd)
+    for name, role in roles.KaamikiRole.registry.items():
+        app.add_role(name, role)
+    app.add_directive("role", roles.CustomRole, override=True)
+    app.add_domain(roles.FaIcon)
+    app.add_domain(roles.Kbd)
     app.add_node(phrase)
 
 
