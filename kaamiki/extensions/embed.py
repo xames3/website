@@ -4,7 +4,7 @@ Embed Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 11 August 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 An `embed` directive that drops a block of HTML into the page::
 
@@ -54,14 +54,13 @@ from urllib.parse import urlsplit
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import confdir
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import hostnames
 from kaamiki.extensions.utils import listed
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import setting
 
 if t.TYPE_CHECKING:
@@ -70,7 +69,6 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
 
 
-name: t.Final[str] = "embed"
 PLACEHOLDER: t.Final[re.Pattern[str]] = re.compile(r"\{\{\s*([\w-]+)\s*\}\}")
 # NOTE(xames3): Keeps a value from closing its `<script>` early and
 # U+2028/2029 from ending a JavaScript string line.
@@ -295,46 +293,43 @@ class placeholders(dict[str, "Callable[[str], t.Any]"]):
         return rst.directives.unchanged
 
 
-class directive(rst.Directive):
+class Embed(KaamikiDirective, spec=placeholders):
     """The `embed` directive.
 
-    The argument is `iframe` in lower case, with the markup as content,
-    or the path to an HTML fragment with nothing below the directive.
-    An embed can't sit in the notes of a walkthrough, nor in a block
-    that links.
+    The argument is `iframe` in lower case, with the markup as the
+    content. Or it is the path to an HTML fragment, with no content
+    below the directive. An embed cannot go in the notes of a
+    walkthrough, or in a block that is a link.
 
     Options::
 
-        - `css`: Stylesheets under `html_static_path`, comma-separated.
-        - `js`: Scripts under `html_static_path`, comma-separated.
-        - `encoding`: The fragment file's encoding. Defaults to
-          `utf-8`. It needs a file, markup written inline has none.
-        - `name`: A name to link to.
-        - `class`: More classes for the `<div>` wrapped around the
-          embed.
+        - `css`: Stylesheets in `html_static_path`, with a comma between
+          each.
+        - `js`: Scripts in `html_static_path`, with a comma between
+          each.
+        - `encoding`: The encoding of the fragment file. The default is
+          `utf-8`. It needs a file, because inline markup has no
+          encoding.
+        - `name`: A name for links.
+        - `class`: More classes for the `<div>` around the embed.
 
-    Every other option is a placeholder's value. Option names are
-    lowercase, as docutils reads them, and so are the placeholders. A
-    value is HTML-escaped in markup, CSS-escaped in a `<style>` and
-    written as a JSON literal in a `<script>`, where it's read as a
-    Python literal first. A placeholder no option fills stops the build,
-    and so does an option no placeholder asks for. A `{# note #}` in the
-    fragment is left out of the page.
+    Each other option is the value of a placeholder. Option names are in
+    lower case, as docutils reads them, and placeholders are also in
+    lower case. In markup, a value is HTML-escaped. In a `<style>`, it
+    is CSS-escaped. In a `<script>`, it is read as a Python literal and
+    written as a JSON literal. The build stops when no option fills a
+    placeholder, or when no placeholder uses an option. A `{# note #}`
+    in the fragment does not go on the page.
     """
 
     has_content = True
     required_arguments = 1
     final_argument_whitespace = True
-    option_spec = placeholders(
-        {
-            "css": rst.directives.unchanged,
-            "js": rst.directives.unchanged,
-            "encoding": checks.encoding,
-            **NATIVE,
-        }
-    )
+    css = Option(rst.directives.unchanged)
+    js = Option(rst.directives.unchanged)
+    encoding = Option(checks.encoding)
 
-    def run(self) -> list[nodes.Node]:
+    def build(self) -> list[nodes.Node]:
         """Read the markup, fill its placeholders and return it.
 
         :return: A list holding the one `raw` node, which also carries
@@ -345,13 +340,10 @@ class directive(rst.Directive):
         self.assets()
         if file == "iframe":
             if not "".join(self.content).strip():
-                raise self.error(
-                    "embed: expected inline HTML content, got none"
-                )
+                self.fail("expected inline HTML content, got none")
             if "encoding" in self.options:
-                raise self.error(
-                    "embed: :encoding: expected a fragment file, got inline"
-                    " HTML"
+                self.fail(
+                    ":encoding: expected a fragment file, got inline HTML"
                 )
             source = "\n".join(self.content)
         else:
@@ -362,7 +354,7 @@ class directive(rst.Directive):
             for key, value in self.options.items()
             if key not in ASSETS
         }
-        self.check(source, values)
+        self.match(source, values)
         attributes: dict[str, t.Any] = {}
         attributes["text"] = substitute(source, values)
         self.guard(attributes["text"])
@@ -371,8 +363,8 @@ class directive(rst.Directive):
         attributes["js"] = listed(self.options.get("js", ""))
         element = nodes.raw(**attributes)
         classes = ["km-embed", *self.options.get("class", [])]
-        wrapper = located(self, nodes.container("", element, classes=classes))
-        named(self, wrapper)
+        wrapper = self.locate(nodes.container("", element, classes=classes))
+        self.add_name(wrapper)
         return [wrapper]
 
     def assets(self) -> None:
@@ -384,7 +376,7 @@ class directive(rst.Directive):
         :raises rst.DirectiveError: For a style or a script that isn't
             a file under `html_static_path`.
         """
-        env = self.state.document.settings.env
+        env = self.env
         options = self.options
         statics = [p.join(confdir(env), _) for _ in env.config.html_static_path]
         for option, suffix in (("css", ".css"), ("js", ".js")):
@@ -392,8 +384,8 @@ class directive(rst.Directive):
                 if not file_name.endswith(suffix) or not checks.FILE.fullmatch(
                     file_name
                 ):
-                    raise self.error(
-                        f"embed: :{option}: expected a {suffix} file, got "
+                    self.fail(
+                        f":{option}: expected a {suffix} file, got "
                         f"{file_name!r}"
                     )
                 path = next(
@@ -405,13 +397,13 @@ class directive(rst.Directive):
                     None,
                 )
                 if path is None:
-                    raise self.error(
-                        f"embed: :{option}: expected a file in"
+                    self.fail(
+                        f":{option}: expected a file in"
                         f" html_static_path, got {file_name!r}"
                     )
                 env.note_dependency(path)
 
-    def check(self, source: str, values: dict[str, str]) -> None:
+    def match(self, source: str, values: dict[str, str]) -> None:
         """Catch an option or a placeholder that's been misspelt.
 
         An option the fragment never asks for is an error, and so is a
@@ -425,15 +417,14 @@ class directive(rst.Directive):
         }
         unused = sorted(_ for _ in values if _.replace("_", "-") not in wanted)
         if unused:
-            raise self.error(
-                f"embed: {', '.join(f':{_}:' for _ in unused)} expected a"
+            self.fail(
+                f"{', '.join(f':{_}:' for _ in unused)} expected a"
                 " placeholder in the fragment, got none"
             )
         given = {_.replace("_", "-") for _ in values}
         for key in sorted(wanted - given):
-            raise self.error(
-                f"embed: {{{{ {key} }}}} expected an option to fill it,"
-                " got none"
+            self.fail(
+                f"{{{{ {key} }}}} expected an option to fill it, got none"
             )
 
     def guard(self, markup: str) -> None:
@@ -452,22 +443,22 @@ class directive(rst.Directive):
         :raises rst.DirectiveError: When an iframe comes from a host
             that isn't allowed.
         """
-        config = self.state.document.settings.env.config
+        config = self.config
         allowed = hostnames(setting(config, "embed_iframe_hosts"), www=True)
         if not allowed:
             return
         fragment = Fragment(markup)
         for start, end, kind in fragment.blocks:
             if kind == "script" and "iframe" in markup[start:end].lower():
-                raise self.error(
-                    "embed: expected a script that builds no iframe, got one,"
+                self.fail(
+                    "expected a script that builds no iframe, got one,"
                     " which kaamiki.conf.embed.iframe_hosts can't check"
                 )
         for tag, attributes in fragment.tags:
             banned = "srcdoc" if "srcdoc" in attributes else f"<{tag}>"
             if tag in FRAMES or "srcdoc" in attributes:
-                raise self.error(
-                    f"embed: expected no {banned}, got one, which "
+                self.fail(
+                    f"expected no {banned}, got one, which "
                     "kaamiki.conf.embed.iframe_hosts can't check"
                 )
             src = attributes.get("src")
@@ -476,8 +467,8 @@ class directive(rst.Directive):
                 and src is not None
                 and not self.allows(src, allowed)
             ):
-                raise self.error(
-                    "embed: expected an iframe from one of"
+                self.fail(
+                    "expected an iframe from one of"
                     f" {', '.join(sorted(allowed))} in"
                     f" kaamiki.conf.embed.iframe_hosts, got {src!r}"
                 )
@@ -525,24 +516,22 @@ class directive(rst.Directive):
         :return: The fragment.
         """
         if self.content:
-            raise self.error(
-                "embed: expected iframe in lower case for inline HTML or the"
+            self.fail(
+                "expected iframe in lower case for inline HTML or the"
                 f" path to a fragment file with no content below it, got"
                 f" {file!r}"
             )
         if any(ord(_) < 32 for _ in file):
-            raise self.error(
-                "embed: expected a file name without control characters, got"
-                f" {file!r}"
+            self.fail(
+                f"expected a file name without control characters, got {file!r}"
             )
-        env = self.state.document.settings.env
+        env = self.env
         relative, path = env.relfn2path(file, env.docname)
         if p.commonpath(
             [p.realpath(path), p.realpath(env.srcdir)]
         ) != p.realpath(env.srcdir):
-            raise self.error(
-                "embed: expected a file inside the source directory, got"
-                f" {file!r}"
+            self.fail(
+                f"expected a file inside the source directory, got {file!r}"
             )
         try:
             with open(
@@ -550,9 +539,7 @@ class directive(rst.Directive):
             ) as fd:
                 source = fd.read()
         except (OSError, UnicodeError) as error:
-            raise self.error(
-                f"embed: expected a file it can read, got {file!r} ({error})"
-            ) from error
+            self.fail(f"expected a file it can read, got {file!r} ({error})")
         env.note_dependency(relative)
         return source
 

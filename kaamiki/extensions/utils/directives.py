@@ -740,7 +740,12 @@ class KaamikiDirective(rst.Directive):
     Node: t.ClassVar[type[nodes.Element]]
 
     def __init_subclass__(
-        cls, *, name: str = "", motion: bool = False, **kwargs: t.Any
+        cls,
+        *,
+        name: str = "",
+        motion: bool = False,
+        spec: type[dict[str, t.Any]] = dict,
+        **kwargs: t.Any,
     ) -> None:
         """Record the directive, collect its options and name its node.
 
@@ -748,6 +753,8 @@ class KaamikiDirective(rst.Directive):
             name of the class in lowercase.
         :param motion: Whether the directive takes `speed` and
             `no-motion`.
+        :param spec: The kind of dictionary for `option_spec`, as one
+            that permits more options than it lists.
         :param kwargs: What the parent class takes.
         :raises TypeError: When the docstring does not list each option
             that the directive takes.
@@ -759,11 +766,13 @@ class KaamikiDirective(rst.Directive):
             for each in vars(owner).values()
             if isinstance(each, Option)
         }
-        cls.option_spec = {
-            **NATIVE,
-            **(MOTION if motion else {}),
-            **{key: each.check for key, each in found.items()},
-        }
+        cls.option_spec = spec(
+            {
+                **NATIVE,
+                **(MOTION if motion else {}),
+                **{key: each.check for key, each in found.items()},
+            }
+        )
         cls.needs = {
             key: each.needs for key, each in found.items() if each.needs
         }
