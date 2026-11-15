@@ -113,7 +113,6 @@ if t.TYPE_CHECKING:
     from kaamiki.extensions.code.grammar import chunk
     from kaamiki.extensions.code.tracer import Trace
 
-name: t.Final[str] = "code-explain"
 code_explain: t.Final[BEM] = BEM("code-explain")
 lang_icon: t.Final[BEM] = BEM("lang-icon")
 CODE_POSITIONS: t.Final[tuple[str, str]] = ("right", "left")

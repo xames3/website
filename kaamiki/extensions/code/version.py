@@ -65,7 +65,6 @@ if t.TYPE_CHECKING:
 
     type Pieces = tuple[chunk, chunk | None, list[chunk]]
 
-name: t.Final[str] = "code-version"
 code_version: t.Final[BEM] = BEM("code-version")
 ATTEMPT: t.Final[frozenset[str]] = frozenset({"attempt"})
 PARTS: t.Final[frozenset[str]] = frozenset({"code", "lines", "output"})

@@ -330,15 +330,10 @@ def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     del docname
     if app.builder.format not in formats:
         return
-    for directive in [*directives, *KaamikiDirective.registry.values()]:
-        plain = getattr(directive, "plain", None)
-        node = getattr(directive, "Node", None) or getattr(
-            directive, "node", None
-        )
-        if plain is None or node is None:
-            continue
-        for found in [*doctree.findall(node)]:
-            found.replace_self(plain(found))
+    for directive in KaamikiDirective.registry.values():
+        if hasattr(directive, "plain"):
+            for found in [*doctree.findall(directive.Node)]:
+                found.replace_self(directive.plain(found))
 
 
 def add_roles(app: Sphinx) -> None:
@@ -360,15 +355,13 @@ def add_directives(app: Sphinx) -> None:
 
     :param app: The Sphinx application instance.
     """
-    for directive in directives:
-        if hasattr(directive, "directive"):
-            app.add_directive(directive.name, directive.directive)
-        if hasattr(directive, "register"):
-            directive.register(app)
-        if hasattr(directive, "html_page_context"):
-            app.connect("html-page-context", directive.html_page_context)
-    for name, each in KaamikiDirective.registry.items():
-        app.add_directive(name, each)
+    for name, directive in KaamikiDirective.registry.items():
+        app.add_directive(name, directive)
+    for module in directives:
+        if hasattr(module, "register"):
+            module.register(app)
+        if hasattr(module, "html_page_context"):
+            app.connect("html-page-context", module.html_page_context)
     html.register(app)
 
 
