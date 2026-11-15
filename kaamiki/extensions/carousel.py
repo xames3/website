@@ -68,8 +68,8 @@ ITEMS: t.Final[tuple[type[nodes.Node], ...]] = (
     button.Button,
     nodes.figure,
     nodes.image,
-    repository.Repository,
-    thumbnail.Thumbnail,
+    repository.Repository.Node,
+    thumbnail.Thumbnail.Node,
 )
 SKIPPED: t.Final[tuple[type[nodes.Node], ...]] = (
     nodes.comment,

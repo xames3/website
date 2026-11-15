@@ -95,9 +95,9 @@ KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
     "embed": is_embed,
     "raw": is_raw,
     "release": is_release,
-    "repository": lambda _: isinstance(_, repository.node),
+    "repository": lambda _: isinstance(_, repository.Repository.Node),
     "tabs": lambda _: isinstance(_, tabs.Tabs.Node),
-    "thumbnail": lambda _: isinstance(_, thumbnail.node),
+    "thumbnail": lambda _: isinstance(_, thumbnail.Thumbnail.Node),
     "video": lambda _: isinstance(_, video.node),
     "youtube": lambda _: isinstance(_, youtube.node),
 }
