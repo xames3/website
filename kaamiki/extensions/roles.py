@@ -142,7 +142,7 @@ class KaamikiRole(SphinxRole):
             roles. Then it is not recorded or checked.
         :param kwargs: What the parent class takes.
         :raises TypeError: When the docstring does not list each option
-            that the role presets.
+            that the role presets, or when another role has the name.
         """
         super().__init_subclass__(**kwargs)
         if abstract:
@@ -153,8 +153,14 @@ class KaamikiRole(SphinxRole):
             **{key: each.check for key, each in Option.of(cls).items()},
         }
         Option.documented(cls, cls.spec)
-        if alone:
-            KaamikiRole.registry[cls.role] = cls()
+        if not alone:
+            return
+        if other := KaamikiRole.registry.get(cls.role):
+            raise TypeError(
+                f"{cls.__qualname__}: expected a new role name, got"
+                f" {cls.role!r} of {type(other).__qualname__}"
+            )
+        KaamikiRole.registry[cls.role] = cls()
 
     def __init__(self) -> None:
         """Give docutils the options that `.. role::` can preset."""
