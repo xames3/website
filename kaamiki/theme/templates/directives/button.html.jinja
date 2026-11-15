@@ -4,34 +4,34 @@ Button Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
-Last updated on: 07 November 2026
+Last updated on: 15 November 2026
 #}
 {%- from "components/helpers.html.jinja" import km_id with context %}
 {%- from "components/chevron.html.jinja" import km_chevron_icon -%}
 {%- from "components/anchors.html.jinja" import km_anchors -%}
-{%- set km_parts = ["km-button", km_look, km_extra, "reference external"] -%}
-{%- set km_icon = [km_faicon, "km-button__icon"] -%}
+{%- set km_parts = ["km-button", kaamiki.directive.look, kaamiki.directive.extra, "reference external"] -%}
+{%- set km_icon = [kaamiki.directive.faicon, "km-button__icon"] -%}
 {%- set km_after = km_icon + ["km-button__icon--icon-position-after"] -%}
-{%- set km_side = "km-button-row--align-" ~ km_align -%}
-{%- set km_row = ["km-button-row", km_side if km_align != "center"] -%}
+{%- set km_side = "km-button-row--align-" ~ kaamiki.directive.align -%}
+{%- set km_row = ["km-button-row", km_side if kaamiki.directive.align != "center"] -%}
 {% block km_button %}
     <p class="{{ km_row|select|join(' ') }}">
-        {{- km_anchors(km_ids) -}}
+        {{- km_anchors(kaamiki.directive.ids) -}}
         <a class="{{ km_parts|select|join(' ') }}"
-           {{ km_id(km_ids) }}
-           href="{{ km_url }}"
-           {{ km_anchor|xmlattr }}>
+           {{ km_id(kaamiki.directive.ids) }}
+           href="{{ kaamiki.directive.url }}"
+           {{ kaamiki.directive.anchor|xmlattr }}>
             <span>
-                {%- if km_faicon and not km_faicon_after -%}
+                {%- if kaamiki.directive.faicon and not kaamiki.directive.faicon_after -%}
                     <span class="{{ km_icon|join(' ') }}"
                           aria-hidden="true"></span>
                 {%- endif -%}
-                {{ km_text }}
-                {%- if km_faicon and km_faicon_after -%}
+                {{ kaamiki.directive.text }}
+                {%- if kaamiki.directive.faicon and kaamiki.directive.faicon_after -%}
                     <span class="{{ km_after|join(' ') }}"
                           aria-hidden="true"></span>
                 {%- endif -%}
-                {%- if km_chevron -%}
+                {%- if kaamiki.directive.chevron -%}
                     {{ km_chevron_icon() }}
                 {%- endif -%}
             </span>

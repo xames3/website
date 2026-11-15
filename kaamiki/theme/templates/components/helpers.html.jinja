@@ -25,5 +25,5 @@ The few bits of markup that many templates write the same way.
     {%- endif -%}
 {%- endmacro -%}
 {%- macro km_class(base, more) -%}
-    {{ ([base] + (more or []))|join(" ") }}
+    {{ ([base] + (more or [])|list)|join(" ") }}
 {%- endmacro -%}

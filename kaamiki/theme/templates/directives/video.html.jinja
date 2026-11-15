@@ -8,26 +8,26 @@ Last updated on: 15 November 2026
 #}
 {%- from "components/helpers.html.jinja" import km_glyph, km_id with context %}
 {%- from "components/anchors.html.jinja" import km_anchors -%}
-{%- set km_figure = ["km-media", "km-media--video"] + (km_classes or []) -%}
+{%- set km_figure = ["km-media", "km-media--video"] + (kaamiki.directive.classes or [])|list -%}
 {% block km_video %}
     <figure class="{{ km_figure|join(' ') }}"
-            {{ km_id(km_ids) }}>
+            {{ km_id(kaamiki.directive.ids) }}>
         <div class="km-media__frame">
-            {{- km_anchors(km_ids) -}}
+            {{- km_anchors(kaamiki.directive.ids) -}}
             <video class="km-media__video"
-                   {{ km_player|xmlattr }}>
-                {%- for source in km_sources %}
+                   {{ kaamiki.directive.player|xmlattr }}>
+                {%- for source in kaamiki.directive.sources %}
                     <source src="{{ source.url }}"
                             {{ {"type": source.type or none}|xmlattr }} />
                 {%- endfor %}
-                {%- for track in km_tracks %}
+                {%- for track in kaamiki.directive.tracks %}
                     <track kind="captions"
                            src="{{ track.url }}"
                            srclang="{{ track.lang }}"
                            label="{{ track.label }}" />
                 {%- endfor %}
                 {%- set km_download -%}
-                    <a href="{{ km_sources[0].url }}"
+                    <a href="{{ kaamiki.directive.sources[0].url }}"
                        download>{{- _("Download it") -}}</a>
                 {%- endset %}
                 {%- trans trimmed download=km_download %}
@@ -36,8 +36,10 @@ Last updated on: 15 November 2026
         </video>
         {{ km_glyph(kaamiki.icons.roles.play, "km-media__facade-icon km-media__play") }}
     </div>
-    {%- if km_caption %}
-        <figcaption class="km-media__caption">{{ km_caption }}</figcaption>
+    {%- if kaamiki.directive.caption %}
+        <figcaption class="km-media__caption">
+            {{- kaamiki.directive.caption -}}
+        </figcaption>
     {%- endif -%}
 </figure>
 {% endblock km_video %}

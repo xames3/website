@@ -615,10 +615,30 @@ def visitor(
         attributes = dict(node.attributes)
         if prepare is not None:
             attributes = prepare(self, attributes)
-        self.body.append(render(template, **attributes, **fields(self, node)))
+        self.body.append(
+            render(
+                template,
+                optional=optional(node),
+                **attributes,
+                **fields(self, node),
+            )
+        )
         raise nodes.SkipNode
 
     return visit
+
+
+def optional(node: nodes.Element) -> frozenset[str]:
+    """Name the options of the directive that wrote a node.
+
+    :param node: The node.
+    :return: The options, as the template reads them (`avatar_size`),
+        which the page can leave out. None for a node of no directive.
+    """
+    for each in KaamikiDirective.registry.values():
+        if each.made(node):
+            return frozenset(_.replace("-", "_") for _ in Option.of(each))
+    return frozenset()
 
 
 def what(found: nodes.Node) -> str:

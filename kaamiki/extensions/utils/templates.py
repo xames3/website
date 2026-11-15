@@ -18,6 +18,8 @@ import typing as t
 import jinja2
 
 from kaamiki.extensions.utils.hooks import on
+from kaamiki.extensions.utils.settings import NAME
+from kaamiki.extensions.utils.settings import Kaamiki
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -38,17 +40,27 @@ environment.install_null_translations(  # type: ignore[attr-defined]
 )
 
 
-def render(template: str, /, **context: object) -> str:
+def render(
+    template: str,
+    /,
+    *,
+    optional: frozenset[str] = frozenset(),
+    **context: object,
+) -> str:
     """Render the template of a directive with a context.
 
     :param template: The file name of the template, relative to
         `theme/templates`.
-    :param context: The values for the template. Each one gets a `km_`
-        prefix in the template.
+    :param optional: The options of the directive, which the page can
+        leave out.
+    :param context: The values for the template, which reads them as
+        `kaamiki.directive.url`, next to the values of the site.
     :return: The rendered HTML.
     """
-    values = {f"km_{k}": v for k, v in context.items()}
-    return environment.get_template(template).render(**values)
+    found = t.cast("Kaamiki", environment.globals[NAME]) | {
+        "directive": Kaamiki(f"{NAME}.directive", context, optional=optional)
+    }
+    return environment.get_template(template).render({NAME: found})
 
 
 @on("builder-inited")

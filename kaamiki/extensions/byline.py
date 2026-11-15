@@ -35,6 +35,7 @@ from kaamiki.extensions.utils import fields
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import opens_new_tab
+from kaamiki.extensions.utils import optional
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import reading_time
 from kaamiki.extensions.utils import relative_to_page
@@ -245,7 +246,7 @@ def visit(self: HTMLTranslator, node: Byline.Node) -> None:
         attributes["data"]["data-km-interval"] = round(
             attributes["interval"] * 1000
         )
-    self.body.append(render(template, **attributes))
+    self.body.append(render(template, optional=optional(node), **attributes))
     raise nodes.SkipNode
 
 

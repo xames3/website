@@ -9,15 +9,15 @@ Last updated on: 15 November 2026
 {%- from "components/helpers.html.jinja" import km_glyph with context %}
 {%- set km_clock = kaamiki.icons.roles.release_date ~ " km-release__date-icon" -%}
 {% block km_release %}
-    {%- if km_date or km_titled %}
+    {%- if kaamiki.directive.date or kaamiki.directive.titled %}
         <div class="km-release__meta">
-            {%- if km_date %}
+            {%- if kaamiki.directive.date %}
                 <time class="km-release__date"
-                      datetime="{{ km_datetime }}">
-                {{ km_glyph(km_clock) }}{{ km_date }}</time>
+                      datetime="{{ kaamiki.directive.datetime }}">
+                {{ km_glyph(km_clock) }}{{ kaamiki.directive.date }}</time>
             {%- endif %}
-            {%- if km_titled %}
-                <span class="km-release__version">{{ km_version }}</span>
+            {%- if kaamiki.directive.titled %}
+                <span class="km-release__version">{{ kaamiki.directive.version }}</span>
             {%- endif %}
         </div>
     {%- endif %}

@@ -47,6 +47,7 @@ from kaamiki.extensions.utils.directives import hollow
 from kaamiki.extensions.utils.directives import html
 from kaamiki.extensions.utils.directives import listed
 from kaamiki.extensions.utils.directives import moving
+from kaamiki.extensions.utils.directives import optional
 from kaamiki.extensions.utils.directives import paragraph
 from kaamiki.extensions.utils.directives import parse
 from kaamiki.extensions.utils.directives import phrase
@@ -134,6 +135,7 @@ __all__: list[str] = [
     "offer",
     "on",
     "opens_new_tab",
+    "optional",
     "overrides",
     "page_fields",
     "page_switches",
