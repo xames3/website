@@ -6,7 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-Kaamiki's settings, their defaults and the helpers that read them.
+The settings of Kaamiki: their schema, their checks, and how a site
+sets them on `kaamiki.conf` or with a `-D`.
 """
 
 from __future__ import annotations
@@ -396,7 +397,12 @@ TWITTER_HANDLE: t.Final = checks.pattern(
 
 
 def role_icon(value: t.Any) -> None:
-    """Check one icon a site sets, as a name or as a Pro and Free pair."""
+    """Check one icon of a site, as a name or as a Pro and Free pair.
+
+    :param value: The icon, or a dictionary with `pro` and `free`.
+    :raises ValueError: When it is not an icon or a pair.
+    :raises TypeError: For a value of a wrong type.
+    """
     if not isinstance(value, dict):
         string(checks.icon)(value)
         return
@@ -411,7 +417,12 @@ def role_icon(value: t.Any) -> None:
 
 
 def site_icons(value: t.Any) -> None:
-    """Check the icons a site sets, where only `BLANK_ROLES` may be empty."""
+    """Check the icons of a site.
+
+    :param value: The icons, by name. Only `BLANK_ROLES` can be empty.
+    :raises ValueError: For an unknown name, or a wrong icon.
+    :raises TypeError: For a value of a wrong type.
+    """
     if isinstance(value, dict):
         value = {
             key: each
@@ -455,7 +466,8 @@ class Value[T]:
         :param number: `int` or `float`, for a number in the `BOUNDS`
             of the setting.
         :param key: The name of the setting in Sphinx, without
-            `kaamiki_`. The default is the group, `_` and the attribute.
+            `kaamiki_`. The default is the group, `_` and the
+            attribute.
         :param reread: Whether a change reads each page again, not only
             writes it again.
         :param page: Whether a page can switch it with a field.
@@ -511,7 +523,7 @@ class Value[T]:
 
 
 class Settings:
-    """A group of Kaamiki's settings, as `kaamiki.conf.show`."""
+    """A group of the settings of Kaamiki, as `kaamiki.conf.show`."""
 
     schema: t.ClassVar[dict[str, Value[t.Any]]] = {}
     groups: t.ClassVar[dict[str, type[Settings]]] = {}
@@ -519,9 +531,9 @@ class Settings:
     given: dict[str, t.Any]
 
     def __init__(self, given: dict[str, t.Any]) -> None:
-        """Make the group, which shares what the site set with the others.
+        """Make the group with the shared values.
 
-        :param given: What the site set, by key.
+        :param given: The values of the site, by key.
         """
         object.__setattr__(self, "given", given)
 
@@ -617,9 +629,9 @@ class Icons(Settings):
     def update(
         self, names: Mapping[str, str] | None = None, /, **more: str
     ) -> None:
-        """Add to Kaamiki's icon names.
+        """Add to the icon names of Kaamiki.
 
-        :param names: Icon names and the icons that they take.
+        :param names: The icon names and their icons.
         :param more: The same, as keywords.
         """
         self.names = {**self.names, **(names or {}), **more}
@@ -870,7 +882,7 @@ class Root(Settings, name=""):
         super().__setattr__(attr, value)
 
     def __getitem__(self, key: str) -> t.Any:
-        """Read a setting by its key, for a key that is known only later.
+        """Read a setting by its key, when the key is known only later.
 
         :param key: The key of the setting, as `show_more`.
         :return: The value, as the attribute of its group gives it.
@@ -931,27 +943,26 @@ RULES: t.Final[dict[str, Rule]] = {
 
 
 def stored[V](env: BuildEnvironment, key: str, default: V) -> V:
-    """Hold something Kaamiki keeps on the build environment.
-
-    It's pickled with the environment, so it's there for the next
-    build, and it's prefixed `km_` so it can't be mistaken for Sphinx's.
+    """Hold a value that Kaamiki keeps on the build environment.
 
     :param env: The build environment.
-    :param key: What it's called, without the prefix.
-    :param default: What to hold when nothing's held yet.
-    :return: What is held, which the caller may change.
+    :param key: The name of the value, without the `km_` prefix. The
+        prefix keeps it apart from the values of Sphinx.
+    :param default: The value to hold when there is none.
+    :return: The value, which the caller can change. It is pickled with
+        the environment, so it stays for the next build.
     """
     held: V = env.__dict__.setdefault(f"km_{key}", default)
     return held
 
 
 def kept[V](env: BuildEnvironment, key: str, value: V) -> V | None:
-    """Replace something Kaamiki keeps on the build environment.
+    """Replace a value that Kaamiki keeps on the build environment.
 
     :param env: The build environment.
-    :param key: What it's called, without the prefix.
-    :param value: What to hold from now on.
-    :return: What was held at the last build, or `None` at the first.
+    :param key: The name of the value, without the prefix.
+    :param value: The value to hold from now.
+    :return: The value of the last build, or `None` at the first.
     """
     before = env.__dict__.get(f"km_{key}")
     env.__dict__[f"km_{key}"] = value
@@ -959,33 +970,33 @@ def kept[V](env: BuildEnvironment, key: str, value: V) -> V | None:
 
 
 def option(key: str) -> str:
-    """Spell a setting the way `conf.py` writes it.
+    """Write a setting as `conf.py` writes it.
 
-    :param key: The setting's name without the prefix, `show_more`.
-    :return: Its place on `kaamiki.conf`, `kaamiki.conf.show.more`.
+    :param key: The name of the setting without the prefix, as
+        `show_more`.
+    :return: Its place on `kaamiki.conf`, as `kaamiki.conf.show.more`.
     """
     return PATHS[key]
 
 
 def flat(key: str) -> str:
-    """Spell a setting the way Sphinx and a `-D` know it.
+    """Write a setting as Sphinx and a `-D` know it.
 
-    :param key: The setting's name without the prefix, `show_more`.
-    :return: Its name in Sphinx's configuration, the group and the name
-        joined by underscores, `kaamiki_show_more`.
+    :param key: The name of the setting without the prefix, as
+        `show_more`.
+    :return: Its name in the configuration of Sphinx, with underscores
+        between the parts, as `kaamiki_show_more`.
     """
     return PATHS[key].replace(".conf.", "_").replace(".", "_")
 
 
 def register(app: Sphinx) -> None:
-    """Make every setting a Sphinx configuration value.
+    """Make each setting a configuration value of Sphinx.
 
-    Sphinx then knows the name, hands Kaamiki the default and sends
-    pages back through reading, or writing, when the value changes.
-    Kaamiki checks the values itself, so Sphinx is asked to leave their
-    types alone.
-
-    :param app: The Sphinx application instance.
+    :param app: The Sphinx application instance. Then Sphinx knows the
+        name, gives Kaamiki the default, and reads or writes the pages
+        again when the value changes. Kaamiki checks the values itself,
+        so Sphinx does not check their types.
     """
     for key, default in DEFAULTS.items():
         value: t.Any = copy.deepcopy(default)
@@ -1000,17 +1011,16 @@ def register(app: Sphinx) -> None:
 
 
 def site_values(config: Config) -> dict[str, t.Any]:
-    """Collect what a site's `conf.py` and `-D` wrote.
+    """Collect what `conf.py` and `-D` of a site wrote.
 
-    Sphinx has no public way to read what `conf.py` wrote as opposed to
-    what it knows, so this reaches for `_raw_config`. Every check of a
-    setting starts from the names found here, and so do the reads of
-    `html_show_sphinx` and `html_use_index`. A Sphinx that moves
-    `_raw_config` stops the build and doesn't let wrong settings through.
-
-    :param config: The Sphinx configuration.
-    :return: The names and their values, a `-D` over what `conf.py` said.
-    :raises KaamikiError: When this Sphinx has no `_raw_config`.
+    :param config: The Sphinx configuration. Sphinx has no public way
+        to read what `conf.py` wrote, so this reads `_raw_config`. Each
+        check of a setting starts from these names, as do the reads of
+        `html_show_sphinx` and `html_use_index`.
+    :return: The names and their values, with a `-D` over the value of
+        `conf.py`.
+    :raises KaamikiError: When this Sphinx has no `_raw_config`, so
+        that no wrong setting gets through.
     """
     raw: dict[str, t.Any] | None = getattr(config, "_raw_config", None)
     if raw is None:
@@ -1049,11 +1059,11 @@ def pair(app: Sphinx) -> None:
 
 
 def switch(argument: str) -> bool:
-    """Read a switch a `-D` gave, `0` or `1` as Sphinx's own are.
+    """Read a switch from a `-D`, `0` or `1`, as for Sphinx.
 
     :param argument: The value as written.
-    :return: Whether it's on.
-    :raises ValueError: For anything else.
+    :return: `True` when it is on.
+    :raises ValueError: For other text.
     """
     if argument not in ("0", "1"):
         raise ValueError(f"expected 0 or 1, got {argument!r}")
@@ -1071,20 +1081,17 @@ ENTRIES: t.Final[dict[tuple[str, str], Callable[[str], t.Any]]] = {
 
 @on("config-inited")
 def overrides(app: Sphinx, config: Config) -> None:
-    """Read the numbers and switches a `-D` on the command line gave.
-
-    Sphinx reads a `-D` by the type of the setting's default, so a
-    setting with no default to go by (`None`) or a number with a
-    point arrives as text. A number is read the way an option's is, by
-    `checks.integer` or `checks.number`, and a switch is `0` or `1`.
-
-    Sphinx moves a `-D name.key=value` into the setting's dictionary,
-    as text, so the entries of `ENTRIES` that are switches or numbers
-    are read there and put back as a switch or a number.
+    """Read the numbers and switches from a `-D`.
 
     :param app: The Sphinx application instance.
-    :param config: The Sphinx configuration.
-    :raises KaamikiError: For a value that isn't one the setting takes.
+    :param config: The Sphinx configuration. Sphinx reads a `-D` by the
+        type of the default, so a setting with a `None` default or a
+        number with a point arrives as text. A number is read by
+        `checks.integer` or `checks.number`, and a switch is `0` or
+        `1`. Sphinx puts a `-D name.key=value` into the dictionary of
+        the setting as text, so the switches and numbers of `ENTRIES`
+        are read there and put back.
+    :raises KaamikiError: For a value that the setting does not take.
     """
     del app
     for key, rule in RULES.items():
@@ -1168,7 +1175,7 @@ class Configured(dict[str, t.Any]):
 
 
 def values(config: Config) -> Root:
-    """Read Kaamiki's settings, by group, from a Sphinx configuration.
+    """Read the settings of Kaamiki, by group.
 
     :param config: The Sphinx configuration.
     :return: The settings, as `values(config).show.more`.
@@ -1178,14 +1185,13 @@ def values(config: Config) -> Root:
 
 @on("config-inited")
 def apply(app: Sphinx, config: Config) -> None:
-    """Hand what `conf.py` set on `kaamiki.conf` to Sphinx.
-
-    A `-D` on the command line wins over `conf.py`, as it does for
-    Sphinx's own settings. A `-D name.key=value` wins entry by entry
-    over the dictionary `conf.py` gave.
+    """Give Sphinx what `conf.py` set on `kaamiki.conf`.
 
     :param app: The Sphinx application instance.
-    :param config: The Sphinx configuration.
+    :param config: The Sphinx configuration. A `-D` on the command line
+        has priority over `conf.py`, as for the settings of Sphinx. A
+        `-D name.key=value` has priority entry by entry over the
+        dictionary from `conf.py`.
     """
     del app
     for key, value in CONF.given.items():
@@ -1200,20 +1206,20 @@ def apply(app: Sphinx, config: Config) -> None:
 
 
 def validate(app: Sphinx) -> None:
-    """Check every setting a site gave Kaamiki.
+    """Check each setting that a site gave Kaamiki.
 
     :param app: The Sphinx application instance.
-    :raises KaamikiError: For the first thing wrong. `_read` refuses a
-        plain `kaamiki_` name written in `conf.py` (a dictionary under
-        one is a `-D name.key=value`), a `-D` for a name that isn't one
-        of Kaamiki's and a value that's `None` or of the wrong type,
-        spelling or range. The other `_check_` helpers refuse an icon or
-        a colour Kaamiki can't draw, Sphinx's own `html_baseurl` and
-        `html_last_updated_fmt` written wrongly, the `KAAMIKI_FA_KIT`
-        environment variable, settings that contradict each other, a
-        file that isn't in `html_static_path`, a folder or a Python
-        that isn't there, a date format that can't be read back and a
-        theme option the sidebar doesn't read.
+    :raises KaamikiError: For the first problem. `_read` refuses a
+        plain `kaamiki_` name in `conf.py` (a dictionary below one is a
+        `-D name.key=value`), a `-D` for a name that is not of Kaamiki,
+        and a value that is `None` or of a wrong type, spelling or
+        range. The other `_check_` helpers refuse an icon or a colour
+        that Kaamiki cannot draw, a wrong `html_baseurl` or
+        `html_last_updated_fmt`, the `KAAMIKI_FA_KIT` environment
+        variable, settings that contradict each other, a file that is
+        not in `html_static_path`, a missing folder or Python, a date
+        format that cannot be read again, and a theme option that the
+        sidebar does not read.
     """
     config = app.config
     conf = p.join(app.confdir, "conf.py")
@@ -1232,16 +1238,15 @@ def validate(app: Sphinx) -> None:
 
 
 def _read(config: Config, conf: str) -> dict[str, t.Any]:
-    """Read the settings a site gave and refuse the ones that aren't right.
+    """Read the settings of a site, and refuse the wrong ones.
 
-    Settings are set on `kaamiki.conf`, which `apply` has handed to
-    Sphinx by now, or with a `-D`. A plain `kaamiki_` name written in
-    `conf.py` is neither. A dictionary under one is what Sphinx makes
-    of a `-D name.key=value`, so it's read and checked like the rest.
-
-    :param config: The Sphinx configuration.
-    :param conf: The path to `conf.py`, for the messages.
-    :return: The settings given, by key.
+    :param config: The Sphinx configuration. A site sets a setting on
+        `kaamiki.conf`, which `apply` gave to Sphinx, or with a `-D`. A
+        plain `kaamiki_` name in `conf.py` is neither. A dictionary
+        below one comes from a `-D name.key=value`, so it is read and
+        checked as the others.
+    :param conf: The path of `conf.py`, for the messages.
+    :return: The settings that the site gave, by key.
     """
     given: dict[str, t.Any] = {}
     for name, value in site_values(config).items():
@@ -1280,9 +1285,9 @@ def _read(config: Config, conf: str) -> dict[str, t.Any]:
 def _check_value(key: str, value: t.Any, conf: str) -> None:
     """Check one setting against its rule.
 
-    :param key: The setting's name without the prefix.
-    :param value: What it was given.
-    :param conf: The path to `conf.py`, for the messages.
+    :param key: The name of the setting without the prefix.
+    :param value: The value that it got.
+    :param conf: The path of `conf.py`, for the messages.
     """
     if value is None:
         if DEFAULTS[key] is not None:
@@ -1342,7 +1347,11 @@ def _check_colours(given: dict[str, t.Any], conf: str) -> None:
 
 
 def _check_site(config: Config, conf: str) -> None:
-    """Check the Sphinx values Kaamiki reads, the address and the date."""
+    """Check the address and the date of Sphinx.
+
+    :param config: The Sphinx configuration.
+    :param conf: The path of `conf.py`, for the messages.
+    """
     base = config.html_baseurl
     if base:
         try:
@@ -1534,7 +1543,11 @@ def _check_static(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
 
 
 def _check_theme(config: Config, conf: str) -> None:
-    """Check the theme options are ones Kaamiki's sidebar reads."""
+    """Check that the sidebar of Kaamiki reads each theme option.
+
+    :param config: The Sphinx configuration.
+    :param conf: The path of `conf.py`, for the messages.
+    """
     for name in UNREAD_OPTIONS:
         if name in config.html_theme_options:
             fail(
@@ -1612,13 +1625,12 @@ def _check_dates(given: dict[str, t.Any], conf: str) -> None:
 
 
 def _check_translation(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
-    """Check the date format a language's catalogue gives.
-
-    It only counts when the site sets no format of its own.
+    """Check the date format that the catalogue of a language gives.
 
     :param app: The Sphinx application instance.
-    :param given: The settings given.
-    :param conf: The path to `conf.py`, for the messages.
+    :param given: The settings that the site gave. The check counts
+        only when the site sets no format.
+    :param conf: The path of `conf.py`, for the messages.
     """
     if app.config.html_last_updated_fmt or given.get("last_updated_fmt"):
         return
@@ -1640,22 +1652,18 @@ def reread(
     changed: set[str],
     removed: set[str],
 ) -> list[str]:
-    """Send every page back through reading when the kit or address changes.
-
-    Sphinx reads every page again by itself when a setting in
-    `PARSE_TIME` changes, as they're all `env` values. It can't see
-    two things that end up in the pages: the Font Awesome kit the
-    `KAAMIKI_FA_KIT` environment variable names and `html_baseurl`,
-    which Sphinx only registers for the HTML builders.
+    """Read each page again when the kit or the address changes.
 
     :param app: The Sphinx application instance.
     :param env: The build environment.
-    :param added: The pages Sphinx found new.
-    :param changed: The pages Sphinx found changed.
-    :param removed: The pages Sphinx found gone.
-    :return: Every page when the kit or the address isn't what it was
-        at the last build, and none otherwise or at the first build,
-        where every page is new anyway.
+    :param added: The pages that Sphinx found new.
+    :param changed: The pages that Sphinx found changed.
+    :param removed: The pages that Sphinx found removed.
+    :return: Each page when the kit or the address is not the same as
+        at the last build, else none, and none at the first build.
+        Sphinx reads each page again for a change in `PARSE_TIME`, but
+        it cannot see the kit from `KAAMIKI_FA_KIT` or `html_baseurl`,
+        which Sphinx records only for the HTML builders.
     """
     del added, changed, removed
     now = json.dumps([icons.Icons.of(app.config).kit, app.config.html_baseurl])

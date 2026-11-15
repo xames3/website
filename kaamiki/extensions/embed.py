@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 11 August 2026
 Last updated on: 15 November 2026
 
-An `embed` directive that drops a block of HTML into the page::
+An `embed` directive that puts a block of HTML in the page::
 
     .. embed:: iframe
        :expected-count: 10
@@ -18,21 +18,20 @@ An `embed` directive that drops a block of HTML into the page::
            data-expected-count="{{ expected-count }}">
        </iframe>
 
-Every other option is a placeholder, so `{{ expected-count }}` is
-replaced by the option's value, escaped for where it lands. Markup gets
-it HTML-escaped and a `<style>` gets it CSS-escaped. A `<script>` reads
-it as a Python literal first and gets it as a JSON literal, so `10` is a
-number there and `'10'` a string. A placeholder no option fills stops
-the build, and so does an option no placeholder asks for. A
-`{# note #}` in the fragment is left out of the page.
+The argument is `iframe` in lower case, with the markup as the
+content. Or it is the path of an HTML fragment, relative to the
+document, or to the source directory with a `/` at the start, without
+content below the directive. Each option other than `css`, `js`,
+`encoding`, `name` and `class` fills the placeholder of the same name,
+as `{{ expected-count }}`. The build stops when no option fills a
+placeholder, or when no placeholder uses an option. A `{# note #}` in
+the fragment does not go on the page. An embed cannot go in the notes
+of a walkthrough, or in a block that is a link.
 
-A larger embed can live in a file of its own, named as the argument,
-relative to the document or to the source directory with a leading `/`.
-The `:css:` and `:js:` options are for the files under
-`html_static_path`, which load in order on the pages that use the
-directive. Here `embed.html` is a file of yours next to the document
-and `embed.css` and `embed.js` sit in `html_static_path`::
-
+The `css` and `js` options name files in `html_static_path`. They load
+in sequence on the pages that use the directive. Here, `embed.html` is
+next to the document, and `embed.css` and `embed.js` are in
+`html_static_path`::
 
     .. embed:: embed.html
        :css: embed.css
@@ -93,13 +92,13 @@ CONTROLS: t.Final[str] = "".join(map(chr, range(0x21)))
 
 
 def encode(value: str, kind: str) -> str:
-    """Write a placeholder's value for where it sits.
+    """Write the value of a placeholder for its place.
 
-    :param value: The option's value, as written.
-    :param kind: `script`, `style` or anything else for markup.
-    :return: The value, escaped so it can't break out of its place.
-        Markup gets it HTML-escaped, a style CSS-escaped and a script as
-        a JSON literal, a number for `3`.
+    :param value: The value of the option, as written.
+    :param kind: `script`, `style`, or another word for markup.
+    :return: The value, escaped so that it cannot leave its place:
+        HTML-escaped in markup, CSS-escaped in a style, and a JSON
+        literal in a script, so `3` is a number there.
     """
     if kind == "script":
         encoded = json.dumps(literal(value), default=str)
@@ -114,13 +113,11 @@ def encode(value: str, kind: str) -> str:
 
 
 def strip_notes(source: str) -> str:
-    """Take the `{# ... #}` notes out of a fragment.
-
-    The spaces after a note and one line break go with it.
+    """Remove the `{# ... #}` notes from a fragment.
 
     :param source: The fragment.
-    :return: The fragment without its notes. A note that never ends is
-        left in.
+    :return: The fragment without its notes, and without the spaces and
+        one line break after each note. A note without an end stays.
     """
     kept: list[str] = []
     cursor = 0
@@ -139,20 +136,17 @@ def strip_notes(source: str) -> str:
 
 
 class Fragment(HTMLParser):
-    """A fragment of HTML, read the way a browser tokenises it.
-
-    :param source: The fragment.
-    """
+    """A fragment of HTML, read as a browser reads it."""
 
     opened: tuple[int, str] | None = None
 
     def __init__(self, source: str) -> None:
-        """Read the whole fragment.
+        """Read all of the fragment.
 
-        `blocks` holds the text of each `<script>` and `<style>` as
-        where it starts, where it ends and which it is, and `tags`
-        every start tag with its attributes, the first of a name
-        winning.
+        :param source: The fragment. Then `blocks` holds where each
+            `<script>` and `<style>` starts and ends, and which it is.
+            `tags` holds each start tag with its attributes, and the
+            first tag of a name has priority.
         """
         super().__init__()
         self.lines = [0] + [_.end() for _ in re.finditer("\n", source)]
@@ -164,9 +158,9 @@ class Fragment(HTMLParser):
             self.blocks.append((self.opened[0], len(source), self.opened[1]))
 
     def at(self) -> int:
-        """Say where the tag being handled starts.
+        """Say where the current tag starts.
 
-        :return: Its place in the fragment.
+        :return: Its position in the fragment.
         """
         line, column = self.getpos()
         return self.lines[line - 1] + column
@@ -174,10 +168,10 @@ class Fragment(HTMLParser):
     def handle_starttag(
         self, tag: str, attrs: list[tuple[str, str | None]]
     ) -> None:
-        """Keep a start tag, and where a script or a style begins.
+        """Keep a start tag, and where a script or a style starts.
 
-        :param tag: The tag's name.
-        :param attrs: Its attributes, a list of names and values.
+        :param tag: The name of the tag.
+        :param attrs: Its attributes, as a list of names and values.
         """
         found: dict[str, str | None] = {}
         for key, value in attrs:
@@ -190,22 +184,21 @@ class Fragment(HTMLParser):
     def handle_startendtag(
         self, tag: str, attrs: list[tuple[str, str | None]]
     ) -> None:
-        """Keep a tag written with a slash.
+        """Keep a tag that is written with a slash.
 
-        A browser ignores the slash on a script or a style, which then
-        go on to their end tag, so it's read as a start tag here.
-
-        :param tag: The tag's name.
-        :param attrs: Its attributes, a list of names and values.
+        :param tag: The name of the tag. A browser ignores the slash on
+            a script or a style, which then continue to their end tag,
+            so this reads it as a start tag.
+        :param attrs: Its attributes, as a list of names and values.
         """
         self.handle_starttag(tag, attrs)
         if tag not in ("script", "style"):
             self.handle_endtag(tag)
 
     def handle_endtag(self, tag: str) -> None:
-        """Close the script or style an end tag ends.
+        """Close the script or the style that an end tag ends.
 
-        :param tag: The tag's name.
+        :param tag: The name of the tag.
         """
         if self.opened is not None and self.opened[1] == tag:
             self.blocks.append((self.opened[0], self.at(), tag))
@@ -213,18 +206,15 @@ class Fragment(HTMLParser):
 
 
 def substitute(source: str, values: dict[str, str]) -> str:
-    """Fill a fragment's placeholders, escaping each for where it sits.
+    """Fill the placeholders of a fragment, each escaped for its place.
 
-    Markup, `<script>` and `<style>` want different escaping, so the
-    source is split on the text of its script and style blocks and each
-    part gets its own. A block that never ends runs to the end.
-
-    :param source: The fragment, placeholders and all.
-    :param values: Directive options, keyed as they're written in the
-        rST. A placeholder may spell them with underscores instead of
-        hyphens.
-    :return: The fragment with every known placeholder filled in.
-        Anything unrecognised is left alone.
+    :param source: The fragment, with its placeholders. It is split at
+        the text of its script and style blocks, because each needs a
+        different escape. A block without an end continues to the end.
+    :param values: The options of the directive, by name as written in
+        the rST. A placeholder can use underscores, not hyphens.
+    :return: The fragment with each known placeholder filled. An
+        unknown placeholder does not change.
     """
 
     def swap(kind: str) -> Callable[[re.Match[str]], str]:
@@ -264,13 +254,11 @@ type Parsed = (
 
 
 def literal(value: str) -> Parsed:
-    """Read an option's value as a Python literal where it's one.
-
-    A script is the one place that wants it, `3` is a number there.
+    """Read the value of an option as a Python literal when it is one.
 
     :param value: The value, as written.
-    :return: A number, list or the like when it reads as one and the
-        text otherwise.
+    :return: A number, a list or a similar value when it reads as one,
+        else the text. Only a script needs this.
     """
     with contextlib.suppress(ValueError, SyntaxError):
         return t.cast("Parsed", ast.literal_eval(value))
@@ -278,18 +266,14 @@ def literal(value: str) -> Parsed:
 
 
 class placeholders(dict[str, "Callable[[str], t.Any]"]):
-    """The option specification of `embed`.
-
-    It holds the options `embed` has of its own. Any other name is the
-    value of a placeholder, so docutils reads it as text instead of
-    refusing it as an unknown option.
-    """
+    """The options of `embed`, with other names as placeholders."""
 
     def __missing__(self, key: str) -> Callable[[str], t.Any]:
-        """Answer for a placeholder.
+        """Give the converter for a placeholder.
 
-        :param key: The option's name.
-        :return: The converter that reads its value as text.
+        :param key: The name of the option.
+        :return: The converter, which reads the value as text, so that
+            docutils does not refuse an unknown option.
         """
         return rst.directives.unchanged
 
@@ -297,30 +281,17 @@ class placeholders(dict[str, "Callable[[str], t.Any]"]):
 class Embed(KaamikiDirective, spec=placeholders):
     """The `embed` directive.
 
-    The argument is `iframe` in lower case, with the markup as the
-    content. Or it is the path to an HTML fragment, with no content
-    below the directive. An embed cannot go in the notes of a
-    walkthrough, or in a block that is a link.
-
     Options::
 
-        - `css`: Stylesheets in `html_static_path`, with a comma between
-          each.
+        - `css`: Stylesheets in `html_static_path`, with a comma
+          between each.
         - `js`: Scripts in `html_static_path`, with a comma between
           each.
-        - `encoding`: The encoding of the fragment file. The default is
-          `utf-8`. It needs a file, because inline markup has no
+        - `encoding`: The encoding of the fragment file. The default
+          is `utf-8`. It needs a file, because inline markup has no
           encoding.
         - `name`: A name for links.
         - `class`: More classes for the `<div>` around the embed.
-
-    Each other option is the value of a placeholder. Option names are in
-    lower case, as docutils reads them, and placeholders are also in
-    lower case. In markup, a value is HTML-escaped. In a `<style>`, it
-    is CSS-escaped. In a `<script>`, it is read as a Python literal and
-    written as a JSON literal. The build stops when no option fills a
-    placeholder, or when no placeholder uses an option. A `{# note #}`
-    in the fragment does not go on the page.
     """
 
     has_content = True
@@ -334,12 +305,10 @@ class Embed(KaamikiDirective, spec=placeholders):
     def made(cls, node: nodes.Node | None) -> bool:
         """Say whether a node is an embed, which is a container.
 
-        An embed holds the `raw` node of its styles and scripts. A
-        container that an author writes does not, whatever its classes
-        are.
-
         :param node: The node to look at.
-        :return: `True` for an embed.
+        :return: `True` for an embed, which holds the `raw` node of its
+            styles and scripts. A container from an author does not
+            hold it.
         """
         return type(node) is nodes.container and any(
             isinstance(each, nodes.raw) and "css" in each
@@ -347,11 +316,11 @@ class Embed(KaamikiDirective, spec=placeholders):
         )
 
     def build(self) -> list[nodes.Node]:
-        """Read the markup, fill its placeholders and return it.
+        """Read the markup, fill its placeholders and give it back.
 
-        :return: A list holding the one `raw` node, which also carries
-            the stylesheets and scripts the page is to load for it. It
-            sits in a `container`, which `:class:` adds classes to.
+        :return: One `raw` node, which also holds the stylesheets and
+            scripts that the page must load, in a `container` that gets
+            the `class` classes.
         """
         file = self.arguments.pop().strip()
         self.assets()
@@ -385,13 +354,12 @@ class Embed(KaamikiDirective, spec=placeholders):
         return [wrapper]
 
     def assets(self) -> None:
-        """Check the styles and scripts, the options that name files.
+        """Check the styles and the scripts that the options name.
 
-        Each file found is a dependency of the page, so deleting it
-        makes the page out of date.
-
-        :raises rst.DirectiveError: For a style or a script that isn't
-            a file under `html_static_path`.
+        :raises rst.DirectiveError: For a style or a script that is not
+            a file in `html_static_path`. Each file found is a
+            dependency of the page, so when the file is deleted, the
+            page is built again.
         """
         env = self.env
         options = self.options
@@ -421,13 +389,12 @@ class Embed(KaamikiDirective, spec=placeholders):
                 env.note_dependency(path)
 
     def match(self, source: str, values: dict[str, str]) -> None:
-        """Catch an option or a placeholder that's been misspelt.
+        """Find an option or a placeholder with a spelling mistake.
 
-        An option the fragment never asks for is an error, and so is a
-        placeholder no option fills.
-
-        :param source: The fragment, placeholders and all.
+        :param source: The fragment, with its placeholders.
         :param values: The options that fill placeholders.
+        :raises rst.DirectiveError: For an option that no placeholder
+            uses, or a placeholder that no option fills.
         """
         wanted = {
             _.lower().replace("_", "-") for _ in PLACEHOLDER.findall(source)
@@ -445,20 +412,17 @@ class Embed(KaamikiDirective, spec=placeholders):
             )
 
     def guard(self, markup: str) -> None:
-        """Keep an `<iframe>` to the hosts the site allows.
+        """Keep an `<iframe>` to the hosts that the site permits.
 
-        Nothing is checked without `kaamiki.conf.embed.iframe_hosts`.
-        With it, a source on a relative path is allowed and one from
-        another host has to be on the list, or on a subdomain of a host
-        that is. The markup is read the way a browser reads it, so the
-        order of the attributes, a `>` in a quoted one or a backslash
-        in the address won't get a frame past the list.
-
-        A `<script>` with `iframe` in it is refused.
-
-        :param markup: The embedded HTML, placeholders filled in.
+        :param markup: The embedded HTML, with its placeholders filled.
+            Without `kaamiki.conf.embed.iframe_hosts`, nothing is
+            checked. With it, a relative path is permitted, and a
+            different host must be on the list or a subdomain of a host
+            on it. The markup is read as a browser reads it, so the
+            sequence of the attributes, a `>` in a quoted value or a
+            backslash in the address cannot get a frame past the list.
         :raises rst.DirectiveError: When an iframe comes from a host
-            that isn't allowed.
+            that is not permitted, or a `<script>` has `iframe` in it.
         """
         config = self.config
         allowed = hostnames(values(config).embed.iframe_hosts, www=True)
@@ -492,19 +456,17 @@ class Embed(KaamikiDirective, spec=placeholders):
 
     @staticmethod
     def allows(src: str, allowed: set[str]) -> bool:
-        """Say whether an iframe's source is one the site allows.
+        """Say whether the site permits the source of an iframe.
 
-        The address is read as a browser reads it: the spaces and
-        control characters around it go, so do tabs and line breaks
-        inside it, a backslash is a slash and a run of slashes at the
-        start is two.
-
-        :param src: The `src` attribute.
-        :param allowed: The hosts the site allows.
-        :return: `True` for `about:blank`, a path and an `http` or
-            `https` address on an allowed host or a subdomain of one.
-            An address with a scheme and no `//` after it is refused,
-            since a browser may read it as a host.
+        :param src: The `src` attribute. It is read as a browser reads
+            it: the spaces and control characters around it and the
+            tabs and line breaks in it go, a backslash is a slash, and
+            slashes at the start are two.
+        :param allowed: The hosts that the site permits.
+        :return: `True` for `about:blank`, a path, and an `http` or
+            `https` address on a permitted host or its subdomain. An
+            address with a scheme and no `//` after it is refused,
+            because a browser can read it as a host.
         """
         text = re.sub(r"[\t\r\n]", "", src.strip(CONTROLS))
         text = re.sub(r"^[/\\]{2,}", "//", text.replace("\\", "/"))
@@ -524,12 +486,10 @@ class Embed(KaamikiDirective, spec=placeholders):
         )
 
     def read(self, file: str) -> str:
-        """Read an HTML fragment off disk.
+        """Read an HTML fragment from the disk.
 
-        The path is relative to the document or to the source directory
-        when it starts with a `/`.
-
-        :param file: The path, as written.
+        :param file: The path as written, relative to the document, or
+            to the source directory when it starts with a `/`.
         :return: The fragment.
         """
         if self.content:
@@ -569,19 +529,17 @@ def html_page_context(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Hand the page its own embedded stylesheets and scripts.
+    """Give the page its embedded stylesheets and scripts.
 
-    The site's `kaamiki.conf.embed.css` and `kaamiki.conf.embed.js`
-    come first, then the page's own in the order it names them, each
-    once. They go in the page's context, so a page without an `embed`
-    gets none.
-
-    :param app: The Sphinx application instance.
-    :param pagename: The page being rendered.
-    :param templatename: The template rendering it.
-    :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
+    :param app: The Sphinx application instance. The
+        `kaamiki.conf.embed.css` and `kaamiki.conf.embed.js` of the
+        site come first, then those of the page in their sequence, each
+        one time. A page without an `embed` gets none.
+    :param pagename: The page that is written.
+    :param templatename: The template that writes it.
+    :param context: The context of the page, changed in place.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del pagename, templatename
     context["km_embed_css"] = []

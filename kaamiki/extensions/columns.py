@@ -6,7 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
 Last updated on: 15 November 2026
 
-A `columns` directive that sets `column` directives side by side::
+A `columns` directive that puts `column` directives next to each
+other::
 
     .. columns:: 3
        :gap: medium
@@ -19,6 +20,13 @@ A `columns` directive that sets `column` directives side by side::
           :span: 2
 
           Second, as wide as two.
+
+The argument is the number of columns, from 1 to 6. Put one `column` in
+it for each item. On a phone, each column takes the full width, and a
+column with `:span: auto` keeps its width and goes in the center.
+Columns cannot go in a container that is narrower than the text of the
+page, so they cannot go in a column that does not span its set, or in a
+block that is not `large`.
 """
 
 from __future__ import annotations
@@ -78,38 +86,33 @@ class Columns(KaamikiDirective):
         - `gap`: The space between columns, `small`, `medium` or
           `large`. The default is `small`. A length in `rem`, up to
           4rem, can replace them. Write one length for the two
-          directions, as `1.5rem`, or two lengths for the row gap and
-          the column gap, as `1rem 2rem`.
-        - `valign`: Where columns of different heights align, `top`,
-          `middle` or `bottom`. The default is `middle`.
-        - `flush`: Remove the space above the first item in each column
-          and below the last item. Then the gap and the margin set the
-          spacing. A column with a `padding`, `border` or `background`
-          is flush already.
+          directions, as `1.5rem`, or two lengths for the row gap
+          and the column gap, as `1rem 2rem`.
+        - `valign`: Where columns of different heights align,
+          `top`, `middle` or `bottom`. The default is `middle`.
+        - `flush`: Remove the space above the first item in each
+          column and below the last item. Then the gap and the
+          margin set the spacing. A column with a `padding`,
+          `border` or `background` is flush already.
         - `padding`: The space in each column, `small`, `medium` or
-          `large`. Lengths in `rem`, as for `gap`, can replace them: the
-          space above and below, then the space at the sides. A column
-          with a `border` or a `background` has `1rem` without it.
+          `large`. Lengths in `rem`, as for `gap`, can replace
+          them: the space above and below, then the space at the
+          sides. A column with a `border` or a `background` has
+          `1rem` without it.
         - `border`: Put a 1px border with round corners around each
           column.
         - `background`: Fill each column, with round corners.
         - `margin`: The space above and below the columns, `small`,
           `medium` or `large`. The default is `medium`. A length in
-          `rem`, up to 8rem, can replace them. Write one length for the
-          two, or two lengths for above and below, as `5rem 2rem`.
-        - `stack-align`: How the text in the columns aligns when they
-          stack on a phone, `left` or `center`. The default is `left`.
+          `rem`, up to 8rem, can replace them. Write one length for
+          the two, or two lengths for above and below, as `5rem
+          2rem`.
+        - `stack-align`: How the text in the columns aligns when
+          they stack on a phone, `left` or `center`. The default is
+          `left`.
         - `class-column`: More classes for each column.
         - `name`: A name for links.
         - `class`: More classes for the columns.
-
-    The argument is the number of columns, from 1 to 6. Put one `column`
-    in it for each item. On a phone, each column takes the full width.
-    A column with `:span: auto` keeps its width and goes in the center.
-
-    Columns cannot go in a container that is narrower than the text of
-    the page. Thus they cannot go in a column that does not span its
-    set, or in a block that is not `large`.
     """
 
     has_content = True
@@ -198,8 +201,8 @@ class Column(KaamikiDirective):
 
     Options::
 
-        - `span`: How many columns it takes, or `auto` to make it as
-          wide as its content. Without it, a column takes one.
+        - `span`: How many columns it takes, or `auto` to make it
+          as wide as its content. Without it, a column takes one.
         - `name`: A name for links.
         - `class`: More classes for the column.
     """
@@ -218,7 +221,7 @@ class Column(KaamikiDirective):
     def build(self) -> list[nodes.Node]:
         """Make the column with its content.
 
-        :return: The column's node.
+        :return: The node of the column.
         """
         node = self.locate(self.Node("", classes=self.classes))
         node["span"] = self.span
@@ -285,7 +288,7 @@ def visit_column(self: HTMLTranslator, node: Column.Node) -> None:
     """Open a column.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The column's node.
+    :param node: The node of the column.
     """
     classes = columns.column(f"span-{node['span']}")
     self.body.append(self.starttag(node, "div", "", CLASS=classes))

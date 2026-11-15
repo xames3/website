@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The helpers that work out how long a page takes to read.
+The helpers that find how long a page takes to read.
 """
 
 from __future__ import annotations
@@ -38,10 +38,10 @@ SKIPPED: t.Final[tuple[type, ...]] = (
 def words(node: nodes.Node) -> int:
     """Count the words in the prose of a node.
 
-    :param node: Where to start counting.
-    :return: The words in its paragraphs, none from what `SKIPPED`
-        names or a table of contents, and the most any one panel of a
-        set of `alternatives` has.
+    :param node: The node to start from.
+    :return: The words in its paragraphs, without what `SKIPPED` names
+        or a table of contents, and only the largest panel of a set of
+        `alternatives`.
     """
     if isinstance(node, SKIPPED) or (
         isinstance(node, nodes.topic) and "contents" in node["classes"]
@@ -60,23 +60,23 @@ def words(node: nodes.Node) -> int:
 
 
 def wordcount(doctree: nodes.document | None) -> int:
-    """Count the words in a page's prose.
+    """Count the words in the prose of a page.
 
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
-    :return: The number of words counted.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
+    :return: The number of words.
     """
     return 0 if doctree is None else words(doctree)
 
 
 def reading_time(doctree: nodes.document | None, config: Config) -> int:
-    """Work out roughly how many minutes a page takes to read.
+    """Find approximately how many minutes a page takes to read.
 
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     :param config: The Sphinx configuration, for
         `kaamiki.conf.site.words_per_minute`.
-    :return: Minutes, rounded up.
+    :return: The minutes, rounded up.
     """
     speed: int = values(config).site.words_per_minute
     return ceil(wordcount(doctree) / speed)
@@ -90,19 +90,17 @@ def show_more(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Decide whether a page is long enough to fold up.
+    """Find whether a page is long enough to fold.
 
-    A page that takes less than `kaamiki.conf.show.more_after` minutes
-    to read never folds, whatever `kaamiki.conf.show.more` or the
-    page's `:km-show-more:` says. Those only switch the fold off, or
-    back on, for a page that's long enough.
-
-    :param app: The Sphinx application instance.
-    :param pagename: The name of the page being rendered.
-    :param templatename: The template rendering it.
-    :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
+    :param app: The Sphinx application instance. A page that takes less
+        than `kaamiki.conf.show.more_after` minutes to read never
+        folds. `kaamiki.conf.show.more` and `:km-show-more:` only set
+        the fold off or on for a page that is long enough.
+    :param pagename: The page that is written.
+    :param templatename: The template that writes it.
+    :param context: The context of the page, changed in place.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del pagename, templatename
     config = app.config

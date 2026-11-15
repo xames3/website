@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
 Last updated on: 15 November 2026
 
-Kaamiki's shared helpers.
+The shared helpers of Kaamiki.
 """
 
 from kaamiki.extensions.utils import checks

@@ -4,9 +4,9 @@ Walkthrough Chrome
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
-The markup a walkthrough wraps itself in.
+The markup around a walkthrough.
 """
 
 from __future__ import annotations
@@ -166,8 +166,8 @@ COMMENTS: t.Final[tuple[tuple[str, str, frozenset[str]], ...]] = (
 def known(language: str) -> bool:
     """Say whether Pygments has a lexer for a language.
 
-    :param language: The language named on the directive.
-    :return: Whether it does.
+    :param language: The language of the directive.
+    :return: `True` when it has one.
     """
     try:
         lexer_for(language)
@@ -179,19 +179,20 @@ def known(language: str) -> bool:
 def lexer_for(language: str) -> Lexer:
     """Find the Pygments lexer for a language.
 
-    :param language: The language named on the directive.
-    :return: Its lexer.
-    :raises ClassNotFound: When Pygments has none, which `known` asks.
+    :param language: The language of the directive.
+    :return: The lexer.
+    :raises ClassNotFound: When Pygments has no lexer. Use `known` to
+        ask first.
     """
     return get_lexer_by_name(language)
 
 
 def comment(language: str) -> dict[str, str] | None:
-    """Find how a language writes a comment, for the values beside it.
+    """Find how a language writes a comment.
 
-    :param language: The language named on the directive.
-    :return: What opens a comment and what closes it or `None` for a
-        language `COMMENTS` doesn't know.
+    :param language: The language of the directive.
+    :return: What opens a comment and what closes it, or `None` for a
+        language that `COMMENTS` does not know.
     :raises ClassNotFound: When Pygments has no lexer for the language.
     """
     names = {language.lower(), *lexer_for(language).aliases}
@@ -202,11 +203,11 @@ def comment(language: str) -> dict[str, str] | None:
 
 
 def highlight(code: str, language: str) -> list[str]:
-    """Highlight a snippet and give it back a line at a time.
+    """Highlight a snippet, one line at a time.
 
     :param code: The snippet.
-    :param language: The language to highlight it as.
-    :return: One string of markup per line.
+    :param language: The language of the snippet.
+    :return: One string of markup for each line.
     """
     formatter = HtmlFormatter(nowrap=True)
     body: str = pygmentise(code, lexer_for(language), formatter)
@@ -225,18 +226,17 @@ def notes_pane(
     linenos: bool,
     digits: int = 0,
 ) -> str:
-    """Write the highlighted snippet a walkthrough steps through.
+    """Write the highlighted snippet that a walkthrough steps through.
 
     :param code: The snippet.
-    :param language: The language to highlight it as.
-    :param start: The number to give the first line.
-    :param emphasis: The lines to mark, numbered as the reader sees
-        them.
-    :param linenos: Whether to show a line-number gutter.
-    :param digits: How many characters the gutter takes, for versions
-        of a snippet that have to line up. Defaults to what the snippet
-        needs.
-    :return: The pane's markup.
+    :param language: The language of the snippet.
+    :param start: The number of the first line.
+    :param emphasis: The lines to mark, with the numbers that the
+        reader sees.
+    :param linenos: Whether to show the line numbers.
+    :param digits: The width of the line numbers, so that versions of a
+        snippet align. The default is the width that the snippet needs.
+    :return: The markup of the pane.
     """
     rows: list[str] = []
     for offset, line in enumerate(highlight(code, language)):
@@ -262,14 +262,12 @@ def notes_pane(
 
 
 def controls(icons: Mapping[str, str]) -> str:
-    """Write what sits at the end of a walkthrough's caption.
+    """Write the controls at the end of the caption of a walkthrough.
 
-    Without a caption, the same markup sits in the snippet's top
-    corner. The button holds both its icons and the stylesheet shows
-    the one that fits its state.
-
-    :param icons: The site's named icons.
-    :return: The markup.
+    :param icons: The named icons of the site.
+    :return: The markup. Without a caption, it goes in the top corner
+        of the snippet. The button holds its two icons, and the
+        stylesheet shows the icon for its state.
     """
     marks = "".join(
         f'<i class="{icons[key]} km-code-explain__{name}"'
@@ -285,7 +283,7 @@ def controls(icons: Mapping[str, str]) -> str:
 
 
 def output() -> str:
-    """Write the box a snippet's prints land in."""
+    """Write the box for what a snippet prints."""
     return (
         '<pre class="km-code-explain__output" data-km-output'
         f' data-km-empty="{html.escape(str(_("Nothing printed yet")))}"'
@@ -294,7 +292,7 @@ def output() -> str:
 
 
 def label(low: int, high: int) -> str:
-    """Name a range of lines the way a warning prints it.
+    """Name a range of lines, as a warning writes it.
 
     :param low: The first line.
     :param high: The last line.
@@ -306,10 +304,10 @@ def label(low: int, high: int) -> str:
 
 
 def visit_explanation(self: HTMLTranslator, node: nodes.Element) -> None:
-    """Open one `lines` block's note.
+    """Open the note of one `lines` block.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The explanation node, carrying its index.
+    :param node: The node of the note, with its index.
     """
     self.body.append(
         f'<div class="km-code-explain__note" data-km-note="{node["index"]}">'

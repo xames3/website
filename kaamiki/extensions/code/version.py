@@ -6,8 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 28 September 2026
 Last updated on: 15 November 2026
 
-A `code-version` directive that steps a reader through the versions a
-piece of code went through on its way to what it is now::
+A `code-version` directive that walks a reader through the versions of
+a piece of code, until its current version::
 
     .. code-version:: python
        :caption: xsnumpy/_core.py
@@ -37,6 +37,11 @@ piece of code went through on its way to what it is now::
            .. lines:: 2-3
 
                The 1D case keeps what already worked.
+
+The argument is the language of all the versions, and the default is
+`python`. Put it on the page itself. A plain `container` or an `only`
+is part of the page. The content of a different directive and the
+notes of a walkthrough are not.
 """
 
 from __future__ import annotations
@@ -77,11 +82,7 @@ class Attempt(nodes.container):
 
 
 class Draft(nodes.container):
-    """An attempt's code and what it printed, framed on their own.
-
-    The script never shows these. They hold the versions it swaps
-    between, and they're the page for a reader with no scripting.
-    """
+    """The code and the output of an attempt, in their own frame."""
 
 
 class Outcome(nodes.literal_block):
@@ -91,20 +92,17 @@ class Outcome(nodes.literal_block):
 class CodeVersion(explain.CodeWalk, name="code-version"):
     """The `code-version` directive.
 
-    The argument is the language of all the versions. The default is
-    `python`. Put it on the page itself. A plain `container` or an
-    `only` is part of the page. The content of a different directive,
-    and the notes of a walkthrough, are not.
-
     Options::
 
-        - `code-position`: The side of the code, `right` or `left`. The
-          default is `right`.
-        - `pace`: The pixels of scrolling for each step, from 24 to 240.
-          A step that brings in a version takes `STRETCH` times that.
+        - `code-position`: The side of the code, `right` or `left`.
+          The default is `right`.
+        - `pace`: The pixels of scrolling for each step, from 24 to
+          240. A step that brings in a version takes `STRETCH` times
+          that.
         - `caption`: A line of text above the code, parsed as rST.
         - `linenos`: Show the line numbers.
-        - `lineno-start`: The number of the first line, from 0 to 10000.
+        - `lineno-start`: The number of the first line, from 0 to
+          10000.
         - `no-motion`: Show it stacked, without motion.
         - `name`: A name for links to the `code-version`.
         - `class`: More classes for the `code-version`.
@@ -114,9 +112,9 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
         """The versions, written as a walkthrough with notes."""
 
     def build(self) -> list[nodes.Node]:
-        """Read each attempt and make the directive's node.
+        """Read each attempt and make the node of the directive.
 
-        :return: A list holding the one `code-version` node.
+        :return: One `code-version` node.
         """
         language = self.arguments.pop().strip() if self.arguments else "python"
         if not known(language):
@@ -159,9 +157,9 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
         return [element]
 
     def attempts(self) -> list[chunk]:
-        """Pull the `attempt` blocks out of the directive's content.
+        """Take the `attempt` blocks from the content of the directive.
 
-        :return: The blocks, in the order they were written.
+        :return: The blocks, in the sequence written.
         """
         try:
             found = split(self.content, self.content_offset, ATTEMPT, {})
@@ -184,15 +182,13 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
     def unpack(self, block: chunk, at: int) -> Pieces:
         """Split an attempt into its code, its output and its notes.
 
-        The prose in an attempt is one note, whichever blocks it sits
-        around, until a `.. lines::` comes along. Each of those is a
-        note of its own, and prose after one starts another.
-
         :param block: The `attempt` block.
-        :param at: Which attempt it is, counting from one.
+        :param at: The number of the attempt, from one.
         :return: The `code` block, the `output` block or `None`, and
-            the notes in the order they were written, prose as nameless
-            chunks and the rest as `lines` blocks.
+            the notes in the sequence written: prose as chunks without
+            a name, and `lines` blocks. All the prose is one note until
+            a `.. lines::`, which is a note itself, and prose after it
+            starts a new note.
         """
         found = split(block.body, block.offset, PARTS, {}, loose=True)
         for kind in ("code", "output"):
@@ -232,14 +228,13 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
     def span(
         self, argument: str, start: int, total: int, at: int = 0
     ) -> tuple[int, int]:
-        """Read the lines a `lines` block points at, in its own
-        version.
+        """Read the lines that a `lines` block points at.
 
-        :param argument: The block's argument, as written.
-        :param start: The number every version's first line is given.
-        :param total: How many lines this version has.
-        :param at: Which attempt it belongs to, counting from one.
-        :return: The first and the last line it covers.
+        :param argument: The argument of the block, as written.
+        :param start: The number of the first line of each version.
+        :param total: The number of lines of this version.
+        :param at: The number of its attempt, from one.
+        :return: The first and the last line that it covers.
         """
         found = linerange(argument)
         if found is None:
@@ -259,19 +254,16 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
     def steps(
         self, drafts: list[Pieces], start: int, base: int
     ) -> list[dict[str, t.Any]]:
-        """Make a step of every note, attempt by attempt.
+        """Make a step of each note, attempt by attempt.
 
-        An attempt with nothing to say still gets a step, since its
-        version has to come up. It borrows the note before it, or the
-        first note there is when none comes before it. The first step
-        of every attempt brings its version in, so it takes `STRETCH`
-        times the scrolling, and its last step is where its output
-        lands.
-
-        :param drafts: The attempts, unpacked.
-        :param start: The number every version's first line is given.
-        :param base: How much scrolling a step takes, in pixels.
-        :return: The steps, in the order they come up.
+        :param drafts: The unpacked attempts.
+        :param start: The number of the first line of each version.
+        :param base: The pixels of scrolling for each step.
+        :return: The steps, in sequence. An attempt without a note
+            still gets a step, with the note before it, or the first
+            note when there is none before it. The first step of each
+            attempt brings in its version, so it takes `STRETCH` times
+            the scrolling, and its output shows at its last step.
         """
         steps: list[dict[str, t.Any]] = []
         count = 0
@@ -302,14 +294,14 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
     def story(
         self, drafts: list[Pieces], language: str, start: int, digits: int
     ) -> explain.Explanations:
-        """Parse every attempt into its frame and its notes.
+        """Parse each attempt into its frame and its notes.
 
-        :param drafts: The attempts, unpacked.
-        :param language: The language to highlight the code in.
-        :param start: The number every version's first line is given.
-        :param digits: The characters the widest version's line numbers
-            take, so every version's code starts in the same column.
-        :return: The attempts, under the container the notes go in.
+        :param drafts: The unpacked attempts.
+        :param language: The language of the highlight.
+        :param start: The number of the first line of each version.
+        :param digits: The width of the widest line numbers, so that
+            the code of each version starts in the same column.
+        :return: The attempts, in the container of the notes.
         """
         box = explain.Explanations()
         count = 0
@@ -353,14 +345,15 @@ html.closes(Attempt, "</div>")
 
 @html.opens(Draft)
 def visit_draft(self: HTMLTranslator, element: Draft) -> None:
-    """Open an attempt's frame and write its code.
-
-    The code is written the way the pane writes it, a line at a time,
-    which is also where the script picks each version's lines up from.
+    """Open the frame of an attempt and write its code.
 
     :param self: The HTML translator, whose body this appends to.
-    :param element: The frame, carrying its index and the gutter's
-        width, and holding the plain code block.
+    :param element: The frame, with its index, the width of the line
+        numbers and the plain code block. The script never shows a
+        frame. It holds the versions for the script, and it is the page
+        for a reader without scripts. The code is written one line at a
+        time, as the pane writes it, and the script takes the lines of
+        each version from it.
     """
     code = next(findall(element, explain.PlainCode))
     index = element["index"]

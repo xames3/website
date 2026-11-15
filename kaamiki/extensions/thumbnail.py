@@ -6,11 +6,22 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September 2025
 Last updated on: 15 November 2026
 
-A `thumbnail` directive that shows a YouTube video's still and links to it::
+A `thumbnail` directive that shows the still of a YouTube video and
+links to it::
 
     .. thumbnail:: https://www.youtube.com/watch?v=jNQXAC9IVRw
        :title: Me at the zoo
        :greyscale:
+
+The argument is the link of a YouTube video, or only its id. The
+thumbnail links to the link as written, so it must be an `http` or
+`https` link. When the thumbnail has no title or channel, the script of
+the page gets them from YouTube. Until they arrive, or when they do not
+arrive, the thumbnail shows "YouTube video" and "Watch on YouTube". The
+link checker gets the picture of the video, so `linkcheck` fails and
+names a video that is deleted or private.
+`kaamiki.conf.youtube.privacy` is for players, so it does not change
+the thumbnail.
 """
 
 from __future__ import annotations
@@ -42,23 +53,14 @@ TEXTS: t.Final[tuple[str, ...]] = ("title", "channel", "caption")
 class Thumbnail(KaamikiDirective):
     """The `thumbnail` directive.
 
-    The argument is the link of a YouTube video, or only its id. The
-    thumbnail links to the link as written, so it must be an `http` or
-    `https` link. When the thumbnail does not have the title or the
-    channel, the script of the page gets them from YouTube. Until they
-    arrive, or when they do not arrive, the thumbnail shows "YouTube
-    video" and "Watch on YouTube". The link checker gets the picture of
-    the video, so `linkcheck` fails and names a video that is deleted or
-    private. `kaamiki.conf.youtube.privacy` of the site is for players,
-    so it does not change the thumbnail.
-
     Options::
 
         - `title`: The title of the video.
         - `channel`: The name of the channel.
-        - `caption`: A line of text below the channel, parsed as rST.
-        - `greyscale`: Show the still in grey until a reader hovers on
-          it. Without it, the still shows in colour.
+        - `caption`: A line of text below the channel, parsed as
+          rST.
+        - `greyscale`: Show the still in grey until a reader hovers
+          on it. Without it, the still shows in colour.
         - `name`: A name for links.
         - `class`: More classes for the thumbnail.
     """
@@ -116,10 +118,10 @@ class Thumbnail(KaamikiDirective):
 
     @staticmethod
     def plain(node: Thumbnail.Node) -> list[nodes.Node]:
-        """Write a thumbnail as words, for a builder that writes no HTML.
+        """Write a thumbnail as words, for a builder without HTML.
 
-        :param node: The thumbnail's node.
-        :return: A paragraph for each text and a paragraph with a link
+        :param node: The node of the thumbnail.
+        :return: A paragraph for each text, and a paragraph with a link
             to the video.
         """
         found: list[nodes.Node] = [

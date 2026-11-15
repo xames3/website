@@ -6,7 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-Kaamiki's Jinja environment and the helpers that read its templates.
+The Jinja environment of Kaamiki and the helpers that read its
+templates.
 """
 
 from __future__ import annotations
@@ -39,12 +40,12 @@ environment.install_null_translations(  # type: ignore[attr-defined]
 
 
 def render(template: str, /, **context: object) -> str:
-    """Render a theme directive template with the given context.
+    """Render the template of a directive with a context.
 
-    Context values are exposed to the template with a `km_` prefix.
-
-    :param template: Template filename, relative to `theme/templates`.
-    :param context: Values made available to the template.
+    :param template: The file name of the template, relative to
+        `theme/templates`.
+    :param context: The values for the template. Each one gets a `km_`
+        prefix in the template.
     :return: The rendered HTML.
     """
     values = {"km_rel": REL, **{f"km_{k}": v for k, v in context.items()}}
@@ -53,12 +54,11 @@ def render(template: str, /, **context: object) -> str:
 
 @on("builder-inited")
 def bridge(app: Sphinx) -> None:
-    """Bridge Kaamiki's directive templates with Sphinx's loader.
+    """Join the directive templates of Kaamiki to the loader of Sphinx.
 
-    Directive templates can be overridden by the site, while keeping
-    Kaamiki's Jinja environment, translations and filters.
-
-    :param app: The Sphinx application instance.
+    :param app: The Sphinx application instance. Then a site can
+        replace a directive template, and the template keeps the Jinja
+        environment, the translations and the filters of Kaamiki.
     """
     environment.install_gettext_translations(  # type: ignore[attr-defined]
         app.translator,

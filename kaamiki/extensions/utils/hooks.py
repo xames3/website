@@ -29,11 +29,11 @@ class Hooks:
     def __call__[F: Callable[..., t.Any]](
         self, event: str, *, priority: int = 500
     ) -> Callable[[F], F]:
-        """Record the function below this decorator as a handler of an event.
+        """Record the function below as a handler of an event.
 
         :param event: The Sphinx event, as `doctree-read`.
-        :param priority: The priority of the handler. A lower one runs
-            first.
+        :param priority: The priority of the handler. A lower priority
+            runs first.
         :return: The decorator, which gives back the same function.
         """
 
@@ -44,7 +44,7 @@ class Hooks:
         return record
 
     def connect(self, app: Sphinx) -> None:
-        """Connect each handler to its event, in the sequence of the record.
+        """Connect each handler to its event, in the recorded sequence.
 
         :param app: The Sphinx application instance.
         """

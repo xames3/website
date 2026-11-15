@@ -6,8 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 October 2026
 Last updated on: 15 November 2026
 
-Stops a page that puts a directive where it makes no sense, or a class
-that only works on the page itself.
+Stop a page that puts a directive where it cannot work, or a class
+that works only on the page itself.
 """
 
 from __future__ import annotations
@@ -34,12 +34,11 @@ if t.TYPE_CHECKING:
 
 
 def is_raw(node: nodes.Node) -> bool:
-    """Say whether a node is a block of HTML an author wrote.
-
-    Such a block can hold anything.
+    """Say whether a node is a block of HTML from an author.
 
     :param node: The node to look at.
-    :return: `True` for a `raw` block with something in it.
+    :return: `True` for a `raw` block with text in it, which can hold
+        anything.
     """
     return (
         isinstance(node, nodes.raw)
@@ -107,11 +106,11 @@ HOSTS: t.Final[tuple[tuple[type, str], ...]] = (
 
 
 def is_part(node: nodes.Node) -> bool:
-    """Say whether a node only holds a piece of a directive's content.
+    """Say whether a node holds a part of a directive.
 
     :param node: The node to look at.
-    :return: `True` for the notes of a walkthrough, an attempt or a
-        release's body, which the message names by what they are in.
+    :return: `True` for the notes of a walkthrough, an attempt, or the
+        body of a release. The message names them by what holds them.
     """
     if isinstance(node, PARTS):
         return True
@@ -119,15 +118,12 @@ def is_part(node: nodes.Node) -> bool:
 
 
 def is_wrapper(node: nodes.Node) -> bool:
-    """Say whether a node only wraps something that sits on the page.
-
-    A block comes in a row of blocks, a code block with a caption in a
-    box of its own and a picture that links in its link, so the class
-    that's on what's inside is on the page.
+    """Say whether a node only wraps a node that is on the page.
 
     :param node: The node to look at.
-    :return: `True` for a row of blocks, a captioned code block's box
-        and a link that holds nothing but a picture.
+    :return: `True` for a row of blocks, the box of a code block with a
+        caption, and a link that holds only a picture. A class on what
+        they hold is on the page.
     """
     if isinstance(node, block.Shelf):
         return True
@@ -139,10 +135,10 @@ def is_wrapper(node: nodes.Node) -> bool:
 
 
 def kind(node: nodes.Node) -> str:
-    """Name the directive a node was written by.
+    """Name the directive that wrote a node.
 
     :param node: The node to look at.
-    :return: The directive's name or an empty string for any other
+    :return: The name of the directive, or an empty string for another
         node.
     """
     for name, directive in KaamikiDirective.registry.items():
@@ -154,12 +150,11 @@ def kind(node: nodes.Node) -> str:
 def open_to_page(node: nodes.Node) -> bool:
     """Say whether a node is part of the page itself.
 
-    That's where the page's own directives go.
-
     :param node: The node to look at.
-    :return: `True` for the document, a section that isn't a release
-        and an `only`. A plain `container` isn't, since an author's
-        wrapper takes the width a walkthrough needs.
+    :return: `True` for the document, a section that is not a release,
+        and an `only`. A plain `container` is not part of the page,
+        because a wrapper from an author takes the width that a
+        walkthrough needs.
     """
     if isinstance(node, (nodes.document, addnodes.only)):
         return True
@@ -167,23 +162,22 @@ def open_to_page(node: nodes.Node) -> bool:
 
 
 def article(name: str) -> str:
-    """Put `a` or `an` in front of a name.
+    """Put `a` or `an` before a name.
 
     :param name: The name.
-    :return: The name with its article, `an accordion`.
+    :return: The name with its article, as `an accordion`.
     """
     return f"an {name}" if name[0] in "aeiou" else f"a {name}"
 
 
 def describe(node: nodes.Node) -> str:
-    """Say what a node is, the way a message names it.
-
-    A directive is named after itself and an admonition after its kind,
-    so a warning isn't a note. A block is named after its size when it
-    isn't large and after its link when it has one.
+    """Say what a node is, as a message names it.
 
     :param node: The node to look at.
-    :return: Its name with an article, `an accordion`.
+    :return: Its name with an article, as `an accordion`. A directive
+        gets its own name, and an admonition gets its kind, so a
+        warning is not a note. A block gets its size when it is not
+        large, and its link when it has one.
     """
     if isinstance(node, block.Block.Node):
         size = "" if node["size"] == "large" else f"{node['size']} "
@@ -207,7 +201,7 @@ def describe(node: nodes.Node) -> str:
 def ancestors(node: nodes.Node) -> Iterator[nodes.Node]:
     """Walk up from a node, nearest first.
 
-    :param node: Where to start, which isn't given.
+    :param node: The node to start from, which is not included.
     :return: Each node above it.
     """
     parent = node.parent
@@ -217,10 +211,10 @@ def ancestors(node: nodes.Node) -> Iterator[nodes.Node]:
 
 
 def holder(node: nodes.Node) -> nodes.Node | None:
-    """Find what holds a node, an `only` aside.
+    """Find what holds a node, but not an `only`.
 
     :param node: The node to look at.
-    :return: The nearest node above it that isn't an `only`.
+    :return: The nearest node above it that is not an `only`.
     """
     return next(
         (_ for _ in ancestors(node) if not isinstance(_, addnodes.only)),
@@ -229,13 +223,11 @@ def holder(node: nodes.Node) -> nodes.Node | None:
 
 
 def narrow(host: nodes.Node) -> bool:
-    """Say whether a host is narrower than the page's text.
-
-    A set of columns has no room in a host like that.
+    """Say whether a host is narrower than the text of the page.
 
     :param host: One of the nodes above the columns.
-    :return: `True` for a column that doesn't span its set and for a
-        block that isn't large.
+    :return: `True` for a column that does not span its set, and for a
+        block that is not large. Columns do not fit in it.
     """
     if isinstance(host, columns.Column.Node):
         whole = holder(host)
@@ -247,11 +239,11 @@ def narrow(host: nodes.Node) -> bool:
 
 
 def refused(name: str, host: nodes.Node) -> bool:
-    """Say whether a directive can't sit in a host.
+    """Say whether a directive cannot be in a host.
 
-    :param name: The directive's name.
+    :param name: The name of the directive.
     :param host: One of the nodes above it.
-    :return: `True` when it can't.
+    :return: `True` when it cannot be there.
     """
     if kind(host) in EXPLAINERS:
         return name in HEAVY
@@ -269,11 +261,11 @@ def refused(name: str, host: nodes.Node) -> bool:
 
 
 def unplaced(node: nodes.Node) -> nodes.Element | None:
-    """Find what keeps a node from being part of the page itself.
+    """Find what keeps a node from the page itself.
 
     :param node: The node to look at.
-    :return: The nearest node above it that isn't part of the page, a
-        wrapper or a part of a directive, or `None` for a node on the
+    :return: The nearest node above it that is not part of the page, a
+        wrapper, or a part of a directive, or `None` for a node on the
         page.
     """
     return next(
@@ -289,16 +281,15 @@ def unplaced(node: nodes.Node) -> nodes.Element | None:
 
 @on("doctree-read", priority=150)
 def nested(app: Sphinx, doctree: nodes.document) -> None:
-    """Stop the build for a directive that sits where it can't.
-
-    A `km-wide` goes on the page itself, since a block in a tab, a column
-    or a list has no room to widen into. It doesn't go on an embed or a
-    thumbnail either, as their iframe and still keep the size they have.
+    """Stop the build for a directive in a place where it cannot be.
 
     :param app: The Sphinx application instance (unused).
     :param doctree: The page, just read.
     :raises KaamikiError: For the first directive or `km-wide` in the
-        wrong place.
+        wrong place. `km-wide` goes on the page itself, because a block
+        in a tab, a column or a list has no space to widen. It cannot
+        go on an embed or a thumbnail, because their iframe and still
+        keep their size.
     """
     del app
     for node in doctree.findall(nodes.Element):

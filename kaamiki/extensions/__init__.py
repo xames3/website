@@ -6,7 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
 Last updated on: 15 November 2026
 
-All of Kaamiki's custom directives.
+The extension modules of Kaamiki. Each module is imported here, so
+that its directives, nodes and hooks are recorded.
 """
 
 from __future__ import annotations

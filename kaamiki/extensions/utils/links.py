@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The helpers that work out where a link goes.
+The helpers that find where a link goes.
 """
 
 from __future__ import annotations
@@ -51,12 +51,11 @@ YOUTUBE_PATHS: t.Final[frozenset[str]] = frozenset(
 def youtube_id(url: str) -> str | None:
     """Find the video id in a YouTube link.
 
-    Watch, `youtu.be`, `embed`, `shorts`, `live` and `v` links work, as
-    does a bare id. A link has to be `http` or `https`, and one urllib
-    can't read has no id.
-
-    :param url: The link, as written.
-    :return: The eleven character id or `None` when there isn't one.
+    :param url: The link, as written: a watch, `youtu.be`, `embed`,
+        `shorts`, `live` or `v` link, or only an id. A link must be
+        `http` or `https`, and a link that urllib cannot read has no
+        id.
+    :return: The id of eleven characters, or `None` when there is none.
     """
     try:
         parts = urlsplit(url.strip())
@@ -77,32 +76,32 @@ def youtube_id(url: str) -> str | None:
 
 
 def youtube_still(vid: str) -> str:
-    """Name the address of a video's picture.
+    """Name the address of the picture of a video.
 
-    :param vid: The eleven character video id.
-    :return: The address of the video's picture on YouTube.
+    :param vid: The video id of eleven characters.
+    :return: The address of the picture of the video on YouTube.
     """
     return f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
 
 
 def youtube_still_id(url: str) -> str | None:
-    """Find the video id in the address of a video's picture.
+    """Find the video id in the address of its picture.
 
     :param url: The address, as `youtube_still` writes it.
-    :return: The eleven character id or `None` for any other address.
+    :return: The id of eleven characters, or `None` for a different
+        address.
     """
     found = YOUTUBE_STILL.fullmatch(url)
     return found[1] if found else None
 
 
 def youtube_start(url: str) -> int | None:
-    """Find the second a YouTube link starts at.
+    """Find the second where a YouTube link starts.
 
-    A link copied at the current time writes it as `t=42`, `t=42s` or
-    `t=1h2m3s` and an embed link as `start=42`.
-
-    :param url: The link, as written.
-    :return: The seconds or `None` when the link names none.
+    :param url: The link, as written. A link copied at the current time
+        has `t=42`, `t=42s` or `t=1h2m3s`, and an embed link has
+        `start=42`.
+    :return: The seconds, or `None` when the link has none.
     """
     try:
         query = parse_qs(urlsplit(url.strip()).query)
@@ -149,16 +148,14 @@ def hosts(config: Config) -> set[str]:
 
 
 def elsewhere(url: str, own: t.Collection[str]) -> bool:
-    """Say whether a link leaves the site.
-
-    Only a host other than the site's own counts, `www.` aside. A
-    browser reads a backslash as a slash, so a link that opens with two
-    of them goes to another site just as one that opens with `//` does.
-    A link urllib can't read is taken to stay on the site.
+    """Say whether a link goes to a different site.
 
     :param url: The link, as written.
-    :param own: The site's own hosts, as `hosts` returns them.
-    :return: Whether the link goes to another site.
+    :param own: The hosts of the site, as `hosts` gives them.
+    :return: `True` for a host that is not of the site, without `www.`.
+        A browser reads a backslash as a slash, so a link with two
+        backslashes at the start goes to a different site, as with
+        `//`. A link that urllib cannot read stays on the site.
     """
     text = SLASHES.sub("//", url.strip().replace("\\", "/"))
     try:
@@ -180,14 +177,13 @@ def guarded(rel: str | None) -> str:
 
 
 def opens_new_tab(url: str, config: Config) -> bool:
-    """Say whether a link should open in a new tab.
-
-    It has to leave the site, `kaamiki.conf.links.internal_hosts`
-    aside, and `kaamiki.conf.links.new_tab` mustn't be off.
+    """Say whether a link opens in a new tab.
 
     :param url: The link, as written.
     :param config: The Sphinx configuration.
-    :return: Whether the link gets `target="_blank"`.
+    :return: `True` for a link that gets `target="_blank"`: it goes to
+        a different site, not in `kaamiki.conf.links.internal_hosts`,
+        and `kaamiki.conf.links.new_tab` is not off.
     """
     if not values(config).links.new_tab:
         return False
@@ -195,11 +191,11 @@ def opens_new_tab(url: str, config: Config) -> bool:
 
 
 def relative_to_page(translator: HTMLTranslator, url: str) -> str:
-    """Make a path written in an option work from the page it's on.
+    """Make the path of an option work from its page.
 
-    :param translator: The HTML translator writing the page.
-    :param url: The path or address, as written.
-    :return: The address, relative to the page where it was a path.
+    :param translator: The HTML translator that writes the page.
+    :param url: The path or the address, as written.
+    :return: The address, relative to the page when it was a path.
     """
     if not url or urlsplit(url).scheme or url.startswith(("//", "#", "?")):
         return url
@@ -209,15 +205,14 @@ def relative_to_page(translator: HTMLTranslator, url: str) -> str:
 
 
 def absolute(url: str, home: str) -> str:
-    """Make an address absolute against the site's own.
+    """Make an address absolute for the site.
 
-    A path counts from the site root, so `_static/cover.png` is the
-    same picture on every page. Without `html_baseurl` it's left as
-    written.
-
-    :param url: The address, as written.
-    :param home: The site's `html_baseurl`.
-    :return: The address, absolute where it can be.
+    :param url: The address, as written. A path starts at the root of
+        the site, so `_static/cover.png` is the same picture on each
+        page.
+    :param home: The `html_baseurl` of the site. Without it, the
+        address does not change.
+    :return: The address, absolute where possible.
     """
     if not url or not home or urlsplit(url).scheme:
         return url

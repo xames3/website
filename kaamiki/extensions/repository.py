@@ -6,12 +6,15 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October 2025
 Last updated on: 15 November 2026
 
-A `repository` directive that shows a GitHub project with its counts::
+A `repository` directive that shows a GitHub project with its numbers::
 
     .. repository:: octocat/Hello-World
        :hide-forks:
 
        My first repository on GitHub.
+
+Without options, the two numbers show. The text below the directive
+shows below the name and the numbers.
 """
 
 from __future__ import annotations
@@ -45,15 +48,12 @@ class Repository(KaamikiDirective, motion=True):
 
         - `hide-stars`: Do not show the number of stargazers.
         - `hide-forks`: Do not show the number of forks.
-        - `speed`: The speed of its motion, relative to the site, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
-          two times as fast.
+        - `speed`: The speed of its motion, relative to the site,
+          one of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or
+          `4`. `2` is two times as fast.
         - `no-motion`: Do not move it.
         - `name`: A name for links.
         - `class`: More classes for the repository.
-
-    Without the options, the two numbers show. The text below the
-    directive shows below the name and the numbers.
     """
 
     has_content = True
@@ -66,10 +66,10 @@ class Repository(KaamikiDirective, motion=True):
         """The repository and its parsed text, which `visit` writes."""
 
     def build(self) -> list[nodes.Node]:
-        """Make the node of the repository. The argument is `owner/name`.
+        """Make the node of the repository.
 
-        :return: The node, the `raw` node for the link checker and what
-            the parser reported.
+        :return: The node, the `raw` node for the link checker, and
+            what the parser reported. The argument is `owner/name`.
         """
         project = self.arguments.pop().strip()
         owner, slash, repo = project.partition("/")
@@ -101,9 +101,9 @@ class Repository(KaamikiDirective, motion=True):
 
     @staticmethod
     def plain(node: Repository.Node) -> list[nodes.Node]:
-        """Write a repository as words, for a builder that writes no HTML.
+        """Write a repository as words, for a builder without HTML.
 
-        :param node: The repository's node.
+        :param node: The node of the repository.
         :return: A paragraph with its name and a link to the project,
             and a paragraph with the text below it.
         """

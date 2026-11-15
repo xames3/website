@@ -6,7 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
 Last updated on: 15 November 2026
 
-What Kaamiki changes in the HTML Sphinx writes, as it writes it.
+What Kaamiki changes in the HTML that Sphinx writes, while it writes
+it.
 """
 
 from __future__ import annotations
@@ -61,20 +62,16 @@ BACKREF: t.Final[re.Pattern[str]] = re.compile(
 
 
 class translator(base):
-    """What Kaamiki adds to the builder's own HTML translator.
-
-    `install` puts it in front of the builder's translator, so one a
-    site swapped in is kept.
-    """
+    """What Kaamiki adds to the HTML translator of the builder."""
 
     def permalink(self, title: str) -> tuple[str, str]:
-        """Work out a heading anchor's label and what it shows.
+        """Find the label of a heading anchor and what it shows.
 
-        :param title: The title Sphinx gives the anchor.
-        :return: The label's attribute and the anchor's content.
-            Sphinx's pilcrow is dropped, since a click anywhere on the
-            heading follows the anchor. A site that sets
-            `html_permalinks_icon` of its own keeps it.
+        :param title: The title that Sphinx gives the anchor.
+        :return: The label attribute and the content of the anchor. The
+            pilcrow of Sphinx goes, because a click on the heading
+            follows the anchor. A site with its own
+            `html_permalinks_icon` keeps it.
         """
         icon: str = self.config.html_permalinks_icon
         if icon.strip() in PILCROW:
@@ -85,13 +82,12 @@ class translator(base):
 
     @t.override
     def add_permalink_ref(self, node: nodes.Element, title: str) -> None:
-        """Write the anchor a heading, caption or table links to.
-
-        The page's own title, its first section, gets none. Every
-        heading after it does, a second top-level one included.
+        """Write the anchor of a heading, a caption or a table.
 
         :param node: The element whose first id the anchor points at.
-        :param title: The title Sphinx gives the anchor.
+            The title of the page, its first section, gets none. Each
+            heading after it gets one, also a second top-level heading.
+        :param title: The title that Sphinx gives the anchor.
         """
         if not node["ids"] or not self.config.html_permalinks:
             return
@@ -108,10 +104,11 @@ class translator(base):
 
     @t.override
     def section_title_tags(self, node: nodes.Element) -> tuple[str, str]:
-        """Open and close a section's heading, without a link back.
+        """Open and close a section heading, with no back link.
 
-        :param node: The section's title.
-        :return: The opening and the closing markup.
+        :param node: The title of the section.
+        :return: The markup that opens it and the markup that closes
+            it.
         """
         if (
             not node.hasattr("refid")
@@ -125,11 +122,12 @@ class translator(base):
         return tags
 
     def icon(self, key: str, *classes: str) -> str:
-        """Write one of Kaamiki's own icons, the way the site draws it.
+        """Write one of the icons of Kaamiki, as the site draws it.
 
-        :param key: The icon's name in `icons.ROLE_ICONS`.
-        :param classes: Classes to put beside the icon's own.
-        :return: The icon's markup or nothing for a site that set none.
+        :param key: The name of the icon in `icons.ROLE_ICONS`.
+        :param classes: The classes to put next to those of the icon.
+        :return: The markup of the icon, or nothing when the site set
+            none.
         """
         found = self.builder.config.html_context["km_fa_icons"][key]
         if not found:
@@ -142,8 +140,8 @@ class translator(base):
     def visit_admonition(self, node: nodes.Element, name: str = "") -> None:
         """Open an admonition with the icon of its kind.
 
-        :param node: The admonition being opened.
-        :param name: Its kind, `note` for a note.
+        :param node: The admonition.
+        :param name: Its kind, as `note` for a note.
         """
         super().visit_admonition(node, name)
         if name in ADMONITIONS:
@@ -155,12 +153,10 @@ class translator(base):
 
     @t.override
     def visit_list_item(self, node: nodes.list_item) -> None:
-        """Open a bullet's item with a tick in front of it.
+        """Open the item of a bullet list with a tick before it.
 
-        The lists of a table of contents, of the navigation and of a
-        release's notes have no tick.
-
-        :param node: The item being opened.
+        :param node: The item. The lists of a table of contents, of the
+            navigation and of the notes of a release get no tick.
         """
         super().visit_list_item(node)
         if not isinstance(node.parent, nodes.bullet_list):
@@ -176,9 +172,9 @@ class translator(base):
 
     @t.override
     def visit_paragraph(self, node: nodes.paragraph) -> None:
-        """Open a quote's first paragraph with an opening mark.
+        """Open the first paragraph of a quote with an opening mark.
 
-        :param node: The paragraph being opened.
+        :param node: The paragraph.
         """
         super().visit_paragraph(node)
         if self.opens_quote(node):
@@ -186,9 +182,9 @@ class translator(base):
 
     @t.override
     def depart_paragraph(self, node: nodes.paragraph) -> None:
-        """Close a quote's first paragraph with a closing mark.
+        """Close the first paragraph of a quote with a closing mark.
 
-        :param node: The paragraph being closed.
+        :param node: The paragraph.
         """
         if self.opens_quote(node):
             self.body.append("\u201d")
@@ -196,19 +192,19 @@ class translator(base):
 
     @staticmethod
     def opens_quote(node: nodes.paragraph) -> bool:
-        """Say whether a paragraph is the first one of a block quote.
+        """Say whether a paragraph is the first in a block quote.
 
         :param node: The paragraph.
-        :return: Whether it's the first one in a block quote.
+        :return: `True` when it is the first in a block quote.
         """
         parent = node.parent
         return isinstance(parent, nodes.block_quote) and parent.index(node) == 0
 
     @t.override
     def visit_title(self, node: nodes.title) -> None:
-        """Open a title, giving a table of contents' caption a level.
+        """Open a title, and give a toctree caption a level.
 
-        :param node: The title being opened.
+        :param node: The title.
         """
         start = len(self.body)
         super().visit_title(node)
@@ -216,12 +212,11 @@ class translator(base):
 
     @t.override
     def depart_title(self, node: nodes.title) -> None:
-        """Close a title and fix the anchor Sphinx writes by hand.
+        """Close a title, and correct the anchor of Sphinx.
 
-        A heading linked back to a table of contents gets its anchor
-        written inline, not through `add_permalink_ref`.
-
-        :param node: The title being closed.
+        :param node: The title. A heading with a back link to a table
+            of contents gets its anchor inline, not through
+            `add_permalink_ref`.
         """
         start = len(self.body)
         super().depart_title(node)
@@ -236,12 +231,10 @@ class translator(base):
 
     @t.override
     def visit_literal(self, node: nodes.Element) -> None:
-        """Open a literal, and let a long one wrap.
+        """Open a literal, and let a long literal wrap.
 
-        One longer than `LONG_LITERAL` characters can pass the width of
-        a column, so it may wrap.
-
-        :param node: The literal being opened.
+        :param node: The literal. A literal longer than `LONG_LITERAL`
+            characters can be wider than a column, so it can wrap.
         """
         if len(node.astext()) > LONG_LITERAL:
             node["classes"].append("km-literal--long")
@@ -249,12 +242,10 @@ class translator(base):
 
     @t.override
     def visit_table(self, node: nodes.table) -> None:
-        """Open a table inside a box that scrolls when it's too wide.
+        """Open a table in a box that scrolls when it is wide.
 
-        The box takes `km-wide` from its table, as it's the box that
-        the page's width is given to.
-
-        :param node: The table being opened.
+        :param node: The table. The box takes `km-wide` from the table,
+            because the page gives its width to the box.
         """
         wide = " km-wide" if "km-wide" in node["classes"] else ""
         self.body.append(f'<div class="km-table{wide}">')
@@ -262,9 +253,9 @@ class translator(base):
 
     @t.override
     def depart_table(self, node: nodes.table) -> None:
-        """Close a table and the box it's in.
+        """Close a table and its box.
 
-        :param node: The table being closed.
+        :param node: The table.
         """
         super().depart_table(node)
         self.body.append("</div>")
@@ -278,20 +269,18 @@ class translator(base):
         empty: bool = False,
         **attributes: t.Any,
     ) -> str:
-        """Open a tag, with what Kaamiki changes in it.
+        """Open a tag, with the changes of Kaamiki.
 
-        A link that leaves the site goes to a new tab. Every bullet and
-        numbered list gets `km-list`, which the stylesheet counts with,
-        and a numbered list that doesn't start at 1 gets a
-        `counter-reset` for its `style`, so the count starts where the
-        list does. The classes a tag is given come before the ones the
-        page's author wrote with `:class:`.
-
-        :param node: The node the tag belongs to.
-        :param tagname: The tag's name.
+        :param node: The node of the tag. A link to a different site
+            opens in a new tab. Each bullet and numbered list gets
+            `km-list`, for the counts of the stylesheet. A numbered
+            list that does not start at 1 gets a `counter-reset` in its
+            `style`. The classes of a tag come before the `:class:` of
+            the author.
+        :param tagname: The name of the tag.
         :param suffix: What follows the tag.
         :param empty: Whether the tag closes itself.
-        :param attributes: The tag's attributes.
+        :param attributes: The attributes of the tag.
         :return: The opening tag.
         """
         classes = str(attributes.get("class") or attributes.get("CLASS") or "")
@@ -320,14 +309,12 @@ class translator(base):
 
     @t.override
     def visit_image(self, node: nodes.image) -> None:
-        """Open an image, loading it lazily unless told otherwise.
+        """Open an image, and load it lazily unless told otherwise.
 
-        Every image an author wrote, alone or in a figure, gets
-        `km-image`, which is how the page's script tells it from the
-        pictures Kaamiki draws itself, and one with a size gets
-        `km-image--sized` too.
-
-        :param node: The image being written.
+        :param node: The image. Each image from an author, alone or in
+            a figure, gets `km-image`, so that the script of the page
+            can find it among the pictures of Kaamiki. An image with a
+            size also gets `km-image--sized`.
         """
         default = getattr(self, "image_loading", "")
         if "loading" not in node and default == "link":
@@ -355,10 +342,8 @@ class translator(base):
     def visit_topic(self, node: nodes.topic) -> None:
         """Open a topic as a `div`.
 
-        An `aside` inside the page's text would be a landmark nested in
-        another one.
-
-        :param node: The topic being opened.
+        :param node: The topic. An `aside` in the text of the page
+            would be a landmark in a landmark.
         """
         super().visit_topic(node)
         if getattr(node, "html5tagname", "") == "aside":
@@ -367,27 +352,27 @@ class translator(base):
 
     @t.override
     def visit_sidebar(self, node: nodes.sidebar) -> None:
-        """Open a sidebar as a `div`, for the reason a topic is one.
+        """Open a sidebar as a `div`, as for a topic.
 
-        :param node: The sidebar being opened.
+        :param node: The sidebar.
         """
         super().visit_sidebar(node)
         self.body[-1] = self.body[-1].replace("<aside", "<div", 1)
 
     @t.override
     def depart_sidebar(self, node: nodes.sidebar) -> None:
-        """Close a sidebar's `div`.
+        """Close the `div` of a sidebar.
 
-        :param node: The sidebar being closed.
+        :param node: The sidebar.
         """
         self.body.append("</div>\n")
         self.in_sidebar = False
 
     @t.override
     def visit_caption(self, node: nodes.caption) -> None:
-        """Open a code block's caption with its language's icon first.
+        """Open a code block caption, with its language icon.
 
-        :param node: The caption being opened.
+        :param node: The caption.
         """
         super().visit_caption(node)
         parent = node.parent
@@ -411,11 +396,11 @@ class translator(base):
 
     @t.override
     def visit_compound(self, node: nodes.compound) -> None:
-        """Open a compound, unless it's an empty toctree wrapper.
+        """Open a compound, unless it is an empty toctree wrapper.
 
-        :param node: The compound being opened.
-        :raises nodes.SkipNode: For a `toctree-wrapper` with nothing
-            left in it, which would paint nothing and leave a gap.
+        :param node: The compound.
+        :raises nodes.SkipNode: For a `toctree-wrapper` that holds
+            nothing, which would show only a gap.
         """
         if "toctree-wrapper" in node["classes"] and not node.children:
             raise nodes.SkipNode
@@ -424,11 +409,10 @@ class translator(base):
 
 @on("builder-inited")
 def install(app: Sphinx) -> None:
-    """Put `translator` in front of the builder's HTML translator.
+    """Put `translator` before the HTML translator of the builder.
 
-    Only HTML builders get it.
-
-    :param app: The Sphinx application instance.
+    :param app: The Sphinx application instance. Only HTML builders get
+        it, and a translator that a site set is kept below it.
     """
     builder = app.builder
     if not isinstance(builder, StandaloneHTMLBuilder):
