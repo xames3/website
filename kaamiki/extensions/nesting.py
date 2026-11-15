@@ -96,7 +96,7 @@ KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
     "raw": is_raw,
     "release": is_release,
     "repository": lambda _: isinstance(_, repository.node),
-    "tabs": lambda _: isinstance(_, tabs.node),
+    "tabs": lambda _: isinstance(_, tabs.Tabs.Node),
     "thumbnail": lambda _: isinstance(_, thumbnail.node),
     "video": lambda _: isinstance(_, video.node),
     "youtube": lambda _: isinstance(_, youtube.node),
@@ -133,7 +133,7 @@ HEAVY: t.Final[tuple[str, ...]] = (
     "youtube",
 )
 SETS: t.Final[tuple[tuple[type, type, str, str], ...]] = (
-    (tabs.pane, tabs.node, "tab", "tabs"),
+    (tabs.Tab.Node, tabs.Tabs.Node, "tab", "tabs"),
     (columns.item, columns.node, "column", "columns"),
 )
 PARTS: t.Final[tuple[type[nodes.Element], ...]] = (
@@ -143,7 +143,7 @@ PARTS: t.Final[tuple[type[nodes.Element], ...]] = (
     version.draft,
 )
 HOSTS: t.Final[tuple[tuple[type, str], ...]] = (
-    (tabs.pane, "a tab"),
+    (tabs.Tab.Node, "a tab"),
     (columns.item, "a column"),
     (block.part, "a block"),
     (nodes.list_item, "a list"),
