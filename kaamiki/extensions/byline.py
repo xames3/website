@@ -27,6 +27,7 @@ import docutils.parsers.rst as rst
 from babel import Locale
 from babel import UnknownLocaleError
 
+from kaamiki.extensions.utils import Kaamiki
 from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
@@ -216,14 +217,14 @@ def visit(self: HTMLTranslator, node: Byline.Node) -> None:
     :raises nodes.SkipNode: Always, since the name is written already.
     """
     config = self.builder.config
-    context = config.html_context
+    found = Kaamiki.of(self.builder)
     attributes = dict(node.attributes)
     attributes.update(fields(self, node))
-    attributes["project"] = context["km_project"]
+    attributes["project"] = found.site.project
     target = attributes.get("target") or attributes["project"]["source"]
     attributes["new_tab"] = opens_new_tab(target, config)
     attributes["target"] = relative_to_page(self, target)
-    attributes["fa_icons"] = context["km_fa_icons"]
+    attributes["fa_icons"] = found.icons.roles
     attributes["minutes"] = max(1, reading_time(node.document, config))
     attributes["page_source"] = (
         source_url(self) if attributes["page_source"] else ""
@@ -269,5 +270,5 @@ def html_page_context(
     """
     del pagename, templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
-    project = app.config.html_context["km_project"]
+    project = Kaamiki.of(app.builder).site.project
     context["km_author"] = meta.get("author") or project.get("author")

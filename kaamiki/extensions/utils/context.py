@@ -19,6 +19,7 @@ template of a site that reads a different setting must read it itself.
 
 from __future__ import annotations
 
+import copy
 import difflib
 import functools
 import json
@@ -57,10 +58,14 @@ from kaamiki.extensions.utils.settings import FA_FREE_INTEGRITY
 from kaamiki.extensions.utils.settings import HEADER_LEAD_LENGTH
 from kaamiki.extensions.utils.settings import HEADER_NO_SUBHEADER_FIELD
 from kaamiki.extensions.utils.settings import HEADER_SUBHEADER_FIELD
+from kaamiki.extensions.utils.settings import NAME
 from kaamiki.extensions.utils.settings import OG_LOCALE
 from kaamiki.extensions.utils.settings import OG_TYPE
 from kaamiki.extensions.utils.settings import PAGE_SWITCHES
 from kaamiki.extensions.utils.settings import PROJECT
+from kaamiki.extensions.utils.settings import Kaamiki
+from kaamiki.extensions.utils.settings import Root
+from kaamiki.extensions.utils.settings import Settings
 from kaamiki.extensions.utils.settings import kept
 from kaamiki.extensions.utils.settings import site_values
 from kaamiki.extensions.utils.settings import stored
@@ -76,6 +81,7 @@ if t.TYPE_CHECKING:
 
     from sphinx.application import Sphinx
     from sphinx.builders.html import StandaloneHTMLBuilder
+    from sphinx.config import Config
     from sphinx.environment import BuildEnvironment
 
 logger = logging.getLogger(__name__)
@@ -187,6 +193,108 @@ def context_defaults(app: Sphinx) -> None:
         t.cast("StandaloneHTMLBuilder", app.builder).use_index = False
     if "html_show_sphinx" not in named:
         context.setdefault("show_sphinx", False)
+    app.builder.__dict__["km_kaamiki"] = made(config)
+
+
+def made(config: Config) -> Kaamiki:
+    """Make the values of Kaamiki for the build, one time.
+
+    :param config: The Sphinx configuration.
+    :return: The values, with the paths of `kaamiki.conf`. A value that
+        Kaamiki finds from a setting replaces it, as
+        `kaamiki.site.project` with its defaults, or goes next to it,
+        as `kaamiki.icons.roles`. `kaamiki.credit` and
+        `kaamiki.fa_free` hold the links of Kaamiki and Font Awesome
+        Free. `kaamiki.page` and some values of the groups are for
+        each page, which the handlers of the page set.
+    """
+    conf = values(config)
+    groups = {
+        name: {
+            each.attr: getattr(getattr(conf, name), each.attr)
+            for each in group.values()
+        }
+        for name, group in Settings.groups.items()
+        if name
+    }
+    icons = Icons.of(config)
+    author = config.author
+    if author == config.values["author"].default:
+        author = ""
+    project = {**PROJECT, "author": author, **conf.site.project}
+    if conf.show.feedback is None:
+        groups["show"]["feedback"] = bool(
+            project["email"] or conf.site.feedback.get("url")
+        )
+    groups["icons"].update(roles=icons.roles(conf.icons.names), kit=icons.kit)
+    depth = conf.toctree.maxdepth
+    groups["toctree"].update(
+        args={
+            "includehidden": conf.toctree.includehidden,
+            **({"maxdepth": depth} if depth else {}),
+        },
+        header=None,
+    )
+    terms = conf.site.license
+    groups["site"].update(
+        project=project,
+        license={
+            **terms,
+            "new_tab": opens_new_tab(terms.get("url") or "", config),
+        },
+        title=str(site_values(config).get("html_title") or config.project),
+        **{
+            key: {
+                text: {
+                    **button,
+                    "icon": icons.custom(button.get("icon")),
+                    "new_tab": opens_new_tab(button["url"], config),
+                }
+                for text, button in getattr(conf.site, key).items()
+            }
+            for key in ("header_buttons", "sidebar_buttons")
+        },
+    )
+    groups["links"]["rel"] = REL
+    groups["credit"] = {
+        "url": CREDIT,
+        "new_tab": opens_new_tab(CREDIT, config),
+    }
+    groups["fa_free"] = {"css": FA_FREE, "integrity": FA_FREE_INTEGRITY}
+    groups["page"] = {"author": "", "related": None, "updated_on": ""}
+    return Kaamiki(
+        NAME,
+        {
+            **{each.attr: getattr(conf, each.attr) for each in Root.values()},
+            **{
+                name: Kaamiki(f"{NAME}.{name}", found)
+                for name, found in groups.items()
+            },
+        },
+    )
+
+
+@on("html-page-context", priority=100)
+def page_values(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: dict[str, t.Any],
+    doctree: nodes.document | None,
+) -> None:
+    """Give the page its copy of the values of Kaamiki.
+
+    :param app: The Sphinx application instance. This runs at priority
+        100, before the other handlers of the page, which change the
+        copy with `context["kaamiki"]["show.feedback"] = True`.
+    :param pagename: The page that is written.
+    :param templatename: The template that writes it.
+    :param context: The context of the page, changed in place.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
+    """
+    del pagename, templatename, doctree
+    context[NAME] = copy.copy(Kaamiki.of(app.builder))
 
 
 SWITCHES: t.Final[frozenset[str]] = frozenset(
@@ -494,10 +602,10 @@ def feedback(
         page.
     """
     del templatename, doctree
-    options = app.config.html_context
+    found = Kaamiki.of(app.builder)
     meta: dict[str, str] = context.get("meta") or {}
     site: dict[str, str] = values(app.config).site.feedback
-    email = options["km_project"]["email"]
+    email = found.site.project["email"]
     title = plain(context.get("title") or "")
     if meta.get("km-feedback-subject") or site.get("subject"):
         said = tidy(str(meta.get("km-feedback-subject") or site["subject"]))
@@ -532,7 +640,7 @@ def feedback(
         or site.get("button")
         or str(_("Submit")),
         "icon": Icons.of(app.config).custom(chosen)
-        or options["km_fa_icons"]["feedback"],
+        or found.icons.roles["feedback"],
         "url": url,
     }
 

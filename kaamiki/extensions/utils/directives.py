@@ -28,6 +28,7 @@ from sphinx.util import docname_join
 from sphinx.util.docutils import SphinxDirective
 
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils.settings import Kaamiki
 from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.templates import render
 
@@ -610,7 +611,7 @@ def visitor(
     """
 
     def visit(self: HTMLTranslator, node: nodes.Element) -> None:
-        icons = self.builder.config.html_context["km_fa_icons"]
+        icons = Kaamiki.of(self.builder).icons.roles
         attributes = dict(node.attributes)
         if prepare is not None:
             attributes = prepare(self, attributes)

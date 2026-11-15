@@ -45,6 +45,7 @@ import docutils.nodes as nodes
 from sphinx import addnodes
 from sphinx.locale import _
 
+from kaamiki.extensions.utils import Kaamiki
 from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
@@ -375,7 +376,7 @@ def visit(self: HTMLTranslator, node: Release.Node) -> None:
     :param node: The `release` node and its attributes.
     """
     attributes = dict(node.attributes)
-    attributes["fa_icons"] = self.builder.config.html_context["km_fa_icons"]
+    attributes["fa_icons"] = Kaamiki.of(self.builder).icons.roles
     iso = attributes.get("datetime")
     attributes["date"] = (
         dated(dt.fromisoformat(iso), self.builder.config) if iso else ""
@@ -486,7 +487,7 @@ def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     del docname
     if not writes_pages(app):
         return
-    classes = app.config.html_context["km_fa_icons"]["release_notes"]
+    classes = Kaamiki.of(app.builder).icons.roles["release_notes"]
     after = values(app.config).button.icon_position == "after"
     for link in findall(doctree, nodes.reference):
         if NOTES not in link["classes"]:

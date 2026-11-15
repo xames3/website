@@ -27,6 +27,7 @@ from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.links import guarded
 from kaamiki.extensions.utils.links import opens_new_tab
+from kaamiki.extensions.utils.settings import Kaamiki
 from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.text import levelled
 
@@ -129,7 +130,7 @@ class translator(base):
         :return: The markup of the icon, or nothing when the site set
             none.
         """
-        found = self.builder.config.html_context["km_fa_icons"][key]
+        found = Kaamiki.of(self.builder).icons.roles[key]
         if not found:
             return ""
         return (
