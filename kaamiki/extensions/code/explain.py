@@ -215,12 +215,12 @@ class CodeWalk(KaamikiDirective, abstract=True):
     required_arguments = 0
     optional_arguments = 1
     final_argument_whitespace = False
-    code_position = Option(checks.word(*CODE_POSITIONS))
+    code_position = Option(checks.word(*CODE_POSITIONS), default="right")
     pace = Option(checks.integer(*map(int, BOUNDS["pace"])))
     caption = Option(checks.text)
     linenos = Option(rst.directives.flag)
     lineno_start = Option(
-        checks.integer(*map(int, BOUNDS["code_explain_lineno"]))
+        checks.integer(*map(int, BOUNDS["code_explain_lineno"])), default=1
     )
     no_motion = Option(rst.directives.flag)
 
@@ -346,7 +346,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
         code, setup, stdin, notes = self.blocks()
         if not notes:
             self.fail("expected a `.. lines::` block per note, got none")
-        start = self.options.get("lineno-start", 1)
+        start = self.lineno_start
         total = len(code.splitlines())
         ranges = [self.span(_.argument, start, total) for _ in notes]
         traced = language.lower() in PYTHON
@@ -359,7 +359,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
             *self.options.get("class", []),
             *moving(self.options, timed=False),
         ]
-        attributes["position"] = self.options.get("code-position", "right")
+        attributes["position"] = self.code_position
         attributes["payload"] = {
             "steps": [compact(_) for _ in steps],
             "pace": self.options.get("pace", pace(language)),

@@ -119,7 +119,7 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
         language = self.arguments.pop().strip() if self.arguments else "python"
         if not known(language):
             self.fail(f"expected a language Pygments knows, got {language!r}")
-        start = self.options.get("lineno-start", 1)
+        start = self.lineno_start
         drafts = [
             self.unpack(block, index)
             for index, block in enumerate(self.attempts(), start=1)
@@ -135,7 +135,7 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
             *self.options.get("class", []),
             *moving(self.options, timed=False),
         ]
-        attributes["position"] = self.options.get("code-position", "right")
+        attributes["position"] = self.code_position
         attributes["payload"] = {
             "steps": self.steps(drafts, start, base),
             "pace": base,
