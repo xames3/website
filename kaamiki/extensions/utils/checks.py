@@ -10,10 +10,10 @@ Kaamiki takes a correct value or stops the build. It does not change,
 guess or ignore a value. A check in this file reads each option, role,
 page field and setting, and a wrong value raises `KaamikiError`.
 `install_reporter` puts `report` before the handler of Sphinx for
-uncaught errors, for all of the process. Sphinx keeps that handler in a
-private module, so Kaamiki does not change it when a version of Sphinx
-moves it. `report` gives each error that is not a `KaamikiError` to the
-handler that it replaced.
+uncaught errors, for all of the process. Sphinx keeps that handler in
+a private module, so Kaamiki does not change it when a version of
+Sphinx moves it. `report` gives each error that is not a
+`KaamikiError` to the handler that it replaced.
 """
 
 from __future__ import annotations
@@ -148,8 +148,9 @@ def fail(message: str, where: str = "") -> t.NoReturn:
     """Stop the build.
 
     :param message: What is wrong and what is correct.
-    :param where: The `source:line` of the mistake, if known. The message is
-        `where: what`, as `report` reads it again from a parallel reader.
+    :param where: The `source:line` of the mistake, if known. The
+        message is `where: what`, as `report` reads it again from a
+        parallel reader.
     :raises KaamikiError: Always.
     """
     raise KaamikiError(f"{where}: {message}" if where else message)
@@ -161,9 +162,9 @@ def text(argument: str | None, maximum: int = TEXT_LENGTH) -> str:
     :param argument: The value as written.
     :param maximum: The maximum number of characters.
     :return: The text without the spaces around it.
-    :raises ValueError: When it is blank, has control characters (a newline is
-        permitted, for an option on more than one line) or is longer than
-        `maximum`.
+    :raises ValueError: When it is blank, has control characters (a
+        newline is permitted, for an option on more than one line) or
+        is longer than `maximum`.
     """
     value = (argument or "").strip()
     if not value:
@@ -198,13 +199,13 @@ def slug(argument: str | None) -> str:
 def reference_name(argument: str | None) -> str:
     """Read a `:name:` as docutils does, and check that it is a name.
 
-    :param argument: The value as written. Any text is a name, as for the
-        directives of docutils, also with spaces, capitals and other scripts.
-        docutils makes the id, as `my-note` for `My Note`, or `id1` when it
-        cannot write it in ASCII.
+    :param argument: The value as written. Any text is a name, as for
+        the directives of docutils, also with spaces, capitals and
+        other scripts. docutils makes the id, as `my-note` for `My
+        Note`, or `id1` when it cannot write it in ASCII.
     :return: The name, with each run of spaces as one space.
-    :raises ValueError: For no name, an empty name, a control character, no
-        letter, or more than `NAME_LENGTH` characters.
+    :raises ValueError: For no name, an empty name, a control
+        character, no letter, or more than `NAME_LENGTH` characters.
     :raises TypeError: For a value that is not text.
     """
     if argument is None:
@@ -232,13 +233,14 @@ def reference_name(argument: str | None) -> str:
 def classes(argument: str | None) -> list[str]:
     """Read class names as docutils does, and check each one.
 
-    :param argument: The names as written. They are split at spaces and made
-        into ids, as the `:class:` option of docutils does, so `Foo_Bar` is
-        `foo-bar`. A comma with no space after it joins two names, so `big,red`
-        is `big-red`.
+    :param argument: The names as written. They are split at spaces and
+        made into ids, as the `:class:` option of docutils does, so
+        `Foo_Bar` is `foo-bar`. A comma with no space after it joins
+        two names, so `big,red` is `big-red`.
     :return: The names, in the sequence written, each one time.
-    :raises ValueError: For no names, a name that cannot make a class, a name
-        longer than `NAME_LENGTH`, or more than `CLASS_COUNT` names.
+    :raises ValueError: For no names, a name that cannot make a class,
+        a name longer than `NAME_LENGTH`, or more than `CLASS_COUNT`
+        names.
     :raises TypeError: For a value that is not text.
     """
     if argument is None or (isinstance(argument, str) and not argument.strip()):
@@ -270,8 +272,8 @@ def encoding(argument: str | None) -> str:
 
     :param argument: The name as written, as `utf-8`.
     :return: The name, trimmed.
-    :raises ValueError: For no name, an empty name, or a name that Python does
-        not have.
+    :raises ValueError: For no name, an empty name, or a name that
+        Python does not have.
     """
     value = (argument or "").strip()
     try:
@@ -338,8 +340,9 @@ def integer(low: int, high: int) -> Callable[[str | None], int]:
 
     :param low: The minimum.
     :param high: The maximum.
-    :return: The check, which takes only digits: no sign, no `_`, no other
-        scripts and no leading zeros. It removes the spaces around them.
+    :return: The check, which takes only digits: no sign, no `_`, no
+        other scripts and no leading zeros. It removes the spaces
+        around them.
     """
 
     def read(argument: str | None) -> int:
@@ -394,12 +397,12 @@ def number(low: float, high: float) -> Callable[[str | None], float]:
 
 
 def spacing(presets: Sequence[str], high: float) -> Callable[[str | None], str]:
-    """Make a check for a space: a preset, or one or two lengths in rem.
+    """Make a check for a preset space or lengths in rem.
 
     :param presets: The words that are spaces.
     :param high: The maximum length, in rem.
-    :return: The check, which gives the preset or the lengths. A bare `0` gets
-        its unit, because `calc()` needs it.
+    :return: The check, which gives the preset or the lengths. A bare
+        `0` gets its unit, because `calc()` needs it.
     """
 
     def read(argument: str | None) -> str:
@@ -431,8 +434,9 @@ def lengths(value: str) -> tuple[str, str]:
     """Split a space from `spacing` into two lengths.
 
     :param value: One or two lengths, as `spacing` gives them.
-    :return: The first and the last length, the same for one length. They are a
-        vertical and a horizontal gap, or an edge above and below.
+    :return: The first and the last length, the same for one length.
+        They are a vertical and a horizontal gap, or an edge above and
+        below.
     """
     words = value.split()
     return words[0], words[-1]
@@ -441,15 +445,16 @@ def lengths(value: str) -> tuple[str, str]:
 def icon(argument: str | None) -> str:
     """Read a Font Awesome icon, as an option or a role writes it.
 
-    :param argument: The icon as written: `plus`, `fa-plus`, or a style and a
-        name, `far fa-plus`, with a Pro family before the style, `fa-sharp
-        fa-solid fa-plus`. After a style or a family, sizes and animations can
-        follow, as `fa-lg` and `fa-spin`, and the Kaamiki tones `km-tone--red`,
-        `km-tone--yellow`, `km-tone--blue` and `km-tone--green`. The maximum is
+    :param argument: The icon as written: `plus`, `fa-plus`, or a style
+        and a name, `far fa-plus`, with a Pro family before the style,
+        `fa-sharp fa-solid fa-plus`. After a style or a family, sizes
+        and animations can follow, as `fa-lg` and `fa-spin`, and the
+        Kaamiki tones `km-tone--red`, `km-tone--yellow`,
+        `km-tone--blue` and `km-tone--green`. The maximum is
         `ICON_WORDS` words.
     :return: The icon, as written.
-    :raises ValueError: When it is not written as an icon. This cannot know
-        whether Font Awesome has the name.
+    :raises ValueError: When it is not written as an icon. This cannot
+        know whether Font Awesome has the name.
     """
     parts = (argument or "").split()
     if not parts:
@@ -493,16 +498,16 @@ def link(
     *,
     schemes: Collection[str] = ("http", "https", "mailto"),
 ) -> str:
-    """Read an address: a full address, a path on the site, or a fragment.
+    """Read a full address, a path on the site, or a fragment.
 
     :param argument: The address as written.
-    :param schemes: The schemes that it can start with. A path and a `#`
-        fragment are always correct.
+    :param schemes: The schemes that it can start with. A path and a
+        `#` fragment are always correct.
     :return: The address, as written.
-    :raises ValueError: For whitespace, a backslash (a browser reads it as a
-        slash, which can change a path into `//host`), a scheme that is not in
-        `schemes`, a full address without a host, an address that starts with
-        `//`, or one longer than `URL_LENGTH`.
+    :raises ValueError: For whitespace, a backslash (a browser reads it
+        as a slash, which can change a path into `//host`), a scheme
+        that is not in `schemes`, a full address without a host, an
+        address that starts with `//`, or one longer than `URL_LENGTH`.
     """
     value = (argument or "").strip()
     if not value:
@@ -559,8 +564,9 @@ def web(argument: str | None) -> str:
 def kit(argument: str | None) -> str:
     """Read the address of a Font Awesome kit.
 
-    :param argument: The address as written, as `https://kit.fontawesome.com/`
-        and the name of the kit, with `.js` at the end.
+    :param argument: The address as written, as
+        `https://kit.fontawesome.com/` and the name of the kit, with
+        `.js` at the end.
     :return: The address.
     :raises ValueError: For other text.
     """
@@ -583,8 +589,8 @@ def kit(argument: str | None) -> str:
 def site(argument: str | None) -> str:
     """Read the address of a site.
 
-    :param argument: The address as written, as `http` or `https` with a host,
-        and without a query, a fragment or a login.
+    :param argument: The address as written, as `http` or `https` with
+        a host, and without a query, a fragment or a login.
     :return: The address.
     :raises ValueError: For other text.
     """
@@ -607,11 +613,11 @@ def site(argument: str | None) -> str:
 def picture(argument: str | None) -> str:
     """Read the address of a picture.
 
-    :param argument: The address as written, as `http` or `https` or a path on
-        the site, with the extension of an image.
+    :param argument: The address as written, as `http` or `https` or a
+        path on the site, with the extension of an image.
     :return: The address, as written.
-    :raises ValueError: For what `link` refuses, a scheme that is not `http` or
-        `https`, or an address that is not a picture.
+    :raises ValueError: For what `link` refuses, a scheme that is not
+        `http` or `https`, or an address that is not a picture.
     """
     value = link(argument, schemes=("http", "https"))
     if not IMAGES.fullmatch(urlsplit(value).path):
@@ -625,12 +631,12 @@ def picture(argument: str | None) -> str:
 def colour(argument: str | None, names: Collection[str] = ()) -> str:
     """Read a colour.
 
-    :param argument: The colour as written: one of `names`, `#abc`, `#aabbcc`,
-        or the three numbers of `hsl`, as `262 83% 58%`.
+    :param argument: The colour as written: one of `names`, `#abc`,
+        `#aabbcc`, or the three numbers of `hsl`, as `262 83% 58%`.
     :param names: The known colour names.
     :return: The colour, as written.
-    :raises ValueError: For other text, or `hsl` numbers that are not a hue to
-        360 and two percentages to 100.
+    :raises ValueError: For other text, or `hsl` numbers that are not a
+        hue to 360 and two percentages to 100.
     """
     value = " ".join((argument or "").split())
     if value in names or HEX.fullmatch(value):
@@ -653,11 +659,11 @@ def colour(argument: str | None, names: Collection[str] = ()) -> str:
 def language(argument: str | None) -> str:
     """Read a language code that Babel knows, as `en`, `hi` or `pt-BR`.
 
-    :param argument: The code as written, with a `-` or an `_` between the
-        language and its region.
+    :param argument: The code as written, with a `-` or an `_` between
+        the language and its region.
     :return: The code, as written.
-    :raises ValueError: For text that is not a language code, or a code that
-        Babel does not have.
+    :raises ValueError: For text that is not a language code, or a code
+        that Babel does not have.
     """
     code = (argument or "").strip()
     try:
@@ -672,8 +678,8 @@ def language(argument: str | None) -> str:
 def host(argument: str | None) -> str:
     """Read a host name, as `example.com`.
 
-    :param argument: The host as written. A host is only itself, without
-        wildcards, so a site lists each subdomain.
+    :param argument: The host as written. A host is only itself,
+        without wildcards, so a site lists each subdomain.
     :return: The host, in lower case.
     :raises ValueError: For other text, also `*.example.com`.
     """
@@ -697,11 +703,11 @@ def location(node: nodes.Element) -> str:
 
 
 def restate(why: str) -> str:
-    """Write an error that docutils gave as prose in the words of Kaamiki.
+    """Write an error from docutils in the words of Kaamiki.
 
     :param why: What docutils said, on one line.
-    :return: The same as `expected X, got Y`, or the words of docutils with a
-        lower-case start, when Kaamiki does not know the error.
+    :return: The same as `expected X, got Y`, or the words of docutils
+        with a lower-case start, when Kaamiki does not know the error.
     """
     for pattern, form in COUNTS:
         if found := pattern.fullmatch(why):
@@ -713,9 +719,10 @@ def restate(why: str) -> str:
 def pythonic(message: str) -> str:
     """Write a message from docutils as one line, as Python does.
 
-    :param message: The message, which docutils writes as a block of prose.
-    :return: The message as one line, `name: what`, with the value as its
-        `repr`.
+    :param message: The message, which docutils writes as a block of
+        prose.
+    :return: The message as one line, `name: what`, with the value as
+        its `repr`.
     """
     flat = " ".join(message.split())
     if found := DIRECTIVE_OPTION.fullmatch(message.strip()):
@@ -738,17 +745,17 @@ def pythonic(message: str) -> str:
 
 
 class Plain(Transform):
-    """Keep the text of each error as written, before the smart quotes."""
+    """Keep the text of each error before the smart quotes."""
 
     default_priority = 700
 
     def apply(self, **kwargs: t.Any) -> None:
         """Record the text of each error on the page.
 
-        :param kwargs: What docutils gives its transforms. This runs before the
-            smart quotes of Sphinx, which change `--` to an en dash and `...` to
-            an ellipsis. Then the value that Kaamiki quotes is the same as the
-            text in the file.
+        :param kwargs: What docutils gives its transforms. This runs
+            before the smart quotes of Sphinx, which change `--` to an
+            en dash and `...` to an ellipsis. Then the value that
+            Kaamiki quotes is the same as the text in the file.
         """
         del kwargs
         for message in self.document.findall(nodes.system_message):
@@ -765,11 +772,11 @@ class Promoted(logging.Filter):
         self.stopped = False
 
     def filter(self, record: logging.LogRecord) -> bool:
-        """Remove an error from docutils after `promote` stops the build.
+        """Remove an error after `promote` stops the build.
 
         :param record: The log record.
-        :return: `False` for an error from docutils after that, and `True` for
-            other records.
+        :return: `False` for an error from docutils after that, and
+            `True` for other records.
         """
         return not (
             self.stopped
@@ -795,13 +802,13 @@ PROMOTED: t.Final[Promoted] = Promoted()
 
 @on("doctree-read", priority=100)
 def promote(app: Sphinx, doctree: nodes.document) -> None:
-    """Make an error that docutils reports while it reads a page stop the build.
+    """Stop the build for an error that docutils reports.
 
     :param app: The Sphinx application instance.
     :param doctree: The page, just read. docutils writes a mistake in a
-        directive, a role or the markup as a message in the page and continues.
-        Kaamiki stops at the first one, from each directive or extension, with
-        or without `-W`.
+        directive, a role or the markup as a message in the page and
+        continues. Kaamiki stops at the first one, from each directive
+        or extension, with or without `-W`.
     :raises KaamikiError: For the first error on the page.
     """
     del app
@@ -817,12 +824,12 @@ def promote(app: Sphinx, doctree: nodes.document) -> None:
 def locate(message: str) -> tuple[str, str, str] | None:
     """Split a message into the file, the line and the error.
 
-    :param message: What `fail` got, with its `where` first, as `file:line:
-        what` or `file: what`. The file is the first part that is a file that
-        exists, so a folder with a space or a drive letter does not cause a
-        problem.
-    :return: The file, the line (empty when there is none) and the error, or
-        `None` when the message does not start with a file.
+    :param message: What `fail` got, with its `where` first, as
+        `file:line: what` or `file: what`. The file is the first part
+        that is a file that exists, so a folder with a space or a drive
+        letter does not cause a problem.
+    :return: The file, the line (empty when there is none) and the
+        error, or `None` when the message does not start with a file.
     """
     end = message.find(": ")
     while end != -1:
@@ -845,15 +852,16 @@ def report(
 ) -> None:
     """Print a Kaamiki error as Python prints a `SyntaxError`.
 
-    :param exception: What stopped the build. A `KaamikiError` is about a value
-        from the site, so it prints alone: the file and the line, the line
-        itself and the error. Sphinx does not add its note that asks to report
-        the problem to Sphinx.
+    :param exception: What stopped the build. A `KaamikiError` is about
+        a value from the site, so it prints alone: the file and the
+        line, the line itself and the error. Sphinx does not add its
+        note that asks to report the problem to Sphinx.
     :param stderr: Where to write.
-    :param print_traceback: Whether Sphinx must show the traceback, as with
-        `-T`. Sphinx still ends the build with its own exit status.
-    :param rest: The other values that Sphinx gives its handler, for the handler
-        that this one replaces.
+    :param print_traceback: Whether Sphinx must show the traceback, as
+        with `-T`. Sphinx still ends the build with its own exit
+        status.
+    :param rest: The other values that Sphinx gives its handler, for
+        the handler that this one replaces.
     """
     message = str(exception) if isinstance(exception, KaamikiError) else ""
     if isinstance(exception, SphinxParallelError):

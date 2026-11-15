@@ -7,14 +7,14 @@ Created on: 08 October 2026
 Last updated on: 15 November 2026
 
 The utilities that fill the context of a page for the templates. The
-templates can use only these names: the settings that `context_defaults`
-copies with a `km_` prefix, and `km_fa_icons`, `km_fa_kit`, `km_fa_css`,
-`km_fa_integrity`, `km_project`, `km_license`, `km_header_buttons`,
-`km_sidebar_buttons`, `km_toctree_args`, `km_credit`,
-`km_credit_new_tab`, `km_rel` and `km_site`. The handlers for each page
-also set `km_author`, `km_feedback`, `km_header_toctree`, `km_social`
-and `km_updated_on`. A template of a site that reads a different setting
-must read it itself.
+templates can use only these names: the settings that
+`context_defaults` copies with a `km_` prefix, and `km_fa_icons`,
+`km_fa_kit`, `km_fa_css`, `km_fa_integrity`, `km_project`,
+`km_license`, `km_header_buttons`, `km_sidebar_buttons`,
+`km_toctree_args`, `km_credit`, `km_credit_new_tab`, `km_rel` and
+`km_site`. The handlers for each page also set `km_author`,
+`km_feedback`, `km_header_toctree`, `km_social` and `km_updated_on`. A
+template of a site that reads a different setting must read it itself.
 """
 
 from __future__ import annotations
@@ -120,13 +120,14 @@ TEMPLATE_KEYS: t.Final[tuple[str, ...]] = (
 def context_defaults(app: Sphinx) -> None:
     """Fill the `html_context` keys that the templates expect.
 
-    :param app: The Sphinx application instance. On `builder-inited`, this
-        checks each setting with `validate`, records the folder of `conf.py`,
-        and copies each setting for the templates with a `km_` prefix, so that a
-        missing setting gives its default. `km_show_feedback` comes from the
-        email of the project and the feedback link when `show_feedback` is not
-        set. Kaamiki has no general index, so `html_use_index` goes off. The
-        credit of Sphinx is hidden unless the site sets `html_show_sphinx`.
+    :param app: The Sphinx application instance. On `builder-inited`,
+        this checks each setting with `validate`, records the folder of
+        `conf.py`, and copies each setting for the templates with a
+        `km_` prefix, so that a missing setting gives its default.
+        `km_show_feedback` comes from the email of the project and the
+        feedback link when `show_feedback` is not set. Kaamiki has no
+        general index, so `html_use_index` goes off. The credit of
+        Sphinx is hidden unless the site sets `html_show_sphinx`.
     """
     validate(app)
     kept(app.env, "confdir", str(app.confdir))
@@ -211,13 +212,13 @@ RELATED_MOST: t.Final[int] = int(BOUNDS["show_previous_next_cards_count"][1])
 
 
 def pages(argument: str) -> list[str]:
-    """Read the pages that `:km-related-docs:` names, with commas between them.
+    """Read the pages that `:km-related-docs:` names.
 
     :param argument: The pages as written, as for a toctree.
     :return: The name of each page, trimmed.
-    :raises ValueError: For a blank name (a comma at the end is one) or more
-        than `RELATED_MOST` pages. `page_fields` refuses a page named two times,
-        after it resolves the names.
+    :raises ValueError: For a blank name (a comma at the end is one) or
+        more than `RELATED_MOST` pages. `page_fields` refuses a page
+        named two times, after it resolves the names.
     """
     names = [_.strip() for _ in argument.split(",")]
     if not argument.strip() or "" in names:
@@ -262,9 +263,10 @@ def field_lists(app: Sphinx, doctree: nodes.document) -> None:
     """Stop for a `:km-*:` field written two times or below the title.
 
     :param app: The Sphinx application instance.
-    :param doctree: The page, just read. This runs on `doctree-read` at priority
-        300, before the metadata collector of Sphinx at 500 removes the field
-        list, and it records where each field is for `page_fields`.
+    :param doctree: The page, just read. This runs on `doctree-read` at
+        priority 300, before the metadata collector of Sphinx at 500
+        removes the field list, and it records where each field is for
+        `page_fields`.
     :raises KaamikiError: For the first field of that kind.
     """
     info = next(findall(doctree, nodes.docinfo), None)
@@ -294,9 +296,9 @@ def page_title(app: Sphinx, doctree: nodes.document) -> None:
 
     :param app: The Sphinx application instance.
     :param doctree: The page, just read.
-    :raises KaamikiError: For a page without a title, or with only an icon. The
-        title names the page in the tab, the navigation, the cards, the search
-        and the link preview.
+    :raises KaamikiError: For a page without a title, or with only an
+        icon. The title names the page in the tab, the navigation, the
+        cards, the search and the link preview.
     """
     where = str(app.env.doc2path(app.env.docname))
     section = next(
@@ -318,10 +320,10 @@ def admonition_title(app: Sphinx, doctree: nodes.document) -> None:
 
     :param app: The Sphinx application instance.
     :param doctree: The page, just read.
-    :raises KaamikiError: For an `admonition` without a title that has words.
-        Only `admonition` is named by its title. The admonitions of docutils, as
-        `note` and `warning`, are named by their kind and can show only their
-        icon.
+    :raises KaamikiError: For an `admonition` without a title that has
+        words. Only `admonition` is named by its title. The admonitions
+        of docutils, as `note` and `warning`, are named by their kind
+        and can show only their icon.
     """
     del app
     for node in findall(doctree, nodes.admonition):
@@ -341,12 +343,14 @@ def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
     """Check the `:km-*:` fields at the start of a page.
 
     :param app: The Sphinx application instance.
-    :param doctree: The page, just read. This runs on `doctree-read` at priority
-        600, after the metadata collector of Sphinx at 500 fills `env.metadata`.
-        A page with `noindex` or `none` in `:km-page-robots:` is also removed
-        from the search of the site, through `nosearch`.
-    :raises KaamikiError: For a `km-` field that Kaamiki does not read, a value
-        that it does not take, or fields that do not go together.
+    :param doctree: The page, just read. This runs on `doctree-read` at
+        priority 600, after the metadata collector of Sphinx at 500
+        fills `env.metadata`. A page with `noindex` or `none` in
+        `:km-page-robots:` is also removed from the search of the site,
+        through `nosearch`.
+    :raises KaamikiError: For a `km-` field that Kaamiki does not read,
+        a value that it does not take, or fields that do not go
+        together.
     """
     docname = app.env.docname
     found = app.env.metadata.get(docname, {})
@@ -470,17 +474,20 @@ def feedback(
 ) -> None:
     """Find what the feedback box of a page says and where it links.
 
-    :param app: The Sphinx application instance. The fields `:km-feedback-*:` of
-        the page come first, then `kaamiki.conf.site.feedback`, then the words
-        of Kaamiki. The button sends an email to the address in
-        `kaamiki.conf.site.project`, or links where the page or the setting
-        tells. A site without an email and without a link has no box, but a page
-        with its own link has one. `:km-feedback-split:` (or `split` in the
-        setting) puts the title and the button next to each other.
+    :param app: The Sphinx application instance. The fields
+        `:km-feedback-*:` of the page come first, then
+        `kaamiki.conf.site.feedback`, then the words of Kaamiki. The
+        button sends an email to the address in
+        `kaamiki.conf.site.project`, or links where the page or the
+        setting tells. A site without an email and without a link has
+        no box, but a page with its own link has one.
+        `:km-feedback-split:` (or `split` in the setting) puts the
+        title and the button next to each other.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
-    :param doctree: The resolved doctree, or `None` for a generated page.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del templatename, doctree
     options = app.config.html_context
@@ -536,13 +543,14 @@ def page_switches(
 ) -> None:
     """Let a page switch a setting on or off for itself.
 
-    :param app: The Sphinx application instance. The switches are the `show_*`
-        settings, `toctree_in_header` and `media_enlarge`, each with the
-        `:km-*:` field of the same name.
+    :param app: The Sphinx application instance. The switches are the
+        `show_*` settings, `toctree_in_header` and `media_enlarge`,
+        each with the `:km-*:` field of the same name.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
-    :param doctree: The resolved doctree, or `None` for a generated page.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del app, pagename, templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
@@ -559,14 +567,14 @@ def ensure_articles(env: BuildEnvironment) -> dict[str, set[str]]:
     """Hold the releases that link each article, and make the store.
 
     :param env: The build environment.
-    :return: The articles that `release` links to, each with the pages of the
-        releases that link it.
+    :return: The articles that `release` links to, each with the pages
+        of the releases that link it.
     """
     return stored(env, "articles", {})
 
 
 def ensure_leads(env: BuildEnvironment) -> dict[str, str]:
-    """Hold the lead of each page that has one, and make the store if necessary.
+    """Hold the lead of each page that has one.
 
     :param env: The build environment.
     :return: The lead of each page, by its document name.
@@ -576,7 +584,7 @@ def ensure_leads(env: BuildEnvironment) -> dict[str, str]:
 
 @on("doctree-read")
 def note_lead(app: Sphinx, doctree: nodes.document) -> None:
-    """Keep the lead of a page as it is read, for the menus of the header.
+    """Keep the lead of a page for the menus of the header.
 
     :param app: The Sphinx application instance.
     :param doctree: The doctree of the page.
@@ -631,10 +639,11 @@ def header_leads(builder: StandaloneHTMLBuilder) -> dict[str, str]:
     """Find the text below the title of each page in the header.
 
     :param builder: The HTML builder.
-    :return: The text of each page as the `km-header__lead` span in its link, by
-        document name. `:km-header-subheader:` comes first, then the lead, then
-        `:km-page-description:`. A page without them is not included, as is a
-        page with `:km-header-no-subheader:` and no subheader. This is done one
+    :return: The text of each page as the `km-header__lead` span in its
+        link, by document name. `:km-header-subheader:` comes first,
+        then the lead, then `:km-page-description:`. A page without
+        them is not included, as is a page with
+        `:km-header-no-subheader:` and no subheader. This is done one
         time for the site and kept for the build.
     """
     env = builder.env
@@ -668,16 +677,17 @@ def toctrees(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Give the page its two navigations, for the header and the sidebar.
+    """Give the page the navigations of the header and sidebar.
 
-    :param app: The Sphinx application instance. The two use the toctree of the
-        site, so it is drawn one time for each page. The copy for the header
-        gets the lead of each page below its title, and the captions of the
-        sidebar get a heading level.
+    :param app: The Sphinx application instance. The two use the
+        toctree of the site, so it is drawn one time for each page. The
+        copy for the header gets the lead of each page below its title,
+        and the captions of the sidebar get a heading level.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
-    :param doctree: The resolved doctree, or `None` for a generated page.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del templatename, doctree
     builder = app.builder
@@ -700,7 +710,7 @@ def toctrees(
         return drawn[key]
 
     def sidebar(**kwargs: t.Any) -> str:
-        """Draw the navigation of the sidebar, with the defaults of Sphinx.
+        """Draw the navigation of the sidebar.
 
         :param kwargs: The arguments of `toctree` in the template.
         :return: The HTML of the navigation.
@@ -711,7 +721,7 @@ def toctrees(
         return levelled(draw(**wanted))
 
     def header(**kwargs: t.Any) -> str:
-        """Draw the navigation of the header, with the lead of each page.
+        """Draw the navigation of the header, with leads.
 
         :param kwargs: The arguments of `toctree` in the template.
         :return: The HTML of the navigation.
@@ -747,15 +757,17 @@ def neighbours(
 ) -> None:
     """Let a page name its previous and next pages.
 
-    :param app: The Sphinx application instance. Sphinx finds them from the
-        toctree, so a page in no toctree gets none. `:km-page-prev:` and
-        `:km-page-next:` take a document, as `:doc:` writes it, and have
-        priority over the toctree. An article that a `release` links to, without
-        a previous page, links back to the page of the release.
+    :param app: The Sphinx application instance. Sphinx finds them from
+        the toctree, so a page in no toctree gets none.
+        `:km-page-prev:` and `:km-page-next:` take a document, as
+        `:doc:` writes it, and have priority over the toctree. An
+        article that a `release` links to, without a previous page,
+        links back to the page of the release.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
-    :param doctree: The resolved doctree, or `None` for a generated page.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del templatename, doctree
     builder = app.builder
@@ -783,8 +795,8 @@ def related_docs(docname: str, meta: dict[str, str]) -> list[str]:
 
     :param docname: The page that lists them.
     :param meta: The fields of the page.
-    :return: Their document names, as `:doc:` writes them, or none when the
-        field is missing or `pages` cannot read it.
+    :return: Their document names, as `:doc:` writes them, or none when
+        the field is missing or `pages` cannot read it.
     """
     try:
         names = pages(meta.get("km-related-docs") or "")
@@ -810,15 +822,16 @@ def skipped(env: BuildEnvironment, docname: str) -> bool:
 
 
 def reading_order(env: BuildEnvironment, docname: str) -> list[str]:
-    """Find the pages that a reader goes to next, as the next buttons do.
+    """Find the pages that a reader goes to next.
 
     :param env: The build environment.
     :param docname: The page.
-    :return: Their document names, or none for a page that no toctree holds.
-        `:km-page-next:` and `:km-page-prev:` come first, then the toctree. The
-        pages after the page come first, nearest first, then the pages before
-        it, to a total of `kaamiki.conf.show.previous_next_cards_count`. The
-        front page and a page with `:km-related-skip-page:` are not included.
+    :return: Their document names, or none for a page that no toctree
+        holds. `:km-page-next:` and `:km-page-prev:` come first, then
+        the toctree. The pages after the page come first, nearest
+        first, then the pages before it, to a total of
+        `kaamiki.conf.show.previous_next_cards_count`. The front page
+        and a page with `:km-related-skip-page:` are not included.
     """
     relations = env.collect_relations()
     meta = env.metadata.get(docname, {})
@@ -840,7 +853,7 @@ def reading_order(env: BuildEnvironment, docname: str) -> list[str]:
         return found[1 if key == "prev" else 2]
 
     def walk(key: str) -> list[str]:
-        """Follow the toctree in one direction from the neighbour of the page.
+        """Follow the toctree in one direction.
 
         :param key: `prev` or `next`.
         :return: The document names, nearest first.
@@ -867,11 +880,12 @@ def reading_order(env: BuildEnvironment, docname: str) -> list[str]:
 
 
 def captions(app: Sphinx) -> dict[str, str]:
-    """Read the captions that the toctrees of the front page give their pages.
+    """Read the captions of the toctrees of the front page.
 
     :param app: The Sphinx application instance.
-    :return: Each page in a toctree of the front page that has a caption, with
-        that caption. This is read one time for each build.
+    :return: Each page in a toctree of the front page that has a
+        caption, with that caption. This is read one time for each
+        build.
     """
     found: dict[str, str] | None = app.builder.__dict__.get("km_captions")
     if found is None:
@@ -890,9 +904,10 @@ def section_of(app: Sphinx, docname: str) -> str:
 
     :param app: The Sphinx application instance.
     :param docname: The page.
-    :return: The caption of the toctree of the front page that lists the page,
-        or the nearest page above it. An empty string for the front page, a page
-        in no toctree, and a toctree without a caption.
+    :return: The caption of the toctree of the front page that lists
+        the page, or the nearest page above it. An empty string for the
+        front page, a page in no toctree, and a toctree without a
+        caption.
     """
     relations = app.env.collect_relations()
     home = app.config.root_doc
@@ -917,9 +932,9 @@ def title_parts(title: str) -> list[dict[str, str]]:
     """Split the rendered title of a page into its words and its icons.
 
     :param title: The title as the builder rendered it.
-    :return: The parts in sequence, each with `text` or with the `glyph` classes
-        of an icon. Only the words and the icons stay, as in the menus of the
-        header. Other roles become plain text.
+    :return: The parts in sequence, each with `text` or with the
+        `glyph` classes of an icon. Only the words and the icons stay,
+        as in the menus of the header. Other roles become plain text.
     """
     parts: list[dict[str, str]] = []
     here = 0
@@ -949,22 +964,24 @@ def related(
 ) -> None:
     """Give a page the cards that `:km-related-docs:` asks for.
 
-    :param app: The Sphinx application instance. Without `:km-related-docs:`,
-        the page gets the pages from `reading_order`, unless
-        `kaamiki.conf.show.previous_next_cards` or its field is off, or the
-        previous and next buttons are on. A page without cards gets no section.
-        `km_related` holds the `header` of the section (`:km-related-header:`,
-        or "More to read." in the language of the site) and a card for each
-        page, with its `link`, `title`, `section`, `date` and `image`. The image
-        is `:km-page-image:`, then `:km-page-backdrop:`, else an empty string,
-        which the template draws as waves. The date is the `created` date of the
-        page, or empty. A page with `:km-related-skip-page:` is not a card and
-        gets none. A page with cards does not show the previous and next
-        buttons.
+    :param app: The Sphinx application instance. Without
+        `:km-related-docs:`, the page gets the pages from
+        `reading_order`, unless `kaamiki.conf.show.previous_next_cards`
+        or its field is off, or the previous and next buttons are on. A
+        page without cards gets no section. `km_related` holds the
+        `header` of the section (`:km-related-header:`, or "More to
+        read." in the language of the site) and a card for each page,
+        with its `link`, `title`, `section`, `date` and `image`. The
+        image is `:km-page-image:`, then `:km-page-backdrop:`, else an
+        empty string, which the template draws as waves. The date is
+        the `created` date of the page, or empty. A page with
+        `:km-related-skip-page:` is not a card and gets none. A page
+        with cards does not show the previous and next buttons.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
-    :param doctree: The resolved doctree, or `None` for a generated page.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del templatename, doctree
     builder = app.builder
@@ -1035,9 +1052,10 @@ def follow(
     :param changed: The pages that Sphinx found changed.
     :param removed: The pages that Sphinx found removed.
     :return: The pages whose `:km-page-prev:`, `:km-page-next:` or
-        `:km-related-docs:` names a page that changed, moved or was removed, and
-        the articles whose release did. These pages have the title of the other
-        page in them. `retitled` handles the neighbours in a toctree.
+        `:km-related-docs:` names a page that changed, moved or was
+        removed, and the articles whose release did. These pages have
+        the title of the other page in them. `retitled` handles the
+        neighbours in a toctree.
     """
     del app
     moved = added | changed | removed
@@ -1061,12 +1079,13 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
 
     :param app: The Sphinx application instance.
     :param env: The build environment, with all pages read.
-    :return: Each page when the title, lead, header subheader or description of
-        a page changed since the last build, because the header of each page
-        lists them. Else the pages whose previous or next page or related cards
-        changed, the pages that no toctree holds now, and the pages that list a
-        page whose part of the site changed. Nothing at the first build. Sphinx
-        itself only writes again the pages whose source changed.
+    :return: Each page when the title, lead, header subheader or
+        description of a page changed since the last build, because the
+        header of each page lists them. Else the pages whose previous
+        or next page or related cards changed, the pages that no
+        toctree holds now, and the pages that list a page whose part of
+        the site changed. Nothing at the first build. Sphinx itself
+        only writes again the pages whose source changed.
     """
     app.builder.__dict__.pop("km_captions", None)
     app.builder.__dict__.pop("km_header_leads", None)

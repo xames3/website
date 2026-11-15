@@ -181,17 +181,18 @@ def lexer_for(language: str) -> Lexer:
 
     :param language: The language of the directive.
     :return: The lexer.
-    :raises ClassNotFound: When Pygments has no lexer. Use `known` to ask first.
+    :raises ClassNotFound: When Pygments has no lexer. Use `known` to
+        ask first.
     """
     return get_lexer_by_name(language)
 
 
 def comment(language: str) -> dict[str, str] | None:
-    """Find how a language writes a comment, for the values next to the code.
+    """Find how a language writes a comment.
 
     :param language: The language of the directive.
-    :return: What opens a comment and what closes it, or `None` for a language
-        that `COMMENTS` does not know.
+    :return: What opens a comment and what closes it, or `None` for a
+        language that `COMMENTS` does not know.
     :raises ClassNotFound: When Pygments has no lexer for the language.
     """
     names = {language.lower(), *lexer_for(language).aliases}
@@ -230,10 +231,11 @@ def notes_pane(
     :param code: The snippet.
     :param language: The language of the snippet.
     :param start: The number of the first line.
-    :param emphasis: The lines to mark, with the numbers that the reader sees.
+    :param emphasis: The lines to mark, with the numbers that the
+        reader sees.
     :param linenos: Whether to show the line numbers.
-    :param digits: The width of the line numbers, so that versions of a snippet
-        align. The default is the width that the snippet needs.
+    :param digits: The width of the line numbers, so that versions of a
+        snippet align. The default is the width that the snippet needs.
     :return: The markup of the pane.
     """
     rows: list[str] = []
@@ -263,9 +265,9 @@ def controls(icons: Mapping[str, str]) -> str:
     """Write the controls at the end of the caption of a walkthrough.
 
     :param icons: The named icons of the site.
-    :return: The markup. Without a caption, it goes in the top corner of the
-        snippet. The button holds its two icons, and the stylesheet shows the
-        icon for its state.
+    :return: The markup. Without a caption, it goes in the top corner
+        of the snippet. The button holds its two icons, and the
+        stylesheet shows the icon for its state.
     """
     marks = "".join(
         f'<i class="{icons[key]} km-code-explain__{name}"'

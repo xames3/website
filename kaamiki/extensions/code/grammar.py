@@ -6,8 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
 Last updated on: 15 November 2026
 
-The grammar of the blocks in the body of a walkthrough, and the readers
-for the options of the blocks.
+The grammar of the blocks in the body of a walkthrough, and the
+readers for the options of the blocks.
 """
 
 import re
@@ -72,10 +72,11 @@ class chunk:
 
         :param name: The name of the block, after the `..`.
         :param argument: The text after the `::` on the same line.
-        :param options: The `:key: value` lines at the start of the body.
+        :param options: The `:key: value` lines at the start of the
+            body.
         :param body: The content of the block, without its indent.
-        :param offset: Where the body starts in the document, for the error
-            messages.
+        :param offset: Where the body starts in the document, for the
+            error messages.
         """
         self.name = name
         self.argument = argument
@@ -95,8 +96,8 @@ def indentation(lines: list[str]) -> int:
     """Measure the indent that the lines of a block share.
 
     :param lines: The lines to measure, blank lines too.
-    :return: The smallest indent of the lines with text, or zero when no line
-        has text.
+    :return: The smallest indent of the lines with text, or zero when
+        no line has text.
     """
     widths = [len(_) - len(_.lstrip()) for _ in lines if _.strip()]
     return min(widths) if widths else 0
@@ -107,8 +108,8 @@ def extent(content: StringList, start: int) -> int:
 
     :param content: The content of the directive.
     :param start: The line where the block opens.
-    :return: The first line after the block, which is the next line that starts
-        in column zero.
+    :return: The first line after the block, which is the next line
+        that starts in column zero.
     """
     end = start + 1
     while end < len(content):
@@ -124,8 +125,8 @@ def blanks(lines: list[str] | StringList, index: int) -> int:
 
     :param lines: The lines to look through.
     :param index: Where to start.
-    :return: The first line from `index` with text, or the number of lines when
-        there is none.
+    :return: The first line from `index` with text, or the number of
+        lines when there is none.
     """
     while index < len(lines) and not lines[index].strip():
         index += 1
@@ -165,15 +166,16 @@ def read_options(
     """Read the `:name: value` lines at the start of a block.
 
     :param raw: The lines of the block, after the line where it opens.
-    :param allowed: The names of the options that the block takes, or `None` for
-        a block without options.
+    :param allowed: The names of the options that the block takes, or
+        `None` for a block without options.
     :param line: The line of the document where `raw` starts.
     :param name: The name of the block.
-    :return: The options, and the line in `raw` where the body starts. A line
-        indented below an option continues its value. A blank line between two
-        options does not end the options.
-    :raises OptionError: For an option that the block does not take, or takes
-        two times, with its line, its name and the name of the block.
+    :return: The options, and the line in `raw` where the body starts.
+        A line indented below an option continues its value. A blank
+        line between two options does not end the options.
+    :raises OptionError: For an option that the block does not take, or
+        takes two times, with its line, its name and the name of the
+        block.
     """
     options: dict[str, str] = {}
     cursor = blanks(raw, 0)
@@ -239,7 +241,8 @@ def read_prose(
     :param index: The line where the prose starts.
     :param offset: The offset of the content in the document.
     :param own: The names of the blocks of this grammar.
-    :return: The prose as a chunk without a name, and the line after it.
+    :return: The prose as a chunk without a name, and the line after
+        it.
     """
     end = index + 1
     while end < len(content):
@@ -263,16 +266,17 @@ def split(
     :param content: The content of the directive.
     :param offset: The offset of the content in the document.
     :param own: The names of the blocks of this grammar.
-    :param options: The names of the options that each block takes. Only these
-        blocks read options, from the lines directly below the line where they
-        open.
-    :param loose: Keep the prose between blocks as chunks without a name, and do
-        not raise an error.
+    :param options: The names of the options that each block takes.
+        Only these blocks read options, from the lines directly below
+        the line where they open.
+    :param loose: Keep the prose between blocks as chunks without a
+        name, and do not raise an error.
     :return: One `chunk` for each block, in the sequence written.
-    :raises StrayError: For the first line that is not in a block, with its line
-        and its text. Not with `loose`.
-    :raises OptionError: For an option that its block does not take, or takes
-        two times, with its line, its name and the name of the block.
+    :raises StrayError: For the first line that is not in a block, with
+        its line and its text. Not with `loose`.
+    :raises OptionError: For an option that its block does not take, or
+        takes two times, with its line, its name and the name of the
+        block.
     """
     found: list[chunk] = []
     index = blanks(content, 0)
@@ -296,11 +300,11 @@ def split(
 
 
 def linerange(line: str) -> tuple[int, int] | None:
-    """Read a line range, as `4` or `4-9`, from the argument of a block.
+    """Read a line range, as `4` or `4-9`, from an argument.
 
     :param line: The argument, as written.
-    :return: The first and the last line, or `None` when the argument is not
-        line numbers.
+    :return: The first and the last line, or `None` when the argument
+        is not line numbers.
     """
     match = RANGE.fullmatch(line.strip())
     if match is None:

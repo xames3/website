@@ -6,8 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The helpers that flatten, tidy and shorten text, and give a level to the
-captions of a table of contents.
+The helpers that flatten, tidy and shorten text, and give a level to
+the captions of a table of contents.
 """
 
 import re
@@ -43,8 +43,8 @@ def clip(text: str, limit: int) -> str:
 
     :param text: The line.
     :param limit: The maximum number of characters, with `...`.
-    :return: The line. A longer line is cut at the last space that fits, or in a
-        word when the first word is too long.
+    :return: The line. A longer line is cut at the last space that
+        fits, or in a word when the first word is too long.
     :raises ValueError: For a limit less than 4.
     """
     if limit < 4:
@@ -62,8 +62,8 @@ def levelled(fragment: str) -> str:
     """Give each caption in a table of contents a heading level.
 
     :param fragment: The table of contents as HTML.
-    :return: The table of contents with each caption at level 2. Sphinx writes a
-        caption as `role="heading"` without a level, and a screen reader needs
-        the level.
+    :return: The table of contents with each caption at level 2. Sphinx
+        writes a caption as `role="heading"` without a level, and a
+        screen reader needs the level.
     """
     return CAPTION.sub(r'\1 role="heading" aria-level="2">', fragment)
