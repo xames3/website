@@ -21,6 +21,7 @@ from docutils.parsers import rst
 from markupsafe import Markup
 from sphinx import addnodes
 from sphinx.util import docname_join
+from sphinx.util.docutils import SphinxDirective
 from sphinx.writers.latex import LaTeXTranslator
 from sphinx.writers.manpage import ManualPageTranslator
 from sphinx.writers.texinfo import TexinfoTranslator
@@ -39,12 +40,13 @@ if t.TYPE_CHECKING:
 
     from docutils.parsers.rst import Directive
     from sphinx.application import Sphinx
-    from sphinx.config import Config
-    from sphinx.environment import BuildEnvironment
     from sphinx.writers.html import HTMLTranslator
 
     Visitor = Callable[[HTMLTranslator, nodes.Element], None]
 
+OPTION: t.Final[re.Pattern[str]] = re.compile(
+    r"^\s*- `([\w-]+)`:", re.MULTILINE
+)
 TRANSLATORS: t.Final[dict[str, type[nodes.NodeVisitor]]] = {
     "latex": LaTeXTranslator,
     "man": ManualPageTranslator,
@@ -732,7 +734,7 @@ class Option:
         return self.default
 
 
-class KaamikiDirective(rst.Directive):
+class KaamikiDirective(SphinxDirective):
     """The base of each Kaamiki directive."""
 
     registry: t.ClassVar[dict[str, type[KaamikiDirective]]] = {}
@@ -745,6 +747,7 @@ class KaamikiDirective(rst.Directive):
         name: str = "",
         motion: bool = False,
         spec: type[dict[str, t.Any]] = dict,
+        abstract: bool = False,
         **kwargs: t.Any,
     ) -> None:
         """Record the directive, collect its options and name its node.
@@ -755,11 +758,15 @@ class KaamikiDirective(rst.Directive):
             `no-motion`.
         :param spec: The kind of dictionary for `option_spec`, as one
             that permits more options than it lists.
+        :param abstract: Whether the class is only a base for other
+            directives. Then it is not recorded and not checked.
         :param kwargs: What the parent class takes.
         :raises TypeError: When the docstring does not list each option
             that the directive takes.
         """
         super().__init_subclass__(**kwargs)
+        if abstract:
+            return
         found = {
             each.name: each
             for owner in reversed(cls.__mro__)
@@ -779,25 +786,14 @@ class KaamikiDirective(rst.Directive):
         if "Node" in vars(cls):
             cls.Node.__name__ = cls.__name__
             cls.Node.__qualname__ = f"{cls.__qualname__}.Node"
-        listed = set(
-            re.findall(r"^\s*- `([\w-]+)`:", cls.__doc__ or "", re.MULTILINE)
-        )
+        options = (cls.__doc__ or "").partition("Options::")[2]
+        listed = set(OPTION.findall(options.split("::\n", 1)[0]))
         if listed != set(cls.option_spec):
             raise TypeError(
                 f"{cls.__qualname__}: expected the docstring to list"
                 f" {sorted(cls.option_spec)}, got {sorted(listed)}"
             )
         KaamikiDirective.registry[name or cls.__name__.lower()] = cls
-
-    @property
-    def env(self) -> BuildEnvironment:
-        """The build environment."""
-        return self.state.document.settings.env  # type: ignore[no-any-return]
-
-    @property
-    def config(self) -> Config:
-        """The Sphinx configuration."""
-        return self.env.config
 
     @property
     def title(self) -> str:

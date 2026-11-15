@@ -88,9 +88,10 @@ KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
     "byline": lambda _: isinstance(_, byline.Byline.Node),
     "carousel": lambda _: isinstance(_, carousel.Carousel.Node),
     "code-explain": lambda _: (
-        isinstance(_, explain.node) and not isinstance(_, version.node)
+        isinstance(_, explain.CodeExplain.Node)
+        and not isinstance(_, version.CodeVersion.Node)
     ),
-    "code-version": lambda _: isinstance(_, version.node),
+    "code-version": lambda _: isinstance(_, version.CodeVersion.Node),
     "columns": lambda _: isinstance(_, columns.Columns.Node),
     "embed": is_embed,
     "raw": is_raw,
@@ -137,10 +138,10 @@ SETS: t.Final[tuple[tuple[type, type, str, str], ...]] = (
     (columns.Column.Node, columns.Columns.Node, "column", "columns"),
 )
 PARTS: t.Final[tuple[type[nodes.Element], ...]] = (
-    explain.explanations,
-    explain.explanation,
-    version.attempt,
-    version.draft,
+    explain.Explanations,
+    explain.Explanation,
+    version.Attempt,
+    version.Draft,
 )
 HOSTS: t.Final[tuple[tuple[type, str], ...]] = (
     (tabs.Tab.Node, "a tab"),
