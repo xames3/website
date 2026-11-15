@@ -27,12 +27,11 @@ import typing as t
 from datetime import datetime as dt
 
 import docutils.nodes as nodes
-import docutils.parsers.rst as rst
 from sphinx import addnodes
 from sphinx.locale import _
 
-from kaamiki.extensions.utils import MOTION
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import dated
 from kaamiki.extensions.utils import day
@@ -42,9 +41,6 @@ from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import moving
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import stored
@@ -58,17 +54,12 @@ if t.TYPE_CHECKING:
     from sphinx.environment import BuildEnvironment
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "release"
 template: t.Final[str] = "directives/release.html.jinja"
 BUTTON: t.Final[tuple[str, ...]] = ("km-button", "km-button--scheme-light")
 NOTES: t.Final[str] = "km-release__notes"
 VERSION: t.Final[re.Pattern[str]] = re.compile(
     r"[A-Za-z0-9][A-Za-z0-9._+-]{0,63}"
 )
-
-
-class Release(nodes.Element):
-    """The release's date and version, waiting for `visit`."""
 
 
 def release_version(argument: str | None) -> str:
@@ -86,105 +77,101 @@ def release_version(argument: str | None) -> str:
     return found
 
 
-class directive(rst.Directive):
+class Release(KaamikiDirective, motion=True):
     """The `release` directive.
 
     Options::
 
-        - `version`: The release's version, like `2026.11.8` or
-          `v1.2.0`, up to 64 letters, numbers and `._+-`. It's needed
-          and a site uses each once.
-        - `article`: A page telling the story behind the release, as
-          `:doc:` would name it. It's linked under the notes.
-        - `article-label`: What the article's link says, up to 60
-          characters. It needs `article`. Defaults to "Read release
-          notes".
-        - `date`: The day it went out, as `5 October 2026` or
-          `2026-10-05`. It wins over the version.
-        - `target`: The release elsewhere, like a GitHub release. It's
-          linked next to the article.
-        - `speed`: How quick its motion is next to the site's, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
-          `2` is twice as quick.
-        - `no-motion`: Keep it still.
-        - `name`: Another name to link to, beside the version.
+        - `version`: The version of the release, as `2026.11.8` or
+          `v1.2.0`, with a maximum of 64 letters, numbers and `._+-`.
+          It is necessary, and a site uses each version only one time.
+        - `article`: A page with the story of the release, named as
+          `:doc:` names it. Its link is below the notes.
+        - `article-label`: The text of the link to the article, with a
+          maximum of 60 characters. It needs `article`. The default is
+          "Read release notes".
+        - `date`: The day of the release, as `5 October 2026` or
+          `2026-10-05`. It has priority over the version.
+        - `target`: The release on a different site, as a GitHub
+          release. Its link is next to the article.
+        - `speed`: The speed of its motion, relative to the site, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
+          two times as fast.
+        - `no-motion`: Do not move it.
+        - `name`: One more name for links, next to the version.
         - `class`: More classes for the release.
 
-    The argument is the title, what the release is about, and is
-    optional. Without one the version is the title. A release is a
-    section, so it goes directly in one: on the page or under a
-    heading, an `only` aside. It never goes in an accordion, a tab, a
-    block, a column, a list or a note.
+    The argument is the title, which tells what the release is about.
+    It is optional. Without it, the version is the title. A release is
+    a section, so it goes directly in a section: on the page or below a
+    heading. An `only` is permitted around it. It cannot go in an
+    accordion, a tab, a block, a column, a list or a note.
 
-    The definition lists in the content are the change groups. Each
+    The definition lists in the content are the groups of changes. Each
     term is one of `Added`, `Changed`, `Deprecated`, `Fixed` and
-    `Removed`. A group in the site's `kaamiki.conf.release.kinds` works
-    too. The list can sit anywhere in the content and a list inside a
-    group is left alone.
+    `Removed`. A group in `kaamiki.conf.release.kinds` of the site is
+    also correct. The list can be anywhere in the content, and a list in
+    a group does not change.
 
-    The site's `kaamiki.conf.release.version_fmt` says how a version
-    spells its date, `%Y.%m.%d` by default. A version that doesn't and
-    has no `:date:` is shown without one.
+    `kaamiki.conf.release.version_fmt` of the site tells how a version
+    writes its date. The default is `%Y.%m.%d`. A version that does not
+    use it, and has no `:date:`, shows no date.
     """
 
     has_content = True
     required_arguments = 0
     optional_arguments = 1
     final_argument_whitespace = True
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        **MOTION,
-        "version": release_version,
-        "article": checks.text,
-        "article-label": lambda _: checks.text(_, 60),
-        "date": checks.text,
-        "target": checks.link,
-    }
+    version = Option(release_version)
+    article = Option(checks.text)
+    article_label = Option(lambda _: checks.text(_, 60), needs="article")
+    date = Option(checks.text)
+    target = Option(checks.link)
 
-    def run(self) -> list[nodes.Node]:
-        """Build the release's section and return it.
+    class Node(nodes.Element):
+        """The date and the version of the release, which `visit` writes."""
 
-        The section's id is the version with dashes for anything that
-        isn't a letter, a number, `_` or `-`. Its date is formatted when
-        the page is written. A directive in the content that takes a
-        name the release has is the one refused.
+    def check(self) -> None:
+        """Make sure that the release has a version."""
+        if self.version is None:
+            self.fail(
+                ":version: expected a version like 2026.11.8 or v1.2.0, got"
+                " none"
+            )
 
-        :return: The section, followed by anything its title reported.
+    def build(self) -> list[nodes.Node]:
+        """Make the section of the release.
+
+        The id of the section is the version, with a dash for each
+        character that is not a letter, a number, `_` or `-`. The date
+        gets its format when the page is written. When a directive in
+        the content takes a name that the release has, the build refuses
+        that directive.
+
+        :return: The section and what its title reported.
         """
-        if "version" not in self.options:
-            raise self.error(
-                "release: :version: expected a version like 2026.11.8 or"
-                " v1.2.0, got none"
+        version = self.version
+        docname = self.env.docname
+        pages = ensure_versions(self.env).setdefault(version, {})
+        if docname in pages:
+            self.fail(
+                ":version: expected a version not on this page yet, got"
+                f" {version!r}"
             )
-        version = self.options["version"]
-        env = self.state.document.settings.env
-        pages = ensure_versions(env).setdefault(version, {})
-        if env.docname in pages:
-            raise self.error(
-                f"release: :version: expected a version not on this page"
-                f" yet, got {version!r}"
-            )
-        section = located(
-            self,
-            nodes.section(
-                "",
-                classes=[
-                    "km-release",
-                    *self.options.get("class", []),
-                    *moving(self.options),
-                ],
-            ),
+        section = self.locate(
+            nodes.section("", classes=["km-release", *self.classes])
         )
-        pages[env.docname] = location(section)
+        pages[docname] = location(section)
         target = re.sub(r"[^\w-]+", "-", version)
-        same = env.temp_data.setdefault("km_release_ids", {})
+        same = t.cast(
+            "dict[str, str]",
+            self.env.temp_data.setdefault("km_release_ids", {}),
+        )
         if same.setdefault(target, version) != version:
-            raise self.error(
-                f"release: :version: expected an id of its own, got"
-                f" {version!r}, which makes {target!r} like {same[target]!r}"
+            self.fail(
+                f":version: expected an id of its own, got {version!r}, which"
+                f" makes {target!r} like {same[target]!r}"
             )
-        if "article-label" in self.options and "article" not in self.options:
-            raise self.error("release: :article-label: needs :article:")
         released = self.released(version)
         title, messages = self.heading(version)
         section["ids"].append(target)
@@ -196,18 +183,19 @@ class directive(rst.Directive):
             )
             if alias:
                 section["ids"].insert(0, alias)
-        attributes: dict[str, t.Any] = {}
-        attributes["version"] = version
-        attributes["datetime"] = released.date().isoformat() if released else ""
-        attributes["titled"] = bool(self.arguments)
+        attributes: dict[str, t.Any] = {
+            "version": version,
+            "datetime": released.date().isoformat() if released else "",
+            "titled": bool(self.arguments),
+        }
         body = nodes.container(classes=["km-release__body"])
-        section.extend([title, Release("", **attributes), body])
-        named(self, section)
+        section.extend([title, self.Node("", **attributes), body])
+        self.add_name(section)
         if not named_too:
             self.state.document.note_explicit_target(section, section)
         self.state.nested_parse(self.content, self.content_offset, body)
         if hollow(body.children):
-            raise self.error("release: expected some content, got none")
+            self.fail("expected some content, got none")
         more = self.more()
         if more is not None:
             body.insert(1, more)
@@ -227,19 +215,18 @@ class directive(rst.Directive):
         if "date" in self.options:
             iso = day(self.options["date"].strip())
             if not iso:
-                raise self.error(
-                    f"release: :date: expected a date like 5 October 2026 or"
+                self.fail(
+                    ":date: expected a date like 5 October 2026 or"
                     f" 2026-10-05, got {self.options['date']!r}"
                 )
             made = dt.fromisoformat(iso).astimezone()
             if not within(iso):
-                raise self.error(
-                    "release: :date: expected a date from 2000 to a year"
-                    f" ahead, got {self.options['date']!r}"
+                self.fail(
+                    ":date: expected a date from 2000 to a year ahead, got"
+                    f" {self.options['date']!r}"
                 )
             return made
-        env = self.state.document.settings.env
-        form = setting(env.config, "release_version_fmt")
+        form = setting(self.config, "release_version_fmt")
         if not form:
             return None
         try:
@@ -263,9 +250,8 @@ class directive(rst.Directive):
         if self.arguments:
             words, messages = self.state.inline_text(text, self.lineno)
             worded(self, words, "a title")
-        title = located(
-            self,
-            nodes.title(text, "", *words, classes=["km-release__title"]),
+        title = self.locate(
+            nodes.title(text, "", *words, classes=["km-release__title"])
         )
         return title, messages
 
@@ -282,10 +268,9 @@ class directive(rst.Directive):
 
         :param body: The release's parsed content, changed in place.
         """
-        env = self.state.document.settings.env
         own = {
             str(key).strip().lower()
-            for key in setting(env.config, "release_kinds")
+            for key in setting(self.config, "release_kinds")
         }
         # NOTE(xames3): Translated here and not at import, as Kaamiki's
         # words only join Sphinx's catalogue once it has set up.
@@ -316,10 +301,10 @@ class directive(rst.Directive):
                 )
                 if not known and said not in own:
                     names = list(kinds.values())
-                    raise self.error(
-                        f"release: expected a group of {', '.join(names[:-1])}"
-                        f" or {names[-1]}, or one in"
-                        f" kaamiki.conf.release.kinds, got {term.astext()!r}"
+                    self.fail(
+                        f"expected a group of {', '.join(names[:-1])} or"
+                        f" {names[-1]}, or one in kaamiki.conf.release.kinds,"
+                        f" got {term.astext()!r}"
                     )
                 term["classes"].append("km-release__kind")
 
@@ -328,35 +313,32 @@ class directive(rst.Directive):
 
         :return: A paragraph holding the links or `None` without any.
         """
-        env = self.state.document.settings.env
         urls: list[nodes.Node] = []
-        if "article" in self.options:
-            ensure_articles(env).setdefault(
-                document(self, self.options["article"], "article"), set()
-            ).add(env.docname)
-            text = self.options.get("article-label") or str(
-                _("Read release notes")
-            )
+        if self.article:
+            ensure_articles(self.env).setdefault(
+                document(self, self.article, "article"), set()
+            ).add(self.env.docname)
+            text = self.article_label or str(_("Read release notes"))
             urls.append(
                 addnodes.pending_xref(
                     "",
                     nodes.inline(text, text),
                     refdomain="std",
                     reftype="doc",
-                    reftarget=self.options["article"],
-                    refdoc=env.docname,
+                    reftarget=self.article,
+                    refdoc=self.env.docname,
                     refexplicit=True,
                     refwarn=True,
                     classes=[*BUTTON, NOTES],
                 )
             )
-        if "target" in self.options:
+        if self.target:
             text = str(_("View release"))
             urls.append(
                 nodes.reference(
                     "",
                     text,
-                    refuri=self.options["target"],
+                    refuri=self.target,
                     classes=list(BUTTON),
                 )
             )
@@ -371,26 +353,28 @@ class directive(rst.Directive):
             "", "", *spaced, classes=["km-release__more", "km-button-row"]
         )
 
+    @staticmethod
+    def plain(node: Release.Node) -> list[nodes.Node]:
+        """Write a release's date and version as words, with no HTML.
 
-def plain(node: Release) -> list[nodes.Node]:
-    """Write a release's date and version as words, with no HTML.
+        :param node: The `release` node and its attributes.
+        :return: A paragraph with the version, when a title has taken
+            its place as the heading, and the date. A release with neither
+            has a comment, which writes nothing.
+        """
+        iso = node["datetime"]
+        config = node.document.settings.env.config if node.document else None
+        date = dated(dt.fromisoformat(iso), config) if iso and config else ""
+        line = ", ".join(
+            each
+            for each in (node["version"] if node["titled"] else "", date)
+            if each
+        )
+        return [nodes.paragraph("", line)] if line else [nodes.comment()]
 
-    :param node: The `release` node and its attributes.
-    :return: A paragraph with the version, when a title has taken
-        its place as the heading, and the date. A release with neither
-        has a comment, which writes nothing.
-    """
-    iso = node["datetime"]
-    config = node.document.settings.env.config if node.document else None
-    date = dated(dt.fromisoformat(iso), config) if iso and config else ""
-    line = ", ".join(
-        _ for _ in (node["version"] if node["titled"] else "", date) if _
-    )
-    return [nodes.paragraph("", line)] if line else [nodes.comment()]
 
-
-@html.opens(Release)
-def visit(self: HTMLTranslator, node: Release) -> None:
+@html.opens(Release.Node)
+def visit(self: HTMLTranslator, node: Release.Node) -> None:
     """Write the date and version out as the HTML writer reaches them.
 
     :param self: The HTML translator, whose body this appends to.
@@ -535,6 +519,3 @@ def register(app: Sphinx) -> None:
     app.connect("env-merge-info", merge)
     app.connect("env-updated", settle)
     app.connect("doctree-resolved", tag)
-
-
-node = Release

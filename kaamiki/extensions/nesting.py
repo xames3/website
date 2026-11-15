@@ -49,7 +49,7 @@ def is_release(node: nodes.Node | None) -> bool:
     :return: `True` for a release.
     """
     return isinstance(node, nodes.section) and any(
-        isinstance(_, release.node) for _ in node.children
+        isinstance(_, release.Release.Node) for _ in node.children
     )
 
 
