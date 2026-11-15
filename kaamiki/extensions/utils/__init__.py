@@ -40,6 +40,8 @@ from kaamiki.extensions.utils.directives import BEM
 from kaamiki.extensions.utils.directives import MOTION
 from kaamiki.extensions.utils.directives import NATIVE
 from kaamiki.extensions.utils.directives import NO_MOTION
+from kaamiki.extensions.utils.directives import KaamikiDirective
+from kaamiki.extensions.utils.directives import Option
 from kaamiki.extensions.utils.directives import closer
 from kaamiki.extensions.utils.directives import document
 from kaamiki.extensions.utils.directives import fields
@@ -97,6 +99,8 @@ __all__: list[str] = [
     "NATIVE",
     "NO_MOTION",
     "TEMPLATES",
+    "KaamikiDirective",
+    "Option",
     "admonition_title",
     "annotated",
     "apply",

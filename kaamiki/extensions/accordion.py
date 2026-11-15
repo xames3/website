@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
 Last updated on: 15 November 2026
 
-An `accordion` directive that folds its content away under a title::
+An `accordion` directive that folds its content below a title::
 
     .. accordion:: What's an accordion?
        :subheader: A short answer
@@ -14,7 +14,7 @@ An `accordion` directive that folds its content away under a title::
        :marker-position: before
        :open:
 
-       It's a box that folds its content away under a title.
+       It's a box that folds its content below a title.
 """
 
 from __future__ import annotations
@@ -25,18 +25,10 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
 from kaamiki.extensions.utils import BEM
-from kaamiki.extensions.utils import MOTION
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import moving
-from kaamiki.extensions.utils import named
-from kaamiki.extensions.utils import setting
-from kaamiki.extensions.utils import titled
-from kaamiki.extensions.utils import unlinked
-from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils.aliases import ALIASES
 from kaamiki.extensions.utils.icons import ACCORDION_MARKERS
 from kaamiki.extensions.utils.icons import Icons
@@ -45,7 +37,6 @@ from kaamiki.extensions.utils.settings import CHOICES
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "accordion"
 MARKER_POSITIONS: t.Final[tuple[str, ...]] = CHOICES[
     "accordion_marker_position"
 ]
@@ -54,178 +45,135 @@ accordion: t.Final[BEM] = BEM("accordion")
 text: t.Final[BEM] = BEM("text")
 
 
-class Accordion(nodes.container):
-    """The accordion and its content, waiting for `visit`."""
-
-
-class summary(nodes.paragraph):
+class Summary(nodes.paragraph):
     """The title, parsed as rST, with the marker's icon and side."""
 
 
-class headline(nodes.TextElement):
-    """A line above or under the title, by its `role`."""
+class Headline(nodes.TextElement):
+    """A line above or below the title, as its `role` tells."""
 
 
-class directive(rst.Directive):
+class Accordion(KaamikiDirective, motion=True):
     """The `accordion` directive.
 
     Options::
 
-        - `open`: Start unfolded. Only one accordion of a `group` may.
+        - `open`: Show the content at the start. Only one accordion in a
+          `group` can have it.
         - `preheader`: A small line above the title.
-        - `class-preheader`: More classes for the preheader, which
-          always has `km-text--preheader`. It needs `preheader`.
-        - `subheader`: A dimmer line under the title.
+        - `class-preheader`: More classes for the preheader. It always
+          has `km-text--preheader`. It needs `preheader`.
+        - `subheader`: A dimmer line below the title.
         - `nested-subheader`: Put the subheader at the top of the
-          content, so it shows once the accordion is open, instead of
-          under the title. It needs `subheader`.
-        - `class-subheader`: More classes for the subheader, which
-          always has `km-text--subheader`. It needs `subheader`.
-        - `marker`: What shows that an accordion opens, `plus`, a `down`
-          chevron or a `right` one. A plus turns 45 degrees as it opens,
-          a right chevron turns 90 degrees to point down and a down
-          chevron turns over.
-        - `marker-position`: The marker's side of the title, `before`
-          it or `after` it.
-        - `hide-show-more`: Show a long body in full. One taller than
-          the screen is folded behind a Show more button otherwise.
-        - `group`: A name shared with other accordions on the page.
-          Opening one folds the rest of its group.
+          content, not below the title. Then it shows only when the
+          accordion is open. It needs `subheader`.
+        - `class-subheader`: More classes for the subheader. It always
+          has `km-text--subheader`. It needs `subheader`.
+        - `marker`: The icon that shows that the accordion opens, `plus`,
+          a `down` chevron or a `right` chevron. When the accordion
+          opens, a plus turns 45 degrees, a right chevron turns 90
+          degrees to point down and a down chevron turns over.
+        - `marker-position`: The side of the title for the marker,
+          `before` or `after`.
+        - `hide-show-more`: Show all of a long body. Without it, a body
+          that is taller than the screen folds behind a Show more button.
+        - `group`: A name that other accordions on the page also use.
+          When one of them opens, the others in the group close.
         - `class-title`: More classes for the title.
         - `class-body`: More classes for the content.
-        - `speed`: How quick its motion is next to the site's, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
-          `2` is twice as quick.
-        - `no-motion`: Keep it still.
-        - `name`: A name to link to. A link to it, or to anything inside
-          it, opens the accordion.
+        - `speed`: The speed of its motion, relative to the site, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
+          two times as fast.
+        - `no-motion`: Do not move it.
+        - `name`: A name for links. A link to the accordion, or to a
+          thing in it, opens the accordion.
         - `class`: More classes for the accordion.
 
-    An accordion needs some content, or the build stops. So does an
-    option that's written wrong, out of range or at odds with another.
-
-    The site's `kaamiki.conf.accordion.marker` and
-    `kaamiki.conf.accordion.marker_position` settle the marker and its
-    side for an accordion that doesn't say.
+    The build stops when an accordion has no content, or when an option
+    is wrong, out of range or in conflict with another option. When an
+    accordion does not set the marker or its side,
+    `kaamiki.conf.accordion.marker` and
+    `kaamiki.conf.accordion.marker_position` set them.
     """
 
     has_content = True
     required_arguments = 1
     final_argument_whitespace = True
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        **MOTION,
-        "open": rst.directives.flag,
-        "preheader": checks.text,
-        "class-preheader": checks.classes,
-        "subheader": checks.text,
-        "nested-subheader": rst.directives.flag,
-        "class-subheader": checks.classes,
-        "marker": checks.word(*MARKERS),
-        "marker-position": checks.word(*MARKER_POSITIONS),
-        "hide-show-more": rst.directives.flag,
-        "group": checks.slug,
-        "class-title": checks.classes,
-        "class-body": checks.classes,
-    }
+    open = Option(rst.directives.flag)
+    preheader = Option(checks.text)
+    class_preheader = Option(checks.classes, needs="preheader", default=())
+    subheader = Option(checks.text)
+    nested_subheader = Option(rst.directives.flag, needs="subheader")
+    class_subheader = Option(checks.classes, needs="subheader", default=())
+    marker = Option(checks.word(*MARKERS), setting="accordion_marker")
+    marker_position = Option(
+        checks.word(*MARKER_POSITIONS), setting="accordion_marker_position"
+    )
+    hide_show_more = Option(rst.directives.flag)
+    group = Option(checks.slug, default="")
+    class_title = Option(checks.classes, default=())
+    class_body = Option(checks.classes, default=())
 
-    def run(self) -> list[nodes.Node]:
-        """Parse the title and the content and return the accordion.
+    class Node(nodes.container):
+        """The accordion and its content."""
 
-        :return: The accordion's node, followed by whatever the title
-            and the lines around it reported.
-        """
-        config = self.state.document.settings.env.config
-        options = self.options
-        for need, each in (
-            ("preheader", "class-preheader"),
-            ("subheader", "nested-subheader"),
-            ("subheader", "class-subheader"),
-        ):
-            if need not in options and each in options:
-                raise self.error(f"accordion: :{each}: needs :{need}:")
-        if "group" in options and "open" in options:
-            group = self.state.document.settings.env.temp_data.setdefault(
-                "km_open_groups", set()
-            )
-            if options["group"] in group:
-                raise self.error(
-                    f"accordion: :open: expected on one accordion of the"
-                    f" group {options['group']!r}, got it on another too"
-                )
-            group.add(options["group"])
-        side = options.get("marker-position")
-        if side is None:
-            side = setting(config, "accordion_marker_position")
-        shape = options.get("marker") or setting(config, "accordion_marker")
-        element = located(
-            self,
-            Accordion(
-                "", classes=[*options.get("class", []), *moving(options)]
-            ),
+    def check(self) -> None:
+        """Permit only one open accordion in each group on the page."""
+        if not (self.group and self.open):
+            return
+        opened = t.cast(
+            "set[str]", self.env.temp_data.setdefault("km_open_groups", set())
         )
-        element["open"] = "open" in options
-        element["group"] = options.get("group", "")
-        element["body"] = [
-            ALIASES.get(_, _) for _ in options.get("class-body", [])
-        ]
-        element["marker"] = shape
-        element["whole"] = "hide-show-more" in options
-        named(self, element)
-        words = titled(self, self.arguments[0])
-        title, messages = self.state.inline_text(words, self.lineno)
-        unlinked(self, title, "a title")
-        worded(self, title, "a title")
-        lines: dict[str, headline] = {}
+        if self.group in opened:
+            self.fail(
+                ":open: expected on one accordion of the group"
+                f" {self.group!r}, got it on another too"
+            )
+        opened.add(self.group)
+
+    def build(self) -> list[nodes.Node]:
+        """Make the accordion with its title, its lines and its content.
+
+        :return: The accordion's node and what the parser reported.
+        """
+        node = self.locate(self.Node("", classes=self.classes))
+        node["open"] = self.open
+        node["group"] = self.group
+        node["body"] = [ALIASES.get(each, each) for each in self.class_body]
+        node["marker"] = self.marker
+        node["whole"] = self.hide_show_more
+        self.add_name(node)
+        words = self.title
+        title, messages = self.text(words, "a title")
+        lines: dict[str, Headline] = {}
         for role in ("preheader", "subheader"):
-            if role in options:
-                lead, more = self.state.inline_text(options[role], self.lineno)
-                unlinked(self, lead, f"a {role}")
-                worded(self, lead, f"a {role}")
-                lines[role] = located(
-                    self,
-                    headline(
-                        options[role],
-                        "",
-                        *lead,
-                        role=role,
-                        classes=list(options.get(f"class-{role}", [])),
-                    ),
+            if written := getattr(self, role):
+                found, more = self.text(written, f"a {role}")
+                classes = [*getattr(self, f"class_{role}")]
+                lines[role] = self.locate(
+                    Headline(written, "", *found, role=role, classes=classes)
                 )
                 messages += more
-        head = located(
-            self,
-            summary(
-                words,
-                "",
-                *([lines["preheader"]] if "preheader" in lines else []),
-                *title,
-                classes=list(options.get("class-title", [])),
-            ),
+        above = [lines["preheader"]] if "preheader" in lines else []
+        head = self.locate(
+            Summary(words, "", *above, *title, classes=[*self.class_title])
         )
-        head["after"] = side == "after"
-        under = lines.get("subheader")
-        nested = "nested-subheader" in options
-        if under is not None and not nested:
-            head += under
-        element += head
-        if under is not None and nested:
-            element += under
-        self.state.nested_parse(self.content, self.content_offset, element)
-        if hollow(
-            _
-            for _ in element.children
-            if not isinstance(_, (summary, headline))
-        ):
-            raise self.error("accordion: expected some content, got none")
-        for para in element.children:
-            if type(para) is nodes.paragraph:
-                para["classes"].append("km-accordion__paragraph")
-        return [element, *messages]
+        head["after"] = self.marker_position == "after"
+        below = lines.get("subheader")
+        if below is not None and not self.nested_subheader:
+            head += below
+        node += head
+        if below is not None and self.nested_subheader:
+            node += below
+        self.fill(node, besides=(Summary, Headline))
+        for paragraph in node.children:
+            if type(paragraph) is nodes.paragraph:
+                paragraph["classes"].append(accordion.paragraph())
+        return [node, *messages]
 
 
-@html.opens(Accordion)
-def visit(self: HTMLTranslator, node: Accordion) -> None:
+@html.opens(Accordion.Node)
+def visit(self: HTMLTranslator, node: Accordion.Node) -> None:
     """Open the accordion.
 
     :param self: The HTML translator, whose body this appends to.
@@ -243,11 +191,11 @@ def visit(self: HTMLTranslator, node: Accordion) -> None:
     self.body.append(self.starttag(node, "details", "", **attributes))
 
 
-html.closes(Accordion, "</div></details>")
+html.closes(Accordion.Node, "</div></details>")
 
 
-@html.opens(summary)
-def visit_summary(self: HTMLTranslator, node: summary) -> None:
+@html.opens(Summary)
+def visit_summary(self: HTMLTranslator, node: Summary) -> None:
     """Open the title. Put the marker first if it goes before the title.
 
     :param self: The HTML translator, whose body this appends to.
@@ -260,8 +208,8 @@ def visit_summary(self: HTMLTranslator, node: summary) -> None:
     self.body.append(f'<span class="{accordion.text()}">')
 
 
-@html.closes(summary)
-def depart_summary(self: HTMLTranslator, node: summary) -> None:
+@html.closes(Summary)
+def depart_summary(self: HTMLTranslator, node: Summary) -> None:
     """Close the title and open the content.
 
     :param self: The HTML translator, whose body this appends to.
@@ -274,8 +222,8 @@ def depart_summary(self: HTMLTranslator, node: summary) -> None:
     self.body.append(f'</summary><div class="{self.attval(classes)}">')
 
 
-@html.opens(headline, elsewhere="inline")
-def visit_headline(self: HTMLTranslator, node: headline) -> None:
+@html.opens(Headline, elsewhere="inline")
+def visit_headline(self: HTMLTranslator, node: Headline) -> None:
     """Open the line above or below the title.
 
     :param self: The HTML translator, whose body this appends to.
@@ -286,10 +234,10 @@ def visit_headline(self: HTMLTranslator, node: headline) -> None:
     self.body.append(f'<span class="{self.attval(classes)}">')
 
 
-html.closes(headline, "</span>")
+html.closes(Headline, "</span>")
 
 
-def marker(self: HTMLTranslator, node: summary) -> str:
+def marker(self: HTMLTranslator, node: Summary) -> str:
     """Write the icon that shows that the accordion opens.
 
     :param self: The HTML translator.
@@ -303,6 +251,3 @@ def marker(self: HTMLTranslator, node: summary) -> str:
         f'<span class="{classes} {accordion.icon()}"'
         ' aria-hidden="true"></span></span>'
     )
-
-
-node = Accordion

@@ -29,6 +29,7 @@ from kaamiki.extensions import nesting
 from kaamiki.extensions import roles
 from kaamiki.extensions.utils import CONF
 from kaamiki.extensions.utils import TEMPLATES
+from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import admonition_title
 from kaamiki.extensions.utils import apply
 from kaamiki.extensions.utils import bridge
@@ -357,11 +358,14 @@ def add_directives(app: Sphinx) -> None:
     :param app: The Sphinx application instance.
     """
     for directive in directives:
-        app.add_directive(directive.name, directive.directive)
+        if hasattr(directive, "directive"):
+            app.add_directive(directive.name, directive.directive)
         if hasattr(directive, "register"):
             directive.register(app)
         if hasattr(directive, "html_page_context"):
             app.connect("html-page-context", directive.html_page_context)
+    for name, each in KaamikiDirective.registry.items():
+        app.add_directive(name, each)
     html.register(app)
 
 

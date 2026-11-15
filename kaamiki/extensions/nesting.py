@@ -4,7 +4,7 @@ Nesting Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 October 2026
-Last updated on: 12 November 2026
+Last updated on: 15 November 2026
 
 Stops a page that puts a directive where it makes no sense, or a class
 that only works on the page itself.
@@ -83,7 +83,7 @@ def is_raw(node: nodes.Node) -> bool:
 
 
 KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
-    "accordion": lambda _: isinstance(_, accordion.node),
+    "accordion": lambda _: isinstance(_, accordion.Accordion.Node),
     "block": lambda _: isinstance(_, block.node),
     "byline": lambda _: isinstance(_, byline.node),
     "carousel": lambda _: isinstance(_, carousel.node),
