@@ -11,6 +11,7 @@ The custom inline roles of Kaamiki.
 
 from __future__ import annotations
 
+import copy
 import functools
 import re
 import typing as t
@@ -25,7 +26,9 @@ from docutils.parsers.rst.directives import misc
 from docutils.utils import unescape
 from sphinx.domains import Domain
 from sphinx.roles import Keyboard
+from sphinx.util.docutils import SphinxRole
 
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import glyph
@@ -48,6 +51,7 @@ if t.TYPE_CHECKING:
     from docutils.parsers.rst import states
     from sphinx.application import Sphinx
     from sphinx.config import Config
+    from sphinx.util.typing import RoleFunction
     from sphinx.writers.html import HTMLTranslator
 
 DECLARATION: t.Final[re.Pattern[str]] = re.compile(
@@ -112,32 +116,49 @@ OPENED: t.Final[re.Pattern[str]] = re.compile(r"(?:^|(?<=\s))<(?=\S)[^>]*\Z")
 Reply = tuple[list[nodes.Node], list[nodes.system_message]]
 
 
-class KaamikiRole:
-    """A Kaamiki role, which `.. role::` can also use as a base."""
+class KaamikiRole(SphinxRole):
+    """The base of each Kaamiki role."""
 
     registry: t.ClassVar[dict[str, KaamikiRole]] = {}
+    role: t.ClassVar[str]
+    spec: t.ClassVar[dict[str, Callable[[str | None], t.Any]]]
+    base_classes: t.ClassVar[tuple[str, ...]] = ()
 
-    def __init__(
-        self,
-        function: Callable[..., Reply],
-        options: dict[str, Callable[[str | None], t.Any]] | None = None,
+    def __init_subclass__(
+        cls,
         *,
         name: str = "",
+        alone: bool = True,
+        abstract: bool = False,
+        **kwargs: t.Any,
     ) -> None:
-        """Wrap a role function with the options that it takes.
+        """Record the role and collect the options that it presets.
 
-        :param function: The role function.
-        :param options: The options other than `class`, each with the
-            check for its value. docutils reads `options` to know what
-            the block below `.. role::` can hold.
-        :param name: The name of the role in rST. With it, the role is
-            recorded in `registry`.
+        :param name: The name of the role in rST and in its messages.
+            The default is the name of the class in lower case.
+        :param alone: Whether the role is recorded in `registry`. A
+            role that only a domain gives is not.
+        :param abstract: Whether the class is only a base for other
+            roles. Then it is not recorded or checked.
+        :param kwargs: What the parent class takes.
+        :raises TypeError: When the docstring does not list each option
+            that the role presets.
         """
-        self.function = function
-        self.options = {"class": checks.classes, **(options or {})}
-        functools.update_wrapper(self, function)
-        if name:
-            KaamikiRole.registry[name] = self
+        super().__init_subclass__(**kwargs)
+        if abstract:
+            return
+        cls.role = name or cls.__name__.lower()
+        cls.spec = {
+            "class": checks.classes,
+            **{key: each.check for key, each in Option.of(cls).items()},
+        }
+        Option.documented(cls, cls.spec)
+        if alone:
+            KaamikiRole.registry[cls.role] = cls()
+
+    def __init__(self) -> None:
+        """Give docutils the options that `.. role::` can preset."""
+        self.options = dict(self.spec)
 
     def __call__(
         self,
@@ -149,49 +170,114 @@ class KaamikiRole:
         options: dict[str, t.Any] | None = None,
         content: Sequence[str] = (),
     ) -> Reply:
-        """Call the role function, with options that are never `None`.
+        """Use a copy of the role on some text.
 
         :param name: The name of the role, as written.
         :param rawtext: All of the role, with its markup.
-        :param text: The text in the role.
+        :param text: The text in the role, with its escapes.
         :param lineno: The line where the paragraph of the role starts,
             for the error messages.
         :param inliner: The docutils inliner that called the role.
-        :param options: The classes and presets of a custom role.
+        :param options: The classes and presets of a custom role. Only
+            the copy gets them, because docutils reads the `options` of
+            the role itself to know what `.. role::` can preset.
         :param content: The content of the role.
-        :return: The nodes and the error messages.
+        :return: The nodes and the error messages. A `ValueError` from
+            `run` becomes a problematic node, with the name of the role
+            before the message.
         """
-        return self.function(
-            name, rawtext, text, lineno, inliner, options or {}, content
+        used = copy.copy(self)
+        used.name, used.rawtext, used.text = name, rawtext, text
+        used.lineno, used.inliner, used.content = lineno, inliner, content
+        used.options = options or {}
+        try:
+            return used.run()
+        except ValueError as error:
+            return used.reject(f"{self.role}: {error}")
+
+    @property
+    def said(self) -> str:
+        """The text in the role, without its escapes."""
+        return unescape(self.text)
+
+    @property
+    def classes(self) -> list[str]:
+        """The classes of the role, then those of `.. role::`."""
+        return [*self.base_classes, *self.options.get("classes", [])]
+
+    @property
+    def line(self) -> int:
+        """The line of the role, else `lineno` when it is not found."""
+        try:
+            source, start = self.get_source_info()
+        except AttributeError:
+            return self.lineno
+        if source is None or start is None:
+            return self.lineno
+        try:
+            with open(source, encoding="utf-8") as fd:
+                lines = fd.read().splitlines()[start - 1 :]
+        except OSError, ValueError:
+            return self.lineno
+        first = (self.rawtext.splitlines() or [""])[0]
+        found = (n for n, _ in enumerate(lines) if first in _)
+        return self.lineno + next(found, 0)
+
+    def run(self) -> Reply:
+        """Make the nodes of the role.
+
+        :return: The nodes and the messages.
+        :raises NotImplementedError: Always. Each role writes its own.
+        """
+        raise NotImplementedError
+
+    def fail(self, message: str) -> t.NoReturn:
+        """Stop the role with a message.
+
+        :param message: The message, without the name of the role.
+        :raises ValueError: Always. The call of the role reports it.
+        """
+        raise ValueError(message)
+
+    def reject(self, message: str) -> Reply:
+        """Report a wrong role, and give docutils a problematic node.
+
+        :param message: What is wrong with the role.
+        :return: The problematic node and the message, as docutils
+            expects them.
+        """
+        msg = self.inliner.reporter.error(
+            message,
+            nodes.literal_block(self.rawtext, self.rawtext),
+            line=self.line,
         )
+        return [self.inliner.problematic(self.rawtext, self.rawtext, msg)], [
+            msg
+        ]
 
+    def split(self, what: str) -> tuple[str, str | None]:
+        """Split the text into its label and the value in angles.
 
-def role(
-    name: str = "", **options: Callable[[str | None], t.Any]
-) -> Callable[[Callable[..., Reply]], KaamikiRole]:
-    """Give docutils a role with its full name and options.
-
-    :param name: The name of the role in rST. The default is the name
-        of the function.
-    :param options: Each option that a custom role can preset, with the
-        check for its value.
-    :return: The decorator.
-    """
-
-    def record(function: Callable[..., Reply]) -> KaamikiRole:
-        return KaamikiRole(function, options, name=name or function.__name__)
-
-    return record
-
-
-def _classes(options: dict[str, t.Any]) -> list[str]:
-    """Read the classes that a custom role gives to its text.
-
-    :param options: The options of the role.
-    :return: The classes. The default is the name of the role, unless
-        `.. role::` sets others.
-    """
-    return list(options.get("classes", []))
+        :param what: What the value is, as `a colour`. The value is a
+            last `<...>` at the start of the text or after a space, as
+            docutils reads `text <target>`. Thus `x < 5` and
+            `List<int>` are labels, and an escaped angle is not an
+            angle.
+        :return: The label and the value between `<` and `>`, without
+            their escapes, or `None` when there is no value.
+        :raises ValueError: When a value is not closed, or is empty.
+        """
+        found = VALUE.search(self.text)
+        if found is None:
+            if OPENED.search(self.text):
+                self.fail(
+                    f"expected {what} between < and >, got {self.said!r}"
+                )
+            return self.said.strip(), None
+        value = unescape(found[1]).strip()
+        if not value:
+            self.fail(f"expected {what} between < and >, got none")
+        return unescape(self.text[: found.start()]).strip(), value
 
 
 class Ink(nodes.inline):
@@ -306,76 +392,6 @@ def depart(self: HTMLTranslator, node: Ink) -> None:
     """
     if _moves(node):
         self.body.append("</span>")
-
-
-def _split(text: str, what: str) -> tuple[str, str | None]:
-    """Split the text of a role into its label and the value in angles.
-
-    :param text: The text in the role, with its escapes. The value is a
-        last `<...>` at the start of the text or after a space, as
-        docutils reads `text <target>`. Thus `x < 5` and `List<int>`
-        are labels, and an escaped angle is not an angle.
-    :param what: What the value is, as `a colour`.
-    :return: The label and the value between `<` and `>`, without their
-        escapes, or `None` when there is no value.
-    :raises ValueError: When a value is not closed, or is empty.
-    """
-    found = VALUE.search(text)
-    if found is None:
-        if OPENED.search(text):
-            raise ValueError(
-                f"expected {what} between < and >, got {unescape(text)!r}"
-            )
-        return unescape(text).strip(), None
-    value = unescape(found[1]).strip()
-    if not value:
-        raise ValueError(f"expected {what} between < and >, got none")
-    return unescape(text[: found.start()]).strip(), value
-
-
-def _placed(inliner: states.Inliner, rawtext: str, lineno: int) -> int:
-    """Find the line of a role.
-
-    :param inliner: The docutils inliner that called the role.
-    :param rawtext: All of the role, with its markup.
-    :param lineno: The line where the paragraph of the role starts.
-        docutils gives this line, so a role further down is found in
-        the source from there.
-    :return: The line, or `lineno` when the source cannot be read.
-    """
-    try:
-        source, start = inliner.reporter.get_source_and_line(lineno)
-    except AttributeError:
-        return lineno
-    if source is None or start is None:
-        return lineno
-    try:
-        with open(source, encoding="utf-8") as fd:
-            lines = fd.read().splitlines()[start - 1 :]
-    except OSError, ValueError:
-        return lineno
-    first = (rawtext.splitlines() or [""])[0]
-    return lineno + next((n for n, _ in enumerate(lines) if first in _), 0)
-
-
-def _reject(
-    inliner: states.Inliner, rawtext: str, lineno: int, message: str
-) -> tuple[list[nodes.Node], list[nodes.system_message]]:
-    """Report a wrong role, and give docutils a problematic node.
-
-    :param inliner: The docutils inliner that called the role.
-    :param rawtext: All of the role, with its markup.
-    :param lineno: The line where the paragraph of the role starts.
-    :param message: What is wrong with the role.
-    :return: The problematic node and the message, as docutils expects
-        them.
-    """
-    msg = inliner.reporter.error(
-        message,
-        nodes.literal_block(rawtext, rawtext),
-        line=_placed(inliner, rawtext, lineno),
-    )
-    return [inliner.problematic(rawtext, rawtext, msg)], [msg]
 
 
 def _query(value: str) -> dict[str, str]:
@@ -547,283 +563,213 @@ def _style(argument: str | None) -> str:
     return "; ".join(found) + ";"
 
 
-@role(style=_style)
-def stylise(
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Put CSS on some text.
+class Stylise(KaamikiRole):
+    """The `stylise` role, which puts CSS on some text.
 
-    :param name: The name of the role, as written (unused).
-    :param rawtext: All of the role, with its markup.
-    :param text: The text in the role, as `label <css>`, or only
-        `label` when the role presets `style`. Only properties that
-        style text are permitted, as `color`, `font-size` to 4rem and
-        `text-decoration`.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes and the `style` of a custom role.
-    :param content: The content of the role (unused).
-    :return: The styled text, and the error messages when the text has
-        no `<` and no `style` is preset.
+    Text::
+
+        `label <css>`, or only `label` when the role presets `style`.
+        Only properties that style text are permitted, as `color`,
+        `font-size` to 4rem and `text-decoration`.
+
+    Options::
+
+        - `style`: The CSS for text without `<css>`, up to 200
+          characters.
+        - `class`: More classes for the text.
     """
-    del name, content
-    said = unescape(text)
-    try:
-        element, style = _split(text, "a style")
-    except ValueError as error:
-        return _reject(inliner, rawtext, lineno, f"stylise: {error}")
-    if style is None:
-        style = options.get("style")
-    if style is None:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"stylise: expected text like `words <color: red;>`, got {said!r}",
-        )
-    found = [_.strip() for _ in style.split(";") if _.strip()]
-    if not element or not found or len(style) > 200:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"stylise: expected text like `words <color: red;>` and a style"
-            f" up to 200 characters, got {said!r}",
-        )
-    for each in found:
-        if not _declared(each):
-            return _reject(
-                inliner,
-                rawtext,
-                lineno,
-                f"stylise: expected a text declaration like color: red, got"
-                f" {each!r}",
+
+    style = Option(_style)
+
+    def run(self) -> Reply:
+        """Put CSS on the text.
+
+        :return: The styled text, and no error messages.
+        :raises ValueError: When the text has no `<` and no `style` is
+            preset, or a declaration does not style text.
+        """
+        element, style = self.split("a style")
+        if style is None:
+            style = self.style
+        if style is None:
+            self.fail(
+                f"expected text like `words <color: red;>`, got {self.said!r}"
             )
-    return [
-        Ink(
-            rawtext,
-            element,
-            classes=_classes(options),
-            style="; ".join(found) + ";",
-        )
-    ], []
+        found = [_.strip() for _ in style.split(";") if _.strip()]
+        if not element or not found or len(style) > 200:
+            self.fail(
+                "expected text like `words <color: red;>` and a style up to"
+                f" 200 characters, got {self.said!r}"
+            )
+        for each in found:
+            if not _declared(each):
+                self.fail(
+                    f"expected a text declaration like color: red, got"
+                    f" {each!r}"
+                )
+        style = "; ".join(found) + ";"
+        return [
+            Ink(self.rawtext, element, classes=self.classes, style=style)
+        ], []
 
 
-@role(subject=functools.partial(checks.text, maximum=150))
-def email(
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Write a `mailto` link.
+class Email(KaamikiRole):
+    """The `email` role, which writes a `mailto` link.
 
-    :param name: The name of the role, as written (unused).
-    :param rawtext: All of the role, with its markup.
-    :param text: The text in the role, as `label <address>`, or only
-        the address, with or without angles. The address can have
-        `?subject=`. Else the subject is the preset `subject`, or the
-        title of the page after the page is read.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes and the `subject` of a custom role.
-    :param content: The content of the role (unused).
-    :return: One `reference` node, and the error messages when the
-        address is wrong or asks for more than a subject.
+    Text::
+
+        `label <address>`, or only the address, with or without
+        angles. The address can have `?subject=`. Else the subject is
+        the preset `subject`, or the title of the page after the page
+        is read.
+
+    Options::
+
+        - `subject`: The subject of an address without one, up to 150
+          characters.
+        - `class`: More classes for the link.
     """
-    del name, content
-    try:
-        alt, rest = _split(text, "an address")
-    except ValueError as error:
-        return _reject(inliner, rawtext, lineno, f"email: {error}")
-    if rest is None:
-        alt, rest = "", alt
-    href, asked, subject = rest.partition("?")
-    href = href.strip()
-    if not checks.EMAIL.fullmatch(href):
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"email: expected an email address, got {href!r}",
+
+    subject = Option(functools.partial(checks.text, maximum=150), default="")
+
+    def run(self) -> Reply:
+        """Write the `mailto` link.
+
+        :return: One `reference` node, and no error messages.
+        :raises ValueError: When the address is wrong or asks for more
+            than a subject.
+        """
+        alt, rest = self.split("an address")
+        if rest is None:
+            alt, rest = "", alt
+        href, asked, subject = rest.partition("?")
+        href = href.strip()
+        if not checks.EMAIL.fullmatch(href):
+            self.fail(f"expected an email address, got {href!r}")
+        if asked:
+            key, equals, subject = subject.partition("=")
+            subject = tidy(subject)
+            if re.search(r"&[A-Za-z]+=", subject):
+                self.fail("expected only subject=text, got more after it")
+            if key.strip().lower() != "subject" or (not equals and subject):
+                self.fail(f"expected subject=text, got {key.strip()!r}")
+            if not subject:
+                self.fail("expected some text after subject=, got none")
+            if len(subject) > 150:
+                self.fail(
+                    "expected a subject up to 150 characters, got a longer one"
+                )
+        subject = subject or tidy(self.subject)
+        refuri = f"mailto:{href}"
+        if subject:
+            refuri += f"?subject={quote(unquote(subject))}"
+        link = nodes.reference(
+            self.rawtext, alt or href, refuri=refuri, classes=self.classes
         )
-    if asked:
-        key, equals, subject = subject.partition("=")
-        subject = tidy(subject)
-        if re.search(r"&[A-Za-z]+=", subject):
-            return _reject(
-                inliner,
-                rawtext,
-                lineno,
-                "email: expected only subject=text, got more after it",
-            )
-        if key.strip().lower() != "subject" or (not equals and subject):
-            return _reject(
-                inliner,
-                rawtext,
-                lineno,
-                f"email: expected subject=text, got {key.strip()!r}",
-            )
         if not subject:
-            return _reject(
-                inliner,
-                rawtext,
-                lineno,
-                "email: expected some text after subject=, got none",
-            )
-        if len(subject) > 150:
-            return _reject(
-                inliner,
-                rawtext,
-                lineno,
-                "email: expected a subject up to 150 characters, got a longer"
-                " one",
-            )
-    subject = subject or tidy(options.get("subject", ""))
-    refuri = f"mailto:{href}"
-    if subject:
-        refuri += f"?subject={quote(unquote(subject))}"
-    link = nodes.reference(
-        rawtext, alt or href, refuri=refuri, classes=_classes(options)
+            link["titled"] = True
+        return [link], []
+
+
+class Sharpie(KaamikiRole):
+    """The `sharpie` role, which puts a highlighter on some text.
+
+    Text::
+
+        `label` or `label <colour>`. The colour is a colour or one of
+        `kaamiki.conf.roles.colours`.
+
+    Options::
+
+        - `colour`: The colour of text without `<colour>`. The default
+          is `kaamiki.conf.roles.sharpie_colour`, which is yellow.
+        - `class`: More classes for the text.
+    """
+
+    base_classes = ("km-sharpie",)
+    colour = Option(checks.text, setting="sharpie_colour")
+
+    def run(self) -> Reply:
+        """Highlight the text.
+
+        :return: The highlighted text, and no error messages.
+        :raises ValueError: When the text is empty or the colour looks
+            like markup.
+        """
+        element, colour = self.split("a colour")
+        colour = _colour(self.config, colour or self.colour)
+        if not element:
+            self.fail(f"expected some text, got none in {self.said!r}")
+        style = f"--km-sharpie-colour: {colour};"
+        return [
+            Ink(self.rawtext, element, classes=self.classes, style=style)
+        ], []
+
+
+class Underline(KaamikiRole):
+    """The `underline` role, which draws a pencil line below some text.
+
+    Text::
+
+        `label`, `label <colour>` or `label <colour?width=3&wobble=0>`.
+        The width is from 0.5 to 4, and the wobble is from 0
+        (straight) to 2.
+
+    Options::
+
+        - `colour`: The colour of the line. The default is
+          `kaamiki.conf.roles.underline_colour`, which is orange.
+        - `width`: The thickness of the line. The default is
+          `kaamiki.conf.roles.underline_width`, which is 2.5.
+        - `wobble`: How much the line moves. The default is
+          `kaamiki.conf.roles.underline_wobble`, which is 1.
+        - `class`: More classes for the text.
+    """
+
+    base_classes = ("km-pencil",)
+    colour = Option(checks.text, setting="underline_colour")
+    width = Option(
+        checks.number(*BOUNDS["underline_width"]), setting="underline_width"
     )
-    if not subject:
-        link["titled"] = True
-    return [link], []
+    wobble = Option(
+        checks.number(*BOUNDS["underline_wobble"]),
+        setting="underline_wobble",
+    )
 
+    def run(self) -> Reply:
+        """Underline the text.
 
-@role(colour=checks.text)
-def sharpie(
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Put a highlighter on some text.
-
-    :param name: The name of the role, as written (unused).
-    :param rawtext: All of the role, with its markup.
-    :param text: The text in the role, as `label` or `label <colour>`.
-        The colour is a colour or one of `kaamiki.conf.roles.colours`.
-        Else it is the preset `colour`, or
-        `kaamiki.conf.roles.sharpie_colour`, which is yellow.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes and the `colour` of a custom role.
-    :param content: The content of the role (unused).
-    :return: The highlighted text, and the error messages when the
-        colour looks like markup.
-    """
-    del name, content
-    config = inliner.document.settings.env.config
-    preset = options.get("colour") or values(config).roles.sharpie_colour
-    try:
-        element, colour = _split(text, "a colour")
-        colour = _colour(config, colour or preset)
-    except ValueError as error:
-        return _reject(inliner, rawtext, lineno, f"sharpie: {error}")
-    if not element:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"sharpie: expected some text, got none in {unescape(text)!r}",
-        )
-    style = f"--km-sharpie-colour: {colour};"
-    classes = ["km-sharpie", *_classes(options)]
-    return [Ink(rawtext, element, classes=classes, style=style)], []
-
-
-@role(
-    colour=checks.text,
-    width=checks.number(*BOUNDS["underline_width"]),
-    wobble=checks.number(*BOUNDS["underline_wobble"]),
-)
-def underline(
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Draw a pencil underline below some text.
-
-    :param name: The name of the role, as written (unused).
-    :param rawtext: All of the role, with its markup.
-    :param text: The text in the role, as `label`, `label <colour>` or
-        `label <colour?width=3&wobble=0>`. The width is from 0.5 to 4,
-        and the wobble is from 0 (straight) to 2. The defaults are the
-        presets of a custom role, else
-        `kaamiki.conf.roles.underline_colour`, `underline_width` and
-        `underline_wobble`: orange, 2.5 and 1.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes, `colour`, `width` and `wobble` of a
-        custom role.
-    :param content: The content of the role (unused).
-    :return: The underlined text, and the error messages when the
-        colour looks like markup, or the width or the wobble is wrong.
-        A `#` and a `%` in the SVG are percent-encoded, as a data URI
-        needs (RFC 2397).
-    """
-    del name, content
-    config = inliner.document.settings.env.config
-    preset = options.get("colour") or values(config).roles.underline_colour
-    try:
-        element, rest = _split(text, "a colour or settings")
+        :return: The underlined text, and no error messages. A `#` and
+            a `%` in the SVG are percent-encoded, as a data URI needs
+            (RFC 2397).
+        :raises ValueError: When the text is empty, the colour looks
+            like markup, or the width or the wobble is wrong.
+        """
+        element, rest = self.split("a colour or settings")
         colour, asked, query = (rest or "").partition("?")
         if asked and not query.strip():
-            raise ValueError("expected width or wobble after ?, got none")
+            self.fail("expected width or wobble after ?, got none")
         given = _query(query)
-        colour = _colour(config, colour.strip() or preset)
-        width = _decimal(
-            given.pop("width", None),
-            "width",
-            options.get("width", values(config).roles.underline_width),
+        colour = _colour(self.config, colour.strip() or self.colour)
+        width = _decimal(given.pop("width", None), "width", self.width)
+        wobble = _decimal(given.pop("wobble", None), "wobble", self.wobble)
+        if given or not element:
+            self.fail(
+                f"expected some text and width or wobble, got"
+                f" {', '.join(given) or self.said!r}"
+            )
+        seed = f"{self.env.docname}:{self.lineno}:{self.rawtext}"
+        ltr, rtl = (
+            quote(_, safe="/:=,.' <>-")
+            for _ in _underline_svg(colour, seed, width, wobble)
         )
-        wobble = _decimal(
-            given.pop("wobble", None),
-            "wobble",
-            options.get("wobble", values(config).roles.underline_wobble),
+        style = (
+            f'--km-underline-forward: url("data:image/svg+xml,{ltr}");'
+            f' --km-underline-return: url("data:image/svg+xml,{rtl}");'
         )
-    except ValueError as error:
-        return _reject(inliner, rawtext, lineno, f"underline: {error}")
-    if given or not element:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"underline: expected some text and width or wobble, got"
-            f" {', '.join(given) or unescape(text)!r}",
-        )
-    seed = f"{inliner.document.settings.env.docname}:{lineno}:{rawtext}"
-    ltr, rtl = (
-        quote(_, safe="/:=,.' <>-")
-        for _ in _underline_svg(colour, seed, width, wobble)
-    )
-    style = (
-        f'--km-underline-forward: url("data:image/svg+xml,{ltr}");'
-        f' --km-underline-return: url("data:image/svg+xml,{rtl}");'
-    )
-    classes = ["km-pencil", *_classes(options)]
-    return [Ink(rawtext, element, classes=classes, style=style)], []
+        return [
+            Ink(self.rawtext, element, classes=self.classes, style=style)
+        ], []
 
 
 def _duration(argument: str | None) -> float:
@@ -849,322 +795,227 @@ def _duration(argument: str | None) -> float:
     return seconds
 
 
-@role(short=rst.directives.flag, duration=_duration)
-def ticker(
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Count a number up from zero.
+class Ticker(KaamikiRole):
+    """The `ticker` role, which counts a number up from zero.
 
-    :param name: The name of the role, as written (unused).
-    :param rawtext: All of the role, with its markup.
-    :param text: The text in the role, as `number`, then optional
-        `short` and `duration` after a `?`, in any sequence. `short`
-        writes the number with k, m or b. The duration is in `s` or
-        `ms`, from 0.1s to 5s, and the default is the preset or 2s. The
-        count starts when the number scrolls into view.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes, `short` and `duration` of a custom
-        role.
-    :param content: The content of the role (unused).
-    :return: The number, and the error messages when it is not a whole
-        number or a setting is wrong.
+    Text::
+
+        `number`, then optional `short` and `duration` after a `?`, in
+        any sequence. The count starts when the number scrolls into
+        view.
+
+    Options::
+
+        - `short`: Write the number with k, m or b.
+        - `duration`: How long the count takes, in `s` or `ms`, from
+          0.1s to 5s. The default is 2s.
+        - `class`: More classes for the number.
     """
-    del name, content
-    number, asked, rest = unescape(text).partition("?")
-    try:
+
+    base_classes = ("km-ticker",)
+    short = Option(rst.directives.flag)
+    duration = Option(_duration)
+
+    def run(self) -> Reply:
+        """Count the number.
+
+        :return: The number, and no error messages.
+        :raises ValueError: When it is not a whole number or a setting
+            is wrong.
+        """
+        number, asked, rest = self.said.partition("?")
         count = checks.integer(*map(int, BOUNDS["ticker"]))(number.strip())
         if asked and not rest.strip():
-            raise ValueError("expected short or duration after ?, got none")
+            self.fail("expected short or duration after ?, got none")
         given = _query(rest)
-    except ValueError as error:
-        return _reject(inliner, rawtext, lineno, f"ticker: {error}")
-    if given.get("short"):
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"ticker: expected short with no value, got {given['short']!r}",
-        )
-    short = given.pop("short", None) is not None or "short" in options
-    seconds = options.get("duration")
-    if "duration" in given:
-        try:
+        if given.get("short"):
+            self.fail(f"expected short with no value, got {given['short']!r}")
+        short = given.pop("short", None) is not None or self.short
+        seconds = self.duration
+        if "duration" in given:
             seconds = _duration(given.pop("duration"))
-        except ValueError as error:
-            return _reject(inliner, rawtext, lineno, f"ticker: {error}")
-    if given:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"ticker: expected short or duration, got {', '.join(given)}",
+        if given:
+            self.fail(f"expected short or duration, got {', '.join(given)}")
+        label = _short(count) if short else str(count)
+        style = (
+            f"--km-ticker-duration: {round(seconds * 1000)}ms;"
+            if seconds is not None
+            else ""
         )
-    label = _short(count) if short else str(count)
-    style = (
-        f"--km-ticker-duration: {round(seconds * 1000)}ms;"
-        if seconds is not None
-        else ""
-    )
-    classes = ["km-ticker", *_classes(options)]
-    return [Ink(rawtext, label, classes=classes, style=style)], []
+        return [
+            Ink(self.rawtext, label, classes=self.classes, style=style)
+        ], []
 
 
-def _turns(
-    role: str,
-    noun: str,
-    limit: int,
-    classes: list[str],
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-) -> Reply:
-    """Read the parts of `:swap:` or `:sweep:`.
+class Turns(KaamikiRole, abstract=True):
+    """The base of `swap` and `sweep`, whose parts take turns."""
 
-    :param role: The name of the role, for the messages.
-    :param noun: What the parts are, for the messages.
-    :param limit: The maximum characters of a part, counted as code
-        points.
-    :param classes: The classes of the text.
-    :param rawtext: All of the role, with its markup.
-    :param text: The text in the role.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :return: The first part, and the error messages when there are
-        fewer than two parts or a part is empty, too long or has a `|`.
+    noun: t.ClassVar[str]
+    limit: t.ClassVar[int]
+
+    def run(self) -> Reply:
+        """Read the parts, split by `|`.
+
+        :return: The first part, and no error messages.
+        :raises ValueError: When there are fewer than two parts, or a
+            part is empty, longer than `limit` code points or has a
+            `|`.
+        """
+        words = [tidy(unescape(_)) for _ in BAR.split(self.text)]
+        if len(words) < 2 or not all(words):
+            self.fail(
+                f"expected two or more {self.noun} split by |, got"
+                f" {self.said!r}"
+            )
+        barred = next((_ for _ in words if "|" in _), None)
+        if barred is not None:
+            self.fail(f"expected {self.noun} without |, got {barred!r}")
+        longest = max(words, key=len)
+        if len(longest) > self.limit:
+            self.fail(
+                f"expected {self.noun} up to {self.limit} characters, got"
+                f" {longest!r} with {len(longest)}"
+            )
+        attributes = {
+            "classes": self.classes,
+            "words": "|".join(words),
+            "support_smartquotes": False,
+        }
+        return [Swapper(self.rawtext, words[0], **attributes)], []
+
+
+class Swap(Turns):
+    """The `swap` role, which shows its words one after another.
+
+    Text::
+
+        The words, with `|` between them, each with a maximum of 45
+        code points. The page, its search and a reader without scripts
+        get the first word. On screen, the other words replace it one
+        by one, in the font, size and colour of the text around them,
+        and each letter rolls to the new letter from the left. In the
+        navbar, the sidebar, the breadcrumbs, a toctree or a link, the
+        first word stays as text. The words keep their quotes.
+
+    Options::
+
+        - `class`: More classes for the words.
     """
-    words = [tidy(unescape(_)) for _ in BAR.split(text)]
-    if len(words) < 2 or not all(words):
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"{role}: expected two or more {noun} split by |, got"
-            f" {unescape(text)!r}",
-        )
-    barred = next((_ for _ in words if "|" in _), None)
-    if barred is not None:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"{role}: expected {noun} without |, got {barred!r}",
-        )
-    longest = max(words, key=len)
-    if len(longest) > limit:
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"{role}: expected {noun} up to {limit} characters, got"
-            f" {longest!r} with {len(longest)}",
-        )
-    attributes = {
-        "classes": classes,
-        "words": "|".join(words),
-        "support_smartquotes": False,
-    }
-    return [Swapper(rawtext, words[0], **attributes)], []
+
+    base_classes = ("km-swap",)
+    noun = "words"
+    limit = SWAP_LENGTH
 
 
-@role()
-def swap(
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Change a word to the next word, again and again.
+class Sweep(Turns):
+    """The `sweep` role, which wipes its phrases in one after another.
 
-    :param name: The name of the role, as written (unused).
-    :param rawtext: All of the role, with its markup.
-    :param text: The words, with `|` between them, each with a maximum
-        of 45 code points. The page, its search and a reader without
-        scripts get the first word. On screen, the other words replace
-        it one by one, in the font, size and colour of the text around
-        them, and each letter rolls to the new letter from the left. In
-        the navbar, the sidebar, the breadcrumbs, a toctree or a link,
-        the first word stays as text. The words keep their quotes.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes of a custom role.
-    :param content: The content of the role (unused).
-    :return: The first word, and the error messages when there are
-        fewer than two words or a word is empty, too long or has a `|`.
-    """
-    del name, content
-    classes = ["km-swap", *_classes(options)]
-    return _turns(
-        "swap",
-        "words",
-        SWAP_LENGTH,
-        classes,
-        rawtext,
-        text,
-        lineno,
-        inliner,
-    )
+    Text::
 
-
-@role()
-def sweep(
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Wipe a title or a word out and the next one in, again and again.
-
-    :param name: The name of the role, as written (unused).
-    :param rawtext: All of the role, with its markup.
-    :param text: The phrases, with `|` between them, each a full title
-        or a word with a maximum of 120 code points. It is as `swap`,
-        but a light moves across the text, and the old phrase fades out
-        behind it as the new one comes in. The page, its search and a
-        reader without scripts get the first phrase. In the navbar, the
+        The phrases, with `|` between them, each a full title or a word
+        with a maximum of 120 code points. It is as `swap`, but a light
+        moves across the text, and the old phrase fades out behind it
+        as the new one comes in. The page, its search and a reader
+        without scripts get the first phrase. In the navbar, the
         sidebar, the breadcrumbs, a toctree or a link, the first phrase
         stays as text. The phrases keep their quotes.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes of a custom role.
-    :param content: The content of the role (unused).
-    :return: The first phrase, and the error messages when there are
-        fewer than two phrases or a phrase is empty, too long or has a
-        `|`.
+
+    Options::
+
+        - `class`: More classes for the phrases.
     """
-    del name, content
-    classes = ["km-swap", "km-sweep", *_classes(options)]
-    return _turns(
-        "sweep",
-        "phrases",
-        SWEEP_LENGTH,
-        classes,
-        rawtext,
-        text,
-        lineno,
-        inliner,
-    )
+
+    base_classes = ("km-swap", "km-sweep")
+    noun = "phrases"
+    limit = SWEEP_LENGTH
 
 
-def _icon(
-    style: str | None,
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Draw a Font Awesome icon.
+class Icon(KaamikiRole, name="fa-icon"):
+    """The `fa-icon` role, which draws a Font Awesome icon.
 
-    :param style: The Font Awesome style class, bound by `icon` and
-        `FaIcon.roles` at import, or `None` for
-        `kaamiki.conf.icons.style`. The roles are `fa-icon:brands`,
-        `fa-icon:light`, `fa-icon:regular`, `fa-icon:solid`,
-        `fa-icon:thin`, `fa-icon:duotone` and `fa-icon`.
-    :param name: The name of the role, as written (unused).
-    :param rawtext: All of the role, with its markup.
-    :param text: The text in the role: the name, then classes, with a
-        space between each.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes of a custom role.
-    :param content: The content of the role (unused).
-    :return: The icon, and the error messages when the name or a class
-        is not part of an icon.
+    Text::
+
+        The name, then classes, with a space between each. The classes
+        are Font Awesome sizes and animations, or classes like
+        `km-tone--red`.
+
+    Options::
+
+        - `class`: More classes for the icon.
     """
-    del name, content
-    config = inliner.document.settings.env.config
-    text = unescape(text)
-    if not text.split():
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            "fa-icon: expected an icon name, got none",
-        )
-    name, *classes = text.split()
-    name = name.removeprefix("fa-")
-    if not GLYPH.fullmatch(name):
-        return _reject(
-            inliner,
-            rawtext,
-            lineno,
-            f"fa-icon: expected a name like star, got {name!r}",
-        )
-    for found in classes:
-        if not checks.MODIFIERS.fullmatch(found):
-            return _reject(
-                inliner,
-                rawtext,
-                lineno,
-                "fa-icon: expected a Font Awesome size or animation, or a"
-                f" class like km-tone--red, got {found!r}",
-            )
-    spec = " ".join(filter(None, [style, f"fa-{name}"]))
-    try:
-        drawn = Icons.of(config).classes(spec).split()
-    except ValueError as error:
-        return _reject(inliner, rawtext, lineno, f"fa-icon: {error}")
-    return [
-        glyph(
-            rawtext,
-            classes=[*drawn, "km-glyph", *classes, *_classes(options)],
-        )
-    ], []
+
+    def __init__(self, style: str | None = None) -> None:
+        """Make the role for one Font Awesome style.
+
+        :param style: The Font Awesome style class, or `None` for
+            `kaamiki.conf.icons.style`. `FaIcon` makes the roles
+            `fa-icon:brands`, `fa-icon:light`, `fa-icon:regular`,
+            `fa-icon:solid`, `fa-icon:thin` and `fa-icon:duotone`.
+        """
+        super().__init__()
+        self.style = style
+
+    def run(self) -> Reply:
+        """Draw the icon.
+
+        :return: The icon, and no error messages.
+        :raises ValueError: When the name or a class is not part of an
+            icon.
+        """
+        if not self.said.split():
+            self.fail("expected an icon name, got none")
+        name, *classes = self.said.split()
+        name = name.removeprefix("fa-")
+        if not GLYPH.fullmatch(name):
+            self.fail(f"expected a name like star, got {name!r}")
+        for found in classes:
+            if not checks.MODIFIERS.fullmatch(found):
+                self.fail(
+                    "expected a Font Awesome size or animation, or a class"
+                    f" like km-tone--red, got {found!r}"
+                )
+        spec = " ".join(filter(None, [self.style, f"fa-{name}"]))
+        drawn = Icons.of(self.config).classes(spec).split()
+        classes = [*drawn, "km-glyph", *classes, *self.classes]
+        return [glyph(self.rawtext, classes=classes)], []
 
 
-def _keys(
-    system: str,
-    name: str,
-    rawtext: str,
-    text: str,
-    lineno: int,
-    inliner: states.Inliner,
-    options: dict[str, t.Any],
-    content: list[t.Any],
-) -> Reply:
-    """Write a keyboard shortcut as a system prints it.
+class Keys(KaamikiRole, name="kbd", alone=False):
+    """The `kbd:` roles, which write a shortcut as a system prints it.
 
-    :param system: The system, bound by `Kbd.roles` at import. The
-        roles are `kbd:mac`, `kbd:windows` and `kbd:linux`.
-    :param name: The name of the role, as written.
-    :param rawtext: All of the role, with its markup.
-    :param text: The keys, joined by `-`, `+` or `^`, as for the `kbd`
-        of Sphinx.
-    :param lineno: The line where the paragraph of the role starts, for
-        the error messages.
-    :param inliner: The docutils inliner that called the role.
-    :param options: The classes of a custom role.
-    :param content: The content of the role (unused).
-    :return: The keys, and no error messages.
+    Text::
+
+        The keys, joined by `-`, `+` or `^`, as for the `kbd` of
+        Sphinx.
+
+    Options::
+
+        - `class`: More classes for the keys.
     """
-    del content
-    classes = [*SYSTEMS[system], *_classes(options)]
-    options = {**options, "classes": classes}
-    return Keyboard()(name, rawtext, text, lineno, inliner, options)
 
+    def __init__(self, system: str) -> None:
+        """Make the role for one system.
 
-icon = KaamikiRole(functools.partial(_icon, None), name="fa-icon")
+        :param system: The system. `Kbd` makes the roles `kbd:mac`,
+            `kbd:windows` and `kbd:linux`.
+        """
+        super().__init__()
+        self.system = system
+
+    def run(self) -> Reply:
+        """Write the keys with the `kbd` role of Sphinx.
+
+        :return: The keys, and no error messages.
+        """
+        classes = [*SYSTEMS[self.system], *self.classes]
+        return Keyboard()(
+            f"{self.role}:{self.system}",
+            self.rawtext,
+            self.text,
+            self.lineno,
+            self.inliner,
+            {**self.options, "classes": classes},
+        )
 
 
 class CustomRole(misc.Role):
@@ -1225,7 +1076,7 @@ def subjects(app: Sphinx, doctree: nodes.document) -> None:
 class Quiet(Domain):
     """A domain without data, so a parallel build merges nothing."""
 
-    def role(self, name: str) -> KaamikiRole | None:
+    def role(self, name: str) -> RoleFunction | None:
         """Give docutils a role with its full name and options.
 
         :param name: The name of the role in the domain.
@@ -1233,14 +1084,7 @@ class Quiet(Domain):
             that name. The roles are `KaamikiRole` roles, so a custom
             role can use each of them as a base.
         """
-        found = self.roles.get(name)
-        if found is None:
-            return None
-        full = f"{self.name}:{name}"
-        return KaamikiRole(
-            lambda _, *rest: found(full, *rest),
-            getattr(found, "options", {}),
-        )
+        return self.roles.get(name)
 
     def merge_domaindata(
         self, docnames: AbstractSet[str], otherdata: dict[str, t.Any]
@@ -1258,8 +1102,7 @@ class FaIcon(Quiet):
     name: t.ClassVar[str] = "fa-icon"
     label: t.ClassVar[str] = "Font Awesome"
     roles = {  # noqa: RUF012
-        key: KaamikiRole(functools.partial(_icon, style))
-        for key, style in STYLE_CLASSES.items()
+        key: Icon(style) for key, style in STYLE_CLASSES.items()
     }
 
 
@@ -1268,6 +1111,4 @@ class Kbd(Quiet):
 
     name: t.ClassVar[str] = "kbd"
     label: t.ClassVar[str] = "Keyboard"
-    roles = {  # noqa: RUF012
-        key: KaamikiRole(functools.partial(_keys, key)) for key in SYSTEMS
-    }
+    roles = {key: Keys(key) for key in SYSTEMS}  # noqa: RUF012

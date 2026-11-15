@@ -46,6 +46,8 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
+    from kaamiki.extensions.roles import KaamikiRole
+
     Visitor = Callable[[HTMLTranslator, nodes.Element], None]
 
 OPTION: t.Final[re.Pattern[str]] = re.compile(
@@ -671,7 +673,7 @@ def listed(value: str) -> list[str]:
 
 
 class Option:
-    """An option of a Kaamiki directive, read as an attribute of it."""
+    """An option of a directive or a role, read as an attribute."""
 
     def __init__(
         self,
@@ -700,35 +702,68 @@ class Option:
     def __set_name__(self, owner: type, name: str) -> None:
         """Name the option as rST writes it, `class-title` for one.
 
-        :param owner: The directive.
+        :param owner: The directive or the role.
         :param name: The attribute. An underscore becomes a dash.
         """
         self.name = name.replace("_", "-")
 
-    @t.overload
-    def __get__(self, directive: None, owner: type) -> Option: ...
+    @classmethod
+    def of(cls, owner: type) -> dict[str, Option]:
+        """Collect the options of a class and of its parents.
+
+        :param owner: The directive or the role.
+        :return: Each option by its name in rST.
+        """
+        return {
+            each.name: each
+            for base in reversed(owner.__mro__)
+            for each in vars(base).values()
+            if isinstance(each, cls)
+        }
+
+    @staticmethod
+    def documented(owner: type, names: Iterable[str]) -> None:
+        """Make sure that the docstring lists each option.
+
+        :param owner: The directive or the role.
+        :param names: The options that it takes.
+        :raises TypeError: When the first `Options::` list of the
+            docstring does not list each option, and only them.
+        """
+        options = (owner.__doc__ or "").partition("Options::")[2]
+        listed = set(OPTION.findall(options.split("::\n", 1)[0]))
+        if listed != set(names):
+            raise TypeError(
+                f"{owner.__qualname__}: expected the docstring to list"
+                f" {sorted(names)}, got {sorted(listed)}"
+            )
 
     @t.overload
-    def __get__(self, directive: KaamikiDirective, owner: type) -> t.Any: ...
+    def __get__(self, user: None, owner: type) -> Option: ...
+
+    @t.overload
+    def __get__(
+        self, user: KaamikiDirective | KaamikiRole, owner: type
+    ) -> t.Any: ...
 
     def __get__(
-        self, directive: KaamikiDirective | None, owner: type
+        self, user: KaamikiDirective | KaamikiRole | None, owner: type
     ) -> t.Any:
-        """Read the value of the option in the directive.
+        """Read the value of the option in a directive or a role.
 
-        :param directive: The directive, or `None` on its class.
-        :param owner: The class of the directive.
+        :param user: The directive or the role, or `None` on its class.
+        :param owner: The class of the directive or the role.
         :return: For a flag, `True` when it is there. Else the checked
             value, the site setting or the default.
         """
-        if directive is None:
+        if user is None:
             return self
         if self.check is rst.directives.flag:
-            return self.name in directive.options
-        if self.name in directive.options:
-            return directive.options[self.name]
+            return self.name in user.options
+        if self.name in user.options:
+            return user.options[self.name]
         if self.setting:
-            return values(directive.config)[self.setting]
+            return values(user.config)[self.setting]
         return self.default
 
 
@@ -765,12 +800,7 @@ class KaamikiDirective(SphinxDirective):
         super().__init_subclass__(**kwargs)
         if abstract:
             return
-        found = {
-            each.name: each
-            for owner in reversed(cls.__mro__)
-            for each in vars(owner).values()
-            if isinstance(each, Option)
-        }
+        found = Option.of(cls)
         cls.option_spec = spec(
             {
                 **NATIVE,
@@ -784,13 +814,7 @@ class KaamikiDirective(SphinxDirective):
         if "Node" in vars(cls):
             cls.Node.__name__ = cls.__name__
             cls.Node.__qualname__ = f"{cls.__qualname__}.Node"
-        options = (cls.__doc__ or "").partition("Options::")[2]
-        listed = set(OPTION.findall(options.split("::\n", 1)[0]))
-        if listed != set(cls.option_spec):
-            raise TypeError(
-                f"{cls.__qualname__}: expected the docstring to list"
-                f" {sorted(cls.option_spec)}, got {sorted(listed)}"
-            )
+        Option.documented(cls, cls.option_spec)
         KaamikiDirective.registry[name or cls.__name__.lower()] = cls
 
     @classmethod
