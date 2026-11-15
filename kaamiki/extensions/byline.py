@@ -4,7 +4,7 @@ Byline Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 A `byline` directive that draws the byline under a page title::
 
@@ -28,6 +28,7 @@ from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import fields
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
@@ -228,6 +229,7 @@ def plain(node: Byline) -> list[nodes.Node]:
     return [nodes.paragraph("", "", *author.children)]
 
 
+@html.opens(Byline)
 def visit(self: HTMLTranslator, node: Byline) -> None:
     """Write the widget out when the HTML writer reaches the node.
 

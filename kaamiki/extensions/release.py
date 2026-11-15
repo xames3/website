@@ -4,7 +4,7 @@ Release Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 September 2026
-Last updated on: 11 November 2026
+Last updated on: 15 November 2026
 
 A `release` directive that writes one entry of a changelog::
 
@@ -41,6 +41,7 @@ from kaamiki.extensions.utils import ensure_articles
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import hollow
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
@@ -388,6 +389,7 @@ def plain(node: Release) -> list[nodes.Node]:
     return [nodes.paragraph("", line)] if line else [nodes.comment()]
 
 
+@html.opens(Release)
 def visit(self: HTMLTranslator, node: Release) -> None:
     """Write the date and version out as the HTML writer reaches them.
 

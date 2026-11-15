@@ -4,7 +4,7 @@ Carousel Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 04 November 2026
-Last updated on: 12 November 2026
+Last updated on: 15 November 2026
 
 A `carousel` directive that lays blocks, buttons, figures, pictures,
 repositories and thumbnails out in a row a reader swipes through::
@@ -37,15 +37,16 @@ from kaamiki.extensions import repository
 from kaamiki.extensions import thumbnail
 from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import fields
 from kaamiki.extensions.utils import hollow
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
-from kaamiki.extensions.utils import skip
 from kaamiki.extensions.utils import through
 from kaamiki.extensions.utils import titled
 from kaamiki.extensions.utils import what
@@ -62,6 +63,8 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "carousel"
+carousel: t.Final[Bem] = Bem("carousel")
+text: t.Final[Bem] = Bem("text")
 template: t.Final[str] = "directives/carousel.html.jinja"
 DIRECTIONS: t.Final[tuple[str, ...]] = ("right", "left")
 CARDS: t.Final[int] = 2
@@ -87,6 +90,9 @@ class Carousel(nodes.container):
 
 class carouseltext(phrase):
     """A line of the carousel's heading, waiting for `visit`."""
+
+
+html.skips(carouseltext)
 
 
 def is_trail(found: nodes.Node) -> bool:
@@ -280,25 +286,24 @@ class directive(rst.Directive):
         return [element, *messages]
 
 
+@html.opens(Carousel)
 def visit(self: HTMLTranslator, node: Carousel) -> None:
     """Open the carousel and the track its items scroll along.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The carousel's node.
     """
-    classes = ["km-carousel"]
-    if node["titled"]:
-        classes.append("km-carousel--titled")
+    modifiers = ["titled"] if node["titled"] else []
     styles: list[str] = []
     if node["gap"] in SIZES:
         if node["gap"] != "small":
-            classes.append(f"km-carousel--gap-{node['gap']}")
+            modifiers.append(f"gap-{node['gap']}")
     else:
         styles.append(f"--km-carousel-gap: {checks.lengths(node['gap'])[1]}")
     if node["cards"] not in (None, CARDS):
-        classes.append(f"km-carousel--cards-{node['cards']}")
+        modifiers.append(f"cards-{node['cards']}")
     attributes: dict[str, t.Any] = {
-        "CLASS": " ".join(classes),
+        "CLASS": carousel(*modifiers),
         "role": "group",
         "aria-roledescription": "carousel",
         "data-km-carousel": "",
@@ -321,14 +326,15 @@ def visit(self: HTMLTranslator, node: Carousel) -> None:
         for field in ("preheader", "title", "subheader"):
             if field in lines:
                 label = f' id="{ident}"' if field == "title" else ""
-                more = " km-text--preheader" if field == "preheader" else ""
+                more = [text["preheader"]] if field == "preheader" else []
+                classes = getattr(carousel, field)(more=more)
                 self.body.append(
-                    f'<p class="km-carousel__{field}{more}"{label}>'
-                    f"{lines[field]}</p>"
+                    f'<p class="{classes}"{label}>{lines[field]}</p>'
                 )
-    self.body.append('<div class="km-carousel__track">')
+    self.body.append(f'<div class="{carousel.track()}">')
 
 
+@html.closes(Carousel)
 def depart(self: HTMLTranslator, node: Carousel) -> None:
     """Close the track, write the arrows or the dots and close the carousel.
 
@@ -339,7 +345,9 @@ def depart(self: HTMLTranslator, node: Carousel) -> None:
     if node["arrows"]:
         self.body.append(render(template))
     if node["dots"]:
-        self.body.append('<div class="km-carousel__dots" aria-hidden="true">')
+        self.body.append(
+            f'<div class="{carousel.dots()}" aria-hidden="true">'
+        )
         self.body.append("</div>")
     self.body.append("</div>")
 
@@ -390,11 +398,10 @@ def plain(node: Carousel) -> list[nodes.Node]:
 
 
 def register(app: Sphinx) -> None:
-    """Register the heading's node and the check on each carousel.
+    """Register the check on each carousel.
 
     :param app: The Sphinx application instance.
     """
-    app.add_node(carouseltext, html=(skip, None))
     app.connect("doctree-resolved", emptied)
 
 

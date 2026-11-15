@@ -356,6 +356,13 @@ class Renderer:
             return None
         return functools.partial(self._record, node, 1)
 
+    def skips(self, node: type[nodes.Element]) -> None:
+        """Record that the HTML builder does not write a node.
+
+        :param node: The node that the HTML builder leaves out.
+        """
+        self._record(node, 0, skip)
+
     def register(self, app: Sphinx) -> None:
         """Give Sphinx each node in the record and how each builder writes it.
 
