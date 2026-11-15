@@ -98,9 +98,9 @@ PROJECT: t.Final[dict[str, str]] = {
 FA_FREE: t.Final[str] = (
     "https://ka-f.fontawesome.com/releases/v7.3.1/css/free.min.css"
 )
-# NOTE(xames3): The hash of the stylesheet above, which has to be worked
-# out again when the release changes: `openssl dgst -sha384 -binary
-# free.min.css | openssl base64 -A`.
+# NOTE(xames3): The hash of the stylesheet above, which has to be
+# worked out again when the release changes: `openssl dgst -sha384
+# -binary free.min.css | openssl base64 -A`.
 # https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
 FA_FREE_INTEGRITY: t.Final[str] = (
     "sha384-eX9o/tJQBecFQ7gYpZvr9Gkhl26eYO6KrYj5maf6JhoXmZ2sLSycaT48proNJxFq"

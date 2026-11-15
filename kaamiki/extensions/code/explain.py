@@ -157,8 +157,8 @@ PACES: t.Final[tuple[tuple[int, frozenset[str]], ...]] = (
 )
 
 
-# NOTE(xames3): docutils already has a `caption` node and finds visitors
-# by class name, so the heading can't borrow that one.
+# NOTE(xames3): docutils already has a `caption` node and finds
+# visitors by class name, so the heading can't borrow that one.
 class Heading(nodes.paragraph):
     """The caption, parsed as rST, and the icon of the language."""
 

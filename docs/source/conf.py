@@ -22,8 +22,8 @@ if t.TYPE_CHECKING:
 
 project: t.Final[str] = "Akshay Mestry"
 author: t.Final[str] = "Akshay Mestry"
-# NOTE(xames3): `SOURCE_DATE_EPOCH` keeps the copyright year of a rebuild
-# the same, whatever year it happens in.
+# NOTE(xames3): `SOURCE_DATE_EPOCH` keeps the copyright year of a
+# rebuild the same, whatever year it happens in.
 # https://reproducible-builds.org/specs/source-date-epoch/
 epoch: t.Final[str | None] = os.environ.get("SOURCE_DATE_EPOCH")
 year: t.Final[int] = (

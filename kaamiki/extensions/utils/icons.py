@@ -472,9 +472,9 @@ def _names(listed: str) -> frozenset[str]:
     return frozenset(listed.split())
 
 
-# HACK(xames3): The names below are copied from Font Awesome Free 7.3.1,
-# so the build doesn't have to install or read the package. Copy them
-# again when `FA_FREE` points at another release.
+# HACK(xames3): The names below are copied from Font Awesome Free
+# 7.3.1, so the build doesn't have to install or read the package. Copy
+# them again when `FA_FREE` points at another release.
 FREE_BRANDS: t.Final[frozenset[str]] = _names(
     """
     11ty 42-group 500px a11y-project accessible-icon accusoft adn adversal

@@ -181,7 +181,7 @@ force-single-line = true
 known-first-party = ["kaamiki"]
 
 [tool.ruff.lint.pycodestyle]
-max-doc-length = 80
+max-doc-length = 71
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
