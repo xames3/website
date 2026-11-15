@@ -21,7 +21,7 @@ from kaamiki.extensions.utils.directives import toggle
 from kaamiki.extensions.utils.doctree import alternatives
 from kaamiki.extensions.utils.doctree import annotated
 from kaamiki.extensions.utils.hooks import on
-from kaamiki.extensions.utils.settings import setting
+from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -78,7 +78,7 @@ def reading_time(doctree: nodes.document | None, config: Config) -> int:
         `kaamiki.conf.site.words_per_minute`.
     :return: Minutes, rounded up.
     """
-    speed: int = setting(config, "words_per_minute")
+    speed: int = values(config).site.words_per_minute
     return ceil(wordcount(doctree) / speed)
 
 
@@ -106,12 +106,12 @@ def show_more(
     """
     del pagename, templatename
     config = app.config
-    after = setting(config, "show_more_after")
+    after = values(config).show.more_after
     meta: dict[str, str] = context.get("meta") or {}
     on = (
         toggle(meta["km-show-more"])
         if "km-show-more" in meta
-        else setting(config, "show_more")
+        else values(config).show.more
     )
     long_enough = reading_time(doctree, config) >= after
     context["km_show_more"] = bool(on and long_enough)

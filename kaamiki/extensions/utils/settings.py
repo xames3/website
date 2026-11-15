@@ -468,6 +468,7 @@ class Value[T]:
         self.reread = reread
         self.page = page
         self.attr = ""
+        self.group = ""
 
     def __set_name__(self, owner: type, name: str) -> None:
         """Keep the name of the attribute.
@@ -546,6 +547,7 @@ class Settings:
         start = cls.name if prefix is None else prefix
         for each in cls.values():
             each.key = each.key or "_".join(filter(None, (start, each.attr)))
+            each.group = cls.name
             if each.choices:
                 each.rule = checks.word(*each.choices)
             elif each.number is int:
@@ -866,6 +868,16 @@ class Root(Settings, name=""):
                 f"{self.path(attr)} is a group, set one of its settings"
             )
         super().__setattr__(attr, value)
+
+    def __getitem__(self, key: str) -> t.Any:
+        """Read a setting by its key, for a key that is known only later.
+
+        :param key: The key of the setting, as `show_more`.
+        :return: The value, as the attribute of its group gives it.
+        """
+        value = Settings.schema[key]
+        group = getattr(self, value.group) if value.group else self
+        return getattr(group, value.attr)
 
     def __dir__(self) -> list[str]:
         """List the settings of no group, then the groups.

@@ -26,7 +26,7 @@ from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.links import guarded
 from kaamiki.extensions.utils.links import opens_new_tab
-from kaamiki.extensions.utils.settings import setting
+from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.text import levelled
 
 if t.TYPE_CHECKING:
@@ -79,7 +79,7 @@ class translator(base):
         icon: str = self.config.html_permalinks_icon
         if icon.strip() in PILCROW:
             icon = ""
-        if setting(self.config, "copy_headerlinks"):
+        if values(self.config).site.copy_headerlinks:
             return f' aria-label="{html.escape(str(_("Copy link")))}"', icon
         return f' title="{title}"', icon
 
@@ -113,8 +113,9 @@ class translator(base):
         :param node: The section's title.
         :return: The opening and the closing markup.
         """
-        if not node.hasattr("refid") or not setting(
-            self.config, "copy_headerlinks"
+        if (
+            not node.hasattr("refid")
+            or not values(self.config).site.copy_headerlinks
         ):
             return super().section_title_tags(node)
         refid = node["refid"]

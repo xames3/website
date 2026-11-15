@@ -28,7 +28,7 @@ from sphinx.writers.texinfo import TexinfoTranslator
 from sphinx.writers.text import TextTranslator
 
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils.settings import setting
+from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.templates import render
 
 if t.TYPE_CHECKING:
@@ -730,7 +730,7 @@ class Option:
         if self.name in directive.options:
             return directive.options[self.name]
         if self.setting:
-            return setting(directive.config, self.setting)
+            return values(directive.config)[self.setting]
         return self.default
 
 

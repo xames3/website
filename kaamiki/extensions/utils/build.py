@@ -30,7 +30,7 @@ from sphinx.util import logging
 from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import youtube_still_id
-from kaamiki.extensions.utils.settings import setting
+from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -89,7 +89,7 @@ def not_found(app: Sphinx) -> bool:
     builder = app.builder
     if not isinstance(builder, StandaloneHTMLBuilder):
         return False
-    if not setting(app.config, "show_404"):
+    if not values(app.config).show.not_found:
         return False
     if NOT_FOUND in app.env.found_docs:
         logger.info(
@@ -153,7 +153,7 @@ def sitemap(app: Sphinx) -> bool:
     :return: `True` when the sitemap was written.
     """
     home = app.config.html_baseurl
-    if not home or not setting(app.config, "show_sitemap"):
+    if not home or not values(app.config).show.sitemap:
         return False
     home = home.rstrip("/") + "/"
     urls: list[str] = []

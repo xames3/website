@@ -4,7 +4,7 @@ Font Awesome Icons
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 11 November 2026
+Last updated on: 15 November 2026
 
 Every icon Kaamiki draws, as a Pro icon and the Free one that stands in
 for it.
@@ -319,11 +319,11 @@ class Icons:
         :param config: The Sphinx configuration.
         :return: The site's icons.
         """
-        from kaamiki.extensions.utils.settings import setting
+        from kaamiki.extensions.utils.settings import values
 
         return cls(
-            kit=read_kit(setting(config, "fa_kit")),
-            style=setting(config, "fa_style"),
+            kit=read_kit(values(config).icons.kit),
+            style=values(config).icons.style,
         )
 
     def classes(self, spec: str) -> str:

@@ -24,7 +24,7 @@ from kaamiki.extensions.utils.doctree import summarise
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import absolute
 from kaamiki.extensions.utils.settings import DESCRIPTION_LENGTH
-from kaamiki.extensions.utils.settings import setting
+from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.text import plain
 from kaamiki.extensions.utils.text import tidy
 
@@ -106,7 +106,7 @@ def social_metadata(
         pages.
     """
     del templatename
-    options = setting(app.config, "open_graph")
+    options = values(app.config).site.open_graph
     meta: dict[str, str] = context.get("meta") or {}
     limit = int(options.get("description_length", DESCRIPTION_LENGTH))
     made = generated(pagename) if doctree is None else None

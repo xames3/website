@@ -27,7 +27,7 @@ from sphinx.util.i18n import format_date
 
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.hooks import on
-from kaamiki.extensions.utils.settings import setting
+from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
     from docutils import nodes
@@ -221,7 +221,7 @@ def dated(when: dt, config: Config) -> str:
     """
     form = (
         config.html_last_updated_fmt
-        or setting(config, "last_updated_fmt")
+        or values(config).site.last_updated_fmt
         or str(_("%d %B %Y"))
     )
     return format_date(form, date=when, language=config.language or "en")
