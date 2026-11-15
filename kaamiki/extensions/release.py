@@ -22,6 +22,7 @@ A `release` directive that writes one entry of a changelog::
 
 from __future__ import annotations
 
+import functools
 import re
 import typing as t
 from datetime import datetime as dt
@@ -125,7 +126,9 @@ class Release(KaamikiDirective, motion=True):
     final_argument_whitespace = True
     version = Option(release_version)
     article = Option(checks.text)
-    article_label = Option(lambda _: checks.text(_, 60), needs="article")
+    article_label = Option(
+        functools.partial(checks.text, maximum=60), needs="article"
+    )
     date = Option(checks.text)
     target = Option(checks.link)
 

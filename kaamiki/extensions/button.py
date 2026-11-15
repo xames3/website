@@ -26,6 +26,7 @@ address, so the link works under every builder::
 from __future__ import annotations
 
 import colorsys
+import functools
 import re
 import typing as t
 
@@ -200,7 +201,7 @@ class Button(KaamikiDirective):
     new_tab = Option(rst.directives.flag)
     same_tab = Option(rst.directives.flag)
     rel = Option(rel)
-    tooltip = Option(lambda _: checks.text(_, 120))
+    tooltip = Option(functools.partial(checks.text, maximum=120))
     download = Option(download)
 
     class Node(nodes.Element):

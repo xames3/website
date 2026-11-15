@@ -12,6 +12,7 @@ The utilities that fill a page's context for the templates.
 from __future__ import annotations
 
 import difflib
+import functools
 import json
 import re
 import typing as t
@@ -246,10 +247,10 @@ FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
     "km-feedback-title": checks.text,
     "km-feedback-type": checks.word("mail", "link"),
     "km-feedback-url": checks.link,
-    "km-header-subheader": lambda _: checks.text(_, 120),
+    "km-header-subheader": functools.partial(checks.text, maximum=120),
     "km-page-backdrop": checks.picture,
     "km-page-card": checks.word(*CARDS),
-    "km-page-description": lambda _: checks.text(_, 300),
+    "km-page-description": functools.partial(checks.text, maximum=300),
     "km-page-image": checks.link,
     "km-page-image-alt": checks.text,
     "km-page-language": checks.language,
@@ -259,10 +260,10 @@ FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
     "km-page-robots": lambda _: [
         checks.word(*ROBOTS)(each.strip()) for each in _.split(",")
     ],
-    "km-page-title": lambda _: checks.text(_, 120),
+    "km-page-title": functools.partial(checks.text, maximum=120),
     "km-page-type": OG_TYPE,
     "km-related-docs": pages,
-    "km-related-header": lambda _: checks.text(_, 120),
+    "km-related-header": functools.partial(checks.text, maximum=120),
 }
 
 

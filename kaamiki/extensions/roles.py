@@ -623,7 +623,7 @@ def stylise(
     ], []
 
 
-@role(subject=lambda _: checks.text(_, 150))
+@role(subject=functools.partial(checks.text, maximum=150))
 def email(
     name: str,
     rawtext: str,
