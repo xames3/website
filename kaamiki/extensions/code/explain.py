@@ -100,6 +100,7 @@ from kaamiki.extensions.code.tracer import execute
 from kaamiki.extensions.code.tracer import replay
 from kaamiki.extensions.code.tracer import show
 from kaamiki.extensions.utils import BEM
+from kaamiki.extensions.utils import Kaamiki
 from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import annotated
@@ -890,7 +891,7 @@ def depart_heading(self: HTMLTranslator, node: Heading) -> None:
     :param self: The HTML translator, whose body this appends to.
     :param node: The header node.
     """
-    icons = self.builder.config.html_context["km_fa_icons"]
+    icons = Kaamiki.of(self.builder).icons.roles
     if node.children:
         self.body.append("</span>")
         self.body.append(controls(icons))

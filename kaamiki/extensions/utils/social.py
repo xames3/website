@@ -24,6 +24,7 @@ from kaamiki.extensions.utils.doctree import summarise
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import absolute
 from kaamiki.extensions.utils.settings import DESCRIPTION_LENGTH
+from kaamiki.extensions.utils.settings import NAME
 from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.text import plain
 from kaamiki.extensions.utils.text import tidy
@@ -124,7 +125,7 @@ def social_metadata(
     alt = meta.get("km-page-image-alt") or (
         options.get("image_alt", "") if image == options.get("image") else ""
     )
-    context["km_social"] = {
+    context[NAME]["site.open_graph"] = {
         "title": title,
         "description": tidy(description),
         "image": absolute(image, app.config.html_baseurl),

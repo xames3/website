@@ -74,6 +74,7 @@ from kaamiki.extensions.utils.links import youtube_still_id
 from kaamiki.extensions.utils.reading import reading_time
 from kaamiki.extensions.utils.reading import show_more
 from kaamiki.extensions.utils.settings import CONF
+from kaamiki.extensions.utils.settings import Kaamiki
 from kaamiki.extensions.utils.settings import apply
 from kaamiki.extensions.utils.settings import kept
 from kaamiki.extensions.utils.settings import overrides
@@ -91,6 +92,7 @@ __all__: list[str] = [
     "BEM",
     "CONF",
     "TEMPLATES",
+    "Kaamiki",
     "KaamikiDirective",
     "Option",
     "admonition_title",

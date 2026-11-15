@@ -21,6 +21,7 @@ https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
 from __future__ import annotations
 
 import copy
+import difflib
 import json
 import os
 import os.path as p
@@ -28,6 +29,7 @@ import re
 import sys
 import typing as t
 from datetime import datetime as dt
+from types import MappingProxyType
 
 from sphinx.locale import _
 from sphinx.util import logging
@@ -42,6 +44,7 @@ if t.TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sphinx.application import Sphinx
+    from sphinx.builders import Builder
     from sphinx.config import Config
     from sphinx.environment import BuildEnvironment
 
@@ -1223,6 +1226,130 @@ def values(config: Config) -> Root:
     :return: The settings, as `values(config).show.more`.
     """
     return Root(Configured(config))
+
+
+def frozen(value: t.Any) -> t.Any:
+    """Make a value that no one can change.
+
+    :param value: The value.
+    :return: A dictionary as a read-only mapping and a list as a tuple,
+        with each item made the same. Other values stay as they are.
+    """
+    if isinstance(value, MappingProxyType):
+        return value
+    if isinstance(value, dict):
+        return MappingProxyType({k: frozen(v) for k, v in value.items()})
+    if isinstance(value, list | tuple):
+        return tuple(frozen(_) for _ in value)
+    return value
+
+
+class Kaamiki:
+    """The values of Kaamiki for the templates, as `kaamiki.show`."""
+
+    __slots__ = ("_page", "_path", "_values")
+    _page: bool
+    _path: str
+    _values: dict[str, t.Any]
+
+    def __init__(
+        self, path: str, values: Mapping[str, t.Any], *, page: bool = False
+    ) -> None:
+        """Keep the values of a group.
+
+        :param path: The name of the group, as `kaamiki.show`.
+        :param values: The values of the group, by name.
+        :param page: Whether this is the copy of one page, which the
+            handlers of the page can change.
+        """
+        object.__setattr__(self, "_page", page)
+        object.__setattr__(self, "_path", path)
+        object.__setattr__(
+            self, "_values", {k: frozen(v) for k, v in values.items()}
+        )
+
+    @classmethod
+    def of(cls, builder: Builder) -> Kaamiki:
+        """Read the values that Kaamiki made for the build.
+
+        :param builder: The builder, which holds the values. They are
+            not pickled.
+        :return: The values, as `Kaamiki.of(builder).show.breadcrumbs`.
+        """
+        found: Kaamiki = builder.__dict__["km_kaamiki"]
+        return found
+
+    def __getattr__(self, name: str) -> t.Any:
+        """Read a value, or stop for a name that is not one.
+
+        :param name: The name, as `breadcrumbs`.
+        :return: The value.
+        :raises AttributeError: For a name that starts with `_`, which
+            Python and Jinja ask for.
+        :raises KaamikiError: For another name that is not a value,
+            with the nearest name.
+        """
+        if name.startswith("_"):
+            raise AttributeError(name)
+        if name not in self._values:
+            near = difflib.get_close_matches(name, self._values, n=1)
+            fail(
+                f"{self._path}.{name}: expected a Kaamiki value, got an"
+                " unknown name"
+                + (f"; did you mean {self._path}.{near[0]}?" if near else "")
+            )
+        return self._values[name]
+
+    def __setattr__(self, name: str, value: t.Any) -> None:
+        """Refuse a change.
+
+        :param name: The name.
+        :param value: The value.
+        :raises TypeError: Always.
+        """
+        raise TypeError(f"{self._path}.{name}: expected no change")
+
+    def __setitem__(self, path: str, value: t.Any) -> None:
+        """Change a value for one page.
+
+        :param path: The value, as `show.breadcrumbs`.
+        :param value: The value for the page.
+        :raises TypeError: For the values of the site.
+        """
+        group, _, name = path.rpartition(".")
+        if not self._page:
+            raise TypeError(f"{self._path}.{path}: expected no change")
+        found = getattr(self, group) if group else self
+        found._values[name] = frozen(value)
+
+    def __copy__(self) -> Kaamiki:
+        """Copy the groups for one page.
+
+        :return: The copy, whose values the handlers of the page can
+            change. The values themselves are not copied.
+        """
+        return Kaamiki(
+            self._path,
+            {
+                k: copy.copy(v) if isinstance(v, Kaamiki) else v
+                for k, v in self._values.items()
+            },
+            page=True,
+        )
+
+    def __dir__(self) -> list[str]:
+        """List the names of the group.
+
+        :return: The names.
+        """
+        return list(self._values)
+
+    def __repr__(self) -> str:
+        """Show the group and its names.
+
+        :return: The name of the group and its names.
+        """
+        return f"<{self._path}: {', '.join(self._values)}>"
 
 
 @on("config-inited")

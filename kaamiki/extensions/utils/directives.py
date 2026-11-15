@@ -610,15 +610,10 @@ def visitor(
     """
 
     def visit(self: HTMLTranslator, node: nodes.Element) -> None:
-        icons = self.builder.config.html_context["km_fa_icons"]
         attributes = dict(node.attributes)
         if prepare is not None:
             attributes = prepare(self, attributes)
-        self.body.append(
-            render(
-                template, fa_icons=icons, **attributes, **fields(self, node)
-            )
-        )
+        self.body.append(render(template, **attributes, **fields(self, node)))
         raise nodes.SkipNode
 
     return visit

@@ -4,7 +4,7 @@ Previous and Next Pages Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 07 November 2026
+Last updated on: 15 November 2026
 #}
 {%- from "components/chevron.html.jinja" import km_chevron_icon -%}
 {%- macro km_related_section(km_related) -%}
@@ -65,9 +65,9 @@ Last updated on: 07 November 2026
     </div>
 {%- endmacro -%}
 {%- set km_link = "km-pagination__link" -%}
-{%- if km_related %}
-    {{ km_related_section(km_related) }}
-{%- elif km_show_previous_next_pages|tobool and (prev or next) %}
+{%- if kaamiki.page.related %}
+    {{ km_related_section(kaamiki.page.related) }}
+{%- elif kaamiki.show.previous_next_pages|tobool and (prev or next) %}
     <nav class="km-pagination"
          aria-label="{{ _('Pagination') }}">
         {%- for page, classes, label in [

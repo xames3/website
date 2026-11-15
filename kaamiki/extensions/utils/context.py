@@ -7,18 +7,16 @@ Created on: 08 October 2026
 Last updated on: 15 November 2026
 
 The utilities that fill the context of a page for the templates. The
-templates can use only these names: the settings that
-`context_defaults` copies with a `km_` prefix, and `km_fa_icons`,
-`km_fa_kit`, `km_fa_css`, `km_fa_integrity`, `km_project`,
-`km_license`, `km_header_buttons`, `km_sidebar_buttons`,
-`km_toctree_args`, `km_credit`, `km_credit_new_tab`, `km_rel` and
-`km_site`. The handlers for each page also set `km_author`,
-`km_feedback`, `km_header_toctree`, `km_social` and `km_updated_on`. A
-template of a site that reads a different setting must read it itself.
+templates read one read-only value, `kaamiki`, with the paths of
+`kaamiki.conf`: `kaamiki.show.breadcrumbs` for
+`kaamiki.conf.show.breadcrumbs`. `made` makes it one time for the
+build, and each page gets a copy that its handlers change. A name that
+is not a value stops the build.
 """
 
 from __future__ import annotations
 
+import copy
 import difflib
 import functools
 import json
@@ -57,15 +55,21 @@ from kaamiki.extensions.utils.settings import FA_FREE_INTEGRITY
 from kaamiki.extensions.utils.settings import HEADER_LEAD_LENGTH
 from kaamiki.extensions.utils.settings import HEADER_NO_SUBHEADER_FIELD
 from kaamiki.extensions.utils.settings import HEADER_SUBHEADER_FIELD
+from kaamiki.extensions.utils.settings import NAME
 from kaamiki.extensions.utils.settings import OG_LOCALE
 from kaamiki.extensions.utils.settings import OG_TYPE
 from kaamiki.extensions.utils.settings import PAGE_SWITCHES
 from kaamiki.extensions.utils.settings import PROJECT
+from kaamiki.extensions.utils.settings import Kaamiki
+from kaamiki.extensions.utils.settings import Root
+from kaamiki.extensions.utils.settings import Settings
 from kaamiki.extensions.utils.settings import kept
+from kaamiki.extensions.utils.settings import option
 from kaamiki.extensions.utils.settings import site_values
 from kaamiki.extensions.utils.settings import stored
 from kaamiki.extensions.utils.settings import validate
 from kaamiki.extensions.utils.settings import values
+from kaamiki.extensions.utils.templates import environment
 from kaamiki.extensions.utils.text import clip
 from kaamiki.extensions.utils.text import levelled
 from kaamiki.extensions.utils.text import plain
@@ -76,6 +80,7 @@ if t.TYPE_CHECKING:
 
     from sphinx.application import Sphinx
     from sphinx.builders.html import StandaloneHTMLBuilder
+    from sphinx.config import Config
     from sphinx.environment import BuildEnvironment
 
 logger = logging.getLogger(__name__)
@@ -90,90 +95,20 @@ def confdir(env: BuildEnvironment) -> str:
     return str(stored(env, "confdir", ""))
 
 
-TEMPLATE_KEYS: t.Final[tuple[str, ...]] = (
-    "colour_mode",
-    "copy_headerlinks",
-    "embed_js_loading",
-    "favicons",
-    "logo_size",
-    "logos",
-    "media_enlarge",
-    "motion_page_transitions",
-    "motion_prefetch",
-    "motion_speed",
-    "show_breadcrumbs",
-    "show_credit",
-    "show_feedback",
-    "show_more",
-    "show_more_after",
-    "show_page_last_updated",
-    "show_previous_next_cards",
-    "show_previous_next_cards_count",
-    "show_previous_next_pages",
-    "show_scrolltop",
-    "show_searchbox",
-    "toctree_in_header",
-    "toctree_titles_only",
-)
-
-
 @on("builder-inited")
 def context_defaults(app: Sphinx) -> None:
-    """Fill the `html_context` keys that the templates expect.
+    """Check the settings and make the values for the templates.
 
     :param app: The Sphinx application instance. On `builder-inited`,
         this checks each setting with `validate`, records the folder of
-        `conf.py`, and copies each setting for the templates with a
-        `km_` prefix, so that a missing setting gives its default.
-        `km_show_feedback` comes from the email of the project and the
-        feedback link when `show_feedback` is not set. Kaamiki has no
-        general index, so `html_use_index` goes off. The credit of
-        Sphinx is hidden unless the site sets `html_show_sphinx`.
+        `conf.py`, and makes the values of `made` one time, on the
+        builder. Kaamiki has no general index, so `html_use_index` goes
+        off.
     """
     validate(app)
     kept(app.env, "confdir", str(app.confdir))
     config = app.config
-    context: dict[str, t.Any] = config.html_context
-    for key in TEMPLATE_KEYS:
-        context[f"km_{key}"] = values(config)[key]
-    icons = Icons.of(config)
-    context["km_fa_icons"] = icons.roles(values(config).icons.names)
-    context["km_fa_kit"] = icons.kit
-    author = config.author
-    if author == config.values["author"].default:
-        author = ""
-    project = {**PROJECT, "author": author, **values(config).site.project}
-    context["km_project"] = project
-    if context["km_show_feedback"] is None:
-        context["km_show_feedback"] = bool(
-            project["email"] or values(config).site.feedback.get("url")
-        )
-    depth = values(config).toctree.maxdepth
-    context["km_toctree_args"] = {
-        "includehidden": values(config).toctree.includehidden,
-        **({"maxdepth": depth} if depth else {}),
-    }
-    terms = values(config).site.license
-    context["km_license"] = {
-        **terms,
-        "new_tab": opens_new_tab(terms.get("url") or "", config),
-    }
-    for key in ("header_buttons", "sidebar_buttons"):
-        context[f"km_{key}"] = {
-            text: {
-                **button,
-                "icon": icons.custom(button.get("icon")),
-                "new_tab": opens_new_tab(button["url"], config),
-            }
-            for text, button in values(config)[key].items()
-        }
-    context["km_credit"] = CREDIT
-    context["km_credit_new_tab"] = opens_new_tab(CREDIT, config)
-    context["km_fa_css"] = FA_FREE
-    context["km_fa_integrity"] = FA_FREE_INTEGRITY
-    context["km_rel"] = REL
     named = site_values(config)
-    context["km_site"] = str(named.get("html_title") or config.project)
     if "html_use_index" in named and config.html_use_index:
         logger.warning(
             "html_use_index: expected False or nothing, got True; Kaamiki"
@@ -185,8 +120,118 @@ def context_defaults(app: Sphinx) -> None:
     config.html_use_index = False
     if writes_pages(app):
         t.cast("StandaloneHTMLBuilder", app.builder).use_index = False
-    if "html_show_sphinx" not in named:
-        context.setdefault("show_sphinx", False)
+    found = made(config)
+    app.builder.__dict__["km_kaamiki"] = found
+    environment.globals[NAME] = found
+
+
+def made(config: Config) -> Kaamiki:
+    """Make the values of Kaamiki for the build, one time.
+
+    :param config: The Sphinx configuration.
+    :return: The values, with the paths of `kaamiki.conf`. A value that
+        Kaamiki finds from a setting replaces it, as
+        `kaamiki.site.project` with its defaults, or goes next to it,
+        as `kaamiki.icons.roles`. `kaamiki.credit` and
+        `kaamiki.fa_free` hold the links of Kaamiki and Font Awesome
+        Free. `kaamiki.page` and some values of the groups are for
+        each page, which the handlers of the page set.
+    """
+    conf = values(config)
+    groups = {
+        name: {
+            each.attr: getattr(getattr(conf, name), each.attr)
+            for each in group.values()
+        }
+        for name, group in Settings.groups.items()
+        if name
+    }
+    icons = Icons.of(config)
+    author = config.author
+    if author == config.values["author"].default:
+        author = ""
+    project = {**PROJECT, "author": author, **conf.site.project}
+    if conf.show.feedback is None:
+        groups["show"]["feedback"] = bool(
+            project["email"] or conf.site.feedback.get("url")
+        )
+    groups["icons"].update(roles=icons.roles(conf.icons.names), kit=icons.kit)
+    depth = conf.toctree.maxdepth
+    groups["toctree"].update(
+        args={
+            "includehidden": conf.toctree.includehidden,
+            **({"maxdepth": depth} if depth else {}),
+        },
+        header=None,
+    )
+    terms = conf.site.license
+    groups["site"].update(
+        project=project,
+        license={
+            **terms,
+            "new_tab": opens_new_tab(terms.get("url") or "", config),
+        },
+        title=str(site_values(config).get("html_title") or config.project),
+        **{
+            key: {
+                text: {
+                    **button,
+                    "icon": icons.custom(button.get("icon")),
+                    "new_tab": opens_new_tab(button["url"], config),
+                }
+                for text, button in getattr(conf.site, key).items()
+            }
+            for key in ("header_buttons", "sidebar_buttons")
+        },
+    )
+    groups["links"]["rel"] = REL
+    groups["credit"] = {
+        "url": CREDIT,
+        "new_tab": opens_new_tab(CREDIT, config),
+    }
+    groups["fa_free"] = {"css": FA_FREE, "integrity": FA_FREE_INTEGRITY}
+    groups["page"] = {"author": "", "related": None, "updated_on": ""}
+    return Kaamiki(
+        NAME,
+        {
+            **{each.attr: getattr(conf, each.attr) for each in Root.values()},
+            **{
+                name: Kaamiki(f"{NAME}.{name}", found)
+                for name, found in groups.items()
+            },
+        },
+    )
+
+
+@on("html-page-context", priority=100)
+def page_values(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: dict[str, t.Any],
+    doctree: nodes.document | None,
+) -> None:
+    """Give the page its copy of the values of Kaamiki.
+
+    :param app: The Sphinx application instance. This runs at priority
+        100, before the other handlers of the page, which change the
+        copy with `context["kaamiki"]["show.feedback"] = True`. A page
+        that brings its own copy keeps it. The credit of Sphinx is
+        hidden unless the site sets `html_show_sphinx`.
+    :param pagename: The page that is written.
+    :param templatename: The template that writes it.
+    :param context: The context of the page, changed in place.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
+    """
+    del pagename, templatename, doctree
+    config = app.config
+    context.setdefault(NAME, copy.copy(Kaamiki.of(app.builder)))
+    if not (
+        "html_show_sphinx" in site_values(config)
+        or "show_sphinx" in config.html_context
+    ):
+        context["show_sphinx"] = False
 
 
 SWITCHES: t.Final[frozenset[str]] = frozenset(
@@ -494,10 +539,10 @@ def feedback(
         page.
     """
     del templatename, doctree
-    options = app.config.html_context
+    found = Kaamiki.of(app.builder)
     meta: dict[str, str] = context.get("meta") or {}
     site: dict[str, str] = values(app.config).site.feedback
-    email = options["km_project"]["email"]
+    email = found.site.project["email"]
     title = plain(context.get("title") or "")
     if meta.get("km-feedback-subject") or site.get("subject"):
         said = tidy(str(meta.get("km-feedback-subject") or site["subject"]))
@@ -517,8 +562,8 @@ def feedback(
             str(app.env.doc2path(pagename)),
         )
     if url and values(app.config).show.feedback is None:
-        context["km_show_feedback"] = True
-    context["km_feedback"] = {
+        context[NAME]["show.feedback"] = True
+    context[NAME]["site.feedback"] = {
         "split": toggle(meta["km-feedback-split"])
         if "km-feedback-split" in meta
         else bool(site.get("split")),
@@ -532,7 +577,7 @@ def feedback(
         or site.get("button")
         or str(_("Submit")),
         "icon": Icons.of(app.config).custom(chosen)
-        or options["km_fa_icons"]["feedback"],
+        or found.icons.roles["feedback"],
         "url": url,
     }
 
@@ -564,7 +609,9 @@ def page_switches(
         field = "km-" + key.replace("_", "-")
         if field not in meta:
             continue
-        context[f"km_{key}"] = toggle(meta[field])
+        context[NAME][option(key).removeprefix(f"{NAME}.conf.")] = toggle(
+            meta[field]
+        )
 
 
 def ensure_articles(env: BuildEnvironment) -> dict[str, set[str]]:
@@ -746,7 +793,7 @@ def toctrees(
         return levelled(LINK.sub(add, draw(**kwargs)))
 
     context["toctree"] = sidebar
-    context["km_header_toctree"] = header
+    context[NAME]["toctree.header"] = header
 
 
 @on("html-page-context")
@@ -968,15 +1015,16 @@ def related(
         `:km-related-docs:`, the page gets the pages from
         `reading_order`, unless `kaamiki.conf.show.previous_next_cards`
         or its field is off, or the previous and next buttons are on. A
-        page without cards gets no section. `km_related` holds the
-        `header` of the section (`:km-related-header:`, or "More to
-        read." in the language of the site) and a card for each page,
-        with its `link`, `title`, `section`, `date` and `image`. The
-        image is `:km-page-image:`, then `:km-page-backdrop:`, else an
-        empty string, which the template draws as waves. The date is
-        the `created` date of the page, or empty. A page with
-        `:km-related-skip-page:` is not a card and gets none. A page
-        with cards does not show the previous and next buttons.
+        page without cards gets no section. `kaamiki.page.related`
+        holds the `header` of the section (`:km-related-header:`, or
+        "More to read." in the language of the site) and a card for
+        each page, with its `link`, `title`, `section`, `date` and
+        `image`. The image is `:km-page-image:`, then
+        `:km-page-backdrop:`, else an empty string, which the template
+        draws as waves. The date is the `created` date of the page, or
+        empty. A page with `:km-related-skip-page:` is not a card and
+        gets none. A page with cards does not show the previous and
+        next buttons.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
@@ -986,7 +1034,7 @@ def related(
     del templatename, doctree
     builder = t.cast("StandaloneHTMLBuilder", app.builder)
     env = app.env
-    context["km_related"] = None
+    context[NAME]["page.related"] = None
     if skipped(env, pagename):
         return
     meta: dict[str, str] = context.get("meta") or {}
@@ -994,8 +1042,8 @@ def related(
     names = related_docs(pagename, meta)
     if (
         not names
-        and context.get("km_show_previous_next_cards")
-        and not context.get("km_show_previous_next_pages")
+        and context[NAME].show.previous_next_cards
+        and not context[NAME].show.previous_next_pages
     ):
         names = reading_order(env, pagename)
     for docname in names:
@@ -1028,7 +1076,7 @@ def related(
             }
         )
     if cards:
-        context["km_related"] = {
+        context[NAME]["page.related"] = {
             "header": meta.get("km-related-header") or str(_("More to read.")),
             "cards": cards,
         }
