@@ -181,7 +181,10 @@ def whole(low: float, high: float) -> Rule:
     """
 
     def rule(value: t.Any) -> None:
-        """Check the whole number."""
+        """Check the whole number.
+
+        :param value: The value to check.
+        """
         if type(value) is not int:
             raise TypeError(f"expected a whole number, got {value!r}")
         if not low <= value <= high:
@@ -199,7 +202,10 @@ def real(low: float, high: float) -> Rule:
     """
 
     def rule(value: t.Any) -> None:
-        """Check the number."""
+        """Check the number.
+
+        :param value: The value to check.
+        """
         if type(value) not in (int, float):
             raise TypeError(f"expected a number, got {value!r}")
         if not low <= value <= high:
@@ -216,7 +222,10 @@ def string(read: Callable[[str], t.Any]) -> Rule:
     """
 
     def rule(value: t.Any) -> None:
-        """Check the string and read it."""
+        """Check the string and read it.
+
+        :param value: The value to check.
+        """
         if not isinstance(value, str):
             raise TypeError(f"expected a string, got {value!r}")
         read(value)
@@ -232,7 +241,10 @@ def many(read: Callable[[str], t.Any]) -> Rule:
     """
 
     def rule(value: t.Any) -> None:
-        """Check each string in the list and that none repeats."""
+        """Check each string in the list and that none repeats.
+
+        :param value: The value to check.
+        """
         if not isinstance(value, (list, tuple)):
             raise TypeError(f"expected a list, got {value!r}")
         for each in value:
@@ -254,7 +266,10 @@ def table(key: Callable[[str], t.Any], read: Rule) -> Rule:
     """
 
     def rule(value: t.Any) -> None:
-        """Check each name and each value of the dict."""
+        """Check each name and each value of the dict.
+
+        :param value: The value to check.
+        """
         if not isinstance(value, dict):
             raise TypeError(f"expected a dict, got {value!r}")
         for name, each in value.items():
@@ -279,7 +294,10 @@ def shape(**fields: Rule) -> Rule:
     """
 
     def rule(value: t.Any) -> None:
-        """Check each field of the dict."""
+        """Check each field of the dict.
+
+        :param value: The value to check.
+        """
         if not isinstance(value, dict):
             raise TypeError(f"expected a dict, got {value!r}")
         for name, each in value.items():
@@ -304,7 +322,10 @@ def lower(read: Callable[[str | None], t.Any]) -> Callable[[str], t.Any]:
     """
 
     def rule(value: str) -> t.Any:
-        """Check the name is lowercase and read it."""
+        """Check the name is lowercase and read it.
+
+        :param value: The name to check.
+        """
         if value != value.lower():
             raise ValueError(
                 f"expected a lowercase name like {value.lower()!r}, got"
@@ -323,7 +344,10 @@ def moment(directives: re.Pattern[str]) -> Callable[[str], None]:
     """
 
     def rule(value: str) -> None:
-        """Check the format has only known date directives."""
+        """Check the format has only known date directives.
+
+        :param value: The date format to check.
+        """
         left = directives.sub("", value)
         if "%" in left:
             raise ValueError(
@@ -343,7 +367,10 @@ def ending(suffix: str, read: Callable[[str], t.Any]) -> Callable[[str], str]:
     """
 
     def check(value: str) -> str:
-        """Check the value and what it ends with."""
+        """Check the value and what it ends with.
+
+        :param value: The address or the file name to check.
+        """
         read(value)
         if not value.endswith(suffix):
             raise ValueError(f"expected a name ending {suffix}, got {value!r}")
@@ -363,7 +390,10 @@ def listed_in(
     """
 
     def read(value: str) -> None:
-        """Check each word of the string."""
+        """Check each word of the string.
+
+        :param value: The string to check.
+        """
         for each in value.split(separator):
             checks.word(*allowed)(each)
 
@@ -436,7 +466,10 @@ def site_icons(value: t.Any) -> None:
 
 
 def button(value: t.Any) -> None:
-    """Check a header or sidebar button."""
+    """Check a header or sidebar button.
+
+    :param value: The button, with its url, icon and extras.
+    """
     if not isinstance(value, dict) or "url" not in value:
         raise ValueError("expected a dict with a url")
     shape(
@@ -1313,7 +1346,11 @@ def _check_value(key: str, value: t.Any, conf: str) -> None:
 
 
 def _check_kit(given: dict[str, t.Any], conf: str) -> None:
-    """Check the Font Awesome kit an environment variable names."""
+    """Check the Font Awesome kit an environment variable names.
+
+    :param given: The settings given.
+    :param conf: The path of `conf.py`, for the messages.
+    """
     kit = os.environ.get(icons.KIT_VARIABLE)
     if kit and not given.get("fa_kit"):
         try:
@@ -1323,7 +1360,12 @@ def _check_kit(given: dict[str, t.Any], conf: str) -> None:
 
 
 def _check_icons(config: Config, given: dict[str, t.Any], conf: str) -> None:
-    """Check every icon a setting names."""
+    """Check every icon a setting names.
+
+    :param config: The Sphinx configuration.
+    :param given: The settings given.
+    :param conf: The path of `conf.py`, for the messages.
+    """
     drawn = icons.Icons.of(config)
     for key, each in given.get("fa_icons", {}).items():
         try:
@@ -1345,7 +1387,11 @@ def _check_icons(config: Config, given: dict[str, t.Any], conf: str) -> None:
 
 
 def _check_colours(given: dict[str, t.Any], conf: str) -> None:
-    """Check the colours a role is drawn in."""
+    """Check the colours a role is drawn in.
+
+    :param given: The settings given.
+    :param conf: The path of `conf.py`, for the messages.
+    """
     colours = {**given.get("role_colours", {})}
     for key in ("sharpie_colour", "underline_colour"):
         if key in given:
@@ -1376,7 +1422,11 @@ def _check_site(config: Config, conf: str) -> None:
 
 
 def _check_buttons(given: dict[str, t.Any], conf: str) -> None:
-    """Check the button scheme and the colours a site adds."""
+    """Check the button scheme and the colours a site adds.
+
+    :param given: The settings given.
+    :param conf: The path of `conf.py`, for the messages.
+    """
     scheme = given.get("button_scheme")
     if scheme is not None and scheme not in (
         *SCHEMES,
@@ -1401,7 +1451,12 @@ def _check_buttons(given: dict[str, t.Any], conf: str) -> None:
 
 
 def _check_pairs(config: Config, given: dict[str, t.Any], conf: str) -> None:
-    """Check the settings that only make sense together."""
+    """Check the settings that only make sense together.
+
+    :param config: The Sphinx configuration.
+    :param given: The settings given.
+    :param conf: The path of `conf.py`, for the messages.
+    """
     feedback = given.get("feedback", {})
     if feedback and given.get("show_feedback") is False:
         fail(
@@ -1515,7 +1570,10 @@ def _check_static(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
     ]
 
     def present(name: str) -> bool:
-        """Say whether a static folder has the file."""
+        """Say whether a static folder has the file.
+
+        :param name: The name of the file.
+        """
         return any(p.isfile(p.join(each, name)) for each in statics)
 
     logo = app.config.html_theme_options.get("logo")
