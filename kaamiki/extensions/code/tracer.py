@@ -4,9 +4,13 @@ Walkthrough Tracer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
-Running a snippet and writing down what it did, one line at a time.
+Run a snippet and record what it does, one line at a time. The limits of
+a run are not a sandbox. The snippet runs as the user of the build, so
+it can read what that user can read, also the environment of the build
+(on Linux through `/proc`). It can also write to other places and
+connect to the network. It needs a POSIX system, Linux or macOS.
 """
 
 import contextlib
@@ -45,7 +49,7 @@ OVERSIZED: t.Final[frozenset[int]] = frozenset(
 
 
 class Trace(t.TypedDict):
-    """What the tracer saw, before any of it is turned into steps."""
+    """What the tracer records, before it becomes steps."""
 
     events: list[dict[str, t.Any]]
     error: dict[str, t.Any] | None
@@ -389,11 +393,11 @@ finish(error)
 
 
 def shorten(text: str, width: int) -> str:
-    """Cut a value down to its two ends.
+    """Cut a value to its two ends.
 
-    :param text: The value, as it'd be printed.
-    :param width: How many characters it may take, ellipsis included.
-    :return: The value, whole when it fits and cut when it doesn't.
+    :param text: The value, as it prints.
+    :param width: The maximum number of characters, with the ellipsis.
+    :return: The full value when it fits, else the cut value.
     """
     if len(text) <= width:
         return text
@@ -403,11 +407,11 @@ def shorten(text: str, width: int) -> str:
 
 
 def show(text: str) -> tuple[str, str | None]:
-    """Give a value in its two lengths, the way the runner does.
+    """Give a value in its two lengths, as the runner does.
 
-    :param text: The value, as it'd be printed.
-    :return: The value whole, clipped to `FULL` and cut down to
-        `SHORT` or `None` when it didn't need cutting.
+    :param text: The value, as it prints.
+    :return: The full value cut to `FULL`, and the value cut to `SHORT`, or
+        `None` when it did not need a cut.
     """
     whole = shorten(" ".join(text.split()), FULL)
     cut = shorten(whole, SHORT)
@@ -415,19 +419,19 @@ def show(text: str) -> tuple[str, str | None]:
 
 
 def overuse(memory_limit: int) -> str:
-    """Say a run used more memory than it was given.
+    """Say that a run used more memory than its limit.
 
-    :param memory_limit: Bytes of memory it was given.
-    :return: The reason, in a line.
+    :param memory_limit: The bytes of memory that it had.
+    :return: The reason, as one line.
     """
     return f"a run that used more than {memory_limit >> 20} MB of memory"
 
 
 def failed(reason: str) -> Trace:
-    """Give back a trace that saw nothing and why.
+    """Give an empty trace and the reason.
 
     :param reason: What went wrong.
-    :return: An empty trace carrying the reason as its error.
+    :return: An empty trace, with the reason as its error.
     """
     return {
         "events": [],
@@ -455,47 +459,34 @@ def execute(
     python: str | None = None,
     cache: str | None = None,
 ) -> Trace:
-    """Run the snippet under a tracer and collect what it did.
-
-    It runs in a subprocess of its own, so a snippet that leaks state,
-    rebinds `sys.stdout` or runs away can't hurt the main build. The
-    answer comes back through a file, which leaves `stdout` to the
-    snippet, and what the snippet prints goes to a file too, held to
-    `output_limit`, so it never fills the build's memory. When the run
-    ends, runs out of time or uses more memory than it's given,
-    whatever the snippet left running is killed, children that went off
-    on their own included (see `reap`).
-
-    These are limits and not a sandbox. The snippet runs as the user
-    running the build, so it can read what that user can, the build's
-    environment too (on Linux through `/proc`), write elsewhere and
-    reach the network. It needs a POSIX system, Linux or macOS.
+    """Run the snippet with a tracer and record what it does.
 
     :param code: The snippet to trace.
-    :param setup: Code to run first, untraced.
-    :param stdin: What `input()` reads, a line at a time.
-    :param watch: The names to keep, in the order they're shown.
-        Empty keeps none.
-    :param limit: How many events to collect before stopping.
-    :param timeout: How long the snippet may run, in seconds of the
-        processor and of the clock.
-    :param pythonpath: Directories to put on `sys.path` first.
-    :param comprehensions: Whether to step into comprehensions, which
-        each carry a frame of their own.
-    :param memory_limit: Bytes of memory its processes may use between
-        them. The system holds each process to it where it takes the
-        limit. The build also watches the resident size of them all
-        while the snippet runs and checks the runner's peak when it
-        ends, whether the system took the limit or not.
-    :param output_limit: Bytes any file it writes may take, what it
-        prints included.
-    :param python: The interpreter to run it with, the one the build
-        runs on when unset.
-    :param cache: A folder to keep the trace in. The same snippet,
-        options, interpreter and packages get it back from there, so
-        long as the files it imported are as they were. A snippet that
-        raised is never kept.
-    :return: The trace, with whatever went wrong on it.
+    :param setup: The code to run first, without a trace.
+    :param stdin: What `input()` reads, one line at a time.
+    :param watch: The names to keep, in the sequence that they show. An empty
+        list keeps none.
+    :param limit: How many events to record before it stops.
+    :param timeout: How long the snippet can run, in seconds of the processor
+        and of the clock.
+    :param pythonpath: The directories to put first on `sys.path`.
+    :param comprehensions: Whether to go into comprehensions, which each have
+        their own frame.
+    :param memory_limit: The bytes of memory that all its processes can use
+        together. The system holds each process to it, where the system takes
+        the limit. The build also measures the resident size while the snippet
+        runs, and the peak of the runner at the end.
+    :param output_limit: The bytes that each file it writes can take, also what
+        it prints.
+    :param python: The interpreter to run it with. The default is the
+        interpreter of the build.
+    :param cache: A folder to keep the trace in. The same snippet, options,
+        interpreter and packages get it again, while the files that it imported
+        do not change. A trace that raised an error is not kept.
+    :return: The trace, with what went wrong. The snippet runs in its own
+        subprocess, so it cannot change the state of the build. The answer comes
+        back through a file, and what the snippet prints goes to a file with a
+        limit. At the end, `reap` stops each process that the snippet started.
     """
     job: dict[str, t.Any] = {
         "code": code,
@@ -571,23 +562,19 @@ def launch(
     timeout: int,
     memory_limit: int,
 ) -> tuple[int | None, bool]:
-    """Start the runner, hold it to its limits and clear up after it.
+    """Start the runner, keep it in its limits and clean up after it.
 
-    Its output goes to a file, where `RLIMIT_FSIZE` caps it, and not to
-    a pipe the build would have to hold in memory.
-
-    :param command: The runner's command line.
-    :param here: The scratch directory, which is the runner's working
-        directory too.
-    :param printed: The file the runner's output goes to.
-    :param timeout: How long it may run, in seconds.
-    :param memory_limit: Bytes of memory the runner and everything
-        started from it may use between them.
-    :return: How it ended, which is negative for a signal, or `None`
-        when it ran out of time, and whether it was stopped for using
-        more memory than it's given.
-    :raises OSError: When it can't be started or its memory can't be
-        read.
+    :param command: The command line of the runner.
+    :param here: The temporary directory, which is also the working directory of
+        the runner.
+    :param printed: The file for the output of the runner, where `RLIMIT_FSIZE`
+        limits it. A pipe would need the memory of the build.
+    :param timeout: How long it can run, in seconds.
+    :param memory_limit: The bytes of memory that the runner and its processes
+        can use together.
+    :return: How it ended, negative for a signal or `None` when the time ended,
+        and whether it stopped for its memory.
+    :raises OSError: When it cannot start or its memory cannot be read.
     """
     before = children(processes(), {os.getpid()})
     adopt(on=True)
@@ -619,21 +606,19 @@ def supervise(
     timeout: int,
     memory_limit: int,
 ) -> tuple[int | None, bool]:
-    """Wait for the runner, watching the clock and its memory.
-
-    The resident size of the runner and everything descended from it is
-    read every `POLL` seconds and a run over `memory_limit` is stopped,
-    whether or not the system took `RLIMIT_AS`, which macOS doesn't. A
-    run that ends between two reads is caught by the peak it reports.
+    """Wait for the runner, and watch the clock and its memory.
 
     :param process: The runner.
-    :param before: The build's own children from before the runner
-        started, which are none of the snippet's.
-    :param timeout: How long it may run, in seconds.
-    :param memory_limit: Bytes of memory it may use with its children.
-    :return: How it ended, which is negative for a signal, or `None`
-        when it ran out of time or memory, and whether it was memory.
-    :raises OSError: When the memory of a process can't be read.
+    :param before: The processes of the build from before the runner started,
+        which are not the snippet's.
+    :param timeout: How long it can run, in seconds.
+    :param memory_limit: The bytes of memory that it can use with its children.
+        The resident size is read each `POLL` seconds, also where the system
+        ignores `RLIMIT_AS`, as macOS does.
+    :return: How it ended, negative for a signal or `None` when the time or the
+        memory ended, and whether it was the memory. A run that ends between two
+        reads is found from its peak.
+    :raises OSError: When the memory of a process cannot be read.
     """
     me = os.getpid()
     deadline = time.monotonic() + timeout
@@ -653,12 +638,11 @@ def supervise(
 
 @functools.cache
 def fingerprint(python: str | None) -> str:
-    """Describe the interpreter and the packages a snippet runs with.
+    """Describe the interpreter and the packages of a snippet.
 
-    :param python: The interpreter, the one the build runs on when
-        unset.
-    :return: A digest of its version and every package installed for it
-        or an empty string when it couldn't be asked.
+    :param python: The interpreter. The default is the interpreter of the build.
+    :return: A digest of its version and of each installed package, or an empty
+        string when it gave no answer.
     """
     code = (
         "import importlib.metadata as m, sys\n"
@@ -684,10 +668,10 @@ def fingerprint(python: str | None) -> str:
 
 
 def digest(path: str) -> str | None:
-    """Hash a file's contents.
+    """Hash the contents of a file.
 
     :param path: The file.
-    :return: The digest or `None` when the file can't be read.
+    :return: The digest, or `None` when the file cannot be read.
     """
     try:
         with open(path, "rb") as fd:
@@ -697,11 +681,11 @@ def digest(path: str) -> str | None:
 
 
 def recall(folder: str, key: str) -> Trace | None:
-    """Fetch a kept trace, if the files it imported are as they were.
+    """Get a kept trace, if the files that it imported did not change.
 
     :param folder: The cache folder.
-    :param key: What the trace was kept under.
-    :return: `Trace` or `None` when there's none or it has gone stale.
+    :param key: The name of the kept trace.
+    :return: The `Trace`, or `None` when there is none or it is old.
     """
     try:
         with open(os.path.join(folder, f"{key}.json")) as fd:
@@ -717,10 +701,10 @@ def recall(folder: str, key: str) -> Trace | None:
 
 
 def remember(folder: str, key: str, trace: Trace) -> None:
-    """Keep a trace along with the digests of the files it imported.
+    """Keep a trace with the digests of the files that it imported.
 
-    :param folder: The cache folder, made if it isn't there.
-    :param key: What to keep the trace under.
+    :param folder: The cache folder. It is made if it is not there.
+    :param key: The name to keep the trace with.
     :param trace: The trace.
     """
     deps: dict[str, str] = {}
@@ -743,18 +727,11 @@ def remember(folder: str, key: str, trace: Trace) -> None:
 
 
 def adopt(*, on: bool) -> None:
-    """Have the build adopt the orphans of the snippet's processes.
+    """Make the build adopt the orphans of the snippet's processes.
 
-    A process whose parent has gone is handed to the nearest ancestor
-    that adopts orphans, or to `init` when there's none, which is out
-    of the build's reach. While the build is that ancestor, a child
-    that went off on its own and lost its parent is still the build's
-    to find and kill. Only Linux does this, anywhere else it does
-    nothing.
-
-    https://man7.org/linux/man-pages/man2/PR_SET_CHILD_SUBREAPER.2const.html
-
-    :param on: Whether to adopt them.
+    :param on: Whether to adopt them, with `PR_SET_CHILD_SUBREAPER`. Then a
+        child that leaves its parent stays for the build to find and stop. Only
+        Linux does this. On other systems, it does nothing.
     """
     if sys.platform == "linux":
         with contextlib.suppress(AttributeError, OSError):
@@ -762,11 +739,11 @@ def adopt(*, on: bool) -> None:
 
 
 def ps(*arguments: str) -> tuple[int, str] | None:
-    """Ask `ps` about the processes, where there's no `/proc`.
+    """Ask `ps` about the processes, when there is no `/proc`.
 
-    :param arguments: What to pass `ps`.
-    :return: The id of the `ps` that ran and what it printed, or `None`
-        when it couldn't be run.
+    :param arguments: The arguments for `ps`.
+    :return: The id of the `ps` and what it printed, or `None` when it could not
+        run.
     """
     try:
         with subprocess.Popen(  # noqa: S603
@@ -788,10 +765,10 @@ def ps(*arguments: str) -> tuple[int, str] | None:
 
 
 def processes() -> dict[int, int]:
-    """Map every process to its parent, as `/proc` or `ps` lists them.
+    """Give each process with its parent, from `/proc` or `ps`.
 
-    :return: The ids, each with its parent's, or nothing on a system
-        with neither.
+    :return: The ids, each with the id of its parent, or nothing on a system
+        without the two.
     """
     table: dict[int, int] = {}
     if not os.path.isdir("/proc/self"):
@@ -816,12 +793,12 @@ def processes() -> dict[int, int]:
 
 
 def resident(pids: set[int]) -> int:
-    """Add up the memory some processes hold in RAM.
+    """Add the memory that some processes hold in RAM.
 
     :param pids: The processes.
     :return: Their resident size together, in bytes.
-    :raises OSError: When the system has neither `/proc` nor a `ps`
-        that tells it.
+    :raises OSError: When the system has no `/proc` and no `ps` that tells the
+        size.
     """
     if not pids:
         return 0
@@ -845,9 +822,9 @@ def resident(pids: set[int]) -> int:
 
 
 def children(table: dict[int, int], parents: set[int]) -> set[int]:
-    """Pick out the children of some processes.
+    """Find the children of some processes.
 
-    :param table: Every process with its parent, from `processes`.
+    :param table: Each process with its parent, from `processes`.
     :param parents: The processes whose children to find.
     :return: The processes whose parent is one of them.
     """
@@ -855,11 +832,11 @@ def children(table: dict[int, int], parents: set[int]) -> set[int]:
 
 
 def descendants(table: dict[int, int], roots: set[int]) -> set[int]:
-    """Gather some processes and everything descended from them.
+    """Find some processes and all the processes that they started.
 
-    :param table: Every process with its parent, from `processes`.
+    :param table: Each process with its parent, from `processes`.
     :param roots: The processes to start from.
-    :return: The roots, their children, those children's and so on.
+    :return: The roots, their children, the children of those, and so on.
     """
     found = set(roots)
     while more := children(table, found) - found:
@@ -868,7 +845,7 @@ def descendants(table: dict[int, int], roots: set[int]) -> set[int]:
 
 
 def send(pid: int, number: int) -> None:
-    """Signal a process, if it's still there and ours to signal.
+    """Send a signal to a process, if it is there and it is ours.
 
     :param pid: The process.
     :param number: The signal.
@@ -878,20 +855,15 @@ def send(pid: int, number: int) -> None:
 
 
 def reap(process: subprocess.Popen[bytes], before: set[int]) -> None:
-    """Stop whatever the snippet left running, its children too.
+    """Stop each process that the snippet left, also its children.
 
-    The runner leads a process group of its own and the group is
-    killed, but a child can leave it by starting a session of its own,
-    and one whose parent has gone belongs to the build by then (see
-    `adopt`). So the process table is walked down from the build's new
-    children, and everything found is stopped before any of it is
-    killed, so that none starts another meanwhile. That includes any
-    other child the build started since the runner did. Where `ps` and
-    `/proc` both fail only the group is killed.
-
-    :param process: The runner.
-    :param before: The build's own children from before the runner
-        started, which are none of the snippet's.
+    :param process: The runner, which leads its own process group. The group is
+        stopped, and the process table is walked down from the new children of
+        the build, because a child can leave the group (see `adopt`). Each
+        process found stops before any is killed, so that none starts another.
+        When `ps` and `/proc` both fail, only the group is stopped.
+    :param before: The processes of the build from before the runner started,
+        which are not the snippet's.
     """
     me = os.getpid()
     stopped: set[int] = set()
@@ -914,7 +886,7 @@ def reap(process: subprocess.Popen[bytes], before: set[int]) -> None:
 
 
 def bare_environment(home: str) -> dict[str, str]:
-    """Build the little environment a snippet runs in.
+    """Make the small environment that a snippet runs in.
 
     :param home: The temporary directory.
     :return: The environment.
@@ -935,15 +907,14 @@ def bare_environment(home: str) -> dict[str, str]:
 
 
 def verdict(status: int, printed: str, timeout: int, output_limit: int) -> str:
-    """Say why a snippet left no answer behind.
+    """Say why a snippet gave no answer.
 
-    :param status: How the runner ended, which is negative for a
-        signal.
-    :param printed: The file its output went to.
-    :param timeout: How long it was allowed, in seconds.
-    :param output_limit: Bytes any file it wrote was allowed to take,
-        what it printed included.
-    :return: The reason, in a line.
+    :param status: How the runner ended, negative for a signal.
+    :param printed: The file with its output.
+    :param timeout: The time that it had, in seconds.
+    :param output_limit: The bytes that each file it wrote could take, also what
+        it printed.
+    :return: The reason, as one line.
     """
     if status in EXHAUSTED:
         return f"a run that went past its {timeout}s"
@@ -962,8 +933,8 @@ def tail(path: str, width: int) -> str:
 
     :param path: The file.
     :param width: How many characters to keep.
-    :return: The end of its text, trimmed, or an empty string when it
-        can't be read.
+    :return: The end of its text, trimmed, or an empty string when it cannot be
+        read.
     """
     try:
         with open(path, "rb") as fd:
@@ -976,11 +947,11 @@ def tail(path: str, width: int) -> str:
 
 
 def replay(trace: Trace, wanted: frozenset[str]) -> list[dict[str, t.Any]]:
-    """Turn what the tracer saw into the steps a reader walks through.
+    """Change a trace into the steps that a reader walks through.
 
-    :param trace: What `execute` gave back.
+    :param trace: What `execute` gave.
     :param wanted: The events to make steps of.
-    :return: The steps, in the order they ran.
+    :return: The steps, in the sequence that they ran.
     """
     events = list(trace["events"])
     error = trace["error"]
@@ -1050,12 +1021,12 @@ def fault(
     fresh: dict[int, set[str]],
     out: str,
 ) -> dict[str, t.Any]:
-    """Write the step a snippet dies on.
+    """Write the step where a snippet fails.
 
     :param error: The exception, as the runner reported it.
-    :param frames: Where every frame's values were last set.
-    :param fresh: The changes not yet shown, by frame.
-    :param out: Whatever was printed on the way down.
+    :param frames: Where the values of each frame were last set.
+    :param fresh: The changes that do not show yet, for each frame.
+    :param out: What the snippet printed before it failed.
     :return: The step.
     """
     ident: int | None = error.get("frame")
@@ -1092,14 +1063,12 @@ def fault(
 
 
 def collapse(steps: list[dict[str, t.Any]]) -> list[dict[str, t.Any]]:
-    """Drop the steps that wouldn't change the page.
+    """Remove the steps that do not change the page.
 
-    A step that only moves the highlight within a note that's already
-    showing, or that no note covers, has nothing new to say, so the
-    step before it stands for it.
-
-    :param steps: The steps as replayed, in order.
-    :return: The steps worth stepping through.
+    :param steps: The steps as replayed, in sequence.
+    :return: The steps to walk through. A step that only moves the highlight in
+        a note that shows already, or that no note covers, is removed, and the
+        step before it stays.
     """
     kept: list[dict[str, t.Any]] = []
     for step in steps:

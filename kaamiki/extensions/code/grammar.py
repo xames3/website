@@ -4,10 +4,10 @@ Walkthrough Block Grammar
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
-The block grammar the walkthroughs carry in their bodies and the
-readers for the options beside it.
+The grammar of the blocks in the body of a walkthrough, and the readers
+for the options of the blocks.
 """
 
 import re
@@ -28,14 +28,14 @@ RANGE: t.Final[re.Pattern[str]] = re.compile(
 
 
 class OptionError(Exception):
-    """An option a block doesn't take or takes twice."""
+    """An option that a block does not take, or takes two times."""
 
     def __init__(self, line: int, key: str, block: str) -> None:
-        """Hold what the message quotes.
+        """Keep what the message tells.
 
-        :param line: The document line the option is on.
-        :param key: The option's name.
-        :param block: The block's name.
+        :param line: The line of the document with the option.
+        :param key: The name of the option.
+        :param block: The name of the block.
         """
         super().__init__(line, key, block)
         self.line = line
@@ -44,13 +44,13 @@ class OptionError(Exception):
 
 
 class StrayError(Exception):
-    """A line that belongs to no block."""
+    """A line that is not in a block."""
 
     def __init__(self, line: int, text: str) -> None:
-        """Hold what the message quotes.
+        """Keep what the message tells.
 
-        :param line: The document line.
-        :param text: What's written on it.
+        :param line: The line of the document.
+        :param text: The text on the line.
         """
         super().__init__(line, text)
         self.line = line
@@ -58,10 +58,7 @@ class StrayError(Exception):
 
 
 class chunk:
-    """One `.. name:: argument` block pulled out of a directive's body.
-
-    `split` returns one of these per block.
-    """
+    """One `.. name:: argument` block, as `split` gives it."""
 
     def __init__(
         self,
@@ -71,14 +68,14 @@ class chunk:
         body: StringList,
         offset: int,
     ) -> None:
-        """Hold the parsed block.
+        """Keep the parsed block.
 
-        :param name: The block's name, as written after the `..`.
-        :param argument: Whatever followed the `::` on the same line.
-        :param options: The `:key: value` lines opening the body.
-        :param body: The block's content, dedented.
-        :param offset: Where the body starts in the document, for
-            error reporting.
+        :param name: The name of the block, after the `..`.
+        :param argument: The text after the `::` on the same line.
+        :param options: The `:key: value` lines at the start of the body.
+        :param body: The content of the block, without its indent.
+        :param offset: Where the body starts in the document, for the error
+            messages.
         """
         self.name = name
         self.argument = argument
@@ -87,19 +84,19 @@ class chunk:
         self.offset = offset
 
     def text(self) -> str:
-        """Give the block's body back as one string.
+        """Give the body of the block as one string.
 
-        :return: The body, newline-joined.
+        :return: The lines of the body, joined with newlines.
         """
         return "\n".join(self.body)
 
 
 def indentation(lines: list[str]) -> int:
-    """Measure the common indent across a block's lines.
+    """Measure the indent that the lines of a block share.
 
-    :param lines: The lines to measure, blanks included.
-    :return: The narrowest indent among the lines carrying text or
-        zero when none of them do.
+    :param lines: The lines to measure, blank lines too.
+    :return: The smallest indent of the lines with text, or zero when no line
+        has text.
     """
     widths = [len(_) - len(_.lstrip()) for _ in lines if _.strip()]
     return min(widths) if widths else 0
@@ -108,10 +105,10 @@ def indentation(lines: list[str]) -> int:
 def extent(content: StringList, start: int) -> int:
     """Find where a block that opens on `start` ends.
 
-    :param content: The directive's content.
-    :param start: The line the block opens on.
-    :return: The first line after it, which is the next one starting in
-        column zero.
+    :param content: The content of the directive.
+    :param start: The line where the block opens.
+    :return: The first line after the block, which is the next line that starts
+        in column zero.
     """
     end = start + 1
     while end < len(content):
@@ -127,8 +124,8 @@ def blanks(lines: list[str] | StringList, index: int) -> int:
 
     :param lines: The lines to look through.
     :param index: Where to start.
-    :return: The first line from `index` with text on it or the number
-        of lines when there isn't one.
+    :return: The first line from `index` with text, or the number of lines when
+        there is none.
     """
     while index < len(lines) and not lines[index].strip():
         index += 1
@@ -138,13 +135,13 @@ def blanks(lines: list[str] | StringList, index: int) -> int:
 def gather(
     content: StringList, first: int, last: int, pad: int = 0
 ) -> StringList:
-    """Copy lines out of the content, keeping where each came from.
+    """Copy lines from the content, and keep where each line came from.
 
-    :param content: The directive's content.
+    :param content: The content of the directive.
     :param first: The first line to copy.
-    :param last: The line after the last one.
-    :param pad: How much indent to take off a line.
-    :return: The lines, without any blank ones at either end.
+    :param last: The line after the last line.
+    :param pad: The indent to remove from each line.
+    :return: The lines, without blank lines at the two ends.
     """
     body = StringList()
     for position in range(first, last):
@@ -165,20 +162,18 @@ def gather(
 def read_options(
     raw: list[str], allowed: frozenset[str] | None, line: int, name: str
 ) -> tuple[dict[str, str], int]:
-    """Read the `:name: value` lines a block opens with.
+    """Read the `:name: value` lines at the start of a block.
 
-    A line indented under an option carries on its value and a blank
-    line between two options doesn't end them. They run to the first
-    line that isn't one.
-
-    :param raw: The block's lines, after the one it opens on.
-    :param allowed: The option names the block takes or `None` for a
-        block that takes none.
-    :param line: The document line `raw` starts on.
-    :param name: The block's name.
-    :return: The options and the line in `raw` the body starts on.
-    :raises OptionError: For an option the block doesn't take or takes
-        twice, with its line number, its name and the block's name.
+    :param raw: The lines of the block, after the line where it opens.
+    :param allowed: The names of the options that the block takes, or `None` for
+        a block without options.
+    :param line: The line of the document where `raw` starts.
+    :param name: The name of the block.
+    :return: The options, and the line in `raw` where the body starts. A line
+        indented below an option continues its value. A blank line between two
+        options does not end the options.
+    :raises OptionError: For an option that the block does not take, or takes
+        two times, with its line, its name and the name of the block.
     """
     options: dict[str, str] = {}
     cursor = blanks(raw, 0)
@@ -213,11 +208,11 @@ def read_block(
 ) -> tuple[chunk, int]:
     """Read the block that opens on a line.
 
-    :param content: The directive's content.
-    :param index: The line the block opens on.
-    :param offset: The content's offset in the document.
+    :param content: The content of the directive.
+    :param index: The line where the block opens.
+    :param offset: The offset of the content in the document.
     :param match: The line, matched against `BLOCK`.
-    :param allowed: The option names the block takes.
+    :param allowed: The names of the options that the block takes.
     :return: The block and the line after it.
     """
     start = index + 1
@@ -238,13 +233,13 @@ def read_block(
 def read_prose(
     content: StringList, index: int, offset: int, own: frozenset[str]
 ) -> tuple[chunk, int]:
-    """Read the prose that runs up to the next block.
+    """Read the prose before the next block.
 
-    :param content: The directive's content.
-    :param index: The line the prose starts on.
-    :param offset: The content's offset in the document.
-    :param own: The block names belonging to this grammar.
-    :return: The prose as a nameless chunk and the line after it.
+    :param content: The content of the directive.
+    :param index: The line where the prose starts.
+    :param offset: The offset of the content in the document.
+    :param own: The names of the blocks of this grammar.
+    :return: The prose as a chunk without a name, and the line after it.
     """
     end = index + 1
     while end < len(content):
@@ -263,22 +258,21 @@ def split(
     *,
     loose: bool = False,
 ) -> list[chunk]:
-    """Pull this grammar's blocks out of a directive's content.
+    """Take the blocks of this grammar from the content of a directive.
 
-    Only the blocks in `options` read options, from the lines right
-    under the one they open on.
-
-    :param content: The directive's content.
-    :param offset: The content's offset in the document.
-    :param own: The block names belonging to this grammar.
-    :param options: The option names each block takes.
-    :param loose: Keep the prose between blocks as nameless chunks
-        instead of raising.
-    :return: One `chunk` per block found, in the order written.
-    :raises StrayError: For the first line belonging to no block, with
-        its line number and its text. Never raised when `loose`.
-    :raises OptionError: For an option its block doesn't take or takes
-        twice, with its line number, its name and the block's name.
+    :param content: The content of the directive.
+    :param offset: The offset of the content in the document.
+    :param own: The names of the blocks of this grammar.
+    :param options: The names of the options that each block takes. Only these
+        blocks read options, from the lines directly below the line where they
+        open.
+    :param loose: Keep the prose between blocks as chunks without a name, and do
+        not raise an error.
+    :return: One `chunk` for each block, in the sequence written.
+    :raises StrayError: For the first line that is not in a block, with its line
+        and its text. Not with `loose`.
+    :raises OptionError: For an option that its block does not take, or takes
+        two times, with its line, its name and the name of the block.
     """
     found: list[chunk] = []
     index = blanks(content, 0)
@@ -302,11 +296,11 @@ def split(
 
 
 def linerange(line: str) -> tuple[int, int] | None:
-    """Read a `4` or a `4-9` line range off a block's argument.
+    """Read a line range, as `4` or `4-9`, from the argument of a block.
 
     :param line: The argument, as written.
-    :return: The range as a low/high pair or `None` when the argument
-        isn't a pair of line numbers.
+    :return: The first and the last line, or `None` when the argument is not
+        line numbers.
     """
     match = RANGE.fullmatch(line.strip())
     if match is None:
