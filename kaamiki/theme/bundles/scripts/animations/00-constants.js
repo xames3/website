@@ -43,7 +43,6 @@ Last updated on: 11 November 2026
     const HIDDEN_PARTS = '.km-tabs__panel:not(.km-tabs__panel--current), '
         + 'details.km-accordion:not([open])';
     const CLAMP_ACCORDION_MIN_PX = 80;
-    const ACCORDION_PX_FACTOR = 0.9;
     const BYLINE_BG_INTERVAL_MS = 7000;
     const BYLINE_BG_HIDDEN = '0.001';
     const BYLINE_BG_GROW_REM = 3;
@@ -53,9 +52,6 @@ Last updated on: 11 November 2026
     const SWEEP_IN_START = 0.4;
     const SWEEP_RESIZE_LAG_SHARE = 0.25;
     const SWEEP_RESIZE_SHARE = 0.5;
-    // https://developer.mozilla.org/en-US/docs/Web/CSS/hanging-punctuation#browser_compatibility
-    const SAFARI = CSS.supports('hanging-punctuation', 'first');
-    const TEXT_BLUR = SAFARI ? 'none' : 'blur(4px)';
     const ROLL_SPREAD_SHARE = 1;
     const ROLL_GLIDE_SHARE = 0.75;
     const ROLL_CLEAR_SHARE = 0.7;
