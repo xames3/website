@@ -18,6 +18,8 @@ Sphinx moves it. `report` gives each error that is not a
 
 from __future__ import annotations
 
+import contextlib
+import datetime as dt
 import logging
 import os.path as p
 import re
@@ -44,6 +46,48 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
 
 ERROR_LEVEL: t.Final[int] = Reporter.ERROR_LEVEL
+MONTHS: t.Final[tuple[str, ...]] = (
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+)
+WEEKDAYS: t.Final[tuple[str, ...]] = (
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+)
+DATE_PARTS: t.Final[dict[str, tuple[str, str]]] = {
+    "d": ("(?P<d>[0-9]{2})", "15"),
+    "m": ("(?P<m>[0-9]{2})", "11"),
+    "y": ("(?P<y>[0-9]{2})", "26"),
+    "Y": ("(?P<Y>[0-9]{4})", "2026"),
+    "j": ("(?P<j>[0-9]{3})", "319"),
+    "B": (f"(?P<B>{'|'.join(MONTHS)})", "November"),
+    "b": (f"(?P<b>{'|'.join(_[:3] for _ in MONTHS)})", "Nov"),
+    "A": (f"(?:{'|'.join(WEEKDAYS)})", "Sunday"),
+    "a": (f"(?:{'|'.join(_[:3] for _ in WEEKDAYS)})", "Sun"),
+    "H": ("[0-9]{2}", "00"),
+    "I": ("[0-9]{2}", "12"),
+    "M": ("[0-9]{2}", "00"),
+    "S": ("[0-9]{2}", "00"),
+    "p": ("(?:AM|PM)", "AM"),
+    "Z": ("[A-Z]*", ""),
+    "z": ("(?:[+-][0-9]{4})?", ""),
+    "%": ("%", "%"),
+}
 TEXT_LENGTH: t.Final[int] = 300
 URL_LENGTH: t.Final[int] = 2048
 HOST_LENGTH: t.Final[int] = 253
@@ -364,6 +408,79 @@ def word(*choices: str) -> Callable[[str | None], str]:
                 f"{argument!r}"
             )
         return argument
+
+    return read
+
+
+def calendar_day(part: dict[str, str | t.Any]) -> dt.date:
+    """Make the day from the parts of a date that `date_in` found.
+
+    :param part: The parts, by their directive, as `Y` and `B`.
+    :return: The day.
+    :raises ValueError: For a day that is not in the calendar.
+    """
+    year = int(part["Y"]) if part.get("Y") else 2000 + int(part["y"])
+    if part.get("j"):
+        made = dt.date(year, 1, 1) + dt.timedelta(int(part["j"]) - 1)
+        if made.year != year:
+            raise ValueError(part["j"])
+        return made
+    if part.get("m"):
+        month = int(part["m"])
+    elif part.get("B"):
+        month = MONTHS.index(part["B"]) + 1
+    else:
+        month = [_[:3] for _ in MONTHS].index(part["b"]) + 1
+    return dt.date(year, month, int(part["d"]))
+
+
+def date_in(form: str) -> Callable[[str | None], str]:
+    """Make a check for a date written in a format.
+
+    :param form: The format, as `%d %B %Y`. The names of the months and
+        the days are in English, in each language of the machine.
+    :return: The check, which gives the date as `2026-11-15`.
+    :raises ValueError: For a format without a day, a month and a year,
+        or with a directive two times.
+    """
+    parts = re.split("%(.)", form)
+    said = set(parts[1::2])
+    if (
+        not said <= DATE_PARTS.keys()
+        or not said & {"Y", "y"}
+        or not ("j" in said or ("d" in said and said & {"m", "B", "b"}))
+    ):
+        raise ValueError(
+            f"expected a date format with a day, a month and a year, got"
+            f" {form!r}"
+        )
+    pieces = [
+        DATE_PARTS[_] if n % 2 else (re.escape(_), _)
+        for n, _ in enumerate(parts)
+    ]
+    try:
+        pattern = re.compile("".join(_[0] for _ in pieces))
+    except re.error:
+        raise ValueError(
+            f"expected a date format with each directive once, got {form!r}"
+        ) from None
+    sample = "".join(_[1] for _ in pieces)
+
+    def read(argument: str | None) -> str:
+        """Read the date.
+
+        :param argument: The date as written.
+        :return: The date as `2026-11-15`.
+        :raises ValueError: When it does not follow the format or is
+            not a day of the calendar.
+        """
+        found = pattern.fullmatch(argument or "")
+        with contextlib.suppress(ValueError):
+            if found:
+                return calendar_day(found.groupdict()).isoformat()
+        raise ValueError(
+            f"expected a date like {sample} ({form}), got {argument!r}"
+        )
 
     return read
 

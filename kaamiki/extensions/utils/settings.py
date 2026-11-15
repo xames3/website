@@ -37,18 +37,24 @@ from sphinx.util import logging
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import icons
 from kaamiki.extensions.utils.checks import fail
+from kaamiki.extensions.utils.doctree import header_comments
 from kaamiki.extensions.utils.hooks import on
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable
+    from collections.abc import Iterator
     from collections.abc import Mapping
 
+    from docutils import nodes
     from sphinx.application import Sphinx
     from sphinx.builders import Builder
     from sphinx.config import Config
     from sphinx.environment import BuildEnvironment
 
 type Rule = Callable[[t.Any], object]
+type Content = Callable[
+    [Config, nodes.document], Iterator[tuple[nodes.Element, str]]
+]
 
 logger = logging.getLogger(__name__)
 
@@ -162,6 +168,7 @@ FAVICONS: t.Final[tuple[str, ...]] = (
 )
 LOGOS: t.Final[tuple[str, ...]] = ("light", "dark")
 SNAKE: t.Final[re.Pattern[str]] = re.compile(r"(?<!^)(?=[A-Z])")
+DATE_FORMAT: t.Final[str] = "%d %B %Y"
 TIME_DIRECTIVES: t.Final[re.Pattern[str]] = re.compile(r"%[aAbBdHIjmMpSyYZz%]")
 
 
@@ -482,6 +489,42 @@ def button(value: t.Any) -> None:
     )(value)
 
 
+def date_format(config: Config) -> str:
+    """Find the format of the date comments at the top of a page.
+
+    :param config: The Sphinx configuration.
+    :return: `kaamiki.conf.site.last_updated_fmt`, else
+        `html_last_updated_fmt`, else `DATE_FORMAT`.
+    """
+    return str(
+        values(config).site.last_updated_fmt
+        or config.html_last_updated_fmt
+        or DATE_FORMAT
+    )
+
+
+def header_dates(
+    config: Config, doctree: nodes.document
+) -> Iterator[tuple[nodes.Element, str]]:
+    """Find the date comments of a page that do not follow the format.
+
+    :param config: The Sphinx configuration.
+    :param doctree: The page, just read.
+    :return: Each `.. Created on:` and `.. Last updated on:` comment at
+        the top of the page that `checks.date_in` cannot read in the
+        `date_format` of the site, with the problem.
+    """
+    read = checks.date_in(date_format(config))
+    for node in header_comments(doctree):
+        key, _, text = node.astext().partition(":")
+        if key.strip().lower() not in ("created on", "last updated on"):
+            continue
+        try:
+            read(text.strip())
+        except ValueError as error:
+            yield node, f"comment {key.strip().capitalize()!r}: {error}"
+
+
 class Value[T]:
     """A Kaamiki setting, read as an attribute of its group."""
 
@@ -496,6 +539,7 @@ class Value[T]:
         key: str = "",
         reread: bool = False,
         page: bool = False,
+        content: Content | None = None,
     ) -> None:
         """Keep the default of the setting and how a value is checked.
 
@@ -514,6 +558,8 @@ class Value[T]:
         :param reread: Whether a change reads each page again, not only
             writes it again.
         :param page: Whether a page can switch it with a field.
+        :param content: The rule that the pages must obey for this
+            setting, which `content_rules` runs on each page.
         """
         self.default = default
         self.rule = string(text) if text else rule
@@ -523,6 +569,7 @@ class Value[T]:
         self.key = key
         self.reread = reread
         self.page = page
+        self.content = content
         self.attr = ""
         self.group = ""
 
@@ -878,7 +925,9 @@ class Site(Settings, prefix=""):
     )
     header_buttons = Value[dict[str, t.Any]]({}, table(checks.text, button))
     sidebar_buttons = Value[dict[str, t.Any]]({}, table(checks.text, button))
-    last_updated_fmt = Value("", text=moment(TIME_DIRECTIVES))
+    last_updated_fmt = Value(
+        "", text=moment(TIME_DIRECTIVES), content=header_dates
+    )
     copy_headerlinks = Value(True, boolean)
     words_per_minute = Value(WORDS_PER_MINUTE, number=int)
 
@@ -1405,7 +1454,7 @@ def validate(app: Sphinx) -> None:
     _check_static(app, given, conf)
     _check_theme(config, conf)
     _check_code_explain(app, given, conf)
-    _check_dates(given, conf)
+    _check_dates(config, given, conf)
     _check_translation(app, given, conf)
 
 
@@ -1794,9 +1843,12 @@ def _check_code_explain(
         )
 
 
-def _check_dates(given: dict[str, t.Any], conf: str) -> None:
+def _check_dates(config: Config, given: dict[str, t.Any], conf: str) -> None:
     """Check the date formats a site wrote.
 
+    :param config: The Sphinx configuration. The format of the date
+        comments, from `date_format`, must have a day, a month and a
+        year.
     :param given: The settings given.
     :param conf: The path to `conf.py`, for the messages.
     """
@@ -1807,6 +1859,16 @@ def _check_dates(given: dict[str, t.Any], conf: str) -> None:
                 f" %Y, got {given[key]!r}",
                 conf,
             )
+    form = date_format(config)
+    try:
+        checks.date_in(form)
+    except ValueError as error:
+        name = (
+            option("last_updated_fmt")
+            if given.get("last_updated_fmt")
+            else "html_last_updated_fmt"
+        )
+        fail(f"{name}: {error}", conf)
     if given.get("release_version_fmt"):
         sample = dt.fromisoformat("2026-01-02").strftime(
             given["release_version_fmt"]

@@ -167,6 +167,22 @@ def buried(paragraph: nodes.Element) -> bool:
     return False
 
 
+def header_comments(doctree: nodes.document) -> list[nodes.comment]:
+    """Find the comments at the top of a page.
+
+    :param doctree: The page.
+    :return: The comments before the first other node, as `.. Created
+        on:`. The substitutions of `rst_prolog` before them are passed.
+    """
+    found: list[nodes.comment] = []
+    for node in doctree.children:
+        if isinstance(node, nodes.comment):
+            found.append(node)
+        elif not isinstance(node, nodes.substitution_definition):
+            break
+    return found
+
+
 def standfirst(doctree: nodes.document | None, limit: int) -> str:
     """Take the lead of the page, the line directly below the title.
 

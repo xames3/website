@@ -14,6 +14,7 @@ from kaamiki.extensions.utils import writer
 from kaamiki.extensions.utils.aliases import spell
 from kaamiki.extensions.utils.build import build_finished
 from kaamiki.extensions.utils.build import linkcheck
+from kaamiki.extensions.utils.content import content_rules
 from kaamiki.extensions.utils.context import admonition_title
 from kaamiki.extensions.utils.context import confdir
 from kaamiki.extensions.utils.context import context_defaults
@@ -104,6 +105,7 @@ __all__: list[str] = [
     "checks",
     "closer",
     "confdir",
+    "content_rules",
     "context_defaults",
     "dated",
     "day",
