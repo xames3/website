@@ -208,7 +208,7 @@ Last updated on: 15 November 2026
           data-km-strings="{{ km_strings|tojson|forceescape }}"
           data-km-more-icon="{{ kaamiki.icons.roles.show_more }}"
           data-km-icons="{{ km_marks|tojson|forceescape }}"
-          {%- if kaamiki.mode != 'dark' %} data-km-mode="{{ kaamiki.mode }}" {%- endif %} {%- if kaamiki.motion.speed != 1 %} style="--km-motion-speed: {{ kaamiki.motion.speed }}" {%- endif %} {% if kaamiki.site.copy_headerlinks %}data-km-copy-links{% endif %}
+          {%- if kaamiki.mode != 'dark' %} data-km-mode="{{- kaamiki.mode -}}" {%- endif %} {%- if kaamiki.motion.speed != 1 %} style="--km-motion-speed: {{ kaamiki.motion.speed }}" {%- endif %} {% if kaamiki.site.copy_headerlinks %}data-km-copy-links{% endif %}
           {% if kaamiki.motion.prefetch|tobool %}data-km-prefetch{% endif %}
           {% if kaamiki.media.enlarge|tobool %}data-km-media-enlarge{% endif %}>
         <head>
