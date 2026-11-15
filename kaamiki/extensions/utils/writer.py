@@ -18,10 +18,10 @@ import re
 import typing as t
 
 import docutils.nodes as nodes
-from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.locale import _
 from sphinx.util.images import get_image_size
 
+from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.doctree import caption_icon
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
@@ -416,9 +416,9 @@ def install(app: Sphinx) -> None:
     :param app: The Sphinx application instance. Only HTML builders get
         it, and a translator that a site set is kept below it.
     """
-    builder = app.builder
-    if not isinstance(builder, StandaloneHTMLBuilder):
+    if not writes_pages(app):
         return
+    builder = app.builder
     current = builder.get_translator_class()
     if issubclass(current, translator):
         return

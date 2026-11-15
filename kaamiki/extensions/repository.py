@@ -30,7 +30,6 @@ from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import paragraph
-from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import worded
 
@@ -99,26 +98,6 @@ class Repository(KaamikiDirective, motion=True):
         node = self.locate(self.Node("", body, **attributes))
         self.add_name(node)
         return [node, *trail(self, {"url": source}, ("url",)), *messages]
-
-    @staticmethod
-    def plain(node: Repository.Node) -> list[nodes.Node]:
-        """Write a repository as words, for a builder without HTML.
-
-        :param node: The node of the repository.
-        :return: A paragraph with its name and a link to the project,
-            and a paragraph with the text below it.
-        """
-        url = f"https://github.com/{node['project']}"
-        link = nodes.reference("", url, refuri=url)
-        found: list[nodes.Node] = [
-            nodes.paragraph("", "", nodes.Text(f"{node['project']} "), link)
-        ]
-        found += [
-            nodes.paragraph("", "", *each.children)
-            for each in node.children
-            if isinstance(each, phrase) and each.children
-        ]
-        return found
 
 
 html.draws(Repository.Node, template)

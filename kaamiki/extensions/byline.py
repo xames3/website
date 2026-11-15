@@ -35,7 +35,6 @@ from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import parse
-from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import reading_time
 from kaamiki.extensions.utils import relative_to_page
 from kaamiki.extensions.utils import render
@@ -206,18 +205,6 @@ class Byline(KaamikiDirective, motion=True):
         node = self.locate(self.Node("", words, **options))
         self.add_name(node)
         return [node, *trail(self, options), *messages]
-
-    @staticmethod
-    def plain(node: Byline.Node) -> list[nodes.Node]:
-        """Write a byline as words, for a builder without HTML.
-
-        :param node: The node of the byline.
-        :return: A paragraph with the name of the author.
-        """
-        author = next(
-            each for each in node.children if isinstance(each, phrase)
-        )
-        return [nodes.paragraph("", "", *author.children)]
 
 
 @html.opens(Byline.Node)

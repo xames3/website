@@ -7,7 +7,9 @@ Created on: 08 October 2026
 Last updated on: 15 November 2026
 
 The utilities that write the 404 page and the sitemap after a build,
-and the link checker that names a missing video.
+the link checker that names a missing video and the one check of the
+builder. Kaamiki writes web pages only, so a builder that is not in
+`BUILDERS` stops the build.
 """
 
 from __future__ import annotations
@@ -23,10 +25,10 @@ from urllib.parse import unquote
 from urllib.parse import urlsplit
 
 import bs4
-from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.builders.linkcheck import CheckExternalLinksBuilder
 from sphinx.util import logging
 
+from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import youtube_still_id
@@ -34,10 +36,13 @@ from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
+    from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.builders.linkcheck import CheckResult
 
 logger = logging.getLogger(__name__)
 
+PAGES: t.Final[tuple[str, ...]] = ("html", "dirhtml")
+BUILDERS: t.Final[tuple[str, ...]] = (*PAGES, "linkcheck")
 NOT_FOUND: t.Final[str] = "404"
 MARKER: t.Final[str] = "Written by Kaamiki, turn it off with"
 ROOTED_ATTRIBUTES: t.Final[tuple[str, ...]] = (
@@ -49,6 +54,31 @@ ROOTED_ATTRIBUTES: t.Final[tuple[str, ...]] = (
 ROOTED_SKIP: t.Final[tuple[str, ...]] = ("#", "/", "data:", "mailto:", "tel:")
 GONE: t.Final[re.Pattern[str]] = re.compile(r"(?:404|410) Client Error")
 GONE_MESSAGE: t.Final[str] = "the video is deleted or private"
+
+
+@on("builder-inited", priority=100)
+def refuse_builder(app: Sphinx) -> None:
+    """Stop the build for a builder that is not in `BUILDERS`.
+
+    :param app: The Sphinx application instance.
+    :raises KaamikiError: For a builder that is not in `BUILDERS`.
+    """
+    name = app.builder.name
+    if name not in BUILDERS:
+        checks.fail(
+            f"expected the {', '.join(BUILDERS[:-1])} or {BUILDERS[-1]}"
+            f" builder, got {name!r}; Kaamiki writes web pages only",
+            "builder",
+        )
+
+
+def writes_pages(app: Sphinx) -> bool:
+    """Say whether the build writes the web pages.
+
+    :param app: The Sphinx application instance.
+    :return: `True` for a builder in `PAGES`, `False` for `linkcheck`.
+    """
+    return app.builder.name in PAGES
 
 
 def root_urls(tree: bs4.BeautifulSoup, base: str, root: str) -> None:
@@ -82,9 +112,7 @@ def not_found(app: Sphinx) -> bool:
         skip it. A site with its own page `404` keeps it.
     :return: `True` when the page was written.
     """
-    builder = app.builder
-    if not isinstance(builder, StandaloneHTMLBuilder):
-        return False
+    builder = t.cast("StandaloneHTMLBuilder", app.builder)
     if not values(app.config).show.not_found:
         return False
     if NOT_FOUND in app.env.found_docs:
@@ -220,16 +248,14 @@ def build_finished(app: Sphinx, exc: Exception | None) -> None:
     :param app: The Sphinx application instance.
     :param exc: What went wrong in the build, or `None`.
     """
-    builder = app.builder
-    if exc or not isinstance(builder, StandaloneHTMLBuilder):
+    if exc or not writes_pages(app):
         return
-    if builder.name in {"html", "dirhtml"}:
-        kept: tuple[str, ...] = ()
-        if not_found(app):
-            kept += (f"{NOT_FOUND}.html",)
-        if sitemap(app):
-            kept += ("sitemap.xml", "robots.txt")
-        forget(app, kept)
+    kept: tuple[str, ...] = ()
+    if not_found(app):
+        kept += (f"{NOT_FOUND}.html",)
+    if sitemap(app):
+        kept += ("sitemap.xml", "robots.txt")
+    forget(app, kept)
 
 
 class linkcheck(CheckExternalLinksBuilder):

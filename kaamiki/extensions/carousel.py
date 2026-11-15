@@ -56,6 +56,7 @@ from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import through
 from kaamiki.extensions.utils import what
 from kaamiki.extensions.utils import worded
+from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.settings import BOUNDS
@@ -273,28 +274,6 @@ class Carousel(KaamikiDirective, motion=True):
                 )
         return [node, *messages]
 
-    @staticmethod
-    def plain(node: Carousel.Node) -> list[nodes.Node]:
-        """Write a carousel as words, for a builder without HTML.
-
-        :param node: The node of the carousel.
-        :return: A paragraph for each line of its heading, then its
-            items.
-        """
-        heading = [
-            nodes.paragraph("", "", *each.children)
-            for each in node.children
-            if isinstance(each, CarouselText)
-        ]
-        return [
-            *heading,
-            *(
-                each
-                for each in node.children
-                if not isinstance(each, CarouselText)
-            ),
-        ]
-
 
 @html.opens(Carousel.Node)
 def visit(self: HTMLTranslator, node: Carousel.Node) -> None:
@@ -373,7 +352,7 @@ def emptied(app: Sphinx, doctree: nodes.document, docname: str) -> None:
         the directive.
     """
     del docname
-    if app.builder.format != "html":
+    if not writes_pages(app):
         return
     for found in doctree.findall(Carousel.Node):
         count = sum(map(is_item, through(found.children)))

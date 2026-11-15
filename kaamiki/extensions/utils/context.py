@@ -30,7 +30,6 @@ from urllib.parse import quote
 
 from docutils import nodes
 from sphinx import addnodes
-from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.environment.adapters.toctree import global_toctree_for_doc
 from sphinx.locale import _
 from sphinx.util import docname_join
@@ -38,6 +37,7 @@ from sphinx.util import logging
 
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.build import is_noindex
+from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.dates import dated
@@ -75,6 +75,7 @@ if t.TYPE_CHECKING:
     from collections.abc import Callable
 
     from sphinx.application import Sphinx
+    from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.environment import BuildEnvironment
 
 logger = logging.getLogger(__name__)
@@ -182,8 +183,8 @@ def context_defaults(app: Sphinx) -> None:
             subtype="settings",
         )
     config.html_use_index = False
-    if isinstance(app.builder, StandaloneHTMLBuilder):
-        app.builder.use_index = False
+    if writes_pages(app):
+        t.cast("StandaloneHTMLBuilder", app.builder).use_index = False
     if "html_show_sphinx" not in named:
         context.setdefault("show_sphinx", False)
 
@@ -693,9 +694,7 @@ def toctrees(
         page.
     """
     del templatename, doctree
-    builder = app.builder
-    if not isinstance(builder, StandaloneHTMLBuilder):
-        return
+    builder = t.cast("StandaloneHTMLBuilder", app.builder)
     drawn: dict[tuple[tuple[str, t.Any], ...], str] = {}
 
     def draw(**kwargs: t.Any) -> str:
@@ -773,9 +772,7 @@ def neighbours(
         page.
     """
     del templatename, doctree
-    builder = app.builder
-    if not isinstance(builder, StandaloneHTMLBuilder):
-        return
+    builder = t.cast("StandaloneHTMLBuilder", app.builder)
     meta: dict[str, str] = context.get("meta") or {}
     released = ensure_articles(app.env)
     for key in ("prev", "next"):
@@ -987,9 +984,7 @@ def related(
         page.
     """
     del templatename, doctree
-    builder = app.builder
-    if not isinstance(builder, StandaloneHTMLBuilder):
-        return
+    builder = t.cast("StandaloneHTMLBuilder", app.builder)
     env = app.env
     context["km_related"] = None
     if skipped(env, pagename):

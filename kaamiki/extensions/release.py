@@ -61,6 +61,7 @@ from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import stored
 from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
+from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.dates import within
@@ -365,25 +366,6 @@ class Release(KaamikiDirective, motion=True):
             "", "", *spaced, classes=["km-release__more", "km-button-row"]
         )
 
-    @staticmethod
-    def plain(node: Release.Node) -> list[nodes.Node]:
-        """Write the date and the version of a release as words.
-
-        :param node: The `release` node and its attributes.
-        :return: A paragraph with the version, when a title replaces it
-            as the heading, and the date. A release without them gets a
-            comment, which writes nothing.
-        """
-        iso = node["datetime"]
-        config = node.document.settings.env.config if node.document else None
-        date = dated(dt.fromisoformat(iso), config) if iso and config else ""
-        line = ", ".join(
-            each
-            for each in (node["version"] if node["titled"] else "", date)
-            if each
-        )
-        return [nodes.paragraph("", line)] if line else [nodes.comment()]
-
 
 @html.opens(Release.Node)
 def visit(self: HTMLTranslator, node: Release.Node) -> None:
@@ -502,7 +484,7 @@ def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     :param docname: The page that is resolved (unused).
     """
     del docname
-    if app.builder.format != "html":
+    if not writes_pages(app):
         return
     classes = app.config.html_context["km_fa_icons"]["release_notes"]
     after = values(app.config).button.icon_position == "after"

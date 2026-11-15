@@ -369,7 +369,7 @@ def depart_swapper(self: HTMLTranslator, node: Swapper) -> None:
         self.body.append("</span>")
 
 
-@html.opens(glyph, elsewhere="skip")
+@html.opens(glyph)
 def visit_glyph(self: HTMLTranslator, node: glyph) -> None:
     """Open the span with the icon.
 

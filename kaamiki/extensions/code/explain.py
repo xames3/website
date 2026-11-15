@@ -165,7 +165,7 @@ class Heading(nodes.paragraph):
 
 
 class PlainCode(nodes.literal_block):
-    """The snippet as a plain code block, for each builder but HTML."""
+    """The snippet as a plain code block, which the visitors read."""
 
 
 class Explanations(nodes.container):
