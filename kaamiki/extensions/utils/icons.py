@@ -6,17 +6,14 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
 Last updated on: 15 November 2026
 
-Every icon Kaamiki draws, as a Pro icon and the Free one that stands in
-for it.
-
+Each icon that Kaamiki draws, as a Pro icon and its Free replacement.
 A site with a Font Awesome kit gets the Pro icons, in its
-`kaamiki.conf.icons.style`. A site without one gets the Free icons,
-which are fewer and come in three styles, `solid`, `regular` and
-`brands`. Every icon Kaamiki writes into a page comes from `Icons`,
-which knows which of the two the site has.
-
-The names Font Awesome Free 7.3.1 draws, the version Kaamiki loads, are
-listed at the end of the file.
+`kaamiki.conf.icons.style`. A site without a kit gets the Free icons,
+which are fewer and come in three styles: `solid`, `regular` and
+`brands`. Each icon that Kaamiki writes in a page comes from `Icons`,
+which knows which of the two the site has. The names that Font Awesome
+Free 7.3.1 draws, the version that Kaamiki loads, are at the end of
+the file.
 """
 
 from __future__ import annotations
@@ -47,12 +44,13 @@ REGULAR_FIRST: t.Final[frozenset[str]] = frozenset({"light", "regular", "thin"})
 
 
 class IconPair(t.NamedTuple):
-    """An icon as a Pro kit draws it and as Font Awesome Free does.
+    """An icon as a Pro kit and as Font Awesome Free draw it.
 
-    `pro` is a name like `house`, which takes the site's
-    `kaamiki.conf.icons.style`, or the classes in full,
-    `fa-brands fa-python`. `free` is always the classes in full and
-    always an icon Font Awesome Free has.
+    :param pro: A name as `house`, which takes the
+        `kaamiki.conf.icons.style` of the site, or the full classes, as
+        `fa-brands fa-python`.
+    :param free: The full classes of an icon that Font Awesome Free
+        has.
     """
 
     pro: str
@@ -60,19 +58,19 @@ class IconPair(t.NamedTuple):
 
 
 def brand_pair(name: str) -> IconPair:
-    """Pair a brand with itself, as Free has every brand Pro does.
+    """Pair a brand with itself, because Free has each brand of Pro.
 
-    :param name: The brand's name, as `python`.
-    :return: The brand's pair.
+    :param name: The name of the brand, as `python`.
+    :return: The pair of the brand.
     """
     classes = f"fa-brands fa-{name}"
     return IconPair(classes, classes)
 
 
 def solid(name: str) -> IconPair:
-    """Pair an icon that's always drawn solid, with a kit or without.
+    """Pair an icon that is always solid, with or without a kit.
 
-    :param name: The icon's name, as `chevron-down`.
+    :param name: The name of the icon, as `chevron-down`.
     :return: The pair.
     """
     return IconPair(f"fa-solid fa-{name}", f"fa-solid fa-{name}")
@@ -257,13 +255,13 @@ def read_kit(configured: str | None) -> str | None:
 
 
 def split(spec: str) -> tuple[list[str], str | None, str, list[str]]:
-    """Take an icon apart.
+    """Split an icon into its parts.
 
     :param spec: The icon as `checks.icon` reads it: `plus`, `fa-plus`,
         `far fa-plus` or `fa-sharp fa-solid fa-plus fa-spin`.
-    :return: The families (`fa-sharp`), the style by its plain name
-        (`solid`), the icon's name without `fa-` and Font Awesome's own
-        sizes and animations.
+    :return: The families (`fa-sharp`), the plain name of the style
+        (`solid`), the name of the icon without `fa-`, and the sizes
+        and animations of Font Awesome.
     """
     parts = spec.split()
     families: list[str] = []
@@ -278,14 +276,14 @@ def split(spec: str) -> tuple[list[str], str | None, str, list[str]]:
 
 
 def free_classes(style: str, name: str) -> str | None:
-    """Find the Font Awesome Free icon that draws a name.
+    """Find the Font Awesome Free icon for a name.
 
-    :param style: The style it was asked for, by its plain name.
-    :param name: The icon's name without `fa-`.
-    :return: The Free icon's classes, in the asked style when Free has
-        it and in the nearest it does have when it hasn't. Without that
-        icon it gives the stand-in the name has or `None` when Free
-        draws nothing like it.
+    :param style: The plain name of the style that was asked for.
+    :param name: The name of the icon without `fa-`.
+    :return: The classes of the Free icon, in the asked style when Free
+        has it, else in the nearest style. Without that icon, the
+        replacement for the name, or `None` when Free has no similar
+        icon.
     """
     if style == "brands":
         return f"fa-brands fa-{name}" if name in FREE_BRANDS else None
@@ -300,13 +298,14 @@ def free_classes(style: str, name: str) -> str | None:
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class Icons:
-    """The icons a site draws, with a Font Awesome kit or without one.
+    """The icons of a site, with or without a Font Awesome kit.
 
-    :param kit: The kit's address, or `None` for Font Awesome Free.
-    :param style: The site's `kaamiki.conf.icons.style`. A kit draws
-        icons in it when they name no style of their own. Without a
-        kit it chooses between Free's `solid` and `regular` icons,
-        where Free has both.
+    :param kit: The address of the kit, or `None` for Font Awesome
+        Free.
+    :param style: The `kaamiki.conf.icons.style` of the site. A kit
+        draws an icon in it when the icon names no style. Without a
+        kit, it selects between the `solid` and `regular` icons of
+        Free, where Free has the two.
     """
 
     kit: str | None = None
@@ -314,10 +313,10 @@ class Icons:
 
     @classmethod
     def of(cls, config: Config) -> Icons:
-        """Read the icons a site has from its settings and its shell.
+        """Read the icons of a site from its settings and its shell.
 
         :param config: The Sphinx configuration.
-        :return: The site's icons.
+        :return: The icons of the site.
         """
         from kaamiki.extensions.utils.settings import values
 
@@ -327,19 +326,18 @@ class Icons:
         )
 
     def classes(self, spec: str) -> str:
-        """Spell out an icon in full, the way the site can draw it.
+        """Write an icon in full, as the site can draw it.
 
-        An icon that names no style takes the site's. One that names a
-        family and no style, `fa-sharp fa-house` say, keeps Font
-        Awesome's own default, `solid`, with a kit.
-
-        :param spec: The icon as `checks.icon` reads it.
-        :return: With a kit, the icon in the style it names or the
-            site's. Without one, the Free icon that draws it, in the
-            site's style where Free has both and in the one it has
-            where it has only one.
-        :raises ValueError: When there's no kit and Free has no icon
-            of that name nor a stand-in for it.
+        :param spec: The icon as `checks.icon` reads it. An icon
+            without a style takes the style of the site. With a kit, an
+            icon with a family and no style, as `fa-sharp fa-house`,
+            keeps the default of Font Awesome, `solid`.
+        :return: With a kit, the icon in its style or the style of the
+            site. Without a kit, the Free icon for it, in the style of
+            the site where Free has the two styles, else in its only
+            style.
+        :raises ValueError: When there is no kit and Free has no icon
+            of that name and no replacement.
         """
         families, style, name, extras = split(spec)
         if self.kit:
@@ -358,11 +356,11 @@ class Icons:
 
     @staticmethod
     def only_brand(name: str) -> bool:
-        """Say whether a name is a brand and nothing else.
+        """Say whether a name is only a brand.
 
-        :param name: The icon's name without `fa-`.
-        :return: Whether it's a brand with no solid or regular icon of
-            its own, so a name with no style can only mean the brand.
+        :param name: The name of the icon without `fa-`.
+        :return: `True` for a brand without its own solid or regular
+            icon, so a name without a style can only be the brand.
         """
         return (
             name in FREE_BRANDS
@@ -372,10 +370,10 @@ class Icons:
 
     @staticmethod
     def refusal(name: str) -> str:
-        """Say why a site with no kit can't draw an icon.
+        """Say why a site without a kit cannot draw an icon.
 
-        :param name: The icon's name without `fa-`.
-        :return: The sentence, with the nearest Free name when there's
+        :param name: The name of the icon without `fa-`.
+        :return: The sentence, with the nearest Free name when there is
             one.
         """
         near = difflib.get_close_matches(
@@ -392,12 +390,12 @@ class Icons:
         )
 
     def pair(self, pair: IconPair) -> str:
-        """Spell out a pair's icon, as the site can draw it.
+        """Write the icon of a pair, as the site can draw it.
 
-        :param pair: The icon's Pro and Free versions.
-        :return: The Pro one with a kit and the Free one without, a
-            regular Free icon swapped for its solid twin when the
-            site's style is `solid`.
+        :param pair: The Pro and Free versions of the icon.
+        :return: The Pro icon with a kit, else the Free icon. A regular
+            Free icon becomes its solid twin when the style of the site
+            is `solid`.
         """
         if not pair.pro:
             return ""
@@ -411,14 +409,15 @@ class Icons:
         return pair.free
 
     def custom(self, value: str | Mapping[str, str] | None) -> str:
-        """Spell out an icon a site chose for itself.
+        """Write an icon that a site selected.
 
-        :param value: An icon like `checks.icon` reads it, or a table
-            with a `pro` icon, a `free` one or both, to give the two
-            plans an icon each. An empty string is no icon.
-        :return: The icon's classes. A table is read for the plan the
-            site has and falls back on the other's icon.
-        :raises ValueError: When the site can't draw it.
+        :param value: An icon as `checks.icon` reads it, or a table
+            with a `pro` icon, a `free` icon or the two, to give each
+            plan its own icon. An empty string is no icon.
+        :return: The classes of the icon. A table is read for the plan
+            of the site, and uses the icon of the other plan if
+            necessary.
+        :raises ValueError: When the site cannot draw it.
         """
         if not value:
             return ""
@@ -430,12 +429,12 @@ class Icons:
     def roles(
         self, chosen: Mapping[str, str | Mapping[str, str]]
     ) -> dict[str, str]:
-        """Spell out every icon Kaamiki's own parts wear.
+        """Write each icon of the parts of Kaamiki.
 
-        :param chosen: The icons the site set in
+        :param chosen: The icons that the site set in
             `kaamiki.conf.icons.names`.
-        :return: Every icon by its name in `ROLE_ICONS`, the site's own
-            where it set one.
+        :return: Each icon by its name in `ROLE_ICONS`, with the icon
+            of the site where it set one.
         """
         return {
             key: self.custom(chosen[key]) if key in chosen else self.role(key)
@@ -443,19 +442,19 @@ class Icons:
         }
 
     def role(self, key: str) -> str:
-        """Spell out one of the icons Kaamiki's own parts wear.
+        """Write one icon of the parts of Kaamiki.
 
-        :param key: The icon's name in `ROLE_ICONS`.
-        :return: The icon's classes or an empty string for none.
+        :param key: The name of the icon in `ROLE_ICONS`.
+        :return: The classes of the icon, or an empty string for none.
         """
         return self.pair(ROLE_ICONS[key])
 
     def language(self, language: str | None) -> str:
-        """Spell out the icon a language is known by.
+        """Write the icon of a language.
 
-        :param language: The language a code block is written in.
-        :return: The icon's classes or an empty string for a language
-            with none.
+        :param language: The language of a code block.
+        :return: The classes of the icon, or an empty string for a
+            language without one.
         """
         name = (language or "").strip().lower()
         for pair, names in LANGUAGE_ICONS:

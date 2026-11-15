@@ -6,8 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
 Last updated on: 15 November 2026
 
-A `code-explain` directive that steps a reader through a snippet, line
-by line, with the values it held at each one... telling a story::
+A `code-explain` directive that walks a reader through a snippet, one
+line at a time, with the values that it held at each line::
 
     .. code-explain:: python
        :caption: xsnumpy/_core.py
@@ -33,35 +33,41 @@ by line, with the values it held at each one... telling a story::
 
            Then I walk the shape **backwards**.
 
+The notes scroll past the code, not below it, so a walkthrough needs a
+minimum of one `.. lines::` block. It does not take in or move the
+content around it. Put it on the page itself. A plain `container` or
+an `only` is part of the page. The content of a different directive
+and the notes of a different walkthrough are not. A `lines` block
+takes a range of lines as its argument, as `4-6`. Each block shows a
+note, in the sequence written.
+
 .. note::
 
-    Python is only run when a site sets `kaamiki.conf.code_explain.run`
-    to `True` in `conf.py`, and then it runs for every page the site
-    builds. Without it a Python walkthrough stops the build. It needs a
-    POSIX system, Linux or macOS.
-    The Python runs in a scratch directory with a bare environment,
-    1GB of memory for all its processes together, 10 seconds and 64MB
-    for any file it writes or prints.
+    Python runs only when `kaamiki.conf.code_explain.run` is `True` in
+    `conf.py`, and then it runs for each page of the site. Without it,
+    a Python walkthrough stops the build. It needs a POSIX system,
+    Linux or macOS. The Python runs in a temporary directory with a
+    small environment, 1GB of memory for all its processes together,
+    10 seconds, and 64MB for each file that it writes or prints.
 
     The system holds each process to the memory where it takes the
-    limit and the build always watches the resident size of the
-    processes as well, stopping a run that uses more than it's given.
+    limit, and the build also measures the resident size and stops a
+    run that uses more. At the end, the directory goes, and so does
+    each process that the snippet left, also the children that left
+    their parent on Linux. These are limits and not a sandbox.
 
-    The directory goes when it finishes and so does anything the
-    snippet left running, children that went off on their own included
-    on Linux. Those are limits and not a sandbox.
+    The snippet runs as the user of the build, so it can read what
+    that user can read, also the environment of the build (on Linux
+    through `/proc`). It can also write to other places and connect
+    to the network. Build only pages that you trust, and keep secrets
+    out of a build that runs them.
 
-    The snippet runs as the user building the site, so it can read what
-    that user can, the build's environment included
-    (on Linux through `/proc`), write elsewhere and reach the network.
-
-    Build only pages you trust and keep secrets out of any build that
-    runs them. A site changes the limits, and what the snippet may run
-    with, through `kaamiki.conf.code_explain` in `conf.py`. A snippet's
-    own `:limit:` and `:timeout:` can lower what the site sets but not
-    go past it. A trace is kept next to the doctrees and used again
-    while the snippet, its options, the interpreter, the installed
-    packages and the files it imported stay the same.
+    A site sets the limits and the interpreter through
+    `kaamiki.conf.code_explain` in `conf.py`. The `:limit:` and the
+    `:timeout:` of a snippet can be lower than those of the site, but
+    not higher. A trace is kept next to the doctrees, and it is used
+    again while the snippet, its options, the interpreter, the
+    installed packages and the files that it imported do not change.
 """
 
 from __future__ import annotations
@@ -168,11 +174,11 @@ class Explanation(nodes.container):
 
 
 def names(argument: str | None) -> str:
-    """Check the names a walkthrough watches.
+    """Check the names that a walkthrough watches.
 
-    :param argument: The names as written, comma-separated.
+    :param argument: The names as written, with commas.
     :return: The names.
-    :raises ValueError: For a name that isn't a Python name, a dotted
+    :raises ValueError: For a name that is not a Python name, a dotted
         name or an index.
     """
     found = checks.text(argument)
@@ -240,11 +246,11 @@ class CodeWalk(KaamikiDirective, abstract=True):
         return head
 
     def snippet(self, code: str, language: str, start: int) -> PlainCode:
-        """Write the snippet out as a plain code block.
+        """Write the snippet as a plain code block.
 
         :param code: The snippet.
-        :param language: The language to highlight it in.
-        :param start: The number the snippet's first line is given.
+        :param language: The language of the highlight.
+        :param start: The number of the first line of the snippet.
         :return: The code block.
         """
         block = PlainCode(code, code)
@@ -258,65 +264,57 @@ class CodeWalk(KaamikiDirective, abstract=True):
 class CodeExplain(CodeWalk, name="code-explain"):
     """The `code-explain` directive.
 
-    The notes scroll past the code, not below it, so it needs a minimum
-    of one `.. lines::` block. It is independent: it does not take in or
-    move the content around it. Put it on the page itself. A plain
-    `container` or an `only` is part of the page. The content of a
-    different directive, and the notes of a different walkthrough, are
-    not.
-
     Options::
 
-        - `code-position`: The side of the code, `right` or `left`. The
-          default is `right`.
-        - `watch`: The names to show, with a comma between each. Without
-          it, only the return value of a function and the exception of
-          the snippet show.
-        - `limit`: How many steps to show, from 1 to 300. It cannot be
-          more than `kaamiki.conf.code_explain.limit` of the site, which
-          is 100 by default.
-        - `timeout`: How long the snippet can run, in seconds, from 1 to
-          60. It cannot be more than `kaamiki.conf.code_explain.timeout`
-          of the site.
+        - `code-position`: The side of the code, `right` or `left`.
+          The default is `right`.
+        - `watch`: The names to show, with a comma between each.
+          Without it, only the return value of a function and the
+          exception of the snippet show.
+        - `limit`: How many steps to show, from 1 to 300. It cannot
+          be more than `kaamiki.conf.code_explain.limit`, which is
+          100 by default.
+        - `timeout`: How long the snippet can run, in seconds, from
+          1 to 60. It cannot be more than
+          `kaamiki.conf.code_explain.timeout`.
         - `pythonpath`: The directories to import from, with a comma
-          between each, relative to the document. The build stops when a
-          directory is not there.
-        - `events`: Which of `call`, `line` and `return` make a step. The
-          default is `kaamiki.conf.code_explain.events` of the site,
+          between each, relative to the document. The build stops
+          when a directory is not there.
+        - `events`: Which of `call`, `line` and `return` make a
+          step. The default is `kaamiki.conf.code_explain.events`,
           which is `line` and `return` by default.
-        - `comprehensions`: Also go into comprehensions. A site can do
-          this for all snippets with
+        - `comprehensions`: Also go into comprehensions. A site can
+          do this for all snippets with
           `kaamiki.conf.code_explain.comprehensions`.
-        - `pace`: The pixels of scrolling for each step, from 24 to 240.
-          The default comes from `pace` for the language.
-        - `raises`: The snippet must fail, so it ends on the exception.
-          Without it, the build stops when the snippet raises. With it,
-          the build stops when the snippet runs to the end.
-        - `comment`: How the language opens a comment, and closes it if
-          necessary (`(* *)`), for a language that Kaamiki does not know.
+        - `pace`: The pixels of scrolling for each step, from 24 to
+          240. The default comes from `pace` for the language.
+        - `raises`: The snippet must fail, so it ends on the
+          exception. Without it, the build stops when the snippet
+          raises. With it, the build stops when the snippet runs to
+          the end.
+        - `comment`: How the language opens a comment, and closes it
+          if necessary (`(* *)`), for a language that Kaamiki does
+          not know.
         - `caption`: A line of text above the code, parsed as rST.
         - `linenos`: Show the line numbers.
-        - `lineno-start`: The number of the first line, from 0 to 10000.
+        - `lineno-start`: The number of the first line, from 0 to
+          10000.
         - `emphasize-lines`: The lines to highlight, as `1, 3-5`.
         - `no-motion`: Show it stacked, without motion.
         - `name`: A name for links to the `code-explain`.
         - `class`: More classes for the `code-explain`.
 
-    A `lines` block takes a range of lines as its argument, as `4-6`,
-    and the options below. Each block shows a note, in the sequence that
-    you write them.
-
     Options of a `lines` block::
 
         - `at`: The line in the snippet where the values of the note
           show. The default is the last line of the range.
-        - `clear`: The names to stop showing from this note, with a comma
-          between each. Each name must show already.
-        - `output`: What the note prints, below the code. A backslash and
-          an n start a new line.
-        - `values`: The values to show from this note, as `name: value`,
-          one on each line or with semicolons between them. A name that
-          you write again takes the new value.
+        - `clear`: The names to stop showing from this note, with a
+          comma between each. Each name must show already.
+        - `output`: What the note prints, below the code. A
+          backslash and an n start a new line.
+        - `values`: The values to show from this note, as
+          `name: value`, one on each line or with semicolons between
+          them. A name that you write again takes the new value.
     """
 
     watch = Option(names)
@@ -330,7 +328,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
     emphasize_lines = Option(checks.text)
 
     class Node(annotated):
-        """The walkthrough, a `container` that each builder can write."""
+        """The walkthrough, a container for each builder."""
 
     def build(self) -> list[nodes.Node]:
         """Step through the snippet and make the walkthrough.
@@ -380,12 +378,11 @@ class CodeExplain(CodeWalk, name="code-explain"):
         return [element]
 
     def cache(self) -> str | None:
-        """Name the folder traces are kept in.
+        """Name the folder that keeps the traces.
 
-        It sits with the doctrees, so a build that starts over with
-        `-E` and `-a` keeps it and deleting the build takes it away.
-
-        :return: The folder, or `None` when the site turned the cache off.
+        :return: The folder, or `None` when the site set the cache off.
+            It is next to the doctrees, so a new build with `-E` and
+            `-a` keeps it, and a deleted build removes it.
         """
         env = self.env
         if not values(env.config).code_explain.cache:
@@ -393,13 +390,13 @@ class CodeExplain(CodeWalk, name="code-explain"):
         return p.join(str(env.doctreedir), "kaamiki-code-explain")
 
     def capped(self, option: str, key: str) -> int:
-        """Read a number the snippet asks for, up to what the site allows.
+        """Read a number from the snippet, to the limit of the site.
 
-        :param option: The directive's option.
-        :param key: The setting that holds the most it may ask for.
-        :return: What the snippet asked for or the most.
-        :raises rst.DirectiveError: When it asks for more than the site
-            allows.
+        :param option: The option of the directive.
+        :param key: The setting with the maximum.
+        :return: The number from the snippet, or the maximum.
+        :raises rst.DirectiveError: When it is more than the site
+            permits.
         """
         most = values(self.config)[key]
         asked = self.options.get(option, most)
@@ -446,12 +443,12 @@ class CodeExplain(CodeWalk, name="code-explain"):
         return code.text(), setup, stdin, notes
 
     def span(self, argument: str, start: int, total: int) -> tuple[int, int]:
-        """Read the lines a `lines` block explains.
+        """Read the lines that a `lines` block explains.
 
-        :param argument: The block's argument, as written.
-        :param start: The number the snippet's first line is given.
-        :param total: How many lines the snippet has.
-        :return: The first and the last line it covers.
+        :param argument: The argument of the block, as written.
+        :param start: The number of the first line of the snippet.
+        :param total: The number of lines of the snippet.
+        :return: The first and the last line that it covers.
         """
         found = linerange(argument)
         if found is None:
@@ -477,20 +474,20 @@ class CodeExplain(CodeWalk, name="code-explain"):
         ranges: list[tuple[int, int]],
         start: int,
     ) -> list[dict[str, t.Any]]:
-        """Run the snippet and turn what it did into steps.
-
-        Each step gets the note whose lines it sits on, counted the way
-        the reader sees them numbered. Nothing is run unless the site
-        set `kaamiki.conf.code_explain.run`, and the build stops
-        without it.
+        """Run the snippet and change what it did into steps.
 
         :param code: The snippet.
-        :param setup: Code to run first, untraced.
+        :param setup: The code to run first, without a trace.
         :param stdin: What `input()` reads.
         :param notes: The `lines` blocks.
-        :param ranges: The lines each note covers.
-        :param start: The number the snippet's first line is given.
-        :return: The steps, in the order they ran.
+        :param ranges: The lines that each note covers.
+        :param start: The number of the first line of the snippet.
+        :return: The steps, in the sequence that they ran. Each step
+            gets the note of its line, with the numbers that the reader
+            sees.
+        :raises rst.DirectiveError: When
+            `kaamiki.conf.code_explain.run` is off, because then
+            nothing runs.
         """
         env = self.env
         config = env.config
@@ -594,15 +591,15 @@ class CodeExplain(CodeWalk, name="code-explain"):
         start: int,
         total: int,
     ) -> list[dict[str, t.Any]]:
-        """Make a step of every note, for a snippet that isn't run.
+        """Make a step of each note, for a snippet that does not run.
 
-        :param setup: The `setup` block, which can't run here.
-        :param stdin: The `stdin` block, which has nothing to read it.
+        :param setup: The `setup` block, which cannot run here.
+        :param stdin: The `stdin` block, which nothing reads here.
         :param notes: The `lines` blocks.
-        :param ranges: The lines each note covers.
-        :param start: The number the snippet's first line is given.
-        :param total: How many lines the snippet has.
-        :return: One step per note, in the order written.
+        :param ranges: The lines that each note covers.
+        :param start: The number of the first line of the snippet.
+        :param total: The number of lines of the snippet.
+        :return: One step for each note, in the sequence written.
         """
         unused = [f":{_}:" for _ in TRACED if _ in self.options]
         unused += [
@@ -660,13 +657,13 @@ class CodeExplain(CodeWalk, name="code-explain"):
         return steps
 
     def place(self, block: chunk, high: int, start: int, total: int) -> int:
-        """Find the line a note's values are written beside.
+        """Find the line where the values of a note show.
 
         :param block: The `lines` block.
-        :param high: The last line it covers.
-        :param start: The number the snippet's first line is given.
-        :param total: How many lines the snippet has.
-        :return: The line, counted from the snippet's first.
+        :param high: The last line that it covers.
+        :param start: The number of the first line of the snippet.
+        :param total: The number of lines of the snippet.
+        :return: The line, counted from the first line of the snippet.
         """
         at = block.options.get("at")
         if at is None:
@@ -720,12 +717,15 @@ class CodeExplain(CodeWalk, name="code-explain"):
         ranges: list[tuple[int, int]],
         steps: list[dict[str, t.Any]],
     ) -> None:
-        """Stop for whatever the author probably didn't mean.
+        """Stop for a result that the author probably did not want.
 
-        :param traced: What the tracer saw.
-        :param watch: The names asked for.
-        :param ranges: The lines each note covers.
+        :param traced: What the tracer recorded.
+        :param watch: The names to watch.
+        :param ranges: The lines that each note covers.
         :param steps: The steps, with their notes.
+        :raises rst.DirectiveError: For an error without `:raises:`,
+            `:raises:` without an error, a watched name that the
+            snippet does not set, or a note that no step shows.
         """
         error = traced["error"]
         raises = "raises" in self.options
@@ -750,10 +750,10 @@ class CodeExplain(CodeWalk, name="code-explain"):
                 )
 
     def emphasis(self, start: int, total: int) -> set[int]:
-        """Read `:emphasize-lines:` as the lines it names.
+        """Read the lines that `:emphasize-lines:` names.
 
-        :param start: The number the snippet's first line is given.
-        :param total: How many lines the snippet has.
+        :param start: The number of the first line of the snippet.
+        :param total: The number of lines of the snippet.
         :return: The lines to mark.
         """
         end = start + total - 1
@@ -778,10 +778,10 @@ class CodeExplain(CodeWalk, name="code-explain"):
 
 
 def inherit(steps: list[dict[str, t.Any]]) -> None:
-    """Give a step no note covers the note before it.
+    """Give a step without a note the note before it.
 
-    The steps that come before the first note take that one, since
-    there's none before them.
+    :param steps: The steps, changed in place. The steps before the
+        first note take the first note.
     """
     last = next((_["note"] for _ in steps if _["note"] is not None), None)
     for step in steps:
@@ -856,10 +856,10 @@ html.closes(CodeExplain.Node, "</div></div>")
 
 @html.opens(Heading)
 def visit_heading(self: HTMLTranslator, node: Heading) -> None:
-    """Open the code's side, its frame and the caption, icon first.
+    """Open the code side, its frame and the caption.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The header node, empty when there's no caption.
+    :param node: The header node, empty when there is no caption.
     """
     self.body.append(f'<div class="{code_explain.grid()}">')
     self.body.append(f'<div class="{code_explain.side()}">')
@@ -878,7 +878,7 @@ def visit_heading(self: HTMLTranslator, node: Heading) -> None:
 
 @html.closes(Heading)
 def depart_heading(self: HTMLTranslator, node: Heading) -> None:
-    """Close the caption, then write the snippet and the code's side.
+    """Close the caption, the snippet and the code side.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The header node.
@@ -925,16 +925,14 @@ def html_page_context(
 ) -> None:
     """Load the explainer script only on the pages that use it.
 
-    A page without a walkthrough has nothing for it to start. Only
-    Kaamiki's own script is left out, whatever else a site loads with a
-    name that ends the same way.
-
     :param app: The Sphinx application instance.
-    :param pagename: The page being rendered.
-    :param templatename: The template rendering it.
-    :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
+    :param pagename: The page that is written.
+    :param templatename: The template that writes it.
+    :param context: The context of the page, changed in place. Only the
+        script of Kaamiki is removed, also when a site loads a
+        different script with a similar name.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del app, pagename, templatename
     if "script_files" not in context:
