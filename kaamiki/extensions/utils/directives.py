@@ -284,16 +284,6 @@ def depart(self: HTMLTranslator, node: nodes.Element) -> None:
     """
 
 
-def close(self: HTMLTranslator, node: nodes.Element) -> None:
-    """Close the `<div>` a node's visitor opened.
-
-    :param self: The HTML translator instance.
-    :param node: The node being departed (unused).
-    """
-    del node
-    self.body.append("</div>")
-
-
 def skip(self: nodes.NodeVisitor, node: nodes.Element) -> None:
     """Leave a node out of a builder that has no use for it.
 

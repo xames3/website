@@ -36,12 +36,10 @@ from kaamiki.extensions.utils import bridge
 from kaamiki.extensions.utils import build_finished
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import context_defaults
-from kaamiki.extensions.utils import depart
 from kaamiki.extensions.utils import feedback
 from kaamiki.extensions.utils import field_lists
 from kaamiki.extensions.utils import follow
 from kaamiki.extensions.utils import forget_lead
-from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import glyph_edges
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import keycaps
@@ -62,7 +60,6 @@ from kaamiki.extensions.utils import related
 from kaamiki.extensions.utils import reread
 from kaamiki.extensions.utils import retitled
 from kaamiki.extensions.utils import show_more
-from kaamiki.extensions.utils import skip
 from kaamiki.extensions.utils import social_metadata
 from kaamiki.extensions.utils import spell
 from kaamiki.extensions.utils import toctrees
@@ -318,9 +315,6 @@ def cleanup(app: Sphinx, exc: Exception | None) -> None:
             os.remove(p.join(app.outdir, "_static", name))
 
 
-away = (skip, None)
-
-
 def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     """Swap Kaamiki's nodes for ordinary ones where there's no HTML.
 
@@ -344,7 +338,7 @@ def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
 
 
 def add_roles(app: Sphinx) -> None:
-    """Register Kaamiki's roles and the nodes they write.
+    """Register Kaamiki's roles, their domains and the `phrase` node.
 
     :param app: The Sphinx application instance.
     """
@@ -354,43 +348,15 @@ def add_roles(app: Sphinx) -> None:
     app.add_role("fa-icon", roles.icon)
     app.add_domain(roles.fa_icon)
     app.add_domain(roles.kbd)
-    app.add_node(roles.ink, html=(roles.visit, roles.depart))
-    app.add_node(
-        roles.swapper, html=(roles.visit_swapper, roles.depart_swapper)
-    )
-    app.add_node(
-        glyph,
-        html=(roles.visit_glyph, roles.depart),
-        latex=away,
-        man=away,
-        texinfo=away,
-        text=away,
-    )
     app.add_node(phrase)
 
 
 def add_directives(app: Sphinx) -> None:
-    """Register Kaamiki's directives and the nodes they write.
+    """Register Kaamiki's directives and each node in the `html` record.
 
     :param app: The Sphinx application instance.
     """
     for directive in directives:
-        if hasattr(directive, "node") and directive.node not in html.visitors:
-            node = directive.node
-            pages = (directive.visit, getattr(directive, "depart", depart))
-            if node.__bases__ == (nodes.Element,) and not hasattr(
-                directive, "plain"
-            ):
-                app.add_node(
-                    node,
-                    html=pages,
-                    latex=away,
-                    man=away,
-                    texinfo=away,
-                    text=away,
-                )
-            else:
-                app.add_node(node, html=pages)
         app.add_directive(directive.name, directive.directive)
         if hasattr(directive, "register"):
             directive.register(app)

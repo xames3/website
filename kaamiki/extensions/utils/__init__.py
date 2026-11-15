@@ -40,9 +40,7 @@ from kaamiki.extensions.utils.directives import MOTION
 from kaamiki.extensions.utils.directives import NATIVE
 from kaamiki.extensions.utils.directives import NO_MOTION
 from kaamiki.extensions.utils.directives import Bem
-from kaamiki.extensions.utils.directives import close
 from kaamiki.extensions.utils.directives import closer
-from kaamiki.extensions.utils.directives import depart
 from kaamiki.extensions.utils.directives import document
 from kaamiki.extensions.utils.directives import fields
 from kaamiki.extensions.utils.directives import hollow
@@ -55,12 +53,10 @@ from kaamiki.extensions.utils.directives import paragraph
 from kaamiki.extensions.utils.directives import parse
 from kaamiki.extensions.utils.directives import phrase
 from kaamiki.extensions.utils.directives import shipped
-from kaamiki.extensions.utils.directives import skip
 from kaamiki.extensions.utils.directives import through
 from kaamiki.extensions.utils.directives import titled
 from kaamiki.extensions.utils.directives import trail
 from kaamiki.extensions.utils.directives import unlinked
-from kaamiki.extensions.utils.directives import visitor
 from kaamiki.extensions.utils.directives import what
 from kaamiki.extensions.utils.directives import worded
 from kaamiki.extensions.utils.doctree import annotated
@@ -108,13 +104,11 @@ __all__: list[str] = [
     "build_finished",
     "caption_icon",
     "checks",
-    "close",
     "closer",
     "confdir",
     "context_defaults",
     "dated",
     "day",
-    "depart",
     "document",
     "ensure_articles",
     "feedback",
@@ -160,7 +154,6 @@ __all__: list[str] = [
     "setting",
     "shipped",
     "show_more",
-    "skip",
     "social_metadata",
     "spell",
     "stored",
@@ -170,7 +163,6 @@ __all__: list[str] = [
     "trail",
     "unlinked",
     "updated_on",
-    "visitor",
     "warm",
     "what",
     "worded",
