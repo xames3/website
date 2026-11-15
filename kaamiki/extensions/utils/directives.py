@@ -356,6 +356,22 @@ class Renderer:
             return None
         return functools.partial(self._record, node, 1)
 
+    def draws(
+        self,
+        node: type[nodes.Element],
+        template: str,
+        prepare: Callable[[HTMLTranslator, dict[str, t.Any]], dict[str, t.Any]]
+        | None = None,
+    ) -> None:
+        """Record a template that writes all of a node.
+
+        :param node: The node that the template writes.
+        :param template: The template, relative to `theme/templates`.
+        :param prepare: The function that changes the node's attributes
+            before the template gets them, as `visitor` takes it.
+        """
+        self._record(node, 0, visitor(template, prepare))
+
     def skips(self, node: type[nodes.Element]) -> None:
         """Record that the HTML builder does not write a node.
 

@@ -4,7 +4,7 @@ GitHub Repository Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 October 2025
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 A `repository` directive that shows a GitHub project with its counts::
 
@@ -24,6 +24,7 @@ from docutils.parsers import rst
 
 from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
@@ -31,7 +32,6 @@ from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import paragraph
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import trail
-from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import worded
 
 name: t.Final[str] = "repository"
@@ -135,7 +135,7 @@ def plain(node: Repository) -> list[nodes.Node]:
     return found
 
 
-visit = visitor(template)
+html.draws(Repository, template)
 
 
 node = Repository
