@@ -82,6 +82,7 @@ from kaamiki.extensions.utils.settings import register
 from kaamiki.extensions.utils.settings import reread
 from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.settings import stored
+from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.social import social_metadata
 from kaamiki.extensions.utils.templates import TEMPLATES
 from kaamiki.extensions.utils.templates import bridge
@@ -157,6 +158,7 @@ __all__: list[str] = [
     "trail",
     "unlinked",
     "updated_on",
+    "values",
     "warm",
     "what",
     "worded",

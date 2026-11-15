@@ -62,7 +62,7 @@ from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import hostnames
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import on
-from kaamiki.extensions.utils import setting
+from kaamiki.extensions.utils import values
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable
@@ -461,7 +461,7 @@ class Embed(KaamikiDirective, spec=placeholders):
             that isn't allowed.
         """
         config = self.config
-        allowed = hostnames(setting(config, "embed_iframe_hosts"), www=True)
+        allowed = hostnames(values(config).embed.iframe_hosts, www=True)
         if not allowed:
             return
         fragment = Fragment(markup)
@@ -591,8 +591,8 @@ def html_page_context(
     embeds = [_ for _ in findall(doctree, nodes.raw) if "css" in _]
     if not embeds:
         return
-    css = dict.fromkeys(setting(app.config, "embed_css"))
-    js = dict.fromkeys(setting(app.config, "embed_js"))
+    css = dict.fromkeys(values(app.config).embed.css)
+    js = dict.fromkeys(values(app.config).embed.js)
     for raw in embeds:
         css.update(dict.fromkeys(raw.get("css", ())))
         js.update(dict.fromkeys(raw.get("js", ())))

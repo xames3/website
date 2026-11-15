@@ -44,8 +44,8 @@ from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import render
-from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import stored
+from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.checks import location
@@ -244,7 +244,7 @@ class Release(KaamikiDirective, motion=True):
                     f" {self.options['date']!r}"
                 )
             return made
-        form = setting(self.config, "release_version_fmt")
+        form = values(self.config).release.version_fmt
         if not form:
             return None
         try:
@@ -288,7 +288,7 @@ class Release(KaamikiDirective, motion=True):
         """
         own = {
             str(key).strip().lower()
-            for key in setting(self.config, "release_kinds")
+            for key in values(self.config).release.kinds
         }
         # NOTE(xames3): Translated here and not at import, as Kaamiki's
         # words only join Sphinx's catalogue once it has set up.
@@ -516,7 +516,7 @@ def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     if app.builder.format != "html":
         return
     classes = app.config.html_context["km_fa_icons"]["release_notes"]
-    after = setting(app.config, "button_icon_position") == "after"
+    after = values(app.config).button.icon_position == "after"
     for link in findall(doctree, nodes.reference):
         if NOTES not in link["classes"]:
             continue
