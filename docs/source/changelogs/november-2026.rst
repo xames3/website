@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 02 October 2026
-.. Last updated on: 13 November 2026
+.. Last updated on: 15 November 2026
 
 :orphan:
 :km-page-title: Kaamiki stops borrowing now!
@@ -257,6 +257,12 @@ With a ``kaamiki.conf.icons.kit`` you get the Pro icons. Without one you get
 Font Awesome Free, so a site with no kit draws every icon instead of empty
 boxes. A name Free doesn't have stops the build and suggests the nearest one,
 so a missing icon is never found by looking at the page.
+
+The Pro+ packs work too. Each one has its own role, like
+``:fa-icon:jelly:`house```, and an ``:icon:`` option takes
+``fa-jelly fa-house`` the same way. A pack has only one style, so Kaamiki
+writes it for you, and a style the pack doesn't have stops the build.
+:ref:`The packs <kaamiki-roles-fa-icon-packs>` lists them all.
 
 .. note::
 

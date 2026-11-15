@@ -96,11 +96,11 @@ SWAP_LENGTH: t.Final[int] = 45
 SWEEP_LENGTH: t.Final[int] = 120
 STYLE_CLASSES: t.Final[dict[str, str]] = {
     "brands": "fa-brands",
-    "duotone": "fa-duotone",
-    "light": "fa-light",
-    "regular": "fa-regular",
-    "solid": "fa-solid",
-    "thin": "fa-thin",
+    **{
+        key: f"fa-{key}"
+        for key in [*checks.FAMILY_STYLES["classic"], *checks.FAMILY_STYLES]
+        if key != "classic"
+    },
 }
 SYSTEMS: t.Final[dict[str, tuple[str, ...]]] = {
     "mac": (),
@@ -947,10 +947,12 @@ class Icon(KaamikiRole, name="fa-icon"):
     def __init__(self, style: str | None = None) -> None:
         """Make the role for one Font Awesome style.
 
-        :param style: The Font Awesome style class, or `None` for
-            `kaamiki.conf.icons.style`. `FaIcon` makes the roles
-            `fa-icon:brands`, `fa-icon:light`, `fa-icon:regular`,
-            `fa-icon:solid`, `fa-icon:thin` and `fa-icon:duotone`.
+        :param style: The Font Awesome style or family class, or `None`
+            for `kaamiki.conf.icons.style`. `FaIcon` makes one role for
+            each of `STYLE_CLASSES`: `fa-icon:solid` for a style, and
+            `fa-icon:jelly` for a family, which draws in its own style.
+            For `fa-icon:sharp:light`, it is the family and the style,
+            as `fa-sharp fa-light`.
         """
         super().__init__()
         self.style = style
@@ -960,8 +962,11 @@ class Icon(KaamikiRole, name="fa-icon"):
 
         :return: The icon, and no error messages.
         :raises ValueError: When the name or a class is not part of an
-            icon.
+            icon, or the family does not have the style.
         """
+        family, _, style = (self.style or "").partition(" ")
+        if style:
+            checks.paired(family, style)
         if not self.said.split():
             self.fail("expected an icon name, got none")
         name, *classes = self.said.split()
@@ -1097,13 +1102,31 @@ class Quiet(Domain):
 
 
 class FaIcon(Quiet):
-    """The `fa-icon:` roles, one for each Font Awesome style."""
+    """The `fa-icon:` roles, one for each style or family of icons."""
 
     name: t.ClassVar[str] = "fa-icon"
     label: t.ClassVar[str] = "Font Awesome"
     roles = {  # noqa: RUF012
         key: Icon(style) for key, style in STYLE_CLASSES.items()
     }
+
+    def role(self, name: str) -> RoleFunction | None:
+        """Give docutils a role for a style, a family, or the two.
+
+        :param name: The name of the role in the domain, as `solid`,
+            `jelly` or `sharp:light`, with the family first.
+        :return: The role, or `None` when Font Awesome has no such
+            family or style. The family and the style are checked
+            when the role is used.
+        """
+        family, _, style = name.partition(":")
+        if not style:
+            return super().role(name)
+        if f"fa-{family}" in checks.FAMILIES and (
+            f"fa-{style}" in checks.STYLES
+        ):
+            return Icon(f"fa-{family} fa-{style}")
+        return None
 
 
 class Kbd(Quiet):

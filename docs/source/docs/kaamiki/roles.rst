@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 15 November 2026
 
 :km-page-title: Kaamiki roles
 :km-page-description: The inline roles Kaamiki adds for links, motion, colour,
@@ -384,14 +384,20 @@ fa-icon
 -------------------------------------------------------------------------------
 
 A Font Awesome icon. The text is an icon's name and then any classes, a space
-between each. The role names the style: ``fa-icon:brands``, ``fa-icon:light``,
-``fa-icon:regular``, ``fa-icon:solid``, ``fa-icon:thin`` or
-``fa-icon:duotone``. A plain ``fa-icon`` draws in the site's
-``kaamiki.conf.icons.style``, which is ``regular`` unless you change it. An
-icon in the middle of a sentence sits between its words like a word does, so
-the spaces you type around it are its spacing. One that starts or ends a line
-is held further from its text, and a full stop right after it still touches it.
-The :doc:`icons example <examples/icons>` shows every place an icon can go:
+between each. The role names the style or the family: ``fa-icon:brands``,
+``fa-icon:solid``, ``fa-icon:regular``, ``fa-icon:light`` or ``fa-icon:thin``
+for a style, ``fa-icon:duotone``, ``fa-icon:sharp`` or
+``fa-icon:sharp-duotone`` for a Pro family, and one role for each
+:ref:`Pro+ pack <kaamiki-roles-fa-icon-packs>`, like ``fa-icon:jelly``. A plain
+``fa-icon`` draws in the site's ``kaamiki.conf.icons.style``, which is
+``regular`` unless you change it. A role can also name a family and then a
+style, the family first, like ``fa-icon:sharp:light`` or
+``fa-icon:duotone:thin``. A family takes only its own styles, so
+``fa-icon:jelly:solid`` stops the build. An icon in the middle of a sentence
+sits between its words like a word does, so the spaces you type around it are
+its spacing. One that starts or ends a line is held further from its text, and
+a full stop right after it still touches it. The :doc:`icons example
+<examples/icons>` shows every place an icon can go:
 
 .. columns:: 2
     :gap: medium
@@ -430,12 +436,106 @@ The :doc:`icons example <examples/icons>` shows every place an icon can go:
 
             Add a :fa-icon:`star km-tone--yellow` star.
 
+    .. column::
+
+        Go :fa-icon:sharp:light:`house` home.
+
+        .. code-block:: rst
+
+            Go :fa-icon:sharp:light:`house` home.
+
+    .. column::
+
+        A :fa-icon:duotone:thin:`bolt km-tone--blue` thin spark.
+
+        .. code-block:: rst
+
+            A :fa-icon:duotone:thin:`bolt km-tone--blue` thin spark.
+
 
 
 Without a Font Awesome Pro kit, a name that isn't in Font Awesome Free stops
 the build and, when it can, suggests the nearest one. :ref:`Icons in settings
 <kaamiki-settings-icons>` explains the kit and the Free and Pro pairs, and
 :ref:`classes <kaamiki-classes>` lists the classes you can add.
+
+.. _kaamiki-roles-fa-icon-packs:
+
+.. rubric:: Pro+ packs
+
+A Pro+ pack has one style, and its role draws in it, so
+``:fa-icon:jelly:`house``` is ``fa-jelly fa-regular fa-house``. A pack holds
+about 200 of the most common icons, not the whole set, and your kit must have
+the pack turned on. Without a kit, each one becomes the Free icon in the
+nearest style.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 40 20 40
+
+    * - Role
+      - Icon
+      - Style
+    * - ``fa-icon:chisel``
+      - :fa-icon:chisel:`house`
+      - ``regular``
+    * - ``fa-icon:etch``
+      - :fa-icon:etch:`house`
+      - ``solid``
+    * - ``fa-icon:graphite``
+      - :fa-icon:graphite:`house`
+      - ``thin``
+    * - ``fa-icon:jelly``
+      - :fa-icon:jelly:`house`
+      - ``regular``
+    * - ``fa-icon:jelly-fill``
+      - :fa-icon:jelly-fill:`house`
+      - ``regular``
+    * - ``fa-icon:jelly-duo``
+      - :fa-icon:jelly-duo:`house`
+      - ``regular``
+    * - ``fa-icon:mosaic``
+      - :fa-icon:mosaic:`house`
+      - ``solid``
+    * - ``fa-icon:notdog``
+      - :fa-icon:notdog:`house`
+      - ``solid``
+    * - ``fa-icon:notdog-duo``
+      - :fa-icon:notdog-duo:`house`
+      - ``solid``
+    * - ``fa-icon:pixel``
+      - :fa-icon:pixel:`house`
+      - ``regular``
+    * - ``fa-icon:slab``
+      - :fa-icon:slab:`house`
+      - ``regular``
+    * - ``fa-icon:slab-press``
+      - :fa-icon:slab-press:`house`
+      - ``regular``
+    * - ``fa-icon:slab-duo``
+      - :fa-icon:slab-duo:`house`
+      - ``regular``
+    * - ``fa-icon:slab-press-duo``
+      - :fa-icon:slab-press-duo:`house`
+      - ``regular``
+    * - ``fa-icon:thumbprint``
+      - :fa-icon:thumbprint:`house`
+      - ``light``
+    * - ``fa-icon:utility``
+      - :fa-icon:utility:`house`
+      - ``semibold``
+    * - ``fa-icon:utility-fill``
+      - :fa-icon:utility-fill:`house`
+      - ``semibold``
+    * - ``fa-icon:utility-duo``
+      - :fa-icon:utility-duo:`house`
+      - ``semibold``
+    * - ``fa-icon:vellum``
+      - :fa-icon:vellum:`house`
+      - ``solid``
+    * - ``fa-icon:whiteboard``
+      - :fa-icon:whiteboard:`house`
+      - ``semibold``
 
 .. _kaamiki-roles-kbd:
 

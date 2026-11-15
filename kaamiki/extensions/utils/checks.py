@@ -58,23 +58,54 @@ DECIMAL: t.Final[re.Pattern[str]] = re.compile(
 LENGTH: t.Final[re.Pattern[str]] = re.compile(
     r"(?:(?:0|[1-9][0-9]{0,2})(?:\.[0-9]{1,3})?rem|0)"
 )
-STYLES: t.Final[frozenset[str]] = frozenset(
-    {
-        "fa-solid",
-        "fa-regular",
-        "fa-light",
-        "fa-thin",
-        "fa-brands",
-        "fas",
-        "far",
-        "fal",
-        "fat",
-        "fab",
-    }
-)
-FAMILIES: t.Final[frozenset[str]] = frozenset(
-    {"fa-duotone", "fa-sharp", "fa-sharp-duotone", "fad", "fass", "fasds"}
-)
+CLASSIC: t.Final[tuple[str, ...]] = ("solid", "regular", "light", "thin")
+FAMILY_STYLES: t.Final[dict[str, tuple[str, ...]]] = {
+    "classic": CLASSIC,
+    "duotone": CLASSIC,
+    "sharp": CLASSIC,
+    "sharp-duotone": CLASSIC,
+    "chisel": ("regular",),
+    "etch": ("solid",),
+    "graphite": ("thin",),
+    "jelly": ("regular",),
+    "jelly-fill": ("regular",),
+    "jelly-duo": ("regular",),
+    "mosaic": ("solid",),
+    "notdog": ("solid",),
+    "notdog-duo": ("solid",),
+    "pixel": ("regular",),
+    "slab": ("regular",),
+    "slab-press": ("regular",),
+    "slab-duo": ("regular",),
+    "slab-press-duo": ("regular",),
+    "thumbprint": ("light",),
+    "utility": ("semibold",),
+    "utility-fill": ("semibold",),
+    "utility-duo": ("semibold",),
+    "vellum": ("solid",),
+    "whiteboard": ("semibold",),
+}
+STYLE_NAMES: t.Final[dict[str, str]] = {
+    "fa-brands": "brands",
+    **{
+        f"fa-{style}": style
+        for styles in FAMILY_STYLES.values()
+        for style in styles
+    },
+    "fas": "solid",
+    "far": "regular",
+    "fal": "light",
+    "fat": "thin",
+    "fab": "brands",
+}
+FAMILY_NAMES: t.Final[dict[str, tuple[str, str | None]]] = {
+    **{f"fa-{family}": (family, None) for family in FAMILY_STYLES},
+    "fad": ("duotone", "solid"),
+    "fass": ("sharp", "solid"),
+    "fasds": ("sharp-duotone", "solid"),
+}
+STYLES: t.Final[frozenset[str]] = frozenset(STYLE_NAMES)
+FAMILIES: t.Final[frozenset[str]] = frozenset(FAMILY_NAMES)
 MODIFIERS: t.Final[re.Pattern[str]] = re.compile(
     r"fa-(?:fw|spin|pulse|beat|fade|beat-fade|bounce|shake|spin-pulse"
     r"|spin-reverse|flip-horizontal|flip-vertical|flip-both"
@@ -446,12 +477,29 @@ def lengths(value: str) -> tuple[str, str]:
     return words[0], words[-1]
 
 
+def paired(family: str, style: str) -> None:
+    """Make sure that a Font Awesome family has a style.
+
+    :param family: The family, as `fa-jelly` or `fad`.
+    :param style: The style, as `fa-regular` or `far`.
+    :raises ValueError: When the family does not have the style.
+    """
+    name, fixed = FAMILY_NAMES[family]
+    allowed = [f"fa-{_}" for _ in ([fixed] if fixed else FAMILY_STYLES[name])]
+    if f"fa-{STYLE_NAMES[style]}" not in allowed:
+        *rest, last = allowed
+        listed = f"{', '.join(rest)} or {last}" if rest else last
+        raise ValueError(f"expected {family} with {listed}, got {style!r}")
+
+
 def icon(argument: str | None) -> str:
     """Read a Font Awesome icon, as an option or a role writes it.
 
     :param argument: The icon as written: `plus`, `fa-plus`, or a style
-        and a name, `far fa-plus`, with a Pro family before the style,
-        `fa-sharp fa-solid fa-plus`. After a style or a family, sizes
+        and a name, `far fa-plus`, with a family of `FAMILY_STYLES`
+        before the style, `fa-sharp fa-solid fa-plus` or
+        `fa-jelly fa-plus`. A family takes only its own styles. After a
+        style or a family, sizes
         and animations can follow, as `fa-lg` and `fa-spin`, and the
         Kaamiki tones `km-tone--red`, `km-tone--yellow`,
         `km-tone--blue` and `km-tone--green`. The maximum is
@@ -471,7 +519,15 @@ def icon(argument: str | None) -> str:
         rest = parts
     elif parts[0] in STYLES or parts[0] in FAMILIES:
         rest = parts[1:]
+        style = STYLE_NAMES.get(parts[0], "brands")
+        if style != "brands" and style not in FAMILY_STYLES["classic"]:
+            owner = next(_ for _, s in FAMILY_STYLES.items() if style in s)
+            raise ValueError(
+                f"expected a family with {parts[0]} before it, as"
+                f" fa-{owner}, got {argument!r}"
+            )
         if parts[0] in FAMILIES and rest and rest[0] in STYLES:
+            paired(parts[0], rest[0])
             rest = rest[1:]
         if not rest or not rest[0].startswith("fa-"):
             raise ValueError(
@@ -480,7 +536,7 @@ def icon(argument: str | None) -> str:
             )
     else:
         raise ValueError(
-            f"expected a style, {', '.join(sorted(STYLES | FAMILIES))}, before"
+            "expected a style or a family, as fa-solid or fa-jelly, before"
             f" the name, got {argument!r}"
         )
     if (
