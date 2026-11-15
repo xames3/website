@@ -4,7 +4,7 @@ Tabs Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 11 November 2026
+Last updated on: 15 November 2026
 
 A `tabs` directive that holds `tab` directives and shows one at a
 time::
@@ -34,9 +34,10 @@ from sphinx import addnodes
 from kaamiki.extensions.roles import steady
 from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import Bem
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import hollow
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
@@ -57,7 +58,8 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "tabs"
-depart = close
+tabs: t.Final[Bem] = Bem("tabs")
+glyph: t.Final[Bem] = Bem("glyph")
 ICON_POSITIONS: t.Final[tuple[str, ...]] = CHOICES["tab_icon_position"]
 
 
@@ -251,6 +253,7 @@ class tab(rst.Directive):
         return [element, *messages]
 
 
+@html.opens(Tabs)
 def visit(self: HTMLTranslator, node: Tabs) -> None:
     """Open the tab set, numbering it among the sets on the page.
 
@@ -262,15 +265,16 @@ def visit(self: HTMLTranslator, node: Tabs) -> None:
     panes = [_ for _ in node.children if isinstance(_, pane)]
     if panes and not any(_["checked"] for _ in panes):
         panes[0]["checked"] = True
-    classes = ["km-tabs"]
-    if node["align"] != "center":
-        classes.append(f"km-tabs--align-{node['align']}")
-    attributes: dict[str, t.Any] = {"CLASS": " ".join(classes)}
+    align = [] if node["align"] == "center" else [f"align-{node['align']}"]
+    attributes: dict[str, t.Any] = {"CLASS": tabs(*align)}
     if node["group"]:
         attributes["data-km-group"] = node["group"]
     if node["bar"]:
         attributes["data-km-bar"] = " ".join(node["bar"])
     self.body.append(self.starttag(node, "div", "", **attributes))
+
+
+html.closes(Tabs, "</div>")
 
 
 def ident(node: nodes.Element) -> str:
@@ -282,6 +286,7 @@ def ident(node: nodes.Element) -> str:
     return f"km-tab-{node.parent['serial']}-{node['index']}"
 
 
+@html.opens(pane)
 def visit_pane(self: HTMLTranslator, node: pane) -> None:
     """Write the radio button that shows a tab.
 
@@ -289,7 +294,7 @@ def visit_pane(self: HTMLTranslator, node: pane) -> None:
     :param node: The tab's node.
     """
     attributes = [
-        'class="km-tabs__input"',
+        f'class="{tabs.input()}"',
         'type="radio"',
         f'id="{ident(node)}"',
         f'name="km-tabs-{node.parent["serial"]}"',
@@ -302,6 +307,9 @@ def visit_pane(self: HTMLTranslator, node: pane) -> None:
     self.body.append(f"<input {' '.join(attributes)}>")
 
 
+html.closes(pane, "</div>")
+
+
 def tab_icon(self: HTMLTranslator, node: tablabel) -> str:
     """Write a tab's icon.
 
@@ -311,22 +319,21 @@ def tab_icon(self: HTMLTranslator, node: tablabel) -> str:
     """
     if not node["icon"]:
         return ""
-    after = " km-tabs__glyph--icon-position-after" if node["after"] else ""
+    after = ["icon-position-after"] if node["after"] else []
     return (
         f'<span aria-hidden="true" class="{self.attval(node["icon"])}'
-        f' km-glyph km-tabs__glyph{after}"></span>'
+        f' {glyph} {tabs.glyph(*after)}"></span>'
     )
 
 
+@html.opens(tablabel)
 def visit_tablabel(self: HTMLTranslator, node: tablabel) -> None:
     """Open a tab's title and put the icon first if it goes there.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The title's node.
     """
-    classes = " ".join(
-        ["km-tabs__label", *node.parent["classes"], *node["classes"]]
-    )
+    classes = tabs.label(more=[*node.parent["classes"], *node["classes"]])
     self.body.append(
         f'<label class="{self.attval(classes)}" for="{ident(node.parent)}">'
     )
@@ -334,6 +341,7 @@ def visit_tablabel(self: HTMLTranslator, node: tablabel) -> None:
         self.body.append(tab_icon(self, node))
 
 
+@html.closes(tablabel)
 def depart_tablabel(self: HTMLTranslator, node: tablabel) -> None:
     """Close the title and open the tab's content.
 
@@ -343,7 +351,7 @@ def depart_tablabel(self: HTMLTranslator, node: tablabel) -> None:
     if node["after"]:
         self.body.append(tab_icon(self, node))
     panel = node.parent
-    classes = " ".join(["km-tabs__panel", *panel["classes"], *panel["body"]])
+    classes = tabs.panel(more=[*panel["classes"], *panel["body"]])
     ids = panel["ids"]
     anchor = f' id="{self.attval(ids[0])}"' if ids else ""
     spans = "".join(f'<span id="{self.attval(_)}"></span>' for _ in ids[1:])
@@ -355,13 +363,11 @@ def depart_tablabel(self: HTMLTranslator, node: tablabel) -> None:
 
 
 def register(app: Sphinx) -> None:
-    """Register the `tab` directive and the nodes only tabs have.
+    """Register the `tab` directive.
 
     :param app: The Sphinx application instance.
     """
     app.add_directive("tab", tab)
-    app.add_node(pane, html=(visit_pane, close))
-    app.add_node(tablabel, html=(visit_tablabel, depart_tablabel))
 
 
 node = Tabs
