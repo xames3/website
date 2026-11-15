@@ -3,8 +3,7 @@ Motion. The speed and the curves every animation takes from, so a site, a
 reader and a test can change them in one place. A time is a `calc()` of
 `--km-motion-speed`, which is 1 and calm, so 2 is twice as quick and 0.5 half
 as quick. The ambient one is how long a loop that never ends takes for a round.
-Reduced motion leaves it alone, since a loop of no time would be a strobe, and
-stills the loop by pausing it with `--km-motion-ambient-state` instead. The
+Reduced motion leaves it alone, since a loop of no time would be a strobe. The
 spring curves are written by archive/tmp/2026-11-10-motion/
 make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
 */
@@ -22,11 +21,7 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
     --km-motion-ambient: calc(1600ms / var(--km-motion-speed));
     --km-motion-rise: 0.75rem;
     --km-motion-rise-small: 0.375rem;
-    --km-motion-ambient-state: running;
     --km-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-    --km-ease-lively: cubic-bezier(0.34, 1.2, 0.64, 1);
-    --km-ease-fade: cubic-bezier(0.2, 0.8, 0.2, 1);
-    --km-ease-ambient: cubic-bezier(0.45, 0, 0.2, 1);
 }
 
 @supports (transition-timing-function: linear(0, 1)) {
@@ -38,18 +33,7 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
             0.8522, 0.8682, 0.8827, 0.8958, 0.9077, 0.9184, 0.928, 0.9367,
             0.9445, 0.9515, 0.9578, 0.9635, 0.9685, 0.9731, 0.9771, 0.9807,
             0.984, 0.9869, 0.9895, 0.9918, 0.9938, 0.9956, 0.9973, 0.9987, 1);
-        --km-ease-lively:
-            linear(0, 0.0082, 0.0305, 0.0638, 0.1055, 0.1534, 0.2054, 0.2599,
-            0.3157, 0.3715, 0.4265, 0.4799, 0.5312, 0.58, 0.626, 0.6689,
-            0.7088, 0.7455, 0.779, 0.8095, 0.837, 0.8617, 0.8837, 0.9032,
-            0.9203, 0.9353, 0.9483, 0.9594, 0.9689, 0.9769, 0.9836, 0.9891,
-            0.9936, 0.9972, 1, 1.002, 1.0035, 1.0046, 1.0051, 1.0054, 1.0053,
-            1.005, 1.0046, 1.004, 1.0033, 1.0025, 1.0017, 1.0008, 1);
     }
-}
-
-:root[data-km-motion="quiet"] {
-    --km-motion-ambient-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -62,7 +46,6 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
         --km-motion-enter: 0.01ms;
         --km-motion-page: 0.01ms;
         --km-motion-stagger: 0.01ms;
-        --km-motion-ambient-state: paused;
     }
 }
 
