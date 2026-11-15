@@ -1,18 +1,13 @@
-    function markMissingIcons() {
-        const icons = Array.from(document.querySelectorAll(ICON_ONLY))
-            .filter((icon) => icon.getClientRects().length);
-        const bare = icons.length > 0 && icons.every((icon) => (
-            ['none', 'normal'].includes(
-                getComputedStyle(icon, '::before').content,
-            )
-        ));
-        document.fonts.ready.then(() => {
-            const failed = Array.from(document.fonts).some((face) => (
-                face.status === 'error' && /Font Awesome/.test(face.family)
+    function markLoadedIcons() {
+        const mark = () => {
+            const loaded = Array.from(document.fonts).some((face) => (
+                face.status === 'loaded' && /Font ?Awesome/.test(face.family)
             ));
-            root.classList.toggle('km-document--no-icons', bare || failed);
-        });
+            if (loaded) root.classList.add('km-document--icons-loaded');
+        };
+        const later = () => document.fonts.ready.then(mark);
+        later();
+        document.fonts.addEventListener('loading', later);
     }
 
-    window.addEventListener('load', markMissingIcons, { once: true });
-
+    markLoadedIcons();
