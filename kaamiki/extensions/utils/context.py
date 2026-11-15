@@ -54,10 +54,10 @@ from kaamiki.extensions.utils.settings import OG_TYPE
 from kaamiki.extensions.utils.settings import PAGE_SWITCHES
 from kaamiki.extensions.utils.settings import PROJECT
 from kaamiki.extensions.utils.settings import kept
-from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.settings import site_values
 from kaamiki.extensions.utils.settings import stored
 from kaamiki.extensions.utils.settings import validate
+from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.text import clip
 from kaamiki.extensions.utils.text import levelled
 from kaamiki.extensions.utils.text import plain
@@ -143,25 +143,25 @@ def context_defaults(app: Sphinx) -> None:
     config = app.config
     context: dict[str, t.Any] = config.html_context
     for key in TEMPLATE_KEYS:
-        context[f"km_{key}"] = setting(config, key)
+        context[f"km_{key}"] = values(config)[key]
     icons = Icons.of(config)
-    context["km_fa_icons"] = icons.roles(setting(config, "fa_icons"))
+    context["km_fa_icons"] = icons.roles(values(config).icons.names)
     context["km_fa_kit"] = icons.kit
     author = config.author
     if author == config.values["author"].default:
         author = ""
-    project = {**PROJECT, "author": author, **setting(config, "project")}
+    project = {**PROJECT, "author": author, **values(config).site.project}
     context["km_project"] = project
     if context["km_show_feedback"] is None:
         context["km_show_feedback"] = bool(
-            project["email"] or setting(config, "feedback").get("url")
+            project["email"] or values(config).site.feedback.get("url")
         )
-    depth = setting(config, "toctree_maxdepth")
+    depth = values(config).toctree.maxdepth
     context["km_toctree_args"] = {
-        "includehidden": bool(setting(config, "toctree_includehidden")),
+        "includehidden": bool(values(config).toctree.includehidden),
         **({"maxdepth": depth} if depth else {}),
     }
-    terms = setting(config, "license")
+    terms = values(config).site.license
     context["km_license"] = {
         **terms,
         "new_tab": opens_new_tab(terms.get("url") or "", config),
@@ -173,7 +173,7 @@ def context_defaults(app: Sphinx) -> None:
                 "icon": icons.custom(button.get("icon")),
                 "new_tab": opens_new_tab(button["url"], config),
             }
-            for text, button in setting(config, key).items()
+            for text, button in values(config)[key].items()
         }
     context["km_credit"] = CREDIT
     context["km_credit_new_tab"] = opens_new_tab(CREDIT, config)
@@ -400,8 +400,8 @@ def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
                 places.get("km-feedback-icon", where),
             )
     if "km-show-feedback" in found and toggle(found["km-show-feedback"]):
-        email = setting(app.config, "project").get("email")
-        site = setting(app.config, "feedback").get("url")
+        email = values(app.config).site.project.get("email")
+        site = values(app.config).site.feedback.get("url")
         if not (email or site or found.get("km-feedback-url")):
             fail(
                 "field :km-show-feedback: expected an email in"
@@ -445,8 +445,9 @@ def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
                 f" :{field}: false, which turns the cards off, got both",
                 places.get("km-related-docs", where),
             )
-        if field not in found and not setting(
-            app.config, "show_previous_next_cards"
+        if (
+            field not in found
+            and not values(app.config).show.previous_next_cards
         ):
             fail(
                 "field :km-related-docs: expected"
@@ -508,7 +509,7 @@ def feedback(
     del templatename, doctree
     options = app.config.html_context
     meta: dict[str, str] = context.get("meta") or {}
-    site: dict[str, str] = setting(app.config, "feedback")
+    site: dict[str, str] = values(app.config).site.feedback
     email = options["km_project"]["email"]
     title = plain(context.get("title") or "")
     if meta.get("km-feedback-subject") or site.get("subject"):
@@ -528,7 +529,7 @@ def feedback(
             " there's no email or :km-feedback-url: for a button",
             str(app.env.doc2path(pagename)),
         )
-    if url and setting(app.config, "show_feedback") is None:
+    if url and values(app.config).show.feedback is None:
         context["km_show_feedback"] = True
     context["km_feedback"] = {
         "split": toggle(meta["km-feedback-split"])
@@ -844,7 +845,7 @@ def reading_order(env: BuildEnvironment, docname: str) -> list[str]:
     relations = env.collect_relations()
     meta = env.metadata.get(docname, {})
     released = ensure_articles(env)
-    most = setting(env.config, "show_previous_next_cards_count")
+    most = values(env.config).show.previous_next_cards_count
 
     def first(key: str) -> str | None:
         """Give the page's own neighbour, its fields first."""
