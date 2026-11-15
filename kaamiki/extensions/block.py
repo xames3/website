@@ -322,7 +322,7 @@ def unrow(app: Sphinx, doctree: nodes.document) -> None:
     del app
     for row in list(doctree.findall(shelf)):
         host = row.parent
-        while host is not None and not isinstance(host, columns.item):
+        while host is not None and not isinstance(host, columns.Column.Node):
             host = host.parent
         if host is not None:
             row.replace_self(list(row.children))

@@ -91,7 +91,7 @@ KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
         isinstance(_, explain.node) and not isinstance(_, version.node)
     ),
     "code-version": lambda _: isinstance(_, version.node),
-    "columns": lambda _: isinstance(_, columns.node),
+    "columns": lambda _: isinstance(_, columns.Columns.Node),
     "embed": is_embed,
     "raw": is_raw,
     "release": is_release,
@@ -134,7 +134,7 @@ HEAVY: t.Final[tuple[str, ...]] = (
 )
 SETS: t.Final[tuple[tuple[type, type, str, str], ...]] = (
     (tabs.Tab.Node, tabs.Tabs.Node, "tab", "tabs"),
-    (columns.item, columns.node, "column", "columns"),
+    (columns.Column.Node, columns.Columns.Node, "column", "columns"),
 )
 PARTS: t.Final[tuple[type[nodes.Element], ...]] = (
     explain.explanations,
@@ -144,7 +144,7 @@ PARTS: t.Final[tuple[type[nodes.Element], ...]] = (
 )
 HOSTS: t.Final[tuple[tuple[type, str], ...]] = (
     (tabs.Tab.Node, "a tab"),
-    (columns.item, "a column"),
+    (columns.Column.Node, "a column"),
     (block.part, "a block"),
     (nodes.list_item, "a list"),
     (nodes.entry, "a table"),
@@ -287,9 +287,11 @@ def narrow(host: nodes.Node) -> bool:
     :return: `True` for a column that doesn't span its set and for a
         block that isn't large.
     """
-    if isinstance(host, columns.item):
+    if isinstance(host, columns.Column.Node):
         whole = holder(host)
-        count = whole["columns"] if isinstance(whole, columns.node) else 1
+        count = (
+            whole["columns"] if isinstance(whole, columns.Columns.Node) else 1
+        )
         return host["span"] == "auto" or int(host["span"]) < count
     return isinstance(host, block.node) and host["size"] != "large"
 
@@ -307,7 +309,7 @@ def refused(name: str, host: nodes.Node) -> bool:
         return True
     if isinstance(host, block.node) and host["link"] and name in CLICKABLE:
         return True
-    if name == "carousel" and isinstance(host, columns.item):
+    if name == "carousel" and isinstance(host, columns.Column.Node):
         return True
     return name == "columns" and narrow(host)
 
