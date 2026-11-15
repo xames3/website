@@ -4,49 +4,51 @@ YouTube Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 07 November 2026
+Last updated on: 15 November 2026
 #}
 {%- from "components/helpers.html.jinja"
 import km_class, km_glyph, km_id with context %}
 {%- from "components/anchors.html.jinja" import km_anchors -%}
 {%- set km_shape = "aspect-ratio: %s; --km-ratio: calc(%s)" -%}
-{%- set km_css = km_shape|format(km_ratio, km_ratio) if km_ratio else none -%}
+{%- set km_css = km_shape|format(kaamiki.directive.ratio, kaamiki.directive.ratio) if kaamiki.directive.ratio else none -%}
 {% block km_youtube %}
-    {%- set km_label = km_caption or _("YouTube video") %}
+    {%- set km_label = kaamiki.directive.caption or _("YouTube video") %}
     {%- set km_cue = _("Play video: %(title)s", title=km_label|striptags) %}
-    <figure class="{{ km_class('km-media', km_classes) }}"
-            {{ km_id(km_ids) }}>
+    <figure class="{{ km_class('km-media', kaamiki.directive.classes) }}"
+            {{ km_id(kaamiki.directive.ids) }}>
         <div class="km-media__frame km-media__frame--ratio"
              {{ {"style": km_css}|xmlattr }}>
-            {{- km_anchors(km_ids) -}}
-            {%- if km_facade %}
+            {{- km_anchors(kaamiki.directive.ids) -}}
+            {%- if kaamiki.directive.facade %}
                 <a class="km-media__facade"
-                   href="{{ km_watch }}"
+                   href="{{ kaamiki.directive.watch }}"
                    data-km-facade
-                   data-km-facade-src="{{ km_url }}&amp;color=white"
+                   data-km-facade-src="{{ kaamiki.directive.url }}&amp;color=white"
                    data-km-facade-title="{{ km_label|striptags|e }}"
-                   data-km-facade-allow="{{ km_allow }}"
-                   data-km-facade-referrer="{{ km_referrer }}">
-                    <img src="{{ km_still }}"
+                   data-km-facade-allow="{{ kaamiki.directive.allow }}"
+                   data-km-facade-referrer="{{ kaamiki.directive.referrer }}">
+                    <img src="{{ kaamiki.directive.still }}"
                          alt=""
                          width="480"
                          height="360"
                          loading="lazy" />
-                    {{ km_glyph(km_play, "km-media__facade-icon") }}
+                    {{ km_glyph(kaamiki.directive.play, "km-media__facade-icon") }}
                     <span class="sr-only">{{ km_cue }}</span>
                 </a>
             {%- else %}
                 <iframe class="km-media__iframe"
-                        src="{{ km_url }}&amp;color=white"
+                        src="{{ kaamiki.directive.url }}&amp;color=white"
                         title="{{ km_label|striptags|e }}"
                         loading="lazy"
-                        referrerpolicy="{{ km_referrer }}"
-                        allow="{{ km_allow }}"
+                        referrerpolicy="{{ kaamiki.directive.referrer }}"
+                        allow="{{ kaamiki.directive.allow }}"
                         allowfullscreen></iframe>
             {%- endif %}
         </div>
-        {%- if km_caption %}
-            <figcaption class="km-media__caption">{{ km_caption }}</figcaption>
+        {%- if kaamiki.directive.caption %}
+            <figcaption class="km-media__caption">
+                {{- kaamiki.directive.caption -}}
+            </figcaption>
         {%- endif -%}
     </figure>
 {% endblock km_youtube %}

@@ -58,6 +58,7 @@ from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import on
+from kaamiki.extensions.utils import optional
 from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import stored
 from kaamiki.extensions.utils import values
@@ -380,7 +381,7 @@ def visit(self: HTMLTranslator, node: Release.Node) -> None:
     attributes["date"] = (
         dated(dt.fromisoformat(iso), self.builder.config) if iso else ""
     )
-    self.body.append(render(template, **attributes))
+    self.body.append(render(template, optional=optional(node), **attributes))
 
 
 def ensure_versions(env: BuildEnvironment) -> dict[str, dict[str, str]]:

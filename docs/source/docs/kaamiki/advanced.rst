@@ -187,7 +187,9 @@ replaces what ``button`` writes with a plain link:
     :caption: _templates/directives/button.html.jinja
 
     {% block km_button %}
-        <a class="mine-button" href="{{ km_url }}">{{ km_text }}</a>
+        <a class="mine-button" href="{{ kaamiki.directive.url }}">
+            {{- kaamiki.directive.text -}}
+        </a>
     {% endblock km_button %}
 
 The pieces a page includes, like ``components/breadcrumbs.html.jinja``, are
@@ -268,9 +270,11 @@ fixed and the ``kaamiki.conf.toctree`` settings set the navigation.
       ``kaamiki.page.related``, the row of cards that takes the place of the
       previous and next buttons, or ``None`` when a page has none.
 
-    The directive templates also get the values of their own options, as
-    ``km_url``, ``km_text``, ``km_look`` and so on. Read the shipped template
-    to see them.
+    A directive's template also reads the values of its own options under
+    ``kaamiki.directive``, as ``kaamiki.directive.url``,
+    ``kaamiki.directive.text``, ``kaamiki.directive.look`` and so on, next to
+    every name above. An option the page leaves out is undefined there, and
+    any other name stops the build. Read the shipped template to see them.
 
 .. note::
 

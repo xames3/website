@@ -1299,13 +1299,19 @@ def frozen(value: t.Any) -> t.Any:
 class Kaamiki:
     """The values of Kaamiki for the templates, as `kaamiki.show`."""
 
-    __slots__ = ("_page", "_path", "_values")
+    __slots__ = ("_optional", "_page", "_path", "_values")
+    _optional: frozenset[str]
     _page: bool
     _path: str
     _values: dict[str, t.Any]
 
     def __init__(
-        self, path: str, values: Mapping[str, t.Any], *, page: bool = False
+        self,
+        path: str,
+        values: Mapping[str, t.Any],
+        *,
+        page: bool = False,
+        optional: frozenset[str] = frozenset(),
     ) -> None:
         """Keep the values of a group.
 
@@ -1313,7 +1319,11 @@ class Kaamiki:
         :param values: The values of the group, by name.
         :param page: Whether this is the copy of one page, which the
             handlers of the page can change.
+        :param optional: The names that can be missing, as the options
+            of a directive that the page leaves out. Jinja reads a
+            missing one as undefined.
         """
+        object.__setattr__(self, "_optional", optional)
         object.__setattr__(self, "_page", page)
         object.__setattr__(self, "_path", path)
         object.__setattr__(
@@ -1337,13 +1347,15 @@ class Kaamiki:
         :param name: The name, as `breadcrumbs`.
         :return: The value.
         :raises AttributeError: For a name that starts with `_`, which
-            Python and Jinja ask for.
+            Python and Jinja ask for, and for a missing optional name.
         :raises KaamikiError: For another name that is not a value,
             with the nearest name.
         """
         if name.startswith("_"):
             raise AttributeError(name)
         if name not in self._values:
+            if name in self._optional:
+                raise AttributeError(name)
             near = difflib.get_close_matches(name, self._values, n=1)
             fail(
                 f"{self._path}.{name}: expected a Kaamiki value, got an"
@@ -1374,6 +1386,19 @@ class Kaamiki:
         found = getattr(self, group) if group else self
         found._values[name] = frozen(value)
 
+    def __or__(self, more: Mapping[str, t.Any]) -> Kaamiki:
+        """Add names to a copy, as `kaamiki | {"directive": values}`.
+
+        :param more: The names and their values.
+        :return: The copy, which has the names of both.
+        """
+        return Kaamiki(
+            self._path,
+            {**self._values, **more},
+            page=self._page,
+            optional=self._optional,
+        )
+
     def __copy__(self) -> Kaamiki:
         """Copy the groups for one page.
 
@@ -1387,6 +1412,7 @@ class Kaamiki:
                 for k, v in self._values.items()
             },
             page=True,
+            optional=self._optional,
         )
 
     def __dir__(self) -> list[str]:
