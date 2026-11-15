@@ -193,7 +193,7 @@ class Video(KaamikiDirective):
                         f" {value!r} in {first!r} and {entry!r}"
                     )
             try:
-                checks.link(file)
+                checks.link(file, schemes=("http", "https"))
                 shipped(self, file, ":track:")
                 checks.language(code)
                 if not checks.LOCALE.fullmatch(code):

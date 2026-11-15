@@ -567,7 +567,8 @@ def link(
         `#` fragment are always correct.
     :return: The address, as written.
     :raises ValueError: For whitespace, a backslash (a browser reads it
-        as a slash, which can change a path into `//host`), a scheme
+        as a slash, which can change a path into `//host`), `"`, `<` or
+        `>` (they can end an HTML attribute), a scheme
         that is not in `schemes`, a full address without a host, an
         address that starts with `//`, or one longer than `URL_LENGTH`.
     """
@@ -577,6 +578,10 @@ def link(
     if "\\" in value:
         raise ValueError(
             f"expected an address without a backslash, got {argument!r}"
+        )
+    if re.search(r'["<>]', value):
+        raise ValueError(
+            f'expected an address without ", < or >, got {argument!r}'
         )
     if value.startswith("//"):
         raise ValueError(

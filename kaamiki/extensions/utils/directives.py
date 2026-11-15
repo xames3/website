@@ -233,11 +233,17 @@ def shipped(directive: Directive, value: str, where: str) -> str:
         read again when the file changes or goes.
     :param where: How it was written, as `:poster:` or `the address`.
     :return: The value, as written.
-    :raises rst.DirectiveError: When the site has no such file.
+    :raises rst.DirectiveError: When the site has no such file or
+        when the value has a host but no scheme.
     """
     from kaamiki.extensions.utils.context import confdir
 
     parts = urlsplit(value)
+    if parts.netloc and not parts.scheme:
+        raise directive.error(
+            f"{directive.name}: {where} expected an address with its"
+            f" scheme, https://, got {value!r}"
+        )
     if parts.scheme or value.startswith("#"):
         return value
     env = directive.state.document.settings.env
