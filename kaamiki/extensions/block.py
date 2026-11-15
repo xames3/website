@@ -4,7 +4,7 @@ Block Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 A `block` directive that frames a title and some content, which
 can link somewhere::
@@ -24,11 +24,12 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
 from kaamiki.extensions import columns
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import document
 from kaamiki.extensions.utils import hollow
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
@@ -46,6 +47,8 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "block"
+block: t.Final[BEM] = BEM("block")
+row: t.Final[BEM] = BEM("block-row")
 LINKS: t.Final[tuple[str, ...]] = ("target", "doc", "ref")
 
 
@@ -247,7 +250,7 @@ def anchor(self: HTMLTranslator, node: Block) -> str:
         self, "block", node["kind"], node["link"], location(node)
     )
     attributes = [
-        'class="km-block__link"',
+        f'class="{block.link()}"',
         f'href="{self.attval(href)}"',
         f'aria-label="{self.attval(node["label"])}"',
     ]
@@ -256,20 +259,20 @@ def anchor(self: HTMLTranslator, node: Block) -> str:
     return f"<a {' '.join(attributes)}></a>"
 
 
+@html.opens(Block)
 def visit(self: HTMLTranslator, node: Block) -> None:
     """Open the block.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The block's node.
     """
-    classes = ["km-block"]
-    if node["size"] != "large":
-        classes.append(f"km-block--size-{node['size']}")
+    modifiers = [] if node["size"] == "large" else [f"size-{node['size']}"]
     if node["link"]:
-        classes.append("km-block--link")
-    self.body.append(self.starttag(node, "div", "", CLASS=" ".join(classes)))
+        modifiers.append("link")
+    self.body.append(self.starttag(node, "div", "", CLASS=block(*modifiers)))
 
 
+@html.closes(Block)
 def depart(self: HTMLTranslator, node: Block) -> None:
     """Close the block, with its link as the last thing in it.
 
@@ -281,24 +284,31 @@ def depart(self: HTMLTranslator, node: Block) -> None:
     self.body.append("</div>")
 
 
+@html.opens(shelf)
 def visit_shelf(self: HTMLTranslator, node: shelf) -> None:
     """Open a row of blocks.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The row's node.
     """
-    self.body.append(self.starttag(node, "div", "", CLASS="km-block-row"))
+    self.body.append(self.starttag(node, "div", "", CLASS=row()))
 
 
+@html.opens(part)
+@html.opens(blocktext)
 def visit_piece(self: HTMLTranslator, node: part | blocktext) -> None:
     """Open a part of a block, or a line of its text.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The part's or the line's node.
     """
-    self.body.append(
-        self.starttag(node, "div", "", CLASS=f"km-block__{node['role']}")
-    )
+    classes = getattr(block, node["role"])()
+    self.body.append(self.starttag(node, "div", "", CLASS=classes))
+
+
+html.closes(shelf, "</div>")
+html.closes(part, "</div>")
+html.closes(blocktext, "</div>")
 
 
 def unrow(app: Sphinx, doctree: nodes.document) -> None:
@@ -319,14 +329,11 @@ def unrow(app: Sphinx, doctree: nodes.document) -> None:
 
 
 def register(app: Sphinx) -> None:
-    """Register the nodes only a block has and the check on their rows.
+    """Register the check on the rows of blocks.
 
     :param app: The Sphinx application instance.
     """
     app.connect("doctree-read", unrow)
-    app.add_node(shelf, html=(visit_shelf, close))
-    app.add_node(part, html=(visit_piece, close))
-    app.add_node(blocktext, html=(visit_piece, close))
 
 
 node = Block

@@ -4,7 +4,7 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 11 November 2026
+Last updated on: 15 November 2026
 
 Kaamiki's custom inline roles.
 """
@@ -29,6 +29,7 @@ from sphinx.roles import Keyboard
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import glyph
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import BOUNDS
@@ -227,6 +228,7 @@ def steady(
             )
 
 
+@html.opens(ink)
 def visit(self: HTMLTranslator, node: ink) -> None:
     """Open the span that carries the style, unless the text is plain.
 
@@ -261,6 +263,7 @@ def _moves(node: ink) -> bool:
     return True
 
 
+@html.opens(swapper)
 def visit_swapper(self: HTMLTranslator, node: swapper) -> None:
     """Open the span the words take turns in, if they do here.
 
@@ -272,6 +275,7 @@ def visit_swapper(self: HTMLTranslator, node: swapper) -> None:
         self.body.append(self.starttag(node, "span", "", **attributes))
 
 
+@html.closes(swapper)
 def depart_swapper(self: HTMLTranslator, node: swapper) -> None:
     """Close the span, if one was opened.
 
@@ -282,6 +286,7 @@ def depart_swapper(self: HTMLTranslator, node: swapper) -> None:
         self.body.append("</span>")
 
 
+@html.opens(glyph, elsewhere="skip")
 def visit_glyph(self: HTMLTranslator, node: glyph) -> None:
     """Open the span that carries the icon.
 
@@ -292,15 +297,18 @@ def visit_glyph(self: HTMLTranslator, node: glyph) -> None:
     self.body.append(self.starttag(node, "span", "", **attributes))
 
 
-def depart(self: HTMLTranslator, node: ink | glyph) -> None:
+html.closes(glyph, "</span>")
+
+
+@html.closes(ink)
+def depart(self: HTMLTranslator, node: ink) -> None:
     """Close the span, if one was opened.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The inked text or the icon.
+    :param node: The inked text.
     """
-    if isinstance(node, ink) and not _moves(node):
-        return
-    self.body.append("</span>")
+    if _moves(node):
+        self.body.append("</span>")
 
 
 def _split(text: str, what: str) -> tuple[str, str | None]:

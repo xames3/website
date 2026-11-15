@@ -4,7 +4,7 @@ Columns Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 A `columns` directive that sets `column` directives side by side::
 
@@ -29,10 +29,11 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 from sphinx import addnodes
 
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import hollow
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import through
@@ -48,7 +49,7 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "columns"
-depart = close
+columns: t.Final[BEM] = BEM("columns")
 COLUMNS: t.Final[int] = 6
 VALIGNS: t.Final[tuple[str, ...]] = ("top", "middle", "bottom")
 STACKS: t.Final[tuple[str, ...]] = ("left", "center")
@@ -241,6 +242,7 @@ class column(rst.Directive):
         return [element]
 
 
+@html.opens(Columns)
 def visit(self: HTMLTranslator, node: Columns) -> None:
     """Open the columns.
 
@@ -249,12 +251,12 @@ def visit(self: HTMLTranslator, node: Columns) -> None:
     """
     styles: list[str] = []
     gap, padding = node["gap"], node["padding"]
-    classes = ["km-columns", f"km-columns--count-{node['columns']}"]
+    modifiers = [f"count-{node['columns']}"]
     if node["valign"] != "middle":
-        classes.append(f"km-columns--valign-{node['valign']}")
+        modifiers.append(f"valign-{node['valign']}")
     if gap in SIZES:
         if gap != "small":
-            classes.append(f"km-columns--gap-{gap}")
+            modifiers.append(f"gap-{gap}")
     else:
         vertical, horizontal = checks.lengths(gap)
         styles += [
@@ -262,12 +264,12 @@ def visit(self: HTMLTranslator, node: Columns) -> None:
             f"--km-columns-gap-x: {horizontal}",
         ]
     if padding in SIZES:
-        classes.append(f"km-columns--padding-{padding}")
+        modifiers.append(f"padding-{padding}")
     elif padding:
         styles.append(f"--km-columns-padding: {padding}")
     margin = node["margin"]
     if margin in SIZES:
-        classes.append(f"km-columns--margin-{margin}")
+        modifiers.append(f"margin-{margin}")
     elif margin:
         above, below = checks.lengths(margin)
         styles += [
@@ -275,38 +277,44 @@ def visit(self: HTMLTranslator, node: Columns) -> None:
             f"--km-columns-margin-bottom: {below}",
         ]
     if node["stack"] == "center":
-        classes.append("km-columns--stack-align-center")
+        modifiers.append("stack-align-center")
     if node["border"]:
-        classes.append("km-columns--border")
+        modifiers.append("border")
     if node["background"]:
-        classes.append("km-columns--background")
+        modifiers.append("background")
     if padding or node["border"] or node["background"]:
-        classes.append("km-columns--padded")
+        modifiers.append("padded")
     if node["flush"] or padding or node["border"] or node["background"]:
-        classes.append("km-columns--flush")
-    attributes: dict[str, t.Any] = {"CLASS": " ".join(classes)}
+        modifiers.append("flush")
+    attributes: dict[str, t.Any] = {"CLASS": columns(*modifiers)}
     if styles:
         attributes["style"] = "; ".join(styles)
     self.body.append(self.starttag(node, "div", "", **attributes))
 
 
+html.closes(Columns, "</div>")
+
+
+@html.opens(item)
 def visit_item(self: HTMLTranslator, node: item) -> None:
     """Open a column.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The column's node.
     """
-    classes = f"km-columns__column km-columns__column--span-{node['span']}"
+    classes = columns.column(f"span-{node['span']}")
     self.body.append(self.starttag(node, "div", "", CLASS=classes))
 
 
+html.closes(item, "</div>")
+
+
 def register(app: Sphinx) -> None:
-    """Register the `column` directive and the node only columns have.
+    """Register the `column` directive.
 
     :param app: The Sphinx application instance.
     """
     app.add_directive("column", column)
-    app.add_node(item, html=(visit_item, close))
 
 
 node = Columns

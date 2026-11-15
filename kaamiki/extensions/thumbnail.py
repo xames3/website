@@ -4,7 +4,7 @@ YouTube Thumbnail Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September 2025
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 A `thumbnail` directive that shows a YouTube video's still and links to it::
 
@@ -24,6 +24,7 @@ import docutils.parsers.rst as rst
 from kaamiki.extensions.roles import steady
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
@@ -31,7 +32,6 @@ from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
-from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils import youtube_id
 from kaamiki.extensions.utils import youtube_still
@@ -140,7 +140,7 @@ def plain(node: Thumbnail) -> list[nodes.Node]:
     return [*found, nodes.paragraph("", "", link)]
 
 
-visit = visitor(template)
+html.draws(Thumbnail, template)
 
 
 node = Thumbnail

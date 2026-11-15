@@ -4,7 +4,7 @@ Accordion Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 11 November 2026
+Last updated on: 15 November 2026
 
 An `accordion` directive that folds its content away under a title::
 
@@ -23,15 +23,13 @@ import typing as t
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
-from sphinx.writers.latex import LaTeXTranslator
-from sphinx.writers.manpage import ManualPageTranslator
-from sphinx.writers.texinfo import TexinfoTranslator
-from sphinx.writers.text import TextTranslator
 
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import MOTION
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import hollow
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
@@ -45,7 +43,6 @@ from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import CHOICES
 
 if t.TYPE_CHECKING:
-    from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
 name: t.Final[str] = "accordion"
@@ -53,6 +50,8 @@ MARKER_POSITIONS: t.Final[tuple[str, ...]] = CHOICES[
     "accordion_marker_position"
 ]
 MARKERS: t.Final[tuple[str, ...]] = CHOICES["accordion_marker"]
+accordion: t.Final[BEM] = BEM("accordion")
+text: t.Final[BEM] = BEM("text")
 
 
 class Accordion(nodes.container):
@@ -225,6 +224,7 @@ class directive(rst.Directive):
         return [element, *messages]
 
 
+@html.opens(Accordion)
 def visit(self: HTMLTranslator, node: Accordion) -> None:
     """Open the accordion.
 
@@ -232,7 +232,7 @@ def visit(self: HTMLTranslator, node: Accordion) -> None:
     :param node: The accordion's node.
     """
     attributes: dict[str, t.Any] = {
-        "CLASS": f"km-accordion km-accordion--marker-{node['marker']}"
+        "CLASS": accordion(f"marker-{node['marker']}")
     }
     if node["open"]:
         attributes["open"] = "open"
@@ -243,29 +243,24 @@ def visit(self: HTMLTranslator, node: Accordion) -> None:
     self.body.append(self.starttag(node, "details", "", **attributes))
 
 
-def depart(self: HTMLTranslator, node: Accordion) -> None:
-    """Close the content and the accordion.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The accordion's node (unused).
-    """
-    del node
-    self.body.append("</div></details>")
+html.closes(Accordion, "</div></details>")
 
 
+@html.opens(summary)
 def visit_summary(self: HTMLTranslator, node: summary) -> None:
-    """Open the title and put the marker first if it goes there.
+    """Open the title. Put the marker first if it goes before the title.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The title's node.
     """
-    classes = " ".join(["km-accordion__title", *node["classes"]])
+    classes = accordion.title(more=node["classes"])
     self.body.append(f'<summary class="{self.attval(classes)}">')
     if not node["after"]:
         self.body.append(marker(self, node))
-    self.body.append('<span class="km-accordion__text">')
+    self.body.append(f'<span class="{accordion.text()}">')
 
 
+@html.closes(summary)
 def depart_summary(self: HTMLTranslator, node: summary) -> None:
     """Close the title and open the content.
 
@@ -275,35 +270,27 @@ def depart_summary(self: HTMLTranslator, node: summary) -> None:
     self.body.append("</span>")
     if node["after"]:
         self.body.append(marker(self, node))
-    classes = " ".join(["km-accordion__body", *node.parent["body"]])
+    classes = accordion.body(more=node.parent["body"])
     self.body.append(f'</summary><div class="{self.attval(classes)}">')
 
 
+@html.opens(headline, elsewhere="inline")
 def visit_headline(self: HTMLTranslator, node: headline) -> None:
-    """Open the line above or under the title.
+    """Open the line above or below the title.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The line's node.
     """
     role = node["role"]
-    classes = " ".join(
-        [f"km-accordion__{role}", f"km-text--{role}", *node["classes"]]
-    )
+    classes = getattr(accordion, role)(more=[text[role], *node["classes"]])
     self.body.append(f'<span class="{self.attval(classes)}">')
 
 
-def depart_headline(self: HTMLTranslator, node: headline) -> None:
-    """Close the line above or under the title.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The line's node (unused).
-    """
-    del node
-    self.body.append("</span>")
+html.closes(headline, "</span>")
 
 
 def marker(self: HTMLTranslator, node: summary) -> str:
-    """Write the icon that shows an accordion is there to open.
+    """Write the icon that shows that the accordion opens.
 
     :param self: The HTML translator.
     :param node: The title's node.
@@ -312,31 +299,9 @@ def marker(self: HTMLTranslator, node: summary) -> str:
     icons = Icons.of(self.builder.config)
     classes = icons.pair(ACCORDION_MARKERS[node.parent["marker"]])
     return (
-        '<span class="km-accordion__marker">'
-        f'<span class="{classes} km-accordion__icon"'
+        f'<span class="{accordion.marker()}">'
+        f'<span class="{classes} {accordion.icon()}"'
         ' aria-hidden="true"></span></span>'
-    )
-
-
-def register(app: Sphinx) -> None:
-    """Register the nodes only an accordion has.
-
-    :param app: The Sphinx application instance.
-    """
-    app.add_node(summary, html=(visit_summary, depart_summary))
-    app.add_node(
-        headline,
-        html=(visit_headline, depart_headline),
-        latex=(LaTeXTranslator.visit_inline, LaTeXTranslator.depart_inline),
-        man=(
-            ManualPageTranslator.visit_inline,
-            ManualPageTranslator.depart_inline,
-        ),
-        texinfo=(
-            TexinfoTranslator.visit_inline,
-            TexinfoTranslator.depart_inline,
-        ),
-        text=(TextTranslator.visit_inline, TextTranslator.depart_inline),
     )
 
 

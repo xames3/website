@@ -4,7 +4,7 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 Kaamiki's shared helpers.
 """
@@ -36,14 +36,15 @@ from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.dates import provenance
 from kaamiki.extensions.utils.dates import updated_on
 from kaamiki.extensions.utils.dates import warm
+from kaamiki.extensions.utils.directives import BEM
 from kaamiki.extensions.utils.directives import MOTION
 from kaamiki.extensions.utils.directives import NATIVE
 from kaamiki.extensions.utils.directives import NO_MOTION
-from kaamiki.extensions.utils.directives import close
-from kaamiki.extensions.utils.directives import depart
+from kaamiki.extensions.utils.directives import closer
 from kaamiki.extensions.utils.directives import document
 from kaamiki.extensions.utils.directives import fields
 from kaamiki.extensions.utils.directives import hollow
+from kaamiki.extensions.utils.directives import html
 from kaamiki.extensions.utils.directives import listed
 from kaamiki.extensions.utils.directives import located
 from kaamiki.extensions.utils.directives import moving
@@ -52,12 +53,10 @@ from kaamiki.extensions.utils.directives import paragraph
 from kaamiki.extensions.utils.directives import parse
 from kaamiki.extensions.utils.directives import phrase
 from kaamiki.extensions.utils.directives import shipped
-from kaamiki.extensions.utils.directives import skip
 from kaamiki.extensions.utils.directives import through
 from kaamiki.extensions.utils.directives import titled
 from kaamiki.extensions.utils.directives import trail
 from kaamiki.extensions.utils.directives import unlinked
-from kaamiki.extensions.utils.directives import visitor
 from kaamiki.extensions.utils.directives import what
 from kaamiki.extensions.utils.directives import worded
 from kaamiki.extensions.utils.doctree import annotated
@@ -92,6 +91,7 @@ from kaamiki.extensions.utils.templates import bridge
 from kaamiki.extensions.utils.templates import render
 
 __all__: list[str] = [
+    "BEM",
     "CONF",
     "MOTION",
     "NATIVE",
@@ -104,12 +104,11 @@ __all__: list[str] = [
     "build_finished",
     "caption_icon",
     "checks",
-    "close",
+    "closer",
     "confdir",
     "context_defaults",
     "dated",
     "day",
-    "depart",
     "document",
     "ensure_articles",
     "feedback",
@@ -123,6 +122,7 @@ __all__: list[str] = [
     "guarded",
     "hollow",
     "hostnames",
+    "html",
     "kept",
     "keycaps",
     "linkcheck",
@@ -154,7 +154,6 @@ __all__: list[str] = [
     "setting",
     "shipped",
     "show_more",
-    "skip",
     "social_metadata",
     "spell",
     "stored",
@@ -164,7 +163,6 @@ __all__: list[str] = [
     "trail",
     "unlinked",
     "updated_on",
-    "visitor",
     "warm",
     "what",
     "worded",

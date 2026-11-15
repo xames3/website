@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 Kaamiki's entry point.
 """
@@ -20,7 +20,6 @@ import shutil
 import tempfile
 import typing as t
 
-import docutils.nodes as nodes
 from sphinx import locale
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util import logging
@@ -36,13 +35,12 @@ from kaamiki.extensions.utils import bridge
 from kaamiki.extensions.utils import build_finished
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import context_defaults
-from kaamiki.extensions.utils import depart
 from kaamiki.extensions.utils import feedback
 from kaamiki.extensions.utils import field_lists
 from kaamiki.extensions.utils import follow
 from kaamiki.extensions.utils import forget_lead
-from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import glyph_edges
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import keycaps
 from kaamiki.extensions.utils import linkcheck
 from kaamiki.extensions.utils import merge_leads
@@ -61,7 +59,6 @@ from kaamiki.extensions.utils import related
 from kaamiki.extensions.utils import reread
 from kaamiki.extensions.utils import retitled
 from kaamiki.extensions.utils import show_more
-from kaamiki.extensions.utils import skip
 from kaamiki.extensions.utils import social_metadata
 from kaamiki.extensions.utils import spell
 from kaamiki.extensions.utils import toctrees
@@ -73,6 +70,7 @@ from kaamiki.extensions.utils.settings import NAME
 if t.TYPE_CHECKING:
     from collections.abc import Sequence
 
+    import docutils.nodes as nodes
     from sphinx.application import Sphinx
 
 __version__: str = "2026.11.8"
@@ -317,9 +315,6 @@ def cleanup(app: Sphinx, exc: Exception | None) -> None:
             os.remove(p.join(app.outdir, "_static", name))
 
 
-away = (skip, None)
-
-
 def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     """Swap Kaamiki's nodes for ordinary ones where there's no HTML.
 
@@ -343,7 +338,7 @@ def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
 
 
 def add_roles(app: Sphinx) -> None:
-    """Register Kaamiki's roles and the nodes they write.
+    """Register Kaamiki's roles, their domains and the `phrase` node.
 
     :param app: The Sphinx application instance.
     """
@@ -353,48 +348,21 @@ def add_roles(app: Sphinx) -> None:
     app.add_role("fa-icon", roles.icon)
     app.add_domain(roles.fa_icon)
     app.add_domain(roles.kbd)
-    app.add_node(roles.ink, html=(roles.visit, roles.depart))
-    app.add_node(
-        roles.swapper, html=(roles.visit_swapper, roles.depart_swapper)
-    )
-    app.add_node(
-        glyph,
-        html=(roles.visit_glyph, roles.depart),
-        latex=away,
-        man=away,
-        texinfo=away,
-        text=away,
-    )
     app.add_node(phrase)
 
 
 def add_directives(app: Sphinx) -> None:
-    """Register Kaamiki's directives and the nodes they write.
+    """Register Kaamiki's directives and each node in the `html` record.
 
     :param app: The Sphinx application instance.
     """
     for directive in directives:
-        if hasattr(directive, "node"):
-            node = directive.node
-            html = (directive.visit, getattr(directive, "depart", depart))
-            if node.__bases__ == (nodes.Element,) and not hasattr(
-                directive, "plain"
-            ):
-                app.add_node(
-                    node,
-                    html=html,
-                    latex=away,
-                    man=away,
-                    texinfo=away,
-                    text=away,
-                )
-            else:
-                app.add_node(node, html=html)
         app.add_directive(directive.name, directive.directive)
         if hasattr(directive, "register"):
             directive.register(app)
         if hasattr(directive, "html_page_context"):
             app.connect("html-page-context", directive.html_page_context)
+    html.register(app)
 
 
 def connect_hooks(app: Sphinx) -> None:

@@ -4,7 +4,7 @@ Code Version Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 28 September 2026
-Last updated on: 11 November 2026
+Last updated on: 15 November 2026
 
 A `code-version` directive that steps a reader through the versions a
 piece of code went through on its way to what it is now::
@@ -54,16 +54,16 @@ from kaamiki.extensions.code.chrome import notes_pane
 from kaamiki.extensions.code.grammar import StrayError
 from kaamiki.extensions.code.grammar import linerange
 from kaamiki.extensions.code.grammar import split
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import NO_MOTION
-from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 
 if t.TYPE_CHECKING:
-    from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
     from kaamiki.extensions.code.grammar import chunk
@@ -71,6 +71,7 @@ if t.TYPE_CHECKING:
     type Pieces = tuple[chunk, chunk | None, list[chunk]]
 
 name: t.Final[str] = "code-version"
+code_version: t.Final[BEM] = BEM("code-version")
 ATTEMPT: t.Final[frozenset[str]] = frozenset({"attempt"})
 PARTS: t.Final[frozenset[str]] = frozenset({"code", "lines", "output"})
 VERDICTS: t.Final[frozenset[str]] = frozenset({"broke", "worked"})
@@ -375,10 +376,11 @@ class directive(explain.directive):
         return box
 
 
-visit = explain.visit
-depart = explain.depart
+html.opens(CodeVersion)(explain.visit)
+html.closes(CodeVersion, "</div></div>")
 
 
+@html.opens(attempt)
 def visit_attempt(self: HTMLTranslator, element: attempt) -> None:
     """Open one attempt.
 
@@ -386,9 +388,13 @@ def visit_attempt(self: HTMLTranslator, element: attempt) -> None:
     :param element: The attempt (unused).
     """
     del element
-    self.body.append('<div class="km-code-version__attempt">')
+    self.body.append(f'<div class="{code_version.attempt()}">')
 
 
+html.closes(attempt, "</div>")
+
+
+@html.opens(draft)
 def visit_draft(self: HTMLTranslator, element: draft) -> None:
     """Open an attempt's frame and write its code.
 
@@ -402,7 +408,7 @@ def visit_draft(self: HTMLTranslator, element: draft) -> None:
     code = next(findall(element, explain.plain_code))
     index = element["index"]
     self.body.append(
-        f'<div class="km-code-version__draft" data-km-draft="{index}">'
+        f'<div class="{code_version.draft()}" data-km-draft="{index}">'
     )
     self.body.append(
         notes_pane(
@@ -416,6 +422,10 @@ def visit_draft(self: HTMLTranslator, element: draft) -> None:
     )
 
 
+html.closes(draft, "</div>")
+
+
+@html.opens(outcome)
 def visit_outcome(self: HTMLTranslator, element: outcome) -> None:
     """Write what an attempt printed, coloured by how it went.
 
@@ -431,25 +441,11 @@ def visit_outcome(self: HTMLTranslator, element: outcome) -> None:
         else ""
     )
     self.body.append(
-        '<pre class="km-code-explain__output"'
+        f'<pre class="{explain.code_explain.output()}"'
         + (f' data-km-verdict="{verdict}"' if verdict else "")
         + f">{spoken}{self.encode(element.astext())}</pre>"
     )
     raise nodes.SkipNode
-
-
-def register(app: Sphinx) -> None:
-    """Register the nodes only a code-version has.
-
-    These are an attempt, its draft and its outcome. The caption, the
-    notes and the prose taken in either side are the code-explain's and
-    are registered with it.
-
-    :param app: The Sphinx application instance.
-    """
-    app.add_node(attempt, html=(visit_attempt, close))
-    app.add_node(draft, html=(visit_draft, close))
-    app.add_node(outcome, html=(visit_outcome, None))
 
 
 node = CodeVersion

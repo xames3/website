@@ -4,7 +4,7 @@ Directive Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 The helpers Kaamiki's directives are built from.
 """
@@ -20,6 +20,10 @@ from docutils.parsers import rst
 from markupsafe import Markup
 from sphinx import addnodes
 from sphinx.util import docname_join
+from sphinx.writers.latex import LaTeXTranslator
+from sphinx.writers.manpage import ManualPageTranslator
+from sphinx.writers.texinfo import TexinfoTranslator
+from sphinx.writers.text import TextTranslator
 
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.templates import render
@@ -32,8 +36,17 @@ if t.TYPE_CHECKING:
     from collections.abc import Sequence
 
     from docutils.parsers.rst import Directive
+    from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
+    Visitor = Callable[[HTMLTranslator, nodes.Element], None]
+
+TRANSLATORS: t.Final[dict[str, type[nodes.NodeVisitor]]] = {
+    "latex": LaTeXTranslator,
+    "man": ManualPageTranslator,
+    "texinfo": TexinfoTranslator,
+    "text": TextTranslator,
+}
 LINKCHECK_OPTIONS: t.Final[tuple[str, ...]] = ("avatar", "backdrop", "target")
 LINKS: t.Final[tuple[type[nodes.Node], ...]] = (
     nodes.reference,
@@ -270,16 +283,6 @@ def depart(self: HTMLTranslator, node: nodes.Element) -> None:
     """
 
 
-def close(self: HTMLTranslator, node: nodes.Element) -> None:
-    """Close the `<div>` a node's visitor opened.
-
-    :param self: The HTML translator instance.
-    :param node: The node being departed (unused).
-    """
-    del node
-    self.body.append("</div>")
-
-
 def skip(self: nodes.NodeVisitor, node: nodes.Element) -> None:
     """Leave a node out of a builder that has no use for it.
 
@@ -289,6 +292,187 @@ def skip(self: nodes.NodeVisitor, node: nodes.Element) -> None:
     """
     del self, node
     raise nodes.SkipNode
+
+
+def closer(tag: str) -> Visitor:
+    """Make a depart that writes only one closing tag.
+
+    :param tag: The HTML that closes the node, as `</span>`.
+    :return: The depart.
+    """
+
+    def close_tag(self: HTMLTranslator, node: nodes.Element) -> None:
+        del node
+        self.body.append(tag)
+
+    return close_tag
+
+
+class Renderer:
+    """The record of how each Kaamiki node is written as HTML."""
+
+    def __init__(self) -> None:
+        """Make an empty record."""
+        self.visitors: dict[type[nodes.Element], list[t.Any]] = {}
+        self.elsewhere: dict[type[nodes.Element], str] = {}
+
+    def opens[V: Callable[..., None]](
+        self, node: type[nodes.Element], *, elsewhere: str = ""
+    ) -> Callable[[V], V]:
+        """Record the function under this decorator as the node's visitor.
+
+        :param node: The node that the function writes.
+        :param elsewhere: How the other builders write the node, `skip`
+            or the name of a docutils node, as `inline`.
+        :return: The decorator, which gives back the same function.
+        """
+        if elsewhere:
+            self.elsewhere[node] = elsewhere
+        return self._recorder(node, 0)
+
+    @t.overload
+    def closes(self, node: type[nodes.Element], tag: str) -> None: ...
+
+    @t.overload
+    def closes[V: Callable[..., None]](
+        self, node: type[nodes.Element]
+    ) -> Callable[[V], V]: ...
+
+    def closes(
+        self, node: type[nodes.Element], tag: str = ""
+    ) -> Callable[[t.Any], t.Any] | None:
+        """Record the function under this decorator as the node's depart.
+
+        :param node: The node that the function closes.
+        :param tag: The HTML that closes the node. With it, you do not
+            write a function.
+        :return: The decorator, or `None` when `tag` is given.
+        """
+        if tag:
+            self._recorder(node, 1)(closer(tag))
+            return None
+        return self._recorder(node, 1)
+
+    def draws(
+        self,
+        node: type[nodes.Element],
+        template: str,
+        prepare: Callable[[HTMLTranslator, dict[str, t.Any]], dict[str, t.Any]]
+        | None = None,
+    ) -> None:
+        """Record a template that writes all of a node.
+
+        :param node: The node that the template writes.
+        :param template: The template, relative to `theme/templates`.
+        :param prepare: The function that changes the node's attributes
+            before the template gets them, as `visitor` takes it.
+        """
+        self._recorder(node, 0)(visitor(template, prepare))
+
+    def skips(self, node: type[nodes.Element]) -> None:
+        """Record that the HTML builder does not write a node.
+
+        :param node: The node that the HTML builder leaves out.
+        """
+        self._recorder(node, 0)(skip)
+
+    def register(self, app: Sphinx) -> None:
+        """Give Sphinx each node in the record and how each builder writes it.
+
+        :param app: The Sphinx application instance.
+        """
+        for node, (visit, leave) in self.visitors.items():
+            app.add_node(node, html=(visit, leave), **self._others(node))
+
+    def _recorder[V: Callable[..., None]](
+        self, node: type[nodes.Element], index: int
+    ) -> Callable[[V], V]:
+        """Make the decorator that keeps a visitor or a depart of a node.
+
+        :param node: The node.
+        :param index: `0` for the visitor and `1` for the depart.
+        :return: The decorator, which gives back the same function.
+        """
+
+        def record(function: V) -> V:
+            self.visitors.setdefault(node, [depart, depart])[index] = function
+            return function
+
+        return record
+
+    def _others(self, node: type[nodes.Element]) -> dict[str, t.Any]:
+        """Find how the builders that are not HTML write a node.
+
+        :param node: The node.
+        :return: The visitor and the depart for each builder.
+        """
+        how = self.elsewhere.get(node)
+        if how is None:
+            return {}
+        if how == "skip":
+            return dict.fromkeys(TRANSLATORS, (skip, None))
+        return {
+            builder: (
+                getattr(translator, f"visit_{how}"),
+                getattr(translator, f"depart_{how}"),
+            )
+            for builder, translator in TRANSLATORS.items()
+        }
+
+
+html: t.Final[Renderer] = Renderer()
+
+
+class BEM:
+    """A BEM class name of Kaamiki, as `km-accordion__title`."""
+
+    __slots__ = ("block", "element")
+
+    def __init__(self, block: str, element: str = "") -> None:
+        """Name a block or an element of a block.
+
+        :param block: The block, without `km-`, as `accordion`.
+        :param element: The element, as `title`.
+        """
+        self.block = block
+        self.element = element
+
+    def __getattr__(self, element: str) -> BEM:
+        """Name an element of the block, `accordion.title` for one.
+
+        :param element: The element. An underscore becomes a dash.
+        :return: The element's name.
+        :raises AttributeError: For a private name or for an element of
+            an element, which BEM does not permit.
+        """
+        if element.startswith("_") or self.element:
+            raise AttributeError(element)
+        return BEM(self.block, element.replace("_", "-"))
+
+    def __getitem__(self, modifier: str) -> str:
+        """Name only a modifier, `text["preheader"]` for one.
+
+        :param modifier: The modifier.
+        :return: The modified name, as `km-text--preheader`.
+        """
+        return f"{self}--{modifier}"
+
+    def __call__(self, *modifiers: str, more: Iterable[str] = ()) -> str:
+        """Write the classes of the block or element.
+
+        :param modifiers: The modifiers, as `marker-plus`.
+        :param more: Other classes that come after them.
+        :return: The name, each modified name and the other classes.
+        """
+        return " ".join([str(self), *map(self.__getitem__, modifiers), *more])
+
+    def __str__(self) -> str:
+        """Write the name.
+
+        :return: `km-accordion` or `km-accordion__title`.
+        """
+        element = f"__{self.element}" if self.element else ""
+        return f"km-{self.block}{element}"
 
 
 def trail(

@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 A `button` directive that renders a link as a button::
 
@@ -37,6 +37,7 @@ from kaamiki.extensions.roles import steady
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import document
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import paragraph
@@ -44,7 +45,6 @@ from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
-from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils.aliases import ALIASES
 from kaamiki.extensions.utils.icons import Icons
@@ -377,7 +377,7 @@ def plain(node: Button) -> list[nodes.Node]:
     return [words]
 
 
-visit = visitor(template, prepare)
+html.draws(Button, template, prepare)
 
 
 node = Button

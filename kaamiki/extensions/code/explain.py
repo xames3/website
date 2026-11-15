@@ -4,7 +4,7 @@ Code Explain Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 11 November 2026
+Last updated on: 15 November 2026
 
 A `code-explain` directive that steps a reader through a snippet, line
 by line, with the values it held at each one... telling a story::
@@ -91,19 +91,19 @@ from kaamiki.extensions.code.tracer import collapse
 from kaamiki.extensions.code.tracer import execute
 from kaamiki.extensions.code.tracer import replay
 from kaamiki.extensions.code.tracer import show
+from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import NO_MOTION
 from kaamiki.extensions.utils import annotated
 from kaamiki.extensions.utils import caption_icon
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils import close
 from kaamiki.extensions.utils import findall
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import setting
-from kaamiki.extensions.utils import skip
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import TRACE_EVENTS
@@ -117,6 +117,8 @@ if t.TYPE_CHECKING:
     from kaamiki.extensions.code.tracer import Trace
 
 name: t.Final[str] = "code-explain"
+code_explain: t.Final[BEM] = BEM("code-explain")
+lang_icon: t.Final[BEM] = BEM("lang-icon")
 CODE_POSITIONS: t.Final[tuple[str, str]] = ("right", "left")
 SHARED: t.Final[dict[str, t.Any]] = {
     "code-position": checks.word(*CODE_POSITIONS),
@@ -867,6 +869,7 @@ def pace(language: str) -> int:
     return 112
 
 
+@html.opens(CodeExplain)
 def visit(self: HTMLTranslator, node: CodeExplain) -> None:
     """Open the walkthrough, write its steps and open the pane.
 
@@ -874,12 +877,8 @@ def visit(self: HTMLTranslator, node: CodeExplain) -> None:
     :param node: The `code-explain` node and its attributes.
     """
     ids: list[str] = node["ids"]
-    classes = " ".join(
-        [
-            "km-code-explain",
-            f"km-code-explain--code-position-{node['position']}",
-            *node.get("classes", []),
-        ]
+    classes = code_explain(
+        f"code-position-{node['position']}", more=node.get("classes", [])
     )
     anchor = f' id="{self.attval(ids[0])}"' if ids else ""
     self.body.append(f'<div{anchor} class="{classes}" data-km-code-explain>')
@@ -892,37 +891,32 @@ def visit(self: HTMLTranslator, node: CodeExplain) -> None:
     self.body.append("<div data-km-pane>")
 
 
-def depart(self: HTMLTranslator, node: CodeExplain) -> None:
-    """Close the pane and the walkthrough.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The `code-explain` node (unused).
-    """
-    del node
-    self.body.append("</div></div>")
+html.closes(CodeExplain, "</div></div>")
 
 
+@html.opens(heading)
 def visit_heading(self: HTMLTranslator, node: heading) -> None:
     """Open the code's side, its frame and the caption, icon first.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The header node, empty when there's no caption.
     """
-    self.body.append('<div class="km-code-explain__grid">')
-    self.body.append('<div class="km-code-explain__side">')
-    self.body.append('<div class="km-code-explain__frame" data-km-frame>')
+    self.body.append(f'<div class="{code_explain.grid()}">')
+    self.body.append(f'<div class="{code_explain.side()}">')
+    self.body.append(f'<div class="{code_explain.frame()}" data-km-frame>')
     if node.children:
         self.body.append(
-            '<div class="code-block-caption km-code-explain__caption">'
+            f'<div class="code-block-caption {code_explain.caption()}">'
             '<span class="caption-text">'
         )
         if node["icon"]:
             self.body.append(
-                f'<span class="km-lang-icon {node["icon"]}"'
+                f'<span class="{lang_icon} {node["icon"]}"'
                 ' aria-hidden="true"></span>'
             )
 
 
+@html.closes(heading)
 def depart_heading(self: HTMLTranslator, node: heading) -> None:
     """Close the caption, then write the snippet and the code's side.
 
@@ -936,13 +930,14 @@ def depart_heading(self: HTMLTranslator, node: heading) -> None:
         self.body.append("</div>")
     else:
         self.body.append(
-            f'<div class="km-code-explain__corner">{controls(icons)}</div>'
+            f'<div class="{code_explain.corner()}">{controls(icons)}</div>'
         )
     self.body.append(node.parent["pane"])
     self.body.append(output())
     self.body.append("</div></div>")
 
 
+@html.opens(explanations)
 def visit_explanations(self: HTMLTranslator, node: explanations) -> None:
     """Open the notes beside the code.
 
@@ -950,29 +945,14 @@ def visit_explanations(self: HTMLTranslator, node: explanations) -> None:
     :param node: The container node (unused).
     """
     del node
-    self.body.append('<div class="km-code-explain__notes" data-km-notes>')
-    self.body.append('<div class="km-code-explain__track" data-km-track>')
+    self.body.append(f'<div class="{code_explain.notes()}" data-km-notes>')
+    self.body.append(f'<div class="{code_explain.track()}" data-km-track>')
 
 
-def depart_explanations(self: HTMLTranslator, node: explanations) -> None:
-    """Close the notes and the row they share with the code.
-
-    :param self: The HTML translator, whose body this appends to.
-    :param node: The container node (unused).
-    """
-    del node
-    self.body.append("</div></div></div>")
-
-
-def register(app: Sphinx) -> None:
-    """Register the nodes only a walkthrough has.
-
-    :param app: The Sphinx application instance.
-    """
-    app.add_node(heading, html=(visit_heading, depart_heading))
-    app.add_node(plain_code, html=(skip, None))
-    app.add_node(explanations, html=(visit_explanations, depart_explanations))
-    app.add_node(explanation, html=(visit_explanation, close))
+html.closes(explanations, "</div></div></div>")
+html.opens(explanation)(visit_explanation)
+html.closes(explanation, "</div>")
+html.skips(plain_code)
 
 
 def html_page_context(

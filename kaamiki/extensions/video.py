@@ -4,7 +4,7 @@ Video Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 A `video` directive that embeds a video in the page::
 
@@ -34,6 +34,7 @@ from babel import Locale
 
 from kaamiki.extensions.utils import NATIVE
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import named
@@ -42,7 +43,6 @@ from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import relative_to_page
 from kaamiki.extensions.utils import shipped
 from kaamiki.extensions.utils import trail
-from kaamiki.extensions.utils import visitor
 from kaamiki.extensions.utils import worded
 
 if t.TYPE_CHECKING:
@@ -337,7 +337,7 @@ def plain(node: Video) -> list[nodes.Node]:
     return [*found, nodes.paragraph("", "", link)]
 
 
-visit = visitor(template, prepare)
+html.draws(Video, template, prepare)
 
 
 node = Video
