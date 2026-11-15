@@ -24,7 +24,6 @@ import tempfile
 import typing as t
 
 from sphinx import locale
-from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util import logging
 
 from kaamiki.extensions import roles
@@ -38,6 +37,7 @@ from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import pair
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import register
+from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.settings import NAME
 
 if t.TYPE_CHECKING:
@@ -99,29 +99,13 @@ def env_version(version: str) -> int:
     return number
 
 
-def themed(app: Sphinx) -> bool:
-    """Say whether the pages of the build use the theme of Kaamiki.
-
-    :param app: The Sphinx application instance.
-    :return: `True` for the HTML builders that get the files of
-        Kaamiki, which are not `epub` and the help builders, else
-        `False`.
-    """
-    if not isinstance(app.builder, StandaloneHTMLBuilder):
-        return False
-    theme = getattr(app.builder, "theme", None)
-    return theme is not None and TEMPLATES in map(
-        p.realpath, theme.get_theme_dirs()
-    )
-
-
 @on("builder-inited")
 def add_theme_assets(app: Sphinx) -> None:
     """Add the static files of Kaamiki to a build.
 
     :param app: The Sphinx application instance.
     """
-    if not themed(app):
+    if not writes_pages(app):
         return
     app.add_static_dir(static_dir)
     for stylesheet, priority in stylesheets:
@@ -157,7 +141,7 @@ def join_parts(app: Sphinx) -> None:
     :raises KaamikiError: For a bundle without parts, a part that is
         not UTF-8 text, or a folder that Kaamiki cannot write to.
     """
-    if not themed(app):
+    if not writes_pages(app):
         return
     texts: dict[str, str] = {}
     for bundle in bundles:
@@ -212,8 +196,7 @@ def flatten(app: Sphinx, exc: Exception | None) -> None:
     :param app: The Sphinx application instance.
     :param exc: What went wrong in the build, or `None`.
     """
-    builder = app.builder
-    if exc or not isinstance(builder, StandaloneHTMLBuilder):
+    if exc or not writes_pages(app):
         return
     try:
         import lightningcss
@@ -280,7 +263,7 @@ def cleanup(app: Sphinx, exc: Exception | None) -> None:
     :param app: The Sphinx application instance.
     :param exc: What went wrong in the build, or `None`.
     """
-    if exc or not isinstance(app.builder, StandaloneHTMLBuilder):
+    if exc or not writes_pages(app):
         return
     for name in basic_files:
         with contextlib.suppress(FileNotFoundError):
