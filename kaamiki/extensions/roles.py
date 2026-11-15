@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
 Last updated on: 15 November 2026
 
-Kaamiki's custom inline roles.
+The custom inline roles of Kaamiki.
 """
 
 from __future__ import annotations
@@ -124,17 +124,14 @@ class KaamikiRole:
         *,
         name: str = "",
     ) -> None:
-        """Wrap a role function with the options it takes.
-
-        Docutils reads `options` to know what the block below
-        `.. role::` can hold. Each role takes `class` and the presets
-        that it permits.
+        """Wrap a role function with the options that it takes.
 
         :param function: The role function.
-        :param options: The options other than `class`, each with the
-            check for its value.
-        :param name: The name of the role in rST. With it, the role is
-            recorded in `registry`.
+        :param options: The options other than `class`, each with the check for
+            its value. docutils reads `options` to know what the block below `..
+            role::` can hold.
+        :param name: The name of the role in rST. With it, the role is recorded
+            in `registry`.
         """
         self.function = function
         self.options = {"class": checks.classes, **(options or {})}
@@ -154,14 +151,14 @@ class KaamikiRole:
     ) -> Reply:
         """Call the role function, with options that are never `None`.
 
-        :param name: The role name, as written.
-        :param rawtext: The whole role, markup and all.
-        :param text: What was written inside it.
-        :param lineno: The line the role's paragraph starts on, for
-            error reporting.
-        :param inliner: The docutils inliner that called this.
+        :param name: The name of the role, as written.
+        :param rawtext: All of the role, with its markup.
+        :param text: The text in the role.
+        :param lineno: The line where the paragraph of the role starts, for the
+            error messages.
+        :param inliner: The docutils inliner that called the role.
         :param options: The classes and presets of a custom role.
-        :param content: Role content.
+        :param content: The content of the role.
         :return: The nodes and the error messages.
         """
         return self.function(
@@ -174,10 +171,10 @@ def role(
 ) -> Callable[[Callable[..., Reply]], KaamikiRole]:
     """Make the function below this decorator a recorded Kaamiki role.
 
-    :param name: The name of the role in rST. The default is the name of
-        the function.
-    :param options: Each option that a custom role can preset, with the
-        check for its value.
+    :param name: The name of the role in rST. The default is the name of the
+        function.
+    :param options: Each option that a custom role can preset, with the check
+        for its value.
     :return: The decorator.
     """
 
@@ -188,21 +185,21 @@ def role(
 
 
 def _classes(options: dict[str, t.Any]) -> list[str]:
-    """Read the classes a custom role gives what it draws.
+    """Read the classes that a custom role gives to its text.
 
-    :param options: The options the role was called with.
-    :return: The classes, the role's own name unless `.. role::` said
-        otherwise.
+    :param options: The options of the role.
+    :return: The classes. The default is the name of the role, unless `..
+        role::` sets others.
     """
     return list(options.get("classes", []))
 
 
 class Ink(nodes.inline):
-    """Text wearing a style, a sharpie or a pencil underline."""
+    """Text with a style, a sharpie or a pencil underline."""
 
 
 class Swapper(Ink):
-    """The first of some words or titles, which take turns in its place."""
+    """The first of some words or titles that show one after the other."""
 
 
 def steady(
@@ -211,13 +208,13 @@ def steady(
     part: str,
     why: str,
 ) -> None:
-    """Refuse `:swap:` and `:sweep:` in a text that has to stay put.
+    """Refuse `:swap:` and `:sweep:` in a text that must not move.
 
     :param directive: The directive that has the text.
-    :param found: The parsed text or the nodes it came to.
-    :param part: What the text is, `a title` for one.
-    :param why: Why it can't move, for the message.
-    :raises rst.DirectiveError: When the text holds swapping words.
+    :param found: The parsed text or its nodes.
+    :param part: What the text is, as `a title`.
+    :param why: Why it cannot move, for the message.
+    :raises rst.DirectiveError: When the text has swapping words.
     """
     for each in [found] if isinstance(found, nodes.Node) else found:
         moving = next(each.findall(Swapper), None)
@@ -231,7 +228,7 @@ def steady(
 
 @html.opens(Ink)
 def visit(self: HTMLTranslator, node: Ink) -> None:
-    """Open the span that carries the style, unless the text is plain.
+    """Open the span with the style, unless the text is plain.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The inked text.
@@ -242,15 +239,13 @@ def visit(self: HTMLTranslator, node: Ink) -> None:
 
 
 def _moves(node: Ink) -> bool:
-    """Tell whether an inked text keeps its style here or is plain.
-
-    It's plain inside a link (a toctree, a `:ref:` or a `:doc:`) and in
-    a title rendered on its own, which is what the breadcrumbs, the
-    page's tab and the previous and next pages get.
-    The swapping words show their first one there.
+    """Say whether inked text keeps its style here, or is plain.
 
     :param node: The inked text or the swapping words.
-    :return: `True` for text in the page itself.
+    :return: `True` for text in the page itself. The text is plain in a link (a
+        toctree, a `:ref:` or a `:doc:`) and in a title that shows alone, as in
+        the breadcrumbs, the tab of the page and the previous and next pages.
+        There, swapping words show only the first word.
     """
     parent = node.parent
     while parent is not None:
@@ -266,7 +261,7 @@ def _moves(node: Ink) -> bool:
 
 @html.opens(Swapper)
 def visit_swapper(self: HTMLTranslator, node: Swapper) -> None:
-    """Open the span the words take turns in, if they do here.
+    """Open the span for the swapping words, if they swap here.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The swapping words.
@@ -278,7 +273,7 @@ def visit_swapper(self: HTMLTranslator, node: Swapper) -> None:
 
 @html.closes(Swapper)
 def depart_swapper(self: HTMLTranslator, node: Swapper) -> None:
-    """Close the span, if one was opened.
+    """Close the span, if one is open.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The swapping words.
@@ -289,7 +284,7 @@ def depart_swapper(self: HTMLTranslator, node: Swapper) -> None:
 
 @html.opens(glyph, elsewhere="skip")
 def visit_glyph(self: HTMLTranslator, node: glyph) -> None:
-    """Open the span that carries the icon.
+    """Open the span with the icon.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The icon.
@@ -303,7 +298,7 @@ html.closes(glyph, "</span>")
 
 @html.closes(Ink)
 def depart(self: HTMLTranslator, node: Ink) -> None:
-    """Close the span, if one was opened.
+    """Close the span, if one is open.
 
     :param self: The HTML translator, whose body this appends to.
     :param node: The inked text.
@@ -313,17 +308,16 @@ def depart(self: HTMLTranslator, node: Ink) -> None:
 
 
 def _split(text: str, what: str) -> tuple[str, str | None]:
-    """Split a role's text into its label and what sits in angles.
+    """Split the text of a role into its label and the value in angles.
 
-    The value is a last `<...>` that opens the text or follows a space,
-    the way docutils reads `text <target>`, so `x < 5` and `List<int>`
-    are labels. An escaped angle is no angle.
-
-    :param text: What was written inside the role, escapes and all.
-    :param what: What the value is, `a colour` say.
-    :return: The label and the value between `<` and `>`, both with
-        their escapes undone, or `None` when there isn't a value.
-    :raises ValueError: When a value isn't closed or is empty.
+    :param text: The text in the role, with its escapes. The value is a last
+        `<...>` at the start of the text or after a space, as docutils reads
+        `text <target>`. Thus `x < 5` and `List<int>` are labels, and an escaped
+        angle is not an angle.
+    :param what: What the value is, as `a colour`.
+    :return: The label and the value between `<` and `>`, without their escapes,
+        or `None` when there is no value.
+    :raises ValueError: When a value is not closed, or is empty.
     """
     found = VALUE.search(text)
     if found is None:
@@ -339,15 +333,14 @@ def _split(text: str, what: str) -> tuple[str, str | None]:
 
 
 def _placed(inliner: states.Inliner, rawtext: str, lineno: int) -> int:
-    """Find the line a role is on.
-
-    Docutils gives a role the line its paragraph starts on, so a role
-    further down is looked for in the source from there.
+    """Find the line of a role.
 
     :param inliner: The docutils inliner that called the role.
-    :param rawtext: The whole role, markup and all.
-    :param lineno: The line the role's paragraph starts on.
-    :return: The line, or `lineno` when the source can't be read.
+    :param rawtext: All of the role, with its markup.
+    :param lineno: The line where the paragraph of the role starts. docutils
+        gives this line, so a role further down is found in the source from
+        there.
+    :return: The line, or `lineno` when the source cannot be read.
     """
     try:
         source, start = inliner.reporter.get_source_and_line(lineno)
@@ -367,14 +360,13 @@ def _placed(inliner: states.Inliner, rawtext: str, lineno: int) -> int:
 def _reject(
     inliner: states.Inliner, rawtext: str, lineno: int, message: str
 ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
-    """Report a bad role and hand docutils a problematic node.
+    """Report a wrong role, and give docutils a problematic node.
 
     :param inliner: The docutils inliner that called the role.
-    :param rawtext: The whole role, markup and all.
-    :param lineno: The line the role's paragraph starts on.
-    :param message: What's wrong with it.
-    :return: The problematic node and the message, as docutils wants
-        them.
+    :param rawtext: All of the role, with its markup.
+    :param lineno: The line where the paragraph of the role starts.
+    :param message: What is wrong with the role.
+    :return: The problematic node and the message, as docutils expects them.
     """
     msg = inliner.reporter.error(
         message,
@@ -387,9 +379,9 @@ def _reject(
 def _query(value: str) -> dict[str, str]:
     """Split the settings after a `?` into names and values.
 
-    :param value: What followed the `?`, settings joined by `&`.
-    :return: Each setting's name and its value, empty for a bare name.
-    :raises ValueError: When a setting is given twice.
+    :param value: The text after the `?`, with `&` between the settings.
+    :return: The name and the value of each setting, empty for a bare name.
+    :raises ValueError: When a setting occurs two times.
     """
     found: dict[str, str] = {}
     for part in value.split("&"):
@@ -405,13 +397,13 @@ def _query(value: str) -> dict[str, str]:
 
 
 def _colour(config: Config, value: str) -> str:
-    """Check a colour a role names and write it the way CSS reads it.
+    """Check the colour that a role names, and write it for CSS.
 
     :param config: The Sphinx configuration.
-    :param value: A colour or the name of one.
-    :return: The colour, `hsl(...)` for a name Kaamiki or the site
-        gave one and `#abc` for a hex colour.
-    :raises ValueError: When it's none of those.
+    :param value: A colour, or the name of a colour.
+    :return: The colour: `hsl(...)` for a name that Kaamiki or the site gave,
+        and `#abc` for a hex colour.
+    :raises ValueError: When it is not one of these.
     """
     names = values(config).roles.colours
     value = checks.colour(value, (*TONES, *names))
@@ -423,13 +415,13 @@ def _colour(config: Config, value: str) -> str:
 
 
 def _decimal(given: str | None, name: str, site: float) -> float:
-    """Read a width or a wobble written after a `?`, or the site's.
+    """Read a width or a wobble after a `?`, or the value of the site.
 
-    :param given: What was written, or `None` for the site's.
+    :param given: The text, or `None` for the value of the site.
     :param name: `width` or `wobble`.
-    :param site: The site's own.
+    :param site: The value of the site.
     :return: The number.
-    :raises ValueError: When it's not a number in the range it takes.
+    :raises ValueError: When it is not a number in its range.
     """
     low, high = BOUNDS[f"underline_{name}"]
     if given is None:
@@ -441,13 +433,12 @@ def _decimal(given: str | None, name: str, site: float) -> float:
 
 
 def _short(number: int) -> str:
-    """Wrap a number in k, m or b, to one decimal, halves rounding up.
+    """Write a number with k, m or b, to one decimal, with halves up.
 
-    A number moves up a unit only when it rounds to a thousand of the
-    one it's in, so 950000 is `950k` and 999950 is `1m`.
-
-    :param number: The number to wrap.
-    :return: The number as written when it's under a thousand.
+    :param number: The number to write.
+    :return: The short number, or the number as written when it is less than a
+        thousand. A number goes to the next unit only when it rounds to a
+        thousand of its unit, so 950000 is `950k` and 999950 is `1m`.
     """
     if number < 1000:
         return str(number)
@@ -465,12 +456,12 @@ def _underline_svg(
 ) -> tuple[str, str]:
     """Draw two wobbly strokes that look like a hand-drawn underline.
 
-    :param colour: The stroke colour, already checked.
-    :param seed: What the wobble is drawn from, so the same underline
-        in the same place comes out the same on every build.
-    :param width: How thick the stroke is.
-    :param wobble: How far the stroke strays, `0` being straight.
-    :return: The left-to-right and right-to-left SVGs.
+    :param colour: The colour of the stroke, already checked.
+    :param seed: The source of the wobble, so that the same underline in the
+        same place is the same in each build.
+    :param width: The thickness of the stroke.
+    :param wobble: How much the stroke moves, `0` for straight.
+    :return: The left-to-right and the right-to-left SVG.
     """
     uniform = Random(sha256(seed.encode()).digest()).uniform
     segments = 7
@@ -479,8 +470,8 @@ def _underline_svg(
     def stroke(start: float, stop: float) -> str:
         """Draw a wobbly path between two heights.
 
-        :param start: The height the stroke starts at.
-        :param stop: The height the stroke stops at.
+        :param start: The height where the stroke starts.
+        :param stop: The height where the stroke stops.
         :return: The path.
         """
         x0 = uniform(1.5, 2.5)
@@ -512,11 +503,11 @@ def _underline_svg(
 
 
 def _declared(each: str) -> bool:
-    """Tell whether a CSS declaration is one the role may write.
+    """Say whether the role can write a CSS declaration.
 
-    :param each: One declaration, like `color: red`.
-    :return: `True` when it styles text and nothing more: a property of
-        `TEXT`, no `url()` and a `font-size` that stays readable.
+    :param each: One declaration, as `color: red`.
+    :return: `True` when it only styles text: a property of `TEXT`, no `url()`,
+        and a `font-size` that stays readable.
     """
     if not DECLARATION.fullmatch(each) or "url(" in each.lower():
         return False
@@ -530,12 +521,12 @@ def _declared(each: str) -> bool:
 
 
 def _style(argument: str | None) -> str:
-    """Read the CSS a custom role presets.
+    """Read the CSS that a custom role presets.
 
     :param argument: The declarations as written.
-    :return: The declarations, joined and ending in `;`.
-    :raises ValueError: For a style over 200 characters or a
-        declaration that doesn't style text.
+    :return: The declarations, joined, with `;` at the end.
+    :raises ValueError: For a style of more than 200 characters, or a
+        declaration that does not style text.
     """
     style = (argument or "").strip()
     found = [_.strip() for _ in style.split(";") if _.strip()]
@@ -561,24 +552,20 @@ def stylise(
     options: dict[str, t.Any],
     content: list[t.Any],
 ) -> Reply:
-    """Put CSS on a run of text.
+    """Put CSS on some text.
 
-    The text reads `label <css>`, or only `label` for a role that
-    presets the `style`. Only properties that style text are allowed,
-    `color`, `font-size` up to 4rem and `text-decoration` among them::
-
-        Some :stylise:`red <color: red;>` text.
-
-    :param name: The role name, as written (unused).
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
-    :param options: The classes and `style` of a custom role.
-    :param content: Role content (unused).
-    :return: The styled text and the error messages if the text doesn't
-        split on a `<` and no `style` was preset.
+    :param name: The name of the role, as written (unused).
+    :param rawtext: All of the role, with its markup.
+    :param text: The text in the role, as `label <css>`, or only `label` when
+        the role presets `style`. Only properties that style text are permitted,
+        as `color`, `font-size` to 4rem and `text-decoration`.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
+    :param options: The classes and the `style` of a custom role.
+    :param content: The content of the role (unused).
+    :return: The styled text, and the error messages when the text has no `<`
+        and no `style` is preset.
     """
     del name, content
     said = unescape(text)
@@ -635,25 +622,19 @@ def email(
 ) -> Reply:
     """Write a `mailto` link.
 
-    The subject is the page's title, once the page is read, unless the
-    address names one after a `?subject=` or a custom role presets the
-    `subject`. Without a label the address is the label, with the angle
-    brackets or without them::
-
-        Send me an :email:`email <you@example.com>`.
-        Send me an :email:`email <you@example.com?subject=Hello>`.
-        Write to :email:`you@example.com` or :email:`<you@example.com>`.
-
-    :param name: The role name, as written (unused).
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
-    :param options: The classes and `subject` of a custom role.
-    :param content: Role content (unused).
-    :return: One `reference` node and the error messages if the address
-        isn't one or it asks for more than a subject.
+    :param name: The name of the role, as written (unused).
+    :param rawtext: All of the role, with its markup.
+    :param text: The text in the role, as `label <address>`, or only the
+        address, with or without angles. The address can have `?subject=`. Else
+        the subject is the preset `subject`, or the title of the page after the
+        page is read.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
+    :param options: The classes and the `subject` of a custom role.
+    :param content: The content of the role (unused).
+    :return: One `reference` node, and the error messages when the address is
+        wrong or asks for more than a subject.
     """
     del name, content
     try:
@@ -725,26 +706,21 @@ def sharpie(
     options: dict[str, t.Any],
     content: list[t.Any],
 ) -> Reply:
-    """Run a highlighter over a run of text.
+    """Put a highlighter on some text.
 
-    The colour is the site's `kaamiki.conf.roles.sharpie_colour`,
-    yellow, unless a custom role presets the `colour` or the role names
-    one, either as a colour or as one of the site's
-    `kaamiki.conf.roles.colours`::
-
-        This is :sharpie:`important` information.
-        This is :sharpie:`critical <red>` information.
-
-    :param name: The role name, as written (unused).
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
-    :param options: The classes and `colour` of a custom role.
-    :param content: Role content (unused).
-    :return: The highlighted text and the error messages if the colour
-        looks like markup.
+    :param name: The name of the role, as written (unused).
+    :param rawtext: All of the role, with its markup.
+    :param text: The text in the role, as `label` or `label <colour>`. The
+        colour is a colour or one of `kaamiki.conf.roles.colours`. Else it is
+        the preset `colour`, or `kaamiki.conf.roles.sharpie_colour`, which is
+        yellow.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
+    :param options: The classes and the `colour` of a custom role.
+    :param content: The content of the role (unused).
+    :return: The highlighted text, and the error messages when the colour looks
+        like markup.
     """
     del name, content
     config = inliner.document.settings.env.config
@@ -780,34 +756,23 @@ def underline(
     options: dict[str, t.Any],
     content: list[t.Any],
 ) -> Reply:
-    """Draw a pencil underline beneath a run of text.
+    """Draw a pencil underline below some text.
 
-    The colour, width and wobble are the site's
-    `kaamiki.conf.roles.underline_colour`,
-    `kaamiki.conf.roles.underline_width`
-    and `kaamiki.conf.roles.underline_wobble`, orange, 2.5 and 1,
-    unless a custom role presets its own or the role names its own
-    after the text. The colour comes first, then the width and wobble
-    after a `?`, an `&` between them::
-
-        This is :underline:`notable` content.
-        This is :underline:`notable <red>` content.
-        This is :underline:`notable <red?width=3&wobble=0>` content.
-
-    The width runs from 0.5 to 4 and the wobble from 0, which is
-    straight, to 2.
-
-    :param name: The role name, as written (unused).
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
-    :param options: The classes, `colour`, `width` and `wobble` of a
-        custom role.
-    :param content: Role content (unused).
-    :return: The underlined text and the error messages if the colour
-        looks like markup or the width or wobble is off.
+    :param name: The name of the role, as written (unused).
+    :param rawtext: All of the role, with its markup.
+    :param text: The text in the role, as `label`, `label <colour>` or `label
+        <colour?width=3&wobble=0>`. The width is from 0.5 to 4, and the wobble
+        is from 0 (straight) to 2. The defaults are the presets of a custom
+        role, else `kaamiki.conf.roles.underline_colour`, `underline_width` and
+        `underline_wobble`: orange, 2.5 and 1.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
+    :param options: The classes, `colour`, `width` and `wobble` of a custom
+        role.
+    :param content: The content of the role (unused).
+    :return: The underlined text, and the error messages when the colour looks
+        like markup, or the width or the wobble is wrong.
     """
     del name, content
     config = inliner.document.settings.env.config
@@ -856,12 +821,12 @@ def underline(
 
 
 def _duration(argument: str | None) -> float:
-    """Read how long a ticker takes to count, in seconds.
+    """Read how long a ticker counts, in seconds.
 
-    :param argument: The duration as written, like `1s` or `500ms`.
+    :param argument: The duration as written, as `1s` or `500ms`.
     :return: The seconds.
-    :raises ValueError: When it isn't a duration or isn't from the
-        least to the most a ticker takes.
+    :raises ValueError: When it is not a duration, or not in the range of a
+        ticker.
     """
     written = (argument or "").strip()
     found = DURATION.fullmatch(written)
@@ -888,30 +853,22 @@ def ticker(
     options: dict[str, t.Any],
     content: list[t.Any],
 ) -> Reply:
-    """Roll a number up from zero.
+    """Count a number up from zero.
 
-    The text reads `number`, then `short` and `duration` after a `?`,
-    both optional and in either order. `short` wraps the number in k, m
-    or b and takes no value, a whole number shows without it. The
-    duration is in `s` or `ms`, from 0.1s to 5s, 2s unless the role
-    gives one or a custom role presets it. The count starts when the
-    number scrolls into view::
-
-        We've :ticker:`2025` stars.
-        We've :ticker:`2025?short` stars.
-        We've :ticker:`2025?short&duration=1s` stars.
-
-    :param name: The role name, as written (unused).
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
-    :param options: The classes, `short` and `duration` of a custom
-        role.
-    :param content: Role content (unused).
-    :return: The number and the error messages if it isn't a whole
-        number or a setting is off.
+    :param name: The name of the role, as written (unused).
+    :param rawtext: All of the role, with its markup.
+    :param text: The text in the role, as `number`, then optional `short` and
+        `duration` after a `?`, in any sequence. `short` writes the number with
+        k, m or b. The duration is in `s` or `ms`, from 0.1s to 5s, and the
+        default is the preset or 2s. The count starts when the number scrolls
+        into view.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
+    :param options: The classes, `short` and `duration` of a custom role.
+    :param content: The content of the role (unused).
+    :return: The number, and the error messages when it is not a whole number or
+        a setting is wrong.
     """
     del name, content
     number, asked, rest = unescape(text).partition("?")
@@ -963,20 +920,19 @@ def _turns(
     lineno: int,
     inliner: states.Inliner,
 ) -> Reply:
-    """Read what takes turns in a role like `:swap:` or `:sweep:`.
+    """Read the parts that show one after the other in `:swap:` or `:sweep:`.
 
-    :param role: The role's name, for the messages.
-    :param noun: What it takes turns with, for the messages.
-    :param limit: The most characters one of them may have, counted as
-        code points.
-    :param classes: The classes the text gets.
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
-    :return: The first of them and the error messages if there aren't
-        two or one is empty, too long or holds a `|`.
+    :param role: The name of the role, for the messages.
+    :param noun: What the parts are, for the messages.
+    :param limit: The maximum characters of a part, counted as code points.
+    :param classes: The classes of the text.
+    :param rawtext: All of the role, with its markup.
+    :param text: The text in the role.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
+    :return: The first part, and the error messages when there are fewer than
+        two parts or a part is empty, too long or has a `|`.
     """
     words = [tidy(unescape(_)) for _ in BAR.split(text)]
     if len(words) < 2 or not all(words):
@@ -1022,32 +978,24 @@ def swap(
     options: dict[str, t.Any],
     content: list[t.Any],
 ) -> Reply:
-    """Swap a word for the next one, again and again.
+    """Change a word to the next word, again and again.
 
-    The text lists the words, split by `|`. The first one is what the
-    page, its search and a reader without scripts get. In the page the
-    rest take its place one by one while the words are on screen, in
-    the font, size and colour of the text around them. Every letter of
-    the old word rolls over to the letter of the new one, from the left.
-    Where a title is shown for something else, in the navbar, the
-    sidebar, the breadcrumbs, a toctree or a link, the first word stays
-    as text::
-
-        Docs you can :swap:`read|search|share` with anyone.
-
-    A word is at most 45 characters long, counted as code points, and
-    holds no `|`. The words keep the quotes they were written with.
-
-    :param name: The role name, as written (unused).
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
+    :param name: The name of the role, as written (unused).
+    :param rawtext: All of the role, with its markup.
+    :param text: The words, with `|` between them, each with a maximum of 45
+        code points. The page, its search and a reader without scripts get the
+        first word. On screen, the other words replace it one by one, in the
+        font, size and colour of the text around them, and each letter rolls to
+        the new letter from the left. In the navbar, the sidebar, the
+        breadcrumbs, a toctree or a link, the first word stays as text. The
+        words keep their quotes.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
     :param options: The classes of a custom role.
-    :param content: Role content (unused).
-    :return: The first word and the error messages if there aren't two
-        words or one of them is empty, too long or holds a `|`.
+    :param content: The content of the role (unused).
+    :return: The first word, and the error messages when there are fewer than
+        two words or a word is empty, too long or has a `|`.
     """
     del name, content
     classes = ["km-swap", *_classes(options)]
@@ -1075,32 +1023,21 @@ def sweep(
 ) -> Reply:
     """Wipe a title or a word out and the next one in, again and again.
 
-    It reads like `swap`, but a light sweeps across the text: the old
-    one fades out behind it and the new one comes in the same way. The
-    text lists the phrases, split by `|`, and each is a whole title or
-    only a word. The first one is what the page, its search and a reader
-    without scripts get. In the page the rest take its place one by one
-    while they are on screen, in the font, size and colour of the text
-    around them. Where a title is shown for something else, in the
-    navbar, the sidebar, the breadcrumbs, a toctree or a link, the
-    first phrase stays as text::
-
-        :sweep:`Your favourite sites|Start with a design you love`
-        Docs you can :sweep:`read|search|share` with anyone.
-
-    A phrase is at most 120 characters long, counted as code points, and
-    holds no `|`. The phrases keep the quotes they were written with.
-
-    :param name: The role name, as written (unused).
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
+    :param name: The name of the role, as written (unused).
+    :param rawtext: All of the role, with its markup.
+    :param text: The phrases, with `|` between them, each a full title or a word
+        with a maximum of 120 code points. It is as `swap`, but a light moves
+        across the text, and the old phrase fades out behind it as the new one
+        comes in. The page, its search and a reader without scripts get the
+        first phrase. In the navbar, the sidebar, the breadcrumbs, a toctree or
+        a link, the first phrase stays as text. The phrases keep their quotes.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
     :param options: The classes of a custom role.
-    :param content: Role content (unused).
-    :return: The first phrase and the error messages if there aren't two
-        phrases or one of them is empty, too long or holds a `|`.
+    :param content: The content of the role (unused).
+    :return: The first phrase, and the error messages when there are fewer than
+        two phrases or a phrase is empty, too long or has a `|`.
     """
     del name, content
     classes = ["km-swap", "km-sweep", *_classes(options)]
@@ -1128,28 +1065,21 @@ def _icon(
 ) -> Reply:
     """Draw a Font Awesome icon.
 
-    The text reads `name` and then any classes, a space between each.
-    The role names the style, `fa-icon:brands`, `fa-icon:light`,
-    `fa-icon:regular`, `fa-icon:solid`, `fa-icon:thin` or
-    `fa-icon:duotone`. A plain `fa-icon` draws in the site's
-    `kaamiki.conf.icons.style`::
-
-        Watch on :fa-icon:brands:`youtube` or listen :fa-icon:`music`.
-        Show some :fa-icon:solid:`heart km-tone--red` love.
-
-    :param style: The Font Awesome style class, bound when the module
-        is imported by `icon` and `fa_icon.roles`, or `None` for the
-        site's `kaamiki.conf.icons.style`.
-    :param name: The role name, as written (unused).
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
+    :param style: The Font Awesome style class, bound by `icon` and
+        `FaIcon.roles` at import, or `None` for `kaamiki.conf.icons.style`. The
+        roles are `fa-icon:brands`, `fa-icon:light`, `fa-icon:regular`,
+        `fa-icon:solid`, `fa-icon:thin`, `fa-icon:duotone` and `fa-icon`.
+    :param name: The name of the role, as written (unused).
+    :param rawtext: All of the role, with its markup.
+    :param text: The text in the role: the name, then classes, with a space
+        between each.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
     :param options: The classes of a custom role.
-    :param content: Role content (unused).
-    :return: The icon and the error messages if the name or a class
-        looks like anything but one.
+    :param content: The content of the role (unused).
+    :return: The icon, and the error messages when the name or a class is not
+        part of an icon.
     """
     del name, content
     config = inliner.document.settings.env.config
@@ -1199,23 +1129,19 @@ def _keys(
     options: dict[str, t.Any],
     content: list[t.Any],
 ) -> Reply:
-    """Write a keyboard shortcut the way a system prints it.
+    """Write a keyboard shortcut as a system prints it.
 
-    It reads like Sphinx's `kbd`, keys joined by `-`, `+` or `^`. The
-    role names the system, `kbd:mac`, `kbd:windows` or `kbd:linux`::
-
-        Copy with :kbd:mac:`Cmd-C` or :kbd:windows:`Ctrl-C`.
-
-    :param system: The system, bound when the module is imported by
-        `kbd.roles`.
-    :param name: The role name, as written.
-    :param rawtext: The whole role, markup and all.
-    :param text: What was written inside it.
-    :param lineno: The line the role's paragraph starts on, for error
-        reporting.
-    :param inliner: The docutils inliner that called this.
+    :param system: The system, bound by `Kbd.roles` at import. The roles are
+        `kbd:mac`, `kbd:windows` and `kbd:linux`.
+    :param name: The name of the role, as written.
+    :param rawtext: All of the role, with its markup.
+    :param text: The keys, joined by `-`, `+` or `^`, as for the `kbd` of
+        Sphinx.
+    :param lineno: The line where the paragraph of the role starts, for the
+        error messages.
+    :param inliner: The docutils inliner that called the role.
     :param options: The classes of a custom role.
-    :param content: Role content (unused).
+    :param content: The content of the role (unused).
     :return: The keys, and no error messages.
     """
     del content
@@ -1228,19 +1154,15 @@ icon = KaamikiRole(functools.partial(_icon, None), name="fa-icon")
 
 
 class CustomRole(misc.Role):
-    """The `role` directive, which also checks the colour a role presets.
-
-    Docutils checks the other presets as it reads them. This checks a
-    colour where the role is made, as it's only a name until the site's
-    `kaamiki.conf.roles.colours` are known.
-    """
+    """The `role` directive, which also checks the preset colour of a role."""
 
     def run(self) -> Sequence[nodes.Node]:
-        """Make the role and check the colour it presets.
+        """Make the role and check the colour that it presets.
 
-        :return: The messages docutils gives.
-        :raises rst.DirectiveError: When the colour is none Kaamiki
-            knows.
+        :return: The messages that docutils gives. docutils checks the other
+            presets when it reads them. A colour is only a name until
+            `kaamiki.conf.roles.colours` is known, so this checks it.
+        :raises rst.DirectiveError: When Kaamiki does not know the colour.
         """
         found = super().run()
         if any(
@@ -1267,12 +1189,11 @@ class CustomRole(misc.Role):
 
 @on("doctree-read")
 def subjects(app: Sphinx, doctree: nodes.document) -> None:
-    """Give an email link with no subject the page's title for one.
-
-    The title is read from the tree once the page is read.
+    """Give an email link without a subject the title of the page.
 
     :param app: The Sphinx application instance (unused).
-    :param doctree: The page, just read.
+    :param doctree: The page, just read. The title comes from the tree after the
+        page is read.
     """
     del app
     section = next(findall(doctree, nodes.section), None)
@@ -1286,18 +1207,15 @@ def subjects(app: Sphinx, doctree: nodes.document) -> None:
 
 
 class Quiet(Domain):
-    """A domain without data, so a parallel build merges nothing.
-
-    Its roles are `KaamikiRole` roles, so a custom role can use each of
-    them as a base.
-    """
+    """A domain without data, so a parallel build merges nothing."""
 
     def role(self, name: str) -> KaamikiRole | None:
-        """Hand docutils a role that knows its full name and options.
+        """Give docutils a role that knows its full name and its options.
 
-        :param name: The role's name inside the domain.
-        :return: The role, or `None` when the domain has none by that
-            name.
+        :param name: The name of the role in the domain.
+        :return: The role, or `None` when the domain has no role with that name.
+            The roles are `KaamikiRole` roles, so a custom role can use each of
+            them as a base.
         """
         found = self.roles.get(name)
         if found is None:
@@ -1313,7 +1231,7 @@ class Quiet(Domain):
     ) -> None:
         """Take nothing from the other processes.
 
-        :param docnames: The pages they read.
+        :param docnames: The pages that they read.
         :param otherdata: What they kept, which is nothing.
         """
 
