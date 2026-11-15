@@ -21,6 +21,13 @@ a time::
        .. tab:: uv
 
           ``uv add kaamiki-sphinx-theme``
+
+Put one `tab` in the set for each title. A tab can be in an `only`. A
+set needs a minimum of two tabs, because one tab has nothing to change
+to. When an `only` removes a tab for a builder, the other tabs show,
+and when the removed tab was the selected one, the first tab becomes
+selected. When a tab does not set the side of its icon,
+`kaamiki.conf.tab.icon_position` sets it.
 """
 
 from __future__ import annotations
@@ -54,7 +61,7 @@ ICON_POSITIONS: t.Final[tuple[str, ...]] = CHOICES["tab_icon_position"]
 
 
 class TabLabel(nodes.paragraph):
-    """A tab's title, parsed as rST, with its icon and the icon's side."""
+    """The title of a tab, parsed as rST, with its icon."""
 
 
 class Tabs(KaamikiDirective, motion=True):
@@ -62,25 +69,20 @@ class Tabs(KaamikiDirective, motion=True):
 
     Options::
 
-        - `group`: A name that other tab sets on the page also use. When
-          you pick a tab, each set in the group picks the tab with the
-          same key, and the browser keeps the choice. The key is the
-          title, or the tab's `key`. A set cannot have a key two times.
+        - `group`: A name that other tab sets on the page also use.
+          When you pick a tab, each set in the group picks the tab
+          with the same key, and the browser keeps the choice. The
+          key is the title, or the `key` of the tab. A set cannot
+          have a key two times.
         - `align`: Where the row of titles is, `left`, `center` or
           `right`. The default is `center`.
         - `class-bar`: More classes for the row of titles.
-        - `speed`: The speed of its motion, relative to the site, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
-          two times as fast.
+        - `speed`: The speed of its motion, relative to the site,
+          one of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or
+          `4`. `2` is two times as fast.
         - `no-motion`: Do not move it.
         - `name`: A name for links.
         - `class`: More classes for the tab set.
-
-    Put one `tab` in the set for each title. A tab can be in an `only`.
-    A set needs a minimum of two tabs, because one tab has nothing to
-    change to. When an `only` removes a tab for a builder, the other
-    tabs show. If the removed tab was the selected one, the first tab
-    becomes selected.
     """
 
     has_content = True
@@ -94,7 +96,7 @@ class Tabs(KaamikiDirective, motion=True):
     def build(self) -> list[nodes.Node]:
         """Make the tab set and number its tabs.
 
-        :return: The tab set's node.
+        :return: The node of the tab set.
         """
         node = self.locate(self.Node("", classes=self.classes))
         node["group"] = self.group
@@ -136,26 +138,25 @@ class Tab(KaamikiDirective):
 
     Options::
 
-        - `fa-icon`: A Font Awesome icon for the title, as `code`,
-          `fa-code` or `fa-regular fa-code`. An icon without a style
-          uses the site's `kaamiki.conf.icons.style`, which is
-          `regular` by default. When Font Awesome Free has no icon of
-          that name in that style, it uses `solid`.
-        - `icon-position`: The side of the title for the icon, `before`
-          or `after`. The default is `before`. It needs `fa-icon`.
-        - `selected`: Show this tab first. Without it, the first tab
-          shows.
-        - `key`: The name that a `group` uses to find this tab. Use it
-          when tabs have different titles but the same meaning. The
-          default is the title.
+        - `fa-icon`: A Font Awesome icon for the title. Font
+          Awesome icon, as `code`, `fa-code` or `fa-regular
+          fa-code`. An icon without a style uses
+          `kaamiki.conf.icons.style`, which is `regular` by
+          default. When Font Awesome Free has no icon of that name
+          in that style, it uses `solid`.
+        - `icon-position`: The side of the title for the icon,
+          `before` or `after`. The default is `before`. It needs
+          `fa-icon`.
+        - `selected`: Show this tab first. Without it, the first
+          tab shows.
+        - `key`: The name that a `group` uses to find this tab. Use
+          it when tabs have different titles but the same meaning.
+          The default is the title.
         - `class-title`: More classes for the title.
         - `class-body`: More classes for the content.
-        - `name`: A name for links. A link to the tab, or to a thing in
-          it, shows the tab.
+        - `name`: A name for links. A link to the tab, or to a
+          thing in it, shows the tab.
         - `class`: More classes for the title and the content.
-
-    When a tab does not set the side of its icon,
-    `kaamiki.conf.tab.icon_position` sets it.
     """
 
     has_content = True
@@ -183,7 +184,7 @@ class Tab(KaamikiDirective):
     def build(self) -> list[nodes.Node]:
         """Make the tab with its title and its content.
 
-        :return: The tab's node and what the parser reported.
+        :return: The node of the tab and what the parser reported.
         """
         node = self.locate(self.Node(""))
         node["selected"] = self.selected
@@ -212,10 +213,10 @@ class Tab(KaamikiDirective):
 
 @html.opens(Tabs.Node)
 def visit(self: HTMLTranslator, node: Tabs.Node) -> None:
-    """Open the tab set, numbering it among the sets on the page.
+    """Open the tab set, with its number on the page.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The tab set's node.
+    :param node: The node of the tab set.
     """
     node["serial"] = self.__dict__.get("km_tab_sets", 0)
     self.__dict__["km_tab_sets"] = node["serial"] + 1
@@ -237,7 +238,7 @@ html.closes(Tabs.Node, "</div>")
 def ident(node: nodes.Element) -> str:
     """Name the radio button that shows a tab.
 
-    :param node: The tab's node.
+    :param node: The node of the tab.
     :return: Its id, which is unique on the page.
     """
     return f"km-tab-{node.parent['serial']}-{node['index']}"
@@ -248,7 +249,7 @@ def visit_tab(self: HTMLTranslator, node: Tab.Node) -> None:
     """Write the radio button that shows a tab.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The tab's node.
+    :param node: The node of the tab.
     """
     attributes = [
         f'class="{tabs.input()}"',
@@ -268,10 +269,10 @@ html.closes(Tab.Node, "</div>")
 
 
 def tab_icon(self: HTMLTranslator, node: TabLabel) -> str:
-    """Write a tab's icon.
+    """Write the icon of a tab.
 
     :param self: The HTML translator.
-    :param node: The title's node.
+    :param node: The node of the title.
     :return: The icon, or nothing for a tab without one.
     """
     if not node["icon"]:
@@ -285,10 +286,10 @@ def tab_icon(self: HTMLTranslator, node: TabLabel) -> str:
 
 @html.opens(TabLabel)
 def visit_label(self: HTMLTranslator, node: TabLabel) -> None:
-    """Open a tab's title and put the icon first if it goes there.
+    """Open the title of a tab, with the icon first if it goes there.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The title's node.
+    :param node: The node of the title.
     """
     classes = tabs.label(more=[*node.parent["classes"], *node["classes"]])
     self.body.append(
@@ -300,10 +301,10 @@ def visit_label(self: HTMLTranslator, node: TabLabel) -> None:
 
 @html.closes(TabLabel)
 def depart_label(self: HTMLTranslator, node: TabLabel) -> None:
-    """Close the title and open the tab's content.
+    """Close the title and open the content of the tab.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The title's node.
+    :param node: The node of the title.
     """
     if node["after"]:
         self.body.append(tab_icon(self, node))

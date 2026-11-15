@@ -15,6 +15,12 @@ An `accordion` directive that folds its content below a title::
        :open:
 
        It's a box that folds its content below a title.
+
+The build stops when an accordion has no content, or when an option is
+wrong, out of range or in conflict with another option. When an
+accordion does not set the marker or its side,
+`kaamiki.conf.accordion.marker` and
+`kaamiki.conf.accordion.marker_position` set them.
 """
 
 from __future__ import annotations
@@ -46,7 +52,7 @@ text: t.Final[BEM] = BEM("text")
 
 
 class Summary(nodes.paragraph):
-    """The title, parsed as rST, with the marker's icon and side."""
+    """The title, parsed as rST, with the icon of the marker."""
 
 
 class Headline(nodes.TextElement):
@@ -58,42 +64,39 @@ class Accordion(KaamikiDirective, motion=True):
 
     Options::
 
-        - `open`: Show the content at the start. Only one accordion in a
-          `group` can have it.
+        - `open`: Show the content at the start. Only one accordion
+          in a `group` can have it.
         - `preheader`: A small line above the title.
-        - `class-preheader`: More classes for the preheader. It always
-          has `km-text--preheader`. It needs `preheader`.
+        - `class-preheader`: More classes for the preheader. It
+          always has `km-text--preheader`. It needs `preheader`.
         - `subheader`: A dimmer line below the title.
         - `nested-subheader`: Put the subheader at the top of the
           content, not below the title. Then it shows only when the
           accordion is open. It needs `subheader`.
-        - `class-subheader`: More classes for the subheader. It always
-          has `km-text--subheader`. It needs `subheader`.
-        - `marker`: The icon that shows that the accordion opens, `plus`,
-          a `down` chevron or a `right` chevron. When the accordion
-          opens, a plus turns 45 degrees, a right chevron turns 90
-          degrees to point down and a down chevron turns over.
+        - `class-subheader`: More classes for the subheader. It
+          always has `km-text--subheader`. It needs `subheader`.
+        - `marker`: The icon that shows that the accordion opens,
+          `plus`, a `down` chevron or a `right` chevron. When the
+          accordion opens, a plus turns 45 degrees, a right chevron
+          turns 90 degrees to point down and a down chevron turns
+          over.
         - `marker-position`: The side of the title for the marker,
           `before` or `after`.
-        - `hide-show-more`: Show all of a long body. Without it, a body
-          that is taller than the screen folds behind a Show more button.
-        - `group`: A name that other accordions on the page also use.
-          When one of them opens, the others in the group close.
+        - `hide-show-more`: Show all of a long body. Without it, a
+          body that is taller than the screen folds behind a Show
+          more button.
+        - `group`: A name that other accordions on the page also
+          use. When one of them opens, the others in the group
+          close.
         - `class-title`: More classes for the title.
         - `class-body`: More classes for the content.
-        - `speed`: The speed of its motion, relative to the site, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
-          two times as fast.
+        - `speed`: The speed of its motion, relative to the site,
+          one of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or
+          `4`. `2` is two times as fast.
         - `no-motion`: Do not move it.
-        - `name`: A name for links. A link to the accordion, or to a
-          thing in it, opens the accordion.
+        - `name`: A name for links. A link to the accordion, or to
+          a thing in it, opens the accordion.
         - `class`: More classes for the accordion.
-
-    The build stops when an accordion has no content, or when an option
-    is wrong, out of range or in conflict with another option. When an
-    accordion does not set the marker or its side,
-    `kaamiki.conf.accordion.marker` and
-    `kaamiki.conf.accordion.marker_position` set them.
     """
 
     has_content = True
@@ -132,9 +135,10 @@ class Accordion(KaamikiDirective, motion=True):
         opened.add(self.group)
 
     def build(self) -> list[nodes.Node]:
-        """Make the accordion with its title, its lines and its content.
+        """Make the accordion with its title, lines and content.
 
-        :return: The accordion's node and what the parser reported.
+        :return: The node of the accordion and what the parser
+            reported.
         """
         node = self.locate(self.Node("", classes=self.classes))
         node["open"] = self.open
@@ -177,7 +181,7 @@ def visit(self: HTMLTranslator, node: Accordion.Node) -> None:
     """Open the accordion.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The accordion's node.
+    :param node: The node of the accordion.
     """
     attributes: dict[str, t.Any] = {
         "CLASS": accordion(f"marker-{node['marker']}")
@@ -196,10 +200,10 @@ html.closes(Accordion.Node, "</div></details>")
 
 @html.opens(Summary)
 def visit_summary(self: HTMLTranslator, node: Summary) -> None:
-    """Open the title. Put the marker first if it goes before the title.
+    """Open the title, with the marker first if it goes there.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The title's node.
+    :param node: The node of the title.
     """
     classes = accordion.title(more=node["classes"])
     self.body.append(f'<summary class="{self.attval(classes)}">')
@@ -213,7 +217,7 @@ def depart_summary(self: HTMLTranslator, node: Summary) -> None:
     """Close the title and open the content.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The title's node.
+    :param node: The node of the title.
     """
     self.body.append("</span>")
     if node["after"]:
@@ -227,7 +231,7 @@ def visit_headline(self: HTMLTranslator, node: Headline) -> None:
     """Open the line above or below the title.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The line's node.
+    :param node: The node of the line.
     """
     role = node["role"]
     classes = getattr(accordion, role)(more=[text[role], *node["classes"]])
@@ -241,8 +245,8 @@ def marker(self: HTMLTranslator, node: Summary) -> str:
     """Write the icon that shows that the accordion opens.
 
     :param self: The HTML translator.
-    :param node: The title's node.
-    :return: The marker's HTML.
+    :param node: The node of the title.
+    :return: The HTML of the marker.
     """
     icons = Icons.of(self.builder.config)
     classes = icons.pair(ACCORDION_MARKERS[node.parent["marker"]])

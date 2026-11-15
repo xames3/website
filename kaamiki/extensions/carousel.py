@@ -6,8 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 04 November 2026
 Last updated on: 15 November 2026
 
-A `carousel` directive that lays blocks, buttons, figures, pictures,
-repositories and thumbnails out in a row a reader swipes through::
+A `carousel` directive that puts blocks, buttons, figures, pictures,
+repositories and thumbnails in a row that a reader swipes through::
 
     .. carousel:: What to read next
        :preheader: :fa-icon:regular:`comments` Guides
@@ -21,6 +21,14 @@ repositories and thumbnails out in a row a reader swipes through::
           A short guide to set things up.
 
        .. thumbnail:: https://www.youtube.com/watch?v=jNQXAC9IVRw
+
+The argument is the title. It is optional, and it looks like the title
+of a section. It is reStructuredText, so roles work in it and in
+`preheader` and `subheader`. The arrows are on the line of the title
+when the two fit on one line, else below the items. Below 768px wide,
+they are always below the items. Put a `block`, a `button`, a
+`figure`, an `image`, a `repository` or a `thumbnail` in it for each
+item.
 """
 
 from __future__ import annotations
@@ -81,19 +89,18 @@ SKIPPED: t.Final[tuple[type[nodes.Node], ...]] = (
 
 
 class CarouselText(phrase):
-    """A line of the carousel's heading, which `visit` writes."""
+    """A line of the heading of the carousel."""
 
 
 html.skips(CarouselText)
 
 
 def is_trail(found: nodes.Node) -> bool:
-    """Say whether a node is the empty `raw` a directive leaves behind.
-
-    The link checker reads that node.
+    """Say whether a node is the empty `raw` that a directive leaves.
 
     :param found: The node to look at.
-    :return: `True` for a `raw` node with nothing in it.
+    :return: `True` for a `raw` node without content. The link checker
+        reads it.
     """
     return isinstance(found, nodes.raw) and not found.astext().strip()
 
@@ -101,10 +108,9 @@ def is_trail(found: nodes.Node) -> bool:
 def is_pending(found: nodes.Node) -> bool:
     """Say whether a node is a `pending` instruction.
 
-    That's what `rst-class` leaves for the element after it.
-
     :param found: The node to look at.
-    :return: `True` for a `pending` node.
+    :return: `True` for a `pending` node, which `rst-class` leaves for
+        the next element.
     """
     return isinstance(found, nodes.pending)
 
@@ -140,47 +146,39 @@ class Carousel(KaamikiDirective, motion=True):
 
     Options::
 
-        - `preheader`: A small line above the title, as the preheader of
-          a section. It can have roles, as `:fa-icon:regular:`heart`
-          Love`. It needs a title.
-        - `subheader`: A dimmer line below the title, as the subheader of
-          a section. It needs a title.
-        - `gap`: The space between items, `small`, `medium` or `large`.
-          The default is `small`. A length in `rem`, up to 4rem, can
-          replace them, as `1.5rem`. With two lengths, as for `columns`,
-          it uses the second.
-        - `cards`: How many items show fully, from 1 to 4. A quarter of
-          the next item shows next to them. The default is 2. The
-          carousel needs a minimum of that number of items. A phone
-          always shows approximately one item and a part of the next.
-        - `hide-arrows`: Remove the arrows. A reader can still swipe or
-          scroll.
+        - `preheader`: A small line above the title, as the
+          preheader of a section. It can have roles, as
+          `:fa-icon:regular:`heart` Love`. It needs a title.
+        - `subheader`: A dimmer line below the title, as the
+          subheader of a section. It needs a title.
+        - `gap`: The space between items, `small`, `medium` or
+          `large`. The default is `small`. A length in `rem`, up to
+          4rem, can replace them, as `1.5rem`. With two lengths, as
+          for `columns`, it uses the second.
+        - `cards`: How many items show fully, from 1 to 4. A
+          quarter of the next item shows next to them. The default
+          is 2. The carousel needs a minimum of that number of
+          items. A phone always shows approximately one item and a
+          part of the next.
+        - `hide-arrows`: Remove the arrows. A reader can still
+          swipe or scroll.
         - `dots`: Show a dot for each item below the row, not the
-          arrows, with a pill that moves from one dot to the next. You
-          cannot use it with `hide-arrows`.
+          arrows, with a pill that moves from one dot to the next.
+          You cannot use it with `hide-arrows`.
         - `auto-run`: Move to the next item automatically. It stops
-          while a reader hovers on it, touches it or puts the focus on
-          it. It does not move for a reader whose device asks for less
-          motion.
+          while a reader hovers on it, touches it or puts the focus
+          on it. It does not move for a reader whose device asks
+          for less motion.
         - `interval`: The seconds between moves, from 2 to 15. The
           default is 4. It needs `auto-run`.
-        - `direction`: The direction of `auto-run`, `right` or `left`.
-          The default is `right`. It needs `auto-run`.
-        - `speed`: The speed of its motion, relative to the site, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
-          two times as fast.
+        - `direction`: The direction of `auto-run`, `right` or
+          `left`. The default is `right`. It needs `auto-run`.
+        - `speed`: The speed of its motion, relative to the site,
+          one of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or
+          `4`. `2` is two times as fast.
         - `no-motion`: Do not move it.
         - `name`: A name for links.
         - `class`: More classes for the carousel.
-
-    The argument is the title. It is optional, and it looks like the
-    title of a section. It is reStructuredText, so roles work in it and
-    in `preheader` and `subheader`. The arrows are on the line of the
-    title when the two fit on one line. If not, they are below the
-    items. Below 768px wide, they are always below the items.
-
-    Put a `block`, a `button`, a `figure`, an `image`, a `repository`
-    or a `thumbnail` in it for each item.
     """
 
     has_content = True
@@ -218,7 +216,7 @@ class Carousel(KaamikiDirective, motion=True):
     def build(self) -> list[nodes.Node]:
         """Make the carousel with its items and its heading.
 
-        :return: The carousel's node and what the parser reported.
+        :return: The node of the carousel and what the parser reported.
         """
         node = self.locate(self.Node("", classes=self.classes))
         node["titled"] = bool(self.arguments)
@@ -277,9 +275,9 @@ class Carousel(KaamikiDirective, motion=True):
 
     @staticmethod
     def plain(node: Carousel.Node) -> list[nodes.Node]:
-        """Write a carousel as words, for a builder that writes no HTML.
+        """Write a carousel as words, for a builder without HTML.
 
-        :param node: The carousel's node.
+        :param node: The node of the carousel.
         :return: A paragraph for each line of its heading, then its
             items.
         """
@@ -300,10 +298,10 @@ class Carousel(KaamikiDirective, motion=True):
 
 @html.opens(Carousel.Node)
 def visit(self: HTMLTranslator, node: Carousel.Node) -> None:
-    """Open the carousel and the track its items scroll along.
+    """Open the carousel and the track of its items.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The carousel's node.
+    :param node: The node of the carousel.
     """
     modifiers = ["titled"] if node["titled"] else []
     styles: list[str] = []
@@ -348,10 +346,10 @@ def visit(self: HTMLTranslator, node: Carousel.Node) -> None:
 
 @html.closes(Carousel.Node)
 def depart(self: HTMLTranslator, node: Carousel.Node) -> None:
-    """Close the track, write the arrows or the dots and close the carousel.
+    """Close the track, write the arrows or the dots, and close it.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The carousel's node.
+    :param node: The node of the carousel.
     """
     self.body.append("</div>")
     if node["arrows"]:
@@ -364,18 +362,15 @@ def depart(self: HTMLTranslator, node: Carousel.Node) -> None:
 
 @on("doctree-resolved")
 def emptied(app: Sphinx, doctree: nodes.document, docname: str) -> None:
-    """Stop the build for a carousel with too few items left to show.
-
-    A carousel whose items are all in an `only` for another builder
-    passes the directive's checks and has nothing in it once the page is
-    resolved. One that has some of them there can fall short of its
-    `cards` the same way.
+    """Stop the build for a carousel with too few items to show.
 
     :param app: The Sphinx application instance.
-    :param doctree: The page, about to be written.
-    :param docname: The page's name (unused).
-    :raises KaamikiError: For the first carousel without an item or
-        with fewer than its `cards`.
+    :param doctree: The page, before it is written.
+    :param docname: The name of the page (unused).
+    :raises KaamikiError: For the first carousel without an item, or
+        with fewer items than its `cards`. This happens when an `only`
+        for a different builder holds its items, after the checks of
+        the directive.
     """
     del docname
     if app.builder.format != "html":

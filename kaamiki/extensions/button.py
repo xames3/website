@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
 Last updated on: 15 November 2026
 
-A `button` directive that renders a link as a button::
+A `button` directive that writes a link as a button::
 
     .. button:: https://example.com/demo.mp4
        :fa-icon: video
@@ -14,13 +14,20 @@ A `button` directive that renders a link as a button::
 
        Watch it here!
 
-A page of the site is named with `:doc:` or `:ref:` in place of the
-address, so the link works under every builder::
+The argument is the address: a full address, a path on the site or a
+fragment. `:doc:` or `:ref:` can replace it, so that the link works
+with all builders, and a button has only one of the three::
 
     .. button::
        :doc: index
 
        Back to the start
+
+When a button does not set the scheme or the side of its icon,
+`kaamiki.conf.button.scheme` and `kaamiki.conf.button.icon_position`
+set them. The `chevron` scheme cannot have `fa-icon` or
+`icon-position`, so when the site uses `chevron`, a button with an
+icon is `light`.
 """
 
 from __future__ import annotations
@@ -110,11 +117,11 @@ def hsl(value: str) -> str:
 
 
 def rel(argument: str | None) -> str:
-    """Check what a link's `rel` says.
+    """Check the `rel` of a link.
 
     :param argument: The words as written.
     :return: The words.
-    :raises ValueError: For one that isn't a link type.
+    :raises ValueError: For a word that is not a link type.
     """
     found = (argument or "").split()
     if not found or any(_ not in RELS for _ in found):
@@ -125,11 +132,12 @@ def rel(argument: str | None) -> str:
 
 
 def download(argument: str | None) -> str:
-    """Check the file name a download is saved under.
+    """Check the file name of a download.
 
-    :param argument: The name as written, or `None` for the link's own.
-    :return: The name, empty for none.
-    :raises ValueError: For a path or a name with odd characters.
+    :param argument: The name as written, or `None` for the name of the
+        link.
+    :return: The name, or empty for none.
+    :raises ValueError: For a path, or a name with unusual characters.
     """
     if argument is None:
         return ""
@@ -143,49 +151,43 @@ def download(argument: str | None) -> str:
 class Button(KaamikiDirective):
     """The `button` directive.
 
-    The argument is the address: a full address, a path on the site or
-    a fragment. `doc` and `ref` can replace it. A button has only one of
-    the three.
-
     Options::
 
-        - `doc`: A document of the site, named as `:doc:` names it. The
-          button links to it. The link works with all builders.
-        - `ref`: A label, named as `:ref:` names it. Capitals and spaces
-          do not change the label. The button links to it.
+        - `doc`: A document of the site, named as `:doc:` names it.
+          The button links to it. The link works with all builders.
+        - `ref`: A label, named as `:ref:` names it. Capitals and
+          spaces do not change the label. The button links to it.
         - `fa-icon`: A Font Awesome icon, as `video`, `fa-video` or
-          `fa-regular fa-video`. An icon without a style uses the site's
-          `kaamiki.conf.icons.style`, which is `regular` by default.
-          When Font Awesome Free has no icon of that name in that style,
-          it uses `solid`.
-        - `icon-position`: The side of the label for the icon, `before`
-          or `after`. The default is `before`. It needs `fa-icon`.
-        - `align`: Where the button is, `left`, `center` or `right`. The
-          default is `left`.
-        - `scheme`: `light`, `dark`, `chevron`, `red`, `yellow`, `blue`
-          or `green`. A colour in `kaamiki.conf.button.colours` is also
-          correct. `chevron` is `light` with a chevron on the right. On
-          hover, the chevron changes to an arrow.
-        - `new-tab`: Open the link in a new tab, also on this site. The
-          build stops when the link opens in a new tab already.
-        - `same-tab`: Open the link in this tab, also for a different
-          site. Without it, a link to a different site opens in a new
-          tab, unless `kaamiki.conf.links.new_tab` of the site is off.
-          The build stops when the link stays in this tab already.
+          `fa-regular fa-video`. An icon without a style uses
+          `kaamiki.conf.icons.style`, which is `regular` by
+          default. When Font Awesome Free has no icon of that name
+          in that style, it uses `solid`.
+        - `icon-position`: The side of the label for the icon,
+          `before` or `after`. The default is `before`. It needs
+          `fa-icon`.
+        - `align`: Where the button is, `left`, `center` or
+          `right`. The default is `left`.
+        - `scheme`: `light`, `dark`, `chevron`, `red`, `yellow`,
+          `blue` or `green`. A colour in
+          `kaamiki.conf.button.colours` is also correct. `chevron`
+          is `light` with a chevron on the right. On hover, the
+          chevron changes to an arrow.
+        - `new-tab`: Open the link in a new tab, also on this site.
+          The build stops when the link opens in a new tab already.
+        - `same-tab`: Open the link in this tab, also for a
+          different site. Without it, a link to a different site
+          opens in a new tab, unless `kaamiki.conf.links.new_tab`
+          is off. The build stops when the link stays in this tab
+          already.
         - `rel`: The `rel` of the link. It adds to `noopener
-          noreferrer`, which a link that opens in a new tab always has.
-        - `tooltip`: The text that shows when a reader hovers on the
-          button, with a maximum of 120 characters.
-        - `download`: Save the link, not open it, with the file name if
-          you give one.
+          noreferrer`, which a link that opens in a new tab always
+          has.
+        - `tooltip`: The text that shows when a reader hovers on
+          the button, with a maximum of 120 characters.
+        - `download`: Save the link, not open it, with the file
+          name if you give one.
         - `name`: A name for links.
         - `class`: More classes for the link.
-
-    When a button does not set the scheme or the side of its icon,
-    `kaamiki.conf.button.scheme` and `kaamiki.conf.button.icon_position`
-    set them. The `chevron` scheme cannot have `fa-icon` or
-    `icon-position`. Thus, when the site uses `chevron`, a button with
-    an icon is `light`.
     """
 
     has_content = True
@@ -208,10 +210,10 @@ class Button(KaamikiDirective):
         """The button and its parsed label, which `visit` writes."""
 
     def build(self) -> list[nodes.Node]:
-        """Parse the label and return the button's node.
+        """Parse the label and give the node of the button.
 
-        :return: The node, followed by the `raw` node `trail` returns
-            for the link checker and anything the label reported.
+        :return: The node, the `raw` node from `trail` for the link
+            checker, and what the label reported.
         """
         config = self.config
         options = self.options
@@ -303,14 +305,15 @@ class Button(KaamikiDirective):
         return [element, *trail(self, attributes, ("url",)), *messages]
 
     def look(self, scheme: str | None, *, iconic: bool) -> tuple[str, str]:
-        """Work out the classes and the colour a scheme stands for.
+        """Find the classes and the colour of a scheme.
 
-        :param scheme: The scheme as written or `None` for the site's.
-        :param iconic: Whether the button has an icon, which a site's
-            `chevron` doesn't suit, so it's `light` there.
-        :return: The classes and the inline style holding the colour,
-            if the scheme is one the site named. The `dark` scheme is
-            how a button looks without one and has no class.
+        :param scheme: The scheme as written, or `None` for the scheme
+            of the site.
+        :param iconic: Whether the button has an icon. A `chevron` of
+            the site does not suit an icon, so then it is `light`.
+        :return: The classes, and the inline style with the colour when
+            the site named the scheme. The `dark` scheme is the look of
+            a button without a scheme, so it has no class.
         """
         config = self.config
         colours = values(config).button.colours
@@ -335,12 +338,12 @@ class Button(KaamikiDirective):
 
     @staticmethod
     def plain(node: Button.Node) -> list[nodes.Node]:
-        """Write a button as words, for a builder that writes no HTML.
+        """Write a button as words, for a builder without HTML.
 
-        :param node: The button's node.
-        :return: A paragraph with its label and its address, written as a
-            link to itself, which a text writer would otherwise drop. A
-            button that names a page of the site has no address to show.
+        :param node: The node of the button.
+        :return: A paragraph with its label and its address as a link
+            to itself, which a text writer would not write. A button
+            that names a page of the site has no address to show.
         """
         label = next(each for each in node.children if isinstance(each, phrase))
         words = nodes.paragraph("", "", *label.children)
@@ -353,12 +356,12 @@ class Button(KaamikiDirective):
 def prepare(
     self: HTMLTranslator, attributes: dict[str, t.Any]
 ) -> dict[str, t.Any]:
-    """Work out where a button that names a page of the site goes.
+    """Find where a button that names a page of the site goes.
 
-    :param self: The HTML translator writing the page.
-    :param attributes: The node's attributes.
-    :return: A copy of them, with the address a `doc` or a `ref` comes
-        to from this page under this builder.
+    :param self: The HTML translator that writes the page.
+    :param attributes: The attributes of the node.
+    :return: A copy of them, with the address that a `doc` or a `ref`
+        gives from this page with this builder.
     """
     found = dict(attributes)
     if found["kind"]:

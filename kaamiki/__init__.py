@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
 Last updated on: 15 November 2026
 
-Kaamiki's entry point.
+The entry point of Kaamiki.
 """
 
 from __future__ import annotations
@@ -85,14 +85,13 @@ logger = logging.getLogger(__name__)
 
 
 def env_version(version: str) -> int:
-    """Turn a version into the number Sphinx compares the cache with.
+    """Change a version into the number for the cache.
 
-    Each of the first four numbers in it moves up two digits for the
-    next, so `2026.11.8` is `20261108` and `2026.11.8.1` is
-    `2026110801`. Only digits count.
-
-    :param version: Kaamiki's version.
-    :return: The number, which changes with every release.
+    :param version: The version of Kaamiki.
+    :return: The number, which changes with each release. Each of the
+        first four numbers moves two digits for the next, so
+        `2026.11.8` is `20261108` and `2026.11.8.1` is `2026110801`.
+        Only digits count.
     """
     number = 0
     for each in re.findall(r"[0-9]+", version)[:4]:
@@ -101,13 +100,12 @@ def env_version(version: str) -> int:
 
 
 def themed(app: Sphinx) -> bool:
-    """Tell if the build's pages are written with Kaamiki's theme.
-
-    Only the HTML builders that do get Kaamiki's files, which leaves out
-    `epub` and the help builders.
+    """Say whether the pages of the build use the theme of Kaamiki.
 
     :param app: The Sphinx application instance.
-    :return: `True` for those builders, `False` for any other.
+    :return: `True` for the HTML builders that get the files of
+        Kaamiki, which are not `epub` and the help builders, else
+        `False`.
     """
     if not isinstance(app.builder, StandaloneHTMLBuilder):
         return False
@@ -119,7 +117,7 @@ def themed(app: Sphinx) -> bool:
 
 @on("builder-inited")
 def add_theme_assets(app: Sphinx) -> None:
-    """Add Kaamiki's static files, stylesheets and scripts to a build.
+    """Add the static files of Kaamiki to a build.
 
     :param app: The Sphinx application instance.
     """
@@ -133,32 +131,31 @@ def add_theme_assets(app: Sphinx) -> None:
 
 
 def generated(app: Sphinx) -> str:
-    """Name the folder where a build keeps the bundles it joined.
+    """Name the folder where a build keeps its joined bundles.
 
     :param app: The Sphinx application instance.
-    :return: The build's own folder, or nothing before `join_parts` made it.
+    :return: The own folder of the build, or nothing before
+        `join_parts` made it.
     """
     return str(app.builder.__dict__.get("km_bundles", ""))
 
 
 @on("builder-inited")
 def join_parts(app: Sphinx) -> None:
-    """Join the parts of every bundle into the file the pages link to.
+    """Join the parts of each bundle into the file that the pages link.
 
-    Sphinx fingerprints a stylesheet or a script from the file in `_static`
-    while it writes the first page, so the joined file has to be there by then,
-    not at the end of the build. It's written as a static folder, which
-    Sphinx copies first. A part's name is its place, so `10-reset.css`
-    comes before `20-base.css`.
-
-    The folder is the build's own, in the system's temporary one. Its name
-    can't be guessed and nobody but the build can write in it, so no other
-    build, and no other user, can change what's copied. Sphinx copies a
-    folder's permissions onto `_static`, so it's opened up for reading.
-
-    :param app: The Sphinx application instance.
-    :raises KaamikiError: For a bundle with no parts, a part that isn't
-        UTF-8 text and a folder Kaamiki can't write to.
+    :param app: The Sphinx application instance. Sphinx makes the
+        fingerprint of a stylesheet or a script from the file in
+        `_static` while it writes the first page, so the joined file
+        must be there then. It is written as a static folder, which
+        Sphinx copies first. The name of a part is its place, so
+        `10-reset.css` comes before `20-base.css`. The folder is in the
+        temporary folder of the system. Its name cannot be guessed, and
+        only the build can write in it, so no other build or user can
+        change what is copied. Sphinx copies the permissions of a
+        folder onto `_static`, so the folder is opened for reading.
+    :raises KaamikiError: For a bundle without parts, a part that is
+        not UTF-8 text, or a folder that Kaamiki cannot write to.
     """
     if not themed(app):
         return
@@ -210,10 +207,10 @@ def join_parts(app: Sphinx) -> None:
 
 @on("build-finished")
 def flatten(app: Sphinx, exc: Exception | None) -> None:
-    """Rewrite Kaamiki's stylesheets for the browsers it supports.
+    """Write the stylesheets of Kaamiki again for its browsers.
 
     :param app: The Sphinx application instance.
-    :param exc: Whatever went wrong during the build or `None`.
+    :param exc: What went wrong in the build, or `None`.
     """
     builder = app.builder
     if exc or not isinstance(builder, StandaloneHTMLBuilder):
@@ -278,10 +275,10 @@ def forget(app: Sphinx, exc: Exception | None) -> None:
 
 @on("build-finished")
 def cleanup(app: Sphinx, exc: Exception | None) -> None:
-    """Remove the files of Sphinx's basic theme that no page loads.
+    """Remove the unused files of the basic theme.
 
     :param app: The Sphinx application instance.
-    :param exc: Whatever went wrong during the build or `None`.
+    :param exc: What went wrong in the build, or `None`.
     """
     if exc or not isinstance(app.builder, StandaloneHTMLBuilder):
         return
@@ -292,15 +289,14 @@ def cleanup(app: Sphinx, exc: Exception | None) -> None:
 
 @on("doctree-resolved")
 def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
-    """Swap Kaamiki's nodes for ordinary ones where there's no HTML.
+    """Change the nodes of Kaamiki where there is no HTML.
 
-    The text, LaTeX, man and texinfo builders can't write Kaamiki's
-    nodes, so a directive that has a `plain` function gets its node
-    swapped for what that returns. They then write words and links.
-
-    :param app: The Sphinx application instance.
-    :param doctree: The page, about to be written.
-    :param docname: The page's name.
+    :param app: The Sphinx application instance. The text, LaTeX, man
+        and texinfo builders cannot write the nodes of Kaamiki, so the
+        node of a directive with a `plain` method changes into what it
+        gives. Then they write words and links.
+    :param doctree: The page, before it is written.
+    :param docname: The name of the page.
     """
     del docname
     if app.builder.format not in formats:
@@ -312,7 +308,7 @@ def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
 
 
 def add_roles(app: Sphinx) -> None:
-    """Register Kaamiki's roles, their domains and the `phrase` node.
+    """Register the roles, their domains and `phrase`.
 
     :param app: The Sphinx application instance.
     """
@@ -325,7 +321,7 @@ def add_roles(app: Sphinx) -> None:
 
 
 def add_directives(app: Sphinx) -> None:
-    """Register Kaamiki's directives and each node in the `html` record.
+    """Register the directives of Kaamiki and each node of `html`.
 
     :param app: The Sphinx application instance.
     """
@@ -335,18 +331,17 @@ def add_directives(app: Sphinx) -> None:
 
 
 def setup(app: Sphinx) -> dict[str, str | bool | int]:
-    """Set Kaamiki up with Sphinx.
+    """Set up Kaamiki with Sphinx.
 
-    Registers Kaamiki, its extensions, directives, roles, the link
-    checker and the handlers that fill in the page context.
-
-    :param app: The Sphinx application instance.
-    :return: Kaamiki's version and an `env_version` that changes with
-        each release, so Sphinx reads every page again. Reading and
-        writing in parallel is safe.
-    :raises KaamikiError: For `kaamiki` in `extensions` with another
-        `html_theme` and for `html_theme = "kaamiki"` without `kaamiki`
-        in `extensions`.
+    :param app: The Sphinx application instance. This registers
+        Kaamiki, its extensions, directives and roles, the link
+        checker, and the handlers that fill the context of a page.
+    :return: The version of Kaamiki, and an `env_version` that changes
+        with each release, so Sphinx reads each page again. Parallel
+        reading and writing are safe.
+    :raises KaamikiError: For `kaamiki` in `extensions` with a
+        different `html_theme`, and for `html_theme = "kaamiki"`
+        without `kaamiki` in `extensions`.
     """
     checks.install_reporter()
     pair(app)

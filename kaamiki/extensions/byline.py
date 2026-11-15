@@ -6,12 +6,15 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
 Last updated on: 15 November 2026
 
-A `byline` directive that draws the byline under a page title::
+A `byline` directive that draws the byline below the title of a page::
 
     .. byline:: Akshay Mestry
        :avatar: https://example.com/avatar.png
        :target: https://github.com/xames3
        :avatar-size: 24
+
+Put it on the page itself, one time. An `only` is part of the page. A
+container and the content of a different directive are not.
 """
 
 from __future__ import annotations
@@ -54,10 +57,11 @@ BACKDROPS: t.Final[int] = 8
 def backdrops(argument: str | None) -> str:
     """Check the pictures to fade through, one address each.
 
-    :param argument: The addresses as written, a comma between each.
-    :return: The addresses, a space between each.
-    :raises ValueError: For one that isn't an address, one twice or
-        more than `BACKDROPS`.
+    :param argument: The addresses as written, with a comma between
+        each.
+    :return: The addresses, with a space between each.
+    :raises ValueError: For a value that is not an address, an address
+        two times, or more than `BACKDROPS` addresses.
     """
     found = [_.strip() for _ in (argument or "").split(",")]
     if not all(found) or len(found) > BACKDROPS:
@@ -75,11 +79,11 @@ def backdrops(argument: str | None) -> str:
 
 
 def source_url(self: HTMLTranslator) -> str:
-    """Link the page's plain-text source, the one Sphinx copies.
+    """Link the plain-text source of the page that Sphinx copies.
 
-    :param self: The HTML translator, writing the page.
-    :return: The address, or an empty string with `html_copy_source` or
-        `html_show_sourcelink` off.
+    :param self: The HTML translator that writes the page.
+    :return: The address, or an empty string when `html_copy_source` or
+        `html_show_sourcelink` is off.
     """
     builder = self.builder
     config = builder.config
@@ -93,10 +97,10 @@ def source_url(self: HTMLTranslator) -> str:
 
 
 def native(code: str) -> str:
-    """Spell a language in its own words, like `English` for `en`.
+    """Write a language in its own words, as `English` for `en`.
 
-    :param code: The language code, like `en` or `pt-BR`.
-    :return: The name, or the code itself for one babel doesn't know.
+    :param code: The language code, as `en` or `pt-BR`.
+    :return: The name, or the code when Babel does not know it.
     """
     try:
         display = Locale.parse(code, sep="-").get_display_name()
@@ -108,36 +112,35 @@ def native(code: str) -> str:
 class Byline(KaamikiDirective, motion=True):
     """The `byline` directive.
 
-    Put it on the page itself, one time. An `only` is part of the page.
-    A container and the content of a different directive are not.
-
     Options::
 
-        - `avatar`: The URL of the author's picture.
-        - `target`: The link of the name, as a profile or a mailto. A
-          path starts at the top of the site, as for `avatar` and
+        - `avatar`: The URL of the picture of the author.
+        - `target`: The link of the name, as a profile or a mailto.
+          A path starts at the top of the site, as for `avatar` and
           `backdrop`.
-        - `backdrop`: One or more image URLs, with a comma between each.
-          They fade one into the next behind the title.
-        - `avatar-size`: The width and height of the picture in pixels,
-          from 16 to 64. The default is 20.
-        - `interval`: The seconds that each backdrop shows, from 2 to 15.
-          It needs two or more `backdrop` pictures. The default is 7.
-        - `align`: Where the byline is, `left`, `center` or `right`. Only
-          `left` puts the author, the reading time, the language and the
-          copy button in one row. On a phone, that row shows only the
-          author and the reading time. The default is `left`.
+        - `backdrop`: One or more image URLs, with a comma between
+          each. They fade one into the next behind the title.
+        - `avatar-size`: The width and height of the picture in
+          pixels, from 16 to 64. The default is 20.
+        - `interval`: The seconds that each backdrop shows, from 2
+          to 15. It needs two or more `backdrop` pictures. The
+          default is 7.
+        - `align`: Where the byline is, `left`, `center` or
+          `right`. Only `left` puts the author, the reading time,
+          the language and the copy button in one row. On a phone,
+          that row shows only the author and the reading time. The
+          default is `left`.
         - `hide-reading-time`: Do not show the reading time.
         - `hide-copy-url`: Do not show the copy button.
-        - `hide-source`: Do not show the link to the plain-text source
-          of the page. Without it, the link shows when `html_copy_source`
-          and `html_show_sourcelink` are on.
+        - `hide-source`: Do not show the link to the plain-text
+          source of the page. Without it, the link shows when
+          `html_copy_source` and `html_show_sourcelink` are on.
         - `show-language`: Show the language of the page. It is the
-          `:km-page-language:` field of the page, or the `language` of
-          the Sphinx configuration when the page has no field.
-        - `speed`: The speed of its motion, relative to the site, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
-          two times as fast.
+          `:km-page-language:` field of the page, or the `language`
+          of the Sphinx configuration when the page has no field.
+        - `speed`: The speed of its motion, relative to the site,
+          one of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or
+          `4`. `2` is two times as fast.
         - `no-motion`: Do not move it.
         - `name`: A name for links.
         - `class`: More classes for the byline.
@@ -173,16 +176,14 @@ class Byline(KaamikiDirective, motion=True):
             self.fail(":avatar-size: needs an avatar")
 
     def build(self) -> list[nodes.Node]:
-        """Keep what the page writes on the node and name the author.
-
-        The `visit` function adds the rest from
-        `kaamiki.conf.site.project`. The name also becomes the author of
-        the page, if its `.. Author:` comment does not name one first.
-        The first backdrop is a fallback for the social image of the
-        page.
+        """Keep the values on the node, and name the author.
 
         :return: The node, the `raw` nodes from `trail` for the link
-            checker and what the parser reported.
+            checker, and what the parser reported. `visit` adds the
+            rest from `kaamiki.conf.site.project`. The name also
+            becomes the author of the page, if its `.. Author:` comment
+            names none. The first backdrop is a fallback for the social
+            image of the page.
         """
         written = self.arguments.pop().strip()
         options = self.options
@@ -208,10 +209,10 @@ class Byline(KaamikiDirective, motion=True):
 
     @staticmethod
     def plain(node: Byline.Node) -> list[nodes.Node]:
-        """Write a byline as words, for a builder that writes no HTML.
+        """Write a byline as words, for a builder without HTML.
 
-        :param node: The byline's node.
-        :return: A paragraph with the author's name.
+        :param node: The node of the byline.
+        :return: A paragraph with the name of the author.
         """
         author = next(
             each for each in node.children if isinstance(each, phrase)
@@ -268,17 +269,16 @@ def html_page_context(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Name the page's author for the `<head>`.
+    """Name the author of the page for the `<head>`.
 
-    The `.. Author:` comment or the byline wins, then the project's
-    author.
-
-    :param app: The Sphinx application instance.
-    :param pagename: The page being rendered.
-    :param templatename: The template rendering it.
-    :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
+    :param app: The Sphinx application instance. The `.. Author:`
+        comment or the byline comes first, then the author of the
+        project.
+    :param pagename: The page that is written.
+    :param templatename: The template that writes it.
+    :param context: The context of the page, changed in place.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del pagename, templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
