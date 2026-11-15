@@ -15,6 +15,7 @@ https://docutils.sourceforge.io/docs/ref/rst/directives.html#common-options
 
 from __future__ import annotations
 
+import difflib
 import os.path as p
 import re
 import typing as t
@@ -28,6 +29,7 @@ from sphinx.util import docname_join
 from sphinx.util.docutils import SphinxDirective
 
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils.settings import Settings
 from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.templates import render
 
@@ -644,7 +646,7 @@ class Option:
 
     def __init__(
         self,
-        check: Callable[[str | None], t.Any],
+        check: Callable[[str | None], t.Any] | None = None,
         *,
         needs: str = "",
         setting: str = "",
@@ -653,6 +655,8 @@ class Option:
         """Keep how the option is checked.
 
         :param check: The function that checks the value as written.
+            An option with a setting has none, as it takes the `read`
+            of the setting.
         :param needs: The option that must also be there, as
             `subheader`.
         :param setting: The site setting that gives the value when the
@@ -660,7 +664,7 @@ class Option:
         :param default: The value when the option and the setting are
             absent.
         """
-        self.check = check
+        self.given = check
         self.needs = needs
         self.setting = setting
         self.default = default
@@ -674,19 +678,50 @@ class Option:
         """
         self.name = name.replace("_", "-")
 
+    @property
+    def check(self) -> Callable[[str | None], t.Any]:
+        """The function that checks the value as written."""
+        if self.given is not None:
+            return self.given
+        return t.cast(
+            "Callable[[str | None], t.Any]",
+            Settings.schema[self.setting].read,
+        )
+
     @classmethod
     def of(cls, owner: type) -> dict[str, Option]:
         """Collect the options of a class and of its parents.
 
         :param owner: The directive or the role.
         :return: Each option by its name in rST.
+        :raises TypeError: For a setting that is not a Kaamiki setting
+            or that rST cannot give, and for an option without a check
+            and without a setting.
         """
-        return {
+        found = {
             each.name: each
             for base in reversed(owner.__mro__)
             for each in vars(base).values()
             if isinstance(each, cls)
         }
+        for name, each in found.items():
+            where = f"{owner.__qualname__}: option :{name}:"
+            value = Settings.schema.get(each.setting)
+            if each.setting and value is None:
+                near = difflib.get_close_matches(
+                    each.setting, Settings.schema, n=1
+                )
+                raise TypeError(
+                    f"{where} expected a Kaamiki setting, got"
+                    f" {each.setting!r}"
+                    + (f"; did you mean {near[0]!r}?" if near else "")
+                )
+            if each.given is None and (value is None or value.read is None):
+                raise TypeError(
+                    f"{where} expected a check or a setting that rST text"
+                    " can give, got neither"
+                )
+        return found
 
     @staticmethod
     def documented(owner: type, names: Iterable[str]) -> None:
