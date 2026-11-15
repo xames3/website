@@ -12,13 +12,16 @@ A `video` directive that embeds a video in the page::
        :autoplay:
        :caption: A short clip.
 
-The caption is parsed as rST. More sources, a poster and subtitles
-go in options. Here the files are yours, in `html_static_path`::
+The caption is parsed as rST. More sources, a poster and subtitles go
+in options. Here the files are yours, in `html_static_path`::
 
     .. video:: _static/clip.mp4
        :sources: _static/clip.webm
        :poster: _static/clip.png
        :track: en=_static/clip.en.vtt, hi=_static/clip.hi.vtt
+
+A phone plays the video in the page. Its controls have a button for
+full screen.
 """
 
 from __future__ import annotations
@@ -76,9 +79,9 @@ TRACKS: t.Final[int] = 8
 
 
 def extension(url: str) -> str:
-    """Read the extension off a video's address.
+    """Read the extension of the address of a video.
 
-    :param url: The address or path, as written.
+    :param url: The address or the path, as written.
     :return: The extension in lower case with its dot, or nothing.
     """
     return p.splitext(urlsplit(url).path)[1].lower()
@@ -92,31 +95,29 @@ class Video(KaamikiDirective):
         - `autoplay`: Play the video, without sound, when it loads.
           `muted` is on already.
         - `caption`: A line of text below the video, parsed as rST.
-        - `type`: The MIME type of the video, when its extension does not
-          tell it. It must agree with an extension that Kaamiki knows.
-          Without it, a `.mov` is `video/mp4`. It can be
-          `video/quicktime`.
-        - `sources`: More files of the same video, with a comma between
-          each, for browsers that cannot play the first file.
-        - `poster`: The picture that shows until the video plays, as an
-          address or a path of a `.jpg`, `.png`, `.webp`, `.avif`,
-          `.gif` or `.svg`.
-        - `preload`: How much the browser gets before the video plays,
-          `none`, `metadata` or `auto`. You cannot use `none` with
-          `autoplay`.
+        - `type`: The MIME type of the video, when its extension
+          does not tell it. It must agree with an extension that
+          Kaamiki knows. Without it, a `.mov` is `video/mp4`. It
+          can be `video/quicktime`.
+        - `sources`: More files of the same video, with a comma
+          between each, for browsers that cannot play the first
+          file.
+        - `poster`: The picture that shows until the video plays,
+          as an address or a path of a `.jpg`, `.png`, `.webp`,
+          `.avif`, `.gif` or `.svg`.
+        - `preload`: How much the browser gets before the video
+          plays, `none`, `metadata` or `auto`. You cannot use
+          `none` with `autoplay`.
         - `loop`: Play it again and again.
         - `muted`: Start without sound.
-        - `hide-controls`: Do not show the controls of the player. It
-          needs `autoplay`, because without controls nothing can play
-          the video.
-        - `track`: Captions, as `language=file`, with a comma between
-          each, to a maximum of 8. Each language and each file can
-          occur only one time.
+        - `hide-controls`: Do not show the controls of the player.
+          It needs `autoplay`, because without controls nothing can
+          play the video.
+        - `track`: Captions, as `language=file`, with a comma
+          between each, to a maximum of 8. Each language and each
+          file can occur only one time.
         - `name`: A name for links.
         - `class`: More classes for the video.
-
-    A phone plays the video in the page. Its controls have a button for
-    full screen.
     """
 
     required_arguments = 1
@@ -136,10 +137,10 @@ class Video(KaamikiDirective):
         """The video and its parsed caption, which `visit` writes."""
 
     def build(self) -> list[nodes.Node]:
-        """Parse the caption and return the video's node.
+        """Parse the caption and give the node of the video.
 
-        :return: The node, followed by the `raw` node `trail` returns
-            for the link checker and anything the caption reported.
+        :return: The node, the `raw` node from `trail` for the link
+            checker, and what the caption reported.
         """
         options = self.options
         url = self.address(self.arguments.pop(), options.get("type"))
@@ -247,15 +248,15 @@ class Video(KaamikiDirective):
         kind: str | None = None,
         where: str = "the address",
     ) -> str:
-        """Check a video's address and that it says what it is.
+        """Check the address of a video, and that it tells its type.
 
         :param argument: The address as written.
-        :param kind: The MIME type the directive gives it, if one.
-        :param where: What the address was written as.
+        :param kind: The MIME type from the directive, if it gives one.
+        :param where: How the address was written.
         :return: The address.
-        :raises rst.DirectiveError: For one that isn't an address or a
-            video file the extension doesn't say so and no `:type:`
-            does.
+        :raises rst.DirectiveError: For a value that is not an address,
+            or a video file whose extension does not tell its type when
+            no `:type:` does.
         """
         try:
             found = checks.link(argument, schemes=("http", "https"))
@@ -269,11 +270,10 @@ class Video(KaamikiDirective):
         return shipped(self, found, where)
 
     def player(self) -> dict[str, str | None]:
-        """Work out the attributes the `<video>` tag is written with.
+        """Find the attributes of the `<video>` tag.
 
-        An empty value is how a boolean attribute is written.
-
-        :return: The attributes, with `None` for the ones to leave out.
+        :return: The attributes, with `None` for those to leave out. An
+            empty value is how a boolean attribute is written.
         """
         options = self.options
         autoplay = "autoplay" in options
@@ -289,11 +289,12 @@ class Video(KaamikiDirective):
 
     @staticmethod
     def plain(node: Video.Node) -> list[nodes.Node]:
-        """Write a video as words, for a builder that writes no HTML.
+        """Write a video as words, for a builder without HTML.
 
-        :param node: The video's node.
-        :return: A paragraph with its caption, when it has one, and one
-            with the video's address, written as a link to itself.
+        :param node: The node of the video.
+        :return: A paragraph with its caption, when it has one, and a
+            paragraph with the address of the video as a link to
+            itself.
         """
         found: list[nodes.Node] = [
             nodes.paragraph("", "", *each.children)
@@ -308,12 +309,12 @@ class Video(KaamikiDirective):
 def prepare(
     self: HTMLTranslator, attributes: dict[str, t.Any]
 ) -> dict[str, t.Any]:
-    """Turn the paths the video was given into addresses.
+    """Change the paths of the video into addresses.
 
-    :param self: The HTML translator writing the page.
-    :param attributes: The node's attributes.
-    :return: A copy of them with the sources, captions and poster
-        resolved against the page.
+    :param self: The HTML translator that writes the page.
+    :param attributes: The attributes of the node.
+    :return: A copy of them, with the sources, the captions and the
+        poster resolved against the page.
     """
     found = dict(attributes)
     found["sources"] = [

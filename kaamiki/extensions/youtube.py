@@ -12,11 +12,12 @@ A `youtube` directive that embeds a video in the page::
        :start: 90
        :caption: What it's about.
 
-The player loads when it's clicked and comes from
-`youtube-nocookie.com`, unless the site's
-`kaamiki.conf.youtube.click_to_load` and
-`kaamiki.conf.youtube.privacy` say otherwise. The picture it shows
-until then is the video's own either way.
+The argument is the link of a YouTube video, or only its id. The
+player loads when a reader clicks it, and it comes from
+`youtube-nocookie.com`, unless `kaamiki.conf.youtube.click_to_load`
+and `kaamiki.conf.youtube.privacy` of the site are off. Until then, it
+shows the picture of the video. The link checker gets that picture, so
+`linkcheck` fails and names a video that is deleted or private.
 """
 
 from __future__ import annotations
@@ -50,10 +51,10 @@ SECONDS: t.Final[tuple[float, float]] = BOUNDS["start"]
 def language(argument: str | None) -> str:
     """Check the language of the player and its captions.
 
-    :param argument: The code as written, like `en` or `pt-BR`.
+    :param argument: The code as written, as `en` or `pt-BR`.
     :return: The code.
-    :raises ValueError: When it isn't a language code Babel knows or
-        isn't written with a `-`, the way YouTube reads it.
+    :raises ValueError: When it is not a language code that Babel
+        knows, or it is not written with a `-`, as YouTube reads it.
     """
     code = checks.language(argument)
     if not checks.LOCALE.fullmatch(code):
@@ -66,38 +67,38 @@ def language(argument: str | None) -> str:
 class Youtube(KaamikiDirective):
     """The `youtube` directive.
 
-    The argument is the link of a YouTube video, or only its id. The
-    link checker gets the picture of the video, so `linkcheck` fails and
-    names a video that is deleted or private.
-
     Options::
 
-        - `autoplay`: Play the video, without sound, when it loads. The
-          player loads immediately, so you cannot use `click-to-load` or
-          `auto-load` with it. `muted` is on already.
+        - `autoplay`: Play the video, without sound, when it loads.
+          The player loads immediately, so you cannot use
+          `click-to-load` or `auto-load` with it. `muted` is on
+          already.
         - `closed-captions`: Show the closed captions.
-        - `caption`: A line of text below the player, parsed as rST.
-        - `start`: The second to start from, 1 to 10800. Without it, the
-          `t=` of a pasted link sets it.
+        - `caption`: A line of text below the player, parsed as
+          rST.
+        - `start`: The second to start from, 1 to 10800. Without
+          it, the `t=` of a pasted link sets it.
         - `end`: The second to stop at, 1 to 10800, after `start`.
-        - `privacy`: Embed from `youtube-nocookie.com`. The picture of a
-          click-to-load player stays the picture of the video. It is on
-          by default, so use it only on a site with
+        - `privacy`: Embed from `youtube-nocookie.com`. The picture
+          of a click-to-load player stays the picture of the video.
+          It is on by default, so use it only on a site with
           `kaamiki.conf.youtube.privacy` off.
         - `no-privacy`: Embed from `youtube.com` when
           `kaamiki.conf.youtube.privacy` of the site is on.
-        - `hide-controls`: Do not show the controls of the player. It
-          needs `autoplay`, because without controls nothing can play
-          the video.
+        - `hide-controls`: Do not show the controls of the player.
+          It needs `autoplay`, because without controls nothing can
+          play the video.
         - `loop`: Play it again and again.
-        - `muted`: Start without sound. `autoplay` does this already.
+        - `muted`: Start without sound. `autoplay` does this
+          already.
         - `player-language`: The language of the player and of the
           captions, as a code, as `en` or `pt-BR`.
-        - `ratio`: The shape of the player, `16:9`, `4:3`, `21:9`, `1:1`
-          or `9:16`. The default is `16:9`.
-        - `click-to-load`: Show the picture of the video, and load the
-          player when a reader clicks it. It is on by default, so use it
-          only on a site with `kaamiki.conf.youtube.click_to_load` off.
+        - `ratio`: The shape of the player, `16:9`, `4:3`, `21:9`,
+          `1:1` or `9:16`. The default is `16:9`.
+        - `click-to-load`: Show the picture of the video, and load
+          the player when a reader clicks it. It is on by default,
+          so use it only on a site with
+          `kaamiki.conf.youtube.click_to_load` off.
         - `auto-load`: Load the player with the page when
           `kaamiki.conf.youtube.click_to_load` of the site is on.
         - `name`: A name for links.
@@ -127,15 +128,15 @@ class Youtube(KaamikiDirective):
     def switch(
         self, on: str, off: str, site: object, setting_name: str
     ) -> bool:
-        """Work out whether a setting a site can set is on for a player.
+        """Find whether a setting of the site is on for a player.
 
-        :param on: The option that turns it on, like `privacy`.
-        :param off: The option that turns it off, like `no-privacy`.
+        :param on: The option that sets it on, as `privacy`.
+        :param off: The option that sets it off, as `no-privacy`.
         :param site: Whether the site has it on.
-        :param setting_name: The site's setting, for the message.
-        :return: Whether it's on for this player.
-        :raises rst.DirectiveError: For both options at once and for
-            one that changes nothing, as the site has it that way
+        :param setting_name: The setting of the site, for the message.
+        :return: `True` when it is on for this player.
+        :raises rst.DirectiveError: For the two options together, or
+            for an option that changes nothing because the site has it
             already.
         """
         turned_on, turned_off = on in self.options, off in self.options
@@ -148,10 +149,10 @@ class Youtube(KaamikiDirective):
         return turned_on or (bool(site) and not turned_off)
 
     def build(self) -> list[nodes.Node]:
-        """Build the embed URL and return the player's node.
+        """Make the embed URL and give the node of the player.
 
-        :return: The node, followed by the `raw` node `trail` returns
-            for the link checker and anything the caption reported.
+        :return: The node, the `raw` node from `trail` for the link
+            checker, and what the caption reported.
         """
         src = self.arguments.pop().strip()
         vid = youtube_id(src)
@@ -254,11 +255,12 @@ class Youtube(KaamikiDirective):
 
     @staticmethod
     def plain(node: Youtube.Node) -> list[nodes.Node]:
-        """Write a player as words, for a builder that writes no HTML.
+        """Write a player as words, for a builder without HTML.
 
-        :param node: The player's node.
-        :return: A paragraph with its caption, when it has one, and one
-            with the video's address, written as a link to itself.
+        :param node: The node of the player.
+        :return: A paragraph with its caption, when it has one, and a
+            paragraph with the address of the video as a link to
+            itself.
         """
         found: list[nodes.Node] = [
             nodes.paragraph("", "", *each.children)

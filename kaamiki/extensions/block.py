@@ -6,14 +6,24 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
 Last updated on: 15 November 2026
 
-A `block` directive that frames a title and some content, which
-can link somewhere::
+A `block` directive that frames a title and some content, which can
+link to a different page::
 
     .. block:: Getting started
        :subheader: A short guide
        :target: https://example.com/guide
 
        Everything you need to set up and start writing.
+
+The argument is the title, and the lines below it are the content. A
+block can have only one of `target`, `doc` and `ref`. Then the full
+block is one link, so the build stops when it holds an `accordion`,
+`carousel`, `embed`, `tabs`, `video` or `youtube`. A block cannot hold
+a block, and a block that is not `large` cannot hold columns. Blocks
+of the same `size`, one after the other, make a row. Blocks in a
+column, at all depths, do not make rows, and each is as wide as the
+column. A `large` block is a row by itself, and a block of a different
+size starts a new row.
 """
 
 from __future__ import annotations
@@ -65,31 +75,21 @@ class Block(KaamikiDirective):
 
     Options::
 
-        - `preheader`: A small line above the title. It can have roles,
-          as `:fa-icon:regular:`heart` Love`.
+        - `preheader`: A small line above the title. It can have
+          roles, as `:fa-icon:regular:`heart` Love`.
         - `subheader`: A smaller line below the title.
         - `footer`: Text at the bottom, written as `preheader`.
         - `target`: An address. The full block is a link to it.
-        - `doc`: A document, named as `:doc:` names it. The full block
-          is a link to it.
+        - `doc`: A document, named as `:doc:` names it. The full
+          block is a link to it.
         - `ref`: A label, named as `:ref:` names it. Capitals and
-          spaces do not change the label. The full block is a link to
-          it.
-        - `size`: The width when blocks are side by side, `small` for
-          three in a row, `medium` for two or `large` for one. The
-          default is `large`.
+          spaces do not change the label. The full block is a link
+          to it.
+        - `size`: The width when blocks are next to each other,
+          `small` for three in a row, `medium` for two or `large`
+          for one. The default is `large`.
         - `name`: A name for links.
         - `class`: More classes for the block.
-
-    The argument is the title, and the lines below it are the content.
-    A block can have only one of `target`, `doc` and `ref`. Then the
-    full block is one link, so the build stops when it holds an
-    `accordion`, `carousel`, `embed`, `tabs`, `video` or `youtube`. A
-    block cannot hold a block, and a block that is not `large` cannot
-    hold columns. Blocks of the same `size`, one after the other, make
-    a row. Blocks in a column, at all depths, do not make rows. Each
-    block is as wide as the column. A `large` block is a row by itself,
-    and a block of a different size starts a new row.
     """
 
     has_content = True
@@ -142,8 +142,8 @@ class Block(KaamikiDirective):
 
         :return: The block or its row, then what the parser reported. A
             block that joins the row before it gives only what the
-            parser reported. A row in a column comes apart when the page
-            is read, see `unrow`.
+            parser reported. A row in a column comes apart when the
+            page is read, see `unrow`.
         """
         kind = self.kind
         link = getattr(self, kind) if kind else ""
@@ -224,11 +224,11 @@ def address(
 
 
 def anchor(self: HTMLTranslator, node: Block.Node) -> str:
-    """Write a block's link.
+    """Write the link of a block.
 
     :param self: The HTML translator.
-    :param node: The block's node.
-    :return: The link, which covers the whole block.
+    :param node: The node of the block.
+    :return: The link, which covers all of the block.
     """
     href, new_tab = address(
         self, "block", node["kind"], node["link"], location(node)
@@ -248,7 +248,7 @@ def visit(self: HTMLTranslator, node: Block.Node) -> None:
     """Open the block.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The block's node.
+    :param node: The node of the block.
     """
     modifiers = [] if node["size"] == "large" else [f"size-{node['size']}"]
     if node["link"]:
@@ -258,10 +258,10 @@ def visit(self: HTMLTranslator, node: Block.Node) -> None:
 
 @html.closes(Block.Node)
 def depart(self: HTMLTranslator, node: Block.Node) -> None:
-    """Close the block, with its link as the last thing in it.
+    """Close the block, with its link as the last item in it.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The block's node.
+    :param node: The node of the block.
     """
     if node["link"]:
         self.body.append(anchor(self, node))
@@ -273,7 +273,7 @@ def visit_shelf(self: HTMLTranslator, node: Shelf) -> None:
     """Open a row of blocks.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The row's node.
+    :param node: The node of the row.
     """
     self.body.append(self.starttag(node, "div", "", CLASS=row()))
 
@@ -284,7 +284,7 @@ def visit_piece(self: HTMLTranslator, node: Part | BlockText) -> None:
     """Open a part of a block, or a line of its text.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The part's or the line's node.
+    :param node: The node of the part or of the line.
     """
     classes = getattr(block, node["role"])()
     self.body.append(self.starttag(node, "div", "", CLASS=classes))
@@ -297,12 +297,11 @@ html.closes(BlockText, "</div>")
 
 @on("doctree-read")
 def unrow(app: Sphinx, doctree: nodes.document) -> None:
-    """Take the blocks out of the rows that sit in a column.
-
-    A column lays out its blocks, however deep they are in it.
+    """Take the blocks out of the rows in a column.
 
     :param app: The Sphinx application instance (unused).
-    :param doctree: The page, just read.
+    :param doctree: The page, just read. A column lays out its blocks,
+        at all depths.
     """
     del app
     for found in list(doctree.findall(Shelf)):
