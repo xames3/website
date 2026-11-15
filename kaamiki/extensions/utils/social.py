@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The handler that works out a page's Open Graph and Twitter values.
+The handler that finds the Open Graph and Twitter values of a page.
 """
 
 from __future__ import annotations
@@ -37,14 +37,12 @@ ATTRIBUTE: t.Final[re.Pattern[str]] = re.compile(r'([\w:-]+)="([^"]*)"')
 
 
 def generated(pagename: str) -> tuple[str, str] | None:
-    """Name and describe a page Sphinx writes without a source file.
+    """Name and describe a page that Sphinx writes without a source.
 
-    The words are looked up on every call, since Kaamiki's own words
-    only join Sphinx's catalogue once it's set up.
-
-    :param pagename: The page being rendered.
-    :return: Its title and description or `None` for a page with a
-        source of its own.
+    :param pagename: The page that is written.
+    :return: Its title and description, or `None` for a page with its
+        own source. The words are found on each call, because the words
+        of Kaamiki join the catalogue of Sphinx only after setup.
     """
     pages = {
         NOT_FOUND: (
@@ -61,11 +59,11 @@ def generated(pagename: str) -> tuple[str, str] | None:
 
 
 def written(context: dict[str, t.Any]) -> str:
-    """Find the description the page's own `.. meta::` gives.
+    """Find the description in the `.. meta::` of the page.
 
-    :param context: The page's rendering context, whose `metatags` hold
-        the tags `.. meta::` wrote, as HTML.
-    :return: The description, or an empty string when there isn't one.
+    :param context: The context of the page, whose `metatags` hold the
+        tags of `.. meta::` as HTML.
+    :return: The description, or an empty string when there is none.
     """
     for tag in META.findall(context.get("metatags") or ""):
         found = dict(ATTRIBUTE.findall(tag))
@@ -82,28 +80,23 @@ def social_metadata(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Work out the Open Graph and Twitter values for a page.
+    """Find the Open Graph and Twitter values of a page.
 
-    The title is the page's `:km-page-title:` field, or else its own
-    title. The description is the one the page's own `.. meta::` gives,
-    then the `:km-page-description:` field, the page's lead, the words
-    of a generated page, the site's `description` and last the page's
-    first paragraph. Only the title arrives as rendered HTML, so only
-    it's stripped of tags.
-
-    The image is the page's `:km-page-image:` field, then its
-    `:km-page-backdrop:`, which the first `:backdrop:` of a `byline`
-    sets, and last the site's `image`.
-
-    Relative image paths are made absolute, since link previews ignore
-    them.
-
-    :param app: The Sphinx application instance.
-    :param pagename: The page being rendered.
-    :param templatename: The template rendering it.
-    :param context: The page's rendering context, updated in place.
-    :param doctree: The resolved doctree or `None` for generated
-        pages.
+    :param app: The Sphinx application instance. The title is
+        `:km-page-title:`, else the title of the page. The description
+        is the `.. meta::` of the page, then `:km-page-description:`,
+        the lead, the words of a generated page, the `description` of
+        the site, and the first paragraph. Only the title arrives as
+        HTML, so only it loses its tags. The image is
+        `:km-page-image:`, then `:km-page-backdrop:` (from the first
+        `:backdrop:` of a `byline`), then the `image` of the site. A
+        relative image path becomes absolute, because link previews
+        ignore relative paths.
+    :param pagename: The page that is written.
+    :param templatename: The template that writes it.
+    :param context: The context of the page, changed in place.
+    :param doctree: The resolved doctree, or `None` for a generated
+        page.
     """
     del templatename
     options = values(app.config).site.open_graph

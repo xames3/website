@@ -6,7 +6,8 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
 Last updated on: 15 November 2026
 
-The classes an author writes in rST and the BEM classes they become.
+The classes that an author writes in rST, and the BEM classes that
+they become.
 """
 
 from __future__ import annotations
@@ -43,7 +44,7 @@ ALIASES: t.Final[Mapping[str, str]] = MappingProxyType(
 
 @on("doctree-read", priority=50)
 def spell(app: Sphinx, doctree: nodes.document) -> None:
-    """Swap each alias on a page for the BEM class it stands for.
+    """Change each alias on a page into its BEM class.
 
     :param app: The Sphinx application instance.
     :param doctree: The page, just read.

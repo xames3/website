@@ -614,7 +614,7 @@ def supervise(
 
     :param process: The runner.
     :param before: The processes of the build from before the runner
-        started, which are not the snippet's.
+        started, which are not of the snippet.
     :param timeout: How long it can run, in seconds.
     :param memory_limit: The bytes of memory that it can use with its
         children. The resident size is read each `POLL` seconds, also
@@ -732,7 +732,7 @@ def remember(folder: str, key: str, trace: Trace) -> None:
 
 
 def adopt(*, on: bool) -> None:
-    """Make the build adopt the orphans of the snippet's processes.
+    """Make the build adopt the orphans of the snippet.
 
     :param on: Whether to adopt them, with `PR_SET_CHILD_SUBREAPER`.
         Then a child that leaves its parent stays for the build to find
@@ -871,7 +871,7 @@ def reap(process: subprocess.Popen[bytes], before: set[int]) -> None:
         so that none starts another. When `ps` and `/proc` both fail,
         only the group is stopped.
     :param before: The processes of the build from before the runner
-        started, which are not the snippet's.
+        started, which are not of the snippet.
     """
     me = os.getpid()
     stopped: set[int] = set()
