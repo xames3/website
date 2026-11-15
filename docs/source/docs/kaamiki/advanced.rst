@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 28 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 15 November 2026
 
 :km-page-title: Advanced Kaamiki
 :km-page-description: What a Sphinx author who wants more control needs to
@@ -408,8 +408,9 @@ Everything else
 ^^^^^^^^^^^^^^^
 
 Builders
-    HTML is what Kaamiki is for. ``html``, ``dirhtml`` and ``singlehtml`` are
-    the ones it styles.
+    HTML is what Kaamiki is for. It takes ``html``, ``dirhtml`` and
+    ``linkcheck``. Any other builder, like ``singlehtml``, ``epub`` or
+    ``latex``, stops the build.
 
 Parallel builds
     ``-j`` is safe, and a page is read again when a setting that shapes it
