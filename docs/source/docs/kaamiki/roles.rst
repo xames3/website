@@ -390,11 +390,14 @@ for a style, ``fa-icon:duotone``, ``fa-icon:sharp`` or
 ``fa-icon:sharp-duotone`` for a Pro family, and one role for each
 :ref:`Pro+ pack <kaamiki-roles-fa-icon-packs>`, like ``fa-icon:jelly``. A plain
 ``fa-icon`` draws in the site's ``kaamiki.conf.icons.style``, which is
-``regular`` unless you change it. An
-icon in the middle of a sentence sits between its words like a word does, so
-the spaces you type around it are its spacing. One that starts or ends a line
-is held further from its text, and a full stop right after it still touches it.
-The :doc:`icons example <examples/icons>` shows every place an icon can go:
+``regular`` unless you change it. A role can also name a family and then a
+style, the family first, like ``fa-icon:sharp:light`` or
+``fa-icon:duotone:thin``. A family takes only its own styles, so
+``fa-icon:jelly:solid`` stops the build. An icon in the middle of a sentence
+sits between its words like a word does, so the spaces you type around it are
+its spacing. One that starts or ends a line is held further from its text, and
+a full stop right after it still touches it. The :doc:`icons example
+<examples/icons>` shows every place an icon can go:
 
 .. columns:: 2
     :gap: medium
@@ -432,6 +435,22 @@ The :doc:`icons example <examples/icons>` shows every place an icon can go:
         .. code-block:: rst
 
             Add a :fa-icon:`star km-tone--yellow` star.
+
+    .. column::
+
+        Go :fa-icon:sharp:light:`house` home.
+
+        .. code-block:: rst
+
+            Go :fa-icon:sharp:light:`house` home.
+
+    .. column::
+
+        A :fa-icon:duotone:thin:`bolt km-tone--blue` thin spark.
+
+        .. code-block:: rst
+
+            A :fa-icon:duotone:thin:`bolt km-tone--blue` thin spark.
 
 
 
