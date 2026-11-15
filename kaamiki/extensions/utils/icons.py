@@ -8,7 +8,8 @@ Last updated on: 15 November 2026
 
 Each icon that Kaamiki draws, as a Pro icon and its Free replacement.
 A site with a Font Awesome kit gets the Pro icons, in its
-`kaamiki.conf.icons.style`. A site without a kit gets the Free icons,
+`kaamiki.conf.icons.style`, and the Pro+ packs that the kit has, as
+`fa-jelly`. A site without a kit gets the Free icons,
 which are fewer and come in three styles: `solid`, `regular` and
 `brands`. Each icon that Kaamiki writes in a page comes from `Icons`,
 which knows which of the two the site has. The names that Font Awesome
@@ -33,13 +34,6 @@ if t.TYPE_CHECKING:
 
 DEFAULT_STYLE: t.Final[str] = "regular"
 KIT_VARIABLE: t.Final[str] = "KAAMIKI_FA_KIT"
-STYLE_ALIASES: t.Final[dict[str, str]] = {
-    "fab": "brands",
-    "fal": "light",
-    "far": "regular",
-    "fas": "solid",
-    "fat": "thin",
-}
 REGULAR_FIRST: t.Final[frozenset[str]] = frozenset(
     {"light", "regular", "thin"}
 )
@@ -274,7 +268,7 @@ def split(spec: str) -> tuple[list[str], str | None, str, list[str]]:
         families.append(parts.pop(0))
     if len(parts) > 1 and parts[0] in checks.STYLES:
         token = parts.pop(0)
-        style = STYLE_ALIASES.get(token) or token.removeprefix("fa-")
+        style = checks.STYLE_NAMES[token]
     name, *extras = parts
     return families, style, name.removeprefix("fa-"), extras
 
@@ -333,30 +327,56 @@ class Icons:
         """Write an icon in full, as the site can draw it.
 
         :param spec: The icon as `checks.icon` reads it. An icon
-            without a style takes the style of the site. With a kit, an
-            icon with a family and no style, as `fa-sharp fa-house`,
-            keeps the default of Font Awesome, `solid`.
-        :return: With a kit, the icon in its style or the style of the
-            site. Without a kit, the Free icon for it, in the style of
-            the site where Free has the two styles, else in its only
-            style.
+            without a style takes the style that `default` gives.
+        :return: With a kit, the icon in its style. Without a kit, the
+            Free icon for it, in the style that `nearest` gives where
+            Free has the two styles, else in its only style.
         :raises ValueError: When there is no kit and Free has no icon
             of that name and no replacement.
         """
         families, style, name, extras = split(spec)
+        style = style or self.default(families, name)
         if self.kit:
-            if style is None and not families:
-                style = "brands" if self.only_brand(name) else self.style
             head = [*families, *([f"fa-{style}"] if style else [])]
             return " ".join([*head, f"fa-{name}", *extras])
-        if style is None:
-            style = "brands" if self.only_brand(name) else self.style
-        if families:
-            style = "solid"
-        found = free_classes(style, name)
+        found = free_classes(self.nearest(families, style), name)
         if found is None:
             raise ValueError(self.refusal(name))
         return " ".join([found, *extras])
+
+    def default(self, families: list[str], name: str) -> str | None:
+        """Find the style of an icon that names no style.
+
+        :param families: The families of the icon, as written.
+        :param name: The name of the icon without `fa-`.
+        :return: For no family or `fa-classic`, the style of the site,
+            or `brands` for a name that is only a brand. For a Pro+
+            pack, its one style, as `regular` for `fa-jelly`. Else
+            `None`, because a short family as `fajr` has its style, and
+            Font Awesome draws `fa-sharp` and `fa-duotone` in `solid`.
+        """
+        if not families:
+            return "brands" if self.only_brand(name) else self.style
+        family, fixed = checks.FAMILY_NAMES[families[0]]
+        styles = checks.FAMILY_STYLES[family]
+        if family == "classic":
+            return self.style
+        return next(iter(styles)) if not fixed and len(styles) == 1 else None
+
+    @staticmethod
+    def nearest(families: list[str], style: str | None) -> str:
+        """Find the Free style that is nearest to an icon.
+
+        :param families: The families of the icon, as written.
+        :param style: The style of the icon, or `None`.
+        :return: The style for no family or `fa-classic`. The one style
+            of a Pro+ pack. Else `solid`, as for `fa-sharp`.
+        """
+        family = checks.FAMILY_NAMES[families[0]][0] if families else ""
+        styles = checks.FAMILY_STYLES.get(family, {})
+        if family in ("", "classic"):
+            return style or "solid"
+        return next(iter(styles)) if len(styles) == 1 else "solid"
 
     @staticmethod
     def only_brand(name: str) -> bool:
