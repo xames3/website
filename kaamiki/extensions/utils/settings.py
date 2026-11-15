@@ -432,12 +432,12 @@ def button(value: t.Any) -> None:
     )(value)
 
 
-class Value:
+class Value[T]:
     """A Kaamiki setting, read as an attribute of its group."""
 
     def __init__(
         self,
-        default: t.Any,
+        default: T,
         rule: Rule | None = None,
         *,
         choices: tuple[str, ...] = (),
@@ -478,10 +478,10 @@ class Value:
         self.attr = name
 
     @t.overload
-    def __get__(self, group: None, owner: type) -> Value: ...
+    def __get__(self, group: None, owner: type) -> Value[T]: ...
 
     @t.overload
-    def __get__(self, group: Settings, owner: type) -> t.Any: ...
+    def __get__(self, group: Settings, owner: type) -> T: ...
 
     def __get__(self, group: Settings | None, owner: type) -> t.Any:
         """Read what the site set, or the default of the setting.
@@ -512,7 +512,7 @@ class Value:
 class Settings:
     """A group of Kaamiki's settings, as `kaamiki.conf.show`."""
 
-    schema: t.ClassVar[dict[str, Value]] = {}
+    schema: t.ClassVar[dict[str, Value[t.Any]]] = {}
     groups: t.ClassVar[dict[str, type[Settings]]] = {}
     name: t.ClassVar[str]
     given: dict[str, t.Any]
@@ -556,7 +556,7 @@ class Settings:
         Settings.groups[cls.name] = cls
 
     @classmethod
-    def values(cls) -> list[Value]:
+    def values(cls) -> list[Value[t.Any]]:
         """List the settings of the group.
 
         :return: The settings, in the sequence of the class.
@@ -609,8 +609,8 @@ class Icons(Settings):
         key="fa_style",
         reread=True,
     )
-    kit = Value(None, string(checks.kit), key="fa_kit", reread=True)
-    names = Value({}, site_icons, key="fa_icons")
+    kit = Value[str | None](None, string(checks.kit), key="fa_kit", reread=True)
+    names = Value[dict[str, t.Any]]({}, site_icons, key="fa_icons")
 
     def update(
         self, names: Mapping[str, str] | None = None, /, **more: str
@@ -629,7 +629,7 @@ class Show(Settings):
     not_found = Value(True, boolean, key="show_404")
     breadcrumbs = Value(True, boolean, page=True)
     credit = Value(False, boolean, page=True)
-    feedback = Value(None, boolean, page=True)
+    feedback = Value[bool | None](None, boolean, page=True)
     more = Value(True, boolean, page=True)
     more_after = Value(SHOW_MORE_AFTER, number=int)
     page_last_updated = Value(True, boolean, page=True)
@@ -676,8 +676,8 @@ class CodeExplain(Settings):
     limit = Value(100, number=int, reread=True)
     memory = Value(1024, number=int, reread=True)
     output_limit = Value(64, number=int, reread=True)
-    python = Value(None, string(checks.text), reread=True)
-    pythonpath = Value([], many(checks.text), reread=True)
+    python = Value[str | None](None, string(checks.text), reread=True)
+    pythonpath = Value[list[str]]([], many(checks.text), reread=True)
     run = Value(False, boolean, reread=True)
     timeout = Value(10, number=int, reread=True)
 
@@ -708,7 +708,7 @@ class Accordion(Settings):
 class Button(Settings):
     """The `kaamiki.conf.button` settings."""
 
-    colours = Value(
+    colours = Value[dict[str, str]](
         {}, table(lower(checks.slug), string(checks.colour)), reread=True
     )
     icon_position = Value("before", choices=("before", "after"), reread=True)
@@ -724,16 +724,16 @@ class Tab(Settings):
 class Embed(Settings):
     """The `kaamiki.conf.embed` settings."""
 
-    css = Value([], many(ending(".css", STATIC_NAME)))
-    iframe_hosts = Value([], many(checks.host), reread=True)
-    js = Value([], many(ending(".js", STATIC_NAME)))
+    css = Value[list[str]]([], many(ending(".css", STATIC_NAME)))
+    iframe_hosts = Value[list[str]]([], many(checks.host), reread=True)
+    js = Value[list[str]]([], many(ending(".js", STATIC_NAME)))
     js_loading = Value("defer", choices=("defer", "async", "normal"))
 
 
 class Links(Settings):
     """The `kaamiki.conf.links` settings."""
 
-    internal_hosts = Value(
+    internal_hosts = Value[list[str]](
         [], many(checks.host), key="internal_hosts", reread=True
     )
     new_tab = Value(True, boolean, key="links_in_new_tab", reread=True)
@@ -742,7 +742,7 @@ class Links(Settings):
 class Roles(Settings, prefix=""):
     """The `kaamiki.conf.roles` settings."""
 
-    colours = Value(
+    colours = Value[dict[str, str]](
         {},
         table(lower(checks.slug), string(checks.colour)),
         key="role_colours",
@@ -757,7 +757,7 @@ class Roles(Settings, prefix=""):
 class Release(Settings):
     """The `kaamiki.conf.release` settings."""
 
-    kinds = Value([], many(lower(checks.slug)), reread=True)
+    kinds = Value[list[str]]([], many(lower(checks.slug)), reread=True)
     version_fmt = Value(
         "%Y.%m.%d", string(moment(TIME_DIRECTIVES)), reread=True
     )
@@ -766,7 +766,7 @@ class Release(Settings):
 class Site(Settings, prefix=""):
     """The `kaamiki.conf.site` settings."""
 
-    project = Value(
+    project = Value[dict[str, t.Any]](
         {},
         shape(
             author=string(checks.text),
@@ -778,8 +778,10 @@ class Site(Settings, prefix=""):
         ),
         reread=True,
     )
-    license = Value({}, shape(name=string(checks.text), url=string(checks.web)))
-    open_graph = Value(
+    license = Value[dict[str, t.Any]](
+        {}, shape(name=string(checks.text), url=string(checks.web))
+    )
+    open_graph = Value[dict[str, t.Any]](
         {},
         shape(
             card=checks.word(*CARDS),
@@ -794,10 +796,14 @@ class Site(Settings, prefix=""):
             type=string(OG_TYPE),
         ),
     )
-    favicons = Value({}, shape(**dict.fromkeys(FAVICONS, string(STATIC_NAME))))
-    logo_size = Value(None, number=int)
-    logos = Value({}, shape(**dict.fromkeys(LOGOS, string(STATIC_NAME))))
-    feedback = Value(
+    favicons = Value[dict[str, str]](
+        {}, shape(**dict.fromkeys(FAVICONS, string(STATIC_NAME)))
+    )
+    logo_size = Value[int | None](None, number=int)
+    logos = Value[dict[str, str]](
+        {}, shape(**dict.fromkeys(LOGOS, string(STATIC_NAME)))
+    )
+    feedback = Value[dict[str, t.Any]](
         {},
         shape(
             type=checks.word("mail", "link"),
@@ -810,8 +816,8 @@ class Site(Settings, prefix=""):
             split=boolean,
         ),
     )
-    header_buttons = Value({}, table(checks.text, button))
-    sidebar_buttons = Value({}, table(checks.text, button))
+    header_buttons = Value[dict[str, t.Any]]({}, table(checks.text, button))
+    sidebar_buttons = Value[dict[str, t.Any]]({}, table(checks.text, button))
     last_updated_fmt = Value("", string(moment(TIME_DIRECTIVES)))
     copy_headerlinks = Value(True, boolean)
     words_per_minute = Value(WORDS_PER_MINUTE, number=int)
@@ -1109,6 +1115,53 @@ def _constant(value: t.Any) -> Callable[[Config], t.Any]:
 
 
 CONF: t.Final[Root] = Root({})
+
+
+class Configured(dict[str, t.Any]):
+    """What a site set, read from the Sphinx configuration."""
+
+    def __init__(self, config: Config) -> None:
+        """Read from a Sphinx configuration.
+
+        :param config: The Sphinx configuration.
+        """
+        super().__init__()
+        self.config = config
+
+    def __contains__(self, key: object) -> bool:
+        """Say that each Kaamiki setting has a value.
+
+        :param key: The key of the setting.
+        :return: `True` for a key in the schema.
+        """
+        return key in Settings.schema
+
+    def __missing__(self, key: str) -> t.Any:
+        """Read a setting, or its default when the site set none.
+
+        :param key: The key of the setting.
+        :return: A copy, so that no caller can change the setting.
+        """
+        value = self.config[flat(key)]
+        return copy.deepcopy(DEFAULTS[key] if value is None else value)
+
+    def __setitem__(self, key: str, value: t.Any) -> None:
+        """Refuse a change, because the configuration is read only.
+
+        :param key: The key of the setting.
+        :param value: The value.
+        :raises TypeError: Always.
+        """
+        raise TypeError(f"{PATHS[key]}: expected no change while building")
+
+
+def values(config: Config) -> Root:
+    """Read Kaamiki's settings, by group, from a Sphinx configuration.
+
+    :param config: The Sphinx configuration.
+    :return: The settings, as `values(config).show.more`.
+    """
+    return Root(Configured(config))
 
 
 @on("config-inited")
