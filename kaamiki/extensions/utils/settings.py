@@ -111,269 +111,8 @@ RELEASE_KINDS: t.Final[tuple[str, ...]] = (
     "fixed",
     "removed",
 )
-DEFAULTS: t.Final[dict[str, t.Any]] = {
-    "accordion_marker": "plus",
-    "accordion_marker_position": "after",
-    "button_colours": {},
-    "button_icon_position": "before",
-    "button_scheme": "light",
-    "colour_mode": "dark",
-    "copy_headerlinks": True,
-    "embed_css": [],
-    "embed_iframe_hosts": [],
-    "embed_js": [],
-    "embed_js_loading": "defer",
-    "fa_icons": {},
-    "fa_kit": None,
-    "fa_style": icons.DEFAULT_STYLE,
-    "favicons": {},
-    "feedback": {},
-    "header_buttons": {},
-    "internal_hosts": [],
-    "last_updated_fmt": "",
-    "license": {},
-    "links_in_new_tab": True,
-    "logo_size": None,
-    "logos": {},
-    "media_enlarge": True,
-    "motion_page_transitions": False,
-    "motion_prefetch": True,
-    "motion_speed": 0.625,
-    "open_graph": {},
-    "project": {},
-    "release_kinds": [],
-    "release_version_fmt": "%Y.%m.%d",
-    "role_colours": {},
-    "sharpie_colour": "yellow",
-    "show_404": True,
-    "show_breadcrumbs": True,
-    "show_credit": False,
-    "show_feedback": None,
-    "show_more": True,
-    "show_more_after": SHOW_MORE_AFTER,
-    "show_page_last_updated": True,
-    "show_previous_next_cards": True,
-    "show_previous_next_cards_count": RELATED_PAGES,
-    "show_previous_next_pages": False,
-    "show_scrolltop": False,
-    "show_searchbox": True,
-    "show_sitemap": True,
-    "toctree_in_header": True,
-    "sidebar_buttons": {},
-    "tab_icon_position": "before",
-    "toctree_includehidden": True,
-    "toctree_maxdepth": 0,
-    "toctree_titles_only": True,
-    "underline_colour": "#FF9800",
-    "underline_width": 2.5,
-    "underline_wobble": 1.0,
-    "code_explain_budget": 25,
-    "code_explain_cache": True,
-    "code_explain_comprehensions": False,
-    "code_explain_events": "line, return",
-    "code_explain_limit": 100,
-    "code_explain_memory": 1024,
-    "code_explain_output_limit": 64,
-    "code_explain_python": None,
-    "code_explain_pythonpath": [],
-    "code_explain_run": False,
-    "code_explain_timeout": 10,
-    "words_per_minute": WORDS_PER_MINUTE,
-    "youtube_allow": (
-        "accelerometer; clipboard-write; encrypted-media; gyroscope;"
-        " picture-in-picture; web-share"
-    ),
-    "youtube_click_to_load": True,
-    "youtube_privacy": True,
-    "youtube_referrer_policy": "strict-origin-when-cross-origin",
-}
-GROUPS: t.Final[dict[str, dict[str, str]]] = {
-    "icons": {
-        "style": "fa_style",
-        "kit": "fa_kit",
-        "names": "fa_icons",
-    },
-    "show": {
-        "not_found": "show_404",
-        "breadcrumbs": "show_breadcrumbs",
-        "credit": "show_credit",
-        "feedback": "show_feedback",
-        "more": "show_more",
-        "more_after": "show_more_after",
-        "page_last_updated": "show_page_last_updated",
-        "previous_next_cards": "show_previous_next_cards",
-        "previous_next_cards_count": "show_previous_next_cards_count",
-        "previous_next_pages": "show_previous_next_pages",
-        "scrolltop": "show_scrolltop",
-        "searchbox": "show_searchbox",
-        "sitemap": "show_sitemap",
-    },
-    "media": {
-        "enlarge": "media_enlarge",
-    },
-    "motion": {
-        "page_transitions": "motion_page_transitions",
-        "prefetch": "motion_prefetch",
-        "speed": "motion_speed",
-    },
-    "toctree": {
-        "in_header": "toctree_in_header",
-        "includehidden": "toctree_includehidden",
-        "maxdepth": "toctree_maxdepth",
-        "titles_only": "toctree_titles_only",
-    },
-    "code_explain": {
-        "budget": "code_explain_budget",
-        "cache": "code_explain_cache",
-        "comprehensions": "code_explain_comprehensions",
-        "events": "code_explain_events",
-        "limit": "code_explain_limit",
-        "memory": "code_explain_memory",
-        "output_limit": "code_explain_output_limit",
-        "python": "code_explain_python",
-        "pythonpath": "code_explain_pythonpath",
-        "run": "code_explain_run",
-        "timeout": "code_explain_timeout",
-    },
-    "youtube": {
-        "allow": "youtube_allow",
-        "click_to_load": "youtube_click_to_load",
-        "privacy": "youtube_privacy",
-        "referrer_policy": "youtube_referrer_policy",
-    },
-    "accordion": {
-        "marker": "accordion_marker",
-        "marker_position": "accordion_marker_position",
-    },
-    "button": {
-        "colours": "button_colours",
-        "icon_position": "button_icon_position",
-        "scheme": "button_scheme",
-    },
-    "tab": {"icon_position": "tab_icon_position"},
-    "embed": {
-        "css": "embed_css",
-        "iframe_hosts": "embed_iframe_hosts",
-        "js": "embed_js",
-        "js_loading": "embed_js_loading",
-    },
-    "links": {
-        "internal_hosts": "internal_hosts",
-        "new_tab": "links_in_new_tab",
-    },
-    "roles": {
-        "colours": "role_colours",
-        "sharpie_colour": "sharpie_colour",
-        "underline_colour": "underline_colour",
-        "underline_width": "underline_width",
-        "underline_wobble": "underline_wobble",
-    },
-    "release": {"kinds": "release_kinds", "version_fmt": "release_version_fmt"},
-    "site": {
-        "project": "project",
-        "license": "license",
-        "open_graph": "open_graph",
-        "favicons": "favicons",
-        "logo_size": "logo_size",
-        "logos": "logos",
-        "feedback": "feedback",
-        "header_buttons": "header_buttons",
-        "sidebar_buttons": "sidebar_buttons",
-        "last_updated_fmt": "last_updated_fmt",
-        "copy_headerlinks": "copy_headerlinks",
-        "words_per_minute": "words_per_minute",
-    },
-}
-ROOT: t.Final[dict[str, str]] = {"mode": "colour_mode"}
-PATHS: t.Final[dict[str, str]] = {
-    **{
-        key: f"{NAME}.conf.{group}.{attr}"
-        for group, members in GROUPS.items()
-        for attr, key in members.items()
-    },
-    **{key: f"{NAME}.conf.{attr}" for attr, key in ROOT.items()},
-}
-FLAT: t.Final[dict[str, str]] = {
-    path.replace(".conf.", "_").replace(".", "_"): key
-    for key, path in PATHS.items()
-}
-PARSE_TIME: t.Final[tuple[str, ...]] = (
-    "accordion_marker",
-    "accordion_marker_position",
-    "button_colours",
-    "button_icon_position",
-    "button_scheme",
-    "embed_iframe_hosts",
-    "fa_kit",
-    "fa_style",
-    "internal_hosts",
-    "links_in_new_tab",
-    "project",
-    "release_kinds",
-    "release_version_fmt",
-    "role_colours",
-    "sharpie_colour",
-    "tab_icon_position",
-    "underline_colour",
-    "underline_width",
-    "underline_wobble",
-    "code_explain_budget",
-    "code_explain_cache",
-    "code_explain_comprehensions",
-    "code_explain_events",
-    "code_explain_limit",
-    "code_explain_memory",
-    "code_explain_output_limit",
-    "code_explain_python",
-    "code_explain_pythonpath",
-    "code_explain_run",
-    "code_explain_timeout",
-    "youtube_allow",
-    "youtube_click_to_load",
-    "youtube_privacy",
-    "youtube_referrer_policy",
-)
-PAGE_SWITCHES: t.Final[tuple[str, ...]] = (
-    "media_enlarge",
-    "show_breadcrumbs",
-    "show_credit",
-    "show_feedback",
-    "show_more",
-    "show_page_last_updated",
-    "show_previous_next_cards",
-    "show_previous_next_pages",
-    "show_scrolltop",
-    "show_searchbox",
-    "toctree_in_header",
-)
-WHOLE_NUMBERS: t.Final[tuple[str, ...]] = (
-    "show_more_after",
-    "show_previous_next_cards_count",
-    "words_per_minute",
-    "logo_size",
-    "toctree_maxdepth",
-    "code_explain_budget",
-    "code_explain_limit",
-    "code_explain_memory",
-    "code_explain_output_limit",
-    "code_explain_timeout",
-)
-REAL_NUMBERS: t.Final[tuple[str, ...]] = (
-    "motion_speed",
-    "underline_width",
-    "underline_wobble",
-)
 ALIGNMENTS: t.Final[tuple[str, ...]] = ("left", "center", "right")
 SIZES: t.Final[tuple[str, ...]] = ("small", "medium", "large")
-CHOICES: t.Final[dict[str, tuple[str, ...]]] = {
-    "accordion_marker": ("plus", "down", "right"),
-    "accordion_marker_position": ("before", "after"),
-    "button_icon_position": ("before", "after"),
-    "colour_mode": ("dark", "light", "system"),
-    "embed_js_loading": ("defer", "async", "normal"),
-    "fa_style": ("solid", "regular", "light", "thin"),
-    "tab_icon_position": ("before", "after"),
-}
 
 
 TRACE_EVENTS: t.Final[tuple[str, ...]] = ("call", "line", "return")
@@ -416,6 +155,7 @@ FAVICONS: t.Final[tuple[str, ...]] = (
     "size_svg",
 )
 LOGOS: t.Final[tuple[str, ...]] = ("light", "dark")
+SNAKE: t.Final[re.Pattern[str]] = re.compile(r"(?<!^)(?=[A-Z])")
 TIME_DIRECTIVES: t.Final[re.Pattern[str]] = re.compile(r"%[aAbBdHIjmMpSyYZz%]")
 
 
@@ -692,94 +432,352 @@ def button(value: t.Any) -> None:
     )(value)
 
 
+class Value:
+    """A Kaamiki setting, read as an attribute of its group."""
+
+    def __init__(
+        self,
+        default: t.Any,
+        rule: Rule | None = None,
+        *,
+        choices: tuple[str, ...] = (),
+        number: type[int | float] | None = None,
+        key: str = "",
+        reread: bool = False,
+        page: bool = False,
+    ) -> None:
+        """Keep the default of the setting and how a value is checked.
+
+        :param default: The value when a site does not set one.
+        :param rule: The check for a value. `choices` and `number` make
+            one when it is not given.
+        :param choices: The words that the setting permits.
+        :param number: `int` or `float`, for a number in the `BOUNDS`
+            of the setting.
+        :param key: The name of the setting in Sphinx, without
+            `kaamiki_`. The default is the group, `_` and the attribute.
+        :param reread: Whether a change reads each page again, not only
+            writes it again.
+        :param page: Whether a page can switch it with a field.
+        """
+        self.default = default
+        self.rule = rule
+        self.choices = choices
+        self.number = number
+        self.key = key
+        self.reread = reread
+        self.page = page
+        self.attr = ""
+
+    def __set_name__(self, owner: type, name: str) -> None:
+        """Keep the name of the attribute.
+
+        :param owner: The group.
+        :param name: The attribute, as `marker`.
+        """
+        self.attr = name
+
+
+class Settings:
+    """A group of Kaamiki's settings, as `kaamiki.conf.show`."""
+
+    schema: t.ClassVar[dict[str, Value]] = {}
+    groups: t.ClassVar[dict[str, type[Settings]]] = {}
+    name: t.ClassVar[str]
+
+    def __init_subclass__(
+        cls,
+        *,
+        name: str | None = None,
+        prefix: str | None = None,
+        **kwargs: t.Any,
+    ) -> None:
+        """Record the group and complete each of its settings.
+
+        :param name: The name of the group in `kaamiki.conf`. The
+            default is the name of the class in snake case.
+        :param prefix: What the keys of the group start with. The
+            default is the name of the group.
+        :param kwargs: What the parent class takes.
+        """
+        super().__init_subclass__(**kwargs)
+        cls.name = (
+            SNAKE.sub("_", cls.__name__).lower() if name is None else name
+        )
+        start = cls.name if prefix is None else prefix
+        for each in cls.values():
+            each.key = each.key or "_".join(filter(None, (start, each.attr)))
+            if each.choices:
+                each.rule = checks.word(*each.choices)
+            elif each.number is int:
+                each.rule = whole(*BOUNDS[each.key])
+            elif each.number is float:
+                each.rule = real(*BOUNDS[each.key])
+            Settings.schema[each.key] = each
+        Settings.groups[cls.name] = cls
+
+    @classmethod
+    def values(cls) -> list[Value]:
+        """List the settings of the group.
+
+        :return: The settings, in the sequence of the class.
+        """
+        return [_ for _ in vars(cls).values() if isinstance(_, Value)]
+
+
+class Icons(Settings):
+    """The `kaamiki.conf.icons` settings."""
+
+    style = Value(
+        icons.DEFAULT_STYLE,
+        choices=("solid", "regular", "light", "thin"),
+        key="fa_style",
+        reread=True,
+    )
+    kit = Value(None, string(checks.kit), key="fa_kit", reread=True)
+    names = Value({}, site_icons, key="fa_icons")
+
+
+class Show(Settings):
+    """The `kaamiki.conf.show` settings."""
+
+    not_found = Value(True, boolean, key="show_404")
+    breadcrumbs = Value(True, boolean, page=True)
+    credit = Value(False, boolean, page=True)
+    feedback = Value(None, boolean, page=True)
+    more = Value(True, boolean, page=True)
+    more_after = Value(SHOW_MORE_AFTER, number=int)
+    page_last_updated = Value(True, boolean, page=True)
+    previous_next_cards = Value(True, boolean, page=True)
+    previous_next_cards_count = Value(RELATED_PAGES, number=int)
+    previous_next_pages = Value(False, boolean, page=True)
+    scrolltop = Value(False, boolean, page=True)
+    searchbox = Value(True, boolean, page=True)
+    sitemap = Value(True, boolean)
+
+
+class Media(Settings):
+    """The `kaamiki.conf.media` settings."""
+
+    enlarge = Value(True, boolean, page=True)
+
+
+class Motion(Settings):
+    """The `kaamiki.conf.motion` settings."""
+
+    page_transitions = Value(False, boolean)
+    prefetch = Value(True, boolean)
+    speed = Value(0.625, number=float)
+
+
+class Toctree(Settings):
+    """The `kaamiki.conf.toctree` settings."""
+
+    in_header = Value(True, boolean, page=True)
+    includehidden = Value(True, boolean)
+    maxdepth = Value(0, number=int)
+    titles_only = Value(True, boolean)
+
+
+class CodeExplain(Settings):
+    """The `kaamiki.conf.code_explain` settings."""
+
+    budget = Value(25, number=int, reread=True)
+    cache = Value(True, boolean, reread=True)
+    comprehensions = Value(False, boolean, reread=True)
+    events = Value(
+        "line, return", string(listed_in(TRACE_EVENTS, ", ")), reread=True
+    )
+    limit = Value(100, number=int, reread=True)
+    memory = Value(1024, number=int, reread=True)
+    output_limit = Value(64, number=int, reread=True)
+    python = Value(None, string(checks.text), reread=True)
+    pythonpath = Value([], many(checks.text), reread=True)
+    run = Value(False, boolean, reread=True)
+    timeout = Value(10, number=int, reread=True)
+
+
+class Youtube(Settings):
+    """The `kaamiki.conf.youtube` settings."""
+
+    allow = Value(
+        "accelerometer; clipboard-write; encrypted-media; gyroscope;"
+        " picture-in-picture; web-share",
+        string(listed_in(PERMISSIONS, "; ")),
+        reread=True,
+    )
+    click_to_load = Value(True, boolean, reread=True)
+    privacy = Value(True, boolean, reread=True)
+    referrer_policy = Value(
+        "strict-origin-when-cross-origin", checks.word(*REFERRERS), reread=True
+    )
+
+
+class Accordion(Settings):
+    """The `kaamiki.conf.accordion` settings."""
+
+    marker = Value("plus", choices=("plus", "down", "right"), reread=True)
+    marker_position = Value("after", choices=("before", "after"), reread=True)
+
+
+class Button(Settings):
+    """The `kaamiki.conf.button` settings."""
+
+    colours = Value(
+        {}, table(lower(checks.slug), string(checks.colour)), reread=True
+    )
+    icon_position = Value("before", choices=("before", "after"), reread=True)
+    scheme = Value("light", string(checks.text), reread=True)
+
+
+class Tab(Settings):
+    """The `kaamiki.conf.tab` settings."""
+
+    icon_position = Value("before", choices=("before", "after"), reread=True)
+
+
+class Embed(Settings):
+    """The `kaamiki.conf.embed` settings."""
+
+    css = Value([], many(ending(".css", STATIC_NAME)))
+    iframe_hosts = Value([], many(checks.host), reread=True)
+    js = Value([], many(ending(".js", STATIC_NAME)))
+    js_loading = Value("defer", choices=("defer", "async", "normal"))
+
+
+class Links(Settings):
+    """The `kaamiki.conf.links` settings."""
+
+    internal_hosts = Value(
+        [], many(checks.host), key="internal_hosts", reread=True
+    )
+    new_tab = Value(True, boolean, key="links_in_new_tab", reread=True)
+
+
+class Roles(Settings, prefix=""):
+    """The `kaamiki.conf.roles` settings."""
+
+    colours = Value(
+        {},
+        table(lower(checks.slug), string(checks.colour)),
+        key="role_colours",
+        reread=True,
+    )
+    sharpie_colour = Value("yellow", string(checks.text), reread=True)
+    underline_colour = Value("#FF9800", string(checks.text), reread=True)
+    underline_width = Value(2.5, number=float, reread=True)
+    underline_wobble = Value(1.0, number=float, reread=True)
+
+
+class Release(Settings):
+    """The `kaamiki.conf.release` settings."""
+
+    kinds = Value([], many(lower(checks.slug)), reread=True)
+    version_fmt = Value(
+        "%Y.%m.%d", string(moment(TIME_DIRECTIVES)), reread=True
+    )
+
+
+class Site(Settings, prefix=""):
+    """The `kaamiki.conf.site` settings."""
+
+    project = Value(
+        {},
+        shape(
+            author=string(checks.text),
+            avatar=string(checks.link),
+            email=string(EMAIL_ONLY),
+            source=string(
+                lambda each: each if each == "#" else checks.web(each)
+            ),
+        ),
+        reread=True,
+    )
+    license = Value({}, shape(name=string(checks.text), url=string(checks.web)))
+    open_graph = Value(
+        {},
+        shape(
+            card=checks.word(*CARDS),
+            description=string(checks.text),
+            description_length=whole(*BOUNDS["description_length"]),
+            enable=boolean,
+            image=string(checks.link),
+            image_alt=string(checks.text),
+            locale=string(OG_LOCALE),
+            site_name=string(checks.text),
+            twitter_site=string(TWITTER_HANDLE),
+            type=string(OG_TYPE),
+        ),
+    )
+    favicons = Value({}, shape(**dict.fromkeys(FAVICONS, string(STATIC_NAME))))
+    logo_size = Value(None, number=int)
+    logos = Value({}, shape(**dict.fromkeys(LOGOS, string(STATIC_NAME))))
+    feedback = Value(
+        {},
+        shape(
+            type=checks.word("mail", "link"),
+            url=string(checks.link),
+            subject=string(checks.text),
+            title=string(checks.text),
+            description=string(checks.text),
+            button=string(checks.text),
+            icon=string(checks.icon),
+            split=boolean,
+        ),
+    )
+    header_buttons = Value({}, table(checks.text, button))
+    sidebar_buttons = Value({}, table(checks.text, button))
+    last_updated_fmt = Value("", string(moment(TIME_DIRECTIVES)))
+    copy_headerlinks = Value(True, boolean)
+    words_per_minute = Value(WORDS_PER_MINUTE, number=int)
+
+
+class Root(Settings, name=""):
+    """The settings of no group, directly on `kaamiki.conf`."""
+
+    mode = Value("dark", choices=("dark", "light", "system"), key="colour_mode")
+
+
+DEFAULTS: t.Final[dict[str, t.Any]] = {
+    key: each.default for key, each in Settings.schema.items()
+}
+GROUPS: t.Final[dict[str, dict[str, str]]] = {
+    name: {each.attr: each.key for each in group.values()}
+    for name, group in Settings.groups.items()
+    if name
+}
+ROOT: t.Final[dict[str, str]] = {each.attr: each.key for each in Root.values()}
+PATHS: t.Final[dict[str, str]] = {
+    **{
+        key: f"{NAME}.conf.{group}.{attr}"
+        for group, members in GROUPS.items()
+        for attr, key in members.items()
+    },
+    **{key: f"{NAME}.conf.{attr}" for attr, key in ROOT.items()},
+}
+FLAT: t.Final[dict[str, str]] = {
+    path.replace(".conf.", "_").replace(".", "_"): key
+    for key, path in PATHS.items()
+}
+PARSE_TIME: t.Final[tuple[str, ...]] = tuple(
+    key for key, each in Settings.schema.items() if each.reread
+)
+PAGE_SWITCHES: t.Final[tuple[str, ...]] = tuple(
+    key for key, each in Settings.schema.items() if each.page
+)
+WHOLE_NUMBERS: t.Final[tuple[str, ...]] = tuple(
+    key for key, each in Settings.schema.items() if each.number is int
+)
+REAL_NUMBERS: t.Final[tuple[str, ...]] = tuple(
+    key for key, each in Settings.schema.items() if each.number is float
+)
+CHOICES: t.Final[dict[str, tuple[str, ...]]] = {
+    key: each.choices for key, each in Settings.schema.items() if each.choices
+}
 RULES: t.Final[dict[str, Rule]] = {
-    "accordion_marker": checks.word(*CHOICES["accordion_marker"]),
-    "accordion_marker_position": checks.word(
-        *CHOICES["accordion_marker_position"]
-    ),
-    "button_icon_position": checks.word(*CHOICES["button_icon_position"]),
-    "colour_mode": checks.word(*CHOICES["colour_mode"]),
-    "copy_headerlinks": boolean,
-    "embed_js_loading": checks.word(*CHOICES["embed_js_loading"]),
-    "fa_style": checks.word(*CHOICES["fa_style"]),
-    "links_in_new_tab": boolean,
-    "media_enlarge": boolean,
-    "motion_page_transitions": boolean,
-    "motion_prefetch": boolean,
-    "tab_icon_position": checks.word(*CHOICES["tab_icon_position"]),
-    "show_404": boolean,
-    "show_breadcrumbs": boolean,
-    "show_credit": boolean,
-    "show_more": boolean,
-    "show_page_last_updated": boolean,
-    "show_previous_next_cards": boolean,
-    "show_previous_next_pages": boolean,
-    "show_scrolltop": boolean,
-    "show_searchbox": boolean,
-    "show_sitemap": boolean,
-    "toctree_in_header": boolean,
-    "toctree_includehidden": boolean,
-    "toctree_titles_only": boolean,
-    "code_explain_cache": boolean,
-    "code_explain_comprehensions": boolean,
-    "code_explain_run": boolean,
-    "youtube_click_to_load": boolean,
-    "youtube_privacy": boolean,
-    "show_feedback": boolean,
-    **{key: whole(*BOUNDS[key]) for key in WHOLE_NUMBERS},
-    **{key: real(*BOUNDS[key]) for key in REAL_NUMBERS},
-    "button_scheme": string(checks.text),
-    "sharpie_colour": string(checks.text),
-    "underline_colour": string(checks.text),
-    "fa_kit": string(checks.kit),
-    "last_updated_fmt": string(moment(TIME_DIRECTIVES)),
-    "release_version_fmt": string(moment(TIME_DIRECTIVES)),
-    "code_explain_events": string(listed_in(TRACE_EVENTS, ", ")),
-    "youtube_allow": string(listed_in(PERMISSIONS, "; ")),
-    "youtube_referrer_policy": checks.word(*REFERRERS),
-    "internal_hosts": many(checks.host),
-    "embed_iframe_hosts": many(checks.host),
-    "embed_css": many(ending(".css", STATIC_NAME)),
-    "embed_js": many(ending(".js", STATIC_NAME)),
-    "code_explain_pythonpath": many(checks.text),
-    "code_explain_python": string(checks.text),
-    "button_colours": table(lower(checks.slug), string(checks.colour)),
-    "role_colours": table(lower(checks.slug), string(checks.colour)),
-    "release_kinds": many(lower(checks.slug)),
-    "fa_icons": site_icons,
-    "favicons": shape(**dict.fromkeys(FAVICONS, string(STATIC_NAME))),
-    "logos": shape(**dict.fromkeys(LOGOS, string(STATIC_NAME))),
-    "header_buttons": table(checks.text, button),
-    "sidebar_buttons": table(checks.text, button),
-    "license": shape(name=string(checks.text), url=string(checks.web)),
-    "feedback": shape(
-        type=checks.word("mail", "link"),
-        url=string(checks.link),
-        subject=string(checks.text),
-        title=string(checks.text),
-        description=string(checks.text),
-        button=string(checks.text),
-        icon=string(checks.icon),
-        split=boolean,
-    ),
-    "open_graph": shape(
-        card=checks.word(*CARDS),
-        description=string(checks.text),
-        description_length=whole(*BOUNDS["description_length"]),
-        enable=boolean,
-        image=string(checks.link),
-        image_alt=string(checks.text),
-        locale=string(OG_LOCALE),
-        site_name=string(checks.text),
-        twitter_site=string(TWITTER_HANDLE),
-        type=string(OG_TYPE),
-    ),
-    "project": shape(
-        author=string(checks.text),
-        avatar=string(checks.link),
-        email=string(EMAIL_ONLY),
-        source=string(lambda each: each if each == "#" else checks.web(each)),
-    ),
+    key: each.rule
+    for key, each in Settings.schema.items()
+    if each.rule is not None
 }
 
 
