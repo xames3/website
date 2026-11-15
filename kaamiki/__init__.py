@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 Kaamiki's entry point.
 """
@@ -43,6 +43,7 @@ from kaamiki.extensions.utils import follow
 from kaamiki.extensions.utils import forget_lead
 from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import glyph_edges
+from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import keycaps
 from kaamiki.extensions.utils import linkcheck
 from kaamiki.extensions.utils import merge_leads
@@ -374,27 +375,28 @@ def add_directives(app: Sphinx) -> None:
     :param app: The Sphinx application instance.
     """
     for directive in directives:
-        if hasattr(directive, "node"):
+        if hasattr(directive, "node") and directive.node not in html.visitors:
             node = directive.node
-            html = (directive.visit, getattr(directive, "depart", depart))
+            pages = (directive.visit, getattr(directive, "depart", depart))
             if node.__bases__ == (nodes.Element,) and not hasattr(
                 directive, "plain"
             ):
                 app.add_node(
                     node,
-                    html=html,
+                    html=pages,
                     latex=away,
                     man=away,
                     texinfo=away,
                     text=away,
                 )
             else:
-                app.add_node(node, html=html)
+                app.add_node(node, html=pages)
         app.add_directive(directive.name, directive.directive)
         if hasattr(directive, "register"):
             directive.register(app)
         if hasattr(directive, "html_page_context"):
             app.connect("html-page-context", directive.html_page_context)
+    html.register(app)
 
 
 def connect_hooks(app: Sphinx) -> None:
