@@ -86,7 +86,7 @@ KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
     "accordion": lambda _: isinstance(_, accordion.Accordion.Node),
     "block": lambda _: isinstance(_, block.Block.Node),
     "byline": lambda _: isinstance(_, byline.node),
-    "carousel": lambda _: isinstance(_, carousel.node),
+    "carousel": lambda _: isinstance(_, carousel.Carousel.Node),
     "code-explain": lambda _: (
         isinstance(_, explain.node) and not isinstance(_, version.node)
     ),

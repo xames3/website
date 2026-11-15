@@ -36,19 +36,15 @@ from kaamiki.extensions import button
 from kaamiki.extensions import repository
 from kaamiki.extensions import thumbnail
 from kaamiki.extensions.utils import BEM
-from kaamiki.extensions.utils import MOTION
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import fields
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import moving
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import through
-from kaamiki.extensions.utils import titled
 from kaamiki.extensions.utils import what
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils.checks import fail
@@ -62,7 +58,6 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "carousel"
 carousel: t.Final[BEM] = BEM("carousel")
 text: t.Final[BEM] = BEM("text")
 template: t.Final[str] = "directives/carousel.html.jinja"
@@ -84,15 +79,11 @@ SKIPPED: t.Final[tuple[type[nodes.Node], ...]] = (
 )
 
 
-class Carousel(nodes.container):
-    """The carousel and what's in it, waiting for `visit`."""
+class CarouselText(phrase):
+    """A line of the carousel's heading, which `visit` writes."""
 
 
-class carouseltext(phrase):
-    """A line of the carousel's heading, waiting for `visit`."""
-
-
-html.skips(carouseltext)
+html.skips(CarouselText)
 
 
 def is_trail(found: nodes.Node) -> bool:
@@ -140,154 +131,174 @@ def few(cards: int, count: int) -> str:
     :param count: How many items it has.
     :return: The message, which names the option.
     """
-    return (
-        f"carousel: :cards: {cards} needs at least {cards} items, got {count}"
-    )
+    return f":cards: {cards} needs at least {cards} items, got {count}"
 
 
-class directive(rst.Directive):
+class Carousel(KaamikiDirective, motion=True):
     """The `carousel` directive.
 
     Options::
 
-        - `preheader`: A small line above the title, set the way a
-          section's preheader text is, with roles like
-          `:fa-icon:regular:`heart` Love`. It needs a title.
-        - `subheader`: A dimmer line under the title, set the way a
-          section's is. It needs a title.
-        - `gap`: The space between items, `small`, `medium` or
-          `large`. Defaults to `small`. A length in `rem` replaces
-          them, up to 4rem, like `1.5rem`. Two lengths, as `columns`
-          takes, use the second.
-        - `cards`: How many items show in full, from 1 to 4, with a
-          quarter of the next one beside them. Defaults to 2. It needs
-          at least that many items. A phone shows about one and a bit
-          whatever it says.
-        - `hide-arrows`: Leave out the arrows. A reader still swipes or
-          scrolls.
-        - `dots`: Put a dot for each item under the row in place of the
-          arrows, with a pill that stretches from one dot to the next.
-          It can't go with `hide-arrows`.
-        - `auto-run`: Move on by itself, pausing while a reader hovers,
-          touches or focuses it. It stays still for a reader who asks
-          their device for less motion.
-        - `interval`: Seconds between moves, from 2 to 15. Defaults to
-          4. It needs `auto-run`.
-        - `direction`: Which way `auto-run` moves, `right` or `left`.
-          Defaults to `right`. It needs `auto-run`.
-        - `speed`: How quick its motion is next to the site's, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
-          `2` is twice as quick.
-        - `no-motion`: Keep it still.
-        - `name`: A name to link to.
+        - `preheader`: A small line above the title, as the preheader of
+          a section. It can have roles, as `:fa-icon:regular:`heart`
+          Love`. It needs a title.
+        - `subheader`: A dimmer line below the title, as the subheader of
+          a section. It needs a title.
+        - `gap`: The space between items, `small`, `medium` or `large`.
+          The default is `small`. A length in `rem`, up to 4rem, can
+          replace them, as `1.5rem`. With two lengths, as for `columns`,
+          it uses the second.
+        - `cards`: How many items show fully, from 1 to 4. A quarter of
+          the next item shows next to them. The default is 2. The
+          carousel needs a minimum of that number of items. A phone
+          always shows approximately one item and a part of the next.
+        - `hide-arrows`: Remove the arrows. A reader can still swipe or
+          scroll.
+        - `dots`: Show a dot for each item below the row, not the
+          arrows, with a pill that moves from one dot to the next. You
+          cannot use it with `hide-arrows`.
+        - `auto-run`: Move to the next item automatically. It stops
+          while a reader hovers on it, touches it or puts the focus on
+          it. It does not move for a reader whose device asks for less
+          motion.
+        - `interval`: The seconds between moves, from 2 to 15. The
+          default is 4. It needs `auto-run`.
+        - `direction`: The direction of `auto-run`, `right` or `left`.
+          The default is `right`. It needs `auto-run`.
+        - `speed`: The speed of its motion, relative to the site, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
+          two times as fast.
+        - `no-motion`: Do not move it.
+        - `name`: A name for links.
         - `class`: More classes for the carousel.
 
-    The argument is the title, which is optional and is set the way a
-    section's is. It's read as reStructuredText, so roles work in it,
-    and so they do in `preheader` and `subheader`. The arrows sit on the
-    title's line when it and they fit on one and below the items when
-    they don't, and always below under 768px wide.
+    The argument is the title. It is optional, and it looks like the
+    title of a section. It is reStructuredText, so roles work in it and
+    in `preheader` and `subheader`. The arrows are on the line of the
+    title when the two fit on one line. If not, they are below the
+    items. Below 768px wide, they are always below the items.
 
-    A `block`, a `button`, a `figure`, an `image`, a `repository` and a
-    `thumbnail` go inside, an item each.
+    Put a `block`, a `button`, a `figure`, an `image`, a `repository`
+    or a `thumbnail` in it for each item.
     """
 
     has_content = True
     required_arguments = 0
     optional_arguments = 1
     final_argument_whitespace = True
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        **MOTION,
-        "preheader": checks.text,
-        "subheader": checks.text,
-        "gap": checks.spacing(SIZES, GAPS),
-        "cards": checks.integer(*map(int, BOUNDS["cards"])),
-        "hide-arrows": rst.directives.flag,
-        "dots": rst.directives.flag,
-        "auto-run": rst.directives.flag,
-        "interval": checks.number(*BOUNDS["interval"]),
-        "direction": checks.word(*DIRECTIONS),
-    }
+    preheader = Option(checks.text)
+    subheader = Option(checks.text)
+    gap = Option(checks.spacing(SIZES, GAPS), default="small")
+    cards = Option(checks.integer(*map(int, BOUNDS["cards"])))
+    hide_arrows = Option(rst.directives.flag)
+    dots = Option(rst.directives.flag)
+    auto_run = Option(rst.directives.flag)
+    interval = Option(
+        checks.number(*BOUNDS["interval"]), needs="auto-run", default=4
+    )
+    direction = Option(
+        checks.word(*DIRECTIONS), needs="auto-run", default="right"
+    )
 
-    def run(self) -> list[nodes.Node]:
-        """Parse the items and return the carousel.
+    class Node(nodes.container):
+        """The carousel and its items."""
 
-        :return: The carousel's node.
-        """
-        options = self.options
+    def check(self) -> None:
+        """Refuse lines without a title, and dots without arrows."""
         for option in ("preheader", "subheader"):
-            if option in options and not self.arguments:
-                raise self.error(f"carousel: :{option}: needs a title")
-        if "dots" in options and "hide-arrows" in options:
-            raise self.error(
-                "carousel: :dots: replaces the arrows, so :hide-arrows: has"
-                " nothing to hide"
+            if option in self.options and not self.arguments:
+                self.fail(f":{option}: needs a title")
+        if self.dots and self.hide_arrows:
+            self.fail(
+                ":dots: replaces the arrows, so :hide-arrows: has nothing"
+                " to hide"
             )
-        if "auto-run" not in options:
-            for option in ("interval", "direction"):
-                if option in options:
-                    raise self.error(f"carousel: :{option}: needs :auto-run:")
-        element = located(
-            self,
-            Carousel("", classes=[*options.get("class", []), *moving(options)]),
-        )
-        element["titled"] = bool(self.arguments)
-        element["gap"] = options.get("gap", "small")
-        element["cards"] = options.get("cards")
-        element["arrows"] = not ({"hide-arrows", "dots"} & set(options))
-        element["dots"] = "dots" in options
-        element["auto"] = "auto-run" in options
-        element["interval"] = options.get("interval", 4)
-        element["direction"] = options.get("direction", "right")
-        named(self, element)
-        self.state.nested_parse(self.content, self.content_offset, element)
-        for row in list(element.findall(block.Shelf)):
-            row.replace_self(list(row.children))
-        found = list(through(element.children))
+
+    def build(self) -> list[nodes.Node]:
+        """Make the carousel with its items and its heading.
+
+        :return: The carousel's node and what the parser reported.
+        """
+        node = self.locate(self.Node("", classes=self.classes))
+        node["titled"] = bool(self.arguments)
+        node["gap"] = self.gap
+        node["cards"] = self.cards
+        node["arrows"] = not (self.hide_arrows or self.dots)
+        node["dots"] = self.dots
+        node["auto"] = self.auto_run
+        node["interval"] = self.interval
+        node["direction"] = self.direction
+        self.add_name(node)
+        self.state.nested_parse(self.content, self.content_offset, node)
+        for shelf in list(node.findall(block.Shelf)):
+            shelf.replace_self(list(shelf.children))
+        found = list(through(node.children))
         if any(
-            isinstance(_, nodes.system_message) and _["level"] >= 3
-            for _ in found
+            isinstance(each, nodes.system_message) and each["level"] >= 3
+            for each in found
         ):
-            return [element]
+            return [node]
         for each in found:
             if not (
                 isinstance(each, SKIPPED) or is_trail(each) or is_item(each)
             ):
-                raise self.error(
-                    "carousel: expected blocks, buttons, figures, images,"
-                    f" repositories and thumbnails, got {what(each)}"
+                self.fail(
+                    "expected blocks, buttons, figures, images, repositories"
+                    f" and thumbnails, got {what(each)}"
                 )
-        if hollow(_ for _ in found if not is_trail(_) and not is_pending(_)):
-            raise self.error("carousel: expected at least 1 item, got none")
+        if hollow(
+            each
+            for each in found
+            if not is_trail(each) and not is_pending(each)
+        ):
+            self.fail("expected at least 1 item, got none")
         count = sum(map(is_item, found))
-        if element["cards"] and count < element["cards"]:
-            raise self.error(few(element["cards"], count))
+        if node["cards"] and count < node["cards"]:
+            self.fail(few(node["cards"], count))
         messages: list[nodes.system_message] = []
         if self.arguments:
-            pieces: list[tuple[str, str]] = [
-                ("title", titled(self, self.arguments[0]))
-            ]
-            if "preheader" in options:
-                pieces.insert(0, ("preheader", options["preheader"]))
-            if "subheader" in options:
-                pieces.append(("subheader", options["subheader"]))
-            for place, (field, text) in enumerate(pieces):
-                words, found_messages = parse(self, text, field)
+            pieces = [("title", self.title)]
+            if self.preheader:
+                pieces.insert(0, ("preheader", self.preheader))
+            if self.subheader:
+                pieces.append(("subheader", self.subheader))
+            for place, (field, written) in enumerate(pieces):
+                words, more = parse(self, written, field)
                 worded(self, words, f"a {field}")
-                messages += found_messages
-                element.insert(
+                messages += more
+                node.insert(
                     place,
-                    located(
-                        self,
-                        carouseltext(text, "", *words.children, field=field),
+                    self.locate(
+                        CarouselText(written, "", *words.children, field=field)
                     ),
                 )
-        return [element, *messages]
+        return [node, *messages]
+
+    @staticmethod
+    def plain(node: Carousel.Node) -> list[nodes.Node]:
+        """Write a carousel as words, for a builder that writes no HTML.
+
+        :param node: The carousel's node.
+        :return: A paragraph for each line of its heading, then its
+            items.
+        """
+        heading = [
+            nodes.paragraph("", "", *each.children)
+            for each in node.children
+            if isinstance(each, CarouselText)
+        ]
+        return [
+            *heading,
+            *(
+                each
+                for each in node.children
+                if not isinstance(each, CarouselText)
+            ),
+        ]
 
 
-@html.opens(Carousel)
-def visit(self: HTMLTranslator, node: Carousel) -> None:
+@html.opens(Carousel.Node)
+def visit(self: HTMLTranslator, node: Carousel.Node) -> None:
     """Open the carousel and the track its items scroll along.
 
     :param self: The HTML translator, whose body this appends to.
@@ -334,8 +345,8 @@ def visit(self: HTMLTranslator, node: Carousel) -> None:
     self.body.append(f'<div class="{carousel.track()}">')
 
 
-@html.closes(Carousel)
-def depart(self: HTMLTranslator, node: Carousel) -> None:
+@html.closes(Carousel.Node)
+def depart(self: HTMLTranslator, node: Carousel.Node) -> None:
     """Close the track, write the arrows or the dots and close the carousel.
 
     :param self: The HTML translator, whose body this appends to.
@@ -367,32 +378,14 @@ def emptied(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     del docname
     if app.builder.format != "html":
         return
-    for found in doctree.findall(Carousel):
+    for found in doctree.findall(Carousel.Node):
         count = sum(map(is_item, through(found.children)))
         if not count:
             fail(
                 "carousel: expected at least 1 item, got none", location(found)
             )
         if found["cards"] and count < found["cards"]:
-            fail(few(found["cards"], count), location(found))
-
-
-def plain(node: Carousel) -> list[nodes.Node]:
-    """Write a carousel as words, for a builder that draws no HTML.
-
-    :param node: The carousel's node.
-    :return: A paragraph for each line of its heading, if it has one,
-        then its items.
-    """
-    words = [
-        nodes.paragraph("", "", *_.children)
-        for _ in node.children
-        if isinstance(_, carouseltext)
-    ]
-    return [
-        *words,
-        *(_ for _ in node.children if not isinstance(_, carouseltext)),
-    ]
+            fail(f"carousel: {few(found['cards'], count)}", location(found))
 
 
 def register(app: Sphinx) -> None:
@@ -401,6 +394,3 @@ def register(app: Sphinx) -> None:
     :param app: The Sphinx application instance.
     """
     app.connect("doctree-resolved", emptied)
-
-
-node = Carousel

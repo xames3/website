@@ -330,11 +330,14 @@ def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     del docname
     if app.builder.format not in formats:
         return
-    for directive in directives:
+    for directive in [*directives, *KaamikiDirective.registry.values()]:
         plain = getattr(directive, "plain", None)
-        if plain is None:
+        node = getattr(directive, "Node", None) or getattr(
+            directive, "node", None
+        )
+        if plain is None or node is None:
             continue
-        for found in [*doctree.findall(directive.node)]:
+        for found in [*doctree.findall(node)]:
             found.replace_self(plain(found))
 
 
