@@ -30,7 +30,7 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import setting
+from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import BOUNDS
@@ -413,7 +413,7 @@ def _colour(config: Config, value: str) -> str:
         gave one and `#abc` for a hex colour.
     :raises ValueError: When it's none of those.
     """
-    names = setting(config, "role_colours")
+    names = values(config).roles.colours
     value = checks.colour(value, (*TONES, *names))
     if value in names:
         value = names[value]
@@ -748,7 +748,7 @@ def sharpie(
     """
     del name, content
     config = inliner.document.settings.env.config
-    preset = options.get("colour") or str(setting(config, "sharpie_colour"))
+    preset = options.get("colour") or values(config).roles.sharpie_colour
     try:
         element, colour = _split(text, "a colour")
         colour = _colour(config, colour or preset)
@@ -811,7 +811,7 @@ def underline(
     """
     del name, content
     config = inliner.document.settings.env.config
-    preset = options.get("colour") or str(setting(config, "underline_colour"))
+    preset = options.get("colour") or values(config).roles.underline_colour
     try:
         element, rest = _split(text, "a colour or settings")
         colour, asked, query = (rest or "").partition("?")
@@ -822,12 +822,12 @@ def underline(
         width = _decimal(
             given.pop("width", None),
             "width",
-            options.get("width", setting(config, "underline_width")),
+            options.get("width", values(config).roles.underline_width),
         )
         wobble = _decimal(
             given.pop("wobble", None),
             "wobble",
-            options.get("wobble", setting(config, "underline_wobble")),
+            options.get("wobble", values(config).roles.underline_wobble),
         )
     except ValueError as error:
         return _reject(inliner, rawtext, lineno, f"underline: {error}")

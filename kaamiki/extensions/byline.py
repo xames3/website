@@ -36,9 +36,9 @@ from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import reading_time
 from kaamiki.extensions.utils import relative_to_page
 from kaamiki.extensions.utils import render
-from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
+from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils.settings import ALIGNMENTS
 from kaamiki.extensions.utils.settings import BOUNDS
@@ -166,7 +166,7 @@ class Byline(KaamikiDirective, motion=True):
         self.env.temp_data["km_byline"] = True
         if self.interval is not None and len(self.backdrop.split()) < 2:
             self.fail(":interval: needs two or more :backdrop: pictures")
-        project = setting(self.config, "project")
+        project = values(self.config).site.project
         if self.avatar_size is not None and not (
             self.avatar or project.get("avatar")
         ):

@@ -4,7 +4,7 @@ Link Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 The helpers that work out where a link goes.
 """
@@ -19,7 +19,7 @@ from urllib.parse import urlsplit
 
 from sphinx.util.osutil import relative_uri
 
-from kaamiki.extensions.utils.settings import setting
+from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
     from collections.abc import Iterable
@@ -144,7 +144,7 @@ def hosts(config: Config) -> set[str]:
         `www.`.
     """
     return hostnames([config.html_baseurl]) | hostnames(
-        setting(config, "internal_hosts")
+        values(config).links.internal_hosts
     )
 
 
@@ -189,7 +189,7 @@ def opens_new_tab(url: str, config: Config) -> bool:
     :param config: The Sphinx configuration.
     :return: Whether the link gets `target="_blank"`.
     """
-    if not setting(config, "links_in_new_tab"):
+    if not values(config).links.new_tab:
         return False
     return elsewhere(url, hosts(config))
 

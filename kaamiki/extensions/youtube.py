@@ -33,8 +33,8 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
-from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import trail
+from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils import youtube_id
 from kaamiki.extensions.utils import youtube_still
@@ -178,7 +178,7 @@ class Youtube(KaamikiDirective):
         private = self.switch(
             "privacy",
             "no-privacy",
-            setting(config, "youtube_privacy"),
+            values(config).youtube.privacy,
             "kaamiki.conf.youtube.privacy",
         )
         facade = False
@@ -193,7 +193,7 @@ class Youtube(KaamikiDirective):
             facade = self.switch(
                 "click-to-load",
                 "auto-load",
-                setting(config, "youtube_click_to_load"),
+                values(config).youtube.click_to_load,
                 "kaamiki.conf.youtube.click_to_load",
             )
         domain = (
@@ -239,13 +239,11 @@ class Youtube(KaamikiDirective):
             self.fail(
                 ":hide-controls: needs :autoplay:, since nothing else plays it"
             )
-        allow = str(setting(config, "youtube_allow")).split("; ")
+        allow = values(config).youtube.allow.split("; ")
         if "autoplay" in options or facade:
             allow = [*dict.fromkeys([*allow, "autoplay"])]
         self.options["allow"] = "; ".join(allow)
-        self.options["referrer"] = str(
-            setting(config, "youtube_referrer_policy")
-        )
+        self.options["referrer"] = values(config).youtube.referrer_policy
         text = self.options.pop("caption", "")
         caption, messages = parse(self, text.strip(), "caption")
         if text.strip():

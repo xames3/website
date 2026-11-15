@@ -43,9 +43,9 @@ from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import paragraph
 from kaamiki.extensions.utils import phrase
-from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
+from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils.aliases import ALIASES
 from kaamiki.extensions.utils.icons import Icons
@@ -258,7 +258,7 @@ class Button(KaamikiDirective):
             )
         side = options.pop("icon-position", None)
         if side is None:
-            side = setting(config, "button_icon_position")
+            side = values(config).button.icon_position
         source, line = self.state_machine.get_source_and_line(self.lineno)
         attributes: dict[str, t.Any] = {}
         attributes["url"] = url
@@ -313,10 +313,10 @@ class Button(KaamikiDirective):
             how a button looks without one and has no class.
         """
         config = self.config
-        colours = setting(config, "button_colours")
+        colours = values(config).button.colours
         where = ""
         if scheme is None:
-            scheme = str(setting(config, "button_scheme"))
+            scheme = values(config).button.scheme
             where = " (set by kaamiki.conf.button.scheme)"
             if scheme == "chevron" and iconic:
                 scheme = "light"

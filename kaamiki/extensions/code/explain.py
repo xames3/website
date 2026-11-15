@@ -101,7 +101,7 @@ from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import on
-from kaamiki.extensions.utils import setting
+from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import TRACE_EVENTS
@@ -388,7 +388,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
         :return: The folder, or `None` when the site turned the cache off.
         """
         env = self.env
-        if not setting(env.config, "code_explain_cache"):
+        if not values(env.config).code_explain.cache:
             return None
         return p.join(str(env.doctreedir), "kaamiki-code-explain")
 
@@ -401,7 +401,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
         :raises rst.DirectiveError: When it asks for more than the site
             allows.
         """
-        most = setting(self.config, key)
+        most = values(self.config)[key]
         asked = self.options.get(option, most)
         if asked > most:
             self.fail(
@@ -494,7 +494,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
         """
         env = self.env
         config = env.config
-        if not setting(config, "code_explain_run"):
+        if not values(config).code_explain.run:
             self.fail(
                 "expected kaamiki.conf.code_explain.run = True to"
                 " run python, got it off; set it in conf.py if you trust every"
@@ -509,8 +509,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
                 )
         events = frozenset(
             listed(
-                self.options.get("events")
-                or setting(config, "code_explain_events")
+                self.options.get("events") or values(config).code_explain.events
             )
         )
         unknown = events - set(TRACE_EVENTS)
@@ -523,7 +522,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
         here = p.dirname(str(self.state.document.current_source))
         paths = [
             _ if p.isabs(_) else p.abspath(p.join(env.srcdir, _))
-            for _ in setting(config, "code_explain_pythonpath")
+            for _ in values(config).code_explain.pythonpath
         ]
         paths += [
             _ if p.isabs(_) else p.abspath(p.join(here, _))
@@ -533,7 +532,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
             if not p.isdir(path):
                 self.fail(f":pythonpath: expected a directory, got {path!r}")
         most = self.capped("limit", "code_explain_limit")
-        budget = most * setting(config, "code_explain_budget")
+        budget = most * values(config).code_explain.budget
         traced = execute(
             code,
             setup,
@@ -543,11 +542,11 @@ class CodeExplain(CodeWalk, name="code-explain"):
             self.capped("timeout", "code_explain_timeout"),
             paths,
             comprehensions="comprehensions" in self.options
-            or bool(setting(config, "code_explain_comprehensions")),
-            python=setting(config, "code_explain_python"),
+            or values(config).code_explain.comprehensions,
+            python=values(config).code_explain.python,
             cache=self.cache(),
-            memory_limit=setting(config, "code_explain_memory") << 20,
-            output_limit=setting(config, "code_explain_output_limit") << 20,
+            memory_limit=values(config).code_explain.memory << 20,
+            output_limit=values(config).code_explain.output_limit << 20,
         )
         for dependency in traced["deps"]:
             env.note_dependency(dependency)
