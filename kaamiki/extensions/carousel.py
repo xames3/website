@@ -69,7 +69,7 @@ template: t.Final[str] = "directives/carousel.html.jinja"
 DIRECTIONS: t.Final[tuple[str, ...]] = ("right", "left")
 CARDS: t.Final[int] = 2
 ITEMS: t.Final[tuple[type[nodes.Node], ...]] = (
-    block.Block,
+    block.Block.Node,
     button.Button,
     nodes.figure,
     nodes.image,
@@ -242,7 +242,7 @@ class directive(rst.Directive):
         element["direction"] = options.get("direction", "right")
         named(self, element)
         self.state.nested_parse(self.content, self.content_offset, element)
-        for row in list(element.findall(block.shelf)):
+        for row in list(element.findall(block.Shelf)):
             row.replace_self(list(row.children))
         found = list(through(element.children))
         if any(

@@ -84,7 +84,7 @@ def is_raw(node: nodes.Node) -> bool:
 
 KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
     "accordion": lambda _: isinstance(_, accordion.Accordion.Node),
-    "block": lambda _: isinstance(_, block.node),
+    "block": lambda _: isinstance(_, block.Block.Node),
     "byline": lambda _: isinstance(_, byline.node),
     "carousel": lambda _: isinstance(_, carousel.node),
     "code-explain": lambda _: (
@@ -145,7 +145,7 @@ PARTS: t.Final[tuple[type[nodes.Element], ...]] = (
 HOSTS: t.Final[tuple[tuple[type, str], ...]] = (
     (tabs.Tab.Node, "a tab"),
     (columns.Column.Node, "a column"),
-    (block.part, "a block"),
+    (block.Part, "a block"),
     (nodes.list_item, "a list"),
     (nodes.entry, "a table"),
     (nodes.definition, "a definition list"),
@@ -182,7 +182,7 @@ def is_wrapper(node: nodes.Node) -> bool:
     :return: `True` for a row of blocks, a captioned code block's box
         and a link that holds nothing but a picture.
     """
-    if isinstance(node, block.shelf):
+    if isinstance(node, block.Shelf):
         return True
     if isinstance(node, nodes.reference):
         return bool(node.children) and all(
@@ -235,7 +235,7 @@ def describe(node: nodes.Node) -> str:
     :param node: The node to look at.
     :return: Its name with an article, `an accordion`.
     """
-    if isinstance(node, block.node):
+    if isinstance(node, block.Block.Node):
         size = "" if node["size"] == "large" else f"{node['size']} "
         links = " that links" if node["link"] else ""
         return f"{article(f'{size}block')}{links}"
@@ -293,7 +293,7 @@ def narrow(host: nodes.Node) -> bool:
             whole["columns"] if isinstance(whole, columns.Columns.Node) else 1
         )
         return host["span"] == "auto" or int(host["span"]) < count
-    return isinstance(host, block.node) and host["size"] != "large"
+    return isinstance(host, block.Block.Node) and host["size"] != "large"
 
 
 def refused(name: str, host: nodes.Node) -> bool:
@@ -307,7 +307,11 @@ def refused(name: str, host: nodes.Node) -> bool:
         return name in HEAVY
     if name == "block" and kind(host) == "block":
         return True
-    if isinstance(host, block.node) and host["link"] and name in CLICKABLE:
+    if (
+        isinstance(host, block.Block.Node)
+        and host["link"]
+        and name in CLICKABLE
+    ):
         return True
     if name == "carousel" and isinstance(host, columns.Column.Node):
         return True
