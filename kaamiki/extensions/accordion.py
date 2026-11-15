@@ -38,15 +38,10 @@ from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils.aliases import ALIASES
 from kaamiki.extensions.utils.icons import ACCORDION_MARKERS
 from kaamiki.extensions.utils.icons import Icons
-from kaamiki.extensions.utils.settings import CHOICES
 
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
-MARKER_POSITIONS: t.Final[tuple[str, ...]] = CHOICES[
-    "accordion_marker_position"
-]
-MARKERS: t.Final[tuple[str, ...]] = CHOICES["accordion_marker"]
 accordion: t.Final[BEM] = BEM("accordion")
 text: t.Final[BEM] = BEM("text")
 
@@ -108,10 +103,8 @@ class Accordion(KaamikiDirective, motion=True):
     subheader = Option(checks.text)
     nested_subheader = Option(rst.directives.flag, needs="subheader")
     class_subheader = Option(checks.classes, needs="subheader", default=())
-    marker = Option(checks.word(*MARKERS), setting="accordion_marker")
-    marker_position = Option(
-        checks.word(*MARKER_POSITIONS), setting="accordion_marker_position"
-    )
+    marker = Option(setting="accordion_marker")
+    marker_position = Option(setting="accordion_marker_position")
     hide_show_more = Option(rst.directives.flag)
     group = Option(checks.slug, default="")
     class_title = Option(checks.classes, default=())

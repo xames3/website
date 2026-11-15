@@ -50,14 +50,12 @@ from kaamiki.extensions.utils.aliases import ALIASES
 from kaamiki.extensions.utils.doctree import alternatives
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import ALIGNMENTS
-from kaamiki.extensions.utils.settings import CHOICES
 
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 tabs: t.Final[BEM] = BEM("tabs")
 glyph: t.Final[BEM] = BEM("glyph")
-ICON_POSITIONS: t.Final[tuple[str, ...]] = CHOICES["tab_icon_position"]
 
 
 class TabLabel(nodes.paragraph):
@@ -167,11 +165,7 @@ class Tab(KaamikiDirective):
     required_arguments = 1
     final_argument_whitespace = True
     fa_icon = Option(checks.icon)
-    icon_position = Option(
-        checks.word(*ICON_POSITIONS),
-        needs="fa-icon",
-        setting="tab_icon_position",
-    )
+    icon_position = Option(needs="fa-icon", setting="tab_icon_position")
     selected = Option(rst.directives.flag)
     key = Option(checks.slug)
     class_title = Option(checks.classes, default=())

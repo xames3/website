@@ -693,7 +693,7 @@ class Sharpie(KaamikiRole):
     """
 
     base_classes = ("km-sharpie",)
-    colour = Option(checks.text, setting="sharpie_colour")
+    colour = Option(setting="sharpie_colour")
 
     def run(self) -> Reply:
         """Highlight the text.
@@ -733,14 +733,9 @@ class Underline(KaamikiRole):
     """
 
     base_classes = ("km-pencil",)
-    colour = Option(checks.text, setting="underline_colour")
-    width = Option(
-        checks.number(*BOUNDS["underline_width"]), setting="underline_width"
-    )
-    wobble = Option(
-        checks.number(*BOUNDS["underline_wobble"]),
-        setting="underline_wobble",
-    )
+    colour = Option(setting="underline_colour")
+    width = Option(setting="underline_width")
+    wobble = Option(setting="underline_wobble")
 
     def run(self) -> Reply:
         """Underline the text.
