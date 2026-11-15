@@ -46,6 +46,8 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
+    from kaamiki.extensions.roles import KaamikiRole
+
     Visitor = Callable[[HTMLTranslator, nodes.Element], None]
 
 OPTION: t.Final[re.Pattern[str]] = re.compile(
@@ -740,9 +742,13 @@ class Option:
     def __get__(self, user: None, owner: type) -> Option: ...
 
     @t.overload
-    def __get__(self, user: KaamikiDirective, owner: type) -> t.Any: ...
+    def __get__(
+        self, user: KaamikiDirective | KaamikiRole, owner: type
+    ) -> t.Any: ...
 
-    def __get__(self, user: KaamikiDirective | None, owner: type) -> t.Any:
+    def __get__(
+        self, user: KaamikiDirective | KaamikiRole | None, owner: type
+    ) -> t.Any:
         """Read the value of the option in a directive or a role.
 
         :param user: The directive or the role, or `None` on its class.
