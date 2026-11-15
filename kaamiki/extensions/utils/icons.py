@@ -488,7 +488,10 @@ class Icons:
 
 
 def _names(listed: str) -> frozenset[str]:
-    """Read the names a block of text lists, one space between each."""
+    """Read the names a block of text lists, one space between each.
+
+    :param listed: The block of text.
+    """
     return frozenset(listed.split())
 
 
