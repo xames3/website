@@ -56,6 +56,7 @@ from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import through
 from kaamiki.extensions.utils import what
 from kaamiki.extensions.utils import worded
+from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.settings import BOUNDS
@@ -373,7 +374,7 @@ def emptied(app: Sphinx, doctree: nodes.document, docname: str) -> None:
         the directive.
     """
     del docname
-    if app.builder.format != "html":
+    if not writes_pages(app):
         return
     for found in doctree.findall(Carousel.Node):
         count = sum(map(is_item, through(found.children)))

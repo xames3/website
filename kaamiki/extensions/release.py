@@ -61,6 +61,7 @@ from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import stored
 from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
+from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.dates import within
@@ -502,7 +503,7 @@ def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     :param docname: The page that is resolved (unused).
     """
     del docname
-    if app.builder.format != "html":
+    if not writes_pages(app):
         return
     classes = app.config.html_context["km_fa_icons"]["release_notes"]
     after = values(app.config).button.icon_position == "after"
