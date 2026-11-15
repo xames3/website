@@ -477,6 +477,21 @@ def lengths(value: str) -> tuple[str, str]:
     return words[0], words[-1]
 
 
+def paired(family: str, style: str) -> None:
+    """Make sure that a Font Awesome family has a style.
+
+    :param family: The family, as `fa-jelly` or `fad`.
+    :param style: The style, as `fa-regular` or `far`.
+    :raises ValueError: When the family does not have the style.
+    """
+    name, fixed = FAMILY_NAMES[family]
+    allowed = [f"fa-{_}" for _ in ([fixed] if fixed else FAMILY_STYLES[name])]
+    if f"fa-{STYLE_NAMES[style]}" not in allowed:
+        *rest, last = allowed
+        listed = f"{', '.join(rest)} or {last}" if rest else last
+        raise ValueError(f"expected {family} with {listed}, got {style!r}")
+
+
 def icon(argument: str | None) -> str:
     """Read a Font Awesome icon, as an option or a role writes it.
 
@@ -512,14 +527,7 @@ def icon(argument: str | None) -> str:
                 f" fa-{owner}, got {argument!r}"
             )
         if parts[0] in FAMILIES and rest and rest[0] in STYLES:
-            family, fixed = FAMILY_NAMES[parts[0]]
-            allowed = [fixed] if fixed else [*FAMILY_STYLES[family]]
-            if STYLE_NAMES[rest[0]] not in allowed:
-                raise ValueError(
-                    f"expected {parts[0]} with"
-                    f" {' or '.join(f'fa-{_}' for _ in allowed)}, got"
-                    f" {rest[0]!r}"
-                )
+            paired(parts[0], rest[0])
             rest = rest[1:]
         if not rest or not rest[0].startswith("fa-"):
             raise ValueError(

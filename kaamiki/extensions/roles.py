@@ -951,6 +951,8 @@ class Icon(KaamikiRole, name="fa-icon"):
             for `kaamiki.conf.icons.style`. `FaIcon` makes one role for
             each of `STYLE_CLASSES`: `fa-icon:solid` for a style, and
             `fa-icon:jelly` for a family, which draws in its own style.
+            For `fa-icon:sharp:light`, it is the family and the style,
+            as `fa-sharp fa-light`.
         """
         super().__init__()
         self.style = style
@@ -960,8 +962,11 @@ class Icon(KaamikiRole, name="fa-icon"):
 
         :return: The icon, and no error messages.
         :raises ValueError: When the name or a class is not part of an
-            icon.
+            icon, or the family does not have the style.
         """
+        family, _, style = (self.style or "").partition(" ")
+        if style:
+            checks.paired(family, style)
         if not self.said.split():
             self.fail("expected an icon name, got none")
         name, *classes = self.said.split()
@@ -1104,6 +1109,24 @@ class FaIcon(Quiet):
     roles = {  # noqa: RUF012
         key: Icon(style) for key, style in STYLE_CLASSES.items()
     }
+
+    def role(self, name: str) -> RoleFunction | None:
+        """Give docutils a role for a style, a family, or the two.
+
+        :param name: The name of the role in the domain, as `solid`,
+            `jelly` or `sharp:light`, with the family first.
+        :return: The role, or `None` when Font Awesome has no such
+            family or style. The family and the style are checked
+            when the role is used.
+        """
+        family, _, style = name.partition(":")
+        if not style:
+            return super().role(name)
+        if f"fa-{family}" in checks.FAMILIES and (
+            f"fa-{style}" in checks.STYLES
+        ):
+            return Icon(f"fa-{family} fa-{style}")
+        return None
 
 
 class Kbd(Quiet):
