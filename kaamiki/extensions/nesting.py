@@ -85,7 +85,7 @@ def is_raw(node: nodes.Node) -> bool:
 KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
     "accordion": lambda _: isinstance(_, accordion.Accordion.Node),
     "block": lambda _: isinstance(_, block.Block.Node),
-    "byline": lambda _: isinstance(_, byline.node),
+    "byline": lambda _: isinstance(_, byline.Byline.Node),
     "carousel": lambda _: isinstance(_, carousel.Carousel.Node),
     "code-explain": lambda _: (
         isinstance(_, explain.node) and not isinstance(_, version.node)
