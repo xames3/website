@@ -6,7 +6,11 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The helpers that the directives of Kaamiki are built from.
+The helpers that the directives of Kaamiki are built from. `NATIVE`
+holds the two options of the directives of docutils, `class` and
+`name`, so that a Kaamiki directive reads them in the same way.
+
+https://docutils.sourceforge.io/docs/ref/rst/directives.html#common-options
 """
 
 from __future__ import annotations
@@ -60,9 +64,6 @@ LINKS: t.Final[tuple[type[nodes.Node], ...]] = (
     nodes.citation_reference,
     addnodes.pending_xref,
 )
-# NOTE(xames3): The two options docutils gives its own directives, so a
-# Kaamiki directive reads `:class:` and `:name:` the same way.
-# https://docutils.sourceforge.io/docs/ref/rst/directives.html#common-options
 NATIVE: t.Final[dict[str, Callable[[str | None], t.Any]]] = {
     "class": checks.classes,
     "name": checks.reference_name,

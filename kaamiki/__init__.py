@@ -6,7 +6,10 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
 Last updated on: 15 November 2026
 
-The entry point of Kaamiki.
+The entry point of Kaamiki. Sphinx adds the stylesheets by priority, so
+`font.css` loads first, and `theme.css` loads last and has priority.
+
+https://www.sphinx-doc.org/en/master/extdev/appapi.html
 """
 
 from __future__ import annotations
@@ -49,9 +52,6 @@ static_dir = p.join(p.abspath(p.dirname(__file__)), "theme", "static")
 bundles_dir = p.join(p.abspath(p.dirname(__file__)), "theme", "bundles")
 locale_dir = p.join(p.abspath(p.dirname(__file__)), "locale")
 supported_extensions: Sequence[str] = ("sphinx_copybutton",)
-# NOTE(xames3): Sphinx adds stylesheets by priority, so font.css loads
-# first and theme.css last and wins.
-# https://www.sphinx-doc.org/en/master/extdev/appapi.html
 stylesheets: Sequence[tuple[str, int]] = (
     ("styles/font.css", 400),
     ("styles/code.css", 600),

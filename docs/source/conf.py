@@ -4,10 +4,14 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 The Sphinx configuration for my website. Sphinx is a documentation
 generator; I use it as a teaching and learning platform instead.
+`SOURCE_DATE_EPOCH` keeps the copyright year of a rebuild the same, in
+each year.
+
+https://reproducible-builds.org/specs/source-date-epoch/
 """
 
 import os
@@ -22,9 +26,6 @@ if t.TYPE_CHECKING:
 
 project: t.Final[str] = "Akshay Mestry"
 author: t.Final[str] = "Akshay Mestry"
-# NOTE(xames3): `SOURCE_DATE_EPOCH` keeps the copyright year of a
-# rebuild the same, whatever year it happens in.
-# https://reproducible-builds.org/specs/source-date-epoch/
 epoch: t.Final[str | None] = os.environ.get("SOURCE_DATE_EPOCH")
 year: t.Final[int] = (
     dt.fromtimestamp(int(epoch), UTC) if epoch else dt.now(UTC)

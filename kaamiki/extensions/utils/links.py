@@ -6,7 +6,12 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The helpers that find where a link goes.
+The helpers that find where a link goes. `REL` is the `rel` of each
+link that opens in a new tab. `noopener` stops the new tab from
+reaching back into this tab, and `noreferrer` stops it from seeing the
+page that the reader came from.
+
+https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel
 """
 
 from __future__ import annotations
@@ -27,10 +32,6 @@ if t.TYPE_CHECKING:
     from sphinx.config import Config
     from sphinx.writers.html import HTMLTranslator
 
-# NOTE(xames3): What every link that opens in a new tab says in `rel`.
-# `noopener` keeps the new tab from reaching back into this one and
-# `noreferrer` keeps it from seeing which page the reader came from.
-# https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel
 REL: t.Final[str] = "noopener noreferrer"
 SLASHES: t.Final[re.Pattern[str]] = re.compile(r"^/{2,}")
 YOUTUBE_ID: t.Final[re.Pattern[str]] = re.compile(r"[A-Za-z0-9_-]{11}")
