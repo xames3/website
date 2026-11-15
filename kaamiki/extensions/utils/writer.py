@@ -198,7 +198,9 @@ class translator(base):
         :return: `True` when it is the first in a block quote.
         """
         parent = node.parent
-        return isinstance(parent, nodes.block_quote) and parent.index(node) == 0
+        return (
+            isinstance(parent, nodes.block_quote) and parent.index(node) == 0
+        )
 
     @t.override
     def visit_title(self, node: nodes.title) -> None:

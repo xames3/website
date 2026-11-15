@@ -794,7 +794,9 @@ def processes() -> dict[int, int]:
                 contextlib.suppress(OSError, ValueError, IndexError),
                 open(f"/proc/{entry}/stat") as fd,
             ):
-                table[int(entry)] = int(fd.read().rpartition(")")[2].split()[1])
+                table[int(entry)] = int(
+                    fd.read().rpartition(")")[2].split()[1]
+                )
     return table
 
 
@@ -989,7 +991,9 @@ def replay(trace: Trace, wanted: frozenset[str]) -> list[dict[str, t.Any]]:
             frame["where"].update(dict.fromkeys(changed, frame["line"]))
         for name in set(frame["where"]) - set(rows):
             del frame["where"][name]
-        frame["values"] = {name: (row[1], row[3]) for name, row in rows.items()}
+        frame["values"] = {
+            name: (row[1], row[3]) for name, row in rows.items()
+        }
         frame["line"] = event["line"]
         fresh.setdefault(ident, set()).update(changed)
         out += event["out"]
@@ -1038,7 +1042,11 @@ def fault(
     :return: The step.
     """
     ident: int | None = error.get("frame")
-    frame: dict[str, t.Any] = {"line": error["line"], "values": {}, "where": {}}
+    frame: dict[str, t.Any] = {
+        "line": error["line"],
+        "values": {},
+        "where": {},
+    }
     taken: set[str] = set()
     if ident is not None:
         frame = frames.get(ident, frame)

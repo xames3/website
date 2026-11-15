@@ -1098,7 +1098,10 @@ def _icon(
     text = unescape(text)
     if not text.split():
         return _reject(
-            inliner, rawtext, lineno, "fa-icon: expected an icon name, got none"
+            inliner,
+            rawtext,
+            lineno,
+            "fa-icon: expected an icon name, got none",
         )
     name, *classes = text.split()
     name = name.removeprefix("fa-")

@@ -243,7 +243,9 @@ def classes(argument: str | None) -> list[str]:
         names.
     :raises TypeError: For a value that is not text.
     """
-    if argument is None or (isinstance(argument, str) and not argument.strip()):
+    if argument is None or (
+        isinstance(argument, str) and not argument.strip()
+    ):
         raise ValueError("expected one or more class names, got none")
     if not isinstance(argument, str):
         raise TypeError(f"expected class names, got {argument!r}")
@@ -396,7 +398,9 @@ def number(low: float, high: float) -> Callable[[str | None], float]:
     return read
 
 
-def spacing(presets: Sequence[str], high: float) -> Callable[[str | None], str]:
+def spacing(
+    presets: Sequence[str], high: float
+) -> Callable[[str | None], str]:
     """Make a check for a preset space or lengths in rem.
 
     :param presets: The words that are spaces.
@@ -484,7 +488,9 @@ def icon(argument: str | None) -> str:
         or rest[0] in STYLES | FAMILIES
         or MODIFIERS.fullmatch(rest[0])
     ):
-        raise ValueError(f"expected an icon name like fa-plus, got {rest[0]!r}")
+        raise ValueError(
+            f"expected an icon name like fa-plus, got {rest[0]!r}"
+        )
     for each in rest[1:]:
         if not MODIFIERS.fullmatch(each):
             raise ValueError(
@@ -557,7 +563,9 @@ def web(argument: str | None) -> str:
     """
     value = link(argument, schemes=("http", "https"))
     if not urlsplit(value).scheme:
-        raise ValueError(f"expected an http or https address, got {argument!r}")
+        raise ValueError(
+            f"expected an http or https address, got {argument!r}"
+        )
     return value
 
 

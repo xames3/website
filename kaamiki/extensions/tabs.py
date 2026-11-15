@@ -123,10 +123,14 @@ class Tabs(KaamikiDirective, motion=True):
         keys = [each["key"] for each in panes]
         for key in keys:
             if keys.count(key) > 1:
-                self.fail(f"expected each key once, got {key!r} more than once")
+                self.fail(
+                    f"expected each key once, got {key!r} more than once"
+                )
         picked = [each for each in panes if each["selected"]]
         if len(picked) > 1:
-            self.fail(":selected: expected on one tab, got it on more than one")
+            self.fail(
+                ":selected: expected on one tab, got it on more than one"
+            )
         for at, each in enumerate(panes):
             each["index"] = at
             each["checked"] = each in picked or (not picked and at == 0)

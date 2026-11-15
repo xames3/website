@@ -363,7 +363,9 @@ class Embed(KaamikiDirective, spec=placeholders):
         """
         env = self.env
         options = self.options
-        statics = [p.join(confdir(env), _) for _ in env.config.html_static_path]
+        statics = [
+            p.join(confdir(env), _) for _ in env.config.html_static_path
+        ]
         for option, suffix in (("css", ".css"), ("js", ".js")):
             for file_name in listed(options.get(option, "")):
                 if not file_name.endswith(suffix) or not checks.FILE.fullmatch(
@@ -500,7 +502,8 @@ class Embed(KaamikiDirective, spec=placeholders):
             )
         if any(ord(_) < 32 for _ in file):
             self.fail(
-                f"expected a file name without control characters, got {file!r}"
+                "expected a file name without control characters, got"
+                f" {file!r}"
             )
         env = self.env
         relative, path = env.relfn2path(file, env.docname)

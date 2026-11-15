@@ -345,7 +345,9 @@ class Button(KaamikiDirective):
             to itself, which a text writer would not write. A button
             that names a page of the site has no address to show.
         """
-        label = next(each for each in node.children if isinstance(each, phrase))
+        label = next(
+            each for each in node.children if isinstance(each, phrase)
+        )
         words = nodes.paragraph("", "", *label.children)
         if node["url"]:
             link = nodes.reference("", node["url"], refuri=node["url"])

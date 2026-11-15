@@ -126,7 +126,9 @@ CODE_POSITIONS: t.Final[tuple[str, str]] = ("right", "left")
 NAME: t.Final[re.Pattern[str]] = re.compile(
     r"[A-Za-z_][\w]*(?:\.[A-Za-z_]\w*|\[[\w'\"-]+\])*"
 )
-BLOCKS: t.Final[frozenset[str]] = frozenset({"code", "setup", "stdin", "lines"})
+BLOCKS: t.Final[frozenset[str]] = frozenset(
+    {"code", "setup", "stdin", "lines"}
+)
 OPTIONS: t.Final[dict[str, frozenset[str]]] = {
     "lines": frozenset({"at", "clear", "output", "values"}),
 }
@@ -242,7 +244,9 @@ class CodeWalk(KaamikiDirective, abstract=True):
         head.rawsource = self.options["caption"]
         head.source, head.line = source, line
         head.extend(parsed[0].children)
-        head["icon"] = caption_icon(head, language, icons=Icons.of(self.config))
+        head["icon"] = caption_icon(
+            head, language, icons=Icons.of(self.config)
+        )
         return head
 
     def snippet(self, code: str, language: str, start: int) -> PlainCode:
@@ -502,11 +506,13 @@ class CodeExplain(CodeWalk, name="code-explain"):
                 given = ", ".join(f":{_}:" for _ in sorted(block.options))
                 self.fail(
                     f"expected no {given} in a python"
-                    f" walkthrough, got them in the note for {label(low, high)}"
+                    f" walkthrough, got them in the note for"
+                    f" {label(low, high)}"
                 )
         events = frozenset(
             listed(
-                self.options.get("events") or values(config).code_explain.events
+                self.options.get("events")
+                or values(config).code_explain.events
             )
         )
         unknown = events - set(TRACE_EVENTS)

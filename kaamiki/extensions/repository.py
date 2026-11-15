@@ -81,7 +81,8 @@ class Repository(KaamikiDirective, motion=True):
             or repo.endswith(".git")
         ):
             self.fail(
-                f"expected owner/name like octocat/Hello-World, got {project!r}"
+                "expected owner/name like octocat/Hello-World, got"
+                f" {project!r}"
             )
         source = f"https://github.com/{owner}/{repo}"
         attributes: dict[str, t.Any] = {

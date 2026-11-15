@@ -220,7 +220,9 @@ def read_block(
     start = index + 1
     end = extent(content, index)
     raw = [content[_] for _ in range(start, end)]
-    options, cursor = read_options(raw, allowed, offset + start, match.group(1))
+    options, cursor = read_options(
+        raw, allowed, offset + start, match.group(1)
+    )
     body = gather(content, start + cursor, end, indentation(raw))
     block = chunk(
         match.group(1),

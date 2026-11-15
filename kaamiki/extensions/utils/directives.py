@@ -640,7 +640,9 @@ def visitor(
         if prepare is not None:
             attributes = prepare(self, attributes)
         self.body.append(
-            render(template, fa_icons=icons, **attributes, **fields(self, node))
+            render(
+                template, fa_icons=icons, **attributes, **fields(self, node)
+            )
         )
         raise nodes.SkipNode
 
@@ -708,7 +710,9 @@ class Option:
     @t.overload
     def __get__(self, directive: KaamikiDirective, owner: type) -> t.Any: ...
 
-    def __get__(self, directive: KaamikiDirective | None, owner: type) -> t.Any:
+    def __get__(
+        self, directive: KaamikiDirective | None, owner: type
+    ) -> t.Any:
         """Read the value of the option in the directive.
 
         :param directive: The directive, or `None` on its class.

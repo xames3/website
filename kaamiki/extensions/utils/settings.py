@@ -283,7 +283,8 @@ def shape(**fields: Rule) -> Rule:
         for name, each in value.items():
             if name not in fields:
                 raise ValueError(
-                    f"expected one of {', '.join(sorted(fields))}, got {name!r}"
+                    f"expected one of {', '.join(sorted(fields))}, got"
+                    f" {name!r}"
                 )
             try:
                 fields[name](each)
@@ -509,7 +510,9 @@ class Value[T]:
         if self.key in group.given:
             return group.given[self.key]
         if isinstance(self.default, dict | list):
-            return group.given.setdefault(self.key, copy.deepcopy(self.default))
+            return group.given.setdefault(
+                self.key, copy.deepcopy(self.default)
+            )
         return self.default
 
     def __set__(self, group: Settings, value: t.Any) -> None:
@@ -623,7 +626,9 @@ class Icons(Settings):
         key="fa_style",
         reread=True,
     )
-    kit = Value[str | None](None, string(checks.kit), key="fa_kit", reread=True)
+    kit = Value[str | None](
+        None, string(checks.kit), key="fa_kit", reread=True
+    )
     names = Value[dict[str, t.Any]]({}, site_icons, key="fa_icons")
 
     def update(
@@ -840,7 +845,9 @@ class Site(Settings, prefix=""):
 class Root(Settings, name=""):
     """The settings of no group, directly on `kaamiki.conf`."""
 
-    mode = Value("dark", choices=("dark", "light", "system"), key="colour_mode")
+    mode = Value(
+        "dark", choices=("dark", "light", "system"), key="colour_mode"
+    )
 
     icons: Icons
     show: Show
@@ -1618,13 +1625,15 @@ def _check_dates(given: dict[str, t.Any], conf: str) -> None:
             dt.strptime(sample, given["release_version_fmt"])  # noqa: DTZ007
         except ValueError, re.error:
             fail(
-                "kaamiki.conf.release.version_fmt: expected a format that reads"
-                " back what it writes, got one that doesn't",
+                "kaamiki.conf.release.version_fmt: expected a format that"
+                " reads back what it writes, got one that doesn't",
                 conf,
             )
 
 
-def _check_translation(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
+def _check_translation(
+    app: Sphinx, given: dict[str, t.Any], conf: str
+) -> None:
     """Check the date format that the catalogue of a language gives.
 
     :param app: The Sphinx application instance.
