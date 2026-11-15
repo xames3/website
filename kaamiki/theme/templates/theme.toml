@@ -1,6 +1,7 @@
 [theme]
 inherit = "basic"
-stylesheets = [  ]
+stylesheets = []
+sidebars = ["sections/sidebar.html.jinja"]
 pygments_style = { default = "monokai" }
 
 [options]

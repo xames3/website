@@ -141,6 +141,7 @@ venv/
 .github/**.md
 .python-version
 archive/*
+/devtools/
 *.bak
 !kaamiki/locale/**/*.mo
 !kaamiki/locale/*.pot

@@ -1,0 +1,116 @@
+/*
+Light mode. The values of every colour token that has another value in light,
+and the filter that turns the byline's white waves dark, once for
+`data-km-mode="light"` and once for `system` on a device that is light. Dark
+has no block: it is what the tokens say, and only the colour scheme is set for
+a reader who picked it. Keep the two blocks the same.
+*/
+:root[data-km-mode="dark"] {
+    color-scheme: dark;
+}
+
+:root[data-km-mode="light"] {
+    color-scheme: only light;
+    --km-colour-surface-baseline: 0 0% 100%;
+    --km-colour-surface-up-1: 0 0% 97%;
+    --km-colour-surface-up-2: 0 0% 94%;
+    --km-colour-surface-up-3: 0 0% 90%;
+    --km-colour-surface-up-4: 0 0% 86%;
+    --km-colour-surface-up-5: 0 0% 82%;
+    --km-colour-text-up-1: 0 0% 0%;
+    --km-colour-text-baseline: 0 0% 11%;
+    --km-colour-text-down-1: 0 0% 20%;
+    --km-colour-text-down-2: 0 0% 28%;
+    --km-colour-text-down-3: 0 0% 34%;
+    --km-colour-text-down-4: 0 0% 40%;
+    --km-colour-focus: 0 0% 92%;
+    --km-colour-highlight: 211.25 97.96% 90%;
+    --km-byline-wave-filter: invert(1);
+    --km-colour-list-ring: 0 0% 80%;
+    --km-colour-diff-added-bg: 142 71% 45% / 0.2;
+    --km-colour-diff-added-fg: 142 80% 17%;
+    --km-colour-diff-removed-bg: 0 84% 60% / 0.18;
+    --km-colour-diff-removed-fg: 0 80% 26%;
+    --km-colour-version-added: 142 70% 31%;
+    --km-colour-version-changed: 40 90% 32%;
+    --km-colour-version-deprecated: 0 70% 45%;
+    --km-colour-admonition-base-bg: var(--km-colour-surface-up-1);
+    --km-colour-admonition-danger-bg: 0 85% 95%;
+    --km-colour-admonition-danger-fg: 5 76% 40%;
+    --km-colour-admonition-hint-bg: 285 70% 95%;
+    --km-colour-admonition-hint-fg: 290 70% 35%;
+    --km-colour-admonition-tip-bg: 142 55% 93%;
+    --km-colour-admonition-tip-fg: 125 66% 26%;
+    --km-colour-admonition-warning-bg: 29 100% 92%;
+    --km-colour-admonition-warning-fg: 25 100% 32%;
+    --km-colour-admonition-seealso-bg: 213 94% 94%;
+    --km-colour-admonition-seealso-fg: 210 100% 36%;
+    --km-colour-code-object: 212 93% 35%;
+    --km-colour-code-string: 213 82% 22%;
+    --km-colour-code-function: 262 63% 52%;
+    --km-colour-code-comment: 212 10% 39%;
+    --km-colour-code-error: 357 80% 42%;
+    --km-colour-code-keyword: 355 70% 44%;
+    --km-colour-code-deleted: 355 75% 38%;
+    --km-colour-code-class: 24 100% 29%;
+    --km-colour-code-entity: 24 100% 33%;
+    --km-colour-code-tag: 135 80% 23%;
+    --km-colour-code-whitespace: 213 10% 72%;
+    --km-colour-code-marker: 212 93% 40%;
+    --km-colour-code-comment-current: 212 10% 34%;
+    --km-colour-code-error-current: 357 80% 36%;
+}
+
+@media (prefers-color-scheme: light) {
+    :root[data-km-mode="system"] {
+        color-scheme: light dark;
+        --km-colour-surface-baseline: 0 0% 100%;
+        --km-colour-surface-up-1: 0 0% 97%;
+        --km-colour-surface-up-2: 0 0% 94%;
+        --km-colour-surface-up-3: 0 0% 90%;
+        --km-colour-surface-up-4: 0 0% 86%;
+        --km-colour-surface-up-5: 0 0% 82%;
+        --km-colour-text-up-1: 0 0% 0%;
+        --km-colour-text-baseline: 0 0% 11%;
+        --km-colour-text-down-1: 0 0% 20%;
+        --km-colour-text-down-2: 0 0% 28%;
+        --km-colour-text-down-3: 0 0% 34%;
+        --km-colour-text-down-4: 0 0% 40%;
+        --km-colour-focus: 0 0% 92%;
+        --km-colour-highlight: 211.25 97.96% 90%;
+        --km-byline-wave-filter: invert(1);
+        --km-colour-list-ring: 0 0% 80%;
+        --km-colour-diff-added-bg: 142 71% 45% / 0.2;
+        --km-colour-diff-added-fg: 142 80% 17%;
+        --km-colour-diff-removed-bg: 0 84% 60% / 0.18;
+        --km-colour-diff-removed-fg: 0 80% 26%;
+        --km-colour-version-added: 142 70% 31%;
+        --km-colour-version-changed: 40 90% 32%;
+        --km-colour-version-deprecated: 0 70% 45%;
+        --km-colour-admonition-base-bg: var(--km-colour-surface-up-1);
+        --km-colour-admonition-danger-bg: 0 85% 95%;
+        --km-colour-admonition-danger-fg: 5 76% 40%;
+        --km-colour-admonition-hint-bg: 285 70% 95%;
+        --km-colour-admonition-hint-fg: 290 70% 35%;
+        --km-colour-admonition-tip-bg: 142 55% 93%;
+        --km-colour-admonition-tip-fg: 125 66% 26%;
+        --km-colour-admonition-warning-bg: 29 100% 92%;
+        --km-colour-admonition-warning-fg: 25 100% 32%;
+        --km-colour-admonition-seealso-bg: 213 94% 94%;
+        --km-colour-admonition-seealso-fg: 210 100% 36%;
+        --km-colour-code-object: 212 93% 35%;
+        --km-colour-code-string: 213 82% 22%;
+        --km-colour-code-function: 262 63% 52%;
+        --km-colour-code-comment: 212 10% 39%;
+        --km-colour-code-error: 357 80% 42%;
+        --km-colour-code-keyword: 355 70% 44%;
+        --km-colour-code-deleted: 355 75% 38%;
+        --km-colour-code-class: 24 100% 29%;
+        --km-colour-code-entity: 24 100% 33%;
+        --km-colour-code-tag: 135 80% 23%;
+        --km-colour-code-whitespace: 213 10% 72%;
+        --km-colour-code-marker: 212 93% 40%;
+        --km-colour-code-comment-current: 212 10% 34%;
+        --km-colour-code-error-current: 357 80% 36%;
+    }
+}

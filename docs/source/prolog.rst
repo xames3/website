@@ -1,5 +1,5 @@
 .. role:: strike
-    :class: km-strikethrough
+    :class: am-strikethrough
 
 .. role:: html(raw)
     :format: html
@@ -13,15 +13,10 @@
 .. role:: python(code)
     :language: python3
 
-.. |bb| replace:: :html:`<span class="km-blinking-cursor"></span>`
-.. |recent| replace:: :html:`<span class="km-recent-post"></span>`
+.. |new| replace:: :html:`<span class="am-badge am-badge--new"
+   ><i class="fa-solid fa-sparkles" aria-hidden="true"></i
+   ><span class="sr-only">New</span></span>`
 
-.. |br| replace:: :html:`<br/>`
-.. |tab| replace:: :html:`&emsp;`
-.. |dash| replace:: :html:`&mdash;`
-
-.. |exp| replace:: :html:`<span class="km-badge km-beta"><i class="fa-solid fa-flask"></i></span>`
-.. |new| replace:: :html:`<span class="km-badge km-new"><i class="fa-solid fa-sparkles"></i></span>`
-.. |pop| replace:: :html:`<span class="km-badge"><i class="fa-solid fa-star"></i></span>`
-
-.. |>| replace:: :html:`<i class="fa-solid fa-chevron-right fa-2xs"></i>`
+.. |pop| replace:: :html:`<span class="am-badge"
+   ><i class="fa-solid fa-star" aria-hidden="true"></i
+   ><span class="sr-only">Easter egg</span></span>`

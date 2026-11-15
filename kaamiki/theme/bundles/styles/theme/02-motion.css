@@ -1,0 +1,147 @@
+/*
+Motion. The speed and the curves every animation takes from, so a site, a
+reader and a test can change them in one place. A time is a `calc()` of
+`--km-motion-speed`, which is 1 and calm, so 2 is twice as quick and 0.5 half
+as quick. The ambient one is how long a loop that never ends takes for a round.
+Reduced motion leaves it alone, since a loop of no time would be a strobe, and
+stills the loop by pausing it with `--km-motion-ambient-state` instead. The
+spring curves are written by archive/tmp/2026-11-10-motion/
+make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
+*/
+:root {
+    --km-motion-speed: 1;
+    --km-site-speed: var(--km-motion-speed);
+    --km-motion-press: calc(200ms / var(--km-motion-speed));
+    --km-motion-surface: calc(340ms / var(--km-motion-speed));
+    --km-motion-state: calc(450ms / var(--km-motion-speed));
+    --km-motion-content: calc(450ms / var(--km-motion-speed));
+    --km-motion-fade: calc(250ms / var(--km-motion-speed));
+    --km-motion-enter: calc(700ms / var(--km-motion-speed));
+    --km-motion-page: calc(500ms / var(--km-motion-speed));
+    --km-motion-stagger: calc(60ms / var(--km-motion-speed));
+    --km-motion-ambient: calc(1600ms / var(--km-motion-speed));
+    --km-motion-rise: 0.75rem;
+    --km-motion-rise-small: 0.375rem;
+    --km-motion-ambient-state: running;
+    --km-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    --km-ease-lively: cubic-bezier(0.34, 1.2, 0.64, 1);
+    --km-ease-fade: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --km-ease-ambient: cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+    :root {
+        --km-ease-smooth:
+            linear(0, 0.0088, 0.0322, 0.0663, 0.1078, 0.1544, 0.204, 0.2551,
+            0.3064, 0.357, 0.4063, 0.4538, 0.4991, 0.542, 0.5823, 0.62,
+            0.6551, 0.6876, 0.7177, 0.7454, 0.7708, 0.794, 0.8153, 0.8346,
+            0.8522, 0.8682, 0.8827, 0.8958, 0.9077, 0.9184, 0.928, 0.9367,
+            0.9445, 0.9515, 0.9578, 0.9635, 0.9685, 0.9731, 0.9771, 0.9807,
+            0.984, 0.9869, 0.9895, 0.9918, 0.9938, 0.9956, 0.9973, 0.9987, 1);
+        --km-ease-lively:
+            linear(0, 0.0082, 0.0305, 0.0638, 0.1055, 0.1534, 0.2054, 0.2599,
+            0.3157, 0.3715, 0.4265, 0.4799, 0.5312, 0.58, 0.626, 0.6689,
+            0.7088, 0.7455, 0.779, 0.8095, 0.837, 0.8617, 0.8837, 0.9032,
+            0.9203, 0.9353, 0.9483, 0.9594, 0.9689, 0.9769, 0.9836, 0.9891,
+            0.9936, 0.9972, 1, 1.002, 1.0035, 1.0046, 1.0051, 1.0054, 1.0053,
+            1.005, 1.0046, 1.004, 1.0033, 1.0025, 1.0017, 1.0008, 1);
+    }
+}
+
+:root[data-km-motion="quiet"] {
+    --km-motion-ambient-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --km-motion-press: 0.01ms;
+        --km-motion-surface: 0.01ms;
+        --km-motion-state: 0.01ms;
+        --km-motion-content: 0.01ms;
+        --km-motion-fade: 0.01ms;
+        --km-motion-enter: 0.01ms;
+        --km-motion-page: 0.01ms;
+        --km-motion-stagger: 0.01ms;
+        --km-motion-ambient-state: paused;
+    }
+}
+
+/*
+A directive with its own speed (`:speed:`) says so with a class, `km-speed--2` for
+twice as quick as the site. Every time under it is worked out again from the
+site's speed times that speed, since a token is only ever worked out where it's
+written. A reader who asks for less motion gets the calmer version whatever the
+speed, so none of it applies to them.
+*/
+@media (prefers-reduced-motion: no-preference) {
+    .km-speed--0-25 {
+        --km-speed: 0.25;
+    }
+
+    .km-speed--0-5 {
+        --km-speed: 0.5;
+    }
+
+    .km-speed--0-75 {
+        --km-speed: 0.75;
+    }
+
+    .km-speed--1 {
+        --km-speed: 1;
+    }
+
+    .km-speed--1-5 {
+        --km-speed: 1.5;
+    }
+
+    .km-speed--2 {
+        --km-speed: 2;
+    }
+
+    .km-speed--3 {
+        --km-speed: 3;
+    }
+
+    .km-speed--4 {
+        --km-speed: 4;
+    }
+
+    [class*="km-speed--"] {
+        --km-motion-speed: calc(var(--km-site-speed) * var(--km-speed));
+        --km-motion-press: calc(200ms / var(--km-motion-speed));
+        --km-motion-surface: calc(340ms / var(--km-motion-speed));
+        --km-motion-state: calc(450ms / var(--km-motion-speed));
+        --km-motion-content: calc(450ms / var(--km-motion-speed));
+        --km-motion-fade: calc(250ms / var(--km-motion-speed));
+        --km-motion-enter: calc(700ms / var(--km-motion-speed));
+        --km-motion-page: calc(500ms / var(--km-motion-speed));
+        --km-motion-stagger: calc(60ms / var(--km-motion-speed));
+        --km-motion-ambient: calc(1600ms / var(--km-motion-speed));
+        --km-duration-hover: calc(500ms / var(--km-motion-speed));
+        --km-duration-fast: calc(250ms / var(--km-motion-speed));
+        --km-duration-drawer: calc(520ms / var(--km-motion-speed));
+        --km-duration-normal: calc(750ms / var(--km-motion-speed));
+        --km-duration-slow: calc(1000ms / var(--km-motion-speed));
+        --km-duration-clamp: calc(420ms / var(--km-motion-speed));
+        --km-title-step: calc(100ms / var(--km-motion-speed));
+        --km-reveal-duration: calc(500ms / var(--km-motion-speed));
+        --km-reveal-step: calc(150ms / var(--km-motion-speed));
+        --km-code-explain-swap: calc(600ms / var(--km-motion-speed));
+        --km-ticker-duration: calc(2000ms / var(--km-motion-speed));
+        --km-sweep-duration: calc(1900ms / var(--km-motion-speed));
+    }
+}
+
+/* A directive that says `:no-motion:` plays nothing: every transition and
+   animation in it ends as it starts, and its loops run once. */
+.km-motion--off,
+.km-motion--off *,
+.km-motion--off *::before,
+.km-motion--off *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+}

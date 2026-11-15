@@ -1,0 +1,66 @@
+    const {
+        initShowMore,
+        initAccordions,
+        initSearchHighlights,
+        initRepositoryWidgets,
+        initTickers,
+        initSwaps,
+        initInkReveal,
+        initTranscripts,
+        initPageReveal,
+        initBylineBackground,
+    } = window.Kaamiki;
+    Object.freeze(window.Kaamiki);
+    for (const init of [
+        initHeaderHeight,
+        initHeaderLine,
+        initKeyboardModality,
+        initColourModes,
+        initLogoInvert,
+        initNavFit,
+        initSidebar,
+        initScrollTop,
+        initTabSets,
+        initCarousels,
+        initRelatedPictures,
+        initShowMore,
+        initHeaderSearch,
+        initAnchorScrolling,
+        initFocusInView,
+        initCopyUrl,
+        initPrefetch,
+        initHeaderLinks,
+        initFuzzyBlur,
+        initImageZoom,
+        initPixelatedBlur,
+        initTouchReveal,
+        initImageEnlarge,
+        initHeaderNavDropdowns,
+        initAccordions,
+        initHighlightedLines,
+        initCopyButtonNames,
+        initScrollable,
+        initScrollFades,
+        initBreadcrumbs,
+        initBylineFit,
+        initColumnFit,
+        initYouTubeBlocks,
+        initYouTubeFacades,
+        initVideoFlags,
+        initVideoAutoplay,
+        initRepositoryWidgets,
+        initTickers,
+        initSwaps,
+        initInkReveal,
+        initTranscripts,
+        initPageReveal,
+        initBylineBackground,
+        initSearchHighlights,
+    ]) {
+        try {
+            init();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+})();

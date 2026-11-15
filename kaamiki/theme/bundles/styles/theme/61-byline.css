@@ -1,0 +1,329 @@
+.km-byline {
+    display: flex;
+    flex-direction: column;
+    color: hsl(var(--km-colour-meta));
+    font-size: var(--km-font-size-down-3);
+    line-height: 1.25rem;
+    --km-tracking: 0.01em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.km-byline__profile,
+.km-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--km-glyph-gap);
+    border-radius: var(--km-radius-round);
+}
+
+.km-byline__profile {
+    margin-inline: auto;
+}
+
+.km-pagination {
+    justify-content: flex-end;
+    width: 100%;
+    max-width: var(--km-layout-container);
+    padding: calc(var(--km-space-1) + 1px);
+    margin: var(--km-space-8) auto var(--km-space-16);
+}
+
+.km-byline--align-left {
+    flex-flow: row wrap;
+    align-items: center;
+    gap: var(--km-glyph-gap);
+    padding-bottom: var(--km-space-16);
+    text-align: left;
+}
+
+.km-byline--align-right {
+    text-align: right;
+}
+
+.km-byline--align-left .km-byline__profile {
+    margin-inline: 0;
+}
+
+.km-byline--align-left .km-byline__meta {
+    display: contents;
+}
+
+.km-byline--align-left .km-byline__meta::after {
+    display: none;
+}
+
+.km-byline--align-left .km-byline__meta-group {
+    gap: var(--km-space-2);
+}
+
+.km-page__content :where(section) > .km-text--lead + .km-byline--align-left {
+    margin-top: var(--km-space-8);
+}
+
+.km-byline--align-right .km-byline__profile {
+    margin-inline: auto 0;
+}
+
+.km-byline__avatar {
+    aspect-ratio: 1 / 1;
+    border-radius: 100%;
+    flex: none;
+    margin: 0;
+    object-fit: cover;
+}
+
+.km-byline__name {
+    font-weight: var(--km-weight-medium);
+}
+
+.km-byline__reading-time-icon {
+    margin-right: var(--km-glyph-gap);
+}
+
+.km-byline__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--km-space-4);
+    margin-top: var(--km-space-24);
+}
+
+.km-byline__meta-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--km-space-2);
+}
+
+.km-byline__meta-group--end {
+    margin-inline-start: auto;
+}
+
+.km-byline__separator {
+    flex: none;
+    width: 2px;
+    height: 2px;
+    border-radius: var(--km-radius-round);
+    background-color: currentColor;
+}
+
+.km-byline__source,
+.km-byline__copy,
+.km-byline__language {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    min-width: 24px;
+    gap: var(--km-glyph-gap);
+    color: inherit;
+    font-weight: inherit;
+    text-transform: inherit;
+}
+
+.km-byline__copy::after {
+    --km-tracking: var(--km-tracking-body);
+    text-transform: none;
+}
+
+.km-byline--tight .km-byline__language,
+.km-byline--tight .km-byline__separator:has(+ .km-byline__language) {
+    display: none;
+}
+
+.km-byline:not(.km-byline--align-left) .km-byline__separator:first-child {
+    display: none;
+}
+
+@keyframes km-byline-bg-zoom {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.08);
+    }
+}
+
+/* The same keyframes under another name: a picture that comes in later
+   starts its zoom again, which a change of class can do and a change of
+   the picture can't. */
+@keyframes km-byline-bg-zoom-again {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.08);
+    }
+}
+
+.km-byline__bg {
+    --km-byline-bleed: min(
+        var(--km-space-24),
+        max(0px, calc((100vw - 100cqw) / 2 - 1rem))
+    );
+    position: absolute;
+    top: 0;
+    left: calc(var(--km-byline-bleed) * -1);
+    right: calc(var(--km-byline-bleed) * -1);
+    z-index: -1;
+    pointer-events: none;
+    clip-path: inset(0);
+    opacity: 0.3;
+    filter: grayscale(1);
+    transition: opacity var(--km-duration-slow) var(--km-ease-standard);
+    --km-byline-feather: radial-gradient(
+        ellipse closest-side at 50% 50%,
+        hsl(var(--km-colour-surface-baseline)) 0%,
+        hsl(var(--km-colour-surface-baseline) / 0.956) 10%,
+        hsl(var(--km-colour-surface-baseline) / 0.835) 20%,
+        hsl(var(--km-colour-surface-baseline) / 0.667) 30%,
+        hsl(var(--km-colour-surface-baseline) / 0.487) 40%,
+        hsl(var(--km-colour-surface-baseline) / 0.325) 50%,
+        hsl(var(--km-colour-surface-baseline) / 0.198) 60%,
+        hsl(var(--km-colour-surface-baseline) / 0.11) 70%,
+        hsl(var(--km-colour-surface-baseline) / 0.056) 80%,
+        hsl(var(--km-colour-surface-baseline) / 0.026) 90%,
+        transparent 100%
+    );
+    mask-image: var(--km-byline-feather);
+    -webkit-mask-image: var(--km-byline-feather);
+}
+
+@media (width >= 768px) and (height >= 500px) {
+    .km-byline__bg {
+        top: var(--km-space-12);
+    }
+}
+
+.km-byline__bg:not(.km-byline__bg--waves)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--km-byline-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation:
+        km-byline-bg-zoom calc(8 * var(--km-duration-slow)) ease-in-out
+            infinite alternate;
+}
+
+.km-byline__bg--still,
+.km-byline__bg--still::before,
+.km-byline__bg--still .km-byline__wave {
+    animation: none;
+    transition: none;
+}
+
+.km-byline__bg--again::before {
+    animation-name: km-byline-bg-zoom-again;
+}
+
+.km-byline__bg--once::before {
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+.km-byline__bg--waves {
+    --km-wave-a: 75rem;
+    --km-wave-b: 112.5rem;
+    --km-wave-c: 56.25rem;
+    overflow: hidden;
+    opacity: 0.75;
+    filter: none;
+    animation: none;
+}
+
+.km-byline__wave {
+    position: absolute;
+    left: 0;
+    width: calc(100% + var(--km-wave-size));
+    height: calc(var(--km-wave-size) * var(--km-wave-ratio));
+    background-repeat: repeat-x;
+    background-size: var(--km-wave-size) 100%;
+    filter: var(--km-byline-wave-filter);
+    will-change: transform;
+    animation: km-wave-right calc(30s / var(--km-speed, 1)) linear infinite;
+}
+
+.km-byline__wave--a {
+    --km-wave-size: var(--km-wave-a);
+    --km-wave-ratio: 0.5;
+    top: 0;
+    left: calc(var(--km-wave-a) * -1);
+    background-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='1200'%20height='600'%20viewBox='0%200%201200%20600'><defs><linearGradient%20id='g'%20gradientUnits='userSpaceOnUse'%20x1='0'%20y1='152'%20x2='0'%20y2='600'><stop%20offset='0'%20stop-color='white'%20stop-opacity='0.36'/><stop%20offset='0.5'%20stop-color='white'%20stop-opacity='0.120'/><stop%20offset='1'%20stop-color='white'%20stop-opacity='0'/></linearGradient><filter%20id='b'%20x='-10%25'%20y='-30%25'%20width='120%25'%20height='160%25'><feGaussianBlur%20stdDeviation='14'/></filter></defs><path%20d='M-1200%20270%20C%20-1050%20180,%20-750%20180,%20-600%20270%20S%20-150%20360,%200%20270%20C%20150%20180,%20450%20180,%20600%20270%20S%201050%20360,%201200%20270%20C%201350%20180,%201650%20180,%201800%20270%20S%202250%20360,%202400%20270%20V1000%20H-1200%20Z'%20fill='url(%23g)'%20filter='url(%23b)'/></svg>");
+}
+
+.km-byline__wave--b {
+    --km-wave-size: var(--km-wave-b);
+    --km-wave-ratio: 0.357;
+    top: var(--km-space-12);
+    background-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='1800'%20height='642.857'%20viewBox='0%200%201800%20642.857'><defs><linearGradient%20id='g'%20gradientUnits='userSpaceOnUse'%20x1='0'%20y1='187.286'%20x2='0'%20y2='642.857'><stop%20offset='0'%20stop-color='white'%20stop-opacity='0.24'/><stop%20offset='0.5'%20stop-color='white'%20stop-opacity='0.080'/><stop%20offset='1'%20stop-color='white'%20stop-opacity='0'/></linearGradient><filter%20id='b'%20x='-10%25'%20y='-30%25'%20width='120%25'%20height='160%25'><feGaussianBlur%20stdDeviation='16'/></filter></defs><path%20d='M-1800%20289.286%20C%20-1575%20219.286,%20-1125%20219.286,%20-900%20289.286%20S%20-225%20359.286,%200%20289.286%20C%20225%20219.286,%20675%20219.286,%20900%20289.286%20S%201575%20359.286,%201800%20289.286%20C%202025%20219.286,%202475%20219.286,%202700%20289.286%20S%203375%20359.286,%203600%20289.286%20V1042.86%20H-1800%20Z'%20fill='url(%23g)'%20filter='url(%23b)'/></svg>");
+    animation-name: km-wave-left;
+}
+
+.km-byline__wave--c {
+    --km-wave-size: var(--km-wave-c);
+    --km-wave-ratio: 0.625;
+    top: calc(var(--km-space-24) * 1.75);
+    left: calc(var(--km-wave-c) * -1);
+    background-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='900'%20height='562.5'%20viewBox='0%200%20900%20562.5'><defs><linearGradient%20id='g'%20gradientUnits='userSpaceOnUse'%20x1='0'%20y1='174.125'%20x2='0'%20y2='562.5'><stop%20offset='0'%20stop-color='white'%20stop-opacity='0.16'/><stop%20offset='0.5'%20stop-color='white'%20stop-opacity='0.053'/><stop%20offset='1'%20stop-color='white'%20stop-opacity='0'/></linearGradient><filter%20id='b'%20x='-10%25'%20y='-30%25'%20width='120%25'%20height='160%25'><feGaussianBlur%20stdDeviation='12'/></filter></defs><path%20d='M-900%20253.125%20C%20-787.5%20198.125,%20-562.5%20198.125,%20-450%20253.125%20S%20-112.5%20308.125,%200%20253.125%20C%20112.5%20198.125,%20337.5%20198.125,%20450%20253.125%20S%20787.5%20308.125,%20900%20253.125%20C%201012.5%20198.125,%201237.5%20198.125,%201350%20253.125%20S%201687.5%20308.125,%201800%20253.125%20V962.5%20H-900%20Z'%20fill='url(%23g)'%20filter='url(%23b)'/></svg>");
+}
+
+@keyframes km-wave-right {
+    to {
+        transform: translate3d(var(--km-wave-size), 0, 0);
+    }
+}
+
+@keyframes km-wave-left {
+    to {
+        transform: translate3d(calc(var(--km-wave-size) * -1), 0, 0);
+    }
+}
+
+@media (width < 768px) {
+    .km-byline__bg--waves {
+        --km-wave-a: 30rem;
+        --km-wave-b: 45rem;
+        --km-wave-c: 22.5rem;
+    }
+}
+
+.km-pagination__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background-color: hsl(var(--km-colour-button-dark-bg));
+    color: hsl(var(--km-colour-button-dark-fg));
+    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: hsl(var(--km-colour-button-dark-bg-hover));
+        }
+    }
+
+    &:active {
+        background-color: hsl(var(--km-colour-button-dark-bg-active));
+    }
+
+    & .km-chevron {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin: 0;
+        vertical-align: baseline;
+    }
+
+    &.km-pagination__link--prev .km-chevron {
+        transform: scaleX(-1);
+    }
+}
+

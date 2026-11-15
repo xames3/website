@@ -1,0 +1,395 @@
+.km-block-row {
+    --km-blocks-gap-x: var(--km-space-1-5);
+    --km-blocks-gap-y: var(--km-space-2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: var(--km-blocks-gap-y) var(--km-blocks-gap-x);
+    margin: var(--km-space-8) 0;
+}
+
+.km-block {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+        "preheader"
+        "body"
+        "footer";
+    min-width: 0;
+    width: 100%;
+    border-radius: var(--km-radius-normal);
+    background-color: hsl(var(--km-colour-code-bg));
+    overflow-wrap: anywhere;
+    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+
+    & a:not(.km-block__link) {
+        position: relative;
+        z-index: 2;
+    }
+
+    & button {
+        z-index: 2;
+    }
+}
+
+.km-block-row>.km-block--size-small {
+    width: calc((100% - 2 * var(--km-blocks-gap-x)) / 3);
+}
+
+.km-block-row>.km-block--size-medium {
+    width: calc((100% - var(--km-blocks-gap-x)) / 2);
+}
+
+:not(.km-block-row) > .km-block + .km-block {
+    margin-top: var(--km-space-2);
+}
+
+.km-carousel {
+    --km-carousel-gap: var(--km-space-1-5);
+    --km-carousel-item: calc((100% - 2 * var(--km-carousel-gap)) / 2.25);
+    margin: var(--km-space-8) 0;
+}
+
+.km-carousel--gap-medium {
+    --km-carousel-gap: var(--km-space-4);
+}
+
+.km-carousel--gap-large {
+    --km-carousel-gap: var(--km-space-8);
+}
+
+.km-carousel--cards-1 {
+    --km-carousel-item: calc((100% - var(--km-carousel-gap)) / 1.25);
+}
+
+.km-carousel--cards-3 {
+    --km-carousel-item: calc((100% - 3 * var(--km-carousel-gap)) / 3.25);
+}
+
+.km-carousel--cards-4 {
+    --km-carousel-item: calc((100% - 4 * var(--km-carousel-gap)) / 4.25);
+}
+
+@media (width < 768px), (height < 500px) {
+    .km-carousel {
+        --km-carousel-item: calc((100% - var(--km-carousel-gap)) / 1.2);
+    }
+}
+
+.km-carousel__track {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: var(--km-carousel-gap);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    &>* {
+        flex: 0 0 var(--km-carousel-item);
+        min-width: 0;
+        width: var(--km-carousel-item);
+        max-width: none;
+        margin: 0;
+        scroll-snap-align: start;
+    }
+
+    &>.km-block + .km-block {
+        margin-top: 0;
+    }
+
+    &>img {
+        align-self: start;
+        height: auto;
+    }
+}
+
+.km-carousel__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--km-space-2);
+    width: fit-content;
+    margin: var(--km-space-4) 0 0 auto;
+    padding: calc(var(--km-space-1) + 1px);
+    border-radius: var(--km-radius-round);
+}
+
+.km-carousel:not([data-km-ready]) .km-carousel__nav,
+.km-carousel--still .km-carousel__nav {
+    display: none;
+}
+
+.km-carousel--titled {
+    position: relative;
+
+    &>.km-carousel__track {
+        margin-top: var(--km-space-8);
+    }
+}
+
+.km-carousel .km-carousel__title,
+.km-carousel .km-carousel__preheader {
+    margin-bottom: 0;
+}
+
+.km-carousel .km-carousel__title {
+    color: hsl(var(--km-colour-title));
+}
+
+.km-carousel--measuring .km-carousel__title {
+    width: max-content;
+    white-space: nowrap;
+}
+
+.km-related {
+    --km-carousel-gap: var(--km-space-4);
+    width: 100%;
+    max-width: var(--km-layout-container);
+    margin: var(--km-space-8) auto var(--km-space-16);
+}
+
+.km-related .km-carousel__title {
+    margin-top: 0;
+
+    &::before {
+        display: none;
+    }
+}
+
+.km-related__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--km-space-2);
+    color: inherit;
+    text-decoration: none;
+}
+
+.km-related__image {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--km-radius-tiny);
+    background-color: hsl(var(--km-colour-surface-baseline));
+    border: 1px solid hsl(var(--km-colour-border));
+
+    & img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        object-fit: cover;
+        filter: grayscale(100%);
+    }
+}
+
+.km-related__waves {
+    --km-wave-a: 20rem;
+    --km-wave-b: 30rem;
+    --km-wave-c: 15rem;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0.75;
+
+    & .km-byline__wave {
+        animation: none;
+    }
+
+    & .km-byline__wave--b {
+        top: var(--km-space-3);
+    }
+
+    & .km-byline__wave--c {
+        top: var(--km-space-6);
+    }
+}
+
+.km-related__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--km-space-2);
+    margin-top: var(--km-space-2);
+    color: hsl(var(--km-colour-meta));
+    font-size: var(--km-font-size-down-2);
+    --km-tracking: var(--km-tracking-small);
+}
+
+.km-related__title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 85%;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    color: hsl(var(--km-colour-title));
+    font-size: var(--km-font-size-down-1);
+    font-weight: var(--km-weight-h2);
+    --km-tracking: var(--km-tracking-h3);
+    line-height: 1.5;
+}
+
+@media (width >= 768px) {
+    .km-carousel--inline>.km-carousel__nav {
+        position: absolute;
+        inset-inline-end: 0;
+        margin: 0;
+    }
+}
+
+.km-pagination__link[aria-disabled="true"] {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+@media (hover: hover) {
+    .km-block--link:hover,
+    .km-block:has(.km-repository__name:hover) {
+        background-color: hsl(var(--km-colour-block-bg-hover));
+    }
+}
+
+.km-block--link:active,
+.km-block:has(.km-repository__name:active) {
+    background-color: hsl(var(--km-colour-block-bg-active));
+}
+
+.km-block:has(.km-block__link:focus-visible) {
+    outline: 2px solid hsl(var(--km-colour-focus));
+    outline-offset: 2px;
+}
+
+.km-block__preheader,
+.km-block__footer {
+    font-size: var(--km-font-size-down-1);
+    line-height: 1.25rem;
+}
+
+.km-block__preheader {
+    grid-area: preheader;
+    padding: var(--km-space-4) var(--km-space-4) 0;
+    color: hsl(var(--km-colour-secondary));
+}
+
+.km-block__footer {
+    grid-area: footer;
+    padding: var(--km-space-4) var(--km-space-4) var(--km-space-4);
+    color: hsl(var(--km-colour-meta));
+}
+
+.km-block__body {
+    grid-area: body;
+    min-width: 0;
+    padding: var(--km-space-4);
+}
+
+.km-block__title {
+    color: hsl(var(--km-colour-title));
+    font-weight: var(--km-weight-h3);
+    --km-tracking: var(--km-tracking-h3);
+
+    &:has(+ .km-repository) {
+        margin-bottom: var(--km-space-4);
+    }
+}
+
+.km-block__subheader {
+    margin-top: var(--km-space-1);
+    font-size: var(--km-font-size-down-1);
+    line-height: 1.25rem;
+    color: hsl(var(--km-colour-secondary));
+
+    &:has(+ p) {
+        color: hsl(var(--km-colour-meta));
+    }
+
+    &:has(+ .km-repository) {
+        margin-bottom: var(--km-space-4);
+    }
+}
+
+.km-block__body>p {
+    margin-top: var(--km-space-4);
+    font-size: var(--km-font-size-down-1);
+    color: hsl(var(--km-colour-secondary));
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.km-block__title+p,
+.km-block__subheader+p {
+    margin-top: var(--km-space-2);
+}
+
+.km-block__body:has(> .km-block__subheader) {
+    display: flex;
+    flex-direction: column;
+
+    & > .km-block__subheader:not(:has(+ .km-repository)) {
+        margin-bottom: var(--km-space-6);
+    }
+
+    & > .km-block__subheader + * {
+        margin-top: auto;
+    }
+}
+
+.km-block__link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: var(--km-radius-normal);
+}
+
+.km-carousel__dots {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: var(--km-space-2);
+    width: max-content;
+    max-width: 100%;
+    margin: var(--km-space-4) auto 0;
+}
+
+.km-carousel--still .km-carousel__dots {
+    display: none;
+}
+
+.km-carousel__dot {
+    position: relative;
+    flex: none;
+    width: 0.375rem;
+    height: 0.375rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--km-radius-round);
+    background-color: hsl(var(--km-colour-text-down-3) / 0.45);
+    cursor: pointer;
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: -0.5rem -0.25rem;
+    }
+}
+
+/* The pill is as wide as the space between its left and its right, which the
+   script moves one edge at a time, so it stretches on its way. */
+.km-carousel__pill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: var(--km-radius-round);
+    background-color: hsl(var(--km-colour-text-baseline));
+    pointer-events: none;
+}

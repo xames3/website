@@ -1,0 +1,124 @@
+{#
+Icons Sidebar Simulation
+========================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 30 October 2026
+Last updated on: 07 November 2026
+#}
+{# djlint:off #}
+<div id="icons-sidebar">
+    <aside class="km-sidebar km-sidebar--primary"
+           style="position: static;
+                  display: flex;
+                  visibility: visible;
+                  transform: none;
+                  height: auto;
+                  width: 100%;
+                  max-width: 24rem;
+                  box-shadow: none">
+        <a href="#"
+           class="km-sidebar__brand"><span
+           class="km-sidebar__brand-title">AM</span></a>
+        <div class="km-sidebar__scroll"
+             style="overflow: visible">
+            <div class="km-sidebar__content"
+                 style="overflow: visible">
+                <nav class="km-sidebar__toc"
+                     aria-label="Simulated contents">
+                    <p class="caption"
+                       role="heading"
+                       aria-level="2">
+                        <span class="caption-text">Docs</span>
+                    </p>
+                    <ul class="current km-list">
+                        <li class="toctree-l1 current">
+                        <a class="reference internal"
+                           href="#"><span aria-hidden="true"
+      class="fa-regular fa-badge-check km-glyph"></span>
+                    The current page</a>
+                    <ul class="km-list">
+                        <li class="toctree-l2">
+                        <a class="reference internal"
+                           href="#"><span aria-hidden="true"
+      class="fa-regular fa-cubes km-glyph"></span>
+                    A nested entry</a>
+                </li>
+                <li class="toctree-l2">
+                    <a class="reference internal"
+                       href="#">A
+                    nested entry with no icon</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <p class="caption"
+       role="heading"
+       aria-level="2">
+        <span class="caption-text">Extras</span>
+    </p>
+    <ul class="km-list">
+        <li class="toctree-l1">
+        <a class="reference internal"
+           href="#"><span aria-hidden="true"
+      class="fa-regular fa-tv km-glyph"></span>
+    An icon before the title</a>
+</li>
+<li class="toctree-l1">
+<a class="reference internal"
+   href="#"><span aria-hidden="true"
+      class="fa-solid fa-heart km-glyph km-tone--red"></span>
+A coloured icon</a>
+</li>
+<li class="toctree-l1">
+    <a class="reference internal"
+       href="#">A title with no icon</a>
+</li>
+</ul>
+<p class="caption"
+   role="heading"
+   aria-level="2">
+    <span class="caption-text">External links</span>
+</p>
+<ul class="km-sidebar__mobile-list">
+    <li>
+    <a href="#"
+       class="km-sidebar__mobile-item"><i class="fa-regular fa-calendar"
+   aria-hidden="true"></i>
+    <span>Check my availability</span></a>
+</li>
+<li>
+<a href="#"
+   class="km-sidebar__mobile-item"><i class="fa-regular fa-heart"
+   aria-hidden="true"></i>
+<span>Sponsor on GitHub</span></a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</aside>
+</div>
+<style>
+    #icons-sidebar a {
+        text-decoration: none;
+    }
+
+    #icons-sidebar p {
+        margin: 0;
+    }
+
+    #icons-sidebar ul {
+        margin-top: 0;
+    }
+
+    #icons-sidebar li,
+    #icons-sidebar li+li {
+        margin-top: 0;
+        padding-left: 0;
+    }
+
+    #icons-sidebar li::before {
+        content: none;
+    }
+</style>

@@ -1,0 +1,114 @@
+@media print {
+    .km-page__content :where(section) > .km-code-explain {
+        margin-inline: 0 !important;
+    }
+
+    .km-code-explain__grid {
+        display: block !important;
+    }
+
+    .km-code-explain__stage {
+        height: auto !important;
+    }
+
+    .km-code-explain__code,
+    .km-code-explain__track {
+        translate: none !important;
+    }
+
+    .km-code-explain__copy {
+        display: none !important;
+    }
+
+    .km-code-version[data-km-mode="stage"] .km-code-explain__frame
+        > :is(.km-code-explain__stage, .km-code-explain__output),
+    .km-code-version[data-km-mode="stage"]
+        .km-code-explain__frame:not(:has(.km-code-explain__caption)) {
+        display: none !important;
+    }
+
+    .km-code-version[data-km-mode="stage"] .km-code-version__draft {
+        display: block !important;
+    }
+
+    .km-code-explain__notes {
+        height: auto !important;
+        mask-image: none !important;
+        overflow: visible !important;
+    }
+
+    .km-code-explain__note {
+        margin-block: 0 var(--km-space-5) !important;
+        opacity: 1 !important;
+    }
+
+    .km-page__more {
+        display: none !important;
+    }
+
+    .km-shell__skip-link,
+    .km-noscript,
+    .km-header,
+    .km-breadcrumbs,
+    .km-sidebar,
+    .km-sidebar__backdrop,
+    .km-enlarge,
+    .km-pagination,
+    .km-related,
+    .km-carousel__nav,
+    .km-scrolltop,
+    .km-footer,
+    .km-feedback-section__button,
+    .km-byline__bg,
+    .km-byline__copy,
+    .km-tabs__frame,
+    .km-tabs__bar,
+    .km-tabs__label,
+    button.copybtn {
+        display: none !important;
+    }
+
+    .km-layout {
+        display: block;
+    }
+
+    .km-tabs__panel {
+        display: block;
+        padding-top: var(--km-space-4);
+    }
+
+    .km-tabs__panel[data-km-label]::before {
+        content: attr(data-km-label);
+        display: block;
+        margin-bottom: var(--km-space-2);
+        color: hsl(var(--km-colour-title));
+        font-weight: var(--km-weight-medium);
+    }
+
+    details.km-accordion::details-content {
+        content-visibility: visible;
+        display: block;
+    }
+
+    pre,
+    pre code {
+        max-height: none;
+        overflow: visible;
+        white-space: pre-wrap;
+    }
+
+    .km-table,
+    .km-page__content table {
+        overflow: visible;
+    }
+
+    .km-page__content table {
+        display: table;
+        width: 100%;
+    }
+
+    .km-page__content table :is(th, td) {
+        white-space: normal;
+    }
+}
+

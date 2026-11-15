@@ -1,0 +1,314 @@
+@media (width < 768px) {
+    .km-block-row>.km-block {
+        width: 100%;
+    }
+}
+
+.km-text--preheader {
+    color: hsl(var(--km-colour-secondary));
+    font-size: var(--km-font-size-down-1);
+    font-weight: var(--km-weight-body);
+    line-height: 1.625;
+    --km-tracking: var(--km-tracking-body);
+    padding-bottom: var(--km-space-1-5);
+}
+
+.km-text--preheader+.rubric {
+    margin-top: 0;
+}
+
+.km-tone--green,
+.km-tone--green>p {
+    color: hsl(var(--km-colour-green));
+}
+
+.km-tone--red,
+.km-tone--red>p {
+    color: hsl(var(--km-colour-red));
+}
+
+.km-tone--blue,
+.km-tone--blue>p {
+    color: hsl(var(--km-colour-blue));
+}
+
+.km-tone--yellow,
+.km-tone--yellow>p {
+    color: hsl(var(--km-colour-yellow));
+}
+
+@keyframes km-sharpie-fill {
+    to {
+        background-size: 100% 100%;
+    }
+}
+
+.km-sharpie {
+    padding: 0.05em 0.2em;
+    border-radius: 0.2em;
+    color: var(--km-sharpie-colour);
+    box-decoration-break: clone;
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(104deg,
+            transparent 0.9%,
+            color-mix(in srgb, var(--km-sharpie-colour), transparent 60%) 2.4%,
+            color-mix(in srgb, var(--km-sharpie-colour), transparent 70%) 5.8%,
+            color-mix(in srgb, var(--km-sharpie-colour), transparent 70%) 93%,
+            color-mix(in srgb, var(--km-sharpie-colour), transparent 60%) 96%,
+            transparent 98%);
+    animation:
+        km-sharpie-fill var(--km-duration-normal) ease-out forwards paused;
+}
+
+@keyframes km-pencil-draw {
+    0% {
+        background-size: 0% 0.55em, 0% 0.55em;
+    }
+
+    55%,
+    60% {
+        background-size: 100% 0.55em, 0% 0.55em;
+    }
+
+    100% {
+        background-size: 100% 0.55em, 100% 0.55em;
+    }
+}
+
+.km-pencil {
+    padding-bottom: 0.4em;
+    box-decoration-break: clone;
+    background-image: var(--km-underline-forward), var(--km-underline-return);
+    background-repeat: no-repeat, no-repeat;
+    background-position: bottom left, bottom right;
+    background-size: 0% 0.55em, 0% 0.55em;
+    animation:
+        km-pencil-draw var(--km-duration-normal) ease-out forwards paused;
+}
+
+.km-sharpie.km-sharpie--visible,
+.km-pencil.km-pencil--visible {
+    animation-play-state: running;
+}
+
+.km-tooltip {
+    position: relative;
+
+    &::after {
+        content: attr(data-tooltip);
+        content: attr(data-tooltip) / "";
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: var(--km-space-0-5) var(--km-space-2);
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        font-family: var(--km-font-sans);
+        font-size: var(--km-font-size-down-1);
+        font-weight: var(--km-weight-body);
+        line-height: 1.125rem;
+        background: hsl(var(--km-colour-tooltip-bg));
+        color: hsl(var(--km-colour-text-baseline));
+        border-radius: calc(var(--km-radius-normal) / 4);
+        transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+    }
+
+    &.km-tooltip--visible::after {
+        opacity: 1;
+    }
+}
+
+.far {
+    font: var(--fa-font-regular);
+}
+
+.km-button {
+    display: inline-block;
+    width: max-content;
+    max-width: 100%;
+    padding: calc(var(--km-space-2) + 2px) calc(var(--km-space-4) + 2px);
+    border: 0;
+    border-radius: var(--km-radius-round);
+    background-color: hsl(var(--km-colour-button-dark-bg));
+    color: hsl(var(--km-colour-button-dark-fg));
+    font-size: var(--km-font-size-down-1);
+    font-weight: var(--km-weight-button);
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    white-space: normal;
+    cursor: pointer;
+    user-select: none;
+    transition:
+        background-color var(--km-duration-hover) var(--km-ease-swift),
+        border-color var(--km-duration-hover) var(--km-ease-swift);
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: hsl(var(--km-colour-button-dark-bg-hover));
+            text-decoration: none;
+        }
+    }
+
+    &:active {
+        background-color: hsl(var(--km-colour-button-dark-bg-active));
+    }
+
+    & :is(strong, em, code) {
+        color: inherit;
+    }
+
+    & .km-button__icon {
+        margin-right: var(--km-glyph-gap);
+    }
+
+    & .km-button__icon--icon-position-after {
+        margin-right: 0;
+        margin-left: var(--km-glyph-gap);
+    }
+}
+
+@media (hover: hover) {
+    .km-button--scheme-light:hover {
+        background-color: hsl(var(--km-colour-button-bg-hover));
+    }
+}
+
+.km-button--scheme-light,
+.km-button--scheme-chevron {
+    background-color: hsl(var(--km-colour-button-bg));
+    color: hsl(var(--km-colour-button-fg));
+
+    &:active {
+        background-color: hsl(var(--km-colour-button-bg-active));
+    }
+}
+
+@media (hover: hover) {
+    .km-button--scheme-chevron:hover {
+        background-color: hsl(var(--km-colour-button-bg));
+    }
+}
+
+.km-button:is(
+    .km-button--scheme-red, .km-button--scheme-yellow, .km-button--scheme-blue, .km-button--scheme-green,
+    .km-button--scheme-custom
+) {
+    padding: var(--km-space-2) var(--km-space-4);
+    background-color: transparent;
+    color: hsl(var(--km-colour-button-scheme));
+    border: 2px solid hsl(var(--km-colour-button-scheme) / 0.3);
+
+    @media (hover: hover) {
+        &:hover {
+            background-color: transparent;
+            border-color: hsl(var(--km-colour-button-scheme) / 0.6);
+        }
+    }
+
+    &:active {
+        background-color: transparent;
+        border-color: hsl(var(--km-colour-button-scheme));
+    }
+}
+
+.km-button--scheme-chevron,
+.km-pagination__link {
+    --km-chevron-time: calc(var(--km-duration-clamp) * 0.625);
+
+    & .km-chevron {
+        display: inline-block;
+        overflow: visible;
+        fill: none;
+        stroke: currentcolor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    & .km-chevron__arrow {
+        transform: translateX(-2px);
+        transition: transform var(--km-chevron-time) var(--km-spring-smooth);
+    }
+
+    & .km-chevron__shaft {
+        stroke-dasharray: 1 2;
+        stroke-dashoffset: 1;
+        transition:
+            stroke-dashoffset var(--km-chevron-time) var(--km-spring-smooth);
+    }
+
+    &:focus {
+        & .km-chevron__arrow {
+            transform: translateX(0);
+        }
+
+        & .km-chevron__shaft {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    @media (hover: hover) {
+        &:hover {
+            & .km-chevron__arrow {
+                transform: translateX(0);
+            }
+
+            & .km-chevron__shaft {
+                stroke-dashoffset: 0;
+            }
+        }
+    }
+}
+
+.km-button--scheme-chevron .km-chevron {
+    width: 1rem;
+    height: 1rem;
+    margin-left: var(--km-space-1-5);
+    vertical-align: -0.2rem;
+}
+
+.km-button--scheme-red {
+    --km-colour-button-scheme: var(--km-colour-red);
+}
+
+.km-button--scheme-yellow {
+    --km-colour-button-scheme: var(--km-colour-yellow);
+}
+
+.km-button--scheme-blue {
+    --km-colour-button-scheme: var(--km-colour-blue);
+}
+
+.km-button--scheme-green {
+    --km-colour-button-scheme: var(--km-colour-green);
+}
+
+.km-button-row {
+    text-align: center;
+}
+
+.km-button-row--align-left {
+    text-align: left;
+}
+
+.km-button-row--align-right {
+    text-align: right;
+}
+
+.km-columns .km-button-row:not(:last-child) {
+    margin-bottom: var(--km-space-6);
+}
+
+.km-columns__column > p:not(.km-button-row)
+    + :is(.km-button-row, .km-thumbnail) {
+    margin-top: var(--km-space-2);
+}
+
+.align-right {
+    margin-left: auto;
+}
+

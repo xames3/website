@@ -1,0 +1,183 @@
+{#
+Icons Navbar Simulation
+=======================
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 30 October 2026
+Last updated on: 07 November 2026
+#}
+{# djlint:off #}
+<div id="icons-navbar">
+    <div style="min-height: 25rem;
+                overflow-x: auto">
+        <header class="km-header"
+                style="position: static">
+            <div class="km-header__inner"
+                 style="padding-inline: 0">
+                <div class="km-header__primary">
+                    <a href="#"
+                       class="km-header__logo"><span
+                       class="km-header__title">AM</span></a>
+                </div>
+                <nav class="km-header__nav"
+                     style="display: flex">
+                    <div class="km-header__nav-tree">
+                        <div class="km-header__nav-group">
+                            <p class="caption">
+                                <span class="caption-text">Academia</span>
+                            </p>
+                        </div>
+                        <div class="km-header__nav-group">
+                            <p class="caption">
+                                <span class="caption-text">Journal</span>
+                            </p>
+                        </div>
+                        <div class="km-header__nav-group">
+                            <p class="caption">
+                                <span class="caption-text">Docs</span>
+                            </p>
+                        </div>
+                        <div class="km-header__nav-group
+                                    km-header__nav-group--open"
+                             style="--km-dropdown-shift: -26rem">
+                            <p class="caption">
+                                <span class="caption-text">Extras</span>
+                            </p>
+                            <ul class="km-list"
+                                style="--km-dropdown-rows: 3;
+                                       --km-dropdown-columns: 2;
+                                       max-width: 45rem">
+                                <li class="toctree-l1">
+                                <a class="reference internal"
+                                   href="#"><span aria-hidden="true"
+      class="fa-regular fa-tv km-glyph"></span>
+                                An icon before the title<span
+                                    class="km-header__lead">A short line under
+                                it, the way every menu entry has
+                            one.</span></a>
+                        </li>
+                        <li class="toctree-l1">
+                        <a class="reference internal"
+                           href="#"><span aria-hidden="true"
+      class="fa-solid fa-heart km-glyph km-tone--red"></span>
+                        A coloured icon<span
+                            class="km-header__lead">The tone is part of
+                        the icon, so the title keeps its own
+                    colour.</span></a>
+                </li>
+                <li class="toctree-l1">
+                <a class="reference internal"
+                   href="#"><span aria-hidden="true"
+      class="fa-regular fa-comments km-glyph"></span>
+                A title long enough that it has to wrap
+                onto a second line<span
+                    class="km-header__lead">And the line under
+            it.</span></a>
+        </li>
+        <li class="toctree-l1">
+            <a class="reference internal"
+               href="#">A title
+                with no icon<span class="km-header__lead">Its line starts
+            where the title does.</span></a>
+        </li>
+    </ul>
+</div>
+<ul class="km-header__nav-links km-list">
+    <li class="toctree-l1">
+    <a class="reference internal"
+       href="#"><span aria-hidden="true"
+      class="fa-regular fa-list-ul km-glyph"></span>
+Changelog</a>
+</li>
+</ul>
+</div>
+</nav>
+<div class="km-header__utilities">
+    <button class="km-header__menu-toggle"
+            type="button">
+        <i class="fa-regular fa-bars"
+           aria-hidden="true"></i>
+        <span class="sr-only">Toggle navigation menu</span>
+    </button>
+    <nav class="km-header__icon-list"
+         aria-label="External links">
+        <a href="#"
+           title="Check my availability"
+           class="km-header__icon-link">
+            <i class="fa-regular fa-calendar"
+               aria-hidden="true"></i>
+        </a>
+        <a href="#"
+           title="Search"
+           class="km-header__icon-link">
+            <i class="fa-regular fa-magnifying-glass"
+               aria-hidden="true"></i>
+        </a>
+    </nav>
+</div>
+</div>
+</header>
+</div>
+<div style="min-height: 15rem;
+            overflow-x: auto">
+    <header class="km-header"
+            style="position: static">
+        <div class="km-header__inner"
+             style="padding-inline: 0">
+            <nav class="km-header__nav"
+                 style="display: flex">
+                <div class="km-header__nav-tree">
+                    <div class="km-header__nav-group
+                                km-header__nav-group--open">
+                        <p class="caption">
+                            <span class="caption-text">Docs</span>
+                        </p>
+                        <ul class="current km-list"
+                            style="--km-dropdown-rows: 2;
+                                   --km-dropdown-columns: 1">
+                            <li class="toctree-l1 current">
+                            <a class="reference internal"
+                               href="#"><span aria-hidden="true"
+      class="fa-regular fa-badge-check km-glyph"></span>
+                            A single column<span
+                                class="km-header__lead">Up to three entries
+                        stay in one column.</span></a>
+                    </li>
+                    <li class="toctree-l1">
+                    <a class="reference internal"
+                       href="#"><span aria-hidden="true"
+      class="fa-brands fa-github km-glyph"></span>
+                    A brand icon<span class="km-header__lead">Brands draw like
+                any other icon.</span></a>
+            </li>
+        </ul>
+    </div>
+</div>
+</nav>
+</div>
+</header>
+</div>
+</div>
+<style>
+    #icons-navbar a {
+        text-decoration: none;
+    }
+
+    #icons-navbar p {
+        margin: 0;
+    }
+
+    #icons-navbar ul {
+        margin-top: 0;
+    }
+
+    #icons-navbar li,
+    #icons-navbar li+li {
+        margin-top: 0;
+        padding-left: 0;
+    }
+
+    #icons-navbar li::before {
+        content: none;
+    }
+</style>

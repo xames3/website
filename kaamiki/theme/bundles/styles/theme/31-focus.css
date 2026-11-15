@@ -1,0 +1,129 @@
+.km-document--no-icons {
+    & :is(.km-header__menu-toggle, .km-search__submit, .km-scrolltop) {
+        width: auto;
+        padding-inline: var(--km-space-3);
+        font-size: var(--km-font-size-down-2);
+        white-space: nowrap;
+
+        & > i {
+            display: none;
+        }
+
+        & > .sr-only {
+            position: static;
+            width: auto;
+            height: auto;
+            margin: 0;
+            overflow: visible;
+            clip-path: none;
+        }
+    }
+
+    & .km-header__search {
+        width: 17rem;
+
+        & .km-search {
+            position: static;
+            width: 100%;
+            background-color: hsl(var(--km-colour-search-bg));
+        }
+
+        & .km-search__input {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
+
+    & .km-header__nav-group {
+        & .caption-text::after,
+        & > a::after {
+            content: "";
+            width: 0.4rem;
+            height: 0.4rem;
+            border-right: 1.5px solid currentcolor;
+            border-bottom: 1.5px solid currentcolor;
+            transform: rotate(45deg);
+        }
+
+        &.km-header__nav-group--open .caption-text::after,
+        &.km-header__nav-group--open > a::after {
+            transform: rotate(-135deg);
+        }
+    }
+}
+
+.km-logo {
+    height: var(--km-logo-size, 2rem);
+    width: auto;
+    object-fit: contain;
+    margin-right: var(--km-space-2);
+}
+
+:root:not([data-km-mode="light"], [data-km-mode="system"]) .km-logo--light,
+:root[data-km-mode="light"] .km-logo--dark {
+    display: none;
+}
+
+@media (prefers-color-scheme: light) {
+    :root[data-km-mode="system"] .km-logo--dark {
+        display: none;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root[data-km-mode="system"] .km-logo--light {
+        display: none;
+    }
+}
+
+:focus-visible {
+    outline: 2px solid hsl(var(--km-colour-focus));
+}
+
+:is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--km-colour-focus));
+    outline-offset: 2px;
+}
+
+:is(
+    input:not(
+        [type="checkbox"], [type="radio"], [type="range"], [type="color"],
+        [type="file"], [type="button"], [type="submit"], [type="reset"],
+        [type="image"]
+    ),
+    textarea,
+    [contenteditable]
+):focus-visible {
+    outline: none;
+}
+
+[tabindex="-1"]:focus {
+    outline: none;
+}
+
+:where(a, button, summary, table, [tabindex]):focus-visible {
+    border-radius: 0.25rem;
+}
+
+a.km-image--enlargeable:focus-visible {
+    outline: none;
+
+    & img {
+        outline: 2px solid hsl(var(--km-colour-focus));
+        outline-offset: 2px;
+    }
+}
+
+.km-figure__clip:has(:focus-visible) {
+    outline: 2px solid hsl(var(--km-colour-focus));
+    outline-offset: 2px;
+
+    & :focus-visible {
+        outline: none;
+    }
+}
+
+.km-figure--greyscale :is(img:focus-visible, :focus-visible img) {
+    position: relative;
+}
+

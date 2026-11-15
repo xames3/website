@@ -1,0 +1,2 @@
+include babel.cfg
+global-exclude *.py[cod] .DS_Store

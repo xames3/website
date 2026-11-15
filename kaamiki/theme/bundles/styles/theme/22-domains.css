@@ -1,0 +1,37 @@
+.sig {
+    font-family: var(--km-font-mono);
+    --km-tracking: normal;
+    font-weight: 700;
+    padding-top: var(--km-space-6);
+    scroll-margin: 5rem
+}
+
+em.property {
+    color: hsl(var(--km-colour-secondary))
+}
+
+.option .sig-prename {
+    font-style: italic
+}
+
+.viewcode-link {
+    color: hsl(var(--km-colour-secondary));
+    float: right
+}
+
+.option-list kbd {
+    font-family: var(--km-font-keys);
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle
+}
+
+dt .classifier {
+    font-style: italic
+}
+
+dt .classifier:before {
+    margin-right: var(--km-space-2);
+    content: ":"
+}
+

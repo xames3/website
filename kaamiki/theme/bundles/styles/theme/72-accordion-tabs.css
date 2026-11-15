@@ -1,0 +1,297 @@
+.km-accordion {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: var(--km-space-8) 0;
+    padding-bottom: var(--km-space-5);
+    border-bottom: 1px solid hsl(var(--km-colour-border));
+    overflow-wrap: anywhere;
+}
+
+.km-accordion+.km-accordion {
+    margin-top: 0;
+    padding-top: var(--km-space-5);
+}
+
+.km-accordion:has(+ .km-accordion) {
+    margin-bottom: 0;
+}
+
+.km-accordion__title {
+    display: flex;
+    justify-content: space-between;
+    padding: 0;
+    color: hsl(var(--km-colour-text-baseline));
+    font-weight: var(--km-weight-medium);
+    line-height: 1.25rem;
+    list-style: none;
+    user-select: none;
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+        display: none;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline-style: none;
+    }
+
+    &:focus-visible {
+        border-radius: 0.5rem;
+        outline: 2px solid hsl(var(--km-colour-focus));
+        outline-offset: 6px;
+    }
+}
+
+.km-accordion__text {
+    flex-grow: 1;
+    padding-right: var(--km-space-2);
+    line-height: 1.625;
+}
+
+.km-accordion__preheader,
+.km-accordion__subheader {
+    display: block;
+}
+
+.km-accordion__text>.km-accordion__subheader {
+    margin-top: 0;
+}
+
+.km-accordion__marker {
+    display: inline-flex;
+    align-items: center;
+    margin-left: var(--km-space-2);
+    pointer-events: none;
+
+    & .km-accordion__icon {
+        display: inline-block;
+        width: auto;
+        line-height: 1;
+        transform: rotateZ(0deg);
+        transition: transform var(--km-duration-hover) var(--km-ease-swift);
+    }
+}
+
+.km-accordion__marker:first-child {
+    margin-left: 0;
+    margin-right: var(--km-space-4);
+}
+
+.km-accordion--marker-plus[open]:not(.km-accordion--closing) > .km-accordion__title
+    > .km-accordion__marker .km-accordion__icon {
+    transform: rotateZ(45deg);
+}
+
+.km-accordion--marker-right[open]:not(.km-accordion--closing) > .km-accordion__title
+    > .km-accordion__marker .km-accordion__icon {
+    transform: rotateZ(90deg);
+}
+
+.km-accordion--marker-down[open]:not(.km-accordion--closing) > .km-accordion__title
+    > .km-accordion__marker .km-accordion__icon {
+    transform: rotateX(-180deg);
+}
+
+.km-accordion__body {
+    flex: 1 1 auto;
+    padding: var(--km-space-8) 0 var(--km-space-4);
+    cursor: default;
+}
+
+.km-accordion__paragraph {
+    margin-top: var(--km-space-4);
+    color: hsl(var(--km-colour-text-baseline));
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.km-accordion.km-accordion--animating>.km-accordion__body {
+    overflow: hidden;
+}
+
+/* The tabs keep the pace they had before everything was slowed down. */
+.km-tabs {
+    --km-tabs-time: calc(var(--km-duration-hover) * 0.625);
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: var(--km-space-8) 0;
+    border-radius: 0.125rem;
+}
+
+.km-accordion__body>.km-tabs:first-child,
+.km-accordion__fold>.km-tabs:first-child {
+    margin-top: 0;
+}
+
+.km-tabs--align-left {
+    justify-content: flex-start;
+}
+
+.km-tabs--align-right {
+    justify-content: flex-end;
+}
+
+.km-tabs>.km-tabs__input {
+    position: absolute;
+    opacity: 0;
+}
+
+.km-tabs__input {
+    margin: 0;
+    pointer-events: none;
+}
+
+.km-tabs__frame {
+    display: flex;
+    max-width: 100%;
+    border: 1px solid hsl(var(--km-colour-border));
+    border-radius: var(--km-radius-round);
+}
+
+.km-tabs__bar {
+    display: flex;
+    position: relative;
+    min-width: 0;
+    max-width: 100%;
+    padding: var(--km-space-1-5);
+    border-radius: inherit;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+
+    &>input[type="radio"] {
+        flex: none;
+        width: 1px;
+        height: 1px;
+        margin: 0 -1px 0 0;
+        opacity: 0;
+        appearance: none;
+    }
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--km-tab-width, 0);
+        height: var(--km-tab-height, 0);
+        translate: var(--km-tab-x, 0) var(--km-tab-y, 0);
+        border-radius: var(--km-radius-round);
+        background-color: hsl(var(--km-colour-button-dark-bg));
+    }
+
+    &>.km-tabs__label {
+        position: relative;
+        flex: none;
+        margin-bottom: 0;
+        white-space: nowrap;
+        cursor: pointer;
+        border-radius: var(--km-radius-round);
+        color: hsl(var(--km-colour-nav-fg));
+        font-weight: var(--km-weight-button);
+        transition:
+            background-color var(--km-tabs-time) var(--km-ease-swift),
+            color var(--km-tabs-time) var(--km-ease-swift);
+    }
+
+    @media (hover: hover) {
+        &>.km-tabs__label:hover {
+            color: hsl(var(--km-colour-nav-fg-hover));
+        }
+    }
+
+    &>input:checked+.km-tabs__label {
+        color: hsl(var(--km-colour-nav-fg-current));
+    }
+
+    &>input:focus-visible+.km-tabs__label {
+        outline: 2px solid hsl(var(--km-colour-focus));
+        outline-offset: 2px;
+    }
+}
+
+html[data-km-keyboard] .km-tabs__bar>input:focus+.km-tabs__label {
+    outline: 2px solid hsl(var(--km-colour-focus));
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .km-tabs__bar.km-tabs__bar--sliding::before {
+        transition:
+            translate var(--km-tabs-time) cubic-bezier(0.32, 0.72, 0, 1),
+            width var(--km-tabs-time) cubic-bezier(0.32, 0.72, 0, 1);
+    }
+}
+
+.km-tabs__label {
+    padding: var(--km-space-2) var(--km-space-3-5);
+    border: none;
+    font-size: var(--km-font-size-down-1);
+    font-weight: var(--km-weight-medium);
+}
+
+.km-tabs>.km-tabs__input:checked+.km-tabs__label {
+    border-radius: var(--km-radius-round);
+    background-color: hsl(var(--km-colour-button-dark-bg));
+    color: hsl(var(--km-colour-nav-fg-current));
+}
+
+.km-tabs__glyph {
+    margin-right: var(--km-glyph-gap);
+}
+
+.km-tabs__glyph--icon-position-after {
+    margin-right: 0;
+    margin-left: var(--km-glyph-gap);
+}
+
+.km-tabs__panel {
+    display: none;
+    order: 99;
+    width: 100%;
+    padding-top: var(--km-space-10);
+    padding-bottom: var(--km-space-3);
+
+    &>:is(:first-child, :where(:empty[id]:first-child + *)) {
+        margin-top: 0;
+    }
+
+    &>:last-child {
+        margin-bottom: 0;
+    }
+
+    &>p {
+        margin-bottom: var(--km-space-6);
+    }
+
+    &>.km-tabs {
+        margin: 0;
+    }
+}
+
+.km-tabs>.km-tabs__input:checked+.km-tabs__label+.km-tabs__panel,
+.km-tabs>.km-tabs__panel.km-tabs__panel--current {
+    display: block;
+    animation:
+        km-tab-in var(--km-tabs-time) cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes km-tab-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .km-tabs>.km-tabs__input:checked+.km-tabs__label+.km-tabs__panel,
+    .km-tabs>.km-tabs__panel.km-tabs__panel--current {
+        animation: none;
+    }
+}
+

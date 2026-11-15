@@ -1,0 +1,9 @@
+.combos-embed-demo {
+    padding: 1rem;
+    border: 1px dashed hsl(var(--km-colour-border));
+    border-radius: 8px;
+}
+
+.combos-embed-demo strong {
+    color: seagreen;
+}

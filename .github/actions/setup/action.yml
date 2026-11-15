@@ -1,0 +1,31 @@
+# Setup Action
+# ============
+#
+# Author: Akshay Mestry <xa@mes3.dev>
+# Created on: 22 October 2026
+# Last updated on: 02 November 2026
+
+name: Set up Python and tox
+description: Install Python, restore the pip cache and install pip and tox
+
+inputs:
+  python-version:
+    description: "Python version to install"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Restore the pip cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ~/.cache/pip
+        key: pip-${{ github.job }}-${{ hashFiles('pyproject.toml') }}
+        restore-keys: pip-${{ github.job }}-
+    - name: Install pip and tox
+      shell: bash
+      run: python -m pip install -Uq pip tox
