@@ -80,7 +80,6 @@ from kaamiki.extensions.utils.settings import overrides
 from kaamiki.extensions.utils.settings import pair
 from kaamiki.extensions.utils.settings import register
 from kaamiki.extensions.utils.settings import reread
-from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.settings import stored
 from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.social import social_metadata
@@ -147,7 +146,6 @@ __all__: list[str] = [
     "render",
     "reread",
     "retitled",
-    "setting",
     "shipped",
     "show_more",
     "social_metadata",

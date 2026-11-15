@@ -316,7 +316,7 @@ class Button(KaamikiDirective):
         colours = values(config).button.colours
         where = ""
         if scheme is None:
-            scheme = str(values(config).button.scheme)
+            scheme = values(config).button.scheme
             where = " (set by kaamiki.conf.button.scheme)"
             if scheme == "chevron" and iconic:
                 scheme = "light"

@@ -239,11 +239,11 @@ class Youtube(KaamikiDirective):
             self.fail(
                 ":hide-controls: needs :autoplay:, since nothing else plays it"
             )
-        allow = str(values(config).youtube.allow).split("; ")
+        allow = values(config).youtube.allow.split("; ")
         if "autoplay" in options or facade:
             allow = [*dict.fromkeys([*allow, "autoplay"])]
         self.options["allow"] = "; ".join(allow)
-        self.options["referrer"] = str(values(config).youtube.referrer_policy)
+        self.options["referrer"] = values(config).youtube.referrer_policy
         text = self.options.pop("caption", "")
         caption, messages = parse(self, text.strip(), "caption")
         if text.strip():

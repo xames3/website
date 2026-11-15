@@ -542,7 +542,7 @@ class CodeExplain(CodeWalk, name="code-explain"):
             self.capped("timeout", "code_explain_timeout"),
             paths,
             comprehensions="comprehensions" in self.options
-            or bool(values(config).code_explain.comprehensions),
+            or values(config).code_explain.comprehensions,
             python=values(config).code_explain.python,
             cache=self.cache(),
             memory_limit=values(config).code_explain.memory << 20,

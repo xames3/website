@@ -158,7 +158,7 @@ def context_defaults(app: Sphinx) -> None:
         )
     depth = values(config).toctree.maxdepth
     context["km_toctree_args"] = {
-        "includehidden": bool(values(config).toctree.includehidden),
+        "includehidden": values(config).toctree.includehidden,
         **({"maxdepth": depth} if depth else {}),
     }
     terms = values(config).site.license

@@ -748,7 +748,7 @@ def sharpie(
     """
     del name, content
     config = inliner.document.settings.env.config
-    preset = options.get("colour") or str(values(config).roles.sharpie_colour)
+    preset = options.get("colour") or values(config).roles.sharpie_colour
     try:
         element, colour = _split(text, "a colour")
         colour = _colour(config, colour or preset)
@@ -811,7 +811,7 @@ def underline(
     """
     del name, content
     config = inliner.document.settings.env.config
-    preset = options.get("colour") or str(values(config).roles.underline_colour)
+    preset = options.get("colour") or values(config).roles.underline_colour
     try:
         element, rest = _split(text, "a colour or settings")
         colour, asked, query = (rest or "").partition("?")
