@@ -58,70 +58,51 @@ DECIMAL: t.Final[re.Pattern[str]] = re.compile(
 LENGTH: t.Final[re.Pattern[str]] = re.compile(
     r"(?:(?:0|[1-9][0-9]{0,2})(?:\.[0-9]{1,3})?rem|0)"
 )
-FAMILY_STYLES: t.Final[dict[str, dict[str, str]]] = {
-    "classic": {
-        "solid": "fas",
-        "regular": "far",
-        "light": "fal",
-        "thin": "fat",
-    },
-    "duotone": {
-        "solid": "fad",
-        "regular": "fadr",
-        "light": "fadl",
-        "thin": "fadt",
-    },
-    "sharp": {
-        "solid": "fass",
-        "regular": "fasr",
-        "light": "fasl",
-        "thin": "fast",
-    },
-    "sharp-duotone": {
-        "solid": "fasds",
-        "regular": "fasdr",
-        "light": "fasdl",
-        "thin": "fasdt",
-    },
-    "chisel": {"regular": "facr"},
-    "etch": {"solid": "faes"},
-    "graphite": {"thin": "fagt"},
-    "jelly": {"regular": "fajr"},
-    "jelly-fill": {"regular": "fajfr"},
-    "jelly-duo": {"regular": "fajdr"},
-    "mosaic": {"solid": "fams"},
-    "notdog": {"solid": "fans"},
-    "notdog-duo": {"solid": "fands"},
-    "pixel": {"regular": "fapr"},
-    "slab": {"regular": "faslr"},
-    "slab-press": {"regular": "faslpr"},
-    "slab-duo": {"regular": "fasldr"},
-    "slab-press-duo": {"regular": "faslpdr"},
-    "thumbprint": {"light": "fatl"},
-    "utility": {"semibold": "fausb"},
-    "utility-fill": {"semibold": "faufsb"},
-    "utility-duo": {"semibold": "faudsb"},
-    "vellum": {"solid": "favs"},
-    "whiteboard": {"semibold": "fawsb"},
+CLASSIC: t.Final[tuple[str, ...]] = ("solid", "regular", "light", "thin")
+FAMILY_STYLES: t.Final[dict[str, tuple[str, ...]]] = {
+    "classic": CLASSIC,
+    "duotone": CLASSIC,
+    "sharp": CLASSIC,
+    "sharp-duotone": CLASSIC,
+    "chisel": ("regular",),
+    "etch": ("solid",),
+    "graphite": ("thin",),
+    "jelly": ("regular",),
+    "jelly-fill": ("regular",),
+    "jelly-duo": ("regular",),
+    "mosaic": ("solid",),
+    "notdog": ("solid",),
+    "notdog-duo": ("solid",),
+    "pixel": ("regular",),
+    "slab": ("regular",),
+    "slab-press": ("regular",),
+    "slab-duo": ("regular",),
+    "slab-press-duo": ("regular",),
+    "thumbprint": ("light",),
+    "utility": ("semibold",),
+    "utility-fill": ("semibold",),
+    "utility-duo": ("semibold",),
+    "vellum": ("solid",),
+    "whiteboard": ("semibold",),
 }
 STYLE_NAMES: t.Final[dict[str, str]] = {
     "fa-brands": "brands",
-    "fab": "brands",
     **{
         f"fa-{style}": style
         for styles in FAMILY_STYLES.values()
         for style in styles
     },
-    **{short: style for style, short in FAMILY_STYLES["classic"].items()},
+    "fas": "solid",
+    "far": "regular",
+    "fal": "light",
+    "fat": "thin",
+    "fab": "brands",
 }
 FAMILY_NAMES: t.Final[dict[str, tuple[str, str | None]]] = {
     **{f"fa-{family}": (family, None) for family in FAMILY_STYLES},
-    **{
-        short: (family, style)
-        for family, styles in FAMILY_STYLES.items()
-        if family != "classic"
-        for style, short in styles.items()
-    },
+    "fad": ("duotone", "solid"),
+    "fass": ("sharp", "solid"),
+    "fasds": ("sharp-duotone", "solid"),
 }
 STYLES: t.Final[frozenset[str]] = frozenset(STYLE_NAMES)
 FAMILIES: t.Final[frozenset[str]] = frozenset(FAMILY_NAMES)

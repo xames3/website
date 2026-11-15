@@ -452,71 +452,71 @@ nearest style.
 
 .. list-table::
     :header-rows: 1
-    :widths: 40 30 30
+    :widths: 40 20 40
 
     * - Role
+      - Icon
       - Style
-      - Short class
     * - ``fa-icon:chisel``
+      - :fa-icon:chisel:`house`
       - ``regular``
-      - ``facr``
     * - ``fa-icon:etch``
+      - :fa-icon:etch:`house`
       - ``solid``
-      - ``faes``
     * - ``fa-icon:graphite``
+      - :fa-icon:graphite:`house`
       - ``thin``
-      - ``fagt``
     * - ``fa-icon:jelly``
+      - :fa-icon:jelly:`house`
       - ``regular``
-      - ``fajr``
     * - ``fa-icon:jelly-fill``
+      - :fa-icon:jelly-fill:`house`
       - ``regular``
-      - ``fajfr``
     * - ``fa-icon:jelly-duo``
+      - :fa-icon:jelly-duo:`house`
       - ``regular``
-      - ``fajdr``
     * - ``fa-icon:mosaic``
+      - :fa-icon:mosaic:`house`
       - ``solid``
-      - ``fams``
     * - ``fa-icon:notdog``
+      - :fa-icon:notdog:`house`
       - ``solid``
-      - ``fans``
     * - ``fa-icon:notdog-duo``
+      - :fa-icon:notdog-duo:`house`
       - ``solid``
-      - ``fands``
     * - ``fa-icon:pixel``
+      - :fa-icon:pixel:`house`
       - ``regular``
-      - ``fapr``
     * - ``fa-icon:slab``
+      - :fa-icon:slab:`house`
       - ``regular``
-      - ``faslr``
     * - ``fa-icon:slab-press``
+      - :fa-icon:slab-press:`house`
       - ``regular``
-      - ``faslpr``
     * - ``fa-icon:slab-duo``
+      - :fa-icon:slab-duo:`house`
       - ``regular``
-      - ``fasldr``
     * - ``fa-icon:slab-press-duo``
+      - :fa-icon:slab-press-duo:`house`
       - ``regular``
-      - ``faslpdr``
     * - ``fa-icon:thumbprint``
+      - :fa-icon:thumbprint:`house`
       - ``light``
-      - ``fatl``
     * - ``fa-icon:utility``
+      - :fa-icon:utility:`house`
       - ``semibold``
-      - ``fausb``
     * - ``fa-icon:utility-fill``
+      - :fa-icon:utility-fill:`house`
       - ``semibold``
-      - ``faufsb``
     * - ``fa-icon:utility-duo``
+      - :fa-icon:utility-duo:`house`
       - ``semibold``
-      - ``faudsb``
     * - ``fa-icon:vellum``
+      - :fa-icon:vellum:`house`
       - ``solid``
-      - ``favs``
     * - ``fa-icon:whiteboard``
+      - :fa-icon:whiteboard:`house`
       - ``semibold``
-      - ``fawsb``
 
 .. _kaamiki-roles-kbd:
 

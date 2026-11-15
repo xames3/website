@@ -352,7 +352,7 @@ class Icons:
         :return: For no family or `fa-classic`, the style of the site,
             or `brands` for a name that is only a brand. For a Pro+
             pack, its one style, as `regular` for `fa-jelly`. Else
-            `None`, because a short family as `fajr` has its style, and
+            `None`, because a short family as `fad` has its style, and
             Font Awesome draws `fa-sharp` and `fa-duotone` in `solid`.
         """
         if not families:
@@ -373,7 +373,7 @@ class Icons:
             of a Pro+ pack. Else `solid`, as for `fa-sharp`.
         """
         family = checks.FAMILY_NAMES[families[0]][0] if families else ""
-        styles = checks.FAMILY_STYLES.get(family, {})
+        styles = checks.FAMILY_STYLES.get(family, ())
         if family in ("", "classic"):
             return style or "solid"
         return next(iter(styles)) if len(styles) == 1 else "solid"
