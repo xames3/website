@@ -4,7 +4,7 @@ Reading Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 The helpers that work out how long a page takes to read.
 """
@@ -20,6 +20,7 @@ from sphinx import addnodes
 from kaamiki.extensions.utils.directives import toggle
 from kaamiki.extensions.utils.doctree import alternatives
 from kaamiki.extensions.utils.doctree import annotated
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.settings import setting
 
 if t.TYPE_CHECKING:
@@ -81,6 +82,7 @@ def reading_time(doctree: nodes.document | None, config: Config) -> int:
     return ceil(wordcount(doctree) / speed)
 
 
+@on("html-page-context")
 def show_more(
     app: Sphinx,
     pagename: str,

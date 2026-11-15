@@ -24,48 +24,17 @@ from sphinx import locale
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util import logging
 
-from kaamiki.extensions import directives
-from kaamiki.extensions import nesting
 from kaamiki.extensions import roles
 from kaamiki.extensions.utils import CONF
 from kaamiki.extensions.utils import TEMPLATES
 from kaamiki.extensions.utils import KaamikiDirective
-from kaamiki.extensions.utils import admonition_title
-from kaamiki.extensions.utils import apply
-from kaamiki.extensions.utils import bridge
-from kaamiki.extensions.utils import build_finished
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils import context_defaults
-from kaamiki.extensions.utils import feedback
-from kaamiki.extensions.utils import field_lists
-from kaamiki.extensions.utils import follow
-from kaamiki.extensions.utils import forget_lead
-from kaamiki.extensions.utils import glyph_edges
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import keycaps
 from kaamiki.extensions.utils import linkcheck
-from kaamiki.extensions.utils import merge_leads
-from kaamiki.extensions.utils import neighbours
-from kaamiki.extensions.utils import note_lead
-from kaamiki.extensions.utils import offer
-from kaamiki.extensions.utils import overrides
-from kaamiki.extensions.utils import page_fields
-from kaamiki.extensions.utils import page_switches
-from kaamiki.extensions.utils import page_title
+from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import pair
 from kaamiki.extensions.utils import phrase
-from kaamiki.extensions.utils import provenance
 from kaamiki.extensions.utils import register
-from kaamiki.extensions.utils import related
-from kaamiki.extensions.utils import reread
-from kaamiki.extensions.utils import retitled
-from kaamiki.extensions.utils import show_more
-from kaamiki.extensions.utils import social_metadata
-from kaamiki.extensions.utils import spell
-from kaamiki.extensions.utils import toctrees
-from kaamiki.extensions.utils import updated_on
-from kaamiki.extensions.utils import warm
-from kaamiki.extensions.utils import writer
 from kaamiki.extensions.utils.settings import NAME
 
 if t.TYPE_CHECKING:
@@ -148,6 +117,7 @@ def themed(app: Sphinx) -> bool:
     )
 
 
+@on("builder-inited")
 def add_theme_assets(app: Sphinx) -> None:
     """Add Kaamiki's static files, stylesheets and scripts to a build.
 
@@ -171,6 +141,7 @@ def generated(app: Sphinx) -> str:
     return str(app.builder.__dict__.get("km_bundles", ""))
 
 
+@on("builder-inited")
 def join_parts(app: Sphinx) -> None:
     """Join the parts of every bundle into the file the pages link to.
 
@@ -237,6 +208,7 @@ def join_parts(app: Sphinx) -> None:
     app.add_static_dir(joined)
 
 
+@on("build-finished")
 def flatten(app: Sphinx, exc: Exception | None) -> None:
     """Rewrite Kaamiki's stylesheets for the browsers it supports.
 
@@ -292,6 +264,7 @@ def flatten(app: Sphinx, exc: Exception | None) -> None:
             f.write(notices + css)
 
 
+@on("build-finished")
 def forget(app: Sphinx, exc: Exception | None) -> None:
     """Remove the folder a build kept its joined bundles in.
 
@@ -303,6 +276,7 @@ def forget(app: Sphinx, exc: Exception | None) -> None:
         shutil.rmtree(joined, ignore_errors=True)
 
 
+@on("build-finished")
 def cleanup(app: Sphinx, exc: Exception | None) -> None:
     """Remove the files of Sphinx's basic theme that no page loads.
 
@@ -316,6 +290,7 @@ def cleanup(app: Sphinx, exc: Exception | None) -> None:
             os.remove(p.join(app.outdir, "_static", name))
 
 
+@on("doctree-resolved")
 def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     """Swap Kaamiki's nodes for ordinary ones where there's no HTML.
 
@@ -356,57 +331,7 @@ def add_directives(app: Sphinx) -> None:
     """
     for name, directive in KaamikiDirective.registry.items():
         app.add_directive(name, directive)
-    for module in directives:
-        if hasattr(module, "register"):
-            module.register(app)
-        if hasattr(module, "html_page_context"):
-            app.connect("html-page-context", module.html_page_context)
     html.register(app)
-
-
-def connect_hooks(app: Sphinx) -> None:
-    """Connect the handlers that read and write Kaamiki's pages.
-
-    :param app: The Sphinx application instance.
-    """
-    app.connect("builder-inited", checks.hush)
-    app.connect("builder-inited", add_theme_assets)
-    app.connect("builder-inited", join_parts)
-    app.connect("builder-inited", context_defaults)
-    app.connect("builder-inited", bridge)
-    app.connect("builder-inited", writer.install)
-    app.connect("html-page-context", social_metadata)
-    app.connect("html-page-context", show_more)
-    app.connect("html-page-context", feedback)
-    app.connect("html-page-context", updated_on)
-    app.connect("html-page-context", page_switches)
-    app.connect("html-page-context", neighbours)
-    app.connect("html-page-context", related)
-    app.connect("html-page-context", toctrees)
-    app.connect("source-read", provenance)
-    app.connect("env-before-read-docs", warm)
-    app.connect("env-get-outdated", reread)
-    app.connect("env-get-outdated", follow)
-    app.connect("env-updated", retitled)
-    app.connect("doctree-read", spell, priority=50)
-    app.connect("doctree-read", checks.promote, priority=100)
-    app.connect("doctree-read", nesting.nested, priority=150)
-    app.connect("doctree-read", field_lists, priority=300)
-    app.connect("doctree-read", offer, priority=400)
-    app.connect("doctree-read", page_title, priority=200)
-    app.connect("doctree-read", admonition_title, priority=200)
-    app.connect("doctree-read", page_fields, priority=600)
-    app.connect("doctree-read", note_lead)
-    app.connect("doctree-read", roles.subjects)
-    app.connect("doctree-read", keycaps)
-    app.connect("doctree-read", glyph_edges, priority=700)
-    app.connect("env-purge-doc", forget_lead)
-    app.connect("env-merge-info", merge_leads)
-    app.connect("doctree-resolved", simplify)
-    app.connect("build-finished", build_finished)
-    app.connect("build-finished", flatten)
-    app.connect("build-finished", cleanup)
-    app.connect("build-finished", forget)
 
 
 def setup(app: Sphinx) -> dict[str, str | bool | int]:
@@ -430,14 +355,12 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     app.add_html_theme(NAME, TEMPLATES)
     app.add_message_catalog("sphinx", locale_dir)
     register(app)
-    app.connect("config-inited", apply)
-    app.connect("config-inited", overrides)
     app.add_transform(checks.Plain)
     app.translator = locale.get_translator()
     add_roles(app)
     add_directives(app)
     app.add_builder(linkcheck, override=True)
-    connect_hooks(app)
+    on.connect(app)
     return {
         "version": __version__,
         "env_version": env_version(__version__),

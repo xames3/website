@@ -25,6 +25,7 @@ from kaamiki.extensions.code import explain
 from kaamiki.extensions.code import version
 from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils.hooks import on
 
 if t.TYPE_CHECKING:
     from collections.abc import Iterator
@@ -286,6 +287,7 @@ def unplaced(node: nodes.Node) -> nodes.Element | None:
     )
 
 
+@on("doctree-read", priority=150)
 def nested(app: Sphinx, doctree: nodes.document) -> None:
     """Stop the build for a directive that sits where it can't.
 

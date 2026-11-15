@@ -4,7 +4,7 @@ Class Aliases
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 12 November 2026
+Last updated on: 15 November 2026
 
 The classes an author writes in rST and the BEM classes they become.
 """
@@ -17,6 +17,7 @@ from types import MappingProxyType
 from docutils import nodes
 
 from kaamiki.extensions.utils.doctree import findall
+from kaamiki.extensions.utils.hooks import on
 
 if t.TYPE_CHECKING:
     from collections.abc import Mapping
@@ -40,6 +41,7 @@ ALIASES: t.Final[Mapping[str, str]] = MappingProxyType(
 )
 
 
+@on("doctree-read", priority=50)
 def spell(app: Sphinx, doctree: nodes.document) -> None:
     """Swap each alias on a page for the BEM class it stands for.
 

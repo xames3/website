@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 12 November 2026
+Last updated on: 15 November 2026
 
 The utilities that fill a page's context for the templates.
 """
@@ -12,6 +12,7 @@ The utilities that fill a page's context for the templates.
 from __future__ import annotations
 
 import difflib
+import functools
 import json
 import re
 import typing as t
@@ -36,6 +37,7 @@ from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.directives import toggle
 from kaamiki.extensions.utils.doctree import findall
 from kaamiki.extensions.utils.doctree import standfirst
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.links import REL
 from kaamiki.extensions.utils.links import opens_new_tab
@@ -106,6 +108,7 @@ TEMPLATE_KEYS: t.Final[tuple[str, ...]] = (
 )
 
 
+@on("builder-inited")
 def context_defaults(app: Sphinx) -> None:
     """Fill in the `html_context` keys the templates expect.
 
@@ -244,10 +247,10 @@ FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
     "km-feedback-title": checks.text,
     "km-feedback-type": checks.word("mail", "link"),
     "km-feedback-url": checks.link,
-    "km-header-subheader": lambda _: checks.text(_, 120),
+    "km-header-subheader": functools.partial(checks.text, maximum=120),
     "km-page-backdrop": checks.picture,
     "km-page-card": checks.word(*CARDS),
-    "km-page-description": lambda _: checks.text(_, 300),
+    "km-page-description": functools.partial(checks.text, maximum=300),
     "km-page-image": checks.link,
     "km-page-image-alt": checks.text,
     "km-page-language": checks.language,
@@ -257,13 +260,14 @@ FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
     "km-page-robots": lambda _: [
         checks.word(*ROBOTS)(each.strip()) for each in _.split(",")
     ],
-    "km-page-title": lambda _: checks.text(_, 120),
+    "km-page-title": functools.partial(checks.text, maximum=120),
     "km-page-type": OG_TYPE,
     "km-related-docs": pages,
-    "km-related-header": lambda _: checks.text(_, 120),
+    "km-related-header": functools.partial(checks.text, maximum=120),
 }
 
 
+@on("doctree-read", priority=300)
 def field_lists(app: Sphinx, doctree: nodes.document) -> None:
     """Stop for a `:km-*:` field that's written twice or below the title.
 
@@ -296,6 +300,7 @@ def field_lists(app: Sphinx, doctree: nodes.document) -> None:
         places[name] = location(field)
 
 
+@on("doctree-read", priority=200)
 def page_title(app: Sphinx, doctree: nodes.document) -> None:
     """Stop for a page that has no title with words in it.
 
@@ -321,6 +326,7 @@ def page_title(app: Sphinx, doctree: nodes.document) -> None:
         )
 
 
+@on("doctree-read", priority=200)
 def admonition_title(app: Sphinx, doctree: nodes.document) -> None:
     """Stop for a custom admonition whose title has no words.
 
@@ -346,6 +352,7 @@ def admonition_title(app: Sphinx, doctree: nodes.document) -> None:
             )
 
 
+@on("doctree-read", priority=600)
 def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
     """Check the `:km-*:` fields a page opens with.
 
@@ -472,6 +479,7 @@ def page_fields(app: Sphinx, doctree: nodes.document) -> None:  # noqa: ARG001
         found["nosearch"] = ""
 
 
+@on("html-page-context")
 def feedback(
     app: Sphinx,
     pagename: str,
@@ -541,6 +549,7 @@ def feedback(
     }
 
 
+@on("html-page-context")
 def page_switches(
     app: Sphinx,
     pagename: str,
@@ -590,6 +599,7 @@ def ensure_leads(env: BuildEnvironment) -> dict[str, str]:
     return stored(env, "leads", {})
 
 
+@on("doctree-read")
 def note_lead(app: Sphinx, doctree: nodes.document) -> None:
     """Keep a page's lead as it's read, for the header's dropdowns.
 
@@ -601,6 +611,7 @@ def note_lead(app: Sphinx, doctree: nodes.document) -> None:
         ensure_leads(app.env)[app.env.docname] = lead
 
 
+@on("env-purge-doc")
 def forget_lead(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
     """Forget a page's lead, as it's read again or removed.
 
@@ -612,6 +623,7 @@ def forget_lead(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
     ensure_leads(env).pop(docname, None)
 
 
+@on("env-merge-info")
 def merge_leads(
     app: Sphinx,
     env: BuildEnvironment,
@@ -675,6 +687,7 @@ def header_leads(builder: StandaloneHTMLBuilder) -> dict[str, str]:
     return found
 
 
+@on("html-page-context")
 def toctrees(
     app: Sphinx,
     pagename: str,
@@ -738,6 +751,7 @@ def toctrees(
     context["km_header_toctree"] = header
 
 
+@on("html-page-context")
 def neighbours(
     app: Sphinx,
     pagename: str,
@@ -942,6 +956,7 @@ def title_parts(title: str) -> list[dict[str, str]]:
     return parts
 
 
+@on("html-page-context")
 def related(
     app: Sphinx,
     pagename: str,
@@ -1027,6 +1042,7 @@ def related(
         }
 
 
+@on("env-get-outdated")
 def follow(
     app: Sphinx,
     env: BuildEnvironment,
@@ -1067,6 +1083,7 @@ def follow(
     return sorted(stale - moved)
 
 
+@on("env-updated")
 def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
     """Send pages back to be written when the navigation changes.
 

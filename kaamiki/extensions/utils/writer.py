@@ -4,7 +4,7 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 12 November 2026
+Last updated on: 15 November 2026
 
 What Kaamiki changes in the HTML Sphinx writes, as it writes it.
 """
@@ -22,6 +22,7 @@ from sphinx.locale import _
 from sphinx.util.images import get_image_size
 
 from kaamiki.extensions.utils.doctree import caption_icon
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.links import guarded
 from kaamiki.extensions.utils.links import opens_new_tab
@@ -420,6 +421,7 @@ class translator(base):
         super().visit_compound(node)
 
 
+@on("builder-inited")
 def install(app: Sphinx) -> None:
     """Put `translator` in front of the builder's HTML translator.
 

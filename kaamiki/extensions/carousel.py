@@ -42,6 +42,7 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import fields
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
+from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import through
@@ -361,6 +362,7 @@ def depart(self: HTMLTranslator, node: Carousel.Node) -> None:
     self.body.append("</div>")
 
 
+@on("doctree-resolved")
 def emptied(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     """Stop the build for a carousel with too few items left to show.
 
@@ -386,11 +388,3 @@ def emptied(app: Sphinx, doctree: nodes.document, docname: str) -> None:
             )
         if found["cards"] and count < found["cards"]:
             fail(f"carousel: {few(found['cards'], count)}", location(found))
-
-
-def register(app: Sphinx) -> None:
-    """Register the check on each carousel.
-
-    :param app: The Sphinx application instance.
-    """
-    app.connect("doctree-resolved", emptied)

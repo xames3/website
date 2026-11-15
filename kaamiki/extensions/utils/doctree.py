@@ -4,7 +4,7 @@ Doctree Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 08 November 2026
+Last updated on: 15 November 2026
 
 The helpers that walk a doctree and pick prose out of it.
 """
@@ -21,6 +21,7 @@ from pygments.util import ClassNotFound
 from sphinx import addnodes
 from sphinx.builders.gettext import MessageCatalogBuilder
 
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import FILE_ICON
 from kaamiki.extensions.utils.icons import KEY_ICONS
 from kaamiki.extensions.utils.icons import Icons
@@ -212,6 +213,7 @@ def summarise(doctree: nodes.document | None, limit: int) -> str:
     return ""
 
 
+@on("doctree-read", priority=400)
 def offer(app: Sphinx, doctree: nodes.document) -> None:
     """Hand the words in a page's own fields to `gettext`.
 
@@ -344,6 +346,7 @@ def combos(children: list[nodes.Node], *, icons: Icons) -> list[nodes.Node]:
     return result
 
 
+@on("doctree-read")
 def keycaps(app: Sphinx, doctree: nodes.document) -> None:
     """Dress `kbd` keys as keycaps.
 
@@ -434,6 +437,7 @@ def _spaced(line: nodes.Element, icons: set[int]) -> None:
         ]
 
 
+@on("doctree-read", priority=700)
 def glyph_edges(app: Sphinx, doctree: nodes.document) -> None:
     """Mark the icons that start or end a line.
 

@@ -100,6 +100,7 @@ from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import moving
+from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import BOUNDS
@@ -915,6 +916,7 @@ html.closes(Explanation, "</div>")
 html.skips(PlainCode)
 
 
+@on("html-page-context")
 def html_page_context(
     app: Sphinx,
     pagename: str,

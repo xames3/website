@@ -4,7 +4,7 @@ Build Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 The utilities that write the 404 page and the sitemap after a build and
 the link checker that names a video that's gone.
@@ -28,6 +28,7 @@ from sphinx.builders.linkcheck import CheckExternalLinksBuilder
 from sphinx.util import logging
 
 from kaamiki.extensions.utils.dates import day
+from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import youtube_still_id
 from kaamiki.extensions.utils.settings import setting
 
@@ -218,6 +219,7 @@ def forget(app: Sphinx, kept: tuple[str, ...]) -> None:
         )
 
 
+@on("build-finished")
 def build_finished(app: Sphinx, exc: Exception | None) -> None:
     """Write Kaamiki's 404 page and the sitemap once the build worked.
 
