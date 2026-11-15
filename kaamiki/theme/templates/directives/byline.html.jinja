@@ -4,7 +4,7 @@ Byline Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 07 November 2026
+Last updated on: 15 November 2026
 #}
 {%- from "components/helpers.html.jinja"
 import km_glyph, km_id, km_tab with context %}
@@ -18,13 +18,13 @@ import km_glyph, km_id, km_tab with context %}
 {%- endmacro -%}
 {%- macro km_reading() -%}
     <p class="km-byline__reading-time">
-        {{ km_glyph(km_fa_icons.reading_time, "km-byline__reading-time-icon") }}
+        {{ km_glyph(kaamiki.icons.roles.reading_time, "km-byline__reading-time-icon") }}
         {{- _("%(num)s min read", num=km_ticker(km_minutes) ) -}}
     </p>
 {%- endmacro -%}
 {%- macro km_lang() -%}
     <span class="km-byline__language">
-        {{ km_glyph(km_fa_icons.language) }}
+        {{ km_glyph(kaamiki.icons.roles.language) }}
         <span lang="{{ km_language.code }}">{{ km_language.name }}</span>
     </span>
 {%- endmacro -%}
@@ -32,7 +32,7 @@ import km_glyph, km_id, km_tab with context %}
     <button type="button"
             class="km-byline__copy km-tooltip"
             data-km-copy-url>
-        {{ km_glyph(km_fa_icons.copy_url) }}
+        {{ km_glyph(kaamiki.icons.roles.copy_url) }}
         <span>{{ _("Copy") }}</span>
     </button>
 {%- endmacro -%}
@@ -40,13 +40,13 @@ import km_glyph, km_id, km_tab with context %}
     <div class="km-byline__meta-group km-byline__meta-group--end">
         <a href="{{ km_page_source }}"
            class="km-byline__source">
-            {{ km_glyph(km_fa_icons.page_source) }}
+            {{ km_glyph(kaamiki.icons.roles.page_source) }}
             <span>{{- _("Show") -}}</span>
         </a>
     </div>
 {%- endmacro -%}
 {% block km_byline %}
-    {%- set km_who = km_name|d(km_project.author) %}
+    {%- set km_who = km_name|d(kaamiki.site.project.author) %}
     {%- set km_items = [
         km_reading() if km_reading_time,
         km_lang() if km_language,
@@ -56,7 +56,7 @@ import km_glyph, km_id, km_tab with context %}
          {{ km_id(km_ids) }}
          {{ km_data|xmlattr }}
          data-km-search-skip>
-        {%- set km_href = km_target|d(km_project.source) %}
+        {%- set km_href = km_target|d(kaamiki.site.project.source) %}
         {%- set km_linked = km_href and km_href != "#" %}
         <{{ "a" if km_linked else "div" }}
         {%- if km_linked %}

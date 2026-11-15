@@ -18,7 +18,6 @@ import typing as t
 import jinja2
 
 from kaamiki.extensions.utils.hooks import on
-from kaamiki.extensions.utils.links import REL
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -48,7 +47,7 @@ def render(template: str, /, **context: object) -> str:
         prefix in the template.
     :return: The rendered HTML.
     """
-    values = {"km_rel": REL, **{f"km_{k}": v for k, v in context.items()}}
+    values = {f"km_{k}": v for k, v in context.items()}
     return environment.get_template(template).render(**values)
 
 

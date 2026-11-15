@@ -14,6 +14,7 @@ builder. Kaamiki writes web pages only, so a builder that is not in
 
 from __future__ import annotations
 
+import copy
 import os
 import os.path as p
 import posixpath
@@ -32,6 +33,8 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.dates import day
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.links import youtube_still_id
+from kaamiki.extensions.utils.settings import NAME
+from kaamiki.extensions.utils.settings import Kaamiki
 from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
@@ -45,6 +48,15 @@ PAGES: t.Final[tuple[str, ...]] = ("html", "dirhtml")
 BUILDERS: t.Final[tuple[str, ...]] = (*PAGES, "linkcheck")
 NOT_FOUND: t.Final[str] = "404"
 MARKER: t.Final[str] = "Written by Kaamiki, turn it off with"
+HIDDEN_ON_NOT_FOUND: t.Final[tuple[str, ...]] = (
+    "breadcrumbs",
+    "feedback",
+    "more",
+    "page_last_updated",
+    "previous_next_cards",
+    "previous_next_pages",
+    "scrolltop",
+)
 ROOTED_ATTRIBUTES: t.Final[tuple[str, ...]] = (
     "action",
     "data-content_root",
@@ -125,18 +137,12 @@ def not_found(app: Sphinx) -> bool:
     if getattr(builder, "globalcontext", None) is None:
         return False
     page = p.join(app.outdir, f"{NOT_FOUND}.html")
+    found = copy.copy(Kaamiki.of(builder))
+    for name in HIDDEN_ON_NOT_FOUND:
+        found[f"show.{name}"] = False
     builder.handle_page(
         NOT_FOUND,
-        {
-            "pageurl": None,
-            "km_show_breadcrumbs": False,
-            "km_show_feedback": False,
-            "km_show_more": False,
-            "km_show_page_last_updated": False,
-            "km_show_previous_next_cards": False,
-            "km_show_previous_next_pages": False,
-            "km_show_scrolltop": False,
-        },
+        {"pageurl": None, NAME: found},
         f"{NOT_FOUND}.html",
         outfilename=page,  # type: ignore[arg-type]
     )

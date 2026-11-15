@@ -45,6 +45,7 @@ from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils.settings import ALIGNMENTS
 from kaamiki.extensions.utils.settings import BOUNDS
+from kaamiki.extensions.utils.settings import NAME
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -220,11 +221,10 @@ def visit(self: HTMLTranslator, node: Byline.Node) -> None:
     found = Kaamiki.of(self.builder)
     attributes = dict(node.attributes)
     attributes.update(fields(self, node))
-    attributes["project"] = found.site.project
-    target = attributes.get("target") or attributes["project"]["source"]
+    project = found.site.project
+    target = attributes.get("target") or project["source"]
     attributes["new_tab"] = opens_new_tab(target, config)
     attributes["target"] = relative_to_page(self, target)
-    attributes["fa_icons"] = found.icons.roles
     attributes["minutes"] = max(1, reading_time(node.document, config))
     attributes["page_source"] = (
         source_url(self) if attributes["page_source"] else ""
@@ -236,7 +236,7 @@ def visit(self: HTMLTranslator, node: Byline.Node) -> None:
     attributes["language"] = (
         {"code": code, "name": native(code)} if attributes["language"] else {}
     )
-    avatar = attributes.get("avatar") or attributes["project"]["avatar"]
+    avatar = attributes.get("avatar") or project["avatar"]
     attributes["avatar"] = relative_to_page(self, avatar)
     backdrop = attributes.get("backdrop", "").split()
     pictures = [relative_to_page(self, _) for _ in backdrop]
@@ -268,7 +268,9 @@ def html_page_context(
     :param doctree: The resolved doctree, or `None` for a generated
         page.
     """
-    del pagename, templatename, doctree
+    del app, pagename, templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
-    project = Kaamiki.of(app.builder).site.project
-    context["km_author"] = meta.get("author") or project.get("author")
+    found = context[NAME]
+    found["page.author"] = meta.get("author") or found.site.project.get(
+        "author"
+    )

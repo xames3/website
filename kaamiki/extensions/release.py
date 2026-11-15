@@ -376,7 +376,6 @@ def visit(self: HTMLTranslator, node: Release.Node) -> None:
     :param node: The `release` node and its attributes.
     """
     attributes = dict(node.attributes)
-    attributes["fa_icons"] = Kaamiki.of(self.builder).icons.roles
     iso = attributes.get("datetime")
     attributes["date"] = (
         dated(dt.fromisoformat(iso), self.builder.config) if iso else ""

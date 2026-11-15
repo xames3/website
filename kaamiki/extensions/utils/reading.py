@@ -21,6 +21,7 @@ from kaamiki.extensions.utils.directives import toggle
 from kaamiki.extensions.utils.doctree import alternatives
 from kaamiki.extensions.utils.doctree import annotated
 from kaamiki.extensions.utils.hooks import on
+from kaamiki.extensions.utils.settings import NAME
 from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
@@ -112,4 +113,4 @@ def show_more(
         else values(config).show.more
     )
     long_enough = reading_time(doctree, config) >= after
-    context["km_show_more"] = bool(on and long_enough)
+    context[NAME]["show.more"] = bool(on and long_enough)

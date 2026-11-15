@@ -69,6 +69,7 @@ from kaamiki.extensions.utils import hostnames
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import values
+from kaamiki.extensions.utils.settings import NAME
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable
@@ -548,8 +549,8 @@ def html_page_context(
         page.
     """
     del pagename, templatename
-    context["km_embed_css"] = []
-    context["km_embed_js"] = []
+    context[NAME]["embed.css"] = []
+    context[NAME]["embed.js"] = []
     if doctree is None:
         return
     embeds = [_ for _ in findall(doctree, nodes.raw) if "css" in _]
@@ -560,5 +561,5 @@ def html_page_context(
     for raw in embeds:
         css.update(dict.fromkeys(raw.get("css", ())))
         js.update(dict.fromkeys(raw.get("js", ())))
-    context["km_embed_css"] = list(css)
-    context["km_embed_js"] = list(js)
+    context[NAME]["embed.css"] = list(css)
+    context[NAME]["embed.js"] = list(js)

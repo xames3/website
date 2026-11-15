@@ -27,6 +27,7 @@ from sphinx.util.i18n import format_date
 
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.hooks import on
+from kaamiki.extensions.utils.settings import NAME
 from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
@@ -89,7 +90,7 @@ def updated_on(
     iso = day(shown)
     if iso:
         shown = dated(dt.fromisoformat(iso), app.config)
-    context["km_updated_on"] = shown
+    context[NAME]["page.updated_on"] = shown
 
 
 def header(source: str) -> dict[str, str]:
