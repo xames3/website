@@ -33,7 +33,6 @@ from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import parse
-from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
@@ -252,23 +251,6 @@ class Youtube(KaamikiDirective):
         element = self.locate(self.Node("", caption, **self.options))
         self.add_name(element)
         return [element, *trail(self, self.options, ("still",)), *messages]
-
-    @staticmethod
-    def plain(node: Youtube.Node) -> list[nodes.Node]:
-        """Write a player as words, for a builder without HTML.
-
-        :param node: The node of the player.
-        :return: A paragraph with its caption, when it has one, and a
-            paragraph with the address of the video as a link to
-            itself.
-        """
-        found: list[nodes.Node] = [
-            nodes.paragraph("", "", *each.children)
-            for each in node.children
-            if isinstance(each, phrase) and each.children
-        ]
-        link = nodes.reference("", node["watch"], refuri=node["watch"])
-        return [*found, nodes.paragraph("", "", link)]
 
 
 html.draws(Youtube.Node, template)

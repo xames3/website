@@ -26,10 +26,6 @@ from markupsafe import Markup
 from sphinx import addnodes
 from sphinx.util import docname_join
 from sphinx.util.docutils import SphinxDirective
-from sphinx.writers.latex import LaTeXTranslator
-from sphinx.writers.manpage import ManualPageTranslator
-from sphinx.writers.texinfo import TexinfoTranslator
-from sphinx.writers.text import TextTranslator
 
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.settings import values
@@ -53,12 +49,6 @@ if t.TYPE_CHECKING:
 OPTION: t.Final[re.Pattern[str]] = re.compile(
     r"^\s*- `([\w-]+)`:", re.MULTILINE
 )
-TRANSLATORS: t.Final[dict[str, type[nodes.NodeVisitor]]] = {
-    "latex": LaTeXTranslator,
-    "man": ManualPageTranslator,
-    "texinfo": TexinfoTranslator,
-    "text": TextTranslator,
-}
 LINKCHECK_OPTIONS: t.Final[tuple[str, ...]] = ("avatar", "backdrop", "target")
 LINKS: t.Final[tuple[type[nodes.Node], ...]] = (
     nodes.reference,
@@ -327,20 +317,15 @@ class Renderer:
     def __init__(self) -> None:
         """Make an empty record."""
         self.visitors: dict[type[nodes.Element], list[t.Any]] = {}
-        self.elsewhere: dict[type[nodes.Element], str] = {}
 
     def opens[V: Callable[..., None]](
-        self, node: type[nodes.Element], *, elsewhere: str = ""
+        self, node: type[nodes.Element]
     ) -> Callable[[V], V]:
         """Record the function below as the visitor.
 
         :param node: The node that the function writes.
-        :param elsewhere: How the other builders write the node, `skip`
-            or the name of a docutils node, as `inline`.
         :return: The decorator, which gives back the same function.
         """
-        if elsewhere:
-            self.elsewhere[node] = elsewhere
         return self._recorder(node, 0)
 
     @t.overload
@@ -395,7 +380,7 @@ class Renderer:
         :param app: The Sphinx application instance.
         """
         for node, (visit, leave) in self.visitors.items():
-            app.add_node(node, html=(visit, leave), **self._others(node))
+            app.add_node(node, html=(visit, leave))
 
     def _recorder[V: Callable[..., None]](
         self, node: type[nodes.Element], index: int
@@ -412,25 +397,6 @@ class Renderer:
             return function
 
         return record
-
-    def _others(self, node: type[nodes.Element]) -> dict[str, t.Any]:
-        """Find how the builders that are not HTML write a node.
-
-        :param node: The node.
-        :return: The visitor and the depart for each builder.
-        """
-        how = self.elsewhere.get(node)
-        if how is None:
-            return {}
-        if how == "skip":
-            return dict.fromkeys(TRANSLATORS, (skip, None))
-        return {
-            builder: (
-                getattr(translator, f"visit_{how}"),
-                getattr(translator, f"depart_{how}"),
-            )
-            for builder, translator in TRANSLATORS.items()
-        }
 
 
 html: t.Final[Renderer] = Renderer()

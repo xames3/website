@@ -39,7 +39,6 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import parse
-from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
 from kaamiki.extensions.utils import worded
@@ -115,22 +114,6 @@ class Thumbnail(KaamikiDirective):
             node.append(parsed)
             messages.extend(reported)
         return [node, *trail(self, options, ("thumbnail",)), *messages]
-
-    @staticmethod
-    def plain(node: Thumbnail.Node) -> list[nodes.Node]:
-        """Write a thumbnail as words, for a builder without HTML.
-
-        :param node: The node of the thumbnail.
-        :return: A paragraph for each text, and a paragraph with a link
-            to the video.
-        """
-        found: list[nodes.Node] = [
-            nodes.paragraph("", "", *each.children)
-            for each in node.children
-            if isinstance(each, phrase)
-        ]
-        link = nodes.reference("", node["src"], refuri=node["src"])
-        return [*found, nodes.paragraph("", "", link)]
 
 
 html.draws(Thumbnail.Node, template)

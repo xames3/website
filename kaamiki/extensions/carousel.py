@@ -274,28 +274,6 @@ class Carousel(KaamikiDirective, motion=True):
                 )
         return [node, *messages]
 
-    @staticmethod
-    def plain(node: Carousel.Node) -> list[nodes.Node]:
-        """Write a carousel as words, for a builder without HTML.
-
-        :param node: The node of the carousel.
-        :return: A paragraph for each line of its heading, then its
-            items.
-        """
-        heading = [
-            nodes.paragraph("", "", *each.children)
-            for each in node.children
-            if isinstance(each, CarouselText)
-        ]
-        return [
-            *heading,
-            *(
-                each
-                for each in node.children
-                if not isinstance(each, CarouselText)
-            ),
-        ]
-
 
 @html.opens(Carousel.Node)
 def visit(self: HTMLTranslator, node: Carousel.Node) -> None:

@@ -226,7 +226,7 @@ def depart_summary(self: HTMLTranslator, node: Summary) -> None:
     self.body.append(f'</summary><div class="{self.attval(classes)}">')
 
 
-@html.opens(Headline, elsewhere="inline")
+@html.opens(Headline)
 def visit_headline(self: HTMLTranslator, node: Headline) -> None:
     """Open the line above or below the title.
 

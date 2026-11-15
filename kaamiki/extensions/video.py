@@ -41,7 +41,6 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import listed
 from kaamiki.extensions.utils import parse
-from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import relative_to_page
 from kaamiki.extensions.utils import shipped
 from kaamiki.extensions.utils import trail
@@ -286,24 +285,6 @@ class Video(KaamikiDirective):
             "poster": options.get("poster"),
             "preload": options.get("preload"),
         }
-
-    @staticmethod
-    def plain(node: Video.Node) -> list[nodes.Node]:
-        """Write a video as words, for a builder without HTML.
-
-        :param node: The node of the video.
-        :return: A paragraph with its caption, when it has one, and a
-            paragraph with the address of the video as a link to
-            itself.
-        """
-        found: list[nodes.Node] = [
-            nodes.paragraph("", "", *each.children)
-            for each in node.children
-            if isinstance(each, phrase) and each.children
-        ]
-        url = node["sources"][0]["url"]
-        link = nodes.reference("", url, refuri=url)
-        return [*found, nodes.paragraph("", "", link)]
 
 
 def prepare(

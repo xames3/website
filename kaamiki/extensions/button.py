@@ -54,7 +54,6 @@ from kaamiki.extensions.utils import document
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import paragraph
-from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
 from kaamiki.extensions.utils import values
@@ -338,24 +337,6 @@ class Button(KaamikiDirective):
                 f":scheme: expected one of {options}, got {scheme!r}{where}"
             )
         return ("" if scheme == "dark" else f"km-button--scheme-{scheme}"), ""
-
-    @staticmethod
-    def plain(node: Button.Node) -> list[nodes.Node]:
-        """Write a button as words, for a builder without HTML.
-
-        :param node: The node of the button.
-        :return: A paragraph with its label and its address as a link
-            to itself, which a text writer would not write. A button
-            that names a page of the site has no address to show.
-        """
-        label = next(
-            each for each in node.children if isinstance(each, phrase)
-        )
-        words = nodes.paragraph("", "", *label.children)
-        if node["url"]:
-            link = nodes.reference("", node["url"], refuri=node["url"])
-            words += [nodes.Text(" "), link]
-        return [words]
 
 
 def prepare(

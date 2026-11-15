@@ -43,7 +43,6 @@ from kaamiki.extensions.utils.settings import NAME
 if t.TYPE_CHECKING:
     from collections.abc import Sequence
 
-    import docutils.nodes as nodes
     from sphinx.application import Sphinx
 
 __version__: str = "2026.11.8"
@@ -80,7 +79,6 @@ browsers: Sequence[str] = (
     "samsung >= 25",
 )
 basic_files: Sequence[str] = ("basic.css", "file.png", "minus.png", "plus.png")
-formats: Sequence[str] = ("latex", "man", "texinfo", "text")
 logger = logging.getLogger(__name__)
 
 
@@ -268,26 +266,6 @@ def cleanup(app: Sphinx, exc: Exception | None) -> None:
     for name in basic_files:
         with contextlib.suppress(FileNotFoundError):
             os.remove(p.join(app.outdir, "_static", name))
-
-
-@on("doctree-resolved")
-def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
-    """Change the nodes of Kaamiki where there is no HTML.
-
-    :param app: The Sphinx application instance. The text, LaTeX, man
-        and texinfo builders cannot write the nodes of Kaamiki, so the
-        node of a directive with a `plain` method changes into what it
-        gives. Then they write words and links.
-    :param doctree: The page, before it is written.
-    :param docname: The name of the page.
-    """
-    del docname
-    if app.builder.format not in formats:
-        return
-    for directive in KaamikiDirective.registry.values():
-        if hasattr(directive, "plain"):
-            for found in [*doctree.findall(directive.Node)]:
-                found.replace_self(directive.plain(found))
 
 
 def add_roles(app: Sphinx) -> None:
