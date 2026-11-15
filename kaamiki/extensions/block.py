@@ -29,6 +29,7 @@ from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import document
 from kaamiki.extensions.utils import html
+from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
@@ -294,6 +295,7 @@ html.closes(Part, "</div>")
 html.closes(BlockText, "</div>")
 
 
+@on("doctree-read")
 def unrow(app: Sphinx, doctree: nodes.document) -> None:
     """Take the blocks out of the rows that sit in a column.
 
@@ -309,11 +311,3 @@ def unrow(app: Sphinx, doctree: nodes.document) -> None:
             host = host.parent
         if host is not None:
             found.replace_self(list(found.children))
-
-
-def register(app: Sphinx) -> None:
-    """Register the check on the rows of blocks.
-
-    :param app: The Sphinx application instance.
-    """
-    app.connect("doctree-read", unrow)

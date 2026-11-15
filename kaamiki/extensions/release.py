@@ -41,6 +41,7 @@ from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import glyph
 from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
+from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import render
 from kaamiki.extensions.utils import setting
 from kaamiki.extensions.utils import stored
@@ -415,6 +416,7 @@ def ensure_versions(env: BuildEnvironment) -> dict[str, dict[str, str]]:
     return stored(env, "versions", {})
 
 
+@on("env-before-read-docs")
 def clear(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
     """Forget every page that's about to be read before the first is.
 
@@ -427,6 +429,7 @@ def clear(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
         env.clear_doc(docname)
 
 
+@on("env-purge-doc")
 def purge(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
     """Forget the articles and versions a page's releases had.
 
@@ -447,6 +450,7 @@ def purge(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
             del seen[version]
 
 
+@on("env-merge-info")
 def merge(
     app: Sphinx,
     env: BuildEnvironment,
@@ -471,6 +475,7 @@ def merge(
                 ensure_versions(env).setdefault(version, {})[page] = where
 
 
+@on("env-updated")
 def settle(app: Sphinx, env: BuildEnvironment) -> None:
     """Stop the build when two pages wrote the same version.
 
@@ -492,6 +497,7 @@ def settle(app: Sphinx, env: BuildEnvironment) -> None:
             )
 
 
+@on("doctree-resolved")
 def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     """Put the site's `release_notes` icon on a release's article link.
 
@@ -521,15 +527,3 @@ def tag(app: Sphinx, doctree: nodes.document, docname: str) -> None:
             link += badge
         else:
             link.insert(0, badge)
-
-
-def register(app: Sphinx) -> None:
-    """Keep track of the articles releases link to and tag them.
-
-    :param app: The Sphinx application instance.
-    """
-    app.connect("env-before-read-docs", clear)
-    app.connect("env-purge-doc", purge)
-    app.connect("env-merge-info", merge)
-    app.connect("env-updated", settle)
-    app.connect("doctree-resolved", tag)

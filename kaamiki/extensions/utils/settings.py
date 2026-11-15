@@ -922,6 +922,7 @@ ENTRIES: t.Final[dict[tuple[str, str], Callable[[str], t.Any]]] = {
 }
 
 
+@on("config-inited")
 def overrides(app: Sphinx, config: Config) -> None:
     """Read the numbers and switches a `-D` on the command line gave.
 
@@ -1113,6 +1114,7 @@ class Conf:
 CONF: t.Final[Conf] = Conf()
 
 
+@on("config-inited")
 def apply(app: Sphinx, config: Config) -> None:
     """Hand what `conf.py` set on `kaamiki.conf` to Sphinx.
 

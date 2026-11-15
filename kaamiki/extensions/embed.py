@@ -61,6 +61,7 @@ from kaamiki.extensions.utils import confdir
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import hostnames
 from kaamiki.extensions.utils import listed
+from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import setting
 
 if t.TYPE_CHECKING:
@@ -560,6 +561,7 @@ class Embed(KaamikiDirective, spec=placeholders):
         return source
 
 
+@on("html-page-context")
 def html_page_context(
     app: Sphinx,
     pagename: str,

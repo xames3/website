@@ -11,8 +11,6 @@ All of Kaamiki's custom directives.
 
 from __future__ import annotations
 
-import typing as t
-
 from . import accordion
 from . import block
 from . import button
@@ -30,26 +28,21 @@ from . import youtube
 from .code import explain
 from .code import version
 
-if t.TYPE_CHECKING:
-    import types
-    from collections.abc import Sequence
-
-__all__: list[str] = ["directives", "nesting"]
-
-directives: Sequence[types.ModuleType] = (
-    accordion,
-    block,
-    button,
-    byline,
-    carousel,
-    columns,
-    embed,
-    explain,
-    release,
-    repository,
-    tabs,
-    thumbnail,
-    version,
-    video,
-    youtube,
-)
+__all__: list[str] = [
+    "accordion",
+    "block",
+    "button",
+    "byline",
+    "carousel",
+    "columns",
+    "embed",
+    "explain",
+    "nesting",
+    "release",
+    "repository",
+    "tabs",
+    "thumbnail",
+    "version",
+    "video",
+    "youtube",
+]

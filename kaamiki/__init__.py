@@ -24,17 +24,14 @@ from sphinx import locale
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.util import logging
 
-from kaamiki.extensions import directives
 from kaamiki.extensions import roles
 from kaamiki.extensions.utils import CONF
 from kaamiki.extensions.utils import TEMPLATES
 from kaamiki.extensions.utils import KaamikiDirective
-from kaamiki.extensions.utils import apply
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import linkcheck
 from kaamiki.extensions.utils import on
-from kaamiki.extensions.utils import overrides
 from kaamiki.extensions.utils import pair
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import register
@@ -334,11 +331,6 @@ def add_directives(app: Sphinx) -> None:
     """
     for name, directive in KaamikiDirective.registry.items():
         app.add_directive(name, directive)
-    for module in directives:
-        if hasattr(module, "register"):
-            module.register(app)
-        if hasattr(module, "html_page_context"):
-            app.connect("html-page-context", module.html_page_context)
     html.register(app)
 
 
@@ -363,8 +355,6 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     app.add_html_theme(NAME, TEMPLATES)
     app.add_message_catalog("sphinx", locale_dir)
     register(app)
-    app.connect("config-inited", apply)
-    app.connect("config-inited", overrides)
     app.add_transform(checks.Plain)
     app.translator = locale.get_translator()
     add_roles(app)
