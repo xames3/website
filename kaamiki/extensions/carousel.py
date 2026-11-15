@@ -65,7 +65,7 @@ DIRECTIONS: t.Final[tuple[str, ...]] = ("right", "left")
 CARDS: t.Final[int] = 2
 ITEMS: t.Final[tuple[type[nodes.Node], ...]] = (
     block.Block.Node,
-    button.Button,
+    button.Button.Node,
     nodes.figure,
     nodes.image,
     repository.Repository.Node,

@@ -34,11 +34,11 @@ import docutils.parsers.rst as rst
 
 from kaamiki.extensions.block import address
 from kaamiki.extensions.roles import steady
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import document
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import paragraph
 from kaamiki.extensions.utils import phrase
@@ -56,7 +56,6 @@ from kaamiki.extensions.utils.settings import SCHEMES
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "button"
 template: t.Final[str] = "directives/button.html.jinja"
 # NOTE(xames3): Inspired by Sphinx Design's button directive.
 # https://sphinx-design.readthedocs.io/en/latest/badges_buttons.html
@@ -140,87 +139,83 @@ def download(argument: str | None) -> str:
     return argument.strip()
 
 
-class Button(nodes.Element):
-    """The button and its parsed label, waiting for `visit`."""
-
-
-class directive(rst.Directive):
+class Button(KaamikiDirective):
     """The `button` directive.
 
-    The argument is the address, a full one, a path on the site or a
-    fragment. `doc` and `ref` stand in for it, and a button takes one
-    of the three.
+    The argument is the address: a full address, a path on the site or
+    a fragment. `doc` and `ref` can replace it. A button has only one of
+    the three.
 
     Options::
 
-        - `doc`: A document of the site the button links to, as `:doc:`
-          names it. The link works under every builder.
-        - `ref`: A label the button links to, as `:ref:` names it,
-          capitals and spaces aside.
+        - `doc`: A document of the site, named as `:doc:` names it. The
+          button links to it. The link works with all builders.
+        - `ref`: A label, named as `:ref:` names it. Capitals and spaces
+          do not change the label. The button links to it.
         - `fa-icon`: A Font Awesome icon, as `video`, `fa-video` or
-          `fa-regular fa-video`. One without a style is drawn in the
-          site's `kaamiki.conf.icons.style`, `regular` unless it says
-          otherwise, and `solid` where Font Awesome Free has no icon of
-          that name in that style.
-        - `icon-position`: `before` the label or `after` it. Defaults
-          to `before`.
-        - `align`: Where the button sits, `left`, `center` or `right`.
-          Defaults to `left`.
+          `fa-regular fa-video`. An icon without a style uses the site's
+          `kaamiki.conf.icons.style`, which is `regular` by default.
+          When Font Awesome Free has no icon of that name in that style,
+          it uses `solid`.
+        - `icon-position`: The side of the label for the icon, `before`
+          or `after`. The default is `before`. It needs `fa-icon`.
+        - `align`: Where the button is, `left`, `center` or `right`. The
+          default is `left`.
         - `scheme`: `light`, `dark`, `chevron`, `red`, `yellow`, `blue`
-          or `green`. A colour named in `kaamiki.conf.button.colours`
-          works too. `chevron` is `light` with a chevron on the right
-          that turns into an arrow on hover.
-        - `new-tab`: Open the link in a new tab, even on this site. It
-          stops the build for a link that opens in one already.
-        - `same-tab`: Open the link in this tab, even off this site.
-          A link off this site opens in a new tab without it, unless
-          the site's `kaamiki.conf.links.new_tab` is off. It stops the
-          build for a link that stays in this tab already.
-        - `rel`: What the link's `rel` says. It adds to `noopener
+          or `green`. A colour in `kaamiki.conf.button.colours` is also
+          correct. `chevron` is `light` with a chevron on the right. On
+          hover, the chevron changes to an arrow.
+        - `new-tab`: Open the link in a new tab, also on this site. The
+          build stops when the link opens in a new tab already.
+        - `same-tab`: Open the link in this tab, also for a different
+          site. Without it, a link to a different site opens in a new
+          tab, unless `kaamiki.conf.links.new_tab` of the site is off.
+          The build stops when the link stays in this tab already.
+        - `rel`: The `rel` of the link. It adds to `noopener
           noreferrer`, which a link that opens in a new tab always has.
-        - `tooltip`: The text a reader sees when they hover over it, up
-          to 120 characters.
-        - `download`: Save the link instead of opening it, under the
-          file name given if there's one.
-        - `name`: A name to link to.
+        - `tooltip`: The text that shows when a reader hovers on the
+          button, with a maximum of 120 characters.
+        - `download`: Save the link, not open it, with the file name if
+          you give one.
+        - `name`: A name for links.
         - `class`: More classes for the link.
 
-    The site's `kaamiki.conf.button.scheme` and
-    `kaamiki.conf.button.icon_position` settle the scheme and the
-    icon's side for a button that doesn't say. The `chevron` scheme
-    takes neither `fa-icon` nor `icon-position`, so a button with an
-    icon is `light` under a site-wide `chevron`.
+    When a button does not set the scheme or the side of its icon,
+    `kaamiki.conf.button.scheme` and `kaamiki.conf.button.icon_position`
+    set them. The `chevron` scheme cannot have `fa-icon` or
+    `icon-position`. Thus, when the site uses `chevron`, a button with
+    an icon is `light`.
     """
 
     has_content = True
     required_arguments = 0
     optional_arguments = 1
     final_argument_whitespace = False
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        "doc": checks.text,
-        "ref": checks.text,
-        "fa-icon": checks.icon,
-        "icon-position": checks.word(*ICON_POSITIONS),
-        "align": checks.word(*ALIGNMENTS),
-        "scheme": checks.text,
-        "new-tab": rst.directives.flag,
-        "same-tab": rst.directives.flag,
-        "rel": rel,
-        "tooltip": lambda _: checks.text(_, 120),
-        "download": download,
-    }
+    doc = Option(checks.text)
+    ref = Option(checks.text)
+    fa_icon = Option(checks.icon)
+    icon_position = Option(checks.word(*ICON_POSITIONS), needs="fa-icon")
+    align = Option(checks.word(*ALIGNMENTS))
+    scheme = Option(checks.text)
+    new_tab = Option(rst.directives.flag)
+    same_tab = Option(rst.directives.flag)
+    rel = Option(rel)
+    tooltip = Option(lambda _: checks.text(_, 120))
+    download = Option(download)
 
-    def run(self) -> list[nodes.Node]:
+    class Node(nodes.Element):
+        """The button and its parsed label, which `visit` writes."""
+
+    def build(self) -> list[nodes.Node]:
         """Parse the label and return the button's node.
 
         :return: The node, followed by the `raw` node `trail` returns
             for the link checker and anything the label reported.
         """
-        config = self.state.document.settings.env.config
+        config = self.config
         options = self.options
         if "new-tab" in options and "same-tab" in options:
-            raise self.error("button: :new-tab: not allowed with :same-tab:")
+            self.fail(":new-tab: not allowed with :same-tab:")
         argument = self.arguments.pop() if self.arguments else ""
         kind = next((_ for _ in ("doc", "ref") if _ in options), "")
         names = [
@@ -228,11 +223,9 @@ class directive(rst.Directive):
             *(f":{_}:" for _ in ("doc", "ref") if _ in options),
         ]
         if not names:
-            raise self.error(
-                "button: expected an address, :doc: or :ref:, got none"
-            )
+            self.fail("expected an address, :doc: or :ref:, got none")
         if len(names) > 1:
-            raise self.error(f"button: {names[0]} not allowed with {names[1]}")
+            self.fail(f"{names[0]} not allowed with {names[1]}")
         url, link = "", ""
         if kind == "doc":
             link = document(self, options.pop("doc"), "doc")
@@ -242,26 +235,24 @@ class directive(rst.Directive):
             try:
                 url = checks.link(argument)
             except ValueError as error:
-                raise self.error(f"button: {error}") from error
+                self.fail(f"{error}")
         new_tab = bool(url) and opens_new_tab(url, config)
         if "new-tab" in options or "same-tab" in options:
             if ("new-tab" in options) == new_tab:
-                raise self.error(
-                    f"button: :{'new-tab' if new_tab else 'same-tab'}: does"
+                self.fail(
+                    f":{'new-tab' if new_tab else 'same-tab'}: does"
                     " nothing, the link does that already"
                 )
             new_tab = "new-tab" in options
         if "download" in options and (new_tab or "new-tab" in options):
-            raise self.error("button: :download: not allowed with a new tab")
-        if "icon-position" in options and "fa-icon" not in options:
-            raise self.error("button: :icon-position: needs :fa-icon:")
+            self.fail(":download: not allowed with a new tab")
         look, style = self.look(
             options.pop("scheme", None), iconic="fa-icon" in options
         )
         chevron = look == "km-button--scheme-chevron"
         if chevron and ("fa-icon" in options or "icon-position" in options):
-            raise self.error(
-                "button: the chevron scheme isn't allowed with :fa-icon: or "
+            self.fail(
+                "the chevron scheme isn't allowed with :fa-icon: or "
                 ":icon-position:"
             )
         side = options.pop("icon-position", None)
@@ -278,7 +269,7 @@ class directive(rst.Directive):
                 options.pop("fa-icon", None)
             )
         except ValueError as error:
-            raise self.error(f"button: :fa-icon: {error}") from error
+            self.fail(f":fa-icon: {error}")
         attributes["faicon_after"] = side == "after"
         attributes["chevron"] = chevron
         attributes["align"] = options.pop("align", "left")
@@ -296,7 +287,7 @@ class directive(rst.Directive):
         }
         text = "\n".join(self.content).strip()
         if blank(text):
-            raise self.error("button: expected a label, got none")
+            self.fail("expected a label, got none")
         label, messages = paragraph(self, text, "text")
         unlinked(self, label, "a label")
         worded(self, label, "a label")
@@ -306,8 +297,8 @@ class directive(rst.Directive):
             "a label",
             "which the script doesn't run inside a link",
         )
-        element = Button("", label, **attributes)
-        named(self, element)
+        element = self.Node("", label, **attributes)
+        self.add_name(element)
         return [element, *trail(self, attributes, ("url",)), *messages]
 
     def look(self, scheme: str | None, *, iconic: bool) -> tuple[str, str]:
@@ -320,7 +311,7 @@ class directive(rst.Directive):
             if the scheme is one the site named. The `dark` scheme is
             how a button looks without one and has no class.
         """
-        config = self.state.document.settings.env.config
+        config = self.config
         colours = setting(config, "button_colours")
         where = ""
         if scheme is None:
@@ -336,11 +327,26 @@ class directive(rst.Directive):
             )
         if scheme not in SCHEMES:
             options = ", ".join(map(repr, [*SCHEMES, *sorted(colours)]))
-            raise self.error(
-                f"button: :scheme: expected one of {options}, got"
-                f" {scheme!r}{where}"
+            self.fail(
+                f":scheme: expected one of {options}, got {scheme!r}{where}"
             )
         return ("" if scheme == "dark" else f"km-button--scheme-{scheme}"), ""
+
+    @staticmethod
+    def plain(node: Button.Node) -> list[nodes.Node]:
+        """Write a button as words, for a builder that writes no HTML.
+
+        :param node: The button's node.
+        :return: A paragraph with its label and its address, written as a
+            link to itself, which a text writer would otherwise drop. A
+            button that names a page of the site has no address to show.
+        """
+        label = next(each for each in node.children if isinstance(each, phrase))
+        words = nodes.paragraph("", "", *label.children)
+        if node["url"]:
+            link = nodes.reference("", node["url"], refuri=node["url"])
+            words += [nodes.Text(" "), link]
+        return [words]
 
 
 def prepare(
@@ -361,23 +367,4 @@ def prepare(
     return found
 
 
-def plain(node: Button) -> list[nodes.Node]:
-    """Write a button as words, for a builder that draws no HTML.
-
-    :param node: The button's node.
-    :return: A paragraph with its label and its address, written as a
-        link to itself, which a text writer would otherwise drop. A
-        button that names a page of the site has no address to show.
-    """
-    label = next(_ for _ in node.children if isinstance(_, phrase))
-    words = nodes.paragraph("", "", *label.children)
-    if node["url"]:
-        link = nodes.reference("", node["url"], refuri=node["url"])
-        words += [nodes.Text(" "), link]
-    return [words]
-
-
-html.draws(Button, template, prepare)
-
-
-node = Button
+html.draws(Button.Node, template, prepare)
