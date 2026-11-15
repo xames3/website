@@ -4,7 +4,7 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 13 November 2026
+Last updated on: 15 November 2026
 
 Kaamiki's shared helpers.
 """
@@ -39,11 +39,14 @@ from kaamiki.extensions.utils.dates import warm
 from kaamiki.extensions.utils.directives import MOTION
 from kaamiki.extensions.utils.directives import NATIVE
 from kaamiki.extensions.utils.directives import NO_MOTION
+from kaamiki.extensions.utils.directives import Bem
 from kaamiki.extensions.utils.directives import close
+from kaamiki.extensions.utils.directives import closer
 from kaamiki.extensions.utils.directives import depart
 from kaamiki.extensions.utils.directives import document
 from kaamiki.extensions.utils.directives import fields
 from kaamiki.extensions.utils.directives import hollow
+from kaamiki.extensions.utils.directives import html
 from kaamiki.extensions.utils.directives import listed
 from kaamiki.extensions.utils.directives import located
 from kaamiki.extensions.utils.directives import moving
@@ -92,6 +95,7 @@ from kaamiki.extensions.utils.templates import bridge
 from kaamiki.extensions.utils.templates import render
 
 __all__: list[str] = [
+    "Bem",
     "CONF",
     "MOTION",
     "NATIVE",
@@ -105,6 +109,7 @@ __all__: list[str] = [
     "caption_icon",
     "checks",
     "close",
+    "closer",
     "confdir",
     "context_defaults",
     "dated",
@@ -123,6 +128,7 @@ __all__: list[str] = [
     "guarded",
     "hollow",
     "hostnames",
+    "html",
     "kept",
     "keycaps",
     "linkcheck",
