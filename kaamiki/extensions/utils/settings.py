@@ -492,6 +492,7 @@ class Value[T]:
         *,
         choices: tuple[str, ...] = (),
         number: type[int | float] | None = None,
+        text: Callable[[str], t.Any] | None = None,
         key: str = "",
         reread: bool = False,
         page: bool = False,
@@ -504,6 +505,9 @@ class Value[T]:
         :param choices: The words that the setting permits.
         :param number: `int` or `float`, for a number in the `BOUNDS`
             of the setting.
+        :param text: The check for a string. It makes the rule, and it
+            is how an option of a directive or a role reads the
+            setting from rST.
         :param key: The name of the setting in Sphinx, without
             `kaamiki_`. The default is the group, `_` and the
             attribute.
@@ -512,7 +516,8 @@ class Value[T]:
         :param page: Whether a page can switch it with a field.
         """
         self.default = default
-        self.rule = rule
+        self.rule = string(text) if text else rule
+        self.read: Callable[[str], t.Any] | None = text
         self.choices = choices
         self.number = number
         self.key = key
@@ -602,11 +607,13 @@ class Settings:
             each.key = each.key or "_".join(filter(None, (start, each.attr)))
             each.group = cls.name
             if each.choices:
-                each.rule = checks.word(*each.choices)
+                each.rule = each.read = checks.word(*each.choices)
             elif each.number is int:
                 each.rule = whole(*BOUNDS[each.key])
+                each.read = checks.integer(*map(int, BOUNDS[each.key]))
             elif each.number is float:
                 each.rule = real(*BOUNDS[each.key])
+                each.read = checks.number(*BOUNDS[each.key])
             Settings.schema[each.key] = each
         Settings.groups[cls.name] = cls
 
@@ -664,9 +671,7 @@ class Icons(Settings):
         key="fa_style",
         reread=True,
     )
-    kit = Value[str | None](
-        None, string(checks.kit), key="fa_kit", reread=True
-    )
+    kit = Value[str | None](None, text=checks.kit, key="fa_kit", reread=True)
     names = Value[dict[str, t.Any]]({}, site_icons, key="fa_icons")
 
     def update(
@@ -728,12 +733,12 @@ class CodeExplain(Settings):
     cache = Value(True, boolean, reread=True)
     comprehensions = Value(False, boolean, reread=True)
     events = Value(
-        "line, return", string(listed_in(TRACE_EVENTS, ", ")), reread=True
+        "line, return", text=listed_in(TRACE_EVENTS, ", "), reread=True
     )
     limit = Value(100, number=int, reread=True)
     memory = Value(1024, number=int, reread=True)
     output_limit = Value(64, number=int, reread=True)
-    python = Value[str | None](None, string(checks.text), reread=True)
+    python = Value[str | None](None, text=checks.text, reread=True)
     pythonpath = Value[list[str]]([], many(checks.text), reread=True)
     run = Value(False, boolean, reread=True)
     timeout = Value(10, number=int, reread=True)
@@ -745,7 +750,7 @@ class Youtube(Settings):
     allow = Value(
         "accelerometer; clipboard-write; encrypted-media; gyroscope;"
         " picture-in-picture; web-share",
-        string(listed_in(PERMISSIONS, "; ")),
+        text=listed_in(PERMISSIONS, "; "),
         reread=True,
     )
     click_to_load = Value(True, boolean, reread=True)
@@ -769,7 +774,7 @@ class Button(Settings):
         {}, table(lower(checks.slug), string(checks.colour)), reread=True
     )
     icon_position = Value("before", choices=("before", "after"), reread=True)
-    scheme = Value("light", string(checks.text), reread=True)
+    scheme = Value("light", text=checks.text, reread=True)
 
 
 class Tab(Settings):
@@ -805,8 +810,8 @@ class Roles(Settings, prefix=""):
         key="role_colours",
         reread=True,
     )
-    sharpie_colour = Value("yellow", string(checks.text), reread=True)
-    underline_colour = Value("#FF9800", string(checks.text), reread=True)
+    sharpie_colour = Value("yellow", text=checks.text, reread=True)
+    underline_colour = Value("#FF9800", text=checks.text, reread=True)
     underline_width = Value(2.5, number=float, reread=True)
     underline_wobble = Value(1.0, number=float, reread=True)
 
@@ -815,9 +820,7 @@ class Release(Settings):
     """The `kaamiki.conf.release` settings."""
 
     kinds = Value[list[str]]([], many(lower(checks.slug)), reread=True)
-    version_fmt = Value(
-        "%Y.%m.%d", string(moment(TIME_DIRECTIVES)), reread=True
-    )
+    version_fmt = Value("%Y.%m.%d", text=moment(TIME_DIRECTIVES), reread=True)
 
 
 class Site(Settings, prefix=""):
@@ -875,7 +878,7 @@ class Site(Settings, prefix=""):
     )
     header_buttons = Value[dict[str, t.Any]]({}, table(checks.text, button))
     sidebar_buttons = Value[dict[str, t.Any]]({}, table(checks.text, button))
-    last_updated_fmt = Value("", string(moment(TIME_DIRECTIVES)))
+    last_updated_fmt = Value("", text=moment(TIME_DIRECTIVES))
     copy_headerlinks = Value(True, boolean)
     words_per_minute = Value(WORDS_PER_MINUTE, number=int)
 
