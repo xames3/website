@@ -7,7 +7,15 @@ Created on: 08 October 2026
 Last updated on: 15 November 2026
 
 The settings of Kaamiki: their schema, their checks, and how a site
-sets them on `kaamiki.conf` or with a `-D`.
+sets them on `kaamiki.conf` or with a `-D`. `WORDS_PER_MINUTE` is 238,
+the average speed at which adults read non-fiction. `FA_FREE_INTEGRITY`
+is the SHA-384 hash of `FA_FREE` for Subresource Integrity. When the
+release changes, make it again with `openssl dgst -sha384 -binary
+free.min.css | openssl base64 -A`.
+
+https://doi.org/10.1016/j.jml.2019.104047
+
+https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
 """
 
 from __future__ import annotations
@@ -43,8 +51,6 @@ logger = logging.getLogger(__name__)
 
 NAME: t.Final[str] = "kaamiki"
 PREFIX: t.Final[str] = f"{NAME}_"
-# NOTE(xames3): A rough average, adults read non-fiction at about
-# 238 words a minute: https://doi.org/10.1016/j.jml.2019.104047
 WORDS_PER_MINUTE: t.Final[int] = 238
 TONES: t.Final[tuple[str, ...]] = ("red", "yellow", "blue", "green")
 PALETTE: t.Final[dict[str, str]] = {
@@ -98,10 +104,6 @@ PROJECT: t.Final[dict[str, str]] = {
 FA_FREE: t.Final[str] = (
     "https://ka-f.fontawesome.com/releases/v7.3.1/css/free.min.css"
 )
-# NOTE(xames3): The hash of the stylesheet above, which has to be worked
-# out again when the release changes: `openssl dgst -sha384 -binary
-# free.min.css | openssl base64 -A`.
-# https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
 FA_FREE_INTEGRITY: t.Final[str] = (
     "sha384-eX9o/tJQBecFQ7gYpZvr9Gkhl26eYO6KrYj5maf6JhoXmZ2sLSycaT48proNJxFq"
 )
@@ -283,7 +285,8 @@ def shape(**fields: Rule) -> Rule:
         for name, each in value.items():
             if name not in fields:
                 raise ValueError(
-                    f"expected one of {', '.join(sorted(fields))}, got {name!r}"
+                    f"expected one of {', '.join(sorted(fields))}, got"
+                    f" {name!r}"
                 )
             try:
                 fields[name](each)
@@ -509,7 +512,9 @@ class Value[T]:
         if self.key in group.given:
             return group.given[self.key]
         if isinstance(self.default, dict | list):
-            return group.given.setdefault(self.key, copy.deepcopy(self.default))
+            return group.given.setdefault(
+                self.key, copy.deepcopy(self.default)
+            )
         return self.default
 
     def __set__(self, group: Settings, value: t.Any) -> None:
@@ -623,7 +628,9 @@ class Icons(Settings):
         key="fa_style",
         reread=True,
     )
-    kit = Value[str | None](None, string(checks.kit), key="fa_kit", reread=True)
+    kit = Value[str | None](
+        None, string(checks.kit), key="fa_kit", reread=True
+    )
     names = Value[dict[str, t.Any]]({}, site_icons, key="fa_icons")
 
     def update(
@@ -840,7 +847,9 @@ class Site(Settings, prefix=""):
 class Root(Settings, name=""):
     """The settings of no group, directly on `kaamiki.conf`."""
 
-    mode = Value("dark", choices=("dark", "light", "system"), key="colour_mode")
+    mode = Value(
+        "dark", choices=("dark", "light", "system"), key="colour_mode"
+    )
 
     icons: Icons
     show: Show
@@ -1122,13 +1131,13 @@ def overrides(app: Sphinx, config: Config) -> None:
                 fail(f"-D {flat(key)}.{entry}={value}: {error}")
 
 
-# NOTE(xames3): A float's plain default makes Sphinx drop a `-D` for it
-# with a warning, where a function's lets the text through.
 def _constant(value: t.Any) -> Callable[[Config], t.Any]:
     """Wrap a default in a function, which Sphinx calls for the value.
 
     :param value: The default.
-    :return: A function that returns it.
+    :return: A function that returns it. Sphinx drops a `-D` with a
+        warning for a plain float default, but a function lets the
+        text through.
     """
     return lambda _: value
 
@@ -1618,13 +1627,15 @@ def _check_dates(given: dict[str, t.Any], conf: str) -> None:
             dt.strptime(sample, given["release_version_fmt"])  # noqa: DTZ007
         except ValueError, re.error:
             fail(
-                "kaamiki.conf.release.version_fmt: expected a format that reads"
-                " back what it writes, got one that doesn't",
+                "kaamiki.conf.release.version_fmt: expected a format that"
+                " reads back what it writes, got one that doesn't",
                 conf,
             )
 
 
-def _check_translation(app: Sphinx, given: dict[str, t.Any], conf: str) -> None:
+def _check_translation(
+    app: Sphinx, given: dict[str, t.Any], conf: str
+) -> None:
     """Check the date format that the catalogue of a language gives.
 
     :param app: The Sphinx application instance.

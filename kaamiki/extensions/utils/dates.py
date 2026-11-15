@@ -300,4 +300,6 @@ def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
     if not metadata.get("created"):
         metadata["created"] = found.get("created on") or written(first)
     if not metadata.get("last_updated"):
-        metadata["last_updated"] = found.get("last updated on") or written(last)
+        metadata["last_updated"] = found.get("last updated on") or written(
+            last
+        )

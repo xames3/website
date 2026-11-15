@@ -28,6 +28,11 @@ When a button does not set the scheme or the side of its icon,
 set them. The `chevron` scheme cannot have `fa-icon` or
 `icon-position`, so when the site uses `chevron`, a button with an
 icon is `light`.
+
+The `button` directive of Sphinx Design was the model for this
+directive.
+
+https://sphinx-design.readthedocs.io/en/latest/badges_buttons.html
 """
 
 from __future__ import annotations
@@ -65,8 +70,6 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 template: t.Final[str] = "directives/button.html.jinja"
-# NOTE(xames3): Inspired by Sphinx Design's button directive.
-# https://sphinx-design.readthedocs.io/en/latest/badges_buttons.html
 RELS: t.Final[frozenset[str]] = frozenset(
     {
         "author",
@@ -345,7 +348,9 @@ class Button(KaamikiDirective):
             to itself, which a text writer would not write. A button
             that names a page of the site has no address to show.
         """
-        label = next(each for each in node.children if isinstance(each, phrase))
+        label = next(
+            each for each in node.children if isinstance(each, phrase)
+        )
         words = nodes.paragraph("", "", *label.children)
         if node["url"]:
             link = nodes.reference("", node["url"], refuri=node["url"])

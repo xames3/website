@@ -40,7 +40,9 @@ STYLE_ALIASES: t.Final[dict[str, str]] = {
     "fas": "solid",
     "fat": "thin",
 }
-REGULAR_FIRST: t.Final[frozenset[str]] = frozenset({"light", "regular", "thin"})
+REGULAR_FIRST: t.Final[frozenset[str]] = frozenset(
+    {"light", "regular", "thin"}
+)
 
 
 class IconPair(t.NamedTuple):
@@ -145,7 +147,9 @@ KEY_ICONS: t.Final[Mapping[str, IconPair]] = MappingProxyType(
         "chevron-up": IconPair("chevron-up", "fa-solid fa-chevron-up"),
         "chevron-down": IconPair("chevron-down", "fa-solid fa-chevron-down"),
         "chevron-left": IconPair("chevron-left", "fa-solid fa-chevron-left"),
-        "chevron-right": IconPair("chevron-right", "fa-solid fa-chevron-right"),
+        "chevron-right": IconPair(
+            "chevron-right", "fa-solid fa-chevron-right"
+        ),
         "globe": IconPair("fa-light fa-globe", "fa-solid fa-globe"),
         "microsoft": brand_pair("microsoft"),
         "ubuntu": brand_pair("ubuntu"),
@@ -468,9 +472,9 @@ def _names(listed: str) -> frozenset[str]:
     return frozenset(listed.split())
 
 
-# HACK(xames3): The names below are copied from Font Awesome Free 7.3.1,
-# so the build doesn't have to install or read the package. Copy them
-# again when `FA_FREE` points at another release.
+# HACK(xames3): The names below are copied from Font Awesome Free
+# 7.3.1, so the build doesn't have to install or read the package. Copy
+# them again when `FA_FREE` points at another release.
 FREE_BRANDS: t.Final[frozenset[str]] = _names(
     """
     11ty 42-group 500px a11y-project accessible-icon accusoft adn adversal

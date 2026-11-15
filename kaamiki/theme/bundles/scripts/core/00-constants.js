@@ -4,15 +4,15 @@ Core Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 17 October 2026
-Last updated on: 11 November 2026
+Last updated on: 15 November 2026
+
+The four scripts share one `window.Kaamiki` and load in this order:
+core, animations, theme, explainer. Each takes what it needs from the
+scripts before it, and theme starts everything. Explainer is only on
+pages with a code-explain or code-version, and it starts itself. The
+`bundles` tuple of `kaamiki/__init__.py` sets the order.
 */
 
-// NOTE(xames3): The four scripts share one `window.Kaamiki` and load in
-// this order: core, animations, theme, explainer. Each takes what it
-// needs from the ones before it, and theme starts everything. Explainer
-// is only on pages with a code-explain or code-version and starts its own.
-// The order is set in the scripts tuple of
-// https://github.com/xames3/website/blob/main/kaamiki/__init__.py
 (() => {
     'use strict';
 

@@ -359,7 +359,9 @@ def _spaced(line: nodes.Element, icons: set[int]) -> None:
     :param icons: The `id` of each icon in it that needs spacing.
     """
     order = [
-        _ for _ in line.findall() if isinstance(_, nodes.Text) or id(_) in icons
+        _
+        for _ in line.findall()
+        if isinstance(_, nodes.Text) or id(_) in icons
     ]
     present = [
         isinstance(_, nodes.Text) and WORD.search(_.astext()) is not None

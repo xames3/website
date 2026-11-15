@@ -158,7 +158,11 @@ COMMENTS: t.Final[tuple[tuple[str, str, frozenset[str]], ...]] = (
             }
         ),
     ),
-    ("<!--", "-->", frozenset({"html", "markdown", "md", "svg", "vue", "xml"})),
+    (
+        "<!--",
+        "-->",
+        frozenset({"html", "markdown", "md", "svg", "vue", "xml"}),
+    ),
     ("/*", "*/", frozenset({"css"})),
 )
 

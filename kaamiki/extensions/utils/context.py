@@ -330,7 +330,10 @@ def admonition_title(app: Sphinx, doctree: nodes.document) -> None:
         if type(node) is not nodes.admonition:
             continue
         heading = node[0] if node.children else None
-        if not isinstance(heading, nodes.title) or not heading.astext().strip():
+        if (
+            not isinstance(heading, nodes.title)
+            or not heading.astext().strip()
+        ):
             fail(
                 "admonition: expected a title with words, got only an icon"
                 " or nothing",

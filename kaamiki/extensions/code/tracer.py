@@ -9,8 +9,17 @@ Last updated on: 15 November 2026
 Run a snippet and record what it does, one line at a time. The limits
 of a run are not a sandbox. The snippet runs as the user of the build,
 so it can read what that user can read, also the environment of the
-build (on Linux through `/proc`). It can also write to other places
-and connect to the network. It needs a POSIX system, Linux or macOS.
+build (on Linux through `/proc`). It can also write to other places and
+connect to the network. It needs a POSIX system, Linux or macOS. The
+runner is a separate script that runs with `-s -P`, so neither the user
+site nor the working directory is on its path. Comprehensions are
+inlined since Python 3.12, so `co_positions` tells their lines apart.
+
+https://docs.python.org/3/library/sys.html#sys.settrace
+
+https://docs.python.org/3/library/resource.html#resource.setrlimit
+
+https://peps.python.org/pep-0709/
 """
 
 import contextlib
@@ -60,12 +69,6 @@ class Trace(t.TypedDict):
     peak: int
 
 
-# NOTE(xames3): The runner is a script of its own, run with `-s -P`
-# so neither the user site nor the working directory is on its path.
-# https://docs.python.org/3/library/sys.html#sys.settrace
-# https://docs.python.org/3/library/resource.html#resource.setrlimit
-# Comprehensions are inlined since 3.12, which is why `co_positions`
-# is used to tell their lines apart: https://peps.python.org/pep-0709/
 RUNNER: t.Final[str] = r"""
 import ast
 import builtins
@@ -794,7 +797,9 @@ def processes() -> dict[int, int]:
                 contextlib.suppress(OSError, ValueError, IndexError),
                 open(f"/proc/{entry}/stat") as fd,
             ):
-                table[int(entry)] = int(fd.read().rpartition(")")[2].split()[1])
+                table[int(entry)] = int(
+                    fd.read().rpartition(")")[2].split()[1]
+                )
     return table
 
 
@@ -989,7 +994,9 @@ def replay(trace: Trace, wanted: frozenset[str]) -> list[dict[str, t.Any]]:
             frame["where"].update(dict.fromkeys(changed, frame["line"]))
         for name in set(frame["where"]) - set(rows):
             del frame["where"][name]
-        frame["values"] = {name: (row[1], row[3]) for name, row in rows.items()}
+        frame["values"] = {
+            name: (row[1], row[3]) for name, row in rows.items()
+        }
         frame["line"] = event["line"]
         fresh.setdefault(ident, set()).update(changed)
         out += event["out"]
@@ -1038,7 +1045,11 @@ def fault(
     :return: The step.
     """
     ident: int | None = error.get("frame")
-    frame: dict[str, t.Any] = {"line": error["line"], "values": {}, "where": {}}
+    frame: dict[str, t.Any] = {
+        "line": error["line"],
+        "values": {},
+        "where": {},
+    }
     taken: set[str] = set()
     if ident is not None:
         frame = frames.get(ident, frame)
