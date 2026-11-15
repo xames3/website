@@ -32,12 +32,11 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 from babel import Locale
 
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import listed
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import relative_to_page
@@ -48,7 +47,6 @@ from kaamiki.extensions.utils import worded
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "video"
 template: t.Final[str] = "directives/video.html.jinja"
 PRELOAD: t.Final[tuple[str, ...]] = ("none", "metadata", "auto")
 KINDS: t.Final[tuple[str, ...]] = (
@@ -86,59 +84,58 @@ def extension(url: str) -> str:
     return p.splitext(urlsplit(url).path)[1].lower()
 
 
-class Video(nodes.Element):
-    """The video and its parsed caption, waiting for `visit`."""
-
-
-class directive(rst.Directive):
+class Video(KaamikiDirective):
     """The `video` directive.
 
     Options::
 
-        - `autoplay`: Play the video, muted, as soon as it loads.
+        - `autoplay`: Play the video, without sound, when it loads.
           `muted` is on already.
-        - `caption`: A line of text under the video, parsed as rST.
-        - `type`: The video's MIME type, when its extension doesn't
-          say. It can't disagree with an extension Kaamiki knows. A
-          `.mov` is `video/mp4` without it and can be `video/quicktime`.
-        - `sources`: More files of the same video, comma-separated, for
-          browsers that can't play the first.
-        - `poster`: The picture shown until the video plays, an address
-          or a path of a `.jpg`, `.png`, `.webp`, `.avif`, `.gif` or
-          `.svg`.
-        - `preload`: How much the browser fetches ahead: `none`,
-          `metadata` or `auto`. `none` isn't allowed with `autoplay`.
-        - `loop`: Play it over and over.
-        - `muted`: Start with the sound off.
-        - `hide-controls`: Hide the player controls, which are shown
-          without it. It needs `autoplay`, or there's no way to play
+        - `caption`: A line of text below the video, parsed as rST.
+        - `type`: The MIME type of the video, when its extension does not
+          tell it. It must agree with an extension that Kaamiki knows.
+          Without it, a `.mov` is `video/mp4`. It can be
+          `video/quicktime`.
+        - `sources`: More files of the same video, with a comma between
+          each, for browsers that cannot play the first file.
+        - `poster`: The picture that shows until the video plays, as an
+          address or a path of a `.jpg`, `.png`, `.webp`, `.avif`,
+          `.gif` or `.svg`.
+        - `preload`: How much the browser gets before the video plays,
+          `none`, `metadata` or `auto`. You cannot use `none` with
+          `autoplay`.
+        - `loop`: Play it again and again.
+        - `muted`: Start without sound.
+        - `hide-controls`: Do not show the controls of the player. It
+          needs `autoplay`, because without controls nothing can play
           the video.
-        - `track`: Captions, as `language=file` and comma-separated, up
-          to 8. A language or a file can be in it once.
-        - `name`: A name to link to.
+        - `track`: Captions, as `language=file`, with a comma between
+          each, to a maximum of 8. Each language and each file can
+          occur only one time.
+        - `name`: A name for links.
         - `class`: More classes for the video.
 
-    A phone plays the video in the page, with full screen one tap away
-    in its controls.
+    A phone plays the video in the page. Its controls have a button for
+    full screen.
     """
 
     required_arguments = 1
     final_argument_whitespace = False
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        "autoplay": rst.directives.flag,
-        "caption": checks.text,
-        "type": checks.word(*KINDS),
-        "sources": checks.text,
-        "poster": checks.picture,
-        "preload": checks.word(*PRELOAD),
-        "loop": rst.directives.flag,
-        "muted": rst.directives.flag,
-        "hide-controls": rst.directives.flag,
-        "track": checks.text,
-    }
+    autoplay = Option(rst.directives.flag)
+    caption = Option(checks.text)
+    type = Option(checks.word(*KINDS))
+    sources = Option(checks.text)
+    poster = Option(checks.picture)
+    preload = Option(checks.word(*PRELOAD))
+    loop = Option(rst.directives.flag)
+    muted = Option(rst.directives.flag)
+    hide_controls = Option(rst.directives.flag)
+    track = Option(checks.text)
 
-    def run(self) -> list[nodes.Node]:
+    class Node(nodes.Element):
+        """The video and its parsed caption, which `visit` writes."""
+
+    def build(self) -> list[nodes.Node]:
         """Parse the caption and return the video's node.
 
         :return: The node, followed by the `raw` node `trail` returns
@@ -149,22 +146,22 @@ class directive(rst.Directive):
         known = TYPES.get(extension(url), ())
         given = options.pop("type", None)
         if given and known and given not in known:
-            raise self.error(
-                f"video: :type: expected {' or '.join(known)} for {url!r},"
+            self.fail(
+                f":type: expected {' or '.join(known)} for {url!r},"
                 f" got {given!r}"
             )
         sources = [{"url": url, "type": given or "".join(known[:1])}]
         more = listed(options.pop("sources", ""))
         if len(more) > SOURCES:
-            raise self.error(
-                f"video: :sources: expected at most {SOURCES} besides the"
+            self.fail(
+                f":sources: expected at most {SOURCES} besides the"
                 f" video, got {len(more)}"
             )
         files = [url, *more]
         if len(set(files)) != len(files):
             repeated = next(_ for _ in files if files.count(_) > 1)
-            raise self.error(
-                f"video: :sources: expected each file once, got {repeated!r}"
+            self.fail(
+                f":sources: expected each file once, got {repeated!r}"
                 " more than once"
             )
         for each in more:
@@ -178,22 +175,20 @@ class directive(rst.Directive):
         tracks: list[dict[str, str]] = []
         entries = listed(options.pop("track", ""))
         if len(entries) > TRACKS:
-            raise self.error(
-                f"video: :track: expected at most {TRACKS} captions, got"
+            self.fail(
+                f":track: expected at most {TRACKS} captions, got"
                 f" {len(entries)}"
             )
         seen: dict[tuple[str, str], str] = {}
         for entry in entries:
             code, equals, file = (_.strip() for _ in entry.partition("="))
             if not equals or not CAPTIONS.fullmatch(file):
-                raise self.error(
-                    f"video: :track: expected language=file.vtt, got {entry!r}"
-                )
+                self.fail(f":track: expected language=file.vtt, got {entry!r}")
             for what, value in (("language", code), ("file", file)):
                 first = seen.setdefault((what, value), entry)
                 if first is not entry:
-                    raise self.error(
-                        f"video: :track: expected each {what} once, got"
+                    self.fail(
+                        f":track: expected each {what} once, got"
                         f" {value!r} in {first!r} and {entry!r}"
                     )
             try:
@@ -208,22 +203,20 @@ class directive(rst.Directive):
                 locale = code.replace("-", "_")
                 label = Locale.parse(locale).get_display_name(locale) or code
             except ValueError as error:
-                raise self.error(f"video: :track: {error}") from error
+                self.fail(f":track: {error}")
             tracks.append({"lang": code, "url": file, "label": label})
         if "hide-controls" in options and "autoplay" not in options:
-            raise self.error(
-                "video: :hide-controls: needs :autoplay:, since nothing else"
-                " plays it"
+            self.fail(
+                ":hide-controls: needs :autoplay:, since nothing else plays it"
             )
         if "autoplay" in options and options.get("preload") == "none":
-            raise self.error(
-                "video: :preload: expected metadata or auto with :autoplay:,"
+            self.fail(
+                ":preload: expected metadata or auto with :autoplay:,"
                 " got 'none'"
             )
         if "autoplay" in options and "muted" in options:
-            raise self.error(
-                "video: :muted: not allowed with :autoplay:, which is muted "
-                "already"
+            self.fail(
+                ":muted: not allowed with :autoplay:, which is muted already"
             )
         self.options["classes"] = self.options.pop("class", [])
         self.options["sources"] = sources
@@ -235,8 +228,8 @@ class directive(rst.Directive):
         caption, messages = parse(self, text.strip(), "caption")
         if text.strip():
             worded(self, caption, "a caption")
-        element = located(self, Video("", caption, **self.options))
-        named(self, element)
+        element = self.locate(self.Node("", caption, **self.options))
+        self.add_name(element)
         urls = {
             "urls": " ".join(
                 [
@@ -267,10 +260,10 @@ class directive(rst.Directive):
         try:
             found = checks.link(argument, schemes=("http", "https"))
         except ValueError as error:
-            raise self.error(f"video: {error}") from error
+            self.fail(str(error))
         if not FILES.fullmatch(urlsplit(found).path) and not kind:
-            raise self.error(
-                "video: expected a .mp4, .m4v, .webm, .ogv, .ogg or .mov file"
+            self.fail(
+                "expected a .mp4, .m4v, .webm, .ogv, .ogg or .mov file"
                 f" or a :type: for it, got {found!r}"
             )
         return shipped(self, found, where)
@@ -293,6 +286,23 @@ class directive(rst.Directive):
             "poster": options.get("poster"),
             "preload": options.get("preload"),
         }
+
+    @staticmethod
+    def plain(node: Video.Node) -> list[nodes.Node]:
+        """Write a video as words, for a builder that writes no HTML.
+
+        :param node: The video's node.
+        :return: A paragraph with its caption, when it has one, and one
+            with the video's address, written as a link to itself.
+        """
+        found: list[nodes.Node] = [
+            nodes.paragraph("", "", *each.children)
+            for each in node.children
+            if isinstance(each, phrase) and each.children
+        ]
+        url = node["sources"][0]["url"]
+        link = nodes.reference("", url, refuri=url)
+        return [*found, nodes.paragraph("", "", link)]
 
 
 def prepare(
@@ -320,24 +330,4 @@ def prepare(
     return found
 
 
-def plain(node: Video) -> list[nodes.Node]:
-    """Write a video as words, for a builder that draws no HTML.
-
-    :param node: The video's node.
-    :return: A paragraph with its caption, when it has one, and one
-        with the video's address, written as a link to itself.
-    """
-    found: list[nodes.Node] = [
-        nodes.paragraph("", "", *_.children)
-        for _ in node.children
-        if isinstance(_, phrase) and _.children
-    ]
-    url = node["sources"][0]["url"]
-    link = nodes.reference("", url, refuri=url)
-    return [*found, nodes.paragraph("", "", link)]
-
-
-html.draws(Video, template, prepare)
-
-
-node = Video
+html.draws(Video.Node, template, prepare)

@@ -98,8 +98,8 @@ KINDS: t.Final[dict[str, Callable[[nodes.Node], bool]]] = {
     "repository": lambda _: isinstance(_, repository.Repository.Node),
     "tabs": lambda _: isinstance(_, tabs.Tabs.Node),
     "thumbnail": lambda _: isinstance(_, thumbnail.Thumbnail.Node),
-    "video": lambda _: isinstance(_, video.node),
-    "youtube": lambda _: isinstance(_, youtube.node),
+    "video": lambda _: isinstance(_, video.Video.Node),
+    "youtube": lambda _: isinstance(_, youtube.Youtube.Node),
 }
 PLURAL: t.Final[frozenset[str]] = frozenset({"columns", "tabs"})
 PAGE: t.Final[dict[str, str]] = {
