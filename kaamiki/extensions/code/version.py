@@ -44,7 +44,6 @@ from __future__ import annotations
 import typing as t
 
 import docutils.nodes as nodes
-from sphinx.directives.code import CodeBlock
 from sphinx.locale import _
 
 from kaamiki.extensions.code import explain
@@ -55,13 +54,9 @@ from kaamiki.extensions.code.grammar import StrayError
 from kaamiki.extensions.code.grammar import linerange
 from kaamiki.extensions.code.grammar import split
 from kaamiki.extensions.utils import BEM
-from kaamiki.extensions.utils import NATIVE
-from kaamiki.extensions.utils import NO_MOTION
 from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import located
 from kaamiki.extensions.utils import moving
-from kaamiki.extensions.utils import named
 
 if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
@@ -70,7 +65,6 @@ if t.TYPE_CHECKING:
 
     type Pieces = tuple[chunk, chunk | None, list[chunk]]
 
-name: t.Final[str] = "code-version"
 code_version: t.Final[BEM] = BEM("code-version")
 ATTEMPT: t.Final[frozenset[str]] = frozenset({"attempt"})
 PARTS: t.Final[frozenset[str]] = frozenset({"code", "lines", "output"})
@@ -78,19 +72,11 @@ VERDICTS: t.Final[frozenset[str]] = frozenset({"broke", "worked"})
 STRETCH: t.Final[float] = 2.5
 
 
-class CodeVersion(explain.CodeExplain):
-    """The parsed directive, waiting for `visit` to write it out.
-
-    It's a walkthrough underneath, so the notes either side of the
-    code are written the same way.
-    """
-
-
-class attempt(nodes.container):
+class Attempt(nodes.container):
     """One attempt: its code, what it printed and its notes."""
 
 
-class draft(nodes.container):
+class Draft(nodes.container):
     """An attempt's code and what it printed, framed on their own.
 
     The script never shows these. They hold the versions it swaps
@@ -98,65 +84,50 @@ class draft(nodes.container):
     """
 
 
-class outcome(nodes.literal_block):
+class Outcome(nodes.literal_block):
     """What an attempt printed, as the author wrote it."""
 
 
-class directive(explain.directive):
+class CodeVersion(explain.CodeWalk, name="code-version"):
     """The `code-version` directive.
 
-    The argument is the language every version is written in, and
-    defaults to `python`. It goes on the page itself, where a plain
-    `container` or an `only` still counts as the page, and not in
-    another directive's content, a walkthrough's notes included.
+    The argument is the language of all the versions. The default is
+    `python`. Put it on the page itself. A plain `container` or an
+    `only` is part of the page. The content of a different directive,
+    and the notes of a walkthrough, are not.
 
     Options::
 
-        - `code-position`: Which side the code sits on, `right` for
-          the default or `left`.
-        - `pace`: Pixels of scrolling a step takes, from 24 to 240. A
-          step bringing a version in takes `STRETCH` times that.
+        - `code-position`: The side of the code, `right` or `left`. The
+          default is `right`.
+        - `pace`: The pixels of scrolling for each step, from 24 to 240.
+          A step that brings in a version takes `STRETCH` times that.
         - `caption`: A line of text above the code, parsed as rST.
-        - `linenos`: Number the lines.
-        - `lineno-start`: The number the first line is given, from 0 to
-          10000.
-        - `no-motion`: Keep it stacked and still.
-        - `name`: A name to link the `code-version` by.
+        - `linenos`: Show the line numbers.
+        - `lineno-start`: The number of the first line, from 0 to 10000.
+        - `no-motion`: Show it stacked, without motion.
+        - `name`: A name for links to the `code-version`.
         - `class`: More classes for the `code-version`.
     """
 
-    option_spec = {  # noqa: RUF012
-        **{
-            key: value
-            for key, value in CodeBlock.option_spec.items()
-            if key not in {"dedent", "emphasize-lines", "force"}
-        },
-        **explain.SHARED,
-        **NATIVE,
-        **NO_MOTION,
-    }
+    class Node(explain.CodeExplain.Node):
+        """The versions, written as a walkthrough with notes."""
 
-    def run(self) -> list[nodes.Node]:
-        """Read every attempt and return the directive's node.
+    def build(self) -> list[nodes.Node]:
+        """Read each attempt and make the directive's node.
 
         :return: A list holding the one `code-version` node.
         """
         language = self.arguments.pop().strip() if self.arguments else "python"
         if not known(language):
-            raise self.error(
-                f"{self.name}: expected a language Pygments knows, got"
-                f" {language!r}"
-            )
+            self.fail(f"expected a language Pygments knows, got {language!r}")
         start = self.options.get("lineno-start", 1)
         drafts = [
             self.unpack(block, index)
             for index, block in enumerate(self.attempts(), start=1)
         ]
         if not any(notes for _, _, notes in drafts):
-            raise self.error(
-                "code-version: expected a note, in prose or `.. lines::`,"
-                " got none"
-            )
+            self.fail("expected a note, in prose or `.. lines::`, got none")
         codes = [code.text() for code, _, _ in drafts]
         digits = len(str(start + max(len(_.splitlines()) for _ in codes) - 1))
         base = self.options.get("pace", explain.pace(language))
@@ -181,10 +152,10 @@ class directive(explain.directive):
             linenos="linenos" in self.options,
             digits=digits,
         )
-        element = located(self, CodeVersion("", **attributes))
-        element += self.caption(language)
+        element = self.locate(self.Node("", **attributes))
+        element += self.captioned(language)
         element += self.story(drafts, language, start, digits)
-        named(self, element)
+        self.add_name(element)
         return [element]
 
     def attempts(self) -> list[chunk]:
@@ -195,24 +166,19 @@ class directive(explain.directive):
         try:
             found = split(self.content, self.content_offset, ATTEMPT, {})
         except StrayError as exc:
-            raise self.error(
-                "code-version: expected text inside an `.. attempt::`, got"
+            self.fail(
+                "expected text inside an `.. attempt::`, got"
                 f" {exc.text!r} on line {exc.line}"
-            ) from exc
-        if not found:
-            raise self.error(
-                "code-version: expected an `.. attempt::` per version, got none"
             )
+        if not found:
+            self.fail("expected an `.. attempt::` per version, got none")
         for block in found:
             if block.argument:
-                raise self.error(
-                    "code-version: `.. attempt::` expected no name, got"
-                    f" {block.argument!r}"
+                self.fail(
+                    f"`.. attempt::` expected no name, got {block.argument!r}"
                 )
         if len(found) == 1:
-            raise self.error(
-                "code-version: expected at least 2 attempts, got 1"
-            )
+            self.fail("expected at least 2 attempts, got 1")
         return found
 
     def unpack(self, block: chunk, at: int) -> Pieces:
@@ -231,31 +197,25 @@ class directive(explain.directive):
         found = split(block.body, block.offset, PARTS, {}, loose=True)
         for kind in ("code", "output"):
             if sum(_.name == kind for _ in found) > 1:
-                raise self.error(
-                    f"code-version: attempt {at} expected one {kind}, got more"
-                    " than one"
+                self.fail(
+                    f"attempt {at} expected one {kind}, got more than one"
                 )
         code = next((_ for _ in found if _.name == "code"), None)
         if code is None:
-            raise self.error(
-                f"code-version: attempt {at} expected one `.. code::` block,"
-                " got none"
-            )
+            self.fail(f"attempt {at} expected one `.. code::` block, got none")
         if not code.body:
-            raise self.error(
-                f"code-version: attempt {at} expected some code in the"
-                " `.. code::`, got none"
+            self.fail(
+                f"attempt {at} expected some code in the `.. code::`, got none"
             )
         printed = next((_ for _ in found if _.name == "output"), None)
         if printed is not None and printed.argument not in VERDICTS | {""}:
-            raise self.error(
-                f"code-version: the output of attempt {at} expected broke or"
+            self.fail(
+                f"the output of attempt {at} expected broke or"
                 f" worked, or nothing, got {printed.argument!r}"
             )
         if printed is not None and not printed.body:
-            raise self.error(
-                f"code-version: the output of attempt {at} expected some"
-                " text, got none"
+            self.fail(
+                f"the output of attempt {at} expected some text, got none"
             )
         notes: list[chunk] = []
         for part in found:
@@ -283,18 +243,15 @@ class directive(explain.directive):
         """
         found = linerange(argument)
         if found is None:
-            raise self.error(
-                f"code-version: :lines: expected a line range, got {argument!r}"
-            )
+            self.fail(f":lines: expected a line range, got {argument!r}")
         low, high = found
         if low > high:
-            raise self.error(
-                f"code-version: :lines: expected a range that runs up, got "
-                f"{argument!r}"
+            self.fail(
+                f":lines: expected a range that runs up, got {argument!r}"
             )
         if low < start or high > start + total - 1:
-            raise self.error(
-                f"code-version: :lines: expected a range within attempt {at},"
+            self.fail(
+                f":lines: expected a range within attempt {at},"
                 f" {label(start, start + total - 1)}, got {label(low, high)}"
             )
         return found
@@ -344,7 +301,7 @@ class directive(explain.directive):
 
     def story(
         self, drafts: list[Pieces], language: str, start: int, digits: int
-    ) -> explain.explanations:
+    ) -> explain.Explanations:
         """Parse every attempt into its frame and its notes.
 
         :param drafts: The attempts, unpacked.
@@ -354,21 +311,21 @@ class directive(explain.directive):
             take, so every version's code starts in the same column.
         :return: The attempts, under the container the notes go in.
         """
-        box = explain.explanations()
+        box = explain.Explanations()
         count = 0
         for index, (code, printed, notes) in enumerate(drafts):
-            group = attempt()
-            frame = draft(index=index, digits=digits)
+            group = Attempt()
+            frame = Draft(index=index, digits=digits)
             frame += self.snippet(code.text(), language, start)
             if printed is not None:
-                result = outcome(printed.text(), printed.text())
+                result = Outcome(printed.text(), printed.text())
                 result["language"] = "text"
                 result["verdict"] = printed.argument
                 self.set_source_info(result)
                 frame += result
             group += frame
             for part in notes:
-                note = explain.explanation(index=count)
+                note = explain.Explanation(index=count)
                 self.state.nested_parse(part.body, part.offset, note)
                 group += note
                 count += 1
@@ -376,12 +333,12 @@ class directive(explain.directive):
         return box
 
 
-html.opens(CodeVersion)(explain.visit)
-html.closes(CodeVersion, "</div></div>")
+html.opens(CodeVersion.Node)(explain.visit)
+html.closes(CodeVersion.Node, "</div></div>")
 
 
-@html.opens(attempt)
-def visit_attempt(self: HTMLTranslator, element: attempt) -> None:
+@html.opens(Attempt)
+def visit_attempt(self: HTMLTranslator, element: Attempt) -> None:
     """Open one attempt.
 
     :param self: The HTML translator, whose body this appends to.
@@ -391,11 +348,11 @@ def visit_attempt(self: HTMLTranslator, element: attempt) -> None:
     self.body.append(f'<div class="{code_version.attempt()}">')
 
 
-html.closes(attempt, "</div>")
+html.closes(Attempt, "</div>")
 
 
-@html.opens(draft)
-def visit_draft(self: HTMLTranslator, element: draft) -> None:
+@html.opens(Draft)
+def visit_draft(self: HTMLTranslator, element: Draft) -> None:
     """Open an attempt's frame and write its code.
 
     The code is written the way the pane writes it, a line at a time,
@@ -405,7 +362,7 @@ def visit_draft(self: HTMLTranslator, element: draft) -> None:
     :param element: The frame, carrying its index and the gutter's
         width, and holding the plain code block.
     """
-    code = next(findall(element, explain.plain_code))
+    code = next(findall(element, explain.PlainCode))
     index = element["index"]
     self.body.append(
         f'<div class="{code_version.draft()}" data-km-draft="{index}">'
@@ -422,11 +379,11 @@ def visit_draft(self: HTMLTranslator, element: draft) -> None:
     )
 
 
-html.closes(draft, "</div>")
+html.closes(Draft, "</div>")
 
 
-@html.opens(outcome)
-def visit_outcome(self: HTMLTranslator, element: outcome) -> None:
+@html.opens(Outcome)
+def visit_outcome(self: HTMLTranslator, element: Outcome) -> None:
     """Write what an attempt printed, coloured by how it went.
 
     :param self: The HTML translator, whose body this appends to.
@@ -446,6 +403,3 @@ def visit_outcome(self: HTMLTranslator, element: outcome) -> None:
         + f">{spoken}{self.encode(element.astext())}</pre>"
     )
     raise nodes.SkipNode
-
-
-node = CodeVersion

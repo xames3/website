@@ -24,14 +24,11 @@ import docutils.parsers.rst as rst
 from babel import Locale
 from babel import UnknownLocaleError
 
-from kaamiki.extensions.utils import MOTION
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import fields
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import moving
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
@@ -49,7 +46,6 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "byline"
 template: t.Final[str] = "directives/byline.html.jinja"
 BACKDROPS: t.Final[int] = 8
 
@@ -108,129 +104,122 @@ def native(code: str) -> str:
     return display[:1].upper() + display[1:] if display else code
 
 
-class Byline(nodes.Element):
-    """The parsed directive, waiting for `visit` to write it out."""
-
-
-class directive(rst.Directive):
+class Byline(KaamikiDirective, motion=True):
     """The `byline` directive.
 
-    It goes on the page itself, once. An `only` counts as the page, a
-    container and the content of another directive don't.
+    Put it on the page itself, one time. An `only` is part of the page.
+    A container and the content of a different directive are not.
 
     Options::
 
-        - `avatar`: URL of the author's picture.
-        - `target`: Where the name links to, a profile or a mailto. A
-          path counts from the top of the site, like `avatar` and
+        - `avatar`: The URL of the author's picture.
+        - `target`: The link of the name, as a profile or a mailto. A
+          path starts at the top of the site, as for `avatar` and
           `backdrop`.
-        - `backdrop`: One or more image URLs, a comma between each, to
-          fade through behind the title.
-        - `avatar-size`: The picture's width and height in pixels, from
-          16 to 64. Defaults to 20.
-        - `interval`: Seconds each backdrop stays, from 2 to 15. It
-          needs two or more `backdrop` pictures. Defaults to 7.
-        - `align`: Where the byline sits, `left`, `center` or `right`.
-          Only `left` puts the author, the reading time, the language
-          and the copy button in one row, which phones cut to the
-          author and the reading time. Defaults to `left`.
-        - `hide-reading-time`: Hide the reading time, which is shown
-          without it.
-        - `hide-copy-url`: Hide the copy button, which is shown without
-          it.
-        - `hide-source`: Hide the link to the page's plain-text source,
-          which is shown without it while `html_copy_source` and
-          `html_show_sourcelink` are on.
-        - `show-language`: Show the page's language, which is hidden
-          without it: the page's `:km-page-language:` field, or the
-          `language` in Sphinx's configuration when it has none.
-        - `speed`: How quick its motion is next to the site's, one
-          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`.
-          `2` is twice as quick.
-        - `no-motion`: Keep it still.
-        - `name`: A name to link to.
+        - `backdrop`: One or more image URLs, with a comma between each.
+          They fade one into the next behind the title.
+        - `avatar-size`: The width and height of the picture in pixels,
+          from 16 to 64. The default is 20.
+        - `interval`: The seconds that each backdrop shows, from 2 to 15.
+          It needs two or more `backdrop` pictures. The default is 7.
+        - `align`: Where the byline is, `left`, `center` or `right`. Only
+          `left` puts the author, the reading time, the language and the
+          copy button in one row. On a phone, that row shows only the
+          author and the reading time. The default is `left`.
+        - `hide-reading-time`: Do not show the reading time.
+        - `hide-copy-url`: Do not show the copy button.
+        - `hide-source`: Do not show the link to the plain-text source
+          of the page. Without it, the link shows when `html_copy_source`
+          and `html_show_sourcelink` are on.
+        - `show-language`: Show the language of the page. It is the
+          `:km-page-language:` field of the page, or the `language` of
+          the Sphinx configuration when the page has no field.
+        - `speed`: The speed of its motion, relative to the site, one
+          of `0.25`, `0.5`, `0.75`, `1`, `1.5`, `2`, `3` or `4`. `2` is
+          two times as fast.
+        - `no-motion`: Do not move it.
+        - `name`: A name for links.
         - `class`: More classes for the byline.
     """
 
     required_arguments = 1
     final_argument_whitespace = True
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        **MOTION,
-        "avatar": checks.link,
-        "target": checks.link,
-        "backdrop": backdrops,
-        "avatar-size": checks.integer(*map(int, BOUNDS["avatar_size"])),
-        "interval": checks.number(*BOUNDS["interval"]),
-        "align": checks.word(*ALIGNMENTS),
-        "hide-reading-time": rst.directives.flag,
-        "hide-copy-url": rst.directives.flag,
-        "hide-source": rst.directives.flag,
-        "show-language": rst.directives.flag,
-    }
+    avatar = Option(checks.link)
+    target = Option(checks.link)
+    backdrop = Option(backdrops, default="")
+    avatar_size = Option(checks.integer(*map(int, BOUNDS["avatar_size"])))
+    interval = Option(checks.number(*BOUNDS["interval"]))
+    align = Option(checks.word(*ALIGNMENTS), default="left")
+    hide_reading_time = Option(rst.directives.flag)
+    hide_copy_url = Option(rst.directives.flag)
+    hide_source = Option(rst.directives.flag)
+    show_language = Option(rst.directives.flag)
 
-    def run(self) -> list[nodes.Node]:
-        """Collect the options and return the node.
+    class Node(nodes.Element):
+        """The byline, which `visit` writes with its template."""
 
-        Only what the page writes goes on the node, `visit` fills in
-        the rest from `kaamiki.conf.site.project`. The name also
-        becomes the page's author, unless its `.. Author:` comment
-        named one first, and the first backdrop, when written, becomes
-        a fallback for its social image.
+    def check(self) -> None:
+        """Permit one byline on a page, and the options it can use."""
+        if self.env.temp_data.get("km_byline"):
+            self.fail("expected once on a page, got it twice")
+        self.env.temp_data["km_byline"] = True
+        if self.interval is not None and len(self.backdrop.split()) < 2:
+            self.fail(":interval: needs two or more :backdrop: pictures")
+        project = setting(self.config, "project")
+        if self.avatar_size is not None and not (
+            self.avatar or project.get("avatar")
+        ):
+            self.fail(":avatar-size: needs an avatar")
 
-        :return: The node, followed by the `raw` nodes `trail` returns
-            for the link checker and anything the name reported.
+    def build(self) -> list[nodes.Node]:
+        """Keep what the page writes on the node and name the author.
+
+        The `visit` function adds the rest from
+        `kaamiki.conf.site.project`. The name also becomes the author of
+        the page, if its `.. Author:` comment does not name one first.
+        The first backdrop is a fallback for the social image of the
+        page.
+
+        :return: The node, the `raw` nodes from `trail` for the link
+            checker and what the parser reported.
         """
-        text = self.arguments.pop().strip()
-        env = self.state.document.settings.env
-        if env.temp_data.get("km_byline"):
-            raise self.error("byline: expected once on a page, got it twice")
-        env.temp_data["km_byline"] = True
+        written = self.arguments.pop().strip()
         options = self.options
-        if (
-            "interval" in options
-            and len(options.get("backdrop", "").split()) < 2
-        ):
-            raise self.error(
-                "byline: :interval: needs two or more :backdrop: pictures"
-            )
-        if "avatar-size" in options and not (
-            "avatar" in options or setting(env.config, "project").get("avatar")
-        ):
-            raise self.error("byline: :avatar-size: needs an avatar")
-        options.setdefault("align", "left")
-        options["reading_time"] = "hide-reading-time" not in options
-        options["copy_url"] = "hide-copy-url" not in options
-        options["page_source"] = "hide-source" not in options
-        options["language"] = "show-language" in options
-        options["classes"] = [*options.pop("class", []), *moving(options)]
-        if "avatar-size" in options:
-            options["avatar_size"] = options["avatar-size"]
-        words, messages = parse(self, text, "name")
+        options["align"] = self.align
+        options["reading_time"] = not self.hide_reading_time
+        options["copy_url"] = not self.hide_copy_url
+        options["page_source"] = not self.hide_source
+        options["language"] = self.show_language
+        options["classes"] = self.classes
+        options.pop("class", None)
+        if self.avatar_size is not None:
+            options["avatar_size"] = self.avatar_size
+        words, messages = parse(self, written, "name")
         unlinked(self, words, "a name")
         worded(self, words, "a name")
-        metadata = env.metadata.setdefault(env.docname, {})
-        metadata.setdefault("author", words.astext().strip() or text)
-        pictures = self.options.get("backdrop", "").split()
-        if pictures:
+        metadata = self.env.metadata.setdefault(self.env.docname, {})
+        metadata.setdefault("author", words.astext().strip() or written)
+        if pictures := self.backdrop.split():
             metadata.setdefault("km-page-backdrop", pictures[0])
-        element = located(self, Byline("", words, **self.options))
-        named(self, element)
-        return [element, *trail(self, self.options), *messages]
+        node = self.locate(self.Node("", words, **options))
+        self.add_name(node)
+        return [node, *trail(self, options), *messages]
+
+    @staticmethod
+    def plain(node: Byline.Node) -> list[nodes.Node]:
+        """Write a byline as words, for a builder that writes no HTML.
+
+        :param node: The byline's node.
+        :return: A paragraph with the author's name.
+        """
+        author = next(
+            each for each in node.children if isinstance(each, phrase)
+        )
+        return [nodes.paragraph("", "", *author.children)]
 
 
-def plain(node: Byline) -> list[nodes.Node]:
-    """Write a byline as words, for a builder that draws no HTML.
-
-    :param node: The byline's node.
-    :return: A paragraph with the author's name.
-    """
-    author = next(_ for _ in node.children if isinstance(_, phrase))
-    return [nodes.paragraph("", "", *author.children)]
-
-
-@html.opens(Byline)
-def visit(self: HTMLTranslator, node: Byline) -> None:
+@html.opens(Byline.Node)
+def visit(self: HTMLTranslator, node: Byline.Node) -> None:
     """Write the widget out when the HTML writer reaches the node.
 
     :param self: The HTML translator, whose body this appends to.
@@ -293,6 +282,3 @@ def html_page_context(
     meta: dict[str, str] = context.get("meta") or {}
     project = app.config.html_context["km_project"]
     context["km_author"] = meta.get("author") or project.get("author")
-
-
-node = Byline

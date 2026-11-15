@@ -12,6 +12,7 @@ The helpers Kaamiki's directives are built from.
 from __future__ import annotations
 
 import os.path as p
+import re
 import typing as t
 from urllib.parse import urlsplit
 
@@ -20,12 +21,14 @@ from docutils.parsers import rst
 from markupsafe import Markup
 from sphinx import addnodes
 from sphinx.util import docname_join
+from sphinx.util.docutils import SphinxDirective
 from sphinx.writers.latex import LaTeXTranslator
 from sphinx.writers.manpage import ManualPageTranslator
 from sphinx.writers.texinfo import TexinfoTranslator
 from sphinx.writers.text import TextTranslator
 
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils.settings import setting
 from kaamiki.extensions.utils.templates import render
 
 if t.TYPE_CHECKING:
@@ -41,6 +44,9 @@ if t.TYPE_CHECKING:
 
     Visitor = Callable[[HTMLTranslator, nodes.Element], None]
 
+OPTION: t.Final[re.Pattern[str]] = re.compile(
+    r"^\s*- `([\w-]+)`:", re.MULTILINE
+)
 TRANSLATORS: t.Final[dict[str, type[nodes.NodeVisitor]]] = {
     "latex": LaTeXTranslator,
     "man": ManualPageTranslator,
@@ -257,7 +263,7 @@ def shipped(directive: Directive, value: str, where: str) -> str:
     )
 
 
-def named(directive: Directive, node: nodes.Element) -> None:
+def named(directive: Directive, node: nodes.Node) -> None:
     """Give a node the name its `:name:` option asks for, once.
 
     :param directive: The directive that has the option.
@@ -272,7 +278,7 @@ def named(directive: Directive, node: nodes.Element) -> None:
         raise directive.error(
             f"{directive.name}: :name: {name!r} is on the page already"
         )
-    directive.add_name(node)
+    rst.Directive.add_name(directive, node)
 
 
 def depart(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -667,3 +673,214 @@ def listed(value: str) -> list[str]:
     :return: The parts, in the order written.
     """
     return [_.strip() for _ in value.split(",") if _.strip()]
+
+
+class Option:
+    """An option of a Kaamiki directive, read as an attribute of it."""
+
+    def __init__(
+        self,
+        check: Callable[[str | None], t.Any],
+        *,
+        needs: str = "",
+        setting: str = "",
+        default: t.Any = None,
+    ) -> None:
+        """Keep how the option is checked and what it gives when absent.
+
+        :param check: The function that checks the value as written.
+        :param needs: The option that must also be there, as `subheader`.
+        :param setting: The site setting that gives the value when the
+            option is absent, as `accordion_marker`.
+        :param default: The value when the option and the setting are
+            absent.
+        """
+        self.check = check
+        self.needs = needs
+        self.setting = setting
+        self.default = default
+        self.name = ""
+
+    def __set_name__(self, owner: type, name: str) -> None:
+        """Name the option as rST writes it, `class-title` for one.
+
+        :param owner: The directive.
+        :param name: The attribute. An underscore becomes a dash.
+        """
+        self.name = name.replace("_", "-")
+
+    @t.overload
+    def __get__(self, directive: None, owner: type) -> Option: ...
+
+    @t.overload
+    def __get__(self, directive: KaamikiDirective, owner: type) -> t.Any: ...
+
+    def __get__(self, directive: KaamikiDirective | None, owner: type) -> t.Any:
+        """Read the option's value in the directive.
+
+        :param directive: The directive, or `None` on its class.
+        :param owner: The directive's class.
+        :return: For a flag, whether it is there. Else the value as
+            checked, the site setting or the default.
+        """
+        if directive is None:
+            return self
+        if self.check is rst.directives.flag:
+            return self.name in directive.options
+        if self.name in directive.options:
+            return directive.options[self.name]
+        if self.setting:
+            return setting(directive.config, self.setting)
+        return self.default
+
+
+class KaamikiDirective(SphinxDirective):
+    """The base of each Kaamiki directive."""
+
+    registry: t.ClassVar[dict[str, type[KaamikiDirective]]] = {}
+    needs: t.ClassVar[dict[str, str]] = {}
+    Node: t.ClassVar[type[nodes.Element]]
+
+    def __init_subclass__(
+        cls,
+        *,
+        name: str = "",
+        motion: bool = False,
+        spec: type[dict[str, t.Any]] = dict,
+        abstract: bool = False,
+        **kwargs: t.Any,
+    ) -> None:
+        """Record the directive, collect its options and name its node.
+
+        :param name: The directive's name in rST. By default, it is the
+            name of the class in lowercase.
+        :param motion: Whether the directive takes `speed` and
+            `no-motion`.
+        :param spec: The kind of dictionary for `option_spec`, as one
+            that permits more options than it lists.
+        :param abstract: Whether the class is only a base for other
+            directives. Then it is not recorded and not checked.
+        :param kwargs: What the parent class takes.
+        :raises TypeError: When the docstring does not list each option
+            that the directive takes.
+        """
+        super().__init_subclass__(**kwargs)
+        if abstract:
+            return
+        found = {
+            each.name: each
+            for owner in reversed(cls.__mro__)
+            for each in vars(owner).values()
+            if isinstance(each, Option)
+        }
+        cls.option_spec = spec(
+            {
+                **NATIVE,
+                **(MOTION if motion else {}),
+                **{key: each.check for key, each in found.items()},
+            }
+        )
+        cls.needs = {
+            key: each.needs for key, each in found.items() if each.needs
+        }
+        if "Node" in vars(cls):
+            cls.Node.__name__ = cls.__name__
+            cls.Node.__qualname__ = f"{cls.__qualname__}.Node"
+        options = (cls.__doc__ or "").partition("Options::")[2]
+        listed = set(OPTION.findall(options.split("::\n", 1)[0]))
+        if listed != set(cls.option_spec):
+            raise TypeError(
+                f"{cls.__qualname__}: expected the docstring to list"
+                f" {sorted(cls.option_spec)}, got {sorted(listed)}"
+            )
+        KaamikiDirective.registry[name or cls.__name__.lower()] = cls
+
+    @classmethod
+    def made(cls, node: nodes.Node | None) -> bool:
+        """Say whether this directive wrote a node.
+
+        :param node: The node to look at.
+        :return: `True` when the node is exactly this directive's node.
+        """
+        return "Node" in vars(cls) and type(node) is cls.Node
+
+    @property
+    def title(self) -> str:
+        """The title, which is the argument, trimmed."""
+        return titled(self, self.arguments[0])
+
+    @property
+    def classes(self) -> list[str]:
+        """The classes from `class`, then the classes of its motion."""
+        return [*self.options.get("class", []), *moving(self.options)]
+
+    def run(self) -> list[nodes.Node]:
+        """Check the options, then make the directive's nodes.
+
+        :return: What `build` makes.
+        """
+        for option, need in self.needs.items():
+            if option in self.options and need not in self.options:
+                self.fail(f":{option}: needs :{need}:")
+        self.check()
+        return self.build()
+
+    def check(self) -> None:
+        """Check what only this directive checks. By default, nothing."""
+
+    def build(self) -> list[nodes.Node]:
+        """Make the directive's nodes.
+
+        :return: The nodes and the messages.
+        :raises NotImplementedError: Always. Each directive writes it.
+        """
+        raise NotImplementedError
+
+    def fail(self, message: str) -> t.NoReturn:
+        """Stop the build with a message that starts with the name.
+
+        :param message: The message, without the directive's name.
+        :raises rst.DirectiveError: Always.
+        """
+        raise self.error(f"{self.name}: {message}")
+
+    def locate[N: nodes.Node](self, node: N) -> N:
+        """Give a node the place in the source of the directive.
+
+        :param node: The node.
+        :return: The same node.
+        """
+        return located(self, node)
+
+    def text(
+        self, written: str, part: str
+    ) -> tuple[list[nodes.Node], list[nodes.system_message]]:
+        """Parse a text that must have words and no link.
+
+        :param written: The text, as written in the rST.
+        :param part: What the text is, `a title` for one.
+        :return: The parsed text and what the parser reported.
+        """
+        found, messages = self.state.inline_text(written, self.lineno)
+        unlinked(self, found, part)
+        worded(self, found, part)
+        return found, messages
+
+    def fill(
+        self, node: nodes.Element, *, besides: tuple[type, ...] = ()
+    ) -> None:
+        """Parse the content into a node. The content must not be empty.
+
+        :param node: The node that gets the content.
+        :param besides: The kinds of child that are not the content.
+        """
+        self.state.nested_parse(self.content, self.content_offset, node)
+        if hollow(_ for _ in node.children if not isinstance(_, besides)):
+            self.fail("expected some content, got none")
+
+    def add_name(self, node: nodes.Node) -> None:
+        """Give the node the name in `name`. Each name occurs only once.
+
+        :param node: The node to name.
+        """
+        named(self, node)

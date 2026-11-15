@@ -89,15 +89,6 @@ UNITS: t.Final[tuple[tuple[int, str], ...]] = (
 )
 SWAP_LENGTH: t.Final[int] = 45
 SWEEP_LENGTH: t.Final[int] = 120
-ROLES: t.Final[tuple[str, ...]] = (
-    "email",
-    "sharpie",
-    "stylise",
-    "swap",
-    "sweep",
-    "ticker",
-    "underline",
-)
 STYLE_CLASSES: t.Final[dict[str, str]] = {
     "brands": "fa-brands",
     "duotone": "fa-duotone",
@@ -120,28 +111,35 @@ OPENED: t.Final[re.Pattern[str]] = re.compile(r"(?:^|(?<=\s))<(?=\S)[^>]*\Z")
 Reply = tuple[list[nodes.Node], list[nodes.system_message]]
 
 
-class base:
-    """A role that `.. role::` can build another on.
+class KaamikiRole:
+    """A Kaamiki role, which `.. role::` can also use as a base."""
 
-    Docutils reads `options` to learn what the block under `.. role::`
-    may hold, so a role carries its own: `class`, which every role
-    takes, and whatever else it lets a site preset.
-    """
+    registry: t.ClassVar[dict[str, KaamikiRole]] = {}
 
     def __init__(
         self,
         function: Callable[..., Reply],
         options: dict[str, Callable[[str | None], t.Any]] | None = None,
+        *,
+        name: str = "",
     ) -> None:
         """Wrap a role function with the options it takes.
 
+        Docutils reads `options` to know what the block below
+        `.. role::` can hold. Each role takes `class` and the presets
+        that it permits.
+
         :param function: The role function.
-        :param options: The options besides `class`, each with the
+        :param options: The options other than `class`, each with the
             check for its value.
+        :param name: The name of the role in rST. With it, the role is
+            recorded in `registry`.
         """
         self.function = function
         self.options = {"class": checks.classes, **(options or {})}
         functools.update_wrapper(self, function)
+        if name:
+            KaamikiRole.registry[name] = self
 
     def __call__(
         self,
@@ -170,20 +168,22 @@ class base:
         )
 
 
-def accepts(
-    **options: Callable[[str | None], t.Any],
-) -> Callable[[Callable[..., Reply]], base]:
-    """Make a role function a `base` that takes the options given.
+def role(
+    name: str = "", **options: Callable[[str | None], t.Any]
+) -> Callable[[Callable[..., Reply]], KaamikiRole]:
+    """Make the function below this decorator a recorded Kaamiki role.
 
-    :param options: Each option a custom role may preset, with the
+    :param name: The name of the role in rST. The default is the name of
+        the function.
+    :param options: Each option that a custom role can preset, with the
         check for its value.
     :return: The decorator.
     """
 
-    def decorate(function: Callable[..., Reply]) -> base:
-        return base(function, options)
+    def record(function: Callable[..., Reply]) -> KaamikiRole:
+        return KaamikiRole(function, options, name=name or function.__name__)
 
-    return decorate
+    return record
 
 
 def _classes(options: dict[str, t.Any]) -> list[str]:
@@ -196,11 +196,11 @@ def _classes(options: dict[str, t.Any]) -> list[str]:
     return list(options.get("classes", []))
 
 
-class ink(nodes.inline):
+class Ink(nodes.inline):
     """Text wearing a style, a sharpie or a pencil underline."""
 
 
-class swapper(ink):
+class Swapper(Ink):
     """The first of some words or titles, which take turns in its place."""
 
 
@@ -219,7 +219,7 @@ def steady(
     :raises rst.DirectiveError: When the text holds swapping words.
     """
     for each in [found] if isinstance(found, nodes.Node) else found:
-        moving = next(each.findall(swapper), None)
+        moving = next(each.findall(Swapper), None)
         if moving is not None:
             role = "sweep" if "km-sweep" in moving["classes"] else "swap"
             raise directive.error(
@@ -228,8 +228,8 @@ def steady(
             )
 
 
-@html.opens(ink)
-def visit(self: HTMLTranslator, node: ink) -> None:
+@html.opens(Ink)
+def visit(self: HTMLTranslator, node: Ink) -> None:
     """Open the span that carries the style, unless the text is plain.
 
     :param self: The HTML translator, whose body this appends to.
@@ -240,7 +240,7 @@ def visit(self: HTMLTranslator, node: ink) -> None:
         self.body.append(self.starttag(node, "span", "", **style))
 
 
-def _moves(node: ink) -> bool:
+def _moves(node: Ink) -> bool:
     """Tell whether an inked text keeps its style here or is plain.
 
     It's plain inside a link (a toctree, a `:ref:` or a `:doc:`) and in
@@ -263,8 +263,8 @@ def _moves(node: ink) -> bool:
     return True
 
 
-@html.opens(swapper)
-def visit_swapper(self: HTMLTranslator, node: swapper) -> None:
+@html.opens(Swapper)
+def visit_swapper(self: HTMLTranslator, node: Swapper) -> None:
     """Open the span the words take turns in, if they do here.
 
     :param self: The HTML translator, whose body this appends to.
@@ -275,8 +275,8 @@ def visit_swapper(self: HTMLTranslator, node: swapper) -> None:
         self.body.append(self.starttag(node, "span", "", **attributes))
 
 
-@html.closes(swapper)
-def depart_swapper(self: HTMLTranslator, node: swapper) -> None:
+@html.closes(Swapper)
+def depart_swapper(self: HTMLTranslator, node: Swapper) -> None:
     """Close the span, if one was opened.
 
     :param self: The HTML translator, whose body this appends to.
@@ -300,8 +300,8 @@ def visit_glyph(self: HTMLTranslator, node: glyph) -> None:
 html.closes(glyph, "</span>")
 
 
-@html.closes(ink)
-def depart(self: HTMLTranslator, node: ink) -> None:
+@html.closes(Ink)
+def depart(self: HTMLTranslator, node: Ink) -> None:
     """Close the span, if one was opened.
 
     :param self: The HTML translator, whose body this appends to.
@@ -550,7 +550,7 @@ def _style(argument: str | None) -> str:
     return "; ".join(found) + ";"
 
 
-@accepts(style=_style)
+@role(style=_style)
 def stylise(
     name: str,
     rawtext: str,
@@ -613,7 +613,7 @@ def stylise(
                 f" {each!r}",
             )
     return [
-        ink(
+        Ink(
             rawtext,
             element,
             classes=_classes(options),
@@ -622,7 +622,7 @@ def stylise(
     ], []
 
 
-@accepts(subject=lambda _: checks.text(_, 150))
+@role(subject=lambda _: checks.text(_, 150))
 def email(
     name: str,
     rawtext: str,
@@ -714,7 +714,7 @@ def email(
     return [link], []
 
 
-@accepts(colour=checks.text)
+@role(colour=checks.text)
 def sharpie(
     name: str,
     rawtext: str,
@@ -762,10 +762,10 @@ def sharpie(
         )
     style = f"--km-sharpie-colour: {colour};"
     classes = ["km-sharpie", *_classes(options)]
-    return [ink(rawtext, element, classes=classes, style=style)], []
+    return [Ink(rawtext, element, classes=classes, style=style)], []
 
 
-@accepts(
+@role(
     colour=checks.text,
     width=checks.number(*BOUNDS["underline_width"]),
     wobble=checks.number(*BOUNDS["underline_wobble"]),
@@ -851,7 +851,7 @@ def underline(
         f' --km-underline-return: url("data:image/svg+xml,{rtl}");'
     )
     classes = ["km-pencil", *_classes(options)]
-    return [ink(rawtext, element, classes=classes, style=style)], []
+    return [Ink(rawtext, element, classes=classes, style=style)], []
 
 
 def _duration(argument: str | None) -> float:
@@ -877,7 +877,7 @@ def _duration(argument: str | None) -> float:
     return seconds
 
 
-@accepts(short=rst.directives.flag, duration=_duration)
+@role(short=rst.directives.flag, duration=_duration)
 def ticker(
     name: str,
     rawtext: str,
@@ -949,7 +949,7 @@ def ticker(
         else ""
     )
     classes = ["km-ticker", *_classes(options)]
-    return [ink(rawtext, label, classes=classes, style=style)], []
+    return [Ink(rawtext, label, classes=classes, style=style)], []
 
 
 def _turns(
@@ -1008,10 +1008,10 @@ def _turns(
         "words": "|".join(words),
         "support_smartquotes": False,
     }
-    return [swapper(rawtext, words[0], **attributes)], []
+    return [Swapper(rawtext, words[0], **attributes)], []
 
 
-@accepts()
+@role()
 def swap(
     name: str,
     rawtext: str,
@@ -1062,7 +1062,7 @@ def swap(
     )
 
 
-@accepts()
+@role()
 def sweep(
     name: str,
     rawtext: str,
@@ -1223,10 +1223,10 @@ def _keys(
     return Keyboard()(name, rawtext, text, lineno, inliner, options)
 
 
-icon = base(functools.partial(_icon, None))
+icon = KaamikiRole(functools.partial(_icon, None), name="fa-icon")
 
 
-class role(misc.Role):
+class CustomRole(misc.Role):
     """The `role` directive, which also checks the colour a role presets.
 
     Docutils checks the other presets as it reads them. This checks a
@@ -1283,14 +1283,14 @@ def subjects(app: Sphinx, doctree: nodes.document) -> None:
             link["refuri"] += f"?subject={quote(title)}"
 
 
-class quiet(Domain):
-    """A domain that holds no data, so a parallel build merges nothing.
+class Quiet(Domain):
+    """A domain without data, so a parallel build merges nothing.
 
-    Its roles are `base` ones, so a custom role can be built on any of
-    them.
+    Its roles are `KaamikiRole` roles, so a custom role can use each of
+    them as a base.
     """
 
-    def role(self, name: str) -> base | None:
+    def role(self, name: str) -> KaamikiRole | None:
         """Hand docutils a role that knows its full name and options.
 
         :param name: The role's name inside the domain.
@@ -1301,7 +1301,7 @@ class quiet(Domain):
         if found is None:
             return None
         full = f"{self.name}:{name}"
-        return base(
+        return KaamikiRole(
             lambda _, *rest: found(full, *rest),
             getattr(found, "options", {}),
         )
@@ -1316,22 +1316,22 @@ class quiet(Domain):
         """
 
 
-class fa_icon(quiet):
+class FaIcon(Quiet):
     """The `fa-icon:` roles, one for each Font Awesome style."""
 
     name: t.ClassVar[str] = "fa-icon"
     label: t.ClassVar[str] = "Font Awesome"
     roles = {  # noqa: RUF012
-        key: base(functools.partial(_icon, style))
+        key: KaamikiRole(functools.partial(_icon, style))
         for key, style in STYLE_CLASSES.items()
     }
 
 
-class kbd(quiet):
+class Kbd(Quiet):
     """The `kbd:` roles, one for each system."""
 
     name: t.ClassVar[str] = "kbd"
     label: t.ClassVar[str] = "Keyboard"
     roles = {  # noqa: RUF012
-        key: base(functools.partial(_keys, key)) for key in SYSTEMS
+        key: KaamikiRole(functools.partial(_keys, key)) for key in SYSTEMS
     }

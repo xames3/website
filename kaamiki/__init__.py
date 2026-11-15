@@ -29,6 +29,7 @@ from kaamiki.extensions import nesting
 from kaamiki.extensions import roles
 from kaamiki.extensions.utils import CONF
 from kaamiki.extensions.utils import TEMPLATES
+from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import admonition_title
 from kaamiki.extensions.utils import apply
 from kaamiki.extensions.utils import bridge
@@ -329,12 +330,10 @@ def simplify(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     del docname
     if app.builder.format not in formats:
         return
-    for directive in directives:
-        plain = getattr(directive, "plain", None)
-        if plain is None:
-            continue
-        for found in [*doctree.findall(directive.node)]:
-            found.replace_self(plain(found))
+    for directive in KaamikiDirective.registry.values():
+        if hasattr(directive, "plain"):
+            for found in [*doctree.findall(directive.Node)]:
+                found.replace_self(directive.plain(found))
 
 
 def add_roles(app: Sphinx) -> None:
@@ -342,12 +341,11 @@ def add_roles(app: Sphinx) -> None:
 
     :param app: The Sphinx application instance.
     """
-    for key in roles.ROLES:
-        app.add_role(key, getattr(roles, key))
-    app.add_directive("role", roles.role, override=True)
-    app.add_role("fa-icon", roles.icon)
-    app.add_domain(roles.fa_icon)
-    app.add_domain(roles.kbd)
+    for name, role in roles.KaamikiRole.registry.items():
+        app.add_role(name, role)
+    app.add_directive("role", roles.CustomRole, override=True)
+    app.add_domain(roles.FaIcon)
+    app.add_domain(roles.Kbd)
     app.add_node(phrase)
 
 
@@ -356,12 +354,13 @@ def add_directives(app: Sphinx) -> None:
 
     :param app: The Sphinx application instance.
     """
-    for directive in directives:
-        app.add_directive(directive.name, directive.directive)
-        if hasattr(directive, "register"):
-            directive.register(app)
-        if hasattr(directive, "html_page_context"):
-            app.connect("html-page-context", directive.html_page_context)
+    for name, directive in KaamikiDirective.registry.items():
+        app.add_directive(name, directive)
+    for module in directives:
+        if hasattr(module, "register"):
+            module.register(app)
+        if hasattr(module, "html_page_context"):
+            app.connect("html-page-context", module.html_page_context)
     html.register(app)
 
 

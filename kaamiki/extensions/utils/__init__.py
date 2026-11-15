@@ -37,24 +37,20 @@ from kaamiki.extensions.utils.dates import provenance
 from kaamiki.extensions.utils.dates import updated_on
 from kaamiki.extensions.utils.dates import warm
 from kaamiki.extensions.utils.directives import BEM
-from kaamiki.extensions.utils.directives import MOTION
-from kaamiki.extensions.utils.directives import NATIVE
-from kaamiki.extensions.utils.directives import NO_MOTION
+from kaamiki.extensions.utils.directives import KaamikiDirective
+from kaamiki.extensions.utils.directives import Option
 from kaamiki.extensions.utils.directives import closer
 from kaamiki.extensions.utils.directives import document
 from kaamiki.extensions.utils.directives import fields
 from kaamiki.extensions.utils.directives import hollow
 from kaamiki.extensions.utils.directives import html
 from kaamiki.extensions.utils.directives import listed
-from kaamiki.extensions.utils.directives import located
 from kaamiki.extensions.utils.directives import moving
-from kaamiki.extensions.utils.directives import named
 from kaamiki.extensions.utils.directives import paragraph
 from kaamiki.extensions.utils.directives import parse
 from kaamiki.extensions.utils.directives import phrase
 from kaamiki.extensions.utils.directives import shipped
 from kaamiki.extensions.utils.directives import through
-from kaamiki.extensions.utils.directives import titled
 from kaamiki.extensions.utils.directives import trail
 from kaamiki.extensions.utils.directives import unlinked
 from kaamiki.extensions.utils.directives import what
@@ -93,10 +89,9 @@ from kaamiki.extensions.utils.templates import render
 __all__: list[str] = [
     "BEM",
     "CONF",
-    "MOTION",
-    "NATIVE",
-    "NO_MOTION",
     "TEMPLATES",
+    "KaamikiDirective",
+    "Option",
     "admonition_title",
     "annotated",
     "apply",
@@ -127,10 +122,8 @@ __all__: list[str] = [
     "keycaps",
     "linkcheck",
     "listed",
-    "located",
     "merge_leads",
     "moving",
-    "named",
     "neighbours",
     "note_lead",
     "offer",
@@ -158,7 +151,6 @@ __all__: list[str] = [
     "spell",
     "stored",
     "through",
-    "titled",
     "toctrees",
     "trail",
     "unlinked",

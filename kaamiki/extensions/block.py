@@ -21,19 +21,15 @@ from __future__ import annotations
 import typing as t
 
 import docutils.nodes as nodes
-import docutils.parsers.rst as rst
 
 from kaamiki.extensions import columns
 from kaamiki.extensions.utils import BEM
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import document
-from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import opens_new_tab
-from kaamiki.extensions.utils import titled
 from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
 from kaamiki.extensions.utils import worded
@@ -46,166 +42,153 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "block"
 block: t.Final[BEM] = BEM("block")
 row: t.Final[BEM] = BEM("block-row")
 LINKS: t.Final[tuple[str, ...]] = ("target", "doc", "ref")
 
 
-class Block(nodes.container):
-    """The block and what's in it, waiting for `visit`."""
-
-
-class shelf(nodes.container):
+class Shelf(nodes.container):
     """A row of blocks of the same size."""
 
 
-class part(nodes.container):
-    """A part of a block that holds other nodes, like its body."""
+class Part(nodes.container):
+    """A part of a block that holds other nodes, as its body."""
 
 
-class blocktext(nodes.paragraph):
-    """A part of a block that holds text, like its title."""
+class BlockText(nodes.paragraph):
+    """A part of a block that holds text, as its title."""
 
 
-class directive(rst.Directive):
+class Block(KaamikiDirective):
     """The `block` directive.
 
     Options::
 
-        - `preheader`: A small line above the title, with roles like
-          `:fa-icon:regular:`heart` Love`.
-        - `subheader`: A smaller line under the title.
-        - `footer`: Text at the bottom, written like `preheader`.
-        - `target`: An address the whole block links to.
-        - `doc`: A document the whole block links to, as `:doc:` names
+        - `preheader`: A small line above the title. It can have roles,
+          as `:fa-icon:regular:`heart` Love`.
+        - `subheader`: A smaller line below the title.
+        - `footer`: Text at the bottom, written as `preheader`.
+        - `target`: An address. The full block is a link to it.
+        - `doc`: A document, named as `:doc:` names it. The full block
+          is a link to it.
+        - `ref`: A label, named as `:ref:` names it. Capitals and
+          spaces do not change the label. The full block is a link to
           it.
-        - `ref`: A label the whole block links to, as `:ref:` names it,
-          capitals and spaces aside.
-        - `size`: How wide it is when blocks sit side by side, `small`
-          for three in a line, `medium` for two or `large`, the
-          default, for one.
-        - `name`: A name to link to.
+        - `size`: The width when blocks are side by side, `small` for
+          three in a row, `medium` for two or `large` for one. The
+          default is `large`.
+        - `name`: A name for links.
         - `class`: More classes for the block.
 
-    The argument is the title and everything below is the content. A
-    block takes one of `target`, `doc` and `ref`, and is one link as a
-    whole, so an `accordion`, `carousel`, `embed`, `tabs`, `video` or
-    `youtube` in it stops the build. A block holds no other block and
-    one that isn't `large` holds no columns. Blocks of the same `size`
-    written one after another form rows. Blocks inside a column, at any
-    depth, form no rows, each is as wide as the column. A `large` block
-    is a row of its own and a block of another size starts a new row.
+    The argument is the title, and the lines below it are the content.
+    A block can have only one of `target`, `doc` and `ref`. Then the
+    full block is one link, so the build stops when it holds an
+    `accordion`, `carousel`, `embed`, `tabs`, `video` or `youtube`. A
+    block cannot hold a block, and a block that is not `large` cannot
+    hold columns. Blocks of the same `size`, one after the other, make
+    a row. Blocks in a column, at all depths, do not make rows. Each
+    block is as wide as the column. A `large` block is a row by itself,
+    and a block of a different size starts a new row.
     """
 
     has_content = True
     required_arguments = 1
     final_argument_whitespace = True
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        "preheader": checks.text,
-        "subheader": checks.text,
-        "footer": checks.text,
-        "target": checks.link,
-        "doc": checks.text,
-        "ref": checks.text,
-        "size": checks.word(*SIZES),
-    }
+    preheader = Option(checks.text)
+    subheader = Option(checks.text)
+    footer = Option(checks.text)
+    target = Option(checks.link)
+    doc = Option(checks.text)
+    ref = Option(checks.text)
+    size = Option(checks.word(*SIZES), default="large")
 
-    def inline(
-        self, role: str, text: str, *, linked: bool
-    ) -> tuple[blocktext, list[nodes.system_message]]:
-        """Parse a line of text the way a paragraph is parsed.
+    class Node(nodes.container):
+        """The block and its content."""
 
-        :param role: The part of the block, like `title` or `footer`.
-        :param text: The text, as written.
-        :param linked: Whether the whole block is a link, which the
-            text can't hold another of.
-        :return: The parsed text and whatever the parsing reported.
-        :raises rst.DirectiveError: For a link in a block that is one.
+    @property
+    def links(self) -> list[str]:
+        """The options that make the full block a link."""
+        return [each for each in LINKS if each in self.options]
+
+    @property
+    def kind(self) -> str:
+        """The option that makes the full block a link, or nothing."""
+        return next(iter(self.links), "")
+
+    def check(self) -> None:
+        """Permit only one of `target`, `doc` and `ref`."""
+        if len(self.links) > 1:
+            first, second = self.links[:2]
+            self.fail(f":{first}: not allowed with :{second}:")
+
+    def line(
+        self, role: str, written: str
+    ) -> tuple[BlockText, list[nodes.system_message]]:
+        """Parse a line of text as a paragraph is parsed.
+
+        :param role: The part of the block, as `title` or `footer`.
+        :param written: The text, as written in the rST.
+        :return: The parsed text and what the parser reported.
         """
-        words, messages = self.state.inline_text(text, self.lineno)
+        words, messages = self.state.inline_text(written, self.lineno)
         worded(self, words, f"a {role}")
-        if linked:
+        if self.kind:
             unlinked(self, words, f"a {role}")
-        return located(self, blocktext(text, "", *words, role=role)), messages
+        return self.locate(BlockText(written, "", *words, role=role)), messages
 
-    def run(self) -> list[nodes.Node]:
-        """Parse the parts and return the block.
+    def build(self) -> list[nodes.Node]:
+        """Make the block, or the row of blocks that it starts.
 
-        :return: The block, or the row of blocks it starts, followed by
-            whatever the parsing reported. A block that joins the row
-            before it returns only what the parsing reported. A row in
-            a column is taken apart once the page is read, see `unrow`.
+        :return: The block or its row, then what the parser reported. A
+            block that joins the row before it gives only what the
+            parser reported. A row in a column comes apart when the page
+            is read, see `unrow`.
         """
-        options = self.options
-        given = [_ for _ in LINKS if _ in options]
-        if len(given) > 1:
-            raise self.error(
-                f"block: :{given[0]}: not allowed with :{given[1]}:"
-            )
-        kind = given[0] if given else ""
-        link = options.get(kind, "")
+        kind = self.kind
+        link = getattr(self, kind) if kind else ""
         if kind == "doc":
             link = document(self, link, "doc")
-        element = located(
-            self, Block("", classes=list(options.get("class", [])))
-        )
-        element["size"] = options.get("size", "large")
-        element["link"] = link
-        element["kind"] = kind
-        named(self, element)
+        node = self.locate(self.Node("", classes=self.classes))
+        node["size"] = self.size
+        node["link"] = link
+        node["kind"] = kind
+        self.add_name(node)
         messages: list[nodes.system_message] = []
-        if "preheader" in options:
-            preheader, found = self.inline(
-                "preheader", options["preheader"], linked=bool(kind)
-            )
-            element += preheader
+        if self.preheader:
+            preheader, found = self.line("preheader", self.preheader)
+            node += preheader
             messages += found
-        content = part("", role="body")
-        title, found = self.inline(
-            "title", titled(self, self.arguments[0]), linked=bool(kind)
-        )
-        element["label"] = title.astext()
+        content = Part("", role="body")
+        title, found = self.line("title", self.title)
+        node["label"] = title.astext()
         content += title
         messages += found
-        subheader_node = None
-        if "subheader" in options:
-            subheader_node, found = self.inline(
-                "subheader", options["subheader"], linked=bool(kind)
-            )
-            content += subheader_node
+        if self.subheader:
+            subheader, found = self.line("subheader", self.subheader)
+            content += subheader
             messages += found
-        self.state.nested_parse(self.content, self.content_offset, content)
-        if hollow(
-            c
-            for c in content.children
-            if c is not title and c is not subheader_node
-        ):
-            raise self.error("block: expected some content, got none")
-        element += content
-        if "footer" in options:
-            footer, found = self.inline(
-                "footer", options["footer"], linked=bool(kind)
-            )
-            element += footer
+        self.fill(content, besides=(BlockText,))
+        node += content
+        if self.footer:
+            footer, found = self.line("footer", self.footer)
+            node += footer
             messages += found
         if kind == "target":
             for reference in trail(self, {"target": link}, ("target",)):
-                element += reference
+                node += reference
         parent = self.state.parent
         previous = parent.children[-1] if parent.children else None
         if (
-            isinstance(previous, shelf)
-            and element["size"] != "large"
-            and previous["last"] == element["size"]
+            isinstance(previous, Shelf)
+            and node["size"] != "large"
+            and previous["last"] == node["size"]
         ):
-            previous += element
-            previous["last"] = element["size"]
+            previous += node
+            previous["last"] = node["size"]
             return [*messages]
-        row = shelf("", last=element["size"])
-        row += element
-        return [row, *messages]
+        shelf = Shelf("", last=node["size"])
+        shelf += node
+        return [shelf, *messages]
 
 
 def address(
@@ -239,7 +222,7 @@ def address(
     return f"{base}#{label[1]}", False
 
 
-def anchor(self: HTMLTranslator, node: Block) -> str:
+def anchor(self: HTMLTranslator, node: Block.Node) -> str:
     """Write a block's link.
 
     :param self: The HTML translator.
@@ -259,8 +242,8 @@ def anchor(self: HTMLTranslator, node: Block) -> str:
     return f"<a {' '.join(attributes)}></a>"
 
 
-@html.opens(Block)
-def visit(self: HTMLTranslator, node: Block) -> None:
+@html.opens(Block.Node)
+def visit(self: HTMLTranslator, node: Block.Node) -> None:
     """Open the block.
 
     :param self: The HTML translator, whose body this appends to.
@@ -272,8 +255,8 @@ def visit(self: HTMLTranslator, node: Block) -> None:
     self.body.append(self.starttag(node, "div", "", CLASS=block(*modifiers)))
 
 
-@html.closes(Block)
-def depart(self: HTMLTranslator, node: Block) -> None:
+@html.closes(Block.Node)
+def depart(self: HTMLTranslator, node: Block.Node) -> None:
     """Close the block, with its link as the last thing in it.
 
     :param self: The HTML translator, whose body this appends to.
@@ -284,8 +267,8 @@ def depart(self: HTMLTranslator, node: Block) -> None:
     self.body.append("</div>")
 
 
-@html.opens(shelf)
-def visit_shelf(self: HTMLTranslator, node: shelf) -> None:
+@html.opens(Shelf)
+def visit_shelf(self: HTMLTranslator, node: Shelf) -> None:
     """Open a row of blocks.
 
     :param self: The HTML translator, whose body this appends to.
@@ -294,9 +277,9 @@ def visit_shelf(self: HTMLTranslator, node: shelf) -> None:
     self.body.append(self.starttag(node, "div", "", CLASS=row()))
 
 
-@html.opens(part)
-@html.opens(blocktext)
-def visit_piece(self: HTMLTranslator, node: part | blocktext) -> None:
+@html.opens(Part)
+@html.opens(BlockText)
+def visit_piece(self: HTMLTranslator, node: Part | BlockText) -> None:
     """Open a part of a block, or a line of its text.
 
     :param self: The HTML translator, whose body this appends to.
@@ -306,9 +289,9 @@ def visit_piece(self: HTMLTranslator, node: part | blocktext) -> None:
     self.body.append(self.starttag(node, "div", "", CLASS=classes))
 
 
-html.closes(shelf, "</div>")
-html.closes(part, "</div>")
-html.closes(blocktext, "</div>")
+html.closes(Shelf, "</div>")
+html.closes(Part, "</div>")
+html.closes(BlockText, "</div>")
 
 
 def unrow(app: Sphinx, doctree: nodes.document) -> None:
@@ -320,12 +303,12 @@ def unrow(app: Sphinx, doctree: nodes.document) -> None:
     :param doctree: The page, just read.
     """
     del app
-    for row in list(doctree.findall(shelf)):
-        host = row.parent
-        while host is not None and not isinstance(host, columns.item):
+    for found in list(doctree.findall(Shelf)):
+        host = found.parent
+        while host is not None and not isinstance(host, columns.Column.Node):
             host = host.parent
         if host is not None:
-            row.replace_self(list(row.children))
+            found.replace_self(list(found.children))
 
 
 def register(app: Sphinx) -> None:
@@ -334,6 +317,3 @@ def register(app: Sphinx) -> None:
     :param app: The Sphinx application instance.
     """
     app.connect("doctree-read", unrow)
-
-
-node = Block

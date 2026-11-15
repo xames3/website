@@ -30,12 +30,10 @@ import docutils.parsers.rst as rst
 from sphinx import addnodes
 
 from kaamiki.extensions.utils import BEM
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
-from kaamiki.extensions.utils import hollow
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import through
 from kaamiki.extensions.utils import what
 from kaamiki.extensions.utils.checks import fail
@@ -45,33 +43,21 @@ from kaamiki.extensions.utils.settings import MARGINS
 from kaamiki.extensions.utils.settings import SIZES
 
 if t.TYPE_CHECKING:
-    from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
-name: t.Final[str] = "columns"
 columns: t.Final[BEM] = BEM("columns")
 COLUMNS: t.Final[int] = 6
 VALIGNS: t.Final[tuple[str, ...]] = ("top", "middle", "bottom")
 STACKS: t.Final[tuple[str, ...]] = ("left", "center")
-
-
-class Columns(nodes.container):
-    """The columns and what's in them, waiting for `visit`."""
-
-
-class item(nodes.container):
-    """One column and its content."""
-
-
 count = checks.integer(1, COLUMNS)
 
 
-def span(argument: str | None) -> str:
+def span_count(argument: str | None) -> str:
     """Check how many columns a column takes.
 
-    :param argument: The number as written or `auto`.
-    :return: The number of columns, as written, or `auto`.
-    :raises ValueError: If it's neither.
+    :param argument: The number as written, or `auto`.
+    :return: The number of columns as written, or `auto`.
+    :raises ValueError: When it is not a number or `auto`.
     """
     if argument == "auto":
         return argument
@@ -84,109 +70,118 @@ def span(argument: str | None) -> str:
         ) from error
 
 
-class directive(rst.Directive):
+class Columns(KaamikiDirective):
     """The `columns` directive.
 
     Options::
 
         - `gap`: The space between columns, `small`, `medium` or
-          `large`. Defaults to `small`. Lengths in `rem` replace them,
-          up to 4rem: one for both directions, like `1.5rem`, or two as
-          the row gap then the column gap, like `1rem 2rem`.
-        - `valign`: Where columns of different heights line up, `top`,
-          `middle` or `bottom`. Defaults to `middle`.
-        - `flush`: Take off the space above the first thing in each
-          column and below the last, so the gap and the margin decide
-          the spacing. A column with a `padding`, `border` or
-          `background` already does.
-        - `padding`: The space inside each column, `small`, `medium` or
-          `large`. Lengths in `rem` like `gap` replace them, as the
-          space above and below then at the sides when there are two. A
-          column with a `border` or a `background` has `1rem` without
-          it.
-        - `border`: Draw a 1px border and rounded corners around each
+          `large`. The default is `small`. A length in `rem`, up to
+          4rem, can replace them. Write one length for the two
+          directions, as `1.5rem`, or two lengths for the row gap and
+          the column gap, as `1rem 2rem`.
+        - `valign`: Where columns of different heights align, `top`,
+          `middle` or `bottom`. The default is `middle`.
+        - `flush`: Remove the space above the first item in each column
+          and below the last item. Then the gap and the margin set the
+          spacing. A column with a `padding`, `border` or `background`
+          is flush already.
+        - `padding`: The space in each column, `small`, `medium` or
+          `large`. Lengths in `rem`, as for `gap`, can replace them: the
+          space above and below, then the space at the sides. A column
+          with a `border` or a `background` has `1rem` without it.
+        - `border`: Put a 1px border with round corners around each
           column.
-        - `background`: Fill each column, with rounded corners.
+        - `background`: Fill each column, with round corners.
         - `margin`: The space above and below the columns, `small`,
-          `medium` or `large`. Defaults to `medium`. Lengths in `rem`
-          replace them, up to 8rem: one for both, or two as above then
-          below, like `5rem 2rem`.
-        - `stack-align`: How the text in the columns lines up when they
-          stack on a phone, `left` or `center`. Defaults to `left`.
-        - `class-column`: More classes for every column in them.
-        - `name`: A name to link to.
+          `medium` or `large`. The default is `medium`. A length in
+          `rem`, up to 8rem, can replace them. Write one length for the
+          two, or two lengths for above and below, as `5rem 2rem`.
+        - `stack-align`: How the text in the columns aligns when they
+          stack on a phone, `left` or `center`. The default is `left`.
+        - `class-column`: More classes for each column.
+        - `name`: A name for links.
         - `class`: More classes for the columns.
 
-    The argument is the number of columns, from 1 to 6. A `column` goes
-    inside for each piece. On a phone every column takes the full
-    width, except one with `:span: auto`, which keeps its own width and
-    is centred.
+    The argument is the number of columns, from 1 to 6. Put one `column`
+    in it for each item. On a phone, each column takes the full width.
+    A column with `:span: auto` keeps its width and goes in the center.
 
-    A set of columns goes in nothing narrower than the page's text, so
-    not in a column that doesn't span its set, nor in a block that
-    isn't `large`.
+    Columns cannot go in a container that is narrower than the text of
+    the page. Thus they cannot go in a column that does not span its
+    set, or in a block that is not `large`.
     """
 
     has_content = True
     required_arguments = 1
     final_argument_whitespace = False
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        "gap": checks.spacing(SIZES, GAPS),
-        "valign": checks.word(*VALIGNS),
-        "flush": rst.directives.flag,
-        "padding": checks.spacing(SIZES, GAPS),
-        "border": rst.directives.flag,
-        "background": rst.directives.flag,
-        "margin": checks.spacing(SIZES, MARGINS),
-        "stack-align": checks.word(*STACKS),
-        "class-column": checks.classes,
-    }
+    gap = Option(checks.spacing(SIZES, GAPS), default="small")
+    valign = Option(checks.word(*VALIGNS), default="middle")
+    flush = Option(rst.directives.flag)
+    padding = Option(checks.spacing(SIZES, GAPS), default="")
+    border = Option(rst.directives.flag)
+    background = Option(rst.directives.flag)
+    margin = Option(checks.spacing(SIZES, MARGINS), default="")
+    stack_align = Option(checks.word(*STACKS), default="left")
+    class_column = Option(checks.classes, default=())
 
-    def run(self) -> list[nodes.Node]:
-        """Parse the columns and return the set.
+    class Node(nodes.container):
+        """The columns and their content."""
 
-        :return: The set's node.
+    def check(self) -> None:
+        """Refuse `flush` with an option that makes a column flush."""
+        if self.flush and (self.padding or self.border or self.background):
+            self.fail(
+                ":flush: not allowed with :padding:, :border: or"
+                " :background:, since a column with one is flush already"
+            )
+
+    def build(self) -> list[nodes.Node]:
+        """Make the columns and give each column its classes.
+
+        :return: The node of the columns.
         """
-        options = self.options
         try:
             number = count(self.arguments[0])
         except ValueError as error:
-            raise self.error(f"columns: {error}") from error
-        element = located(
-            self, Columns("", classes=list(options.get("class", [])))
-        )
-        element["columns"] = number
-        element["gap"] = options.get("gap", "small")
-        element["valign"] = options.get("valign", "middle")
-        element["flush"] = "flush" in options
-        element["padding"] = options.get("padding", "")
-        element["margin"] = options.get("margin", "")
-        element["stack"] = options.get("stack-align", "left")
-        element["border"] = "border" in options
-        element["background"] = "background" in options
-        element["column_classes"] = list(options.get("class-column", []))
-        named(self, element)
-        self.state.nested_parse(self.content, self.content_offset, element)
-        found = list(through(element.children))
+            self.fail(str(error))
+        node = self.locate(self.Node("", classes=self.classes))
+        node["columns"] = number
+        node["gap"] = self.gap
+        node["valign"] = self.valign
+        node["flush"] = self.flush
+        node["padding"] = self.padding
+        node["margin"] = self.margin
+        node["stack"] = self.stack_align
+        node["border"] = self.border
+        node["background"] = self.background
+        node["column_classes"] = [*self.class_column]
+        self.add_name(node)
+        self.state.nested_parse(self.content, self.content_offset, node)
+        found = list(through(node.children))
         if any(
-            isinstance(_, nodes.system_message) and _["level"] >= 3
-            for _ in found
+            isinstance(each, nodes.system_message) and each["level"] >= 3
+            for each in found
         ):
-            return [element]
-        skipped = (item, nodes.comment, nodes.target, nodes.system_message)
+            return [node]
+        skipped = (
+            Column.Node,
+            nodes.comment,
+            nodes.target,
+            nodes.system_message,
+        )
         if stray := next(
-            (_ for _ in found if not isinstance(_, skipped)), None
+            (each for each in found if not isinstance(each, skipped)), None
         ):
-            raise self.error(
-                "columns: expected column directives and nothing else, got"
+            self.fail(
+                "expected column directives and nothing else, got"
                 f" {what(stray)}"
             )
-        reported = (item, nodes.system_message)
-        if not any(isinstance(_, reported) for _ in found):
-            raise self.error("columns: expected at least 1 column, got none")
+        reported = (Column.Node, nodes.system_message)
+        if not any(isinstance(each, reported) for each in found):
+            self.fail("expected at least 1 column, got none")
         for each in found:
-            if not isinstance(each, item):
+            if not isinstance(each, Column.Node):
                 continue
             if each["span"] != "auto" and int(each["span"]) > number:
                 fail(
@@ -194,56 +189,46 @@ class directive(rst.Directive):
                     f" {each['span']!r}",
                     location(each),
                 )
-            each["classes"] = [*element["column_classes"], *each["classes"]]
-        padded = ("padding", "border", "background")
-        if "flush" in options and any(_ in options for _ in padded):
-            raise self.error(
-                "columns: :flush: not allowed with :padding:, :border: or"
-                " :background:, since a column with one is flush already"
-            )
-        return [element]
+            each["classes"] = [*node["column_classes"], *each["classes"]]
+        return [node]
 
 
-class column(rst.Directive):
+class Column(KaamikiDirective):
     """The `column` directive.
 
     Options::
 
-        - `span`: How many of the columns it takes, or `auto` to be as
-          wide as its content. A column without it takes one.
-        - `name`: A name to link to.
+        - `span`: How many columns it takes, or `auto` to make it as
+          wide as its content. Without it, a column takes one.
+        - `name`: A name for links.
         - `class`: More classes for the column.
     """
 
     has_content = True
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        "span": span,
-    }
+    span = Option(span_count, default="1")
 
-    def run(self) -> list[nodes.Node]:
-        """Parse the content and return the column.
+    class Node(nodes.container):
+        """One column and its content."""
+
+    def check(self) -> None:
+        """Permit a column only in columns."""
+        if not isinstance(self.state.parent, (Columns.Node, addnodes.only)):
+            self.fail("expected inside columns, got it on its own")
+
+    def build(self) -> list[nodes.Node]:
+        """Make the column with its content.
 
         :return: The column's node.
         """
-        if not isinstance(self.state.parent, (Columns, addnodes.only)):
-            raise self.error(
-                "column: expected inside columns, got it on its own"
-            )
-        options = self.options
-        element = located(
-            self, item("", classes=list(options.get("class", [])))
-        )
-        element["span"] = options.get("span", "1")
-        named(self, element)
-        self.state.nested_parse(self.content, self.content_offset, element)
-        if hollow(element.children):
-            raise self.error("column: expected some content, got none")
-        return [element]
+        node = self.locate(self.Node("", classes=self.classes))
+        node["span"] = self.span
+        self.add_name(node)
+        self.fill(node)
+        return [node]
 
 
-@html.opens(Columns)
-def visit(self: HTMLTranslator, node: Columns) -> None:
+@html.opens(Columns.Node)
+def visit(self: HTMLTranslator, node: Columns.Node) -> None:
     """Open the columns.
 
     :param self: The HTML translator, whose body this appends to.
@@ -292,11 +277,11 @@ def visit(self: HTMLTranslator, node: Columns) -> None:
     self.body.append(self.starttag(node, "div", "", **attributes))
 
 
-html.closes(Columns, "</div>")
+html.closes(Columns.Node, "</div>")
 
 
-@html.opens(item)
-def visit_item(self: HTMLTranslator, node: item) -> None:
+@html.opens(Column.Node)
+def visit_column(self: HTMLTranslator, node: Column.Node) -> None:
     """Open a column.
 
     :param self: The HTML translator, whose body this appends to.
@@ -306,15 +291,4 @@ def visit_item(self: HTMLTranslator, node: item) -> None:
     self.body.append(self.starttag(node, "div", "", CLASS=classes))
 
 
-html.closes(item, "</div>")
-
-
-def register(app: Sphinx) -> None:
-    """Register the `column` directive.
-
-    :param app: The Sphinx application instance.
-    """
-    app.add_directive("column", column)
-
-
-node = Columns
+html.closes(Column.Node, "</div>")

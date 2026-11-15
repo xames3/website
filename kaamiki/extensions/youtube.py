@@ -27,11 +27,10 @@ import urllib.parse as urlparse
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
-from kaamiki.extensions.utils import NATIVE
+from kaamiki.extensions.utils import KaamikiDirective
+from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import located
-from kaamiki.extensions.utils import named
 from kaamiki.extensions.utils import parse
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import setting
@@ -43,7 +42,6 @@ from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.links import youtube_start
 from kaamiki.extensions.utils.settings import BOUNDS
 
-name: t.Final[str] = "youtube"
 template: t.Final[str] = "directives/youtube.html.jinja"
 RATIOS: t.Final[tuple[str, ...]] = ("16:9", "4:3", "21:9", "1:1", "9:16")
 SECONDS: t.Final[tuple[float, float]] = BOUNDS["start"]
@@ -65,72 +63,66 @@ def language(argument: str | None) -> str:
     return code
 
 
-class Youtube(nodes.Element):
-    """The player and its parsed caption, waiting for `visit`."""
-
-
-class directive(rst.Directive):
+class Youtube(KaamikiDirective):
     """The `youtube` directive.
 
-    The argument is a YouTube video link or just its id. The link
-    checker is given the video's picture, so `linkcheck` fails and names
-    a video that's been deleted or made private.
+    The argument is the link of a YouTube video, or only its id. The
+    link checker gets the picture of the video, so `linkcheck` fails and
+    names a video that is deleted or private.
 
     Options::
 
-        - `autoplay`: Play the video, muted, as soon as it loads. The
-          player loads at once, so it takes neither `click-to-load`
-          nor `auto-load`, and `muted` is on already.
-        - `closed-captions`: Turn closed captions on.
-        - `caption`: A line of text under the player, parsed as rST.
-        - `start`: Seconds to start playing from, 1 to 10800. A pasted
-          link's own `t=` is used when it isn't written.
-        - `end`: Seconds to stop playing at, 1 to 10800 and after
-          `start`.
-        - `privacy`: Embed from `youtube-nocookie.com`, the picture of
-          a click-to-load player staying the video's own. It's on
-          without it, so it only works for a site that turned
+        - `autoplay`: Play the video, without sound, when it loads. The
+          player loads immediately, so you cannot use `click-to-load` or
+          `auto-load` with it. `muted` is on already.
+        - `closed-captions`: Show the closed captions.
+        - `caption`: A line of text below the player, parsed as rST.
+        - `start`: The second to start from, 1 to 10800. Without it, the
+          `t=` of a pasted link sets it.
+        - `end`: The second to stop at, 1 to 10800, after `start`.
+        - `privacy`: Embed from `youtube-nocookie.com`. The picture of a
+          click-to-load player stays the picture of the video. It is on
+          by default, so use it only on a site with
           `kaamiki.conf.youtube.privacy` off.
-        - `no-privacy`: Embed from `youtube.com`, even though the
-          site's `kaamiki.conf.youtube.privacy` is on.
-        - `hide-controls`: Hide the player controls, which are shown
-          without it. It needs `autoplay`, or there's no way to play
+        - `no-privacy`: Embed from `youtube.com` when
+          `kaamiki.conf.youtube.privacy` of the site is on.
+        - `hide-controls`: Do not show the controls of the player. It
+          needs `autoplay`, because without controls nothing can play
           the video.
-        - `loop`: Play it over and over.
-        - `muted`: Start with the sound off. `autoplay` does that
-          already.
-        - `player-language`: The player's language and the captions' as
-          a code, like `en` or `pt-BR`.
-        - `ratio`: The player's shape, `16:9`, `4:3`, `21:9`, `1:1` or
-          `9:16`. Defaults to `16:9`.
-        - `click-to-load`: Show the video's picture and load the player
-          once it's clicked. It's on without it, so it only works for a
-          site that turned `kaamiki.conf.youtube.click_to_load` off.
-        - `auto-load`: Load the player with the page, even though
-          the site's `kaamiki.conf.youtube.click_to_load` is on.
-        - `name`: A name to link to.
+        - `loop`: Play it again and again.
+        - `muted`: Start without sound. `autoplay` does this already.
+        - `player-language`: The language of the player and of the
+          captions, as a code, as `en` or `pt-BR`.
+        - `ratio`: The shape of the player, `16:9`, `4:3`, `21:9`, `1:1`
+          or `9:16`. The default is `16:9`.
+        - `click-to-load`: Show the picture of the video, and load the
+          player when a reader clicks it. It is on by default, so use it
+          only on a site with `kaamiki.conf.youtube.click_to_load` off.
+        - `auto-load`: Load the player with the page when
+          `kaamiki.conf.youtube.click_to_load` of the site is on.
+        - `name`: A name for links.
         - `class`: More classes for the player.
     """
 
     required_arguments = 1
     final_argument_whitespace = False
-    option_spec = {  # noqa: RUF012
-        **NATIVE,
-        "autoplay": rst.directives.flag,
-        "closed-captions": rst.directives.flag,
-        "caption": checks.text,
-        "start": checks.integer(*map(int, SECONDS)),
-        "end": checks.integer(*map(int, SECONDS)),
-        "privacy": rst.directives.flag,
-        "no-privacy": rst.directives.flag,
-        "hide-controls": rst.directives.flag,
-        "loop": rst.directives.flag,
-        "muted": rst.directives.flag,
-        "player-language": language,
-        "ratio": checks.word(*RATIOS),
-        "click-to-load": rst.directives.flag,
-        "auto-load": rst.directives.flag,
-    }
+    autoplay = Option(rst.directives.flag)
+    closed_captions = Option(rst.directives.flag)
+    caption = Option(checks.text)
+    start = Option(checks.integer(*map(int, SECONDS)))
+    end = Option(checks.integer(*map(int, SECONDS)))
+    privacy = Option(rst.directives.flag)
+    no_privacy = Option(rst.directives.flag)
+    hide_controls = Option(rst.directives.flag)
+    loop = Option(rst.directives.flag)
+    muted = Option(rst.directives.flag)
+    player_language = Option(language)
+    ratio = Option(checks.word(*RATIOS))
+    click_to_load = Option(rst.directives.flag)
+    auto_load = Option(rst.directives.flag)
+
+    class Node(nodes.Element):
+        """The player and its parsed caption, which `visit` writes."""
 
     def switch(
         self, on: str, off: str, site: object, setting_name: str
@@ -148,18 +140,14 @@ class directive(rst.Directive):
         """
         turned_on, turned_off = on in self.options, off in self.options
         if turned_on and turned_off:
-            raise self.error(f"youtube: :{on}: not allowed with :{off}:")
+            self.fail(f":{on}: not allowed with :{off}:")
         if turned_on and site:
-            raise self.error(
-                f"youtube: :{on}: does nothing, {setting_name} is on already"
-            )
+            self.fail(f":{on}: does nothing, {setting_name} is on already")
         if turned_off and not site:
-            raise self.error(
-                f"youtube: :{off}: does nothing, {setting_name} is off already"
-            )
+            self.fail(f":{off}: does nothing, {setting_name} is off already")
         return turned_on or (bool(site) and not turned_off)
 
-    def run(self) -> list[nodes.Node]:
+    def build(self) -> list[nodes.Node]:
         """Build the embed URL and return the player's node.
 
         :return: The node, followed by the `raw` node `trail` returns
@@ -168,30 +156,25 @@ class directive(rst.Directive):
         src = self.arguments.pop().strip()
         vid = youtube_id(src)
         if vid is None:
-            raise self.error(
-                f"youtube: expected a YouTube video link or id, got {src!r}"
-            )
+            self.fail(f"expected a YouTube video link or id, got {src!r}")
         if not urlparse.urlsplit(src).netloc:
             src = f"https://www.youtube.com/watch?v={vid}"
         options = self.options
         if "start" not in options and (found := youtube_start(src)):
             low, high = SECONDS
             if not low <= found <= high:
-                raise self.error(
-                    f"youtube: expected a start time in the link from {low:g}"
+                self.fail(
+                    f"expected a start time in the link from {low:g}"
                     f" to {high:g} seconds, got {found!r}"
                 )
             options["start"] = found
         if "end" in options and options["end"] <= options.get("start", 0):
-            raise self.error(
-                f"youtube: :end: expected after :start:, got {options['end']!r}"
-            )
+            self.fail(f":end: expected after :start:, got {options['end']!r}")
         if "muted" in options and "autoplay" in options:
-            raise self.error(
-                "youtube: :muted: not allowed with :autoplay:, which is "
-                "muted already"
+            self.fail(
+                ":muted: not allowed with :autoplay:, which is muted already"
             )
-        config = self.state.document.settings.env.config
+        config = self.config
         private = self.switch(
             "privacy",
             "no-privacy",
@@ -202,8 +185,8 @@ class directive(rst.Directive):
         if "autoplay" in options:
             for each in ("click-to-load", "auto-load"):
                 if each in options:
-                    raise self.error(
-                        f"youtube: :{each}: not allowed with :autoplay:,"
+                    self.fail(
+                        f":{each}: not allowed with :autoplay:,"
                         " which loads the player at once"
                     )
         else:
@@ -253,9 +236,8 @@ class directive(rst.Directive):
             ":", " / "
         )
         if "hide-controls" in options and "autoplay" not in options:
-            raise self.error(
-                "youtube: :hide-controls: needs :autoplay:, since nothing else"
-                " plays it"
+            self.fail(
+                ":hide-controls: needs :autoplay:, since nothing else plays it"
             )
         allow = str(setting(config, "youtube_allow")).split("; ")
         if "autoplay" in options or facade:
@@ -268,28 +250,25 @@ class directive(rst.Directive):
         caption, messages = parse(self, text.strip(), "caption")
         if text.strip():
             worded(self, caption, "a caption")
-        element = located(self, Youtube("", caption, **self.options))
-        named(self, element)
+        element = self.locate(self.Node("", caption, **self.options))
+        self.add_name(element)
         return [element, *trail(self, self.options, ("still",)), *messages]
 
+    @staticmethod
+    def plain(node: Youtube.Node) -> list[nodes.Node]:
+        """Write a player as words, for a builder that writes no HTML.
 
-def plain(node: Youtube) -> list[nodes.Node]:
-    """Write a player as words, for a builder that draws no HTML.
-
-    :param node: The player's node.
-    :return: A paragraph with its caption, when it has one, and one
-        with the video's address, written as a link to itself.
-    """
-    found: list[nodes.Node] = [
-        nodes.paragraph("", "", *_.children)
-        for _ in node.children
-        if isinstance(_, phrase) and _.children
-    ]
-    link = nodes.reference("", node["watch"], refuri=node["watch"])
-    return [*found, nodes.paragraph("", "", link)]
-
-
-html.draws(Youtube, template)
+        :param node: The player's node.
+        :return: A paragraph with its caption, when it has one, and one
+            with the video's address, written as a link to itself.
+        """
+        found: list[nodes.Node] = [
+            nodes.paragraph("", "", *each.children)
+            for each in node.children
+            if isinstance(each, phrase) and each.children
+        ]
+        link = nodes.reference("", node["watch"], refuri=node["watch"])
+        return [*found, nodes.paragraph("", "", link)]
 
 
-node = Youtube
+html.draws(Youtube.Node, template)
