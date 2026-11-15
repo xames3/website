@@ -489,10 +489,11 @@ def execute(
         that it imported do not change. A trace that raised an error is
         not kept.
     :return: The trace, with what went wrong. The snippet runs in its
-        own subprocess, so it cannot change the state of the build. The
-        answer comes back through a file, and what the snippet prints
-        goes to a file with a limit. At the end, `reap` stops each
-        process that the snippet started.
+        own subprocess, so it cannot change the memory of the build,
+        but it can write each file that the user of the build can
+        write. The answer comes back through a file, and what the
+        snippet prints goes to a file with a limit. At the end, `reap`
+        stops each process that the snippet started.
     """
     job: dict[str, t.Any] = {
         "code": code,
