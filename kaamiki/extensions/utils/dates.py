@@ -199,14 +199,15 @@ def dated(when: dt, config: Config) -> str:
     :param when: The date.
     :param config: The Sphinx configuration.
     :return: The date in the `language` of the site, or in English when
-        it is not set. Each date follows `html_last_updated_fmt` when
-        set, then `kaamiki.conf.site.last_updated_fmt`, else it is `04
-        May 2026`. `written` keeps the form of the header comments,
-        because Kaamiki reads that again.
+        it is not set. Each date follows
+        `kaamiki.conf.site.last_updated_fmt` when set, then
+        `html_last_updated_fmt`, as `date_format` reads the header
+        comments, else it is `04 May 2026`. `written` keeps the form of
+        the header comments, because Kaamiki reads that again.
     """
     form = (
-        config.html_last_updated_fmt
-        or values(config).site.last_updated_fmt
+        values(config).site.last_updated_fmt
+        or config.html_last_updated_fmt
         or str(_("%d %B %Y"))
     )
     return format_date(form, date=when, language=config.language or "en")
