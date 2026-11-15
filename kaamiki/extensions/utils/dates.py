@@ -11,6 +11,7 @@ The helpers that give a page its dates, from its comments or from git.
 
 from __future__ import annotations
 
+import contextlib
 import re
 import typing as t
 import weakref
@@ -25,9 +26,12 @@ from subprocess import check_output as co
 from sphinx.locale import _
 from sphinx.util.i18n import format_date
 
+from kaamiki.extensions.utils.checks import MONTHS
+from kaamiki.extensions.utils.checks import date_in
 from kaamiki.extensions.utils.checks import fail
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.settings import NAME
+from kaamiki.extensions.utils.settings import date_format
 from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
@@ -38,20 +42,6 @@ if t.TYPE_CHECKING:
 
 HEADER_RE: t.Final[re.Pattern[str]] = re.compile(
     r"^\.\.\s+(Author|Created on|Last updated on):\s*(.+)$", re.IGNORECASE
-)
-MONTHS: t.Final[tuple[str, ...]] = (
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
 )
 NUMBERS: t.Final[dict[str, int]] = {
     name.lower(): number for number, name in enumerate(MONTHS, 1)
@@ -268,29 +258,32 @@ def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
         latest commit, read one time for the build), then the day of
         the build. A missing author comes from the `byline` directive,
         then the project.
-    :raises KaamikiError: For a date comment that is not a date from
-        2000 to one year later, or a page updated before it was
-        created.
+        A date comment is read in the `date_format` of the site and
+        kept as `2026-11-15`. One that does not follow it is left to
+        `header_dates`, which names its line.
+    :raises KaamikiError: For a date comment that is not from 2000 to
+        one year later, or a page updated before it was created.
     """
     metadata = app.env.metadata.setdefault(docname, {})
     found = header(source[0] if source else "")
     where = str(app.env.doc2path(docname))
     if found.get("author"):
         metadata.setdefault("author", found["author"])
+    read = date_in(date_format(app.config))
+    iso: dict[str, str] = {}
     for key in ("created on", "last updated on"):
-        if key in found:
-            iso = day(found[key])
-            if not iso or not within(iso):
-                fail(
-                    f"comment {key.capitalize()!r}: expected a date like 5"
-                    " October 2026 or 2026-10-05, from 2000 to a year ahead,"
-                    f" got {found[key]!r}",
-                    where,
-                )
+        with contextlib.suppress(KeyError, ValueError):
+            iso[key] = read(found[key])
+        if key in iso and not within(iso[key]):
+            fail(
+                f"comment {key.capitalize()!r}: expected a date from 2000 to"
+                f" a year ahead, got {found[key]!r}",
+                where,
+            )
     if (
-        "created on" in found
-        and "last updated on" in found
-        and (day(found["last updated on"]) < day(found["created on"]))
+        "created on" in iso
+        and "last updated on" in iso
+        and iso["last updated on"] < iso["created on"]
     ):
         fail(
             "comment 'Last updated on': expected after 'Created on', got it"
@@ -299,8 +292,6 @@ def provenance(app: Sphinx, docname: str, source: list[str]) -> None:
         )
     first, last = committed(app, docname)
     if not metadata.get("created"):
-        metadata["created"] = found.get("created on") or written(first)
+        metadata["created"] = iso.get("created on") or written(first)
     if not metadata.get("last_updated"):
-        metadata["last_updated"] = found.get("last updated on") or written(
-            last
-        )
+        metadata["last_updated"] = iso.get("last updated on") or written(last)
