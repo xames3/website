@@ -6,7 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
 Last updated on: 15 November 2026
 
-The helpers Kaamiki's directives are built from.
+The helpers that the directives of Kaamiki are built from.
 """
 
 from __future__ import annotations
@@ -87,14 +87,14 @@ MOTION: t.Final[dict[str, Callable[[str | None], t.Any]]] = {
 
 
 def moving(options: Mapping[str, t.Any], *, timed: bool = True) -> list[str]:
-    """Name the classes that carry a directive's own speed and stillness.
+    """Name the classes of the speed and the stillness of a directive.
 
-    :param options: The directive's options.
-    :param timed: Whether the directive's `:speed:` is the speed of its
-        motion. It's not an option of `code-explain` and `code-version`,
-        which scroll by `:pace:` instead.
-    :return: `km-speed--2` for a `:speed:` of 2 (a point is a dash, as in
-        `km-speed--0-5`) and `km-motion--off` for `:no-motion:`.
+    :param options: The options of the directive.
+    :param timed: Whether `:speed:` is the speed of the motion. It is
+        not an option of `code-explain` and `code-version`, which
+        scroll by `:pace:`.
+    :return: `km-speed--2` for a `:speed:` of 2 (a point is a dash, as
+        in `km-speed--0-5`), and `km-motion--off` for `:no-motion:`.
     """
     found: list[str] = []
     if timed and "speed" in options:
@@ -107,11 +107,11 @@ def moving(options: Mapping[str, t.Any], *, timed: bool = True) -> list[str]:
 def toggle(argument: str | None) -> bool:
     """Read a directive option or a page field as a switch.
 
-    A bare one is on and `false` turns it off.
-
-    :param argument: The value written in the rST or `None` when bare.
-    :return: Whether it's on.
-    :raises ValueError: For any value but none, `true` or `false`.
+    :param argument: The value in the rST, or `None` when it is bare. A
+        bare switch is on, and `false` sets it off.
+    :return: `True` when it is on.
+    :raises ValueError: For a value that is not none, `true` or
+        `false`.
     """
     if argument in (None, "", "true"):
         return True
@@ -131,10 +131,10 @@ def hollow(found: Iterable[nodes.Node]) -> bool:
 
 
 def through(found: Iterable[nodes.Node]) -> Iterator[nodes.Node]:
-    """Walk some nodes, looking through each `only` to what it holds.
+    """Walk some nodes, and look into each `only`.
 
     :param found: The nodes.
-    :return: Each node that isn't an `only`, in the order written.
+    :return: Each node that is not an `only`, in the sequence written.
     """
     for each in found:
         if isinstance(each, addnodes.only):
@@ -148,12 +148,12 @@ def unlinked(
     found: Iterable[nodes.Node] | nodes.Node,
     part: str,
 ) -> None:
-    """Refuse a link in a text that's a link already or a control.
+    """Refuse a link in a text that is a link or a control already.
 
     :param directive: The directive that has the text.
-    :param found: The parsed text or the nodes it came to.
-    :param part: What the text is, `a label` for one.
-    :raises rst.DirectiveError: When the text holds a link.
+    :param found: The parsed text or its nodes.
+    :param part: What the text is, as `a label`.
+    :raises rst.DirectiveError: When the text has a link.
     """
     for each in [found] if isinstance(found, nodes.Node) else found:
         if any(isinstance(_, LINKS) for _ in each.findall()):
@@ -167,15 +167,14 @@ def worded(
     found: Iterable[nodes.Node] | nodes.Node,
     part: str,
 ) -> None:
-    """Refuse a text that has no words, only an icon or nothing.
-
-    An icon adds to a text and never stands for it, so a screen reader
-    and a reader with the icons switched off still get the meaning.
+    """Refuse a text without words, with only an icon or nothing.
 
     :param directive: The directive that has the text.
-    :param found: The parsed text or the nodes it came to.
-    :param part: What the text is, `a title` for one.
-    :raises rst.DirectiveError: When the text reads as nothing.
+    :param found: The parsed text or its nodes.
+    :param part: What the text is, as `a title`.
+    :raises rst.DirectiveError: When the text has no words. An icon
+        adds to a text and does not replace it, so that a screen reader
+        and a reader without icons get the meaning.
     """
     each = [found] if isinstance(found, nodes.Node) else found
     if not "".join(_.astext() for _ in each).strip():
@@ -186,12 +185,12 @@ def worded(
 
 
 def titled(directive: Directive, argument: str) -> str:
-    """Read the title a directive is given as its argument.
+    """Read the title that a directive gets as its argument.
 
     :param directive: The directive that has the title.
     :param argument: The title as written.
     :return: The title, trimmed.
-    :raises rst.DirectiveError: When it's blank or too long.
+    :raises rst.DirectiveError: When it is blank or too long.
     """
     try:
         return checks.text(argument)
@@ -200,13 +199,13 @@ def titled(directive: Directive, argument: str) -> str:
 
 
 def document(directive: Directive, name: str, option: str) -> str:
-    """Find the document an option names, as `:doc:` would write it.
+    """Find the document that an option names, as `:doc:` writes it.
 
     :param directive: The directive that has the option.
-    :param name: The document, relative to the page or from the top
-        with a leading `/`.
-    :param option: The option it was written in.
-    :return: The document's name.
+    :param name: The document, relative to the page, or from the top
+        with a `/` at the start.
+    :param option: The option where it is written.
+    :return: The name of the document.
     :raises rst.DirectiveError: When the site has no such document.
     """
     env = directive.state.document.settings.env
@@ -220,19 +219,18 @@ def document(directive: Directive, name: str, option: str) -> str:
 
 
 def shipped(directive: Directive, value: str, where: str) -> str:
-    """Check that a path from the top of the site is a file that ships.
-
-    A full address or a `#` fragment is left alone. A path under
-    `_static` has to be in one of `html_static_path` and any other path
-    in `html_extra_path`, and it can't climb out of that folder. The
-    file is noted as one the page depends on, so the page is read again
-    when it changes or goes.
+    """Check that a path is a file of the site.
 
     :param directive: The directive that has the option.
-    :param value: The path or address, as written.
-    :param where: What it was written as, `:poster:` or `the address`.
+    :param value: The path or the address, as written. A full address
+        or a `#` fragment does not change. A path below `_static` must
+        be in `html_static_path`, and another path in
+        `html_extra_path`, and it cannot go out of that folder. The
+        file is recorded as a dependency of the page, so the page is
+        read again when the file changes or goes.
+    :param where: How it was written, as `:poster:` or `the address`.
     :return: The value, as written.
-    :raises rst.DirectiveError: When no such file ships with the site.
+    :raises rst.DirectiveError: When the site has no such file.
     """
     from kaamiki.extensions.utils.context import confdir
 
@@ -325,7 +323,7 @@ class Renderer:
     def opens[V: Callable[..., None]](
         self, node: type[nodes.Element], *, elsewhere: str = ""
     ) -> Callable[[V], V]:
-        """Record the function under this decorator as the node's visitor.
+        """Record the function below as the visitor.
 
         :param node: The node that the function writes.
         :param elsewhere: How the other builders write the node, `skip`
@@ -347,7 +345,7 @@ class Renderer:
     def closes(
         self, node: type[nodes.Element], tag: str = ""
     ) -> Callable[[t.Any], t.Any] | None:
-        """Record the function under this decorator as the node's depart.
+        """Record the function below as the depart.
 
         :param node: The node that the function closes.
         :param tag: The HTML that closes the node. With it, you do not
@@ -370,8 +368,8 @@ class Renderer:
 
         :param node: The node that the template writes.
         :param template: The template, relative to `theme/templates`.
-        :param prepare: The function that changes the node's attributes
-            before the template gets them, as `visitor` takes it.
+        :param prepare: The function that changes the attributes of the
+            node before the template gets them, as for `visitor`.
         """
         self._recorder(node, 0)(visitor(template, prepare))
 
@@ -383,7 +381,7 @@ class Renderer:
         self._recorder(node, 0)(skip)
 
     def register(self, app: Sphinx) -> None:
-        """Give Sphinx each node in the record and how each builder writes it.
+        """Give Sphinx each recorded node.
 
         :param app: The Sphinx application instance.
         """
@@ -393,7 +391,7 @@ class Renderer:
     def _recorder[V: Callable[..., None]](
         self, node: type[nodes.Element], index: int
     ) -> Callable[[V], V]:
-        """Make the decorator that keeps a visitor or a depart of a node.
+        """Make the decorator that keeps a function.
 
         :param node: The node.
         :param index: `0` for the visitor and `1` for the depart.
@@ -444,12 +442,12 @@ class BEM:
         self.element = element
 
     def __getattr__(self, element: str) -> BEM:
-        """Name an element of the block, `accordion.title` for one.
+        """Name an element of the block, as `accordion.title`.
 
         :param element: The element. An underscore becomes a dash.
-        :return: The element's name.
-        :raises AttributeError: For a private name or for an element of
-            an element, which BEM does not permit.
+        :return: The name of the element.
+        :raises AttributeError: For a private name, or an element of an
+            element, which BEM does not permit.
         """
         if element.startswith("_") or self.element:
             raise AttributeError(element)
@@ -486,17 +484,16 @@ def trail(
     options: dict[str, t.Any],
     keys: Sequence[str] = LINKCHECK_OPTIONS,
 ) -> list[nodes.Node]:
-    """Give `linkcheck` the URLs a directive keeps in its options.
+    """Give `linkcheck` the URLs in the options of a directive.
 
-    Sphinx only reads URLs off `reference`, `image` and `raw` nodes, so
-    each one is returned as an empty `raw` node to sit beside the
-    directive's own, on the line the directive is written.
-
-    :param directive: The directive the URLs were written in.
-    :param options: The directive's options, as written in the rST.
-    :param keys: The options holding URLs, the byline's by default.
-    :return: One empty `raw` node per URL found, ready to sit beside
-        the directive's own node.
+    :param directive: The directive with the URLs.
+    :param options: The options of the directive, as written in the
+        rST.
+    :param keys: The options with URLs. The default is those of the
+        byline.
+    :return: One empty `raw` node for each URL, to go next to the node
+        of the directive, on its line. Sphinx reads URLs only from
+        `reference`, `image` and `raw` nodes.
     """
     found: list[nodes.Node] = []
     for option in keys:
@@ -509,17 +506,16 @@ def trail(
 
 
 class phrase(nodes.TextElement):
-    """A directive's text, parsed and waiting for its template."""
+    """The parsed text of a directive, for its template."""
 
 
 def located[N: nodes.Node](directive: Directive, node: N) -> N:
-    """Give a node the place in the source it was written.
+    """Give a node its place in the source.
 
-    `gettext` needs it to collect the text.
-
-    :param directive: The directive the node's text belongs to.
+    :param directive: The directive of the text of the node.
     :param node: The node.
-    :return: The same node.
+    :return: The same node, with the place that `gettext` needs to
+        collect the text.
     """
     node.source, node.line = directive.state_machine.get_source_and_line(
         directive.lineno
@@ -530,16 +526,15 @@ def located[N: nodes.Node](directive: Directive, node: N) -> N:
 def parse(
     directive: Directive, text: str, field: str
 ) -> tuple[phrase, list[nodes.system_message]]:
-    """Parse a directive's text the way a paragraph is parsed.
+    """Parse the text of a directive as a paragraph.
 
-    The text keeps its place in the source, so `gettext` can collect
-    it.
-
-    :param directive: The directive the text belongs to.
+    :param directive: The directive of the text.
     :param text: The text, as written in the rST.
-    :param field: The name the directive's template knows it by.
-    :return: The parsed text, held under its name and whatever the
-        parsing reported.
+    :param field: The name of the text in the template of the
+        directive.
+    :return: The parsed text with its name, and what the parser
+        reported. The text keeps its place in the source, so that
+        `gettext` can collect it.
     """
     words, messages = directive.state.inline_text(text, directive.lineno)
     return located(directive, phrase(text, "", *words, field=field)), messages
@@ -559,17 +554,17 @@ BLOCKS: t.Final[tuple[tuple[type[nodes.Node], str], ...]] = (
 def paragraph(
     directive: Directive, text: str, field: str
 ) -> tuple[phrase, list[nodes.system_message]]:
-    """Parse a directive's content, which is one paragraph of text.
+    """Parse the content of a directive, which is one paragraph.
 
-    It reads the content as a page does, so a list, a second paragraph
-    or a directive in it is found and not written out as text.
-
-    :param directive: The directive the content belongs to.
-    :param text: The content, as written in the rST.
-    :param field: The name the directive's template knows it by.
-    :return: The parsed text, held under its name, and whatever the
-        parsing reported.
-    :raises rst.DirectiveError: When the content isn't one paragraph.
+    :param directive: The directive of the content.
+    :param text: The content, as written in the rST. It is read as a
+        page reads it, so a list, a second paragraph or a directive is
+        found, not written as text.
+    :param field: The name of the text in the template of the
+        directive.
+    :return: The parsed text with its name, and what the parser
+        reported.
+    :raises rst.DirectiveError: When the content is not one paragraph.
     """
     if not text.strip():
         return parse(directive, text, field)
@@ -602,14 +597,12 @@ def paragraph(
 
 
 def fields(self: HTMLTranslator, node: nodes.Element) -> dict[str, Markup]:
-    """Write out the text `parse` made, one piece of HTML per field.
+    """Write the text from `parse` as HTML, one piece for each field.
 
-    The page's own translator writes each one, so it reads as a
-    paragraph would.
-
-    :param self: The HTML translator.
-    :param node: The directive's node, holding what `parse` made.
-    :return: Each field's HTML under its name, ready for a template.
+    :param self: The HTML translator. The translator of the page writes
+        each piece, so it reads as a paragraph.
+    :param node: The node of the directive, with the text from `parse`.
+    :return: The HTML of each field by name, for a template.
     """
     found: dict[str, Markup] = {}
     body = self.body
@@ -629,17 +622,16 @@ def visitor(
     prepare: Callable[[HTMLTranslator, dict[str, t.Any]], dict[str, t.Any]]
     | None = None,
 ) -> Callable[[HTMLTranslator, nodes.Element], None]:
-    """Make the visitor that writes a directive's node out in one go.
+    """Make the visitor that writes all of the node of a directive.
 
-    One template draws the whole node, so the writer has nothing left
-    to walk into.
-
-    :param template: The directive's template, relative to
-        `theme/templates`.
-    :param prepare: Called with the translator and a copy of the node's
-        attributes, it returns what the template is given. It's where
-        a directive turns the paths it was handed into addresses.
-    :return: The visitor, which raises `nodes.SkipNode` once written.
+    :param template: The template of the directive, relative to
+        `theme/templates`. It draws all of the node, so the writer does
+        not go into it.
+    :param prepare: A function that gets the translator and a copy of
+        the attributes of the node, and gives what the template gets. A
+        directive changes its paths into addresses there.
+    :return: The visitor, which raises `nodes.SkipNode` after it
+        writes.
     """
 
     def visit(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -667,10 +659,10 @@ def what(found: nodes.Node) -> str:
 
 
 def listed(value: str) -> list[str]:
-    """Split a comma-separated option into its trimmed parts.
+    """Split an option with commas into its trimmed parts.
 
-    :param value: The option's value.
-    :return: The parts, in the order written.
+    :param value: The value of the option.
+    :return: The parts, in the sequence written.
     """
     return [_.strip() for _ in value.split(",") if _.strip()]
 
@@ -686,10 +678,11 @@ class Option:
         setting: str = "",
         default: t.Any = None,
     ) -> None:
-        """Keep how the option is checked and what it gives when absent.
+        """Keep how the option is checked.
 
         :param check: The function that checks the value as written.
-        :param needs: The option that must also be there, as `subheader`.
+        :param needs: The option that must also be there, as
+            `subheader`.
         :param setting: The site setting that gives the value when the
             option is absent, as `accordion_marker`.
         :param default: The value when the option and the setting are
@@ -716,12 +709,12 @@ class Option:
     def __get__(self, directive: KaamikiDirective, owner: type) -> t.Any: ...
 
     def __get__(self, directive: KaamikiDirective | None, owner: type) -> t.Any:
-        """Read the option's value in the directive.
+        """Read the value of the option in the directive.
 
         :param directive: The directive, or `None` on its class.
-        :param owner: The directive's class.
-        :return: For a flag, whether it is there. Else the value as
-            checked, the site setting or the default.
+        :param owner: The class of the directive.
+        :return: For a flag, `True` when it is there. Else the checked
+            value, the site setting or the default.
         """
         if directive is None:
             return self
@@ -752,14 +745,14 @@ class KaamikiDirective(SphinxDirective):
     ) -> None:
         """Record the directive, collect its options and name its node.
 
-        :param name: The directive's name in rST. By default, it is the
-            name of the class in lowercase.
+        :param name: The name of the directive in rST. The default is
+            the name of the class in lower case.
         :param motion: Whether the directive takes `speed` and
             `no-motion`.
         :param spec: The kind of dictionary for `option_spec`, as one
             that permits more options than it lists.
         :param abstract: Whether the class is only a base for other
-            directives. Then it is not recorded and not checked.
+            directives. Then it is not recorded or checked.
         :param kwargs: What the parent class takes.
         :raises TypeError: When the docstring does not list each option
             that the directive takes.
@@ -800,7 +793,7 @@ class KaamikiDirective(SphinxDirective):
         """Say whether this directive wrote a node.
 
         :param node: The node to look at.
-        :return: `True` when the node is exactly this directive's node.
+        :return: `True` when the node is the node of this directive.
         """
         return "Node" in vars(cls) and type(node) is cls.Node
 
@@ -815,7 +808,7 @@ class KaamikiDirective(SphinxDirective):
         return [*self.options.get("class", []), *moving(self.options)]
 
     def run(self) -> list[nodes.Node]:
-        """Check the options, then make the directive's nodes.
+        """Check the options, then make the nodes of the directive.
 
         :return: What `build` makes.
         """
@@ -826,20 +819,24 @@ class KaamikiDirective(SphinxDirective):
         return self.build()
 
     def check(self) -> None:
-        """Check what only this directive checks. By default, nothing."""
+        """Check what only this directive checks.
+
+        :return: Nothing. By default, it checks nothing.
+        """
 
     def build(self) -> list[nodes.Node]:
-        """Make the directive's nodes.
+        """Make the nodes of the directive.
 
         :return: The nodes and the messages.
-        :raises NotImplementedError: Always. Each directive writes it.
+        :raises NotImplementedError: Always. Each directive writes its
+            own.
         """
         raise NotImplementedError
 
     def fail(self, message: str) -> t.NoReturn:
         """Stop the build with a message that starts with the name.
 
-        :param message: The message, without the directive's name.
+        :param message: The message, without the name of the directive.
         :raises rst.DirectiveError: Always.
         """
         raise self.error(f"{self.name}: {message}")
@@ -869,18 +866,20 @@ class KaamikiDirective(SphinxDirective):
     def fill(
         self, node: nodes.Element, *, besides: tuple[type, ...] = ()
     ) -> None:
-        """Parse the content into a node. The content must not be empty.
+        """Parse the content into a node.
 
         :param node: The node that gets the content.
         :param besides: The kinds of child that are not the content.
+        :raises rst.DirectiveError: When the content is empty.
         """
         self.state.nested_parse(self.content, self.content_offset, node)
         if hollow(_ for _ in node.children if not isinstance(_, besides)):
             self.fail("expected some content, got none")
 
     def add_name(self, node: nodes.Node) -> None:
-        """Give the node the name in `name`. Each name occurs only once.
+        """Give the node the name in `name`.
 
         :param node: The node to name.
+        :raises rst.DirectiveError: When the page has the name already.
         """
         named(self, node)
