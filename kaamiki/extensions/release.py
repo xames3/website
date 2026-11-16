@@ -4,7 +4,7 @@ Release Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 September 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 A `release` directive that writes one entry of a changelog::
 
@@ -79,6 +79,10 @@ NOTES: t.Final[str] = "km-release__notes"
 VERSION: t.Final[re.Pattern[str]] = re.compile(
     r"[A-Za-z0-9][A-Za-z0-9._+-]{0,63}"
 )
+WANTED: t.Final[str] = (
+    "a version of up to 64 letters, numbers and ._+- that starts with a"
+    " letter or a number"
+)
 
 
 def release_version(argument: str | None) -> str:
@@ -86,14 +90,12 @@ def release_version(argument: str | None) -> str:
 
     :param argument: The version as written.
     :return: The version, trimmed.
-    :raises ValueError: When it is not a version, as 2026.11.8 or
-        v1.2.0.
+    :raises ValueError: When it is not up to 64 letters, numbers and
+        `._+-` that start with a letter or a number.
     """
     found = (argument or "").strip()
     if not VERSION.fullmatch(found):
-        raise ValueError(
-            f"expected a version like 2026.11.8 or v1.2.0, got {argument!r}"
-        )
+        raise ValueError(f"expected {WANTED}, got {argument!r}")
     return found
 
 
@@ -157,10 +159,7 @@ class Release(KaamikiDirective, motion=True):
         :raises rst.DirectiveError: When it has no `version`.
         """
         if self.version is None:
-            self.fail(
-                ":version: expected a version like 2026.11.8 or v1.2.0, got"
-                " none"
-            )
+            self.fail(f":version: expected {WANTED}, got none")
 
     def build(self) -> list[nodes.Node]:
         """Make the section of the release.
