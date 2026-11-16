@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: code-explain, option by option
 :km-page-description: Every option of the code-explain directive on and off, in
@@ -1213,7 +1213,8 @@ An accordion in a note
 
 .. code-block:: text
 
-    accordion: expected somewhere else, got it in a code-explain
+    accordion: expected outside a code-explain, a code-version and a block that
+    links, got it in a code-explain
 
 Tabs in a note
 ^^^^^^^^^^^^^^
@@ -1241,7 +1242,8 @@ Tabs in a note
 
 .. code-block:: text
 
-    tabs: expected somewhere else, got it in a code-explain
+    tabs: expected outside a code-explain, a code-version, a block that links,
+    a tab and a table, got it in a code-explain
 
 A video in a note
 ^^^^^^^^^^^^^^^^^
@@ -1262,7 +1264,8 @@ A video in a note
 
 .. code-block:: text
 
-    video: expected somewhere else, got it in a code-explain
+    video: expected outside a code-explain, a code-version and a block that
+    links, got it in a code-explain
 
 Raw HTML in a note
 ^^^^^^^^^^^^^^^^^^
@@ -1283,7 +1286,8 @@ Raw HTML in a note
 
 .. code-block:: text
 
-    raw: expected somewhere else, got it in a code-explain
+    raw: expected outside a code-explain and a code-version, got it in a
+    code-explain
 
 A code-version in a note
 ^^^^^^^^^^^^^^^^^^^^^^^^

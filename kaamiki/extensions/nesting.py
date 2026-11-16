@@ -28,6 +28,7 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.hooks import on
 
 if t.TYPE_CHECKING:
+    from collections.abc import Callable
     from collections.abc import Iterator
 
     from sphinx.application import Sphinx
@@ -56,7 +57,6 @@ PAGE: t.Final[dict[str, str]] = {
 }
 WIDE: t.Final[str] = "km-wide"
 FIXED: t.Final[tuple[str, ...]] = ("embed", "thumbnail")
-EXPLAINERS: t.Final[tuple[str, ...]] = ("code-explain", "code-version")
 CELLS: t.Final[tuple[str, ...]] = ("carousel", "columns", "tabs", "youtube")
 CLICKABLE: t.Final[tuple[str, ...]] = (
     "accordion",
@@ -239,6 +239,39 @@ def narrow(host: nodes.Node) -> bool:
     return isinstance(host, block.Block.Node) and host["size"] != "large"
 
 
+class Rule(t.NamedTuple):
+    """A place where some directives cannot be.
+
+    :param names: The directives that cannot be there.
+    :param place: The place, as a message names it.
+    :param holds: Says whether a host is that place.
+    """
+
+    names: tuple[str, ...]
+    place: str
+    holds: Callable[[nodes.Node], bool]
+
+
+RULES: t.Final[tuple[Rule, ...]] = (
+    Rule(HEAVY, "a code-explain", lambda _: kind(_) == "code-explain"),
+    Rule(HEAVY, "a code-version", lambda _: kind(_) == "code-version"),
+    Rule(("block",), "a block", lambda _: kind(_) == "block"),
+    Rule(
+        CLICKABLE,
+        "a block that links",
+        lambda _: isinstance(_, block.Block.Node) and bool(_["link"]),
+    ),
+    Rule(
+        ("carousel",),
+        "a column",
+        lambda _: isinstance(_, columns.Column.Node),
+    ),
+    Rule(("tabs",), "a tab", lambda _: isinstance(_, tabs.Tab.Node)),
+    Rule(CELLS, "a table", lambda _: isinstance(_, nodes.entry)),
+    Rule(("columns",), "a narrow column or block", narrow),
+)
+
+
 def refused(name: str, host: nodes.Node) -> bool:
     """Say whether a directive cannot be in a host.
 
@@ -246,23 +279,17 @@ def refused(name: str, host: nodes.Node) -> bool:
     :param host: One of the nodes above it.
     :return: `True` when it cannot be there.
     """
-    if kind(host) in EXPLAINERS:
-        return name in HEAVY
-    if name == "block" and kind(host) == "block":
-        return True
-    if (
-        isinstance(host, block.Block.Node)
-        and host["link"]
-        and name in CLICKABLE
-    ):
-        return True
-    if name == "carousel" and isinstance(host, columns.Column.Node):
-        return True
-    if name == "tabs" and isinstance(host, tabs.Tab.Node):
-        return True
-    if name in CELLS and isinstance(host, nodes.entry):
-        return True
-    return name == "columns" and narrow(host)
+    return any(name in _.names and _.holds(host) for _ in RULES)
+
+
+def places(name: str) -> str:
+    """Name the places where a directive cannot be.
+
+    :param name: The name of the directive.
+    :return: The places, as `a column and a table`.
+    """
+    *first, last = [_.place for _ in RULES if name in _.names]
+    return f"{', '.join(first)} and {last}" if first else last
 
 
 def unplaced(node: nodes.Node) -> nodes.Element | None:
@@ -345,7 +372,7 @@ def nested(app: Sphinx, doctree: nodes.document) -> None:
         for host in ancestors(node):
             if refused(name, host):
                 checks.fail(
-                    f"{name}: expected somewhere else, got it in"
+                    f"{name}: expected outside {places(name)}, got it in"
                     f" {describe(host)}",
                     where,
                 )

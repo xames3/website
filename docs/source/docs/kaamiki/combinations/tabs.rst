@@ -1247,7 +1247,8 @@ In a tab
 
 .. code-block:: text
 
-    tabs: expected somewhere else, got it in a tab
+    tabs: expected outside a code-explain, a code-version, a block that links,
+    a tab and a table, got it in a tab
 
 In a table
 ^^^^^^^^^^
@@ -1270,7 +1271,8 @@ In a table
 
 .. code-block:: text
 
-    tabs: expected somewhere else, got it in a table
+    tabs: expected outside a code-explain, a code-version, a block that links,
+    a tab and a table, got it in a table
 
 .. _combos-tabs-what-a-title-cant-hold:
 

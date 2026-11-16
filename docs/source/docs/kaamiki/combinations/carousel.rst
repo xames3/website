@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 05 November 2026
-.. Last updated on: 12 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Carousels, everywhere
 :km-page-description: Every option of the carousel directive on and off, with
@@ -2022,10 +2022,11 @@ Where it can't go.
 -------------------------------------------------------------------------------
 
 A carousel goes in an accordion, a tab, a note and a list item, but not in a
-column, which is too narrow for a row of cards. A carousel of blocks can't go
-in a block, since a block takes no block, and none can go in a block that
-links, since the block is one big link and a reader's swipe would follow it,
-nor in the notes of a walkthrough. The message is written under the source:
+column or a table cell, which are too narrow for a row of cards. A carousel of
+blocks can't go in a block, since a block takes no block, and none can go in a
+block that links, since the block is one big link and a reader's swipe would
+follow it, nor in the notes of a walkthrough. The message is written under the
+source:
 
 In a column
 ^^^^^^^^^^^
@@ -2050,7 +2051,28 @@ In a column
 
 .. code-block:: text
 
-    carousel: expected somewhere else, got it in a column
+    carousel: expected outside a code-explain, a code-version, a block that
+    links, a column and a table, got it in a column
+
+In a table
+^^^^^^^^^^
+
+.. code-block:: rst
+
+    .. list-table::
+
+        * - .. carousel::
+
+                .. block:: Inside
+
+                    Text.
+
+          - Another cell.
+
+.. code-block:: text
+
+    carousel: expected outside a code-explain, a code-version, a block that
+    links, a column and a table, got it in a table
 
 A carousel of blocks in a block
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2067,7 +2089,8 @@ A carousel of blocks in a block
 
 .. code-block:: text
 
-    block: expected somewhere else, got it in a block
+    block: expected outside a code-explain, a code-version and a block, got it
+    in a block
 
 In a block that links
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2085,7 +2108,8 @@ In a block that links
 
 .. code-block:: text
 
-    carousel: expected somewhere else, got it in a block that links
+    carousel: expected outside a code-explain, a code-version, a block that
+    links, a column and a table, got it in a block that links
 
 In a walkthrough's notes
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2108,7 +2132,8 @@ In a walkthrough's notes
 
 .. code-block:: text
 
-    carousel: expected somewhere else, got it in a code-explain
+    carousel: expected outside a code-explain, a code-version, a block that
+    links, a column and a table, got it in a code-explain
 
 .. _combos-carousel-options-that-need-others:
 

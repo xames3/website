@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Columns, everywhere
 :km-page-description: Every option of the columns and column directives on and
@@ -1623,17 +1623,18 @@ In a list item
 
               Column 2.
 
-.. _combos-columns-not-in-a-column:
+.. _combos-columns-where-it-cant-go:
 
 -------------------------------------------------------------------------------
-Not in a column.
+Where it can't go.
 -------------------------------------------------------------------------------
 
 A column that shares its row is about 335px wide at most, so a columns has no
 room in it and the build stops. The same goes for a small or a medium block. A
 column that spans its whole set, a set of one column and a large block have
-room, and so do a list item and a table cell. The message is written under the
-source:
+room, and so does a list item. A table cell doesn't: it's only as wide as its
+text, so the columns get squeezed and the build stops too. The message is
+written under the source:
 
 Columns in a column
 ^^^^^^^^^^^^^^^^^^^
@@ -1660,7 +1661,8 @@ Columns in a column
 
 .. code-block:: text
 
-    columns: expected somewhere else, got it in a column
+    columns: expected outside a code-explain, a code-version, a table and a
+    narrow column or block, got it in a column
 
 Columns in a small block
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1682,4 +1684,29 @@ Columns in a small block
 
 .. code-block:: text
 
-    columns: expected somewhere else, got it in a small block
+    columns: expected outside a code-explain, a code-version, a table and a
+    narrow column or block, got it in a small block
+
+Columns in a table
+^^^^^^^^^^^^^^^^^^
+
+.. code-block:: rst
+
+    .. list-table::
+
+        * - .. columns:: 2
+
+                .. column::
+
+                    One.
+
+                .. column::
+
+                    Two.
+
+          - Another cell.
+
+.. code-block:: text
+
+    columns: expected outside a code-explain, a code-version, a table and a
+    narrow column or block, got it in a table
