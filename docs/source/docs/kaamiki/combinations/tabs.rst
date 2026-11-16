@@ -1,11 +1,11 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Tabs, everywhere
 :km-page-description: Every option of the tabs and tab directives on and off,
     with icons and roles, holding every other directive and inside every
-    container.
+    container that takes them.
 :km-page-type: article
 :km-header-subheader: Every way to switch content
 :km-feedback-title: Did I miss a way to combine them?
@@ -25,8 +25,8 @@
 
 Tabs show one panel at a time. This page writes them with every option on and
 off, with icons and roles in their titles, with every other Kaamiki directive
-inside a tab and tabs inside every container, so the markup and the result sit
-side by side.
+inside a tab and tabs inside every container that takes them, so the markup and
+the result sit side by side.
 
 .. _combos-tabs-the-options-of-tabs-one-at-a-time:
 
@@ -692,10 +692,11 @@ a moving word would move the row of titles. They work in the content:
 Holding every other directive.
 -------------------------------------------------------------------------------
 
-A tab takes every directive but byline, code-explain, code-version and
-release. The first three belong to the page itself and a release belongs in a
-section, so they stop the build anywhere else. Each of the others is written
-inside it below, with the source under the result.
+A tab takes every directive but byline, code-explain, code-version, release and
+tabs. The first three belong to the page itself and a release belongs in a
+section, so they stop the build anywhere else. Tabs in a tab stop the build
+too, as :ref:`combos-tabs-where-it-cant-go` shows. Each of the others is
+written inside it below, with the source under the result.
 
 accordion
 ^^^^^^^^^
@@ -905,51 +906,6 @@ repository
 
             Nothing in this one.
 
-tabs
-^^^^
-
-.. tabs::
-
-    .. tab:: Holds it
-        :selected:
-
-        .. tabs::
-
-            .. tab:: First
-                :fa-icon: fa-regular fa-code
-
-                The first tab.
-
-            .. tab:: Second
-
-                The second tab.
-
-    .. tab:: Another tab
-
-        Nothing in this one.
-
-.. code-block:: rst
-
-    .. tabs::
-
-        .. tab:: Holds it
-            :selected:
-
-            .. tabs::
-
-                .. tab:: First
-                    :fa-icon: fa-regular fa-code
-
-                    The first tab.
-
-                .. tab:: Second
-
-                    The second tab.
-
-        .. tab:: Another tab
-
-            Nothing in this one.
-
 thumbnail
 ^^^^^^^^^
 
@@ -1047,8 +1003,8 @@ youtube
 Inside every other container.
 -------------------------------------------------------------------------------
 
-A tab set goes anywhere a paragraph does. Here it sits in each container, with
-the source under the result.
+A tab set goes anywhere a paragraph does, but not in a tab or a table. Here it
+sits in each container that takes it, with the source under the result.
 
 In an accordion
 ^^^^^^^^^^^^^^^
@@ -1255,71 +1211,66 @@ In a list item
 
               Tab content.
 
-.. _combos-tabs-tabs-of-tabs:
+.. _combos-tabs-where-it-cant-go:
 
 -------------------------------------------------------------------------------
-Tabs of tabs.
+Where it can't go.
 -------------------------------------------------------------------------------
 
-.. tabs::
+Tabs can't go in a tab, because a row of titles in a row of titles is hard to
+use. They can't go in a table either, because a table cell doesn't wrap the row
+of titles, so the table gets wider than the page. The message is written under
+the source:
 
-    .. tab:: :fa-icon:regular:`layer-group` Outer one
-        :selected:
-
-        .. tabs::
-
-            .. tab:: Inner one
-                :selected:
-
-                .. tabs::
-
-                    .. tab:: Innermost
-                        :selected:
-
-                        Three sets deep.
-
-                    .. tab:: Another
-
-                        Beside it.
-
-            .. tab:: Inner two
-
-                The second inner tab.
-
-    .. tab:: Outer two
-
-        The second outer tab.
+In a tab
+^^^^^^^^
 
 .. code-block:: rst
 
     .. tabs::
 
-        .. tab:: :fa-icon:regular:`layer-group` Outer one
-            :selected:
+        .. tab:: Outer one
 
             .. tabs::
 
                 .. tab:: Inner one
-                    :selected:
 
-                    .. tabs::
-
-                        .. tab:: Innermost
-                            :selected:
-
-                            Three sets deep.
-
-                        .. tab:: Another
-
-                            Beside it.
+                    One.
 
                 .. tab:: Inner two
 
-                    The second inner tab.
+                    Two.
 
         .. tab:: Outer two
 
             The second outer tab.
+
+.. code-block:: text
+
+    tabs: expected somewhere else, got it in a tab
+
+In a table
+^^^^^^^^^^
+
+.. code-block:: rst
+
+    .. list-table::
+
+        * - .. tabs::
+
+                .. tab:: One
+
+                    One.
+
+                .. tab:: Two
+
+                    Two.
+
+          - Another cell.
+
+.. code-block:: text
+
+    tabs: expected somewhere else, got it in a table
 
 .. _combos-tabs-what-a-title-cant-hold:
 

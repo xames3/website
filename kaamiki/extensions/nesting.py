@@ -258,6 +258,8 @@ def refused(name: str, host: nodes.Node) -> bool:
         return True
     if name == "carousel" and isinstance(host, columns.Column.Node):
         return True
+    if name == "tabs" and isinstance(host, tabs.Tab.Node):
+        return True
     if name in CELLS and isinstance(host, nodes.entry):
         return True
     return name == "columns" and narrow(host)
