@@ -4,7 +4,7 @@ Nesting Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 30 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 Stop a page that puts a directive where it cannot work, or a class
 that works only on the page itself.
@@ -57,6 +57,7 @@ PAGE: t.Final[dict[str, str]] = {
 WIDE: t.Final[str] = "km-wide"
 FIXED: t.Final[tuple[str, ...]] = ("embed", "thumbnail")
 EXPLAINERS: t.Final[tuple[str, ...]] = ("code-explain", "code-version")
+CELLS: t.Final[tuple[str, ...]] = ("columns", "tabs", "youtube")
 CLICKABLE: t.Final[tuple[str, ...]] = (
     "accordion",
     "carousel",
@@ -256,6 +257,8 @@ def refused(name: str, host: nodes.Node) -> bool:
     ):
         return True
     if name == "carousel" and isinstance(host, columns.Column.Node):
+        return True
+    if name in CELLS and isinstance(host, nodes.entry):
         return True
     return name == "columns" and narrow(host)
 
