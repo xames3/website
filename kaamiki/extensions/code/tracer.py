@@ -4,7 +4,7 @@ Walkthrough Tracer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 Run a snippet and record what it does, one line at a time. The limits
 of a run are not a sandbox. The snippet runs as the user of the build,
@@ -20,6 +20,7 @@ https://docs.python.org/3/library/sys.html#sys.settrace
 https://docs.python.org/3/library/resource.html#resource.setrlimit
 
 https://peps.python.org/pep-0709/
+https://github.com/torvalds/linux/blob/master/include/uapi/linux/prctl.h
 """
 
 import contextlib
@@ -44,7 +45,6 @@ POSIX: t.Final[bool] = (
     and hasattr(signal, "SIGKILL")
     and hasattr(signal, "SIGSTOP")
 )
-# https://github.com/torvalds/linux/blob/master/include/uapi/linux/prctl.h
 PR_SET_CHILD_SUBREAPER: t.Final[int] = 36
 EXHAUSTED: t.Final[frozenset[int]] = frozenset(
     -getattr(signal, _) for _ in ("SIGXCPU",) if hasattr(signal, _)

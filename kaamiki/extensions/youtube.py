@@ -19,6 +19,8 @@ and `kaamiki.conf.youtube.privacy` of the site are off. Until then, it
 shows the picture of the video. The link checker gets that picture, so
 `linkcheck` fails on the picture of a video that is deleted or
 private.
+
+https://developers.google.com/youtube/player_parameters
 """
 
 from __future__ import annotations
@@ -202,8 +204,6 @@ class Youtube(KaamikiDirective):
             if private
             else "https://www.youtube.com"
         )
-        # Every player parameter:
-        # https://developers.google.com/youtube/player_parameters
         params = {
             "start": self.options.get("start", 0),
             "autoplay": 1 if "autoplay" in self.options else 0,
