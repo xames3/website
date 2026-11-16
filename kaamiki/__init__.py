@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 The entry point of Kaamiki. Sphinx adds the stylesheets by priority, so
 `font.css` loads first, and `theme.css` loads last and has priority.
@@ -23,6 +23,7 @@ import shutil
 import tempfile
 import typing as t
 
+import lightningcss
 from sphinx import locale
 from sphinx.util import logging
 
@@ -195,17 +196,6 @@ def flatten(app: Sphinx, exc: Exception | None) -> None:
     :param exc: What went wrong in the build, or `None`.
     """
     if exc or not writes_pages(app):
-        return
-    try:
-        import lightningcss
-    except ImportError as error:
-        logger.warning(
-            "lightningcss isn't installed, so the stylesheets stay as they"
-            " were copied: %s",
-            error,
-            type="kaamiki",
-            subtype="css",
-        )
         return
     for stylesheet, _ in stylesheets:
         source = p.join(
