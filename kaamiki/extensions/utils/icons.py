@@ -88,7 +88,7 @@ ROLE_ICONS: t.Final[Mapping[str, IconPair]] = MappingProxyType(
         "colour_light": IconPair("lightbulb", "fa-solid fa-sun"),
         "colour_system": IconPair("hard-drive", "fa-solid fa-hard-drive"),
         "close": IconPair("xmark", "fa-solid fa-xmark"),
-        "copy_url": IconPair("link", "fa-solid fa-link"),
+        "copy_url": IconPair("link-simple", "fa-solid fa-link"),
         "external_link": IconPair(
             "arrow-up-right-from-square",
             "fa-solid fa-arrow-up-right-from-square",
