@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 The settings of Kaamiki: their schema, their checks, and how a site
 sets them on `kaamiki.conf` or with a `-D`. `WORDS_PER_MINUTE` is 238,
@@ -28,6 +28,7 @@ import os.path as p
 import re
 import sys
 import typing as t
+import weakref
 from datetime import datetime as dt
 from types import MappingProxyType
 
@@ -1231,6 +1232,9 @@ def _constant(value: t.Any) -> Callable[[Config], t.Any]:
 
 
 CONF: t.Final[Root] = Root({})
+GIVEN: t.Final[weakref.WeakKeyDictionary[Sphinx, frozenset[str]]] = (
+    weakref.WeakKeyDictionary()
+)
 
 
 class Configured(dict[str, t.Any]):
@@ -1430,18 +1434,22 @@ class Kaamiki:
         return f"<{self._path}: {', '.join(self._values)}>"
 
 
-@on("config-inited")
+@on("config-inited", priority=0)
 def apply(app: Sphinx, config: Config) -> None:
     """Give Sphinx what `conf.py` set on `kaamiki.conf`.
 
-    :param app: The Sphinx application instance.
+    :param app: The Sphinx application instance. It keeps the keys
+        that `conf.py` set. Then `kaamiki.conf` is empty again, so the
+        next build in the same process starts from the defaults.
     :param config: The Sphinx configuration. A `-D` on the command line
         has priority over `conf.py`, as for the settings of Sphinx. A
         `-D name.key=value` has priority entry by entry over the
         dictionary from `conf.py`.
     """
-    del app
-    for key, value in CONF.given.items():
+    given = dict(CONF.given)
+    CONF.given.clear()
+    GIVEN[app] = frozenset(given)
+    for key, value in given.items():
         name = flat(key)
         if name in config.overrides:
             continue
@@ -1470,7 +1478,7 @@ def validate(app: Sphinx) -> None:
     """
     config = app.config
     conf = p.join(app.confdir, "conf.py")
-    given = _read(config, conf)
+    given = _read(config, conf, GIVEN.get(app, frozenset()))
     _check_kit(given, conf)
     _check_icons(config, given, conf)
     _check_colours(given, conf)
@@ -1484,7 +1492,7 @@ def validate(app: Sphinx) -> None:
     _check_translation(app, given, conf)
 
 
-def _read(config: Config, conf: str) -> dict[str, t.Any]:
+def _read(config: Config, conf: str, keys: frozenset[str]) -> dict[str, t.Any]:
     """Read the settings of a site, and refuse the wrong ones.
 
     :param config: The Sphinx configuration. A site sets a setting on
@@ -1493,6 +1501,7 @@ def _read(config: Config, conf: str) -> dict[str, t.Any]:
         below one comes from a `-D name.key=value`, so it is read and
         checked as the others.
     :param conf: The path of `conf.py`, for the messages.
+    :param keys: The keys that `conf.py` set on `kaamiki.conf`.
     :return: The settings that the site gave, by key.
     """
     given: dict[str, t.Any] = {}
@@ -1512,7 +1521,7 @@ def _read(config: Config, conf: str) -> dict[str, t.Any]:
             f"{name}: expected {option(key)}, got a plain name in conf.py",
             conf,
         )
-    for key in CONF.given:
+    for key in keys:
         if flat(key) not in config.overrides:
             given[key] = config[flat(key)]
     for name in sorted(config.overrides):
