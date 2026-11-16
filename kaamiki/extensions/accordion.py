@@ -4,7 +4,7 @@ Accordion Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 An `accordion` directive that folds its content below a title::
 
@@ -34,12 +34,17 @@ from kaamiki.extensions.utils import BEM
 from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import Option
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils import findall
 from kaamiki.extensions.utils import html
+from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils.aliases import ALIASES
+from kaamiki.extensions.utils.checks import fail
+from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.icons import ACCORDION_MARKERS
 from kaamiki.extensions.utils.icons import Icons
 
 if t.TYPE_CHECKING:
+    from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
 
 accordion: t.Final[BEM] = BEM("accordion")
@@ -82,7 +87,7 @@ class Accordion(KaamikiDirective, motion=True):
           more button.
         - `group`: A name that other accordions on the page also
           use. When one of them opens, the others in the group
-          close.
+          close. A group needs two or more accordions on the page.
         - `class-title`: More classes for the title.
         - `class-body`: More classes for the content.
         - `speed`: The speed of its motion, relative to the site,
@@ -248,3 +253,26 @@ def marker(self: HTMLTranslator, node: Summary) -> str:
         f'<span class="{classes} {accordion.icon()}"'
         ' aria-hidden="true"></span></span>'
     )
+
+
+@on("doctree-read")
+def grouped(app: Sphinx, doctree: nodes.document) -> None:
+    """Stop the build for a group with only one accordion.
+
+    :param app: The Sphinx application instance (unused).
+    :param doctree: The page, just read.
+    :raises KaamikiError: For the first group on the page that has
+        only one accordion, at that accordion.
+    """
+    del app
+    found: dict[str, list[Accordion.Node]] = {}
+    for node in findall(doctree, Accordion.Node):
+        if node["group"]:
+            found.setdefault(node["group"], []).append(node)
+    for group, members in found.items():
+        if len(members) == 1:
+            fail(
+                f"accordion: :group: expected at least 2 accordions in"
+                f" {group!r}, got 1",
+                location(members[0]),
+            )
