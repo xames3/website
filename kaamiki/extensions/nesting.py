@@ -57,7 +57,7 @@ PAGE: t.Final[dict[str, str]] = {
 WIDE: t.Final[str] = "km-wide"
 FIXED: t.Final[tuple[str, ...]] = ("embed", "thumbnail")
 EXPLAINERS: t.Final[tuple[str, ...]] = ("code-explain", "code-version")
-CELLS: t.Final[tuple[str, ...]] = ("columns", "tabs", "youtube")
+CELLS: t.Final[tuple[str, ...]] = ("carousel", "columns", "tabs", "youtube")
 CLICKABLE: t.Final[tuple[str, ...]] = (
     "accordion",
     "carousel",
