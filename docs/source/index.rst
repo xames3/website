@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February 2025
-.. Last updated on: 08 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Akshay Mestry
 :km-page-description: Stories from what I build, explainers and notes from
@@ -174,7 +174,6 @@ can read the long versions in future blogs.
     :titlesonly:
 
     academia/thoughts-on-teaching
-    css225
 
 .. toctree::
     :caption: Journal
