@@ -157,10 +157,10 @@ class Carousel(KaamikiDirective, motion=True):
           4rem, can replace them, as `1.5rem`. With two lengths, as
           for `columns`, it uses the second.
         - `cards`: How many items show fully, from 1 to 4. A
-          quarter of the next item shows next to them. The default
-          is 2. The carousel needs a minimum of that number of
-          items. A phone always shows approximately one item and a
-          part of the next.
+          quarter of the next item shows next to them. Without it,
+          2 show. With it, the carousel needs a minimum of that
+          number of items. A phone always shows approximately one
+          item and a part of the next.
         - `hide-arrows`: Remove the arrows. A reader can still
           swipe or scroll.
         - `dots`: Show a dot for each item below the row, not the
