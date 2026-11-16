@@ -96,6 +96,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: var(--km-space-2);
+    font-size: var(--km-font-size-down-2);
 }
 
 .km-byline__meta-group--end {

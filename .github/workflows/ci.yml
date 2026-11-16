@@ -3,7 +3,7 @@
 #
 # Author: Akshay Mestry <xa@mes3.dev>
 # Created on: 26 August 2025
-# Last updated on: 07 November 2026
+# Last updated on: 16 November 2026
 
 name: Continuous Integration
 run-name: Started ${{ github.workflow }} (CI) workflow
@@ -98,6 +98,21 @@ jobs:
       - name: Run template checks (djlint)
         run: tox -e website-check
 
+  bundles:
+    name: Check JS and CSS bundles
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Python and tox
+        uses: ./.github/actions/setup
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Check line length, ASCII and BEM
+        run: tox -e bundles-check
+
   translations:
     name: Check translation catalogues
     runs-on: ubuntu-24.04
@@ -129,15 +144,22 @@ jobs:
         run: tox -e sphinxlint
 
   build:
-    name: Build website pages
+    name: Build website pages${{ matrix.pins && ' (lowest pins)' || '' }}
     needs:
       - lint
       - format
       - typecheck
       - templates
+      - bundles
       - translations
       - sphinxlint
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        pins:
+          - ""
+          - sphinx==9.1.0 docutils==0.21 jinja2==3.1.6
     outputs:
       artifact: ${{ env.ARTIFACT_NAME }}
     steps:
@@ -150,12 +172,12 @@ jobs:
         uses: ./.github/actions/setup
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Build the wheel
-        run: |
-          python -m pip install -q build
-          python -m build --wheel
+      - name: Build and check the distributions
+        run: tox -e package-check
       - name: Install the wheel
-        run: python -m pip install -q dist/*.whl
+        run: >-
+          python -m pip install -q .tox/package-check/tmp/dist/*.whl
+          ${{ matrix.pins }}
       - name: Restore intersphinx inventories
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
@@ -170,11 +192,13 @@ jobs:
         if: >-
           github.event_name != 'pull_request'
           && github.ref == 'refs/heads/main'
+          && matrix.pins == ''
         run: rm -f "${OUTPUT_DIR}".buildinfo*
       - name: Upload built documentation as artifact
         if: >-
           github.event_name != 'pull_request'
           && github.ref == 'refs/heads/main'
+          && matrix.pins == ''
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           name: ${{ env.ARTIFACT_NAME }}

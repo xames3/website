@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 28 October 2026
-.. Last updated on: 15 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Advanced Kaamiki
 :km-page-description: What a Sphinx author who wants more control needs to
@@ -116,9 +116,9 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             ``--km-radius-normal`` and ``--km-radius-tiny``.
         * - ``--km-duration-``, ``--km-ease-``, ``--km-spring-``
           - How long and how smooth every motion is. ``--km-motion-speed`` is
-            the dial that scales every duration, ``0.625`` by default and ``2`` for
-            twice as quick as ``1``. The
-            theme turns motion down for a reader who asks for less.
+            the dial that scales every duration, ``0.625`` by default and ``2``
+            for twice as quick as ``1``. The theme turns motion down for a
+            reader who asks for less.
         * - ``--km-reveal-``
           - How a page fades in, block by block.
         * - ``--km-nav-``, ``--km-title-skip``
@@ -147,9 +147,8 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             role rests between phrases (``--km-sweep-hold``, 5500ms), how long
             a sweep takes (``--km-sweep-duration``) and the colours of its
             light (``--km-sweep-colours``), how long a ticker counts
-            (``--km-ticker-duration``, 2000ms over the site's speed, 3200ms by default)
-            and how long a tooltip stays
-            (1800ms).
+            (``--km-ticker-duration``, 2000ms over the site's speed, 3200ms by
+            default) and how long a tooltip stays (1800ms).
         * - ``--km-motion-ambient``
           - How long a loop that never ends takes for a round (1600ms over the
             site's speed).

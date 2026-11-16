@@ -41,7 +41,9 @@
                 add(mode === 'light' ? '#ffffff' : '#000000');
             }
             const scheme = head.querySelector('meta[name="color-scheme"]');
-            if (scheme) scheme.content = mode === 'system' ? 'light dark' : mode;
+            if (scheme) {
+                scheme.content = mode === 'system' ? 'light dark' : mode;
+            }
         };
 
         const show = (mode) => {
@@ -49,7 +51,8 @@
                 icon.hidden = icon.dataset.kmColourMode !== mode;
             });
             const shown = icons.find((icon) => !icon.hidden);
-            const name = `${button.dataset.kmColourName}: ${shown?.dataset.kmLabel ?? mode}`;
+            const label = shown?.dataset.kmLabel ?? mode;
+            const name = `${button.dataset.kmColourName}: ${label}`;
             button.setAttribute('aria-label', name);
             button.title = name;
             button.dataset.kmColourState = mode;

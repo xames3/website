@@ -50,8 +50,8 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
 }
 
 /*
-A directive with its own speed (`:speed:`) says so with a class, `km-speed--2` for
-twice as quick as the site. Every time under it is worked out again from the
+A directive with its own speed (`:speed:`) says so with a class, `km-speed--2`
+for twice as quick as the site. Every time under it is worked out again from the
 site's speed times that speed, since a token is only ever worked out where it's
 written. A reader who asks for less motion gets the calmer version whatever the
 speed, so none of it applies to them.

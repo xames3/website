@@ -202,7 +202,8 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
         opacity: 0;
         transform: translateY(var(--km-motion-rise-small));
         transition:
-            opacity calc(var(--km-duration-hover) * 0.6) var(--km-ease-standard),
+            opacity calc(var(--km-duration-hover) * 0.6)
+                var(--km-ease-standard),
             transform calc(var(--km-duration-hover) * 0.6) var(--km-ease-swift),
             display calc(var(--km-duration-hover) * 0.6) allow-discrete;
         position: absolute;

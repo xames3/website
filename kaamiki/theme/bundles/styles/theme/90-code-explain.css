@@ -418,7 +418,8 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
 }
 
-.km-code-explain--code-position-left[data-km-mode="stage"] .km-code-explain__grid {
+.km-code-explain--code-position-left[data-km-mode="stage"]
+    .km-code-explain__grid {
     grid-template-areas: "code notes";
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
 }
