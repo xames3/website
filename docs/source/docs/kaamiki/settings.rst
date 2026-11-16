@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 15 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -410,9 +410,9 @@ Who you are and how the site presents itself.
 
 The logo itself isn't a Kaamiki setting, unless you have one for each colour.
 Use Sphinx's ``html_logo``, or the theme option ``logo`` for a file in
-``_static``. If both are set, ``html_logo`` wins. A logo from ``html_logo`` that
-is all black is drawn white on dark and one that is all white is drawn black on
-light, so one file works in both. A logo with colours of its own needs
+``_static``. If both are set, ``html_logo`` wins. A logo from ``html_logo``
+that is all black is drawn white on dark and one that is all white is drawn
+black on light, so one file works in both. A logo with colours of its own needs
 ``kaamiki.conf.site.logos``.
 
 .. _kaamiki-settings-og:

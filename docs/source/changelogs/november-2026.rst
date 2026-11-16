@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 02 October 2026
-.. Last updated on: 15 November 2026
+.. Last updated on: 16 November 2026
 
 :orphan:
 :km-page-title: Kaamiki stops borrowing now!
@@ -319,12 +319,12 @@ and the logo size, are settings now, all under ``kaamiki.conf``. Most of the
 Light, dark or the device's own.
 -------------------------------------------------------------------------------
 
-Kaamiki is dark by default and has a light side now. ``kaamiki.conf.mode`` takes
-``"dark"``, ``"light"`` or ``"system"``. The first two are how the site looks
-for every reader, whatever their device says, so it looks the way you meant it
-to. ``"system"`` follows the reader's device and puts a button beside the
-copyright that steps through light, dark and the device's own, so a reader can
-pick for themselves. The pick is kept in their browser and wins over the
+Kaamiki is dark by default and has a light side now. ``kaamiki.conf.mode``
+takes ``"dark"``, ``"light"`` or ``"system"``. The first two are how the site
+looks for every reader, whatever their device says, so it looks the way you
+meant it to. ``"system"`` follows the reader's device and puts a button beside
+the copyright that steps through light, dark and the device's own, so a reader
+can pick for themselves. The pick is kept in their browser and wins over the
 device. A site with two logos names them in ``kaamiki.conf.site.logos``, and a
 single black or white logo turns itself the right way round.
 

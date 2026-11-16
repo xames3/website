@@ -248,7 +248,7 @@ commands = [
         "--enable",
         "line-too-long",
         "--max-line-length",
-        "80",
+        "79",
         "docs/source",
     ],
 ]

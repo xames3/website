@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 15 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Kaamiki roles
 :km-page-description: The inline roles Kaamiki adds for links, motion, colour,
@@ -148,12 +148,12 @@ sweep
 -------------------------------------------------------------------------------
 
 It reads like ``swap``, but a band of light crosses the text: the old text
-fades out behind it and the new text comes in through it. Each phrase is a whole
-title or only a word, split by ``|``. The first is what the page, its search
-and a reader without scripts get. In the page the rest take its place one by
-one while they are on screen and keep doing it, in the font, size and colour
-of the text around them. A reader whose system asks for less motion gets the
-first phrase and nothing moves.
+fades out behind it and the new text comes in through it. Each phrase is a
+whole title or only a word, split by ``|``. The first is what the page, its
+search and a reader without scripts get. In the page the rest take its place
+one by one while they are on screen and keep doing it, in the font, size and
+colour of the text around them. A reader whose system asks for less motion gets
+the first phrase and nothing moves.
 
 A whole title, which can run over more than one line:
 
@@ -343,8 +343,8 @@ either order. ``short`` writes the number with a ``k``, ``m`` or ``b``, and a
 number below a thousand shows as it is. It takes no value, so ``?short=no``
 stops the build. The duration is in ``s`` or ``ms``, from 0.1s to 5s. A ticker
 that isn't given one counts for as long as the site's speed says, 2s at a
-``kaamiki.conf.motion.speed`` of ``1`` and 3.2s at the default of ``0.625``, and
-one that is keeps it as written:
+``kaamiki.conf.motion.speed`` of ``1`` and 3.2s at the default of ``0.625``,
+and one that is keeps it as written:
 
 .. columns:: 2
     :gap: medium

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 November 2026
-.. Last updated on: 12 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: How Kaamiki moves
 :km-page-description: Every animation in Kaamiki, shown working in one
@@ -346,9 +346,9 @@ of another length sends the extra letters in from or out to nothing, as in
 :swap:`go|going|forgotten`. The :ref:`swap role <kaamiki-roles-swap>` says what
 it takes and what it leaves alone.
 
-A number can be written short, so :ticker:`12400?short` reads in thousands. Left
-alone it counts for as long as the site's speed says, 3.2 seconds, and it can
-take its own time, as :ticker:`1900?duration=1s` does.
+A number can be written short, so :ticker:`12400?short` reads in thousands.
+Left alone it counts for as long as the site's speed says, 3.2 seconds, and it
+can take its own time, as :ticker:`1900?duration=1s` does.
 
 ``:sweep:`` changes a whole phrase instead of a word. A band of light crosses
 the text, the old phrase fades out behind it and the new one comes in through
@@ -464,8 +464,8 @@ itself out the same way. Rest your pointer on a link for a moment and the page
 it leads to starts loading before you click, so it opens at once. The next and
 previous pages load quietly once this one is still. It's
 ``kaamiki.conf.motion.prefetch``, on by default, and a reader on a slow or
-data-saving connection is left alone. Your browser's network panel shows it as a
-request for a prefetch.
+data-saving connection is left alone. Your browser's network panel shows it as
+a request for a prefetch.
 
 .. _kaamiki-example-motion-page-to-page:
 
@@ -601,8 +601,8 @@ Moving around the site.
 The furniture moves too, and it's all in front of you. In a wide window, the
 names in the header open dropdowns that leave the way they came. The search box
 grows as you press it. The colour button changes the colours of the whole page,
-and the new ones spread out from the button with a soft edge, slowly, instead of
-switching at once.
+and the new ones spread out from the button with a soft edge, slowly, instead
+of switching at once.
 
 In a narrow window, or on a phone, the menu slides in from the side. Open it
 and pull it shut with a finger: it follows you, and a quick flick closes it
