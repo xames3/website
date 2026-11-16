@@ -4,7 +4,7 @@ Link Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 The helpers that find where a link goes. `REL` is the `rel` of each
 link that opens in a new tab. `noopener` stops the new tab from
@@ -35,9 +35,6 @@ if t.TYPE_CHECKING:
 REL: t.Final[str] = "noopener noreferrer"
 SLASHES: t.Final[re.Pattern[str]] = re.compile(r"^/{2,}")
 YOUTUBE_ID: t.Final[re.Pattern[str]] = re.compile(r"[A-Za-z0-9_-]{11}")
-YOUTUBE_STILL: t.Final[re.Pattern[str]] = re.compile(
-    r"https://img\.youtube\.com/vi/([A-Za-z0-9_-]{11})/hqdefault\.jpg"
-)
 YOUTUBE_START: t.Final[re.Pattern[str]] = re.compile(
     r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?"
 )
@@ -83,17 +80,6 @@ def youtube_still(vid: str) -> str:
     :return: The address of the picture of the video on YouTube.
     """
     return f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
-
-
-def youtube_still_id(url: str) -> str | None:
-    """Find the video id in the address of its picture.
-
-    :param url: The address, as `youtube_still` writes it.
-    :return: The id of eleven characters, or `None` for a different
-        address.
-    """
-    found = YOUTUBE_STILL.fullmatch(url)
-    return found[1] if found else None
 
 
 def youtube_start(url: str) -> int | None:

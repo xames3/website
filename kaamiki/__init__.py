@@ -33,7 +33,6 @@ from kaamiki.extensions.utils import TEMPLATES
 from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import linkcheck
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import pair
 from kaamiki.extensions.utils import phrase
@@ -285,8 +284,8 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     """Set up Kaamiki with Sphinx.
 
     :param app: The Sphinx application instance. This registers
-        Kaamiki, its extensions, directives and roles, the link
-        checker, and the handlers that fill the context of a page.
+        Kaamiki, its extensions, directives and roles, and the
+        handlers that fill the context of a page.
     :return: The version of Kaamiki, and an `env_version` that changes
         with each release, so Sphinx reads each page again. Parallel
         reading and writing are safe.
@@ -305,7 +304,6 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     app.translator = locale.get_translator()
     add_roles(app)
     add_directives(app)
-    app.add_builder(linkcheck, override=True)
     on.connect(app)
     return {
         "version": __version__,

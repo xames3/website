@@ -4,7 +4,7 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 The shared helpers of Kaamiki.
 """
@@ -13,7 +13,6 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import writer
 from kaamiki.extensions.utils.aliases import spell
 from kaamiki.extensions.utils.build import build_finished
-from kaamiki.extensions.utils.build import linkcheck
 from kaamiki.extensions.utils.content import content_rules
 from kaamiki.extensions.utils.context import admonition_title
 from kaamiki.extensions.utils.context import confdir
@@ -72,7 +71,6 @@ from kaamiki.extensions.utils.links import relative_to_page
 from kaamiki.extensions.utils.links import youtube_id
 from kaamiki.extensions.utils.links import youtube_start
 from kaamiki.extensions.utils.links import youtube_still
-from kaamiki.extensions.utils.links import youtube_still_id
 from kaamiki.extensions.utils.reading import reading_time
 from kaamiki.extensions.utils.reading import show_more
 from kaamiki.extensions.utils.settings import CONF
@@ -126,7 +124,6 @@ __all__: list[str] = [
     "html",
     "kept",
     "keycaps",
-    "linkcheck",
     "listed",
     "merge_leads",
     "moving",
@@ -170,5 +167,4 @@ __all__: list[str] = [
     "youtube_id",
     "youtube_start",
     "youtube_still",
-    "youtube_still_id",
 ]

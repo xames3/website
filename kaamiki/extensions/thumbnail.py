@@ -4,7 +4,7 @@ YouTube Thumbnail Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 06 September 2025
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 A `thumbnail` directive that shows the still of a YouTube video and
 links to it::
@@ -18,8 +18,8 @@ thumbnail links to the link as written, so it must be an `http` or
 `https` link. When the thumbnail has no title or channel, the script of
 the page gets them from YouTube. Until they arrive, or when they do not
 arrive, the thumbnail shows "YouTube video" and "Watch on YouTube". The
-link checker gets the picture of the video, so `linkcheck` fails and
-names a video that is deleted or private.
+link checker gets the picture of the video, so `linkcheck` fails on
+the picture of a video that is deleted or private.
 `kaamiki.conf.youtube.privacy` is for players, so it does not change
 the thumbnail.
 """
