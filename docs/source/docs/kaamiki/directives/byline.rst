@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: The byline directive
 :km-page-description: Show who wrote a page, how long it takes to read and a
@@ -27,10 +27,11 @@
 
 The byline under this title is the directive itself. It shows who wrote the
 page, a picture, how long the page takes to read, a button that copies the
-page's link and, on the right, a link to the page's source, "Show". Put it
-right under the title and its lead. On a phone only the author and the reading
-time stay. The text after ``::`` is the name, read like any paragraph, so it
-can hold markup but not a link, since it's the link to the author's profile:
+page's link and, on the right, a link to the page's source, "Show". It shows
+where you put it, so put it right under the title and its lead. On a phone only
+the author and the reading time stay. The text after ``::`` is the name, read
+like any paragraph, so it can hold markup but not a link, since it's the link
+to the author's profile:
 
 .. code-block:: rst
 
