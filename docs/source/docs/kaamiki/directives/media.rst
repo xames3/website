@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 13 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Video, YouTube and thumbnails
 :km-page-description: Put your own video, a YouTube player or a card that links
@@ -54,8 +54,8 @@ and ``:auto-load:`` and ``:no-privacy:`` turn them off for one player:
     .. youtube:: https://www.youtube.com/watch?v=kCc8FmEb1nY
         :caption: A caption under the player.
 
-``make linkcheck`` asks YouTube for that picture, so it fails and names a video
-that's been deleted or made private.
+``make linkcheck`` asks YouTube for that picture, so it fails on the picture of
+a video that's been deleted or made private.
 
 ``:ratio:`` is the player's shape: ``16:9`` (the default), ``4:3``, ``21:9``,
 ``1:1`` or ``9:16``:
@@ -191,8 +191,8 @@ The card's picture comes from YouTube's servers. So do its title and channel,
 unless you write them with ``:title:`` and ``:channel:``, and the card says
 "YouTube video" and "Watch on YouTube" until they arrive or when they can't.
 ``kaamiki.conf.youtube.privacy`` is for players, so it changes nothing here.
-``make linkcheck`` asks YouTube for the picture, so it fails and names a video
-that's been deleted or made private.
+``make linkcheck`` asks YouTube for the picture, so it fails on the picture of
+a video that's been deleted or made private.
 
 .. accordion:: The options of thumbnail
 

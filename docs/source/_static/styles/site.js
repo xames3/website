@@ -248,7 +248,7 @@
                     item.style.inlineSize = organisation.width;
                 }
                 const label = document.createElement('span');
-                label.className = 'sr-only';
+                label.className = 'km-sr-only';
                 label.textContent = organisation.name;
                 item.appendChild(label);
                 list.appendChild(item);

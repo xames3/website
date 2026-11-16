@@ -80,7 +80,7 @@
         ghost.textContent = current;
         stage.append(ghost);
         const spoken = document.createElement('span');
-        spoken.className = 'sr-only';
+        spoken.className = 'km-sr-only';
         spoken.textContent = next;
         field.replaceChildren(spoken, stage);
         const edge = was.height;

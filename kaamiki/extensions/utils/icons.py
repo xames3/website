@@ -4,7 +4,7 @@ Font Awesome Icons
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 Each icon that Kaamiki draws, as a Pro icon and its Free replacement.
 A site with a Font Awesome kit gets the Pro icons, in its
@@ -14,7 +14,8 @@ which are fewer and come in three styles: `solid`, `regular` and
 `brands`. Each icon that Kaamiki writes in a page comes from `Icons`,
 which knows which of the two the site has. The names that Font Awesome
 Free 7.3.1 draws, the version that Kaamiki loads, are at the end of
-the file.
+the file. They are copied, so the build does not install or read the
+package. Copy them again when `FA_FREE` points at a different release.
 """
 
 from __future__ import annotations
@@ -495,9 +496,6 @@ def _names(listed: str) -> frozenset[str]:
     return frozenset(listed.split())
 
 
-# HACK(xames3): The names below are copied from Font Awesome Free
-# 7.3.1, so the build doesn't have to install or read the package. Copy
-# them again when `FA_FREE` points at another release.
 FREE_BRANDS: t.Final[frozenset[str]] = _names(
     """
     11ty 42-group 500px a11y-project accessible-icon accusoft adn adversal

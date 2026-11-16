@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 The entry point of Kaamiki. Sphinx adds the stylesheets by priority, so
 `font.css` loads first, and `theme.css` loads last and has priority.
@@ -23,6 +23,7 @@ import shutil
 import tempfile
 import typing as t
 
+import lightningcss
 from sphinx import locale
 from sphinx.util import logging
 
@@ -32,7 +33,6 @@ from kaamiki.extensions.utils import TEMPLATES
 from kaamiki.extensions.utils import KaamikiDirective
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
-from kaamiki.extensions.utils import linkcheck
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import pair
 from kaamiki.extensions.utils import phrase
@@ -196,17 +196,6 @@ def flatten(app: Sphinx, exc: Exception | None) -> None:
     """
     if exc or not writes_pages(app):
         return
-    try:
-        import lightningcss
-    except ImportError as error:
-        logger.warning(
-            "lightningcss isn't installed, so the stylesheets stay as they"
-            " were copied: %s",
-            error,
-            type="kaamiki",
-            subtype="css",
-        )
-        return
     for stylesheet, _ in stylesheets:
         source = p.join(
             generated(app) if stylesheet in bundles else static_dir, stylesheet
@@ -295,8 +284,8 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     """Set up Kaamiki with Sphinx.
 
     :param app: The Sphinx application instance. This registers
-        Kaamiki, its extensions, directives and roles, the link
-        checker, and the handlers that fill the context of a page.
+        Kaamiki, its extensions, directives and roles, and the
+        handlers that fill the context of a page.
     :return: The version of Kaamiki, and an `env_version` that changes
         with each release, so Sphinx reads each page again. Parallel
         reading and writing are safe.
@@ -315,7 +304,6 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     app.translator = locale.get_translator()
     add_roles(app)
     add_directives(app)
-    app.add_builder(linkcheck, override=True)
     on.connect(app)
     return {
         "version": __version__,

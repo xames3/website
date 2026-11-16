@@ -4,7 +4,7 @@ YouTube Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 A `youtube` directive that embeds a video in the page::
 
@@ -17,7 +17,10 @@ player loads when a reader clicks it, and it comes from
 `youtube-nocookie.com`, unless `kaamiki.conf.youtube.click_to_load`
 and `kaamiki.conf.youtube.privacy` of the site are off. Until then, it
 shows the picture of the video. The link checker gets that picture, so
-`linkcheck` fails and names a video that is deleted or private.
+`linkcheck` fails on the picture of a video that is deleted or
+private.
+
+https://developers.google.com/youtube/player_parameters
 """
 
 from __future__ import annotations
@@ -201,8 +204,6 @@ class Youtube(KaamikiDirective):
             if private
             else "https://www.youtube.com"
         )
-        # Every player parameter:
-        # https://developers.google.com/youtube/player_parameters
         params = {
             "start": self.options.get("start", 0),
             "autoplay": 1 if "autoplay" in self.options else 0,

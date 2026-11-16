@@ -4,7 +4,7 @@ Date Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 The helpers that give a page its dates, from its comments or from git.
 """
@@ -12,9 +12,11 @@ The helpers that give a page its dates, from its comments or from git.
 from __future__ import annotations
 
 import contextlib
+import os
 import re
 import typing as t
 import weakref
+from datetime import UTC
 from datetime import date
 from datetime import datetime as dt
 from datetime import timedelta
@@ -184,11 +186,15 @@ def warm(app: Sphinx, env: BuildEnvironment, docnames: list[str]) -> None:
 def written(when: dt | None) -> str:
     """Write a date as the header comments write it.
 
-    :param when: The date, or `None` for the day of the build.
+    :param when: The date, or `None` for the day of the build. The
+        day of the build is `SOURCE_DATE_EPOCH` in UTC when it is set,
+        as in Sphinx, so a rebuild gives the same date.
     :return: The date, as `04 May 2026`. The month is always in
         English, in each language of the machine, because `day` reads
         it again.
     """
+    if when is None and (epoch := os.environ.get("SOURCE_DATE_EPOCH")):
+        when = dt.fromtimestamp(float(epoch), UTC)
     when = when or dt.now().astimezone()
     return f"{when:%d} {MONTHS[when.month - 1]} {when.year}"
 

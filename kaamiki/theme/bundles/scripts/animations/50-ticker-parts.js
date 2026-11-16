@@ -131,7 +131,7 @@
             ticker.appendChild(tickerSymbol(text.slice(-1)));
         }
         const label = document.createElement('span');
-        label.className = 'sr-only';
+        label.className = 'km-sr-only';
         label.textContent = text;
 
         wheels.forEach((wheel) => turnTickerWheel(

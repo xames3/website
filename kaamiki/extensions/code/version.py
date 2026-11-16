@@ -4,7 +4,7 @@ Code Version Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 28 September 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 A `code-version` directive that walks a reader through the versions of
 a piece of code, until its current version::
@@ -386,7 +386,7 @@ def visit_outcome(self: HTMLTranslator, element: Outcome) -> None:
     verdict = element["verdict"]
     words = {"broke": str(_("Broke")), "worked": str(_("Worked"))}
     spoken = (
-        f'<span class="sr-only">{self.encode(words[verdict])}: </span>'
+        f'<span class="km-sr-only">{self.encode(words[verdict])}: </span>'
         if verdict
         else ""
     )

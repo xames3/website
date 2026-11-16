@@ -4,7 +4,7 @@ Input Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 Kaamiki takes a correct value or stops the build. It does not change,
 guess or ignore a value. A check in this file reads each option, role,
@@ -35,6 +35,7 @@ from docutils.transforms import Transform
 from docutils.utils import Reporter
 from sphinx.errors import SphinxError
 from sphinx.errors import SphinxParallelError
+from sphinx.util.logging import getLogger
 
 from kaamiki.extensions.utils.hooks import on
 
@@ -46,6 +47,7 @@ if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
 
 ERROR_LEVEL: t.Final[int] = Reporter.ERROR_LEVEL
+logger = getLogger(__name__)
 MONTHS: t.Final[tuple[str, ...]] = (
     "January",
     "February",
@@ -1084,7 +1086,11 @@ def report(
 
 
 def install_reporter() -> None:
-    """Put `report` before the Sphinx handler for uncaught errors."""
+    """Put `report` before the Sphinx handler for uncaught errors.
+
+    When this Sphinx has no such handler, a warning tells it, and the
+    errors of Kaamiki print as the errors of Sphinx.
+    """
     global original
     try:
         from sphinx._cli.util import errors
@@ -1093,7 +1099,12 @@ def install_reporter() -> None:
             original = errors.handle_exception
             errors.handle_exception = report  # type: ignore[assignment]
     except ImportError, AttributeError:
-        return
+        logger.warning(
+            "this Sphinx has no sphinx._cli.util.errors.handle_exception,"
+            " so the errors of Kaamiki print as the errors of Sphinx",
+            type="kaamiki",
+            subtype="errors",
+        )
 
 
 original: t.Any = None

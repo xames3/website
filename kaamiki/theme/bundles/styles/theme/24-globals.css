@@ -67,7 +67,7 @@ i[class*="fa-"] {
     line-height: 1.75;
 }
 
-.sr-only,
+.km-sr-only,
 button.copybtn svg,
 .admonition:is(
     .note, .seealso, .tip, .hint, .important, .danger, .error, .warning,
@@ -84,7 +84,7 @@ button.copybtn svg,
     border: 0;
 }
 
-.sr-only,
+.km-sr-only,
 button.copybtn svg {
     margin: -1px;
 }

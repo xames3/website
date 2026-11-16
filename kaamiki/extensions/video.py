@@ -4,7 +4,7 @@ Video Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 A `video` directive that embeds a video in the page::
 
@@ -21,7 +21,12 @@ in options. Here the files are yours, in `html_static_path`::
        :track: en=_static/clip.en.vtt, hi=_static/clip.hi.vtt
 
 A phone plays the video in the page. Its controls have a button for
-full screen.
+full screen. Each extension gives the types that a browser tries.
+Chromium does not try `video/quicktime`, so a `.mov` is written as
+`video/mp4`, which plays the H.264 that a phone records. Here an `.ogg`
+holds video, not audio.
+
+https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Containers
 """
 
 from __future__ import annotations
@@ -57,10 +62,6 @@ KINDS: t.Final[tuple[str, ...]] = (
     "video/ogg",
     "video/quicktime",
 )
-# The types a browser tries, by extension. Chromium won't try
-# video/quicktime, so a .mov is written as video/mp4, which plays the
-# H.264 a phone records, and .ogg holds video here, not audio.
-# https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Containers
 TYPES: t.Final[dict[str, tuple[str, ...]]] = {
     ".mp4": ("video/mp4",),
     ".m4v": ("video/mp4",),
