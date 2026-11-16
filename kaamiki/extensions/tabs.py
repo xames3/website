@@ -4,7 +4,7 @@ Tabs Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 A `tabs` directive that holds `tab` directives and shows one of them at
 a time::
@@ -24,10 +24,10 @@ a time::
 
 Put one `tab` in the set for each title. A tab can be in an `only`. A
 set needs a minimum of two tabs, because one tab has nothing to change
-to. When an `only` removes a tab for a builder, the other tabs show,
-and when the removed tab was the selected one, the first tab becomes
-selected. When a tab does not set the side of its icon,
-`kaamiki.conf.tab.icon_position` sets it.
+to, and it has a maximum of six. When an `only` removes a tab for a
+builder, the other tabs show, and when the removed tab was the selected
+one, the first tab becomes selected. When a tab does not set the side
+of its icon, `kaamiki.conf.tab.icon_position` sets it.
 """
 
 from __future__ import annotations
@@ -56,6 +56,7 @@ if t.TYPE_CHECKING:
 
 tabs: t.Final[BEM] = BEM("tabs")
 glyph: t.Final[BEM] = BEM("glyph")
+TABS: t.Final[int] = 6
 
 
 class TabLabel(nodes.paragraph):
@@ -118,6 +119,8 @@ class Tabs(KaamikiDirective, motion=True):
         panes = [each for each in found if isinstance(each, Tab.Node)]
         if len(panes) < 2:
             self.fail(f"expected at least 2 tabs, got {len(panes)}")
+        if len(panes) > TABS:
+            self.fail(f"expected at most {TABS} tabs, got {len(panes)}")
         keys = [each["key"] for each in panes]
         for key in keys:
             if keys.count(key) > 1:
