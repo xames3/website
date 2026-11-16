@@ -334,9 +334,11 @@ dictionaries, like ``-D kaamiki_site_open_graph.enable=0``, as
 ``KAAMIKI_FA_KIT`` names your Font Awesome kit from the environment when
 ``kaamiki.conf.icons.kit`` doesn't. Kaamiki has no page for the general index,
 so ``html_use_index`` is left off, with a warning if you set it to ``True``.
-Kaamiki has two warnings, ``kaamiki.css`` for a stylesheet it couldn't minify
-and ``kaamiki.settings`` for that ``html_use_index``, and both can be quieted
-through ``suppress_warnings``. Everything else it finds wrong stops the build,
+Kaamiki has three warnings, ``kaamiki.css`` for a stylesheet it couldn't
+minify, ``kaamiki.settings`` for that ``html_use_index`` and
+``kaamiki.errors`` for a Sphinx that has moved its error handler, so Kaamiki's
+errors print as Sphinx's. All three can be quieted through
+``suppress_warnings``. Everything else it finds wrong stops the build,
 and that includes an embed with a ``{{ key }}`` placeholder that no option
 fills.
 
