@@ -518,4 +518,9 @@ commands = [
         "check-wheel-contents",
         "{env_tmp_dir}/dist",
     ],
+    [
+        "sh",
+        "-c",
+        "rm -rf ./*.egg-info",
+    ],
 ]
