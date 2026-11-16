@@ -69,7 +69,7 @@ kaamiki = "kaamiki"
 [dependency-groups]
 dev = [{ include-group = "sphinxlint" }, "tox>=4.65.4"]
 sphinxlint = ["sphinx-lint==1.0.2"]
-ruff = ["ruff==0.17.3"]
+ruff = ["ruff==0.17.4"]
 typecheck = [
     "mypy==2.4.1",
     "types-docutils==0.23.0.20261030",
