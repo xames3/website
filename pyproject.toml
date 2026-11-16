@@ -122,7 +122,7 @@ indent = 4
 format_js = true
 max_attribute_length = 1
 max_line_length = 80
-ignore = "H031"
+ignore = "H031,H021"
 
 [tool.ruff]
 line-length = 79

@@ -73,7 +73,7 @@ Last updated on: 16 November 2026
         {%- for page, classes, label in [
             (prev, km_link ~ " " ~ km_link ~ "--prev", _('Previous page')),
             (next, km_link, _('Next page'))
-            ] %}
+        ] %}
             {%- if page %}
                 <a href="{{ page.link|e }}"
                    class="{{ classes }}">
