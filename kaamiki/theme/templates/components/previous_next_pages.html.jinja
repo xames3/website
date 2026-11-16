@@ -4,7 +4,7 @@ Previous and Next Pages Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 #}
 {%- from "components/chevron.html.jinja" import km_chevron_icon -%}
 {%- macro km_related_section(km_related) -%}
@@ -78,14 +78,14 @@ Last updated on: 15 November 2026
                 <a href="{{ page.link|e }}"
                    class="{{ classes }}">
                     {{- km_chevron_icon() -}}
-                    <span class="sr-only">{{ label }}</span>
+                    <span class="km-sr-only">{{ label }}</span>
                 </a>
             {%- else %}
                 <a role="link"
                    class="{{ classes }}"
                    aria-disabled="true">
                     {{- km_chevron_icon() -}}
-                    <span class="sr-only">{{ label }}</span>
+                    <span class="km-sr-only">{{ label }}</span>
                 </a>
             {%- endif %}
         {%- endfor %}

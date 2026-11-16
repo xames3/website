@@ -27,7 +27,7 @@
     }
 
     const liveRegion = document.createElement('div');
-    liveRegion.className = 'sr-only';
+    liveRegion.className = 'km-sr-only';
     liveRegion.setAttribute('role', 'status');
     document.body.append(liveRegion);
     let announcing = 0;
