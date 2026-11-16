@@ -20,6 +20,7 @@ Last updated on: 16 November 2026
         copyText,
         decodeId,
         fetchJson,
+        glideAcross,
         glideTo,
         headerHeight,
         isModifiedClick,

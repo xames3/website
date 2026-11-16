@@ -1,17 +1,17 @@
-    let glideStop = null;
+    const glideStops = new Map();
 
     // Runs `step(now)` every frame until it says it's done or a reader takes
-    // over, and says which of the two it was.
-    function everyFrame(step) {
-        glideStop?.();
+    // over `scroller`, and says which of the two it was.
+    function everyFrame(step, scroller = window) {
+        glideStops.get(scroller)?.();
         return new Promise((resolve) => {
             let frame = 0;
             const finish = (arrived) => {
                 cancelAnimationFrame(frame);
                 GLIDE_STOPS.forEach((type) => (
-                    window.removeEventListener(type, stop, true)
+                    scroller.removeEventListener(type, stop, true)
                 ));
-                glideStop = null;
+                glideStops.delete(scroller);
                 resolve(arrived);
             };
             const stop = (event) => {
@@ -25,8 +25,8 @@
                 if (step(now)) finish(true);
                 else frame = requestAnimationFrame(tick);
             };
-            glideStop = stop;
-            GLIDE_STOPS.forEach((type) => window.addEventListener(
+            glideStops.set(scroller, stop);
+            GLIDE_STOPS.forEach((type) => scroller.addEventListener(
                 type,
                 stop,
                 { capture: true, passive: true },
@@ -35,18 +35,19 @@
         });
     }
 
-    // Scroll from `startY` to `endY`, `shareOf(now)` saying how much of the
-    // way it should have gone (0 to 1) at each frame, until it says 1 or a
-    // reader takes over. It's how a glide and a fold share one motion.
-    function driveScroll(startY, endY, shareOf) {
+    // Scroll `scroller` along `side` from `start` to `end`, `shareOf(now)`
+    // saying how much of the way it should have gone (0 to 1) at each
+    // frame, until it says 1 or a reader takes over. It's how a glide and
+    // a fold share one motion.
+    function driveScroll(start, end, shareOf, scroller = window, side = 'top') {
         return everyFrame((now) => {
             const share = clamp(shareOf(now), 0, 1);
-            window.scrollTo({
-                top: startY + (endY - startY) * share,
+            scroller.scrollTo({
+                [side]: start + (end - start) * share,
                 behavior: 'instant',
             });
             return share === 1;
-        });
+        }, scroller);
     }
 
     // Keeps `anchor` where it is on the screen while something above it
@@ -63,19 +64,14 @@
         });
     }
 
-    function glideTo(targetY) {
-        const startY = window.scrollY;
-        const endY = clamp(
-            targetY,
-            0,
-            Math.max(0, root.scrollHeight - window.innerHeight),
-        );
-        if (Math.abs(endY - startY) < 1) return Promise.resolve(true);
+    function glide(scroller, side, start, far, target) {
+        const end = clamp(target, 0, Math.max(0, far));
+        if (Math.abs(end - start) < 1) return Promise.resolve(true);
         if (prefersReducedMotion()) {
-            window.scrollTo(0, endY);
+            scroller.scrollTo({ [side]: end });
             return Promise.resolve(true);
         }
-        const distance = endY - startY;
+        const distance = end - start;
         const duration = clamp(
             GLIDE_BASE_MS + Math.abs(distance) * GLIDE_PX_FACTOR,
             GLIDE_MIN_MS,
@@ -83,13 +79,40 @@
         );
         const spring = springProgress();
         const began = performance.now();
-        return driveScroll(startY, endY, (now) => (
+        return driveScroll(start, end, (now) => (
             spring(clamp((now - began) / duration, 0, 1))
-        ));
+        ), scroller, side);
+    }
+
+    function glideTo(targetY) {
+        return glide(
+            window,
+            'top',
+            window.scrollY,
+            root.scrollHeight - window.innerHeight,
+            targetY,
+        );
+    }
+
+    // The same across `element`, with its snap let go on the way, so the
+    // snap doesn't pull at each frame.
+    function glideAcross(element, left) {
+        element.style.scrollSnapType = 'none';
+        return glide(
+            element,
+            'left',
+            element.scrollLeft,
+            element.scrollWidth - element.clientWidth,
+            left,
+        ).finally(() => {
+            if (!glideStops.has(element)) {
+                element.style.removeProperty('scroll-snap-type');
+            }
+        });
     }
 
     function stopGlide() {
-        glideStop?.();
+        glideStops.get(window)?.();
     }
 
     function headerHeight() {
