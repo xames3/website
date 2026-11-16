@@ -7,8 +7,12 @@
         const writtenTitle = block.hasAttribute('data-km-youtube-title');
         const writtenChannel = block.hasAttribute('data-km-youtube-channel');
 
-        const watch = encodeURIComponent(`https://www.youtube.com/watch?v=${id}`);
-        fetchJson(`https://www.youtube.com/oembed?url=${watch}&format=json`).then((data) => {
+        const watch = encodeURIComponent(
+            `https://www.youtube.com/watch?v=${id}`,
+        );
+        fetchJson(
+            `https://www.youtube.com/oembed?url=${watch}&format=json`,
+        ).then((data) => {
             if (!data) return;
             if (!writtenTitle && title && data.title) {
                 title.textContent = data.title;
@@ -17,7 +21,9 @@
             if (!writtenChannel && channel && data.author_name) {
                 channel.textContent = data.author_name;
             }
-            if (channel && data.author_url) linkChannel(channel, title, data.author_url);
+            if (channel && data.author_url) {
+                linkChannel(channel, title, data.author_url);
+            }
         });
     }
 
@@ -28,7 +34,10 @@
         } catch {
             return;
         }
-        if (url.protocol !== 'https:' || !/(^|\.)youtube\.com$/.test(url.hostname)) {
+        if (
+            url.protocol !== 'https:'
+            || !/(^|\.)youtube\.com$/.test(url.hostname)
+        ) {
             return;
         }
         const link = document.createElement('a');

@@ -54,8 +54,9 @@ which way the reader went) so the header and the footer stay as they are. The
         animation: none;
     }
 
-    /* The rest of the page, the header, the sidebar and the footer, is the old
-       page's until the old content has gone, and the new page's from then on. */
+    /* The rest of the page, the header, the sidebar and the footer, is the
+       old page's until the old content has gone, and the new page's from then
+       on. */
     :root:not(.km-document--revealing)::view-transition-old(root),
     :root:not(.km-document--revealing)::view-transition-new(root) {
         mix-blend-mode: normal;
@@ -92,15 +93,24 @@ which way the reader went) so the header and the footer stay as they are. The
             radial-gradient(
             circle closest-side,
             #000 calc(100% - var(--km-reveal-feather, 400px) * 1.0),
-            rgb(0 0 0 / 0.956) calc(100% - var(--km-reveal-feather, 400px) * 0.9),
-            rgb(0 0 0 / 0.835) calc(100% - var(--km-reveal-feather, 400px) * 0.8),
-            rgb(0 0 0 / 0.667) calc(100% - var(--km-reveal-feather, 400px) * 0.7),
-            rgb(0 0 0 / 0.487) calc(100% - var(--km-reveal-feather, 400px) * 0.6),
-            rgb(0 0 0 / 0.325) calc(100% - var(--km-reveal-feather, 400px) * 0.5),
-            rgb(0 0 0 / 0.198) calc(100% - var(--km-reveal-feather, 400px) * 0.4),
-            rgb(0 0 0 / 0.11) calc(100% - var(--km-reveal-feather, 400px) * 0.3),
-            rgb(0 0 0 / 0.056) calc(100% - var(--km-reveal-feather, 400px) * 0.2),
-            rgb(0 0 0 / 0.026) calc(100% - var(--km-reveal-feather, 400px) * 0.1),
+            rgb(0 0 0 / 0.956)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.9),
+            rgb(0 0 0 / 0.835)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.8),
+            rgb(0 0 0 / 0.667)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.7),
+            rgb(0 0 0 / 0.487)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.6),
+            rgb(0 0 0 / 0.325)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.5),
+            rgb(0 0 0 / 0.198)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.4),
+            rgb(0 0 0 / 0.11)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.3),
+            rgb(0 0 0 / 0.056)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.2),
+            rgb(0 0 0 / 0.026)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.1),
             transparent 100%
         );
         mask-image:
@@ -108,15 +118,24 @@ which way the reader went) so the header and the footer stay as they are. The
             radial-gradient(
             circle closest-side,
             #000 calc(100% - var(--km-reveal-feather, 400px) * 1.0),
-            rgb(0 0 0 / 0.956) calc(100% - var(--km-reveal-feather, 400px) * 0.9),
-            rgb(0 0 0 / 0.835) calc(100% - var(--km-reveal-feather, 400px) * 0.8),
-            rgb(0 0 0 / 0.667) calc(100% - var(--km-reveal-feather, 400px) * 0.7),
-            rgb(0 0 0 / 0.487) calc(100% - var(--km-reveal-feather, 400px) * 0.6),
-            rgb(0 0 0 / 0.325) calc(100% - var(--km-reveal-feather, 400px) * 0.5),
-            rgb(0 0 0 / 0.198) calc(100% - var(--km-reveal-feather, 400px) * 0.4),
-            rgb(0 0 0 / 0.11) calc(100% - var(--km-reveal-feather, 400px) * 0.3),
-            rgb(0 0 0 / 0.056) calc(100% - var(--km-reveal-feather, 400px) * 0.2),
-            rgb(0 0 0 / 0.026) calc(100% - var(--km-reveal-feather, 400px) * 0.1),
+            rgb(0 0 0 / 0.956)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.9),
+            rgb(0 0 0 / 0.835)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.8),
+            rgb(0 0 0 / 0.667)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.7),
+            rgb(0 0 0 / 0.487)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.6),
+            rgb(0 0 0 / 0.325)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.5),
+            rgb(0 0 0 / 0.198)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.4),
+            rgb(0 0 0 / 0.11)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.3),
+            rgb(0 0 0 / 0.056)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.2),
+            rgb(0 0 0 / 0.026)
+                calc(100% - var(--km-reveal-feather, 400px) * 0.1),
             transparent 100%
         );
         -webkit-mask-repeat: no-repeat;

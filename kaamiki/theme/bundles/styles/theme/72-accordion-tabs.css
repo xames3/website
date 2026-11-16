@@ -78,18 +78,18 @@
     margin-right: var(--km-space-4);
 }
 
-.km-accordion--marker-plus[open]:not(.km-accordion--closing) > .km-accordion__title
-    > .km-accordion__marker .km-accordion__icon {
+.km-accordion--marker-plus[open]:not(.km-accordion--closing)
+    > .km-accordion__title > .km-accordion__marker .km-accordion__icon {
     transform: rotateZ(45deg);
 }
 
-.km-accordion--marker-right[open]:not(.km-accordion--closing) > .km-accordion__title
-    > .km-accordion__marker .km-accordion__icon {
+.km-accordion--marker-right[open]:not(.km-accordion--closing)
+    > .km-accordion__title > .km-accordion__marker .km-accordion__icon {
     transform: rotateZ(90deg);
 }
 
-.km-accordion--marker-down[open]:not(.km-accordion--closing) > .km-accordion__title
-    > .km-accordion__marker .km-accordion__icon {
+.km-accordion--marker-down[open]:not(.km-accordion--closing)
+    > .km-accordion__title > .km-accordion__marker .km-accordion__icon {
     transform: rotateX(-180deg);
 }
 

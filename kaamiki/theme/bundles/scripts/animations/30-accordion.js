@@ -372,8 +372,8 @@
                     open.top = top;
                     open.bottom = bottom;
                 }
-                // It closes quicker than it opens, so the gap the content leaves
-                // behind doesn't take long to close.
+                // It closes quicker than it opens, so the gap the content
+                // leaves behind doesn't take long to close.
                 running = engine.animate(
                     content,
                     opening ? frames(shut, open) : frames(open, shut),

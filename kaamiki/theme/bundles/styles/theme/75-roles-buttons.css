@@ -190,7 +190,10 @@
 }
 
 .km-button:is(
-    .km-button--scheme-red, .km-button--scheme-yellow, .km-button--scheme-blue, .km-button--scheme-green,
+    .km-button--scheme-red,
+    .km-button--scheme-yellow,
+    .km-button--scheme-blue,
+    .km-button--scheme-green,
     .km-button--scheme-custom
 ) {
     padding: var(--km-space-2) var(--km-space-4);
