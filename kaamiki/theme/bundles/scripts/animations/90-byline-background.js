@@ -34,23 +34,46 @@
         return overlay;
     }
 
+    const pictures = new Map();
+
+    function preload(url) {
+        if (!pictures.has(url)) {
+            const picture = new Image();
+            picture.src = url;
+            pictures.set(url, picture.decode().catch(() => {}));
+        }
+        return pictures.get(url);
+    }
+
+    function showBackdrop(overlay) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            overlay.style.opacity = '';
+        }));
+    }
+
     function cycleBackdrop(overlay, urls, byline) {
         const every = (Number(byline.getAttribute('data-km-interval'))
             || BYLINE_BG_INTERVAL_MS) / engine.speedOf(byline);
         let index = 0;
-        setInterval(() => {
+        let busy = false;
+        preload(urls[1]);
+        setInterval(async () => {
+            if (busy) return;
+            busy = true;
+            const next = (index + 1) % urls.length;
+            await preload(urls[next]);
             overlay.style.opacity = '0';
             setTimeout(() => {
-                index = (index + 1) % urls.length;
+                index = next;
                 overlay.style.setProperty(
                     '--km-byline-image',
                     `url("${urls[index]}")`,
                 );
                 // The zoom of the picture starts over with each one.
                 overlay.classList.toggle('km-byline__bg--again');
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                    overlay.style.opacity = '';
-                }));
+                showBackdrop(overlay);
+                preload(urls[(index + 1) % urls.length]);
+                busy = false;
             }, TIMING.slow() + 50);
         }, every);
     }
@@ -77,20 +100,31 @@
         const overlay = createBackdrop(backdrop, urls, byline);
         main.appendChild(overlay);
 
+        // The layout, not the reveal that still moves the title, sets the
+        // height, so the picture doesn't jump when the reveal ends.
         const measure = () => {
             const fontSize = parseFloat(getComputedStyle(root).fontSize) || 16;
-            const bottom = anchor.getBoundingClientRect().bottom
-                + fontSize * ((byline ? -2 : 2) + BYLINE_BG_GROW_REM);
-            const height = bottom - main.getBoundingClientRect().top;
+            let end = anchor.offsetHeight;
+            for (let at = anchor; at && at !== main; at = at.offsetParent) {
+                end += at.offsetTop;
+            }
+            // The pictures end where the meta group of the byline ends.
+            const height = backdrop
+                ? end - parseFloat(getComputedStyle(byline).paddingBottom)
+                    - overlay.offsetTop
+                : end + fontSize * ((byline ? -2 : 2) + BYLINE_BG_GROW_REM);
             overlay.style.height = `${Math.max(0, height)}px`;
         };
 
         measure();
-        afterLoading(() => setTimeout(() => {
-            requestAnimationFrame(() => requestAnimationFrame(() => {
-                overlay.style.opacity = '';
-            }));
-        }, titleHold()));
+        const cycles = backdrop && urls.length > 1 && !prefersStill(byline);
+        const ready = backdrop ? preload(urls[0]) : Promise.resolve();
+        afterLoading(() => setTimeout(() => ready.then(() => {
+            // The zoom and the cycle start when the picture comes in.
+            if (backdrop) overlay.classList.toggle('km-byline__bg--again');
+            showBackdrop(overlay);
+            if (cycles) cycleBackdrop(overlay, urls, byline);
+        }), titleHold()));
 
         window.addEventListener(
             'resize',
@@ -99,9 +133,5 @@
         );
         new ResizeObserver(measure).observe(main);
         document.fonts.ready.then(measure);
-        anchor.addEventListener('animationend', measure);
-
-        if (!backdrop || urls.length === 1 || prefersStill(byline)) return;
-        cycleBackdrop(overlay, urls, byline);
     }
 
