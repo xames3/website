@@ -67,7 +67,31 @@ Funding = "https://github.com/sponsors/xames3"
 kaamiki = "kaamiki"
 
 [dependency-groups]
-dev = ["sphinx-lint>=1.0.2", "tox>=4.65.4"]
+dev = [{ include-group = "sphinxlint" }, "tox>=4.65.4"]
+sphinxlint = ["sphinx-lint==1.0.2"]
+ruff = ["ruff==0.17.3"]
+typecheck = [
+    "mypy==2.4.1",
+    "types-docutils==0.23.0.20261030",
+    "types-Pygments==2.21.0.20260819",
+    "babel",
+    "beautifulsoup4",
+    "docutils",
+    "jinja2",
+    "lightningcss",
+    "pygments",
+    "sphinx",
+    "sphinx-copybutton",
+]
+djlint = ["djlint==1.36.4"]
+translations = ["babel==2.18.0", "jinja2==3.1.6"]
+package = [
+    "build[uv]==1.6.1",
+    "check-wheel-contents==0.6.3",
+    "twine==7.0.0",
+    "uv==0.13.6",
+    "validate-pyproject==0.27",
+]
 
 [tool.setuptools.packages.find]
 include = ["kaamiki*"]
@@ -215,7 +239,7 @@ env_list = [
 [tool.tox.env.sphinxlint]
 description = "Lint the reStructuredText sources with sphinx-lint"
 skip_install = true
-deps = ["sphinx-lint==1.0.2"]
+dependency_groups = ["sphinxlint"]
 commands = [
     [
         "sphinx-lint",
@@ -232,7 +256,7 @@ commands = [
 [tool.tox.env.lint]
 description = "Lint with ruff and change nothing"
 skip_install = true
-deps = ["ruff==0.17.3"]
+dependency_groups = ["ruff"]
 commands = [
     [
         "ruff",
@@ -245,9 +269,7 @@ commands = [
 [tool.tox.env.format]
 description = "Check the Python formatting with ruff and change nothing"
 skip_install = true
-deps = [
-    "ruff==0.17.3",
-]
+dependency_groups = ["ruff"]
 commands = [
     [
         "ruff",
@@ -261,25 +283,13 @@ commands = [
 [tool.tox.env.typecheck]
 description = "Check the types with mypy"
 skip_install = true
-deps = [
-    "mypy==2.4.1",
-    "types-docutils==0.23.0.20261030",
-    "types-Pygments==2.21.0.20260819",
-    "babel",
-    "beautifulsoup4",
-    "docutils",
-    "jinja2",
-    "lightningcss",
-    "pygments",
-    "sphinx",
-    "sphinx-copybutton",
-]
+dependency_groups = ["typecheck"]
 commands = [["mypy", { replace = "posargs", extend = true }]]
 
 [tool.tox.env.website-check]
 description = "Check and lint HTML and Jinja with djlint, change nothing"
 skip_install = true
-deps = ["djlint==1.36.4"]
+dependency_groups = ["djlint"]
 commands = [
     [
         "djlint",
@@ -321,7 +331,7 @@ commands = [
 [tool.tox.env.translations]
 description = "Extract Kaamiki's words, then update and compile the catalogues"
 skip_install = true
-deps = ["babel==2.18.0", "jinja2==3.1.6"]
+dependency_groups = ["translations"]
 allowlist_externals = ["git", "sh"]
 commands = [
     [
@@ -399,7 +409,7 @@ commands = [
 [tool.tox.env.translations-check]
 description = "Fail when the catalogues are behind the sources, write nothing"
 skip_install = true
-deps = ["babel==2.18.0", "jinja2==3.1.6"]
+dependency_groups = ["translations"]
 allowlist_externals = ["sh"]
 commands = [
     [
@@ -441,10 +451,7 @@ commands = [
 [tool.tox.env.reformat]
 description = "Fix lint and reformat the Python, HTML and Jinja in place"
 skip_install = true
-deps = [
-    "djlint==1.36.4",
-    "ruff==0.17.3",
-]
+dependency_groups = ["djlint", "ruff"]
 commands = [
     [
         "djlint",
@@ -482,13 +489,7 @@ commands = [
 description = "Build the sdist and the wheel and check them, without publishing"
 skip_install = true
 allowlist_externals = ["sh"]
-deps = [
-    "build[uv]==1.6.1",
-    "check-wheel-contents==0.6.3",
-    "twine==7.0.0",
-    "uv==0.13.6",
-    "validate-pyproject==0.27",
-]
+dependency_groups = ["package"]
 commands = [
     [
         "sh",
