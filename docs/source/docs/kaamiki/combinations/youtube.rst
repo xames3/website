@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: YouTube players, everywhere
 :km-page-description: Every option of the youtube directive on and off, with
@@ -498,3 +498,28 @@ In a list item
 
       .. youtube:: https://youtu.be/kCc8FmEb1nY
           :caption: A video.
+
+.. _combos-youtube-where-it-cant-go:
+
+-------------------------------------------------------------------------------
+Where it can't go.
+-------------------------------------------------------------------------------
+
+A video can't go in a table cell: the cell is only as wide as its text, so the
+video gets no width and doesn't show. The message is written under the source:
+
+In a table
+^^^^^^^^^^
+
+.. code-block:: rst
+
+    .. list-table::
+
+        * - .. youtube:: https://youtu.be/kCc8FmEb1nY
+
+          - Another cell.
+
+.. code-block:: text
+
+    youtube: expected outside a code-explain, a code-version, a block that
+    links and a table, got it in a table

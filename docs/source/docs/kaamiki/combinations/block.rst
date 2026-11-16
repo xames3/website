@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: Blocks, everywhere
 :km-page-description: Every option of the block directive on and off, with
@@ -1032,7 +1032,8 @@ A block in a block
 
 .. code-block:: text
 
-    block: expected somewhere else, got it in a block
+    block: expected outside a code-explain, a code-version and a block, got it
+    in a block
 
 .. _combos-block-no-link-in-a-block-that-links:
 
@@ -1089,4 +1090,5 @@ An accordion in the body
 
 .. code-block:: text
 
-    accordion: expected somewhere else, got it in a block that links
+    accordion: expected outside a code-explain, a code-version and a block that
+    links, got it in a block that links

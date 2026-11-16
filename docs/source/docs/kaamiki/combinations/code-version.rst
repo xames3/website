@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 16 November 2026
 
 :km-page-title: code-version, option by option
 :km-page-description: Every option of the code-version directive on and off,
@@ -1485,7 +1485,8 @@ An accordion in a note
 
 .. code-block:: text
 
-    accordion: expected somewhere else, got it in a code-version
+    accordion: expected outside a code-explain, a code-version and a block that
+    links, got it in a code-version
 
 Tabs in a note
 ^^^^^^^^^^^^^^
@@ -1529,7 +1530,8 @@ Tabs in a note
 
 .. code-block:: text
 
-    tabs: expected somewhere else, got it in a code-version
+    tabs: expected outside a code-explain, a code-version, a block that links,
+    a tab and a table, got it in a code-version
 
 A video in a note
 ^^^^^^^^^^^^^^^^^
@@ -1566,7 +1568,8 @@ A video in a note
 
 .. code-block:: text
 
-    video: expected somewhere else, got it in a code-version
+    video: expected outside a code-explain, a code-version and a block that
+    links, got it in a code-version
 
 Raw HTML in a note
 ^^^^^^^^^^^^^^^^^^
@@ -1609,7 +1612,8 @@ Raw HTML in a note
 
 .. code-block:: text
 
-    raw: expected somewhere else, got it in a code-version
+    raw: expected outside a code-explain and a code-version, got it in a
+    code-version
 
 A code-explain in a note
 ^^^^^^^^^^^^^^^^^^^^^^^^
