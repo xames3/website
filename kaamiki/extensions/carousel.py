@@ -4,7 +4,7 @@ Carousel Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 04 November 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 A `carousel` directive that puts blocks, buttons, figures, pictures,
 repositories and thumbnails in a row that a reader swipes through::
@@ -204,7 +204,9 @@ class Carousel(KaamikiDirective, motion=True):
         """The carousel and its items."""
 
     def check(self) -> None:
-        """Refuse lines without a title, and dots without arrows."""
+        """Refuse lines without a title, dots without arrows and an
+        auto-run without motion.
+        """
         for option in ("preheader", "subheader"):
             if option in self.options and not self.arguments:
                 self.fail(f":{option}: needs a title")
@@ -212,6 +214,10 @@ class Carousel(KaamikiDirective, motion=True):
             self.fail(
                 ":dots: replaces the arrows, so :hide-arrows: has nothing"
                 " to hide"
+            )
+        if self.auto_run and "no-motion" in self.options:
+            self.fail(
+                ":auto-run: not allowed with :no-motion:, which stops it"
             )
 
     def build(self) -> list[nodes.Node]:
