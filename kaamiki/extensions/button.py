@@ -4,7 +4,7 @@ Button Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 29 April 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 A `button` directive that writes a link as a button::
 
@@ -16,7 +16,9 @@ A `button` directive that writes a link as a button::
 
 The argument is the address: a full address, a path on the site or a
 fragment. `:doc:` or `:ref:` can replace it, so that the link works
-with all builders, and a button has only one of the three::
+with all builders, and a button has only one of the three. A path to
+the HTML of a page, as `other.html`, stops the build, since only
+`:doc:` links a page with all builders::
 
     .. button::
        :doc: index
@@ -41,9 +43,11 @@ import colorsys
 import functools
 import re
 import typing as t
+from urllib.parse import urlsplit
 
 import docutils.nodes as nodes
 import docutils.parsers.rst as rst
+from sphinx.util import docname_join
 
 from kaamiki.extensions.block import address
 from kaamiki.extensions.roles import steady
@@ -241,6 +245,19 @@ class Button(KaamikiDirective):
                 url = checks.link(argument)
             except ValueError as error:
                 self.fail(f"{error}")
+            parts = urlsplit(url)
+            page = docname_join(
+                self.env.docname, parts.path.removesuffix(".html")
+            )
+            if (
+                not parts.scheme
+                and parts.path.endswith(".html")
+                and page in self.env.found_docs
+            ):
+                self.fail(
+                    f"expected :doc: /{page} for a page of this site, got"
+                    f" {argument!r}"
+                )
         new_tab = bool(url) and opens_new_tab(url, config)
         if "new-tab" in options or "same-tab" in options:
             if ("new-tab" in options) == new_tab:
