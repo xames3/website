@@ -4,7 +4,7 @@ Directive Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 The helpers that the directives of Kaamiki are built from. `NATIVE`
 holds the two options of the directives of docutils, `class` and
@@ -873,6 +873,8 @@ class KaamikiDirective(SphinxDirective):
         for option, need in self.needs.items():
             if option in self.options and need not in self.options:
                 self.fail(f":{option}: needs :{need}:")
+        if "speed" in self.options and "no-motion" in self.options:
+            self.fail(":speed: not allowed with :no-motion:, which stops it")
         self.check()
         return self.build()
 

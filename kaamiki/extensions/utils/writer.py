@@ -4,7 +4,7 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 15 November 2026
+Last updated on: 16 November 2026
 
 What Kaamiki changes in the HTML that Sphinx writes, while it writes
 it.
@@ -22,6 +22,8 @@ from sphinx.locale import _
 from sphinx.util.images import get_image_size
 
 from kaamiki.extensions.utils.build import writes_pages
+from kaamiki.extensions.utils.checks import fail
+from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.doctree import caption_icon
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
@@ -318,7 +320,19 @@ class translator(base):
             a figure, gets `km-image`, so that the script of the page
             can find it among the pictures of Kaamiki. An image with a
             size also gets `km-image--sized`.
+        :raises KaamikiError: For an image without `alt`. An empty
+            `alt` is for a picture that only decorates.
         """
+        if "alt" not in node:
+            host = node.parent
+            if isinstance(host, nodes.reference):
+                host = host.parent
+            kind = "figure" if isinstance(host, nodes.figure) else "image"
+            fail(
+                f"{kind}: :alt: expected a text, or an empty one for a"
+                " picture that only decorates, got none",
+                location(node),
+            )
         default = getattr(self, "image_loading", "")
         if "loading" not in node and default == "link":
             node["loading"] = "lazy"

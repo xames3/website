@@ -1031,11 +1031,14 @@ Images and a figure.
 .. carousel:: Pictures.
 
     .. image:: /_static/combos/poster.jpg
+        :alt: A dark frame of a sample clip with five coloured circles
 
     .. image:: /_static/combos/poster.jpg
+        :alt: A dark frame of a sample clip with five coloured circles
         :width: 50%
 
     .. figure:: /_static/combos/poster.jpg
+        :alt: A dark frame of a sample clip with five coloured circles
 
         A caption.
 
@@ -1044,11 +1047,14 @@ Images and a figure.
     .. carousel:: Pictures.
 
         .. image:: /_static/combos/poster.jpg
+            :alt: A dark frame of a sample clip with five coloured circles
 
         .. image:: /_static/combos/poster.jpg
+            :alt: A dark frame of a sample clip with five coloured circles
             :width: 50%
 
         .. figure:: /_static/combos/poster.jpg
+            :alt: A dark frame of a sample clip with five coloured circles
 
             A caption.
 
@@ -1057,9 +1063,11 @@ A picture that links is an item too.
 .. carousel:: Pictures that link.
 
     .. image:: /_static/combos/poster.jpg
+        :alt: The xames3/website repository on GitHub
         :target: https://github.com/xames3/website
 
     .. image:: /_static/combos/poster.jpg
+        :alt: The xames3 profile on GitHub
         :target: https://github.com/xames3
 
 .. code-block:: rst
@@ -1067,9 +1075,11 @@ A picture that links is an item too.
     .. carousel:: Pictures that link.
 
         .. image:: /_static/combos/poster.jpg
+            :alt: The xames3/website repository on GitHub
             :target: https://github.com/xames3/website
 
         .. image:: /_static/combos/poster.jpg
+            :alt: The xames3 profile on GitHub
             :target: https://github.com/xames3
 
 Repositories.
@@ -1151,6 +1161,7 @@ Every kind of item in one row.
         :title: A video
 
     .. image:: /_static/combos/poster.jpg
+        :alt: A dark frame of a sample clip with five coloured circles
 
 .. code-block:: rst
 
@@ -1171,6 +1182,7 @@ Every kind of item in one row.
             :title: A video
 
         .. image:: /_static/combos/poster.jpg
+            :alt: A dark frame of a sample clip with five coloured circles
 
 .. _combos-carousel-with-icons:
 
