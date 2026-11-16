@@ -98,6 +98,21 @@ jobs:
       - name: Run template checks (djlint)
         run: tox -e website-check
 
+  bundles:
+    name: Check JS and CSS bundles
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Python and tox
+        uses: ./.github/actions/setup
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Check line length, ASCII and BEM
+        run: tox -e bundles-check
+
   translations:
     name: Check translation catalogues
     runs-on: ubuntu-24.04
@@ -135,6 +150,7 @@ jobs:
       - format
       - typecheck
       - templates
+      - bundles
       - translations
       - sphinxlint
     runs-on: ubuntu-24.04

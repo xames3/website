@@ -233,6 +233,7 @@ env_list = [
     "format",
     "typecheck",
     "website-check",
+    "bundles-check",
     "translations-check",
 ]
 
@@ -325,6 +326,101 @@ commands = [
         "--lint",
         "--include",
         "H017",
+    ],
+]
+
+[tool.tox.env.bundles-check]
+description = "Check JS and CSS lines, ASCII and BEM, fix lines on KM_FIX"
+skip_install = true
+pass_env = ["KM_FIX"]
+commands = [
+    [
+        "python",
+        "-c",
+        '''
+import os
+import re
+import sys
+from pathlib import Path
+
+WIDTH = 80
+FIX = os.environ.get("KM_FIX") == "1"
+SKIP = re.compile(r"://|data:")
+TOKEN = re.compile(r"/\*|\*/")
+CLASS = re.compile(r"\.(km-[\w-]+)")
+PART = r"[a-z0-9]+(-[a-z0-9]+)*"
+BEM = re.compile("km-%s(__%s)?(--%s)?" % (PART, PART, PART))
+
+
+def wrap(line, lead, quoted):
+    out = list()
+    while len(line) > WIDTH:
+        start, cut, quote = len(line) - len(line.lstrip()), -1, None
+        for i, c in enumerate(line[: WIDTH + 1]):
+            if quoted and quote:
+                quote = None if c == quote else quote
+            elif quoted and c in "\"'`":
+                quote = c
+            elif c == " " and i > start:
+                cut = i
+        if cut < 0:
+            break
+        out.append(line[:cut].rstrip())
+        line = lead + line[cut:].lstrip()
+    return out + list((line,))
+
+
+def run(path):
+    lines, problems, fixed = path.read_text().split("\n"), list(), list()
+    css, block = path.suffix == ".css", False
+    for number, line in enumerate(lines, 1):
+        text = line.lstrip()
+        indent = line[: len(line) - len(text)]
+        if text.startswith("//"):
+            lead, kind = indent + "// ", "comment"
+        elif block:
+            star = "* " if text.startswith("* ") else ""
+            lead, kind = indent + star, "comment"
+        elif text.startswith("/*"):
+            lead, kind = indent + "   ", "comment"
+        else:
+            lead, kind = indent + "    ", "css" if css else "js"
+        for token in TOKEN.findall(line):
+            block = token == "/*"
+        where = "%s:%d:" % (path, number)
+        if not line.isascii():
+            problems.append("%s not ASCII" % where)
+        if kind == "css":
+            for name in CLASS.findall(re.sub(r"/\*.*?\*/", "", line)):
+                if not BEM.fullmatch(name):
+                    problems.append("%s not BEM: %s" % (where, name))
+        if len(line) <= WIDTH or SKIP.search(line):
+            fixed.append(line)
+            continue
+        if FIX and kind != "js":
+            new = wrap(line, lead, quoted=kind == "css")
+            if all(len(piece) <= WIDTH for piece in new):
+                fixed.extend(new)
+                continue
+        fixed.append(line)
+        problems.append("%s %d > %d characters" % (where, len(line), WIDTH))
+    if FIX and fixed != lines:
+        path.write_text("\n".join(fixed))
+    return problems
+
+
+roots = ("kaamiki/theme/bundles", "docs/source/_static")
+paths = sorted(
+    path
+    for root in roots
+    for path in Path(root).rglob("*")
+    if path.suffix in (".css", ".js") and ".min." not in path.name
+)
+problems = list(problem for path in paths for problem in run(path))
+if problems:
+    print("\n".join(problems))
+sys.exit(1 if problems and not FIX else 0)
+''',
     ],
 ]
 
@@ -449,10 +545,18 @@ commands = [
 ]
 
 [tool.tox.env.reformat]
-description = "Fix lint and reformat the Python, HTML and Jinja in place"
+description = "Fix lint and reformat the Python, HTML, Jinja, JS and CSS"
 skip_install = true
 dependency_groups = ["djlint", "ruff"]
+set_env = { KM_FIX = "1" }
 commands = [
+    { replace = "ref", of = [
+        "tool",
+        "tox",
+        "env",
+        "bundles-check",
+        "commands",
+    ], extend = true },
     [
         "djlint",
         "kaamiki/theme/templates",
