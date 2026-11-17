@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 November 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 17 November 2026
 
 :km-page-title: How Kaamiki moves
 :km-page-description: Every animation in Kaamiki, shown working in one
@@ -697,8 +697,10 @@ swipe down, or with Back on a phone, and a second press while it's still
 moving turns it round from where it is. Turn the screen or resize the window
 with it open, then close it, to see it find its way back. A greyscale picture
 (:ref:`classes <kaamiki-classes-pictures>` has some) comes out of its grey as
-it lifts and goes back to it as it shrinks, and however you close it nothing is
-left focused or ringed. This one is 640px wide, shown at 240px:
+it lifts and goes back to it as it shrinks. Close it with a press and nothing
+is left focused or ringed. Close it from the keyboard and the focus goes back
+to the picture, its ring fading away a moment later. This one is 640px wide,
+shown at 240px:
 
 .. figure:: /_static/combos/poster.jpg
     :width: 240px

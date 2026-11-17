@@ -30,6 +30,7 @@
         const SKIP = 'button, summary, .km-no-enlarge, .km-code-explain';
         const MARK = 'km-image--enlargeable';
         const HELD = 'km-image--held';
+        const RESTED = 'km-image--rested';
         const route = (url) => new URL(url, window.location.href).pathname;
         const entries = [];
         document.querySelectorAll('.km-page__content img.km-image')
@@ -101,6 +102,16 @@
                     words ? `${words}. ${say('enlarge')}` : say('enlarge'),
                 );
             }
+        };
+        const rest = (trigger) => {
+            const timer = setTimeout(
+                () => trigger.classList.add(RESTED),
+                ENLARGE_RING_HOLD_MS,
+            );
+            trigger.addEventListener('blur', () => {
+                clearTimeout(timer);
+                trigger.classList.remove(RESTED);
+            }, { once: true });
         };
         const refresh = rafThrottle(() => {
             if (view) return;
@@ -305,7 +316,8 @@
             }
             if (trigger.isConnected) {
                 trigger.focus({ preventScroll: true });
-                trigger.blur();
+                if (root.hasAttribute('data-km-keyboard')) rest(trigger);
+                else trigger.blur();
             }
             refresh();
         }

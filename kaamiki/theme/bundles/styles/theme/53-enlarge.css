@@ -5,6 +5,15 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+:is(
+    a.km-image--rested:focus-visible img,
+    img.km-image--rested:focus-visible,
+    .km-figure__clip:has(.km-image--rested:focus-visible)
+) {
+    outline-color: transparent;
+    transition: outline-color var(--km-duration-slow) var(--km-ease-standard);
+}
+
 .km-image--held {
     opacity: 0;
 }
