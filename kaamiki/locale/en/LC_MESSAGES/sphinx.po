@@ -210,7 +210,9 @@ msgstr ""
 
 #, python-format
 msgid "%(num)s min read"
-msgstr ""
+msgid_plural "%(num)s mins read"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Show"
 msgstr ""
