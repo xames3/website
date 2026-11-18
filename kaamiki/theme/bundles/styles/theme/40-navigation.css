@@ -340,6 +340,23 @@
     z-index: var(--km-layer-backdrop);
     background-color: var(--km-colour-backdrop);
     backdrop-filter: blur(var(--km-backdrop-blur));
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity var(--km-motion-surface) var(--km-ease-smooth),
+        visibility var(--km-motion-surface);
+}
+
+.km-sidebar__backdrop--visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-duration: var(--km-motion-surface), 0s;
+}
+
+.km-sidebar__backdrop--dragging {
+    transition: none;
 }
 
 .km-sidebar {
@@ -366,14 +383,15 @@
     touch-action: pan-y;
 }
 
-.km-sidebar--dragging {
-    transition: none;
-}
-
 .km-sidebar--visible,
 html:not(.km-document--scripted) .km-sidebar:target {
     visibility: visible;
     transform: translateX(0);
+    transition-duration: var(--km-motion-surface), 0s;
+}
+
+.km-sidebar--dragging {
+    transition: none;
 }
 
 .km-document:not(.km-document--scripted) button.km-header__menu-toggle {
