@@ -9,13 +9,14 @@
                 .filter((item) => item.offsetWidth > 0);
             const room = () => track.scrollWidth - track.clientWidth;
             let aim = null;
+            let moved = () => {};
             const goTo = (left) => {
                 if (prefersStill(carousel)) {
                     track.scrollTo({ left });
-                    return;
+                    return Promise.resolve();
                 }
                 aim = left;
-                glideAcross(track, left).then(() => {
+                return glideAcross(track, left).then(() => {
                     if (aim === left) aim = null;
                 });
             };
@@ -25,11 +26,9 @@
                     item.offsetLeft,
                     room(),
                 ));
-                if (way > 0) {
-                    goTo(stops.find((stop) => stop > at + 1) ?? room());
-                } else {
-                    goTo(stops.findLast((stop) => stop < at - 1) ?? 0);
-                }
+                return way > 0
+                    ? goTo(stops.find((stop) => stop > at + 1) ?? room())
+                    : goTo(stops.findLast((stop) => stop < at - 1) ?? 0);
             };
             const name = () => carousel.getAttribute('aria-label')
                 || document.getElementById(
@@ -57,14 +56,14 @@
                     if (button.getAttribute('aria-disabled') === 'true') {
                         return;
                     }
-                    step(Number(button.dataset.kmCarouselStep));
+                    moved(step(Number(button.dataset.kmCarouselStep)));
                 });
             });
             track.addEventListener('keydown', (event) => {
                 if (event.target !== track || event.altKey || event.ctrlKey
                     || event.metaKey || event.shiftKey) return;
-                if (event.key === 'ArrowRight') step(1);
-                else if (event.key === 'ArrowLeft') step(-1);
+                if (event.key === 'ArrowRight') moved(step(1));
+                else if (event.key === 'ArrowLeft') moved(step(-1));
                 else return;
                 event.preventDefault();
             });
@@ -120,9 +119,9 @@
                     dot.type = 'button';
                     dot.tabIndex = -1;
                     dot.className = 'km-carousel__dot';
-                    dot.addEventListener('click', () => goTo(
+                    dot.addEventListener('click', () => moved(goTo(
                         Math.min(card.offsetLeft, room()),
-                    ));
+                    )));
                     dots.append(dot);
                 });
             };
@@ -206,32 +205,51 @@
                 ? -1
                 : 1;
             const holds = new Set();
+            let timer = 0;
+            const later = () => {
+                window.clearTimeout(timer);
+                timer = window.setTimeout(turn, wait * 1000);
+            };
+            const turn = () => {
+                later();
+                if (document.hidden || room() <= 1) return;
+                const at = track.scrollLeft;
+                if (way > 0 && at >= room() - 1) goTo(0);
+                else if (way < 0 && at <= 1) goTo(room());
+                else step(way);
+            };
             const hold = (reason, on) => {
+                const was = holds.size;
                 if (on) holds.add(reason);
                 else holds.delete(reason);
+                if (holds.size) window.clearTimeout(timer);
+                else if (was) later();
             };
             carousel.addEventListener(
                 'pointerenter',
                 (event) => event.pointerType === 'mouse' && hold('hover', 1),
             );
             carousel.addEventListener('pointerleave', () => hold('hover', 0));
-            carousel.addEventListener('focusin', () => hold('focus', 1));
+            carousel.addEventListener('focusin', (event) => hold(
+                'focus',
+                event.target.matches(':focus-visible'),
+            ));
             carousel.addEventListener('focusout', () => hold('focus', 0));
             carousel.addEventListener('touchstart', () => hold('touch', 1), {
                 passive: true,
             });
             carousel.addEventListener('touchend', () => hold('touch', 0));
             carousel.addEventListener('touchcancel', () => hold('touch', 0));
+            moved = (run) => {
+                window.clearTimeout(timer);
+                run.then(() => {
+                    if (!holds.size) later();
+                });
+            };
             new IntersectionObserver((entries) => {
                 hold('away', !entries.at(-1).isIntersecting);
             }).observe(carousel);
-            setInterval(() => {
-                if (holds.size || document.hidden || room() <= 1) return;
-                const at = track.scrollLeft;
-                if (way > 0 && at >= room() - 1) goTo(0);
-                else if (way < 0 && at <= 1) goTo(room());
-                else step(way);
-            }, wait * 1000);
+            later();
         });
     }
 
