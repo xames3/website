@@ -586,6 +586,10 @@ html:not(.km-document--scripted) .km-sidebar:target {
     color: hsl(var(--km-colour-button-dark-fg));
     transition: background-color var(--km-motion-press) var(--km-ease-smooth);
 
+    & > i {
+        transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
+    }
+
     @media (hover: hover) {
         &:hover {
             background-color: hsl(var(--km-colour-button-dark-bg));
@@ -595,6 +599,10 @@ html:not(.km-document--scripted) .km-sidebar:target {
     &:active {
         background-color: hsl(var(--km-colour-button-dark-bg-hover));
     }
+}
+
+:root:not(.km-document--icons-loaded) .km-search__submit > i {
+    opacity: 0;
 }
 
 .km-header__search {

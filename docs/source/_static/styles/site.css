@@ -28,12 +28,13 @@
     width: 1em;
     --km-tracking: normal;
     color: hsl(var(--km-colour-blue));
+    transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
 }
 
 :root:not(.km-document--icons-loaded) :is(
     .km-header__title, .km-sidebar__brand-title
 )::after {
-    visibility: hidden;
+    opacity: 0;
 }
 
 .km-columns__column.am-align-right {
