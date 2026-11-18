@@ -78,23 +78,9 @@
     margin-right: var(--km-space-4);
 }
 
-.km-accordion--marker-plus>.km-accordion__title>.km-accordion__marker {
-    display: inline-grid;
-    place-items: center;
-
-    & .km-accordion__icon {
-        grid-area: 1 / 1;
-    }
-
-    & .km-accordion__icon--upright {
-        transform: rotateZ(90deg);
-    }
-}
-
 .km-accordion--marker-plus[open]:not(.km-accordion--closing)
-    > .km-accordion__title > .km-accordion__marker
-    > .km-accordion__icon--upright {
-    transform: rotateZ(0deg);
+    > .km-accordion__title > .km-accordion__marker .km-accordion__icon {
+    transform: rotateZ(45deg);
 }
 
 .km-accordion--marker-right[open]:not(.km-accordion--closing)
