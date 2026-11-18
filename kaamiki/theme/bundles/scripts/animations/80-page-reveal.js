@@ -4,6 +4,14 @@
         ));
     }
 
+    function arrival() {
+        return root.getAttribute('data-km-arrival');
+    }
+
+    function kept(node) {
+        return arrival() === 'link' && node.matches('.km-header, .km-footer');
+    }
+
     function markTitle() {
         const heading = document.querySelector('#km-content > section > h1');
         if (!heading) return [];
@@ -14,7 +22,7 @@
             ...Array.from(heading.parentElement.children).filter((child) => (
                 child.matches('.km-text--lead, .km-byline')
             )),
-        ].filter(Boolean);
+        ].filter((item) => item && !kept(item));
         items.forEach((item) => item.classList.add(TITLE_ITEM));
         return items;
     }
@@ -42,7 +50,7 @@
     }
 
     function initPageReveal() {
-        if (prefersReducedMotion()) return;
+        if (prefersReducedMotion() || arrival() === 'history') return;
         const title = new Set(markTitle());
         const blocks = [
             document.querySelector('.km-header'),
@@ -54,7 +62,7 @@
             document.querySelector('.km-pagination'),
             document.querySelector('.km-related'),
             document.querySelector('.km-footer'),
-        ].filter((block) => block && !title.has(block));
+        ].filter((block) => block && !title.has(block) && !kept(block));
 
         const duration = engine.ms('enter');
         let step = engine.ms('stagger');
@@ -122,17 +130,6 @@
                 }
                 if (began === null) {
                     began = now;
-                    if (root.hasAttribute('data-km-nav')) {
-                        [
-                            document.querySelector('.km-header'),
-                            document.querySelector('.km-footer'),
-                        ].forEach((kept) => {
-                            kept?.classList.remove(TITLE_ITEM, REVEAL_WAITING);
-                        });
-                        waiting = waiting.filter((block) => (
-                            !block.matches('.km-footer')
-                        ));
-                    }
                     screen = screenHeight();
                     const clip = edges(Math.max(window.innerHeight, screen));
                     waiting = waiting.filter((block) => {

@@ -66,31 +66,16 @@
     window.addEventListener('pagereveal', (event) => {
         const change = event.viewTransition;
         // A page shown again from the back and forward
-        // cache is whole already, with no content to show
-        // in once the old one has left.
-        if (revealed && change) change.skipTransition();
-        if (revealed || !change) return release();
+        // cache, or reached from the history, is whole
+        // already, with no content to show in once the old
+        // one has left.
+        const history = revealed || root.getAttribute(
+            'data-km-arrival'
+        ) === 'history';
+        if (history && change) change.skipTransition();
+        if (history || !change) return release();
         revealed = true;
-        let back = false;
-        try {
-            const move = window.navigation.activation;
-            back = move.navigationType === 'traverse' &&
-                move.entry.index < move.from.index;
-        } catch (error) {}
-        root.setAttribute(
-            'data-km-nav',
-            back ? 'back' : 'forward'
-        );
         hold();
-        const loaded = new Promise((resolve) => {
-            if (document.readyState === 'complete') {
-                resolve();
-            } else {
-                window.addEventListener('load', resolve, {
-                    once: true
-                });
-            }
-        }).then(() => document.fonts.ready);
         const picture = (move, name) => (
             move.effect &&
             move.effect.pseudoElement === name
@@ -110,15 +95,13 @@
         });
         change.ready.then(() => {
             const moving = document.getAnimations();
-            return Promise.all([
-                loaded,
-                ...moving
+            return Promise.all(moving
                 .filter((move) => picture(
                     move,
                     '::view-transition-old(km-content)'
                 ))
-                .map(nearly),
-            ]).then(() => moving
+                .map(nearly)
+            ).then(() => moving
                 .filter((move) => [
                     '::view-transition-old(root)',
                     '::view-transition-old(km-dropdown)',

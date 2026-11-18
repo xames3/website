@@ -2,6 +2,11 @@
     const root = document.documentElement;
     const classes = root.classList;
     const held = () => root.hasAttribute('data-km-handing');
+    const entry = performance.getEntriesByType('navigation')[0];
+    const local = document.referrer.startsWith(location.origin + '/');
+    const arrival = entry?.type === 'back_forward' ? 'history'
+        : entry?.type === 'navigate' && local ? 'link' : '';
+    if (arrival) root.setAttribute('data-km-arrival', arrival);
     let fonts = false;
     let timer = window.setTimeout(show, held() ? 5000 : 2000);
     classes.add(
@@ -23,7 +28,7 @@
     }
 
     function ready() {
-        const loaded = document.fonts.ready;
+        const loaded = arrival ? Promise.resolve() : document.fonts.ready;
         requestAnimationFrame(() => loaded.then(() => {
             fonts = true;
             settle();
