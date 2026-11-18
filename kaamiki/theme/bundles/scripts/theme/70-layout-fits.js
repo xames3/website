@@ -201,7 +201,7 @@
         if (!items.length) return;
 
         const update = () => {
-            items.forEach(({ scroller, host, axis }) => {
+            const spans = items.map(({ scroller, axis }) => {
                 const across = axis === 'x';
                 const room = (across
                     ? scroller.scrollWidth - scroller.clientWidth
@@ -209,6 +209,10 @@
                 const at = Math.abs(
                     across ? scroller.scrollLeft : scroller.scrollTop,
                 );
+                return { room, at };
+            });
+            items.forEach(({ host }, index) => {
+                const { room, at } = spans[index];
                 host.classList.toggle('km-fade--start', room > 1 && at > 1);
                 host.classList.toggle(
                     'km-fade--end',
