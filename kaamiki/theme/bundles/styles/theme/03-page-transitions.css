@@ -43,7 +43,6 @@ its content can be pictured. A page reached from the history
 @media (prefers-reduced-motion: no-preference) {
     :root {
         --km-nav-out: calc(var(--km-motion-fade) * 0.6);
-        --km-nav-hold: calc(var(--km-motion-enter) * 1.5);
     }
 
     .km-document--leaving .km-layout__content {
@@ -69,7 +68,7 @@ its content can be pictured. A page reached from the history
 
     :root:not(.km-document--revealing)::view-transition-old(root) {
         z-index: 1;
-        animation: km-nav-chrome-out var(--km-nav-hold) steps(1, end) both;
+        animation: km-nav-chrome-out var(--km-nav-out) steps(1, end) both;
     }
 
     /* A change of colours: the old page stays on top and a hole with a soft

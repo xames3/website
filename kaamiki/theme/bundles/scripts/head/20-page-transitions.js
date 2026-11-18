@@ -28,6 +28,10 @@
     );
     window.addEventListener('pageswap', (event) => {
         if (!event.viewTransition) return;
+        if (event.activation?.navigationType === 'traverse') {
+            event.viewTransition.skipTransition();
+            return;
+        }
         Array.from(menus()).find((menu) => (
             getComputedStyle(menu).visibility !== 'hidden'
         ))?.style.setProperty(
@@ -76,38 +80,6 @@
         if (history || !change) return release();
         revealed = true;
         hold();
-        const picture = (move, name) => (
-            move.effect &&
-            move.effect.pseudoElement === name
-        );
-        const nearly = (move) => new Promise((resolve) => {
-            const check = () => {
-                const length = move.effect
-                    .getComputedTiming().duration;
-                if (move.playState === 'finished' ||
-                    move.currentTime >= length * 0.95) {
-                    resolve();
-                } else {
-                    window.requestAnimationFrame(check);
-                }
-            };
-            check();
-        });
-        change.ready.then(() => {
-            const moving = document.getAnimations();
-            return Promise.all(moving
-                .filter((move) => picture(
-                    move,
-                    '::view-transition-old(km-content)'
-                ))
-                .map(nearly)
-            ).then(() => moving
-                .filter((move) => [
-                    '::view-transition-old(root)',
-                    '::view-transition-old(km-dropdown)',
-                ].some((name) => picture(move, name)))
-                .forEach((move) => move.finish()));
-        }).catch(() => {}).then(release);
         change.finished.catch(() => {}).then(release);
     });
 })();
