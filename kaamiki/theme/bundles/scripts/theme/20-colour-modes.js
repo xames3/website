@@ -97,12 +97,19 @@
                 Math.max(y, window.innerHeight - y),
             );
             // The hole in the old page is a soft-edged disc; growing it from
-            // the toggle until its soft edge is past the furthest corner shows
-            // the whole new page. It starts as wide as its soft edge, so the
-            // first frame already shows something, and it keeps its last
-            // size until the old page is let go of.
+            // the toggle until only the faint rim of its soft edge is left
+            // over the furthest corner shows the whole new page, and the
+            // old page is let go of there. It starts as wide as its soft
+            // edge, so the first frame already shows something, and it
+            // keeps its last size until the old page is let go of.
             const soft = feather(reach);
             const across = 2 * (reach + soft);
+            const total = engine.ms('content') * REVEAL_STRETCH;
+            const cut = engine.when(
+                total,
+                1 - (soft * REVEAL_HIDDEN_SHARE) / (reach + soft / 2),
+            );
+            const end = soft + (across - soft) * engine.curve(total)(cut);
             root.style.setProperty('--km-reveal-feather', `${soft}px`);
             root.classList.add('km-document--revealing');
             const change = document.startViewTransition(() => apply(mode));
@@ -110,18 +117,16 @@
                 {
                     maskSize: [
                         `100% 100%, ${soft}px ${soft}px`,
-                        `100% 100%, ${across}px ${across}px`,
+                        `100% 100%, ${end}px ${end}px`,
                     ],
                     maskPosition: [
                         `0px 0px, ${x - soft / 2}px ${y - soft / 2}px`,
-                        `0px 0px, ${x - across / 2}px ${y - across / 2}px`,
+                        `0px 0px, ${x - end / 2}px ${y - end / 2}px`,
                     ],
                 },
                 {
-                    duration: engine.ms('content') * REVEAL_STRETCH,
-                    easing: engine.ease(
-                        engine.ms('content') * REVEAL_STRETCH,
-                    ),
+                    duration: total * cut,
+                    easing: engine.ease(total, 1, cut),
                     fill: 'forwards',
                     pseudoElement: '::view-transition-old(root)',
                 },

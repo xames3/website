@@ -40,11 +40,29 @@
 
     // The same as an easing for the Web Animations API, or a plain one
     // where `linear()` isn't known.
-    function motionEasing(settleMs, zeta = 1) {
+    function motionEasing(settleMs, zeta = 1, until = 1) {
         if (!CSS.supports('animation-timing-function', 'linear(0, 1)')) {
             return getCssVar('--km-ease-smooth');
         }
-        return springEasing(makeSpring(Math.max(1, settleMs), zeta));
+        return springEasing(
+            makeSpring(Math.max(1, settleMs), zeta),
+            0,
+            0,
+            SPRING_POINTS,
+            until,
+        );
+    }
+
+    function motionWhen(settleMs, progress, zeta = 1) {
+        const curve = motionCurve(settleMs, zeta);
+        let low = 0;
+        let high = 1;
+        for (let i = 0; i < 40; i += 1) {
+            const middle = (low + high) / 2;
+            if (curve(middle) < progress) low = middle;
+            else high = middle;
+        }
+        return high;
     }
 
     // The speed a directive asked for (`:speed: 2` is 2) and 1 for one that
@@ -349,6 +367,7 @@
         easing: springEasing,
         curve: motionCurve,
         ease: motionEasing,
+        when: motionWhen,
         lab: motionLab,
     };
 

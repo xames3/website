@@ -78,6 +78,7 @@
         from = 0,
         speed = 0,
         points = SPRING_POINTS,
+        until = 1,
     ) {
         const total = 1 - from;
         if (total < 1e-6) return [0, 1];
@@ -86,10 +87,11 @@
         );
         // The curve is stretched by what it still lacks at its last point,
         // so it lands on 1 without a jump at the end.
-        const settled = at(spring.settleMs);
+        const span = spring.settleMs * until;
+        const settled = at(span);
         const samples = [];
         for (let i = 0; i <= points; i += 1) {
-            samples.push(at((spring.settleMs * i) / points) / settled);
+            samples.push(at((span * i) / points) / settled);
         }
         samples[0] = 0;
         samples[points] = 1;
@@ -101,8 +103,9 @@
         from = 0,
         speed = 0,
         points = SPRING_POINTS,
+        until = 1,
     ) {
-        const samples = springSamples(spring, from, speed, points);
+        const samples = springSamples(spring, from, speed, points, until);
         return `linear(${samples.map((value) => (
             Number(value.toFixed(4))
         )).join(', ')})`;
