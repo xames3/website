@@ -4,7 +4,7 @@ Animations Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 17 October 2026
-Last updated on: 16 November 2026
+Last updated on: 18 November 2026
 */
 
 (() => {
@@ -37,6 +37,9 @@ Last updated on: 16 November 2026
     const CLAMP_SLACK_PX = 48;
     const CLAMP_MIN_PX = 320;
     const CLAMP_MIN_SCREEN_PX = 480;
+    const PLACE_BLOCKS = 'section > :not(section)';
+    const PLACE_SETTLE_MS = 500;
+    const PLACE_SAVE_MS = 150;
     const HIGHLIGHT_WAIT_MS = 2000;
     const HIDDEN_PARTS = '.km-tabs__panel:not(.km-tabs__panel--current), '
         + 'details.km-accordion:not([open])';

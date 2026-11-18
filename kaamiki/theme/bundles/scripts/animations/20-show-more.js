@@ -93,10 +93,13 @@
         const toggle = (next, animate = true) => {
             if (next === expanded || whole) return;
             expanded = next;
-            attempt(() => history.replaceState(
-                { ...history.state, kmExpanded: next },
-                '',
-            ));
+            attempt(() => {
+                history.replaceState(
+                    { ...history.state, kmExpanded: next },
+                    '',
+                );
+                history.scrollRestoration = next ? 'manual' : 'auto';
+            });
             button.setAttribute('aria-expanded', next ? 'true' : 'false');
             const relabel = () => {
                 if (!label || current !== turn) return;
@@ -138,6 +141,49 @@
             }
             motion.close(collapsed, shell).then(relabel);
         };
+
+        const blocks = () => content.querySelectorAll(PLACE_BLOCKS);
+
+        const mark = () => {
+            const all = Array.from(blocks());
+            const index = all.findIndex((block) => {
+                const box = block.getBoundingClientRect();
+                return box.bottom > 0 && box.height > 0;
+            });
+            if (index < 0) return null;
+            const box = all[index].getBoundingClientRect();
+            return { index, share: -box.top / box.height };
+        };
+
+        const keep = (place) => {
+            const block = blocks()[place?.index];
+            if (!block) return;
+            const box = block.getBoundingClientRect();
+            window.scrollBy({
+                top: box.top + place.share * box.height,
+                behavior: 'instant',
+            });
+            let height = 0;
+            let still = 0;
+            holdPlace(block, () => {
+                const now = content.getBoundingClientRect().height;
+                if (now !== height) {
+                    height = now;
+                    still = performance.now();
+                }
+                return document.readyState === 'complete'
+                    && performance.now() - still > PLACE_SETTLE_MS;
+            }, place.share);
+        };
+
+        const save = () => {
+            if (!expanded) return;
+            attempt(() => history.replaceState(
+                { ...history.state, kmPlace: mark() },
+                '',
+            ));
+        };
+        let saving = 0;
 
         const holds = (href) => {
             if (!href.startsWith('#') || href.length < 2) return false;
@@ -192,8 +238,15 @@
         document.fonts.ready.then(refit);
         document.fonts.addEventListener?.('loadingdone', refit);
 
+        onScroll(() => {
+            window.clearTimeout(saving);
+            saving = window.setTimeout(save, PLACE_SAVE_MS);
+        });
+        window.addEventListener('pagehide', save);
+
         if (holds(location.hash)
             || history.state?.kmExpanded) toggle(true, false);
+        if (expanded) keep(history.state?.kmPlace);
         root.classList.add('km-document--fold-ready');
     }
 

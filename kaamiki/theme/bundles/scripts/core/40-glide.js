@@ -50,13 +50,18 @@
         }, scroller);
     }
 
-    // Keeps `anchor` where it is on the screen while something above it
-    // changes size, by scrolling the page as far as it would have moved,
-    // until `settled()` says the change is over or a reader takes over.
-    function holdPlace(anchor, settled) {
-        const top = anchor.getBoundingClientRect().top;
+    // Keeps the point `share` of the way down `anchor` where it is on the
+    // screen while something changes size, by scrolling the page as far as
+    // it would have moved, until `settled()` says the change is over or a
+    // reader takes over.
+    function holdPlace(anchor, settled, share = 0) {
+        const point = () => {
+            const box = anchor.getBoundingClientRect();
+            return box.top + share * box.height;
+        };
+        const top = point();
         return everyFrame(() => {
-            const drift = anchor.getBoundingClientRect().top - top;
+            const drift = point() - top;
             if (Math.abs(drift) >= 0.5) {
                 window.scrollBy({ top: drift, behavior: 'instant' });
             }
