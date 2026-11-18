@@ -3,7 +3,7 @@
             codeExplains.push(createCodeExplain(host));
         });
         if (!codeExplains.length) return;
-        measureAll();
+        measureSome(codeExplains);
         onScroll(updateSoon);
 
         const panes = new ResizeObserver(settleSoon);
@@ -58,7 +58,7 @@
 
         window.matchMedia('(prefers-reduced-motion: reduce)')
             .addEventListener('change', measureAll);
-        document.fonts.ready.then(measureAll);
-        window.addEventListener('load', measureAll, { once: true });
+        document.fonts.ready.then(refitAll);
+        window.addEventListener('load', refitAll, { once: true });
     }
 

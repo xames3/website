@@ -132,11 +132,10 @@
                     began = now;
                     screen = screenHeight();
                     const clip = edges(Math.max(window.innerHeight, screen));
-                    waiting = waiting.filter((block) => {
-                        if (inView(block, clip)) return true;
-                        release(block, false);
-                        return false;
-                    });
+                    const seen = waiting.map((block) => inView(block, clip));
+                    waiting.filter((block, index) => !seen[index])
+                        .forEach((block) => release(block, false));
+                    waiting = waiting.filter((block, index) => seen[index]);
                     step = clamp(
                         (REVEAL_BUDGET_MS / engine.speed() - duration)
                             / Math.max(1, waiting.length - 1),
