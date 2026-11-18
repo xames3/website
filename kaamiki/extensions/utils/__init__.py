@@ -4,7 +4,7 @@ Theme Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 16 November 2026
+Last updated on: 18 November 2026
 
 The shared helpers of Kaamiki.
 """
@@ -86,6 +86,7 @@ from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.social import social_metadata
 from kaamiki.extensions.utils.templates import TEMPLATES
 from kaamiki.extensions.utils.templates import bridge
+from kaamiki.extensions.utils.templates import parts
 from kaamiki.extensions.utils.templates import render
 
 __all__: list[str] = [
@@ -140,6 +141,7 @@ __all__: list[str] = [
     "pair",
     "paragraph",
     "parse",
+    "parts",
     "phrase",
     "provenance",
     "reading_time",

@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 November 2026
+Last updated on: 18 November 2026
 
 The utilities that fill the context of a page for the templates. The
 templates read one read-only value, `kaamiki`, with the paths of
@@ -70,6 +70,7 @@ from kaamiki.extensions.utils.settings import stored
 from kaamiki.extensions.utils.settings import validate
 from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.templates import environment
+from kaamiki.extensions.utils.templates import parts
 from kaamiki.extensions.utils.text import clip
 from kaamiki.extensions.utils.text import levelled
 from kaamiki.extensions.utils.text import plain
@@ -125,6 +126,24 @@ def context_defaults(app: Sphinx) -> None:
     environment.globals[NAME] = found
 
 
+def inline(name: str, text: str) -> str:
+    """Check that a part of a bundle can go in a `<script>` element.
+
+    :param name: The file name of the part.
+    :param text: The text of the part.
+    :return: The text, without the space at its end.
+    :raises KaamikiError: For a part that closes the element, which
+        would end the script early.
+    """
+    if "</script" in text.lower():
+        fail(
+            f"expected no '</script' in {name!r}, got one, so the script"
+            " would end early",
+            "bundles",
+        )
+    return text.rstrip()
+
+
 def made(config: Config) -> Kaamiki:
     """Make the values of Kaamiki for the build, one time.
 
@@ -132,7 +151,9 @@ def made(config: Config) -> Kaamiki:
     :return: The values, with the paths of `kaamiki.conf`. A value that
         Kaamiki finds from a setting replaces it, as
         `kaamiki.site.project` with its defaults, or goes next to it,
-        as `kaamiki.icons.roles`. `kaamiki.credit` and
+        as `kaamiki.icons.roles`. `kaamiki.embed.head` holds the text
+        of each part of `scripts/head.js` by its name, as
+        `colour-mode`, for the head of a page. `kaamiki.credit` and
         `kaamiki.fa_free` hold the links of Kaamiki and Font Awesome
         Free. `kaamiki.page` and some values of the groups are for
         each page, which the handlers of the page set.
@@ -188,6 +209,10 @@ def made(config: Config) -> Kaamiki:
     groups["credit"] = {
         "url": CREDIT,
         "new_tab": opens_new_tab(CREDIT, config),
+    }
+    groups["embed"]["head"] = {
+        name.split("-", 1)[1].removesuffix(".js"): inline(name, text)
+        for name, text in parts("scripts/head.js").items()
     }
     groups["fa_free"] = {"css": FA_FREE, "integrity": FA_FREE_INTEGRITY}
     groups["page"] = {"author": "", "related": None, "updated_on": ""}

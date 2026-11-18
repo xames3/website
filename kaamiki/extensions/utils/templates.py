@@ -4,19 +4,21 @@ Template Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 November 2026
+Last updated on: 18 November 2026
 
 The Jinja environment of Kaamiki and the helpers that read its
-templates.
+templates and the parts of its bundles.
 """
 
 from __future__ import annotations
 
+import os
 import os.path as p
 import typing as t
 
 import jinja2
 
+from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.settings import NAME
 from kaamiki.extensions.utils.settings import Kaamiki
@@ -24,9 +26,11 @@ from kaamiki.extensions.utils.settings import Kaamiki
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
 
-TEMPLATES: t.Final[str] = p.join(
-    p.dirname(p.dirname(p.dirname(p.realpath(__file__)))), "theme", "templates"
+THEME: t.Final[str] = p.join(
+    p.dirname(p.dirname(p.dirname(p.realpath(__file__)))), "theme"
 )
+TEMPLATES: t.Final[str] = p.join(THEME, "templates")
+BUNDLES: t.Final[str] = p.join(THEME, "bundles")
 environment: jinja2.Environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(TEMPLATES),
     autoescape=True,
@@ -38,6 +42,45 @@ environment: jinja2.Environment = jinja2.Environment(
 environment.install_null_translations(  # type: ignore[attr-defined]
     newstyle=True
 )
+
+
+def parts(bundle: str) -> dict[str, str]:
+    """Read the parts of a bundle, in sequence.
+
+    :param bundle: The bundle, relative to `theme/bundles`, as
+        `scripts/theme.js`. Its parts are in the folder of the same
+        name, and the name of a part is its place, so `10-reset.css`
+        comes before `20-base.css`.
+    :return: The text of each part, by its file name.
+    :raises KaamikiError: For a bundle without parts, or a part that
+        is not UTF-8 text.
+    """
+    stem, suffix = p.splitext(bundle)
+    folder = p.join(BUNDLES, stem)
+    names = sorted(
+        _
+        for _ in (os.listdir(folder) if p.isdir(folder) else ())
+        if _.endswith(suffix) and not _.startswith(".")
+    )
+    if not names:
+        checks.fail(
+            f"expected the parts of {bundle!r} in {folder!r}, got none,"
+            " so the install is incomplete",
+            "bundles",
+        )
+    found: dict[str, str] = {}
+    for name in names:
+        try:
+            with open(
+                p.join(folder, name), encoding="utf-8-sig", newline=""
+            ) as f:
+                found[name] = f.read()
+        except (OSError, UnicodeDecodeError) as error:
+            checks.fail(
+                f"expected {name!r} to be UTF-8 text, got {error}",
+                "bundles",
+            )
+    return found
 
 
 def render(
