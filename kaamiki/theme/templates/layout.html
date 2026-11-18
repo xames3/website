@@ -383,10 +383,10 @@ Last updated on: 18 November 2026
                                 ))
                                 .map(nearly),
                             ]).then(() => moving
-                                .filter((move) => picture(
-                                    move,
-                                    '::view-transition-old(root)'
-                                ))
+                                .filter((move) => [
+                                    '::view-transition-old(root)',
+                                    '::view-transition-old(km-dropdown)',
+                                ].some((name) => picture(move, name)))
                                 .forEach((move) => move.finish()));
                         }).catch(() => {}).then(release);
                         change.finished.catch(() => {}).then(release);
