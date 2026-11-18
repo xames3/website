@@ -13,19 +13,26 @@
         });
         new ResizeObserver(settleSoon).observe(document.body);
 
-        const restage = () => {
-            const again = codeExplains.filter((explainer) => (
-                explainer.host.getAttribute('data-km-mode') === 'stack'
-                && explainer.host.closest('.km-page--clamped') === null
-                && window.innerWidth >= stageMinWidth()
-                && !prefersStill(explainer.host)
-            ));
-            if (!again.length) return;
-            again.forEach((explainer) => explainer.measure());
-            updateAll();
-        };
+        const hosts = new Map(codeExplains.map((explainer) => (
+            [explainer.host, explainer]
+        )));
+        const near = new IntersectionObserver((entries) => {
+            const due = entries
+                .filter((entry) => entry.isIntersecting)
+                .map((entry) => hosts.get(entry.target))
+                .filter((explainer) => stale.delete(explainer));
+            if (due.length) measureSome(due);
+        }, { rootMargin: '100% 0px' });
+        codeExplains.forEach((explainer) => near.observe(explainer.host));
+        const restage = () => measureSome(codeExplains.filter((explainer) => (
+            !stale.has(explainer)
+            && explainer.host.getAttribute('data-km-mode') === 'stack'
+            && explainer.host.closest('.km-page--clamped') === null
+            && window.innerWidth >= stageMinWidth()
+            && !prefersStill(explainer.host)
+        )));
         document.addEventListener('km:fold', () => {
-            measureAll();
+            measureSome(codeExplains);
             requestAnimationFrame(() => requestAnimationFrame(restage));
         });
         window.addEventListener('beforeprint', () => {

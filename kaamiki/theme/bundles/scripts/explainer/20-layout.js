@@ -26,11 +26,34 @@
         updateAll();
     }
 
-    function refitAll() {
-        codeExplains.forEach((explainer) => {
-            if (explainer.shape() !== explainer.shaped) explainer.measure();
+    // Only the explainers near the screen are measured at once; the rest
+    // wait until they come near, so a change of the page's size doesn't
+    // hold it while all of them are.
+    const stale = new Set();
+
+    function nearScreen(explainer) {
+        const box = explainer.host.getBoundingClientRect();
+        return box.bottom > -window.innerHeight
+            && box.top < 2 * window.innerHeight;
+    }
+
+    function measureSome(list) {
+        const now = list.filter((explainer) => {
+            if (nearScreen(explainer)) {
+                stale.delete(explainer);
+                return true;
+            }
+            stale.add(explainer);
+            return false;
         });
+        now.forEach((explainer) => explainer.measure());
         updateAll();
+    }
+
+    function refitAll() {
+        measureSome(codeExplains.filter((explainer) => (
+            explainer.shape() !== explainer.shaped
+        )));
     }
 
     let settleTimer = 0;
