@@ -54,16 +54,27 @@
             search.classList.remove('km-search--open');
         };
 
-        submit?.addEventListener('click', (event) => {
-            if (search.classList.contains('km-search--open')) return;
+        submit?.addEventListener('mousedown', (event) => {
             event.preventDefault();
-            open();
+        });
+        submit?.addEventListener('click', (event) => {
+            const opened = search.classList.contains('km-search--open');
+            if (opened && input?.value.trim()) return;
+            event.preventDefault();
+            if (!opened) {
+                open();
+                return;
+            }
+            close();
+            if (document.activeElement === input) input.blur();
         });
 
         input?.addEventListener('focus', () => (
             search.classList.add('km-search--open')
         ));
-        input?.addEventListener('blur', () => setTimeout(close, 0));
+        search.addEventListener('focusout', (event) => {
+            if (!search.contains(event.relatedTarget)) close();
+        });
         input?.addEventListener('keydown', (event) => {
             if (event.key !== 'Escape') return;
             close();
