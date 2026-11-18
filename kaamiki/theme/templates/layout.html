@@ -4,7 +4,7 @@ Base Layout Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 16 November 2026
+Last updated on: 18 November 2026
 #}
 {%- from "components/helpers.html.jinja" import km_glyph, km_tab with context %}
 {%- from "components/logo.html.jinja" import km_logo, km_title with context -%}
@@ -284,11 +284,20 @@ Last updated on: 16 November 2026
                         hold();
                     }
 
-                    // The old page names its content so it can be pictured
-                    // as it was, and gives the name up if it's shown again
-                    // from the back and forward cache.
+                    // The old page names its content and an open dropdown so
+                    // they can be pictured as they were, and gives the names
+                    // up if it's shown again from the back and forward cache.
+                    const menus = () => document.querySelectorAll(
+                        '.km-header__nav-group > ul'
+                    );
                     window.addEventListener('pageswap', (event) => {
                         if (!event.viewTransition) return;
+                        Array.from(menus()).find((menu) => (
+                            getComputedStyle(menu).display !== 'none'
+                        ))?.style.setProperty(
+                            'view-transition-name',
+                            'km-dropdown'
+                        );
                         const content = document.querySelector(
                             '.km-layout__content'
                         );
@@ -310,6 +319,9 @@ Last updated on: 16 November 2026
                         classes.remove('km-document--leaving');
                         document.querySelector('.km-layout__content')
                             ?.style.removeProperty('clip-path');
+                        menus().forEach((menu) => {
+                            menu.style.removeProperty('view-transition-name');
+                        });
                     });
 
                     // Fires with the first frame, after deferred scripts
