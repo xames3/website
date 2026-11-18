@@ -617,9 +617,8 @@ html:not(.km-document--scripted) .km-sidebar:target {
         overflow: hidden;
         transition:
             width var(--km-motion-surface) var(--km-ease-smooth),
-            background-color calc(var(--km-motion-press) * 1.5)
-                var(--km-ease-smooth)
-                calc(var(--km-motion-surface) * 0.8);
+            background-color var(--km-motion-press) var(--km-ease-smooth)
+                calc(var(--km-motion-surface) - var(--km-motion-press) / 2);
     }
 
     & .km-search__label {
@@ -636,7 +635,7 @@ html:not(.km-document--scripted) .km-sidebar:target {
         background-color: transparent;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0s;
+        transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
     }
 
     & .km-search__submit {
@@ -650,7 +649,9 @@ html:not(.km-document--scripted) .km-sidebar:target {
     & .km-search:is(.km-search--open, :focus-within) {
         width: 10rem;
         background-color: hsl(var(--km-colour-search-bg));
-        transition: width var(--km-motion-surface) var(--km-ease-smooth);
+        transition:
+            width var(--km-motion-surface) var(--km-ease-smooth),
+            background-color var(--km-motion-press) var(--km-ease-smooth);
     }
 
     & .km-search:is(.km-search--open, :focus-within) .km-search__input {
@@ -672,7 +673,9 @@ html:not(.km-document--scripted) .km-sidebar:target {
         & .km-search:hover {
             width: 10rem;
             background-color: hsl(var(--km-colour-search-bg));
-            transition: width var(--km-motion-surface) var(--km-ease-smooth);
+            transition:
+                width var(--km-motion-surface) var(--km-ease-smooth),
+                background-color var(--km-motion-press) var(--km-ease-smooth);
         }
 
         & .km-search:hover .km-search__input {
