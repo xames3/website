@@ -4,7 +4,7 @@ Theme Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 15 October 2026
-Last updated on: 17 November 2026
+Last updated on: 18 November 2026
 */
 
 (() => {
@@ -80,7 +80,7 @@ Last updated on: 17 November 2026
     const DROPDOWN_AIM_WINDOW_MS = 120;
     const DROPDOWN_AIM_STEP_MS = 60;
     const DROPDOWN_AIM_MS = 450;
-    const DROPDOWN_WRAPPED_CLOSE_DELAY_MS = 700;
+    const DROPDOWN_PIN_MS = 300;
     const DROPDOWN_EDGE_PX = 8;
     const DROPDOWN_ROWS = 3;
     const SIDEBAR_WIDE_PX = 768;

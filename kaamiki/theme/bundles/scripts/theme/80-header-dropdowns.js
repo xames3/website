@@ -37,14 +37,14 @@
                 || signs.every((sign) => sign <= 0);
         };
 
+        let hovered = 0;
+        const mouse = (event) => event.pointerType === 'mouse';
+        const outside = (event) => {
+            if (current && !current.group.contains(event.target)) hide();
+        };
+
         const place = ({ group, list }) => {
             group.style.setProperty('--km-dropdown-shift', '0px');
-            const drop = Math.max(
-                0,
-                nav.getBoundingClientRect().bottom
-                    - group.getBoundingClientRect().bottom,
-            );
-            const wrapped = drop > 1;
             const box = list.getBoundingClientRect();
             const room = document.documentElement.clientWidth
                 - DROPDOWN_EDGE_PX;
@@ -52,12 +52,7 @@
                 DROPDOWN_EDGE_PX - box.left,
                 Math.min(0, room - box.right),
             );
-            group.style.setProperty(
-                '--km-dropdown-drop',
-                `${wrapped ? drop : 0}px`,
-            );
             group.style.setProperty('--km-dropdown-shift', `${left}px`);
-            group.dataset.kmWrapped = wrapped ? 'true' : '';
         };
         const hide = () => {
             clearTimeout(timer);
@@ -66,9 +61,10 @@
             current.trigger.setAttribute('aria-expanded', 'false');
             current = null;
             document.removeEventListener('mousemove', track);
+            document.removeEventListener('pointerdown', outside);
             trail.length = 0;
         };
-        const show = (menu) => {
+        const show = (menu, hover = false) => {
             clearTimeout(timer);
             if (current === menu) return;
             hide();
@@ -76,7 +72,15 @@
             place(menu);
             menu.trigger.setAttribute('aria-expanded', 'true');
             current = menu;
+            hovered = hover ? performance.now() : 0;
             document.addEventListener('mousemove', track, { passive: true });
+            document.addEventListener('pointerdown', outside, {
+                passive: true,
+            });
+        };
+        const toggle = (menu) => {
+            if (current !== menu) show(menu);
+            else if (performance.now() - hovered > DROPDOWN_PIN_MS) hide();
         };
         const later = (fn, delay) => {
             clearTimeout(timer);
@@ -101,53 +105,45 @@
                 '--km-dropdown-columns',
                 Math.max(1, Math.ceil(count / DROPDOWN_ROWS)),
             );
-            if (!isLink) {
-                trigger.setAttribute('tabindex', '0');
-                trigger.setAttribute('role', 'button');
-                trigger.removeAttribute('aria-level');
-            }
             trigger.setAttribute('aria-controls', list.id);
             trigger.setAttribute('aria-expanded', 'false');
 
-            group.addEventListener('mouseenter', () => {
+            group.addEventListener('pointerenter', (event) => {
+                if (!mouse(event)) return;
                 if (current === menu) {
                     clearTimeout(timer);
                 } else if (!current) {
-                    later(() => show(menu), DROPDOWN_OPEN_DELAY_MS);
+                    later(() => show(menu, true), DROPDOWN_OPEN_DELAY_MS);
                 } else {
                     const until = performance.now()
                         + DROPDOWN_SWITCH_DELAY_MS + DROPDOWN_AIM_MS;
                     const attempt = () => {
                         if (aimed() && performance.now() < until) {
                             later(attempt, DROPDOWN_AIM_STEP_MS);
-                        } else show(menu);
+                        } else show(menu, true);
                     };
                     later(attempt, DROPDOWN_SWITCH_DELAY_MS);
                 }
             }, { passive: true });
-            group.addEventListener('mouseleave', () => {
+            group.addEventListener('pointerleave', (event) => {
+                if (!mouse(event)) return;
                 if (group.querySelector(':focus-visible')) return;
-                const delay = group.dataset.kmWrapped
-                    ? DROPDOWN_WRAPPED_CLOSE_DELAY_MS
-                    : DROPDOWN_CLOSE_DELAY_MS;
-                const until = performance.now() + delay + DROPDOWN_AIM_MS;
+                const until = performance.now()
+                    + DROPDOWN_CLOSE_DELAY_MS + DROPDOWN_AIM_MS;
                 const attempt = () => {
                     if (aimed() && performance.now() < until) {
                         later(attempt, DROPDOWN_AIM_STEP_MS);
                     } else hide();
                 };
-                later(attempt, delay);
+                later(attempt, DROPDOWN_CLOSE_DELAY_MS);
             }, { passive: true });
             group.addEventListener('focusout', (event) => {
                 if (current === menu
                     && !group.contains(event.relatedTarget)) hide();
             });
+            if (!isLink) trigger.addEventListener('click', () => toggle(menu));
             trigger.addEventListener('keydown', (event) => {
-                if (!isLink && (event.key === 'Enter' || event.key === ' ')) {
-                    event.preventDefault();
-                    if (current === menu) hide();
-                    else show(menu);
-                } else if (event.key === 'ArrowDown') {
+                if (event.key === 'ArrowDown') {
                     event.preventDefault();
                     show(menu);
                     list.querySelector('a[href]')?.focus();
@@ -166,10 +162,14 @@
             if (list?.tagName !== 'UL') return;
 
             const group = document.createElement('div');
+            const button = document.createElement('button');
             group.className = 'km-header__nav-group';
-            caption.parentNode.insertBefore(group, caption);
-            group.append(caption, list);
-            dropdown(group, caption, list);
+            button.type = 'button';
+            button.className = caption.className;
+            button.append(...caption.childNodes);
+            caption.replaceWith(group);
+            group.append(button, list);
+            dropdown(group, button, list);
         });
 
         Array.from(nav.children).forEach((node) => {

@@ -29,7 +29,7 @@
     window.addEventListener('pageswap', (event) => {
         if (!event.viewTransition) return;
         Array.from(menus()).find((menu) => (
-            getComputedStyle(menu).display !== 'none'
+            getComputedStyle(menu).visibility !== 'hidden'
         ))?.style.setProperty(
             'view-transition-name',
             'km-dropdown'
