@@ -4,7 +4,7 @@ Accordion Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 16 November 2026
+Last updated on: 18 November 2026
 
 An `accordion` directive that folds its content below a title::
 
@@ -77,9 +77,9 @@ class Accordion(KaamikiDirective, motion=True):
           always has `km-text--subheader`. It needs `subheader`.
         - `marker`: The icon that shows that the accordion opens,
           `plus`, a `down` chevron or a `right` chevron. When the
-          accordion opens, a plus turns 45 degrees, a right chevron
-          turns 90 degrees to point down and a down chevron turns
-          over.
+          accordion opens, a plus turns into a minus, a right
+          chevron turns 90 degrees to point down and a down chevron
+          turns over.
         - `marker-position`: The side of the title for the marker,
           `before` or `after`.
         - `hide-show-more`: Show all of a long body. Without it, a
@@ -247,12 +247,15 @@ def marker(self: HTMLTranslator, node: Summary) -> str:
     :return: The HTML of the marker.
     """
     icons = Icons.of(self.builder.config)
-    classes = icons.pair(ACCORDION_MARKERS[node.parent["marker"]])
-    return (
-        f'<span class="{accordion.marker()}">'
-        f'<span class="{classes} {accordion.icon()}"'
-        ' aria-hidden="true"></span></span>'
+    shape = node.parent["marker"]
+    classes = icons.pair(ACCORDION_MARKERS[shape])
+    bars = ((), ("upright",)) if shape == "plus" else ((),)
+    icon = "".join(
+        f'<span class="{classes} {accordion.icon(*bar)}"'
+        ' aria-hidden="true"></span>'
+        for bar in bars
     )
+    return f'<span class="{accordion.marker()}">{icon}</span>'
 
 
 @on("doctree-read")

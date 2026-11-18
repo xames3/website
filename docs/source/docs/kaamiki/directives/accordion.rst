@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 23 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 18 November 2026
 
 :km-page-title: The accordion directive
 :km-page-description: Fold a block of content away under a title that opens on
@@ -42,7 +42,7 @@ Markers and where they sit.
 -------------------------------------------------------------------------------
 
 ``:marker:`` picks what shows an accordion opens and ``:marker-position:`` puts
-it ``before`` or ``after`` the title. A plus turns 45 degrees as it opens, a
+it ``before`` or ``after`` the title. A plus turns into a minus as it opens, a
 right chevron turns 90 degrees to point down and a down chevron turns over.
 
 .. columns:: 2

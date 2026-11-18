@@ -4,7 +4,7 @@ Font Awesome Icons
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 16 November 2026
+Last updated on: 18 November 2026
 
 Each icon that Kaamiki draws, as a Pro icon and its Free replacement.
 A site with a Font Awesome kit gets the Pro icons, in its
@@ -128,7 +128,7 @@ ROLE_ICONS: t.Final[Mapping[str, IconPair]] = MappingProxyType(
 BLANK_ROLES: t.Final[tuple[str, ...]] = ("release_notes",)
 ACCORDION_MARKERS: t.Final[Mapping[str, IconPair]] = MappingProxyType(
     {
-        "plus": IconPair("plus", "fa-solid fa-plus"),
+        "plus": IconPair("minus", "fa-solid fa-minus"),
         "down": IconPair("chevron-down", "fa-solid fa-chevron-down"),
         "right": IconPair("chevron-right", "fa-solid fa-chevron-right"),
     }
