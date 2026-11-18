@@ -168,7 +168,7 @@
                 pill.style.right = `${right}px`;
                 if (first || prefersStill(carousel)) return;
                 const duration = engine.ms('surface', carousel);
-                const easing = 'cubic-bezier(0.22, 1, 0.36, 1)';
+                const easing = engine.ease(duration);
                 const edge = (name, start, end, leads) => pill.animate(
                     [{ [name]: `${start}px` }, { [name]: `${end}px` }],
                     {

@@ -115,7 +115,7 @@
                 120,
                 engine.ms('surface') * (Math.abs(target - from) / width),
             );
-            const easing = 'cubic-bezier(0.22, 1, 0.36, 1)';
+            const easing = engine.ease(duration);
             sidebar.style.visibility = 'visible';
             const frames = (key, a, b) => [
                 { [key]: key === 'transform' ? `translateX(${a}px)` : a },

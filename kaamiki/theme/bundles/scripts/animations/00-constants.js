@@ -31,7 +31,6 @@ Last updated on: 16 November 2026
         rafThrottle,
         say,
         settleHash,
-        springProgress,
     } = window.Kaamiki;
     const root = document.documentElement;
 

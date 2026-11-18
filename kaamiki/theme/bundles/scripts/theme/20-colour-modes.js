@@ -119,7 +119,9 @@
                 },
                 {
                     duration: engine.ms('content') * REVEAL_STRETCH,
-                    easing: REVEAL_EASING,
+                    easing: engine.ease(
+                        engine.ms('content') * REVEAL_STRETCH,
+                    ),
                     fill: 'forwards',
                     pseudoElement: '::view-transition-old(root)',
                 },

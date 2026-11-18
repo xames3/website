@@ -27,7 +27,6 @@
         rafThrottle,
         say,
         settleHash,
-        springProgress,
         stopGlide,
     };
 })();

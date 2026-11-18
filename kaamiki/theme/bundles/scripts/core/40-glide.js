@@ -76,8 +76,8 @@
             GLIDE_BASE_MS + Math.abs(distance) * GLIDE_PX_FACTOR,
             GLIDE_MIN_MS,
             GLIDE_MAX_MS,
-        );
-        const spring = springProgress();
+        ) / motionSpeed();
+        const spring = motionCurve(duration);
         const began = performance.now();
         return driveScroll(start, end, (now) => (
             spring(clamp((now - began) / duration, 0, 1))

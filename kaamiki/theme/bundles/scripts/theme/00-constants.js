@@ -45,7 +45,6 @@ Last updated on: 17 November 2026
     const REVEAL_FEATHER_MIN_PX = 280;
     const REVEAL_FEATHER_MAX_PX = 900;
     const REVEAL_STRETCH = 2.2;
-    const REVEAL_EASING = 'cubic-bezier(0.3, 0.25, 0.2, 1)';
     const COPY_HOLD_POLL_MS = 50;
     const YOUTUBE_PLAY_WAIT_MS = 1000;
     const COPY_HOLD_POLLS = 60;

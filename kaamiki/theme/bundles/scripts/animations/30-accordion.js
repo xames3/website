@@ -345,7 +345,12 @@
                     if (opening) {
                         content.animate(
                             [{ opacity: 0 }, { opacity: 1 }],
-                            { duration: 150, easing: 'ease-out' },
+                            {
+                                duration: engine.ms('fade', details),
+                                easing: engine.ease(
+                                    engine.ms('fade', details),
+                                ),
+                            },
                         );
                     }
                     return;
