@@ -15,9 +15,15 @@
 
         const limit = () => {
             const style = getComputedStyle(content);
+            const room = (node) => {
+                const { marginTop, marginBottom } = getComputedStyle(node);
+                return node.getBoundingClientRect().height
+                    + parseFloat(marginTop) + parseFloat(marginBottom);
+            };
             const chrome = body
                 ? details.getBoundingClientRect().height
                     - body.getBoundingClientRect().height
+                    - room(shell) + tail()
                 : summary.getBoundingClientRect().height
                     + parseFloat(style.paddingTop)
                     + parseFloat(style.paddingBottom) + tail();
@@ -45,11 +51,14 @@
             button.setAttribute('aria-expanded', String(next));
             label.textContent = next ? say('less') : say('more');
         };
+        const relabel = (next, current) => () => {
+            if (current === turn) name(next);
+        };
 
         const toggle = (next, animate = true) => {
             if (next === expanded) return;
             expanded = next;
-            name(next);
+            button.setAttribute('aria-expanded', String(next));
             if (next) idle.stir();
             else idle.rest();
             const start = body.getBoundingClientRect().height;
@@ -59,6 +68,7 @@
                 const height = full();
                 if (!animate || prefersStill(details)) {
                     motion.settle(true);
+                    name(true);
                     return;
                 }
                 const room = viewportHeight()
@@ -67,7 +77,7 @@
                     true,
                     start,
                     Math.min(height, Math.max(start, room, viewportHeight())),
-                );
+                ).then(relabel(true, current));
                 return;
             }
             const collapsed = Math.min(start, limit());
@@ -77,18 +87,10 @@
             if (!animate || prefersStill(details)) {
                 keep();
                 motion.settle(false);
+                name(false);
                 return;
             }
-            keep().then(() => {
-                if (current !== turn) return;
-                const shown = viewportHeight()
-                    - body.getBoundingClientRect().top;
-                motion.resize(
-                    false,
-                    Math.min(start, Math.max(collapsed, shown)),
-                    collapsed,
-                );
-            });
+            motion.close(collapsed, shell).then(relabel(false, current));
         };
 
         const measure = () => {

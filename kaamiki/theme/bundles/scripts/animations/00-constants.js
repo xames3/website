@@ -35,7 +35,6 @@ Last updated on: 16 November 2026
     const root = document.documentElement;
 
     const CLAMP_SLACK_PX = 48;
-    const CLAMP_SETTLE_MS = 60;
     const CLAMP_MIN_PX = 320;
     const CLAMP_MIN_SCREEN_PX = 480;
     const HIGHLIGHT_WAIT_MS = 2000;

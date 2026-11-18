@@ -17,7 +17,6 @@
 
         let expanded = false;
         let whole = false;
-        let gliding = 0;
 
         const tail = () => (
             button.getBoundingClientRect().height + showMoreDock()
@@ -48,13 +47,8 @@
             return full;
         };
 
-        const moving = () => content.getAnimations().some((animation) => (
-            animation.transitionProperty === 'max-height'
-        ));
-
         const judge = (first = false) => {
-            if (gliding || page.classList.contains('km-page--clamping')
-                || moving()) return;
+            if (page.classList.contains('km-page--clamping')) return;
             shell.hidden = false;
             const { top, room } = fit();
             const full = page.classList.contains('km-page--clamped')
@@ -104,11 +98,12 @@
                 '',
             ));
             button.setAttribute('aria-expanded', next ? 'true' : 'false');
-            if (label) {
+            const relabel = () => {
+                if (!label || current !== turn) return;
                 label.textContent = next
                     ? button.dataset.kmLabelLess
                     : button.dataset.kmLabelMore;
-            }
+            };
             if (next) stir();
             else rest();
 
@@ -120,6 +115,7 @@
                 page.classList.remove('km-page--clamped');
                 if (!animate || prefersReducedMotion()) {
                     motion.settle(true);
+                    relabel();
                     return;
                 }
                 const roomPx = viewportHeight()
@@ -128,7 +124,7 @@
                     true,
                     start,
                     Math.min(full, Math.max(start, roomPx, viewportHeight())),
-                );
+                ).then(relabel);
                 return;
             }
             const clampValue = page.style
@@ -137,20 +133,10 @@
             if (!animate || prefersReducedMotion()) {
                 keepInView(content, collapsed, tail());
                 motion.settle(false);
+                relabel();
                 return;
             }
-            gliding += 1;
-            keepInView(content, collapsed, tail()).then(() => {
-                gliding -= 1;
-                if (current !== turn) return;
-                const shown = viewportHeight()
-                    - content.getBoundingClientRect().top;
-                motion.resize(
-                    false,
-                    Math.min(start, Math.max(collapsed, shown)),
-                    collapsed,
-                );
-            });
+            motion.close(collapsed, shell).then(relabel);
         };
 
         const holds = (href) => {
