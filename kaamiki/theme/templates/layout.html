@@ -350,6 +350,11 @@ Last updated on: 18 November 2026
                       crossorigin />
             {%- endif %}
         {%- endblock km_thirdparty %}
+        <link rel="preload"
+              href="{{ pathto('_static/fonts/inter-opsz.woff2', 1) |e }}"
+              as="font"
+              type="font/woff2"
+              crossorigin />
         {%- for css in css_files %}
             {%- if css|attr("filename") %}
                 {{ css_tag(css) }}

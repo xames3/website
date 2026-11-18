@@ -25,6 +25,7 @@
     flex: none;
     font: var(--fa-font-solid);
     font-size: var(--km-font-size-baseline);
+    width: 1em;
     --km-tracking: normal;
     color: hsl(var(--km-colour-blue));
 }

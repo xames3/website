@@ -180,7 +180,8 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
     }
 
     & .km-header__arrow {
-        --fa-width: auto;
+        --fa-width: calc(447em / 512);
+        width: var(--fa-width);
         line-height: 1;
         font-size: 0.5rem;
         transition: transform var(--km-motion-surface) var(--km-ease-smooth);
