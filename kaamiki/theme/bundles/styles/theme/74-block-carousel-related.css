@@ -245,7 +245,7 @@
     }
 }
 
-.km-pagination__link[aria-disabled="true"] {
+.km-carousel__step[aria-disabled="true"] {
     opacity: 0.35;
     pointer-events: none;
 }

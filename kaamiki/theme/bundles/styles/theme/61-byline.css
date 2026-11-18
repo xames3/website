@@ -287,7 +287,8 @@
     }
 }
 
-.km-pagination__link {
+.km-pagination__link,
+.km-carousel__step {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -315,7 +316,7 @@
         vertical-align: baseline;
     }
 
-    &.km-pagination__link--prev .km-chevron {
+    &:is(.km-pagination__link--prev, .km-carousel__step--prev) .km-chevron {
         transform: scaleX(-1);
     }
 }

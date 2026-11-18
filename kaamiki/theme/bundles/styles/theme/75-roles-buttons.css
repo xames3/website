@@ -217,7 +217,8 @@
 }
 
 .km-button--scheme-chevron,
-.km-pagination__link {
+.km-pagination__link,
+.km-carousel__step {
     --km-chevron-time: var(--km-motion-surface);
 
     & .km-chevron {
