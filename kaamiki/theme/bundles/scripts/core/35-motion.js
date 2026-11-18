@@ -17,14 +17,10 @@
         '--km-motion-rise',
         '--km-motion-rise-small',
     ];
-    const MOTION_SLOW_FRAME_MS = 34;
-    const MOTION_SLOW_SHARE = 0.25;
-    const MOTION_GUARD_RUNS = 2;
     const MOTION_STEADY = 1e-3;
     const MOTION_PX_STEADY = 0.5;
     const MOTION_CALM_POLL_MS = 400;
     const motionOriginal = new Map();
-    const motionGuard = { slow: 0 };
 
     // A spring as a function of how far through it is (0 to 1), for motion a
     // script drives itself: 0 at the start and 1 at the end, exactly.
@@ -90,41 +86,6 @@
         durationCache.clear();
     }
 
-    function quietMotion() {
-        root.setAttribute('data-km-motion', 'quiet');
-        attempt(() => window.sessionStorage.setItem('km-motion', 'quiet'));
-    }
-
-    function isQuiet() {
-        return root.getAttribute('data-km-motion') === 'quiet';
-    }
-
-    // A screen found slow stays quiet for the rest of the visit.
-    if (attempt(() => window.sessionStorage.getItem('km-motion')) === 'quiet') {
-        root.setAttribute('data-km-motion', 'quiet');
-    }
-
-    // A screen that can't keep up gets quieter motion, not a stuttering one.
-    function watchFrames(animation) {
-        let last = performance.now();
-        let slow = 0;
-        let count = 0;
-        const frame = (now) => {
-            count += 1;
-            if (now - last > MOTION_SLOW_FRAME_MS) slow += 1;
-            last = now;
-            if (animation.playState === 'running') {
-                requestAnimationFrame(frame);
-                return;
-            }
-            if (count > 6 && slow / count > MOTION_SLOW_SHARE) {
-                motionGuard.slow += 1;
-                if (motionGuard.slow >= MOTION_GUARD_RUNS) quietMotion();
-            }
-        };
-        requestAnimationFrame(frame);
-    }
-
     function motionKeyframes(frames, side) {
         return Object.fromEntries(
             Object.entries(frames).map(([name, pair]) => [name, pair[side]]),
@@ -151,7 +112,6 @@
             [motionKeyframes(frames, 0), motionKeyframes(frames, 1)],
             { duration: spring.settleMs, easing, fill: 'both' },
         );
-        if (!prefersReducedMotion()) watchFrames(animation);
         const state = (time) => {
             const here = springAt(spring, time, 1, -speed);
             return { value: 1 - here.left, rate: -here.speed };
@@ -356,8 +316,6 @@
         ms: motionMs,
         speedOf: scopeSpeed,
         speed: motionSpeed,
-        quiet: isQuiet,
-        watch: watchFrames,
         animate: animateMotion,
         length: animateLength,
         intent: onIntent,

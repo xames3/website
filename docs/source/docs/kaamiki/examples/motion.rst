@@ -63,8 +63,7 @@ top of it:
     Reload this page
 
 Behind the byline the pictures take turns and the waves drift. It's the one
-motion that never stops, so it pauses on a screen that can't keep up and for a
-reader who asks for less motion.
+motion that never stops, so it pauses for a reader who asks for less motion.
 
 .. _kaamiki-example-motion-a-long-page-folded:
 
