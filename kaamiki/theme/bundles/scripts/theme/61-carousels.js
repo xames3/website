@@ -1,5 +1,15 @@
     function initCarousels() {
         const carousels = document.querySelectorAll('[data-km-carousel]');
+        const placing = new Set();
+        let placeFrame = 0;
+        const placeAll = () => {
+            placeFrame = 0;
+            const parts = Array.from(placing);
+            placing.clear();
+            parts.forEach((part) => part.open());
+            const sizes = parts.map((part) => part.read());
+            parts.forEach((part, index) => part.close(sizes[index]));
+        };
         carousels.forEach((carousel) => {
             const track = carousel.querySelector('.km-carousel__track');
             const [back, forward] = carousel.querySelectorAll(
@@ -84,21 +94,32 @@
             });
             const title = carousel.querySelector('.km-carousel__title');
             const nav = carousel.querySelector('.km-carousel__nav');
+            const part = {
+                open: () => {
+                    carousel.classList.add('km-carousel--measuring');
+                    nav.style.display = 'flex';
+                },
+                read: () => ({
+                    wide: title.getBoundingClientRect().width
+                        + nav.getBoundingClientRect().width
+                        + parseFloat(getComputedStyle(root).fontSize),
+                    line: title.offsetTop + title.offsetHeight
+                        - parseFloat(getComputedStyle(title).lineHeight) / 2
+                        - nav.offsetHeight / 2,
+                    room: carousel.clientWidth,
+                }),
+                close: ({ wide, line, room: width }) => {
+                    nav.style.display = '';
+                    carousel.classList.remove('km-carousel--measuring');
+                    const inline = wide <= width;
+                    carousel.classList.toggle('km-carousel--inline', inline);
+                    nav.style.insetBlockStart = inline ? `${line}px` : '';
+                },
+            };
             const place = () => {
                 if (!title || !nav) return;
-                carousel.classList.add('km-carousel--measuring');
-                nav.style.display = 'flex';
-                const wide = title.getBoundingClientRect().width
-                    + nav.getBoundingClientRect().width
-                    + parseFloat(getComputedStyle(root).fontSize);
-                const line = title.offsetTop + title.offsetHeight
-                    - parseFloat(getComputedStyle(title).lineHeight) / 2
-                    - nav.offsetHeight / 2;
-                nav.style.display = '';
-                carousel.classList.remove('km-carousel--measuring');
-                const inline = wide <= carousel.clientWidth;
-                carousel.classList.toggle('km-carousel--inline', inline);
-                nav.style.insetBlockStart = inline ? `${line}px` : '';
+                placing.add(part);
+                placeFrame ||= requestAnimationFrame(placeAll);
             };
             // With `:dots:` a dot stands for each card under the row, in place
             // of the arrows, and a pill stretches from the dot it was on to
@@ -193,7 +214,7 @@
             watch.observe(carousel);
             if (title) watch.observe(title);
             watch.observe(track);
-            items().forEach((item) => watch.observe(item));
+            Array.from(track.children).forEach((item) => watch.observe(item));
             document.fonts.ready.then(refresh);
             refresh();
             carousel.setAttribute('data-km-ready', '');
