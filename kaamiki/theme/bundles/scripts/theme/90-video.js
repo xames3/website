@@ -144,6 +144,10 @@
             ['play', 'pause', 'ended', 'loadedmetadata'].forEach((name) => {
                 video.addEventListener(name, sync, { passive: true });
             });
+            frame.querySelector('.km-media__play')?.addEventListener(
+                'click',
+                () => video.play().catch(() => {}),
+            );
             sync();
         });
     }
