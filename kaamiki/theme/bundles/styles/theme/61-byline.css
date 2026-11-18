@@ -175,7 +175,7 @@
     clip-path: inset(0);
     opacity: 0.3;
     filter: grayscale(1);
-    transition: opacity var(--km-duration-slow) var(--km-ease-standard);
+    transition: opacity var(--km-motion-enter) var(--km-ease-smooth);
     --km-byline-feather: radial-gradient(
         ellipse closest-side at 50% 50%,
         hsl(var(--km-colour-surface-baseline)) 0%,
@@ -201,7 +201,7 @@
     background-position: center;
     background-repeat: no-repeat;
     animation:
-        km-byline-bg-zoom calc(8 * var(--km-duration-slow)) ease-in-out
+        km-byline-bg-zoom calc(8 * var(--km-motion-enter)) var(--km-ease-smooth)
             infinite alternate;
 }
 
@@ -296,7 +296,7 @@
     border-radius: 50%;
     background-color: hsl(var(--km-colour-button-dark-bg));
     color: hsl(var(--km-colour-button-dark-fg));
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {

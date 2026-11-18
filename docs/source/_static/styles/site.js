@@ -61,7 +61,7 @@
             var after = split(to);
             var count = Math.max(before.length, after.length);
             var easing = getComputedStyle(document.documentElement)
-                .getPropertyValue("--km-ease-standard").trim();
+                .getPropertyValue("--km-ease-smooth").trim();
             var width = word.offsetWidth;
             var old = measure(from, before);
             var now = measure(to, after);

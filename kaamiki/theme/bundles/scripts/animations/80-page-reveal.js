@@ -56,8 +56,8 @@
             document.querySelector('.km-footer'),
         ].filter((block) => block && !title.has(block));
 
-        const duration = TIMING.revealDuration();
-        let step = TIMING.revealStep();
+        const duration = engine.ms('enter');
+        let step = engine.ms('stagger');
         let titled = false;
         let waiting = blocks;
         let began = null;

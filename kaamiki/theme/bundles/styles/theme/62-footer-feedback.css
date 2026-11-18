@@ -13,9 +13,9 @@
     background-color: hsl(var(--km-colour-button-dark-bg));
     color: hsl(var(--km-colour-button-dark-fg));
     transition:
-        opacity var(--km-duration-fast) var(--km-ease-standard),
-        transform var(--km-duration-fast) var(--km-ease-swift),
-        background-color var(--km-duration-hover) var(--km-ease-swift),
+        opacity var(--km-motion-fade) var(--km-ease-smooth),
+        transform var(--km-motion-surface) var(--km-ease-smooth),
+        background-color var(--km-motion-press) var(--km-ease-smooth),
         visibility 0s;
 
     @media (hover: hover) {
@@ -37,10 +37,10 @@
     pointer-events: none;
     transform: translateY(0.5rem) scale(0.92);
     transition:
-        opacity var(--km-duration-fast) var(--km-ease-standard),
-        transform var(--km-duration-fast) var(--km-ease-swift),
-        background-color var(--km-duration-hover) var(--km-ease-swift),
-        visibility 0s linear var(--km-duration-fast);
+        opacity var(--km-motion-fade) var(--km-ease-smooth),
+        transform var(--km-motion-surface) var(--km-ease-smooth),
+        background-color var(--km-motion-press) var(--km-ease-smooth),
+        visibility 0s linear var(--km-motion-fade);
 }
 
 /* How far down the page the reader is, as a ring around the button. */
@@ -123,8 +123,8 @@
     font-size: var(--km-font-size-down-2);
     cursor: pointer;
     transition:
-        color var(--km-duration-hover) var(--km-ease-swift),
-        background-color var(--km-duration-hover) var(--km-ease-swift);
+        color var(--km-motion-press) var(--km-ease-smooth),
+        background-color var(--km-motion-press) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {
@@ -207,7 +207,7 @@
     border-radius: var(--km-radius-round);
     background-color: hsl(var(--km-colour-button-bg));
     color: hsl(var(--km-colour-button-fg));
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {

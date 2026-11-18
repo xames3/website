@@ -4,7 +4,7 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 15 November 2026
+Last updated on: 18 November 2026
 
 The custom inline roles of Kaamiki.
 """
@@ -839,7 +839,7 @@ class Ticker(KaamikiRole):
             self.fail(f"expected short or duration, got {', '.join(given)}")
         label = _short(count) if short else str(count)
         style = (
-            f"--km-ticker-duration: {round(seconds * 1000)}ms;"
+            f"--km-motion-ticker: {round(seconds * 1000)}ms;"
             if seconds is not None
             else ""
         )

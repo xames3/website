@@ -23,6 +23,7 @@ Last updated on: 08 November 2026
         say,
         stopGlide,
         codeExplains,
+        motion: engine,
     } = window.Kaamiki;
     const root = document.documentElement;
 

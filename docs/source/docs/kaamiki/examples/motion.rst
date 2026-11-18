@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 November 2026
-.. Last updated on: 17 November 2026
+.. Last updated on: 18 November 2026
 
 :km-page-title: How Kaamiki moves
 :km-page-description: Every animation in Kaamiki, shown working in one
@@ -41,7 +41,7 @@ press, drag, hover or scroll, and the table under :ref:`Folding things away
 
 Two things change how everything below feels. The first is the speed. Every
 animation takes its time from one number, ``kaamiki.conf.motion.speed``, and
-the default, ``0.625``, is calm. The second is your device: a reader who asks
+the default is ``1``. The second is your device: a reader who asks
 for less motion gets the calmer version. Both are on the :ref:`settings page
 <kaamiki-settings-motion>`.
 
@@ -101,8 +101,8 @@ page gets it ready as your pointer comes near.
 .. accordion:: What's the dial?
 
     It's ``kaamiki.conf.motion.speed``, one number from ``0.25`` to ``4`` that
-    sets the speed of every animation in the theme. ``1`` is 60% quicker
-    than the default of ``0.625`` and ``2`` is twice as quick as ``1``.
+    sets the speed of every animation in the theme. ``1`` is the default
+    and ``2`` is twice as quick.
 
 .. accordion:: Every animation on this page
 
@@ -347,7 +347,7 @@ of another length sends the extra letters in from or out to nothing, as in
 it takes and what it leaves alone.
 
 A number can be written short, so :ticker:`12400?short` reads in thousands.
-Left alone it counts for as long as the site's speed says, 3.2 seconds, and it
+Left alone it counts for as long as the site's speed says, 2 seconds, and it
 can take its own time, as :ticker:`1900?duration=1s` does.
 
 ``:sweep:`` changes a whole phrase instead of a word. A band of light crosses
@@ -569,7 +569,7 @@ in it stands still. Open this one:
     :no-motion:
 
     ``:no-motion:``, and this opened at once. A :ticker:`2025` that's counted
-    for 3.2 seconds elsewhere shows its number here from the first frame.
+    for 2 seconds elsewhere shows its number here from the first frame.
 
 .. code-block:: rst
 
@@ -728,7 +728,7 @@ the defaults of the motion settings:
 
 .. code-block:: python
 
-    kaamiki.conf.motion.speed = 0.625
+    kaamiki.conf.motion.speed = 1
     kaamiki.conf.motion.prefetch = True
     kaamiki.conf.motion.page_transitions = False
 

@@ -100,7 +100,7 @@
         const reach = ROLL_OVERLAP_EM * parseFloat(
             getComputedStyle(field).fontSize,
         );
-        const easing = getCssVar('--km-ease-standard') || 'ease-in-out';
+        const easing = getCssVar('--km-ease-smooth');
         const turn = (angle) => (
             `translateZ(${-edge / 2}px) rotateX(${angle}deg)`
         );
@@ -210,7 +210,7 @@
         word.style.width = `${to.width}px`;
         stage.style.width = `${from.width}px`;
         stage.style.height = `${from.height}px`;
-        const duration = TIMING.sweepDuration();
+        const duration = engine.ms('sweep', field);
         const sweep = { duration, easing: 'linear', fill: 'both' };
         const gone = { backgroundPosition: '0% 0' };
         const here = { backgroundPosition: '100% 0' };

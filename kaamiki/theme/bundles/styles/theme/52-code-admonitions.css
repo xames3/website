@@ -153,7 +153,7 @@ button.copybtn {
     width: 1.75rem;
     height: 1.75rem;
     border-radius: var(--km-radius-round);
-    transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+    transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
 
     & .km-copy__icon {
         --fa-width: auto;
@@ -164,8 +164,8 @@ button.copybtn {
         font-size: var(--km-font-size-down-1);
         line-height: 1;
         transition:
-            opacity var(--km-duration-fast) var(--km-ease-standard),
-            scale var(--km-duration-fast) var(--km-ease-swift);
+            opacity var(--km-motion-fade) var(--km-ease-smooth),
+            scale var(--km-motion-surface) var(--km-ease-smooth);
     }
 
     & .km-copy__icon--done {

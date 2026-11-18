@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 16 November 2026
+Last updated on: 18 November 2026
 
 The settings of Kaamiki: their schema, their checks, and how a site
 sets them on `kaamiki.conf` or with a `-D`. `WORDS_PER_MINUTE` is 238,
@@ -762,7 +762,7 @@ class Motion(Settings):
 
     page_transitions = Value(False, boolean)
     prefetch = Value(True, boolean)
-    speed = Value(0.625, number=float)
+    speed = Value(1.0, number=float)
 
 
 class Toctree(Settings):

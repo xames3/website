@@ -52,9 +52,9 @@
 .km-fade {
     --km-fade-size: var(--km-space-8);
     transition:
-        --km-fade-start var(--km-duration-hover) var(--km-ease-standard),
-        --km-fade-end var(--km-duration-hover) var(--km-ease-standard),
-        mask-image 0s var(--km-duration-hover) allow-discrete;
+        --km-fade-start var(--km-motion-press) var(--km-ease-smooth),
+        --km-fade-end var(--km-motion-press) var(--km-ease-smooth),
+        mask-image 0s var(--km-motion-fade) allow-discrete;
 }
 
 .km-fade--start,
@@ -102,7 +102,7 @@
     width: var(--km-fade-size);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+    transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
 }
 
 .literal-block-wrapper .km-fade--code::before,

@@ -74,7 +74,7 @@
                 showBackdrop(overlay);
                 preload(urls[(index + 1) % urls.length]);
                 busy = false;
-            }, TIMING.slow() + 50);
+            }, engine.ms('enter') + 50);
         }, every);
     }
 

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 18 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -994,13 +994,12 @@ A directive that moves can take a speed of its own, or play nothing, with
           - Default
           - What it does
         * - ``kaamiki.conf.motion.speed``
-          - ``0.625``
-          - How quick every animation is. The default is calm: every animation
-            takes 60% longer than it does at ``1``. ``2`` is twice as quick as
-            ``1`` and ``0.5`` is slower than the default. It takes a number
-            from ``0.25`` to ``4``, and anything else stops the build. A
-            ``:ticker:`` that isn't given a time counts for 2 seconds over it,
-            3.2 by default. It's *site-wide*.
+          - ``1``
+          - How quick every animation is. ``2`` is twice as quick as the
+            default and ``0.5`` is half as quick. It takes a number from
+            ``0.25`` to ``4``, and anything else stops the build. A
+            ``:ticker:`` that isn't given a time counts for 2 seconds over
+            it. It's *site-wide*.
         * - ``kaamiki.conf.motion.page_transitions``
           - ``False``
           - Following a link to another page of the site hands over from one

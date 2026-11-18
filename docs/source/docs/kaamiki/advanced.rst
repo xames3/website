@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 28 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 18 November 2026
 
 :km-page-title: Advanced Kaamiki
 :km-page-description: What a Sphinx author who wants more control needs to
@@ -114,13 +114,18 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
         * - ``--km-radius-``
           - The three corner sizes, ``--km-radius-round``,
             ``--km-radius-normal`` and ``--km-radius-tiny``.
-        * - ``--km-duration-``, ``--km-ease-``, ``--km-spring-``
-          - How long and how smooth every motion is. ``--km-motion-speed`` is
-            the dial that scales every duration, ``0.625`` by default and ``2``
-            for twice as quick as ``1``. The theme turns motion down for a
-            reader who asks for less.
+        * - ``--km-motion-``, ``--km-ease-smooth``
+          - How long every motion is and the one spring curve it follows.
+            ``--km-motion-speed`` is the dial that scales every duration,
+            ``1`` by default and ``2`` for twice as quick. Each motion takes
+            its time from a role: ``press`` (200ms), ``fade`` (250ms),
+            ``surface`` (340ms), ``state`` and ``content`` (450ms), ``page``
+            (500ms), ``enter`` (700ms) and ``stagger`` (60ms). The theme turns
+            motion down for a reader who asks for less.
         * - ``--km-reveal-``
-          - How a page fades in, block by block.
+          - How far a page's blocks rise and blur as they fade in, block by
+            block (``--km-motion-enter`` each, ``--km-motion-stagger``
+            apart).
         * - ``--km-nav-``, ``--km-title-skip``
           - How a page hands over to the next, with
             ``kaamiki.conf.motion.page_transitions`` on. ``--km-nav-out`` is
@@ -130,7 +135,7 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             page's header, sidebar and footer are held for while the new page
             loads (1.5 of ``--km-motion-enter``) and ``--km-title-skip`` how
             far into its fade the new page's first thing starts (0.35 of
-            ``--km-duration-slow``), so there's something to see as the old
+            ``--km-motion-enter``), so there's something to see as the old
             content goes. ``data-km-nav`` on the root says which way the reader
             went.
         * - ``--km-code-``
@@ -145,10 +150,10 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             ``--km-motion-state`` and each letter starts
             ``--km-motion-stagger`` after the one before), how long the sweep
             role rests between phrases (``--km-sweep-hold``, 5500ms), how long
-            a sweep takes (``--km-sweep-duration``) and the colours of its
+            a sweep takes (``--km-motion-sweep``) and the colours of its
             light (``--km-sweep-colours``), how long a ticker counts
-            (``--km-ticker-duration``, 2000ms over the site's speed, 3200ms by
-            default) and how long a tooltip stays (1800ms).
+            (``--km-motion-ticker``, 2000ms over the site's speed) and how
+            long a tooltip stays (1800ms).
         * - ``--km-motion-ambient``
           - How long a loop that never ends takes for a round (1600ms over the
             site's speed).

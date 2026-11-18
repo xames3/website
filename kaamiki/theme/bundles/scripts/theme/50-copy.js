@@ -11,7 +11,7 @@
             if (!transient) return;
             tooltipTimers.set(link, window.setTimeout(
                 () => link.removeAttribute('data-tooltip'),
-                TIMING.normal(),
+                engine.ms('enter'),
             ));
         }, TIMING.tooltipHold()));
     }

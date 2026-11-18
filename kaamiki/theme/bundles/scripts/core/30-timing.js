@@ -58,20 +58,11 @@
     }
 
     const TIMING = {
-        revealDuration: () => getDurationMs('--km-reveal-duration'),
-        revealStep: () => getDurationMs('--km-reveal-step'),
         titleStep: () => getDurationMs('--km-title-step'),
         titleSkip: () => getDurationMs('--km-title-skip'),
         tooltipHold: () => getDurationMs('--km-tooltip-hold'),
-        fast: () => getDurationMs('--km-duration-fast'),
-        normal: () => getDurationMs('--km-duration-normal'),
-        slow: () => getDurationMs('--km-duration-slow'),
-        clamp: () => getDurationMs('--km-duration-clamp'),
         showMoreHold: () => getDurationMs('--km-show-more-hold'),
-        tickerDuration: () => getDurationMs('--km-ticker-duration'),
         swapHold: () => getDurationMs('--km-swap-hold'),
         sweepHold: () => getDurationMs('--km-sweep-hold'),
-        sweepDuration: () => getDurationMs('--km-sweep-duration'),
-        codeSwap: () => getDurationMs('--km-code-explain-swap'),
     };
 

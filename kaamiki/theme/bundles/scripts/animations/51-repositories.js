@@ -30,7 +30,7 @@
         );
         const timing = { duration, easing: engine.ease(duration) };
         const stagger = engine.ms('stagger', widget);
-        const rolling = TIMING.tickerDuration() / engine.speedOf(widget);
+        const rolling = engine.ms('ticker', widget);
         let entered = 0;
         numbers.forEach((number, index) => {
             if (number === null) return;

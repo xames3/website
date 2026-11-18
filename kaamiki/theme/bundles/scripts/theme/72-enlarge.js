@@ -271,7 +271,7 @@
             view.fading = true;
             dialog.shell.classList.add('km-enlarge--still');
             view.move?.cancel();
-            pace(view.fade, 'var(--km-ease-standard)');
+            pace(view.fade, 'var(--km-ease-smooth)');
             clearTimeout(view.timer);
             view.timer = setTimeout(done, view.fade + ENLARGE_FADE_SLACK_MS);
         };

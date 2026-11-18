@@ -52,7 +52,7 @@
             window.clearTimeout(timer);
             timer = window.setTimeout(
                 () => settle(next),
-                TIMING.clamp() + CLAMP_SETTLE_MS,
+                engine.ms('content') + CLAMP_SETTLE_MS,
             );
         };
         const stop = () => window.clearTimeout(timer);

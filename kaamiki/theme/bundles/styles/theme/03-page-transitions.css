@@ -157,15 +157,15 @@ which way the reader went) so the header and the footer stay as they are. The
 
     ::view-transition-old(km-content) {
         animation:
-            km-nav-fade var(--km-nav-out) linear both,
-            km-nav-drift var(--km-nav-out) ease-in both;
+            km-nav-fade var(--km-nav-out) var(--km-ease-smooth) both,
+            km-nav-drift var(--km-nav-out) var(--km-ease-smooth) both;
         mix-blend-mode: normal;
     }
 
     ::view-transition-old(km-dropdown) {
         animation:
-            km-nav-fade var(--km-nav-out) var(--km-ease-standard) both,
-            km-nav-sink var(--km-nav-out) var(--km-ease-swift) both;
+            km-nav-fade var(--km-nav-out) var(--km-ease-smooth) both,
+            km-nav-sink var(--km-nav-out) var(--km-ease-smooth) both;
         mix-blend-mode: normal;
     }
 }

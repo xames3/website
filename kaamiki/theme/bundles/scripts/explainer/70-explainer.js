@@ -237,7 +237,7 @@
                 signLine(line, 'removed');
             });
             run.coming.forEach((line) => signLine(line, 'added'));
-            const swap = TIMING.codeSwap();
+            const swap = engine.ms('swap');
             const scheduleSwap = (delay, then) => (
                 run.timers.push(window.setTimeout(then, delay))
             );
@@ -850,9 +850,9 @@
             if (!done) return;
             scheduleCopy(TIMING.tooltipHold(), () => {
                 button.classList.add('km-code-explain__copy--fading');
-                scheduleCopy(TIMING.fast(), () => {
+                scheduleCopy(engine.ms('fade'), () => {
                     button.classList.remove('success');
-                    scheduleCopy(TIMING.fast() * 2, () => (
+                    scheduleCopy(engine.ms('fade') * 2, () => (
                         button.classList.remove('km-code-explain__copy--fading')
                     ));
                 });

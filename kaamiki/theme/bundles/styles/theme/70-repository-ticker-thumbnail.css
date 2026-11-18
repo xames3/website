@@ -7,7 +7,7 @@
     position: relative;
     border-radius: var(--km-radius-normal);
     background-color: hsl(var(--km-colour-code-bg));
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {
@@ -119,9 +119,9 @@
     opacity: 0;
     filter: blur(4px);
     transition:
-        width var(--km-duration-normal) var(--km-spring-smooth),
-        opacity var(--km-duration-normal) var(--km-ease-standard),
-        filter var(--km-duration-normal) var(--km-ease-standard);
+        width var(--km-motion-enter) var(--km-ease-smooth),
+        opacity var(--km-motion-enter) var(--km-ease-smooth),
+        filter var(--km-motion-enter) var(--km-ease-smooth);
 
     &.km-ticker__digit--shown {
         width: 1ch;

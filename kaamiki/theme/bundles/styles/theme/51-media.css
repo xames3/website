@@ -2,10 +2,10 @@
     & .km-transcript__word {
         transition-property: opacity, filter, color;
         transition-duration:
-            var(--km-duration-fast),
-            var(--km-duration-fast),
-            var(--km-duration-normal);
-        transition-timing-function: var(--km-ease-swift);
+            var(--km-motion-fade),
+            var(--km-motion-fade),
+            var(--km-motion-enter);
+        transition-timing-function: var(--km-ease-smooth);
         transition-delay: var(--km-delay);
     }
 
@@ -25,17 +25,17 @@
         user-select: none;
         pointer-events: none;
         animation:
-            km-guess-in var(--km-duration-fast) var(--km-ease-swift)
+            km-guess-in var(--km-motion-fade) var(--km-ease-smooth)
                 var(--km-delay) both paused,
-            km-guess-out var(--km-duration-fast) var(--km-ease-swift)
+            km-guess-out var(--km-motion-fade) var(--km-ease-smooth)
                 var(--km-fix) forwards paused;
     }
 
     & p:first-child::after,
     & p.attribution {
         transition-property: opacity;
-        transition-duration: var(--km-duration-normal);
-        transition-timing-function: var(--km-ease-standard);
+        transition-duration: var(--km-motion-enter);
+        transition-timing-function: var(--km-ease-smooth);
         transition-delay: var(--km-transcript-total);
     }
 
@@ -193,7 +193,7 @@ table.docutils caption {
 }
 
 .km-figure__scale {
-    transition: transform var(--km-duration-slow) var(--km-spring-smooth);
+    transition: transform var(--km-motion-enter) var(--km-ease-smooth);
 }
 
 .km-figure__clip:not(figure *) :where(img) {
@@ -209,7 +209,7 @@ table.docutils caption {
     border-radius: 0;
     transform: scale(var(--km-fuzzy-overscan));
     filter: blur(var(--km-fuzzy-radius));
-    transition: filter var(--km-duration-slow) var(--km-ease-standard);
+    transition: filter var(--km-motion-enter) var(--km-ease-smooth);
 }
 
 .km-figure--fuzzy-blur.km-figure--revealed .km-figure__clip :where(img) {
@@ -231,7 +231,7 @@ table.docutils caption {
     opacity: 0;
     pointer-events: none;
     image-rendering: pixelated;
-    transition: opacity var(--km-duration-slow) var(--km-ease-standard);
+    transition: opacity var(--km-motion-enter) var(--km-ease-smooth);
 }
 
 .km-figure__pixelated-canvas.km-figure__pixelated-canvas--drawn {
@@ -245,7 +245,7 @@ table.docutils caption {
 
 .km-figure--greyscale {
     filter: grayscale(100%);
-    transition: filter var(--km-duration-slow) var(--km-ease-standard);
+    transition: filter var(--km-motion-enter) var(--km-ease-smooth);
 }
 
 .km-figure--greyscale.km-figure--revealed {
@@ -254,7 +254,7 @@ table.docutils caption {
 
 .km-thumbnail__image--greyscale {
     filter: grayscale(100%);
-    transition: filter var(--km-duration-slow) var(--km-ease-standard);
+    transition: filter var(--km-motion-enter) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {
@@ -337,7 +337,7 @@ table.docutils caption {
     color: hsl(var(--km-colour-white));
     font-size: var(--km-font-size-up-2);
     translate: -50% -50%;
-    transition: scale var(--km-duration-hover) var(--km-spring-snappy);
+    transition: scale var(--km-motion-surface) var(--km-ease-smooth);
 }
 
 .km-media__facade-icon::before {
@@ -366,8 +366,8 @@ table.docutils caption {
     opacity: 0;
     pointer-events: none;
     transition:
-        opacity var(--km-duration-hover) var(--km-ease-standard),
-        scale var(--km-duration-hover) var(--km-spring-snappy);
+        opacity var(--km-motion-fade) var(--km-ease-smooth),
+        scale var(--km-motion-surface) var(--km-ease-smooth);
 }
 
 .km-media__frame.km-media__frame--paused>.km-media__play {

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 18 November 2026
 
 :km-page-title: Kaamiki roles
 :km-page-description: The inline roles Kaamiki adds for links, motion, colour,
@@ -184,7 +184,7 @@ the sidebar, the breadcrumbs, a table of contents or a link, the first phrase
 stays as plain text.
 
 The light's colours are ``--km-sweep-colours`` and the times are
-``--km-sweep-hold`` and ``--km-sweep-duration``, as :ref:`the advanced page
+``--km-sweep-hold`` and ``--km-motion-sweep``, as :ref:`the advanced page
 <kaamiki-advanced-tokens>` shows.
 
 .. _kaamiki-roles-sharpie:
@@ -342,9 +342,9 @@ number, then ``short`` and ``duration`` after a ``?``, both optional and in
 either order. ``short`` writes the number with a ``k``, ``m`` or ``b``, and a
 number below a thousand shows as it is. It takes no value, so ``?short=no``
 stops the build. The duration is in ``s`` or ``ms``, from 0.1s to 5s. A ticker
-that isn't given one counts for as long as the site's speed says, 2s at a
-``kaamiki.conf.motion.speed`` of ``1`` and 3.2s at the default of ``0.625``,
-and one that is keeps it as written:
+that isn't given one counts for as long as the site's speed says, 2s at
+the default ``kaamiki.conf.motion.speed`` of ``1``, and one that is keeps it
+as written:
 
 .. columns:: 2
     :gap: medium
