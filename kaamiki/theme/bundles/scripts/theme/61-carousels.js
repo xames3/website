@@ -8,12 +8,19 @@
             const items = () => Array.from(track.children)
                 .filter((item) => item.offsetWidth > 0);
             const room = () => track.scrollWidth - track.clientWidth;
-            const goTo = (left) => track.scrollTo({
-                left,
-                behavior: prefersStill(carousel) ? 'auto' : 'smooth',
-            });
+            let aim = null;
+            const goTo = (left) => {
+                if (prefersStill(carousel)) {
+                    track.scrollTo({ left });
+                    return;
+                }
+                aim = left;
+                glideAcross(track, left).then(() => {
+                    if (aim === left) aim = null;
+                });
+            };
             const step = (way) => {
-                const at = track.scrollLeft;
+                const at = aim ?? track.scrollLeft;
                 const stops = items().map((item) => Math.min(
                     item.offsetLeft,
                     room(),

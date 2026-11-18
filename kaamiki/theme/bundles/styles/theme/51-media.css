@@ -372,6 +372,7 @@ table.docutils caption {
 
 .km-media__frame.km-media__frame--paused>.km-media__play {
     opacity: 1;
+    pointer-events: auto;
 }
 
 .km-embed {

@@ -96,7 +96,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: var(--km-space-2);
-    font-size: var(--km-font-size-down-2);
+    font-family: var(--km-font-mono);
 }
 
 .km-byline__meta-group--end {
@@ -179,15 +179,7 @@
     --km-byline-feather: radial-gradient(
         ellipse closest-side at 50% 50%,
         hsl(var(--km-colour-surface-baseline)) 0%,
-        hsl(var(--km-colour-surface-baseline) / 0.956) 10%,
-        hsl(var(--km-colour-surface-baseline) / 0.835) 20%,
-        hsl(var(--km-colour-surface-baseline) / 0.667) 30%,
-        hsl(var(--km-colour-surface-baseline) / 0.487) 40%,
-        hsl(var(--km-colour-surface-baseline) / 0.325) 50%,
-        hsl(var(--km-colour-surface-baseline) / 0.198) 60%,
-        hsl(var(--km-colour-surface-baseline) / 0.11) 70%,
-        hsl(var(--km-colour-surface-baseline) / 0.056) 80%,
-        hsl(var(--km-colour-surface-baseline) / 0.026) 90%,
+        hsl(var(--km-colour-surface-baseline) / 0.056) 100%,
         transparent 100%
     );
     mask-image: var(--km-byline-feather);

@@ -7,7 +7,7 @@ Created on: 29 October 2025
 Last updated on: 16 November 2026
 #}
 {%- from "components/helpers.html.jinja"
-import km_class, km_glyph, km_id, km_tab with context %}
+    import km_class, km_glyph, km_id, km_tab with context %}
 {%- from "components/anchors.html.jinja" import km_anchors -%}
 {%- macro km_count(name, label, field, icon) -%}
     <p class="km-repository__{{ name }}"
@@ -32,11 +32,11 @@ import km_class, km_glyph, km_id, km_tab with context %}
             <div class="km-repository__details">
                 {% if kaamiki.directive.stars %}
                     {{ km_count("stars", _("Stars") , "stargazers_count",
-                    kaamiki.icons.roles.repository_stars) }}
+                        kaamiki.icons.roles.repository_stars) }}
                 {% endif %}
                 {% if kaamiki.directive.forks %}
                     {{ km_count("forks", _("Forks") , "forks_count",
-                    kaamiki.icons.roles.repository_forks) }}
+                        kaamiki.icons.roles.repository_forks) }}
                 {% endif %}
             </div>
         </div>

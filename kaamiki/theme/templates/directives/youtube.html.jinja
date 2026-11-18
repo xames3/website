@@ -7,7 +7,7 @@ Created on: 22 February 2025
 Last updated on: 16 November 2026
 #}
 {%- from "components/helpers.html.jinja"
-import km_class, km_glyph, km_id with context %}
+    import km_class, km_glyph, km_id with context %}
 {%- from "components/anchors.html.jinja" import km_anchors -%}
 {%- set km_shape = "aspect-ratio: %s; --km-ratio: calc(%s)" -%}
 {%- set km_css = km_shape|format(kaamiki.directive.ratio, kaamiki.directive.ratio) if kaamiki.directive.ratio else none -%}

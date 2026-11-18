@@ -12,6 +12,7 @@
         decodeId,
         fetchJson,
         getCssVar,
+        glideAcross,
         glideTo,
         headerHeight,
         holdPlace,

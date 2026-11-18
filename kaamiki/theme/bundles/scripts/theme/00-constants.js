@@ -4,7 +4,7 @@ Theme Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 15 October 2026
-Last updated on: 16 November 2026
+Last updated on: 17 November 2026
 */
 
 (() => {
@@ -20,6 +20,7 @@ Last updated on: 16 November 2026
         copyText,
         decodeId,
         fetchJson,
+        glideAcross,
         glideTo,
         headerHeight,
         isModifiedClick,
@@ -74,6 +75,7 @@ Last updated on: 16 November 2026
     const ENLARGE_COAST_MS = 120;
     const ENLARGE_SETTLE_RATIO = 1.4;
     const ENLARGE_GREY = 'grayscale(1)';
+    const ENLARGE_RING_HOLD_MS = 1500;
     const DROPDOWN_CLOSE_DELAY_MS = 140;
     const DROPDOWN_SWITCH_DELAY_MS = 90;
     const DROPDOWN_AIM_WINDOW_MS = 120;

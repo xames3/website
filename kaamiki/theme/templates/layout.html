@@ -13,9 +13,9 @@ Last updated on: 16 November 2026
         <p class="km-noscript">
             {%- trans trimmed -%}
             JavaScript is off, so some parts of this site may not work.
-        {%- endtrans -%}
-    </p>
-</noscript>
+            {%- endtrans -%}
+        </p>
+    </noscript>
 {%- endmacro -%}
 {%- macro km_brand() -%}
     <a href="{{ pathto(master_doc) }}"
@@ -72,18 +72,18 @@ Last updated on: 16 November 2026
          aria-label="{{ _('Primary navigation') }}">
         <div class="km-header__nav-tree">
             {{ km_nav(titles_only=kaamiki.toctree.titles_only,
-                        collapse=true,
-                        **kaamiki.toctree.args) }}
+                collapse=true,
+                **kaamiki.toctree.args) }}
         </div>
     </nav>
 {%- endmacro -%}
 {%- macro km_colour_modes() -%}
-    {%- if kaamiki.mode == 'system' -%}
+    {%- if kaamiki.mode == "system" -%}
         {%- set km_labels = {
-                "light": _("Light"),
-                "dark": _("Dark"),
-                "system": _("System"),
-                } -%}
+            "light": _("Light"),
+            "dark": _("Dark"),
+            "system": _("System"),
+        } -%}
         <div class="km-footer__modes"
              data-km-colour-modes>
             <button type="button"
@@ -108,577 +108,579 @@ Last updated on: 16 November 2026
     <div class="km-footer__content">
         {%- if show_copyright and copyright|length %}
             <p class="km-footer__text">
-                {%- if hasdoc('copyright') -%}
-                    {%- trans path=pathto('copyright'),
-                    copyright=copyright|e -%}
+                {%- if hasdoc("copyright") -%}
+                    {%- trans path=pathto("copyright"),
+                        copyright=copyright|e -%}
                     <a href="{{ path }}">Copyright</a> {{ copyright }}
+                    {%- endtrans -%}
+                {%- else -%}
+                    {{ copyright|e }}
+                {%- endif -%}
+            </p>
+        {%- endif %}
+        {%- if last_updated %}
+            <p class="km-footer__text">
+                {%- trans updated_on=last_updated|e -%}
+                Last updated on {{ updated_on }}
                 {%- endtrans -%}
-            {%- else -%}
-                {{ copyright|e }}
-            {%- endif -%}
-        </p>
-    {%- endif %}
-    {%- if last_updated %}
-        <p class="km-footer__text">
-            {%- trans updated_on=last_updated|e -%}
-            Last updated on {{ updated_on }}
-        {%- endtrans -%}
-    </p>
-{%- endif %}
-{%- if show_sphinx %}
-    <p class="km-footer__text">
-        {%- trans trimmed -%}
-        Built with <a href="https://www.sphinx-doc.org"
-    rel="noreferrer">Sphinx</a>.
-    {%- endtrans -%}
-</p>
-{%- endif %}
-{%- if kaamiki.show.credit|tobool %}
-    {%- set km_theme -%}
-        <a href="{{ kaamiki.credit.url }}"
-           {{ km_tab(kaamiki.credit.new_tab) }}>Kaamiki</a>
-    {%- endset %}
-    <p class="km-footer__text">
-        {%- trans km_theme=km_theme -%}
-        Styled with the {{ km_theme }} theme.
-    {%- endtrans -%}
-</p>
-{%- endif %}
-{%- if kaamiki.site.license.name %}
-    {%- set km_license_link -%}
-        {%- if kaamiki.site.license.url -%}
-            <a href="{{ kaamiki.site.license.url|e }}"
-               {{ km_tab(kaamiki.site.license.new_tab) }}>
-                {{- kaamiki.site.license.name|e -}}
-            </a>
-        {%- else -%}
-            {{ kaamiki.site.license.name|e }}
-        {%- endif -%}
-    {%- endset %}
-    <p class="km-footer__text">
-        {%- trans km_license=km_license_link -%}
-        Content licensed under {{ km_license }}.
-    {%- endtrans -%}
-</p>
-{%- endif %}
-</div>
+            </p>
+        {%- endif %}
+        {%- if show_sphinx %}
+            <p class="km-footer__text">
+                {%- trans trimmed -%}
+                Built with <a href="https://www.sphinx-doc.org"
+                              rel="noreferrer">Sphinx</a>.
+                {%- endtrans -%}
+            </p>
+        {%- endif %}
+        {%- if kaamiki.show.credit|tobool %}
+            {%- set km_theme -%}
+                <a href="{{ kaamiki.credit.url }}"
+                   {{ km_tab(kaamiki.credit.new_tab) }}>Kaamiki</a>
+            {%- endset %}
+            <p class="km-footer__text">
+                {%- trans km_theme=km_theme -%}
+                Styled with the {{ km_theme }} theme.
+                {%- endtrans -%}
+            </p>
+        {%- endif %}
+        {%- if kaamiki.site.license.name %}
+            {%- set km_license_link -%}
+                {%- if kaamiki.site.license.url -%}
+                    <a href="{{ kaamiki.site.license.url|e }}"
+                       {{ km_tab(kaamiki.site.license.new_tab) }}>
+                        {{- kaamiki.site.license.name|e -}}
+                    </a>
+                {%- else -%}
+                    {{ kaamiki.site.license.name|e }}
+                {%- endif -%}
+            {%- endset %}
+            <p class="km-footer__text">
+                {%- trans km_license=km_license_link -%}
+                Content licensed under {{ km_license }}.
+                {%- endtrans -%}
+            </p>
+        {%- endif %}
+    </div>
 {%- endmacro -%}
 {%- set km_loading = kaamiki.embed.js_loading|replace("normal", "") -%}
 {%- macro km_scripts() -%}
     {%- for js in script_files %}{{ js_tag(js) }}{%- endfor %}
-        {%- for name in kaamiki.embed.js %}
-            <script src="{{ pathto('_static/' + name, 1)|e }}"
-                    {{ km_loading }}></script>
-        {%- endfor %}
-    {%- endmacro -%}
-    {%- set km_menu = "sections/sidebar.html.jinja" in sidebars -%}
-    {%- set km_search = hasdoc("search") and kaamiki.show.searchbox|tobool -%}
-    {%- set km_top = kaamiki.toctree.in_header|tobool -%}
-    {%- set km_icons = kaamiki.site.header_buttons|tobool -%}
-    {%- set km_nested = " km-layout--nav-in-header" if km_top else "" -%}
-    {%- set km_pages = "components/previous_next_pages.html.jinja" -%}
-    {%- set km_lang_attr = (language or "en")|replace("_", "-") -%}
-    {%- set km_image = kaamiki.site.open_graph and kaamiki.site.open_graph.image -%}
-    {%- set km_card = kaamiki.site.open_graph.card if km_image else "summary" -%}
-    {%- set km_strings = {
-        "copied": _("Copied"),
-        "failed": _("Copy failed"),
-        "copy": _("Copy"),
-        "more": _("Show more"),
-        "less": _("Show less"),
-        "returns": _("returns:"),
-        "error": _("error:"),
-        "setup": _("Setup"),
-        "code": _("Code"),
-        "table": _("Table"),
-        "enlarge": _("Enlarge image"),
-        "close": _("Close"),
-        "image": _("Image"),
-        } -%}
-    {%- set km_marks = {
-        "nav_arrow": kaamiki.icons.roles.nav_arrow,
-        "copy": kaamiki.icons.roles["copy"],
-        "copied": kaamiki.icons.roles.copied,
-        "close": kaamiki.icons.roles.close,
-        } -%}
-    <!DOCTYPE html>
-    <html lang="{{ km_lang_attr }}"
-          class="km-document"
-          data-content_root="{{ content_root }}"
-          data-km-strings="{{ km_strings|tojson|forceescape }}"
-          data-km-more-icon="{{ kaamiki.icons.roles.show_more }}"
-          data-km-icons="{{ km_marks|tojson|forceescape }}"
-          {%- if kaamiki.mode != 'dark' %} data-km-mode="{{- kaamiki.mode -}}" {%- endif %} {%- if kaamiki.motion.speed != 1 %} style="--km-motion-speed: {{ kaamiki.motion.speed }}" {%- endif %} {% if kaamiki.site.copy_headerlinks %}data-km-copy-links{% endif %}
-          {% if kaamiki.motion.prefetch|tobool %}data-km-prefetch{% endif %}
-          {% if kaamiki.media.enlarge|tobool %}data-km-media-enlarge{% endif %}>
-        <head>
-            <meta charset="utf-8" />
-            {%- if 'name="viewport"' not in metatags %}
-                <meta name="viewport"
-                      content="width=device-width, initial-scale=1" />
-            {%- endif %}
-            {%- if kaamiki.mode == 'light' %}
-                <meta name="color-scheme"
-                      content="only light" />
-                <meta name="theme-color"
-                      content="#ffffff" />
-            {%- elif kaamiki.mode == 'system' %}
-                <meta name="color-scheme"
-                      content="light dark" />
-                <meta name="theme-color"
-                      media="(prefers-color-scheme: light)"
-                      content="#ffffff" />
-                <meta name="theme-color"
-                      media="(prefers-color-scheme: dark)"
-                      content="#000000" />
-            {%- else %}
-                <meta name="color-scheme"
-                      content="dark" />
-                <meta name="theme-color"
-                      content="#000000" />
-            {%- endif %}
-            {%- if kaamiki.mode == 'system' %}
-                <script>
-                    (function() {
-                        try {
-                            const saved = window.localStorage
-                                .getItem('km-colour-mode');
-                            if (['dark', 'light', 'system'].includes(saved)) {
-                                document.documentElement
-                                    .setAttribute('data-km-mode', saved);
-                            }
-                        } catch (error) {}
-                    })();
-                </script>
-            {%- endif %}
-            {%- if kaamiki.motion.page_transitions|tobool %}
-                <style>
+    {%- for name in kaamiki.embed.js %}
+        <script src="{{ pathto('_static/' + name, 1)|e }}"
+                {{ km_loading }}></script>
+    {%- endfor %}
+{%- endmacro -%}
+{%- set km_menu = "sections/sidebar.html.jinja" in sidebars -%}
+{%- set km_search = hasdoc("search") and kaamiki.show.searchbox|tobool -%}
+{%- set km_top = kaamiki.toctree.in_header|tobool -%}
+{%- set km_icons = kaamiki.site.header_buttons|tobool -%}
+{%- set km_nested = " km-layout--nav-in-header" if km_top else "" -%}
+{%- set km_pages = "components/previous_next_pages.html.jinja" -%}
+{%- set km_lang_attr = (language or "en")|replace("_", "-") -%}
+{%- set km_image = kaamiki.site.open_graph and kaamiki.site.open_graph.image -%}
+{%- set km_card = kaamiki.site.open_graph.card if km_image else "summary" -%}
+{%- set km_strings = {
+    "copied": _("Copied"),
+    "failed": _("Copy failed"),
+    "copy": _("Copy"),
+    "more": _("Show more"),
+    "less": _("Show less"),
+    "returns": _("returns:"),
+    "error": _("error:"),
+    "setup": _("Setup"),
+    "code": _("Code"),
+    "table": _("Table"),
+    "enlarge": _("Enlarge image"),
+    "close": _("Close"),
+    "image": _("Image"),
+} -%}
+{%- set km_marks = {
+    "nav_arrow": kaamiki.icons.roles.nav_arrow,
+    "copy": kaamiki.icons.roles["copy"],
+    "copied": kaamiki.icons.roles.copied,
+    "close": kaamiki.icons.roles.close,
+} -%}
+<!DOCTYPE html>
+<html lang="{{ km_lang_attr }}"
+      class="km-document"
+      data-content_root="{{ content_root }}"
+      data-km-strings="{{ km_strings|tojson|forceescape }}"
+      data-km-more-icon="{{ kaamiki.icons.roles.show_more }}"
+      data-km-icons="{{ km_marks|tojson|forceescape }}"
+      {%- if kaamiki.mode != 'dark' %} data-km-mode="{{- kaamiki.mode -}}" {%- endif %}
+      {%- if kaamiki.motion.speed != 1 %} style="--km-motion-speed: {{ kaamiki.motion.speed }}" {%- endif %}
+      {% if kaamiki.site.copy_headerlinks %}data-km-copy-links{% endif %}
+      {% if kaamiki.motion.prefetch|tobool %}data-km-prefetch{% endif %}
+      {% if kaamiki.media.enlarge|tobool %}data-km-media-enlarge{% endif %}>
+    <head>
+        <meta charset="utf-8" />
+        {%- if 'name="viewport"' not in metatags %}
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1" />
+        {%- endif %}
+        {%- if kaamiki.mode == "light" %}
+            <meta name="color-scheme"
+                  content="only light" />
+            <meta name="theme-color"
+                  content="#ffffff" />
+        {%- elif kaamiki.mode == "system" %}
+            <meta name="color-scheme"
+                  content="light dark" />
+            <meta name="theme-color"
+                  media="(prefers-color-scheme: light)"
+                  content="#ffffff" />
+            <meta name="theme-color"
+                  media="(prefers-color-scheme: dark)"
+                  content="#000000" />
+        {%- else %}
+            <meta name="color-scheme"
+                  content="dark" />
+            <meta name="theme-color"
+                  content="#000000" />
+        {%- endif %}
+        {%- if kaamiki.mode == "system" %}
+            <script>
+                (function() {
+                    try {
+                        const saved = window.localStorage
+                            .getItem('km-colour-mode');
+                        if (['dark', 'light', 'system'].includes(saved)) {
+                            document.documentElement
+                                .setAttribute('data-km-mode', saved);
+                        }
+                    } catch (error) {}
+                })();
+            </script>
+        {%- endif %}
+        {%- if kaamiki.motion.page_transitions|tobool %}
+            <style>
                     @media (prefers-reduced-motion: no-preference) {
                         @view-transition {
                             navigation: auto;
                         }
                     }
-                </style>
-                <script>
-                    (function() {
-                        const root = document.documentElement;
-                        const classes = root.classList;
-                        let revealed = false;
-                        let timer = 0;
-
-                        function release() {
-                            revealed = true;
-                            window.clearTimeout(timer);
-                            root.removeAttribute('data-km-handing');
-                        }
-
-                        function hold() {
-                            window.clearTimeout(timer);
-                            timer = window.setTimeout(release, 4500);
-                        }
-
-                        if ('PageRevealEvent' in window) {
-                            root.setAttribute('data-km-handing', '');
-                            hold();
-                        }
-
-                        // The old page names its content so it can be pictured
-                        // as it was, and gives the name up if it's shown again
-                        // from the back and forward cache.
-                        window.addEventListener('pageswap', (event) => {
-                            if (!event.viewTransition) return;
-                            const content = document.querySelector(
-                                '.km-layout__content'
-                            );
-                            const header = document.querySelector('.km-header');
-                            if (content && header) {
-                                const box = content.getBoundingClientRect();
-                                const top = header.getBoundingClientRect()
-                                    .bottom - box.top;
-                                const bottom = box.bottom - window.innerHeight;
-                                content.style.clipPath = 'inset(' +
-                                    `${Math.max(0, top)}px -100vmax ` +
-                                    `${Math.max(0, bottom)}px -100vmax)`;
-                            }
-                            classes.add('km-document--leaving');
-                        });
-
-                        window.addEventListener('pageshow', (event) => {
-                            if (!event.persisted) return;
-                            classes.remove('km-document--leaving');
-                            document.querySelector('.km-layout__content')
-                                ?.style.removeProperty('clip-path');
-                        });
-
-                        // Fires with the first frame, after deferred scripts
-                        // have run, and has a transition when the reader came
-                        // from another page of the site.
-                        window.addEventListener('pagereveal', (event) => {
-                            const change = event.viewTransition;
-                            // A page shown again from the back and forward
-                            // cache is whole already, with no content to show
-                            // in once the old one has left.
-                            if (revealed && change) change.skipTransition();
-                            if (revealed || !change) return release();
-                            revealed = true;
-                            let back = false;
-                            try {
-                                const move = window.navigation.activation;
-                                back = move.navigationType === 'traverse' &&
-                                    move.entry.index < move.from.index;
-                            } catch (error) {}
-                            root.setAttribute(
-                                'data-km-nav',
-                                back ? 'back' : 'forward'
-                            );
-                            hold();
-                            const loaded = new Promise((resolve) => {
-                                if (document.readyState === 'complete') {
-                                    resolve();
-                                } else {
-                                    window.addEventListener('load', resolve, {
-                                        once: true
-                                    });
-                                }
-                            }).then(() => document.fonts.ready);
-                            const picture = (move, name) => (
-                                move.effect &&
-                                move.effect.pseudoElement === name
-                            );
-                            const nearly = (move) => new Promise((resolve) => {
-                                const check = () => {
-                                    const length = move.effect
-                                        .getComputedTiming().duration;
-                                    if (move.playState === 'finished' ||
-                                        move.currentTime >= length * 0.95) {
-                                        resolve();
-                                    } else {
-                                        window.requestAnimationFrame(check);
-                                    }
-                                };
-                                check();
-                            });
-                            change.ready.then(() => {
-                                const moving = document.getAnimations();
-                                return Promise.all([
-                                    loaded,
-                                    ...moving
-                                    .filter((move) => picture(
-                                        move,
-                                        '::view-transition-old(km-content)'
-                                    ))
-                                    .map(nearly),
-                                ]).then(() => moving
-                                    .filter((move) => picture(
-                                        move,
-                                        '::view-transition-old(root)'
-                                    ))
-                                    .forEach((move) => move.finish()));
-                            }).catch(() => {}).then(release);
-                            change.finished.catch(() => {}).then(release);
-                        });
-                    })();
-                </script>
-            {%- endif %}
+            </style>
             <script>
                 (function() {
                     const root = document.documentElement;
                     const classes = root.classList;
-                    const held = () => root.hasAttribute('data-km-handing');
-                    let fonts = false;
-                    let timer = window.setTimeout(show, held() ? 5000 : 2000);
-                    classes.add(
-                        'km-document--scripted',
+                    let revealed = false;
+                    let timer = 0;
+
+                    function release() {
+                        revealed = true;
+                        window.clearTimeout(timer);
+                        root.removeAttribute('data-km-handing');
+                    }
+
+                    function hold() {
+                        window.clearTimeout(timer);
+                        timer = window.setTimeout(release, 4500);
+                    }
+
+                    if ('PageRevealEvent' in window) {
+                        root.setAttribute('data-km-handing', '');
+                        hold();
+                    }
+
+                    // The old page names its content so it can be pictured
+                    // as it was, and gives the name up if it's shown again
+                    // from the back and forward cache.
+                    window.addEventListener('pageswap', (event) => {
+                        if (!event.viewTransition) return;
+                        const content = document.querySelector(
+                            '.km-layout__content'
+                        );
+                        const header = document.querySelector('.km-header');
+                        if (content && header) {
+                            const box = content.getBoundingClientRect();
+                            const top = header.getBoundingClientRect()
+                                .bottom - box.top;
+                            const bottom = box.bottom - window.innerHeight;
+                            content.style.clipPath = 'inset(' +
+                                `${Math.max(0, top)}px -100vmax ` +
+                                `${Math.max(0, bottom)}px -100vmax)`;
+                        }
+                        classes.add('km-document--leaving');
+                    });
+
+                    window.addEventListener('pageshow', (event) => {
+                        if (!event.persisted) return;
+                        classes.remove('km-document--leaving');
+                        document.querySelector('.km-layout__content')
+                            ?.style.removeProperty('clip-path');
+                    });
+
+                    // Fires with the first frame, after deferred scripts
+                    // have run, and has a transition when the reader came
+                    // from another page of the site.
+                    window.addEventListener('pagereveal', (event) => {
+                        const change = event.viewTransition;
+                        // A page shown again from the back and forward
+                        // cache is whole already, with no content to show
+                        // in once the old one has left.
+                        if (revealed && change) change.skipTransition();
+                        if (revealed || !change) return release();
+                        revealed = true;
+                        let back = false;
+                        try {
+                            const move = window.navigation.activation;
+                            back = move.navigationType === 'traverse' &&
+                                move.entry.index < move.from.index;
+                        } catch (error) {}
+                        root.setAttribute(
+                            'data-km-nav',
+                            back ? 'back' : 'forward'
+                        );
+                        hold();
+                        const loaded = new Promise((resolve) => {
+                            if (document.readyState === 'complete') {
+                                resolve();
+                            } else {
+                                window.addEventListener('load', resolve, {
+                                    once: true
+                                });
+                            }
+                        }).then(() => document.fonts.ready);
+                        const picture = (move, name) => (
+                            move.effect &&
+                            move.effect.pseudoElement === name
+                        );
+                        const nearly = (move) => new Promise((resolve) => {
+                            const check = () => {
+                                const length = move.effect
+                                    .getComputedTiming().duration;
+                                if (move.playState === 'finished' ||
+                                    move.currentTime >= length * 0.95) {
+                                    resolve();
+                                } else {
+                                    window.requestAnimationFrame(check);
+                                }
+                            };
+                            check();
+                        });
+                        change.ready.then(() => {
+                            const moving = document.getAnimations();
+                            return Promise.all([
+                                loaded,
+                                ...moving
+                                .filter((move) => picture(
+                                    move,
+                                    '::view-transition-old(km-content)'
+                                ))
+                                .map(nearly),
+                            ]).then(() => moving
+                                .filter((move) => picture(
+                                    move,
+                                    '::view-transition-old(root)'
+                                ))
+                                .forEach((move) => move.finish()));
+                        }).catch(() => {}).then(release);
+                        change.finished.catch(() => {}).then(release);
+                    });
+                })();
+            </script>
+        {%- endif %}
+        <script>
+            (function() {
+                const root = document.documentElement;
+                const classes = root.classList;
+                const held = () => root.hasAttribute('data-km-handing');
+                let fonts = false;
+                let timer = window.setTimeout(show, held() ? 5000 : 2000);
+                classes.add(
+                    'km-document--scripted',
+                    'km-document--loading',
+                    'km-document--no-transitions'
+                );
+
+                function show() {
+                    window.clearTimeout(timer);
+                    classes.remove(
                         'km-document--loading',
                         'km-document--no-transitions'
                     );
+                }
 
-                    function show() {
-                        window.clearTimeout(timer);
-                        classes.remove(
-                            'km-document--loading',
-                            'km-document--no-transitions'
-                        );
-                    }
+                function settle() {
+                    if (fonts && !held()) show();
+                }
 
-                    function settle() {
-                        if (fonts && !held()) show();
-                    }
-
-                    function ready() {
-                        const loaded = document.fonts.ready;
-                        requestAnimationFrame(() => loaded.then(() => {
-                            fonts = true;
-                            settle();
-                        }));
-                    }
-
-                    function folded() {
-                        if (classes.contains('km-document--fold-ready')) return;
-                        if (!document.querySelector('.km-page--clamped')) return;
-                        classes.add('km-document--fold-failed');
-                    }
-
-                    function loaded() {
-                        window.setTimeout(folded, 1000);
-                    }
-
-                    new MutationObserver(() => {
-                        if (held()) return;
-                        window.clearTimeout(timer);
-                        timer = window.setTimeout(show, 2000);
+                function ready() {
+                    const loaded = document.fonts.ready;
+                    requestAnimationFrame(() => loaded.then(() => {
+                        fonts = true;
                         settle();
-                    }).observe(root, {
-                        attributes: true,
-                        attributeFilter: ['data-km-handing']
-                    });
-                    document.addEventListener('DOMContentLoaded', ready, {
-                        once: true
-                    });
-                    window.addEventListener('load', loaded);
-                })();
-            </script>
-            {{ metatags }}
-            {%- if kaamiki.page.author %}
-                <meta name="author"
-                      content="{{ kaamiki.page.author|e }}" />
+                    }));
+                }
+
+                function folded() {
+                    if (classes.contains('km-document--fold-ready')) return;
+                    if (!document.querySelector('.km-page--clamped')) return;
+                    classes.add('km-document--fold-failed');
+                }
+
+                function loaded() {
+                    window.setTimeout(folded, 1000);
+                }
+
+                new MutationObserver(() => {
+                    if (held()) return;
+                    window.clearTimeout(timer);
+                    timer = window.setTimeout(show, 2000);
+                    settle();
+                }).observe(root, {
+                    attributes: true,
+                    attributeFilter: ['data-km-handing']
+                });
+                document.addEventListener('DOMContentLoaded', ready, {
+                    once: true
+                });
+                window.addEventListener('load', loaded);
+            })();
+        </script>
+        {{ metatags }}
+        {%- if kaamiki.page.author %}
+            <meta name="author"
+                  content="{{ kaamiki.page.author|e }}" />
+        {%- endif %}
+        {%- set km_robots = (meta or {}).get('km-page-robots') %}
+        {%- if km_robots and 'name="robots"' not in metatags %}
+            <meta name="robots"
+                  content="{{ km_robots|e }}" />
+        {%- endif %}
+        {%- block km_social %}
+            {%- set km_described = 'name="description"' in metatags %}
+            {%- if kaamiki.site.open_graph and kaamiki.site.open_graph.description and not km_described %}
+                <meta name="description"
+                      content="{{ kaamiki.site.open_graph.description|e }}" />
             {%- endif %}
-            {%- set km_robots = (meta or {}).get('km-page-robots') %}
-            {%- if km_robots and 'name="robots"' not in metatags %}
-                <meta name="robots"
-                      content="{{ km_robots|e }}" />
-            {%- endif %}
-            {%- block km_social %}
-                {%- set km_described = 'name="description"' in metatags %}
-                {%- if kaamiki.site.open_graph and kaamiki.site.open_graph.description and not km_described %}
-                    <meta name="description"
+            {%- if kaamiki.site.open_graph and kaamiki.site.open_graph.enable %}
+                <meta property="og:title"
+                      content="{{ kaamiki.site.open_graph.title|e }}" />
+                <meta property="og:type"
+                      content="{{ kaamiki.site.open_graph.type|e }}" />
+                {%- if kaamiki.site.open_graph.site_name %}
+                    <meta property="og:site_name"
+                          content="{{ kaamiki.site.open_graph.site_name|e }}" />
+                {%- endif %}
+                {%- if pageurl %}
+                    <meta property="og:url"
+                          content="{{ pageurl|e }}" />
+                {%- endif %}
+                {%- if kaamiki.site.open_graph.description %}
+                    <meta property="og:description"
                           content="{{ kaamiki.site.open_graph.description|e }}" />
                 {%- endif %}
-                {%- if kaamiki.site.open_graph and kaamiki.site.open_graph.enable %}
-                    <meta property="og:title"
-                          content="{{ kaamiki.site.open_graph.title|e }}" />
-                    <meta property="og:type"
-                          content="{{ kaamiki.site.open_graph.type|e }}" />
-                    {%- if kaamiki.site.open_graph.site_name %}
-                        <meta property="og:site_name"
-                              content="{{ kaamiki.site.open_graph.site_name|e }}" />
-                    {%- endif %}
-                    {%- if pageurl %}
-                        <meta property="og:url"
-                              content="{{ pageurl|e }}" />
-                    {%- endif %}
-                    {%- if kaamiki.site.open_graph.description %}
-                        <meta property="og:description"
-                              content="{{ kaamiki.site.open_graph.description|e }}" />
-                    {%- endif %}
-                    {%- if kaamiki.site.open_graph.locale %}
-                        <meta property="og:locale"
-                              content="{{ kaamiki.site.open_graph.locale|e }}" />
-                    {%- endif %}
-                    {%- if kaamiki.site.open_graph.image %}
-                        <meta property="og:image"
-                              content="{{ kaamiki.site.open_graph.image|e }}" />
-                        {%- if kaamiki.site.open_graph.image_alt %}
-                            <meta property="og:image:alt"
-                                  content="{{ kaamiki.site.open_graph.image_alt|e }}" />
-                        {%- endif %}
-                    {%- endif %}
-                    {%- if kaamiki.site.open_graph.type == 'article' %}
-                        {%- if kaamiki.site.open_graph.published %}
-                            <meta property="article:published_time"
-                                  content="{{ kaamiki.site.open_graph.published|e }}" />
-                        {%- endif %}
-                        {%- if kaamiki.site.open_graph.modified %}
-                            <meta property="article:modified_time"
-                                  content="{{ kaamiki.site.open_graph.modified|e }}" />
-                        {%- endif %}
-                        {%- if kaamiki.page.author %}
-                            <meta property="article:author"
-                                  content="{{ kaamiki.page.author|e }}" />
-                        {%- endif %}
-                    {%- endif %}
-                    <meta name="twitter:card"
-                          content="{{ km_card|e }}" />
-                    {%- if kaamiki.site.open_graph.site %}
-                        <meta name="twitter:site"
-                              content="{{ kaamiki.site.open_graph.site|e }}" />
+                {%- if kaamiki.site.open_graph.locale %}
+                    <meta property="og:locale"
+                          content="{{ kaamiki.site.open_graph.locale|e }}" />
+                {%- endif %}
+                {%- if kaamiki.site.open_graph.image %}
+                    <meta property="og:image"
+                          content="{{ kaamiki.site.open_graph.image|e }}" />
+                    {%- if kaamiki.site.open_graph.image_alt %}
+                        <meta property="og:image:alt"
+                              content="{{ kaamiki.site.open_graph.image_alt|e }}" />
                     {%- endif %}
                 {%- endif %}
-            {%- endblock km_social %}
-            {# djlint:off H023 #}
-            {%- block htmltitle %}
-                <title>
-                    {{- kaamiki.site.title|e -}}
-                    {%- if title and pagename != master_doc %}
-                        {{- " &middot; "|safe ~ title|striptags|e -}}
-                    {%- endif -%}
-                </title>
-            {%- endblock htmltitle %}
-            {# djlint:on #}
-            {%- block km_thirdparty %}
-                {%- if kaamiki.icons.kit %}
-                    <link rel="preconnect"
-                          href="{{ kaamiki.icons.kit.split("/")[:3] |join('/') }}"
-                          crossorigin />
-                    <script src="{{ kaamiki.icons.kit }}"
-                            crossorigin="anonymous"
-                            async></script>
-                {%- elif kaamiki.fa_free.css %}
-                    <link rel="preconnect"
-                          href="{{ kaamiki.fa_free.css.split("/")[:3] |join('/') }}"
-                          crossorigin />
+                {%- if kaamiki.site.open_graph.type == "article" %}
+                    {%- if kaamiki.site.open_graph.published %}
+                        <meta property="article:published_time"
+                              content="{{ kaamiki.site.open_graph.published|e }}" />
+                    {%- endif %}
+                    {%- if kaamiki.site.open_graph.modified %}
+                        <meta property="article:modified_time"
+                              content="{{ kaamiki.site.open_graph.modified|e }}" />
+                    {%- endif %}
+                    {%- if kaamiki.page.author %}
+                        <meta property="article:author"
+                              content="{{ kaamiki.page.author|e }}" />
+                    {%- endif %}
                 {%- endif %}
-            {%- endblock km_thirdparty %}
-            {%- for css in css_files %}
-                {%- if css|attr("filename") %}
-                    {{ css_tag(css) }}
-                {%- else -%}
-                    <link rel="stylesheet"
-                          href="{{ pathto(css, 1) |e }}" />
+                <meta name="twitter:card"
+                      content="{{ km_card|e }}" />
+                {%- if kaamiki.site.open_graph.site %}
+                    <meta name="twitter:site"
+                          content="{{ kaamiki.site.open_graph.site|e }}" />
                 {%- endif %}
-            {%- endfor %}
-            {%- for name in kaamiki.embed.css %}
+            {%- endif %}
+        {%- endblock km_social %}
+        {# djlint:off H023 #}
+        {%- block htmltitle %}
+            <title>
+                {{- kaamiki.site.title|e -}}
+                {%- if title and pagename != master_doc %}
+                    {{- " &middot; "|safe ~ title|striptags|e -}}
+                {%- endif -%}
+            </title>
+        {%- endblock htmltitle %}
+        {# djlint:on #}
+        {%- block km_thirdparty %}
+            {%- if kaamiki.icons.kit %}
+                <link rel="preconnect"
+                      href="{{ kaamiki.icons.kit.split('/')[:3] |join('/') }}"
+                      crossorigin />
+                <script src="{{ kaamiki.icons.kit }}"
+                        crossorigin="anonymous"
+                        async></script>
+            {%- elif kaamiki.fa_free.css %}
+                <link rel="preconnect"
+                      href="{{ kaamiki.fa_free.css.split('/')[:3] |join('/') }}"
+                      crossorigin />
+            {%- endif %}
+        {%- endblock km_thirdparty %}
+        {%- for css in css_files %}
+            {%- if css|attr("filename") %}
+                {{ css_tag(css) }}
+            {%- else -%}
                 <link rel="stylesheet"
-                      href="{{ pathto('_static/' + name, 1) |e }}" />
-            {%- endfor %}
-            {%- block km_icons %}
-                {%- if kaamiki.fa_free.css and not kaamiki.icons.kit %}
-                    {%- set km_sri = kaamiki.fa_free.integrity or none %}
-                    <link rel="stylesheet"
-                          href="{{ kaamiki.fa_free.css }}"
-                          {{ {"integrity": km_sri}|xmlattr }}
-                          crossorigin="anonymous" />
-                {%- endif %}
-            {%- endblock km_icons %}
-            {%- if kaamiki.site.favicons and kaamiki.site.favicons.size_96 %}
-                <link rel="icon"
-                      type="image/png"
-                      href="{{ pathto('_static/' + kaamiki.site.favicons.size_96, 1) }}"
-                      sizes="96x96" />
+                      href="{{ pathto(css, 1) |e }}" />
             {%- endif %}
-            {%- if kaamiki.site.favicons and kaamiki.site.favicons.size_svg %}
-                <link rel="icon"
-                      type="image/svg+xml"
-                      href="{{ pathto('_static/' + kaamiki.site.favicons.size_svg, 1) }}" />
+        {%- endfor %}
+        {%- for name in kaamiki.embed.css %}
+            <link rel="stylesheet"
+                  href="{{ pathto('_static/' + name, 1) |e }}" />
+        {%- endfor %}
+        {%- block km_icons %}
+            {%- if kaamiki.fa_free.css and not kaamiki.icons.kit %}
+                {%- set km_sri = kaamiki.fa_free.integrity or none %}
+                <link rel="stylesheet"
+                      href="{{ kaamiki.fa_free.css }}"
+                      {{ {"integrity": km_sri}|xmlattr }}
+                      crossorigin="anonymous" />
             {%- endif %}
-            {%- if kaamiki.site.favicons and kaamiki.site.favicons.ico %}
-                <link rel="shortcut icon"
-                      href="{{ pathto('_static/' + kaamiki.site.favicons.ico, 1) }}" />
-            {%- elif favicon_url %}
-                <link rel="shortcut icon"
-                      href="{{ favicon_url }}" />
+        {%- endblock km_icons %}
+        {%- if kaamiki.site.favicons and kaamiki.site.favicons.size_96 %}
+            <link rel="icon"
+                  type="image/png"
+                  href="{{ pathto('_static/' + kaamiki.site.favicons.size_96, 1) }}"
+                  sizes="96x96" />
+        {%- endif %}
+        {%- if kaamiki.site.favicons and kaamiki.site.favicons.size_svg %}
+            <link rel="icon"
+                  type="image/svg+xml"
+                  href="{{ pathto('_static/' + kaamiki.site.favicons.size_svg, 1) }}" />
+        {%- endif %}
+        {%- if kaamiki.site.favicons and kaamiki.site.favicons.ico %}
+            <link rel="shortcut icon"
+                  href="{{ pathto('_static/' + kaamiki.site.favicons.ico, 1) }}" />
+        {%- elif favicon_url %}
+            <link rel="shortcut icon"
+                  href="{{ favicon_url }}" />
+        {%- endif %}
+        {%- if kaamiki.site.favicons and kaamiki.site.favicons.size_180 %}
+            <link rel="apple-touch-icon"
+                  sizes="180x180"
+                  href="{{ pathto('_static/' + kaamiki.site.favicons.size_180, 1) }}" />
+            <meta name="apple-mobile-web-app-title"
+                  content="{{ (docstitle or title)|striptags|e }}" />
+        {%- endif %}
+        {%- if kaamiki.site.favicons and kaamiki.site.favicons.manifest %}
+            <link rel="manifest"
+                  href="{{ pathto('_static/' + kaamiki.site.favicons.manifest, 1) }}" />
+        {%- endif %}
+        {%- block linktags %}
+            {%- if pageurl %}
+                <link rel="canonical"
+                      href="{{ pageurl|e }}" />
             {%- endif %}
-            {%- if kaamiki.site.favicons and kaamiki.site.favicons.size_180 %}
-                <link rel="apple-touch-icon"
-                      sizes="180x180"
-                      href="{{ pathto('_static/' + kaamiki.site.favicons.size_180, 1) }}" />
-                <meta name="apple-mobile-web-app-title"
-                      content="{{ (docstitle or title)|striptags|e }}" />
+            {%- if hasdoc("search") %}
+                <link rel="search"
+                      title="{{ _('Search') }}"
+                      href="{{ pathto('search') }}" />
             {%- endif %}
-            {%- if kaamiki.site.favicons and kaamiki.site.favicons.manifest %}
-                <link rel="manifest"
-                      href="{{ pathto('_static/' + kaamiki.site.favicons.manifest, 1) }}" />
+            {%- if next %}
+                <link rel="next"
+                      title="{{ next.title|striptags|e }}"
+                      href="{{ next.link|e }}" />
             {%- endif %}
-            {%- block linktags %}
-                {%- if pageurl %}
-                    <link rel="canonical"
-                          href="{{ pageurl|e }}" />
-                {%- endif %}
-                {%- if hasdoc('search') %}
-                    <link rel="search"
-                          title="{{ _('Search') }}"
-                          href="{{ pathto('search') }}" />
-                {%- endif %}
-                {%- if next %}
-                    <link rel="next"
-                          title="{{ next.title|striptags|e }}"
-                          href="{{ next.link|e }}" />
-                {%- endif %}
-                {%- if prev %}
-                    <link rel="prev"
-                          title="{{ prev.title|striptags|e }}"
-                          href="{{ prev.link|e }}" />
-                {%- endif %}
-            {%- endblock linktags %}
-            {%- block extrahead %}
-            {%- endblock extrahead %}
-        </head>
-        <body class="km-body">
-            {%- if km_menu %}
-                <div class="km-sidebar__backdrop"
-                     hidden></div>
+            {%- if prev %}
+                <link rel="prev"
+                      title="{{ prev.title|striptags|e }}"
+                      href="{{ prev.link|e }}" />
             {%- endif %}
-            <div id="km-page"
-                 class="km-shell">
-                <a href="#km-content"
-                   class="km-shell__skip-link">{{ _("Skip to content") }}</a>
-                <div id="searchbox"></div>
-                {{ km_noscript() }}
-                {%- block header %}
-                    <header class="km-header">
-                        {%- block km_header_before %}
-                        {%- endblock km_header_before %}
-                        <div class="km-header__inner">
-                            {%- block km_header_left %}
-                                <div class="km-header__primary">
-                                    {%- block km_website_logo %}
-                                        {{ km_brand() }}
-                                    {%- endblock km_website_logo %}
-                                </div>
-                            {%- endblock km_header_left %}
-                            {{ km_primary_nav() if km_top }}
-                            {%- block km_header_right %}
-                                <div class="km-header__utilities">
-                                    {%- block km_mobile_menu %}
-                                        {{ km_menu_button() if km_menu }}
-                                    {%- endblock km_mobile_menu %}
-                                    {%- block km_header_buttons %}
-                                        {{ km_icon_links() if km_icons }}
-                                    {%- endblock km_header_buttons %}
-                                    {{ km_header_search() if km_search }}
-                                </div>
-                            {%- endblock km_header_right %}
-                        </div>
-                        {%- block km_header_after %}
-                        {%- endblock km_header_after %}
-                    </header>
-                {%- endblock header %}
-                <div class="km-shell__main">
-                    <div class="km-layout km-container{{ km_nested }}">
-                        {%- block km_sidebar %}
-                            {%- for km_each in sidebars %}
-                                {%- include km_each %}
-                            {%- endfor %}
-                        {%- endblock km_sidebar %}
-                        {%- block km_main %}
-                            <div class="km-layout__content">
-                                {%- block body %}
-                                {%- endblock body %}
+        {%- endblock linktags %}
+        {%- block extrahead %}
+        {%- endblock extrahead %}
+    </head>
+    <body class="km-body">
+        {%- if km_menu %}
+            <div class="km-sidebar__backdrop"
+                 hidden></div>
+        {%- endif %}
+        <div id="km-page"
+             class="km-shell">
+            <a href="#km-content"
+               class="km-shell__skip-link">{{ _("Skip to content") }}</a>
+            <div id="searchbox"></div>
+            {{ km_noscript() }}
+            {%- block header %}
+                <header class="km-header">
+                    {%- block km_header_before %}
+                    {%- endblock km_header_before %}
+                    <div class="km-header__inner">
+                        {%- block km_header_left %}
+                            <div class="km-header__primary">
+                                {%- block km_website_logo %}
+                                    {{ km_brand() }}
+                                {%- endblock km_website_logo %}
                             </div>
-                            {%- include km_pages %}
-                        {%- endblock km_main %}
-                        {%- block km_aside %}
-                        {%- endblock km_aside %}
+                        {%- endblock km_header_left %}
+                        {{ km_primary_nav() if km_top }}
+                        {%- block km_header_right %}
+                            <div class="km-header__utilities">
+                                {%- block km_mobile_menu %}
+                                    {{ km_menu_button() if km_menu }}
+                                {%- endblock km_mobile_menu %}
+                                {%- block km_header_buttons %}
+                                    {{ km_icon_links() if km_icons }}
+                                {%- endblock km_header_buttons %}
+                                {{ km_header_search() if km_search }}
+                            </div>
+                        {%- endblock km_header_right %}
                     </div>
-                </div>
-                {%- if kaamiki.show.scrolltop|tobool %}
-                    {%- include "components/scrolltop.html.jinja" %}
-                {%- endif %}
-                {%- block footer %}
-                    <footer class="km-footer km-container">
-                        {%- block km_footer_before %}
-                        {%- endblock km_footer_before %}
-                        <div class="km-footer__inner">
-                            {{ km_footer_text() }}
-                            {{ km_colour_modes() }}
+                    {%- block km_header_after %}
+                    {%- endblock km_header_after %}
+                </header>
+            {%- endblock header %}
+            <div class="km-shell__main">
+                <div class="km-layout km-container{{ km_nested }}">
+                    {%- block km_sidebar %}
+                        {%- for km_each in sidebars %}
+                            {%- include km_each %}
+                        {%- endfor %}
+                    {%- endblock km_sidebar %}
+                    {%- block km_main %}
+                        <div class="km-layout__content">
+                            {%- block body %}
+                            {%- endblock body %}
                         </div>
-                        {%- block km_footer_after %}
-                        {%- endblock km_footer_after %}
-                    </footer>
-                {%- endblock footer %}
+                        {%- include km_pages %}
+                    {%- endblock km_main %}
+                    {%- block km_aside %}
+                    {%- endblock km_aside %}
+                </div>
             </div>
-            {%- block scripts %}
-                {{ km_scripts() }}
-            {%- endblock scripts %}
-        </body>
-    </html>
+            {%- if kaamiki.show.scrolltop|tobool %}
+                {%- include "components/scrolltop.html.jinja" %}
+            {%- endif %}
+            {%- block footer %}
+                <footer class="km-footer km-container">
+                    {%- block km_footer_before %}
+                    {%- endblock km_footer_before %}
+                    <div class="km-footer__inner">
+                        {{ km_footer_text() }}
+                        {{ km_colour_modes() }}
+                    </div>
+                    {%- block km_footer_after %}
+                    {%- endblock km_footer_after %}
+                </footer>
+            {%- endblock footer %}
+        </div>
+        {%- block scripts %}
+            {{ km_scripts() }}
+        {%- endblock scripts %}
+    </body>
+</html>
