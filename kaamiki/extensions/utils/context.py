@@ -50,6 +50,7 @@ from kaamiki.extensions.utils.links import opens_new_tab
 from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import CARDS
 from kaamiki.extensions.utils.settings import CREDIT
+from kaamiki.extensions.utils.settings import DROPDOWN_ROWS
 from kaamiki.extensions.utils.settings import FA_FREE
 from kaamiki.extensions.utils.settings import FA_FREE_INTEGRITY
 from kaamiki.extensions.utils.settings import HEADER_LEAD_LENGTH
@@ -71,6 +72,7 @@ from kaamiki.extensions.utils.settings import validate
 from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.templates import environment
 from kaamiki.extensions.utils.templates import parts
+from kaamiki.extensions.utils.text import HeaderNav
 from kaamiki.extensions.utils.text import clip
 from kaamiki.extensions.utils.text import levelled
 from kaamiki.extensions.utils.text import plain
@@ -176,7 +178,11 @@ def made(config: Config) -> Kaamiki:
         groups["show"]["feedback"] = bool(
             project["email"] or conf.site.feedback.get("url")
         )
-    groups["icons"].update(roles=icons.roles(conf.icons.names), kit=icons.kit)
+    groups["icons"].update(
+        roles=icons.roles(conf.icons.names),
+        arrow=icons.arrow(conf.icons.names),
+        kit=icons.kit,
+    )
     depth = conf.toctree.maxdepth
     groups["toctree"].update(
         args={
@@ -798,7 +804,7 @@ def toctrees(
         """Draw the navigation of the header, with leads.
 
         :param kwargs: The arguments of `toctree` in the template.
-        :return: The HTML of the navigation.
+        :return: The HTML of the navigation, with its dropdowns.
         """
         spans = header_leads(builder)
         by_link = {
@@ -815,7 +821,11 @@ def toctrees(
             span = by_link.get(unescape(found[2]), "")
             return f"{found[1]}{found[3]}{span}{found[4]}"
 
-        return levelled(LINK.sub(add, draw(**kwargs)))
+        return HeaderNav(
+            levelled(LINK.sub(add, draw(**kwargs))),
+            arrow=context[NAME].icons.arrow,
+            rows=DROPDOWN_ROWS,
+        ).html
 
     context["toctree"] = sidebar
     context[NAME]["toctree.header"] = header

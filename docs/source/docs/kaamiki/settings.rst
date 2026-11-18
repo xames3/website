@@ -1238,7 +1238,9 @@ With a kit, the "With a kit" column follows ``kaamiki.conf.icons.style``.
 ``release_notes`` may be left empty with ``""``, so no icon appears. The other
 names always need an icon. ``nav_arrow``, ``release_notes``,
 ``repository_forks``, ``repository_mark`` and ``repository_stars`` are drawn in
-one style, whatever ``kaamiki.conf.icons.style`` says.
+one style, whatever ``kaamiki.conf.icons.style`` says. Unless the site sets
+``nav_arrow``, its arrow is written in the page as SVG, so it shows from the
+first frame without the kit.
 
 Write the icon in whichever way suits you. ``video``, ``fa-video`` and
 ``fa-solid fa-video`` all mean the same thing, and a bare name gets

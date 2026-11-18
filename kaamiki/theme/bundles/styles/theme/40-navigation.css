@@ -82,14 +82,6 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-
-    &>p.caption {
-        display: none;
-    }
-}
-
-html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
-    display: none;
 }
 
 .km-header__nav-tree>ul {
@@ -182,6 +174,7 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
     & .km-header__arrow {
         --fa-width: calc(447em / 512);
         width: var(--fa-width);
+        height: 1em;
         line-height: 1;
         font-size: 0.5rem;
         transition: transform var(--km-motion-surface) var(--km-ease-smooth);

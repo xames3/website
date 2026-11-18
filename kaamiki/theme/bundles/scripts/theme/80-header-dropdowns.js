@@ -2,7 +2,6 @@
         const nav = document.querySelector('.km-header__nav-tree');
         if (!nav) return;
 
-        let uid = 0;
         let current = null;
         let timer = 0;
         const trail = [];
@@ -90,23 +89,6 @@
         const dropdown = (group, trigger, list) => {
             const menu = { group, trigger, list };
             const isLink = trigger.tagName === 'A';
-            const arrow = makeIcon('nav_arrow', 'km-header__arrow');
-            const holder = isLink
-                ? trigger
-                : trigger.querySelector('.caption-text');
-            if (arrow && holder) holder.append(arrow);
-            list.id = list.id || `km-nav-group-${++uid}`;
-            const count = list.querySelectorAll(':scope > li').length;
-            list.style.setProperty(
-                '--km-dropdown-rows',
-                Math.max(1, Math.min(DROPDOWN_ROWS, count)),
-            );
-            list.style.setProperty(
-                '--km-dropdown-columns',
-                Math.max(1, Math.ceil(count / DROPDOWN_ROWS)),
-            );
-            trigger.setAttribute('aria-controls', list.id);
-            trigger.setAttribute('aria-expanded', 'false');
 
             group.addEventListener('pointerenter', (event) => {
                 if (!mouse(event)) return;
@@ -157,34 +139,12 @@
         };
         window.addEventListener('resize', hide, { passive: true });
 
-        Array.from(nav.querySelectorAll('p.caption')).forEach((caption) => {
-            const list = caption.nextElementSibling;
-            if (list?.tagName !== 'UL') return;
-
-            const group = document.createElement('div');
-            const button = document.createElement('button');
-            group.className = 'km-header__nav-group';
-            button.type = 'button';
-            button.className = caption.className;
-            button.append(...caption.childNodes);
-            caption.replaceWith(group);
-            group.append(button, list);
-            dropdown(group, button, list);
-        });
-
-        Array.from(nav.children).forEach((node) => {
-            if (node.tagName === 'UL') {
-                node.classList.add('km-header__nav-links');
-            }
-        });
-
-        nav.querySelectorAll('.km-header__nav-links > li').forEach((item) => {
-            const link = item.querySelector(':scope > a');
-            const list = item.querySelector(':scope > ul');
-            if (!link || !list) return;
-
-            item.classList.add('km-header__nav-group');
-            dropdown(item, link, list);
+        nav.querySelectorAll('.km-header__nav-group').forEach((group) => {
+            dropdown(
+                group,
+                group.querySelector(':scope > .caption, :scope > a'),
+                group.querySelector(':scope > ul'),
+            );
         });
     }
 

@@ -103,6 +103,7 @@ SHOW_MORE_AFTER: t.Final[int] = 5
 RELATED_PAGES: t.Final[int] = 5
 DESCRIPTION_LENGTH: t.Final[int] = 200
 HEADER_LEAD_LENGTH: t.Final[int] = 90
+DROPDOWN_ROWS: t.Final[int] = 3
 HEADER_SUBHEADER_FIELD: t.Final[str] = "km-header-subheader"
 HEADER_NO_SUBHEADER_FIELD: t.Final[str] = "km-header-no-subheader"
 PROJECT: t.Final[dict[str, str]] = {

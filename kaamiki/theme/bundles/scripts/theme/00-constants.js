@@ -82,7 +82,6 @@ Last updated on: 18 November 2026
     const DROPDOWN_AIM_MS = 450;
     const DROPDOWN_PIN_MS = 300;
     const DROPDOWN_EDGE_PX = 8;
-    const DROPDOWN_ROWS = 3;
     const SIDEBAR_WIDE_PX = 768;
     const NAV_WIDE_PX = 960;
     const NAV_WRAPPED = 'km-document--nav-wrapped';
