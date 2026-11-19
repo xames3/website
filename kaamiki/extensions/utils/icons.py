@@ -18,20 +18,16 @@ the file. They are copied, so the build does not install or read the
 package. Copy them again when `FA_FREE` points at a different release.
 `NAV_ARROW` is the `chevron-down` of Font Awesome Free 7.3.1 (CC BY
 4.0) as SVG, so the arrow of a header dropdown shows from the first
-frame of a page. `copy_button` writes the button that copies a code
-block or a snippet, with its two icons.
+frame of a page.
 """
 
 from __future__ import annotations
 
 import dataclasses
 import difflib
-import html
 import os
 import typing as t
 from types import MappingProxyType
-
-from sphinx.locale import _
 
 from kaamiki.extensions.utils import checks
 
@@ -519,27 +515,6 @@ class Icons:
             if name in names:
                 return self.pair(pair)
         return ""
-
-
-def copy_button(roles: Mapping[str, str], *classes: str) -> str:
-    """Write the button that copies a code block or a snippet.
-
-    :param roles: The named icons of the site.
-    :param classes: The classes to put next to `km-copy`.
-    :return: The markup. The button holds its two icons, and the
-        stylesheet shows the icon for its state.
-    """
-    marks = "".join(
-        f'<i class="{roles[key]} km-copy__icon km-copy__icon--{state}"'
-        ' aria-hidden="true"></i>'
-        for key, state in (("copy", "copy"), ("copied", "done"))
-        if roles[key]
-    )
-    label = html.escape(str(_("Copy the snippet")))
-    return (
-        f'<button type="button" class="{" ".join(("km-copy", *classes))}"'
-        f' data-km-copy aria-label="{label}">{marks}</button>'
-    )
 
 
 def _names(listed: str) -> frozenset[str]:

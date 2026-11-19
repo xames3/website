@@ -82,6 +82,12 @@
         return parseFloat(getCssVar('--km-motion-speed')) || 1;
     }
 
+    // A time a reader or a directive wrote in the page, over the site's
+    // speed and the directive's own, as the tokens are.
+    function pacedMs(ms, scope) {
+        return ms / motionSpeed() / scopeSpeed(scope);
+    }
+
     function resetMotion() {
         durationCache.clear();
     }
@@ -314,7 +320,7 @@
 
     const motion = {
         ms: motionMs,
-        speedOf: scopeSpeed,
+        paced: pacedMs,
         speed: motionSpeed,
         animate: animateMotion,
         length: animateLength,

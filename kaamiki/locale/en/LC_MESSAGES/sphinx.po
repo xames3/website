@@ -78,9 +78,6 @@ msgstr ""
 msgid "%d %B %Y"
 msgstr ""
 
-msgid "Copy the snippet"
-msgstr ""
-
 msgid "Page not found"
 msgstr ""
 
@@ -93,6 +90,9 @@ msgid "Search results"
 msgstr ""
 
 msgid "Search every page on this site."
+msgstr ""
+
+msgid "Copy the snippet"
 msgstr ""
 
 msgid "Copy link"

@@ -176,6 +176,11 @@
     animation: none;
 }
 
+.km-typewrite__cursor--still,
+.km-typewrite__cursor--still::before {
+    animation-play-state: paused;
+}
+
 @keyframes km-typewrite-blink {
     0% {
         opacity: 1;

@@ -141,32 +141,6 @@ li .highlight pre {
     }
 }
 
-.km-copy {
-    & .km-copy__icon {
-        --fa-width: auto;
-        line-height: 1;
-        transition:
-            opacity var(--km-motion-fade) var(--km-ease-smooth),
-            scale var(--km-motion-surface) var(--km-ease-smooth);
-    }
-
-    & .km-copy__icon--done {
-        opacity: 0;
-        scale: 0.6;
-        color: hsl(var(--km-colour-green));
-    }
-
-    &[data-km-copied] .km-copy__icon--copy {
-        opacity: 0;
-        scale: 0.6;
-    }
-
-    &[data-km-copied] .km-copy__icon--done {
-        opacity: 1;
-        scale: 1;
-    }
-}
-
 .km-copy--code {
     position: absolute;
     display: flex;

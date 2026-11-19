@@ -51,9 +51,26 @@
         }));
     }
 
+    function renewWaves(overlay) {
+        new IntersectionObserver((entries) => {
+            if (entries.at(-1).isIntersecting) return;
+            overlay.querySelectorAll('.km-byline__wave').forEach((wave) => {
+                wave.getAnimations().forEach((animation) => {
+                    const run = animation.effect.getComputedTiming().duration;
+                    if (animation.currentTime % run > run / 2) {
+                        animation.currentTime = 0;
+                    }
+                });
+            });
+        }).observe(overlay);
+    }
+
     function cycleBackdrop(overlay, urls, byline) {
-        const every = (Number(byline.getAttribute('data-km-interval'))
-            || BYLINE_BG_INTERVAL_MS) / engine.speedOf(byline);
+        const every = engine.paced(
+            Number(byline.getAttribute('data-km-interval'))
+                || BYLINE_BG_INTERVAL_MS,
+            byline,
+        );
         let index = 0;
         let busy = false;
         preload(urls[1]);
@@ -99,6 +116,7 @@
         main.style.isolation = 'isolate';
         const overlay = createBackdrop(backdrop, urls, byline);
         main.appendChild(overlay);
+        if (!backdrop) renewWaves(overlay);
 
         // The layout, not the reveal that still moves the title, sets the
         // height, so the picture doesn't jump when the reveal ends.

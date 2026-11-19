@@ -219,8 +219,10 @@
             refresh();
             carousel.setAttribute('data-km-ready', '');
 
-            const wait = Number(carousel.dataset.kmCarouselInterval)
-                / engine.speedOf(carousel);
+            const wait = engine.paced(
+                Number(carousel.dataset.kmCarouselInterval),
+                carousel,
+            );
             if (!wait || prefersStill(carousel)) return;
             const way = carousel.dataset.kmCarouselDirection === 'left'
                 ? -1

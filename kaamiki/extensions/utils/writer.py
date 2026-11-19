@@ -27,7 +27,6 @@ from kaamiki.extensions.utils.checks import location
 from kaamiki.extensions.utils.doctree import caption_icon
 from kaamiki.extensions.utils.hooks import on
 from kaamiki.extensions.utils.icons import Icons
-from kaamiki.extensions.utils.icons import copy_button
 from kaamiki.extensions.utils.links import guarded
 from kaamiki.extensions.utils.links import opens_new_tab
 from kaamiki.extensions.utils.settings import Kaamiki
@@ -35,6 +34,8 @@ from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.text import levelled
 
 if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sphinx.application import Sphinx
     from sphinx.writers.html5 import HTML5Translator
 
@@ -63,6 +64,27 @@ BACKREF: t.Final[re.Pattern[str]] = re.compile(
     r'</a><a class="headerlink" href="([^"]*)" title="([^"]*)">(.*)',
     re.DOTALL,
 )
+
+
+def copy_button(roles: Mapping[str, str], *classes: str) -> str:
+    """Write the button that copies a code block or a snippet.
+
+    :param roles: The named icons of the site.
+    :param classes: The classes to put next to `km-copy`.
+    :return: The markup. The button holds its two icons, and the
+        stylesheet shows the icon for its state.
+    """
+    marks = "".join(
+        f'<i class="{roles[key]} km-copy__icon km-copy__icon--{state}"'
+        ' aria-hidden="true"></i>'
+        for key, state in (("copy", "copy"), ("copied", "done"))
+        if roles[key]
+    )
+    label = html.escape(str(_("Copy the snippet")))
+    return (
+        f'<button type="button" class="{" ".join(("km-copy", *classes))}"'
+        f' data-km-copy aria-label="{label}">{marks}</button>'
+    )
 
 
 class translator(base):

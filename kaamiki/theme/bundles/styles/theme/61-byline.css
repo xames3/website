@@ -223,7 +223,8 @@
 
 /*
 Safari leaves the strips out for a frame each time their loop starts again,
-so each strip is many tiles wide and runs for an hour before it does.
+so each strip is many tiles wide and runs for an hour, and the script starts
+it again only while it's off the screen.
 */
 .km-byline__bg--waves {
     --km-wave-tiles: 120;

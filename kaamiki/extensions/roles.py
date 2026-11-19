@@ -763,7 +763,12 @@ class Underline(KaamikiRole):
                 f"expected some text and width or wobble, got"
                 f" {', '.join(given) or self.said!r}"
             )
-        seed = f"{self.env.docname}:{self.lineno}:{self.rawtext}"
+        seen = t.cast(
+            "dict[str, int]",
+            self.env.temp_data.setdefault("km_underlines", {}),
+        )
+        seen[self.rawtext] = seen.get(self.rawtext, 0) + 1
+        seed = f"{self.env.docname}:{self.rawtext}:{seen[self.rawtext]}"
         ltr, rtl = (
             quote(_, safe="/:=,.' <>-")
             for _ in _underline_svg(colour, seed, width, wobble)
@@ -973,9 +978,8 @@ class Typewrite(Turns):
           `--km-motion-typewrite-delete` token.
         - `interval`: The seconds that a typed word stays, from 2 to
           15. The default is the `--km-typewrite-hold` token.
-        - `rest`: The wait after a word is deleted, in `s` or `ms`,
-          from 0.2s to 5s. The default is the `--km-typewrite-rest`
-          token.
+        - `rest`: The seconds of the wait after a word is deleted, from
+          0.2 to 5. The default is the `--km-typewrite-rest` token.
         - `class`: More classes for the words.
     """
 
@@ -983,9 +987,9 @@ class Typewrite(Turns):
     noun = "words"
     limit = TYPEWRITE_LENGTH
     key = Option(functools.partial(_duration, bounds="typewrite_key"))
-    delete = Option(functools.partial(_duration, bounds="typewrite_key"))
+    delete = Option(functools.partial(_duration, bounds="typewrite_delete"))
     interval = Option(checks.number(*BOUNDS["interval"]))
-    rest = Option(functools.partial(_duration, bounds="typewrite_rest"))
+    rest = Option(checks.number(*BOUNDS["typewrite_rest"]))
 
     @property
     def timing(self) -> dict[str, int]:

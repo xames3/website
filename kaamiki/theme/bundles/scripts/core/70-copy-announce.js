@@ -49,7 +49,7 @@
         if (!copied) return;
         copiedTimers.set(button, window.setTimeout(
             () => button.removeAttribute('data-km-copied'),
-            TIMING.tooltipHold(),
+            TIMING.copyHold(),
         ));
     }
 

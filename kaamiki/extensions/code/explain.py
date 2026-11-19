@@ -112,10 +112,10 @@ from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils.icons import Icons
-from kaamiki.extensions.utils.icons import copy_button
 from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import TRACE_EVENTS
 from kaamiki.extensions.utils.settings import option as conf_path
+from kaamiki.extensions.utils.writer import copy_button
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx

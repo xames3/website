@@ -70,7 +70,7 @@
 
     function ownMs(field, name, token) {
         return name in field.dataset
-            ? Number(field.dataset[name]) / engine.speedOf(field)
+            ? engine.paced(Number(field.dataset[name]), field)
             : token;
     }
 
@@ -217,7 +217,11 @@
         stage.style.width = `${from.width}px`;
         stage.style.height = `${from.height}px`;
         const duration = engine.ms('sweep', field);
-        const sweep = { duration, easing: 'linear', fill: 'both' };
+        const sweep = {
+            duration,
+            easing: engine.ease(duration),
+            fill: 'both',
+        };
         const gone = { backgroundPosition: '0% 0' };
         const here = { backgroundPosition: '100% 0' };
         const animations = [
@@ -272,6 +276,7 @@
             : () => ownMs(field, 'kmInterval', TIMING.rollHold());
         let index = 0;
         let busy = false;
+        let stopped = false;
         let timer;
         let round = 0;
         const advance = async () => {
@@ -284,20 +289,29 @@
             } catch {
                 field.textContent = words[index];
             }
+            if (stopped) field.textContent = words[0];
             busy = false;
         };
         const turn = async (mine) => {
             await advance();
             if (mine === round) timer = setTimeout(() => turn(mine), hold());
         };
-        new IntersectionObserver((entries) => {
+        const seen = new IntersectionObserver((entries) => {
             clearTimeout(timer);
             round += 1;
             if (entries[entries.length - 1].isIntersecting) {
                 const mine = round;
                 timer = setTimeout(() => turn(mine), hold());
             }
-        }).observe(field.parentElement);
+        });
+        seen.observe(field.parentElement);
+        return () => {
+            stopped = true;
+            seen.disconnect();
+            clearTimeout(timer);
+            round += 1;
+            field.textContent = words[0];
+        };
     }
 
     function typeNoise() {
@@ -393,9 +407,10 @@
 
     function buildTypewrite(field) {
         const words = field.dataset.kmWords.split('|');
+        const still = field.textContent;
         const spoken = document.createElement('span');
         spoken.className = 'km-sr-only';
-        spoken.textContent = field.textContent;
+        spoken.textContent = still;
         const typed = document.createElement('span');
         typed.setAttribute('aria-hidden', 'true');
         const cursor = document.createElement('span');
@@ -437,6 +452,11 @@
             timer = setTimeout(step, lead + steps[0].wait);
         };
         const cycle = (mine) => {
+            if (document.hidden) {
+                const later = ownMs(field, 'kmRest', TIMING.typewriteRest());
+                timer = setTimeout(() => cycle(mine), later);
+                return;
+            }
             const word = words[index];
             index = (index + 1) % words.length;
             play(
@@ -451,27 +471,43 @@
                 ),
             );
         };
-        new IntersectionObserver((entries) => {
+        const seen = new IntersectionObserver((entries) => {
             clearTimeout(timer);
             round += 1;
-            if (entries[entries.length - 1].isIntersecting) {
+            const shown = entries[entries.length - 1].isIntersecting;
+            cursor.classList.toggle('km-typewrite__cursor--still', !shown);
+            if (shown) {
                 typed.textContent = '';
                 cycle(round);
             }
-        }).observe(field.parentElement);
+        });
+        seen.observe(field.parentElement);
+        return () => {
+            seen.disconnect();
+            clearTimeout(timer);
+            clearTimeout(solid);
+            round += 1;
+            field.textContent = still;
+        };
     }
 
     function initTurns() {
-        if (prefersReducedMotion()) return;
-        document.querySelectorAll('[data-km-words]').forEach(
-            (field) => {
-                if (field.closest('a') || prefersStill(field)) return;
-                if (field.classList.contains('km-typewrite')) {
-                    buildTypewrite(field);
-                } else {
-                    buildTurns(field);
-                }
-            },
-        );
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let stops = [];
+        const start = () => {
+            stops = [...document.querySelectorAll('[data-km-words]')]
+                .filter((field) => !field.closest('a') && !prefersStill(field))
+                .map((field) => (
+                    field.classList.contains('km-typewrite')
+                        ? buildTypewrite(field)
+                        : buildTurns(field)
+                ));
+        };
+        reduced.addEventListener('change', () => {
+            stops.forEach((stop) => stop());
+            stops = [];
+            if (!reduced.matches) start();
+        });
+        if (!reduced.matches) start();
     }
 
