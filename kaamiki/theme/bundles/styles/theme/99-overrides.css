@@ -17,7 +17,11 @@
 
 @media (scripting: none) {
     .km-page__more,
-    .km-copy--code {
+    .km-copy--code,
+    .km-footer__modes,
+    .km-search,
+    .km-byline__copy,
+    .km-byline__separator:has(+ .km-byline__copy) {
         display: none;
     }
 }

@@ -324,6 +324,13 @@ class Icons:
     kit: str | None = None
     style: str = DEFAULT_STYLE
 
+    @property
+    def stylesheet(self) -> str | None:
+        """The CSS of the kit, which draws icons without a script."""
+        if not (self.kit and self.kit.endswith(".js")):
+            return None
+        return self.kit.removesuffix(".js") + ".css"
+
     @classmethod
     def of(cls, config: Config) -> Icons:
         """Read the icons of a site from its settings and its shell.

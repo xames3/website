@@ -364,6 +364,13 @@ Last updated on: 19 November 2026
                   href="{{ pathto('_static/' + name, 1) |e }}" />
         {%- endfor %}
         {%- block km_icons %}
+            {%- if kaamiki.icons.kit_css %}
+                <noscript>
+                    <link rel="stylesheet"
+                          href="{{ kaamiki.icons.kit_css }}"
+                          crossorigin="anonymous" />
+                </noscript>
+            {%- endif %}
             {%- if kaamiki.fa_free.css and not kaamiki.icons.kit %}
                 {%- set km_sri = kaamiki.fa_free.integrity or none %}
                 <link rel="stylesheet"

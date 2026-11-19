@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 18 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -1080,12 +1080,12 @@ If your versions look like ``1.4.0`` they don't match, so give the release a
 Icons.
 -------------------------------------------------------------------------------
 
-Kaamiki draws its icons with `Font Awesome`_ and works with the Free set out
-of the box. Add a Pro kit and every icon switches to its Pro version. If Font
-Awesome doesn't load, because it's blocked, you're offline or a kit refuses the
-address, the icons stay empty and show when Font Awesome loads. A kit only
-answers the addresses on its allow-list in your Font Awesome account, so a
-preview from another address gets no kit.
+Kaamiki draws its icons with `Font Awesome`_, Free out of the box. A Pro kit
+switches every icon to its Pro version, as CSS for a reader without JavaScript.
+If Font Awesome doesn't load, because it's blocked, you're offline or a kit
+refuses the address, the icons stay empty and show when Font Awesome loads. A
+kit only answers the addresses on its allow-list in your Font Awesome account,
+so a preview from another address gets no kit.
 
 .. accordion:: Every setting here
 

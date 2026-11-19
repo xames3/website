@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 18 November 2026
+Last updated on: 19 November 2026
 
 The utilities that fill the context of a page for the templates. The
 templates read one read-only value, `kaamiki`, with the paths of
@@ -182,6 +182,7 @@ def made(config: Config) -> Kaamiki:
         roles=icons.roles(conf.icons.names),
         arrow=icons.arrow(conf.icons.names),
         kit=icons.kit,
+        kit_css=icons.stylesheet,
     )
     depth = conf.toctree.maxdepth
     groups["toctree"].update(
