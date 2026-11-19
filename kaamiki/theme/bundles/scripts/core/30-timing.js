@@ -37,5 +37,7 @@
         showMoreHold: () => getDurationMs('--km-show-more-hold'),
         rollHold: () => getDurationMs('--km-roll-hold'),
         sweepHold: () => getDurationMs('--km-sweep-hold'),
+        typewriteHold: () => getDurationMs('--km-typewrite-hold'),
+        typewriteRest: () => getDurationMs('--km-typewrite-rest'),
     };
 

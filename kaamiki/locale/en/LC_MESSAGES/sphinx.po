@@ -42,6 +42,10 @@ msgstr ""
 msgid "View release"
 msgstr ""
 
+#, python-format
+msgid "%(rest)s and %(last)s"
+msgstr ""
+
 msgid "Code"
 msgstr ""
 

@@ -43,8 +43,16 @@ extensions: list[str] = [
 with open("prolog.rst", encoding="utf-8") as f:
     rst_prolog: str = f.read()
 
-with open("_static/data/greetings.json", encoding="utf-8") as f:
-    greetings: str = "|".join(each["name"] for each in json.load(f))
+
+def names(data: str) -> str:
+    """Read the names in a data file, split by `|` for a role.
+
+    :param data: The name of the file in `_static/data`.
+    :return: The names.
+    """
+    with open(f"_static/data/{data}.json", encoding="utf-8") as f:
+        return "|".join(each["name"] for each in json.load(f))
+
 
 rst_epilog: str = f"""
 .. role:: greeting(roll)
@@ -52,7 +60,11 @@ rst_epilog: str = f"""
     :duration: 700ms
     :stagger: 45ms
 
-.. |greeting| replace:: :greeting:`{greetings}`
+.. role:: teaching(typewrite)
+
+.. |greeting| replace:: :greeting:`{names("greetings")}`
+
+.. |teaching| replace:: :teaching:`{names("currently-teaching")}`
 """
 
 nitpicky: bool = True

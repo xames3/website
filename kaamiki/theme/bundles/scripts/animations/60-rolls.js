@@ -300,11 +300,175 @@
         }).observe(field.parentElement);
     }
 
+    function typeNoise() {
+        return (Math.random() + Math.random() + Math.random() - 1.5) / 0.5;
+    }
+
+    function typeSlip(char) {
+        const lower = char.toLowerCase();
+        const near = [];
+        TYPEWRITE_ROWS.forEach((row, y) => {
+            const x = row.indexOf(lower);
+            if (x === -1) return;
+            near.push(row.charAt(x - 1), row.charAt(x + 1));
+            [y - 1, y + 1].forEach((other) => {
+                if (TYPEWRITE_ROWS[other]) {
+                    near.push(TYPEWRITE_ROWS[other].charAt(x));
+                }
+            });
+        });
+        const keys = near.filter(Boolean);
+        if (!keys.length) return '';
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        return char === lower ? key : key.toUpperCase();
+    }
+
+    function typeGap(previous, key, drift) {
+        let wait = key * drift * Math.exp(typeNoise() * 0.3);
+        if (previous === ' ') {
+            wait += key * (0.3 + Math.random() * 0.7);
+        } else if (previous === ',' || previous === '-') {
+            wait += key * (0.8 + Math.random() * 1.2);
+        }
+        if (Math.random() < 0.05) wait += key * (2 + Math.random() * 3);
+        return Math.round(wait);
+    }
+
+    function typeSteps(word, key, back) {
+        const steps = [];
+        let shown = '';
+        let drift = 1;
+        let careful = false;
+        const put = (text, wait) => {
+            steps.push({ text, wait });
+            shown = text;
+        };
+        while (shown !== word) {
+            const at = shown.length;
+            const char = word.charAt(at);
+            const wrong = at > 0 && !careful && Math.random() < TYPEWRITE_SLIP
+                ? typeSlip(char)
+                : '';
+            drift = clamp(drift + (Math.random() - 0.5) * 0.2, 0.8, 1.25);
+            careful = false;
+            if (!wrong) {
+                put(shown + char, typeGap(word.charAt(at - 1), key, drift));
+                continue;
+            }
+            const run = Math.min(
+                word.length - at - 1,
+                Math.floor(Math.random() * 3),
+            );
+            put(shown + wrong, typeGap(word.charAt(at - 1), key, drift));
+            for (let i = 1; i <= run; i += 1) {
+                put(
+                    shown + word.charAt(at + i),
+                    typeGap(word.charAt(at + i - 1), key, drift),
+                );
+            }
+            for (let j = 0; j <= run; j += 1) {
+                put(
+                    shown.slice(0, -1),
+                    j
+                        ? Math.round(back * (0.8 + Math.random() * 0.4))
+                        : Math.round(key * (2 + Math.random() * 2)),
+                );
+            }
+            careful = true;
+        }
+        return steps;
+    }
+
+    function deleteSteps(word, back) {
+        const steps = [];
+        for (let i = word.length - 1; i >= 0; i -= 1) {
+            const held = word.length - 1 - i;
+            const wait = held === 0
+                ? back * 1.5
+                : held === 1 ? back * 4 : back * (0.85 + Math.random() * 0.3);
+            steps.push({ text: word.slice(0, i), wait: Math.round(wait) });
+        }
+        return steps;
+    }
+
+    function buildTypewrite(field) {
+        const words = field.dataset.kmWords.split('|');
+        const spoken = document.createElement('span');
+        spoken.className = 'km-sr-only';
+        spoken.textContent = field.textContent;
+        const typed = document.createElement('span');
+        typed.setAttribute('aria-hidden', 'true');
+        const cursor = document.createElement('span');
+        cursor.className = 'km-typewrite__cursor';
+        cursor.setAttribute('aria-hidden', 'true');
+        field.replaceChildren(spoken, typed, cursor);
+        const key = () => ownMs(
+            field,
+            'kmKey',
+            engine.ms('typewrite-key', field),
+        );
+        const back = () => ownMs(
+            field,
+            'kmDelete',
+            engine.ms('typewrite-delete', field),
+        );
+        let index = 0;
+        let timer = 0;
+        let solid = 0;
+        let round = 0;
+        const show = (text) => {
+            typed.textContent = text;
+            cursor.classList.add('km-typewrite__cursor--typing');
+            clearTimeout(solid);
+            solid = setTimeout(
+                () => cursor.classList.remove('km-typewrite__cursor--typing'),
+                TYPEWRITE_SOLID_MS,
+            );
+        };
+        const play = (steps, lead, mine, done) => {
+            let at = 0;
+            const step = () => {
+                if (mine !== round) return;
+                show(steps[at].text);
+                at += 1;
+                if (at < steps.length) timer = setTimeout(step, steps[at].wait);
+                else done();
+            };
+            timer = setTimeout(step, lead + steps[0].wait);
+        };
+        const cycle = (mine) => {
+            const word = words[index];
+            index = (index + 1) % words.length;
+            play(
+                typeSteps(word, key(), back()),
+                ownMs(field, 'kmRest', TIMING.typewriteRest()),
+                mine,
+                () => play(
+                    deleteSteps(word, back()),
+                    ownMs(field, 'kmInterval', TIMING.typewriteHold()),
+                    mine,
+                    () => cycle(mine),
+                ),
+            );
+        };
+        new IntersectionObserver((entries) => {
+            clearTimeout(timer);
+            round += 1;
+            if (entries[entries.length - 1].isIntersecting) {
+                typed.textContent = '';
+                cycle(round);
+            }
+        }).observe(field.parentElement);
+    }
+
     function initTurns() {
         if (prefersReducedMotion()) return;
         document.querySelectorAll('[data-km-words]').forEach(
             (field) => {
-                if (!field.closest('a') && !prefersStill(field)) {
+                if (field.closest('a') || prefersStill(field)) return;
+                if (field.classList.contains('km-typewrite')) {
+                    buildTypewrite(field);
+                } else {
                     buildTurns(field);
                 }
             },

@@ -150,14 +150,9 @@ their questions without getting cocky about how much you know.
 
 So far, I've taught...
 
-.. embed:: ./assets/html/currently-teaching.html
-    :source: /_static/data/currently-teaching.json
-    :prefix-text:
-    :typing-speed: 120
-    :deleting-speed: 80
-    :pause-after-typing: 2000
-    :pause-after-deleting: 1000
-    :js: styles/site.js
+.. rst-class:: am-teaching
+
+    |teaching|
 
 My approach to teaching and mentoring has changed loads over the years. You
 can read the long versions in future blogs.

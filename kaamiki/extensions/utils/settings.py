@@ -89,6 +89,8 @@ BOUNDS: t.Final[dict[str, tuple[float, float]]] = {
     "ticker": (0, 999_999_999),
     "ticker_duration": (0.1, 5),
     "toctree_maxdepth": (0, 4),
+    "typewrite_key": (0.02, 0.5),
+    "typewrite_rest": (0.2, 5),
     "underline_width": (0.5, 4),
     "underline_wobble": (0, 2),
     "code_explain_budget": (1, 100),

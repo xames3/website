@@ -21,7 +21,7 @@
 
     Small marks inside a sentence.
 
-A role is written ``:name:`text```. Kaamiki adds nine, and this one sentence
+A role is written ``:name:`text```. Kaamiki adds ten, and this one sentence
 uses most of them: a :sharpie:`highlight`, a :underline:`pencil line`, a
 :ticker:`2025?short` count, the :kbd:mac:`Cmd-K` shortcut, an
 :fa-icon:solid:`heart km-tone--red` icon and a word that
@@ -29,8 +29,8 @@ uses most of them: a :sharpie:`highlight`, a :underline:`pencil line`, a
 
 Where a title is shown for something else, in the navbar, the sidebar, the
 breadcrumbs, a table of contents or a link, ``sharpie``, ``underline``,
-``ticker`` and ``stylise`` are plain text and ``roll`` and ``sweep`` show
-their first word.
+``ticker`` and ``stylise`` are plain text, ``roll`` and ``sweep`` show their
+first word and ``typewrite`` its whole list.
 An icon stays and a key loses its keycap. A link written with ``:doc:`` or
 ``:ref:`` is the exception: it shows the title's words and leaves an icon out.
 
@@ -163,6 +163,32 @@ thumbnail's title, channel or caption, and the build stops there. Where a
 title is shown for something else, in the navbar, the sidebar, the
 breadcrumbs, a table of contents or a link, the first word stays as plain
 text.
+
+.. _kaamiki-roles-typewrite:
+
+-------------------------------------------------------------------------------
+typewrite
+-------------------------------------------------------------------------------
+
+The text lists the words, split by ``|``. The page, its search and a reader
+without scripts or with less motion get all of them as a list, as in "a, b and
+c". In the page, each word is typed one key at a time behind a blinking cursor,
+with a slip now and then that's put right. It's held, deleted and followed by
+the next, while the words are on screen:
+
+So far, I've taught :typewrite:`Programming|Cloud Computing|Data Analysis`.
+
+.. code-block:: rst
+
+    So far, I've taught :typewrite:`Programming|Cloud Computing|Data Analysis`.
+
+A key takes 120ms and a deleted letter 80ms, at the site's speed. A typed word
+stays for 2s, and the next one starts 1s after it's deleted. A role of your own
+changes them with ``:key:``, ``:delete:``, ``:interval:`` and ``:rest:``, as
+:ref:`the presets <kaamiki-roles-custom>` show. A word can be up to 45
+characters long and can't hold a ``|``. The role can't go in a tab's title, a
+button's label or a thumbnail's title, channel or caption, and the build stops
+there.
 
 .. _kaamiki-roles-sweep:
 
@@ -672,6 +698,9 @@ the build at the ``role`` directive, naming the option.
         * - ``roll``
           - ``:interval:``, in seconds, and ``:duration:`` and ``:stagger:``,
             like ``700ms``.
+        * - ``typewrite``
+          - ``:interval:``, in seconds, and ``:key:``, ``:delete:`` and
+            ``:rest:``, like ``120ms``.
         * - ``stylise``
           - ``:style:``, the CSS, so the text is only the words.
         * - ``email``

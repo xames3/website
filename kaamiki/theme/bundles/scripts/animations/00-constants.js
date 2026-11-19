@@ -47,6 +47,9 @@ Last updated on: 19 November 2026
     const BYLINE_BG_INTERVAL_MS = 7000;
     const BYLINE_BG_HIDDEN = '0.001';
     const BYLINE_BG_GROW_REM = 3;
+    const TYPEWRITE_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+    const TYPEWRITE_SLIP = 0.03;
+    const TYPEWRITE_SOLID_MS = 350;
     const TICKER_CELLS = 11;
     const TICKER_BLUR_PX = 2;
     const SWEEP_OUT_END = 0.7;

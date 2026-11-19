@@ -383,14 +383,9 @@ by itself and a line types and deletes as if someone were writing it:
 
 So far, I've taught...
 
-.. embed:: /assets/html/currently-teaching.html
-    :source: /_static/data/currently-teaching.json
-    :prefix-text:
-    :typing-speed: 120
-    :deleting-speed: 80
-    :pause-after-typing: 2000
-    :pause-after-deleting: 1000
-    :js: styles/site.js
+.. rst-class:: am-teaching
+
+    |teaching|
 
 .. _kaamiki-example-motion-cards-buttons-and-links:
 

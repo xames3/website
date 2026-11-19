@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaamiki 2026.11.8\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-11-19 06:03+0000\n"
+"POT-Creation-Date: 2026-11-19 18:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,6 +39,10 @@ msgid "Read release notes"
 msgstr ""
 
 msgid "View release"
+msgstr ""
+
+#, python-format
+msgid "%(rest)s and %(last)s"
 msgstr ""
 
 msgid "Code"

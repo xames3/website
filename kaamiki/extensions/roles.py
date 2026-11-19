@@ -25,6 +25,7 @@ import docutils.parsers.rst as rst
 from docutils.parsers.rst.directives import misc
 from docutils.utils import unescape
 from sphinx.domains import Domain
+from sphinx.locale import _
 from sphinx.roles import Keyboard
 from sphinx.util.docutils import SphinxRole
 
@@ -93,6 +94,7 @@ UNITS: t.Final[tuple[tuple[int, str], ...]] = (
     (10**3, "k"),
 )
 ROLL_LENGTH: t.Final[int] = 45
+TYPEWRITE_LENGTH: t.Final[int] = 45
 SWEEP_LENGTH: t.Final[int] = 120
 STYLE_CLASSES: t.Final[dict[str, str]] = {
     "brands": "fa-brands",
@@ -311,10 +313,9 @@ def steady(
     for each in [found] if isinstance(found, nodes.Node) else found:
         moving = next(each.findall(Turning), None)
         if moving is not None:
-            role = "sweep" if "km-sweep" in moving["classes"] else "roll"
             raise directive.error(
                 f"{directive.name}: expected {part} that stays put, got"
-                f" :{role}:, {why}"
+                f" :{moving['role']}:, {why}"
             )
 
 
@@ -862,6 +863,14 @@ class Turns(KaamikiRole, abstract=True):
         """The times that the role sets, in ms, as data attributes."""
         return {}
 
+    def shown(self, words: list[str]) -> str:
+        """Say what the page, its search and a still reader get.
+
+        :param words: The parts, in their sequence.
+        :return: The first part.
+        """
+        return words[0]
+
     def run(self) -> Reply:
         """Read the parts, split by `|`.
 
@@ -889,9 +898,10 @@ class Turns(KaamikiRole, abstract=True):
             "classes": self.classes,
             "words": "|".join(words),
             "timing": self.timing,
+            "role": self.role,
             "support_smartquotes": False,
         }
-        return [Turning(self.rawtext, words[0], **attributes)], []
+        return [Turning(self.rawtext, self.shown(words), **attributes)], []
 
 
 class Roll(Turns):
@@ -937,6 +947,70 @@ class Roll(Turns):
             f"data-km-{name}": round(seconds * 1000)
             for name, seconds in given.items()
             if seconds is not None
+        }
+
+
+class Typewrite(Turns):
+    """The `typewrite` role, which types its words and deletes them.
+
+    Text::
+
+        The words, with `|` between them, each with a maximum of 45
+        code points. The page, its search and a reader without scripts
+        or with less motion get all of them as a list, as in `a, b and
+        c`. On screen, each word is typed one key at a time, with a
+        slip now and then that is put right, held, deleted and
+        followed by the next, behind a blinking cursor. In the navbar,
+        the sidebar, the breadcrumbs, a toctree or a link, the list
+        stays as text. The words keep their quotes.
+
+    Options::
+
+        - `key`: How long one key takes, in `s` or `ms`, from 0.02s to
+          0.5s. The default is the `--km-motion-typewrite-key` token.
+        - `delete`: How long one letter takes to delete, in `s` or
+          `ms`, from 0.02s to 0.5s. The default is the
+          `--km-motion-typewrite-delete` token.
+        - `interval`: The seconds that a typed word stays, from 2 to
+          15. The default is the `--km-typewrite-hold` token.
+        - `rest`: The wait after a word is deleted, in `s` or `ms`,
+          from 0.2s to 5s. The default is the `--km-typewrite-rest`
+          token.
+        - `class`: More classes for the words.
+    """
+
+    base_classes = ("km-typewrite",)
+    noun = "words"
+    limit = TYPEWRITE_LENGTH
+    key = Option(functools.partial(_duration, bounds="typewrite_key"))
+    delete = Option(functools.partial(_duration, bounds="typewrite_key"))
+    interval = Option(checks.number(*BOUNDS["interval"]))
+    rest = Option(functools.partial(_duration, bounds="typewrite_rest"))
+
+    @property
+    def timing(self) -> dict[str, int]:
+        """The times that the role sets, in ms, as data attributes."""
+        given = {
+            "key": self.key,
+            "delete": self.delete,
+            "interval": self.interval,
+            "rest": self.rest,
+        }
+        return {
+            f"data-km-{name}": round(seconds * 1000)
+            for name, seconds in given.items()
+            if seconds is not None
+        }
+
+    def shown(self, words: list[str]) -> str:
+        """Say what the page, its search and a still reader get.
+
+        :param words: The words, in their sequence.
+        :return: All of them as a list, as in `a, b and c`.
+        """
+        return str(_("%(rest)s and %(last)s")) % {
+            "rest": ", ".join(words[:-1]),
+            "last": words[-1],
         }
 
 

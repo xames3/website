@@ -96,6 +96,9 @@
     --km-show-more-hold: 3000ms;
     --km-roll-hold: 4000ms;
     --km-sweep-hold: 5500ms;
+    --km-typewrite-hold: 2000ms;
+    --km-typewrite-rest: 1000ms;
+    --km-typewrite-blink: 1060ms;
     --km-sweep-colours: #0af 41.22%, #e1e1fe 45.71%, #ffcb5c 50.2%,
         #f40 54.68%, #f384ff 59.17%;
     --km-radius-round: 500px;
