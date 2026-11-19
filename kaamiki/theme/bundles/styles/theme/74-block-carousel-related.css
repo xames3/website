@@ -199,10 +199,6 @@
     overflow: hidden;
     opacity: 0.75;
 
-    & .km-byline__wave {
-        animation: none;
-    }
-
     & .km-byline__wave--b {
         top: var(--km-space-3);
     }
