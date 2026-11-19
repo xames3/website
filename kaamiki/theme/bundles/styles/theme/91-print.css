@@ -64,7 +64,7 @@
     .km-tabs__frame,
     .km-tabs__bar,
     .km-tabs__label,
-    button.copybtn {
+    .km-copy--code {
         display: none !important;
     }
 

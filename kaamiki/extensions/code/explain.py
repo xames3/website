@@ -4,7 +4,7 @@ Code Explain Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 November 2026
+Last updated on: 19 November 2026
 
 A `code-explain` directive that walks a reader through a snippet, one
 line at a time, with the values that it held at each line::
@@ -84,7 +84,6 @@ import docutils.nodes as nodes
 import docutils.parsers.rst as rst
 
 from kaamiki.extensions.code.chrome import comment
-from kaamiki.extensions.code.chrome import controls
 from kaamiki.extensions.code.chrome import known
 from kaamiki.extensions.code.chrome import label
 from kaamiki.extensions.code.chrome import lexer_for
@@ -113,6 +112,7 @@ from kaamiki.extensions.utils import moving
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils.icons import Icons
+from kaamiki.extensions.utils.icons import copy_button
 from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import TRACE_EVENTS
 from kaamiki.extensions.utils.settings import option as conf_path
@@ -892,14 +892,14 @@ def depart_heading(self: HTMLTranslator, node: Heading) -> None:
     :param node: The header node.
     """
     icons = Kaamiki.of(self.builder).icons.roles
+    button = copy_button(icons, "km-code-explain__copy")
     if node.children:
         self.body.append("</span>")
-        self.body.append(controls(icons))
+        self.body.append(button)
         self.body.append("</div>")
     else:
-        self.body.append(
-            f'<div class="{code_explain.corner()}">{controls(icons)}</div>'
-        )
+        corner = code_explain.corner()
+        self.body.append(f'<div class="{corner}">{button}</div>')
     self.body.append(node.parent["pane"])
     self.body.append(output())
     self.body.append("</div></div>")

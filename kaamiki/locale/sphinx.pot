@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaamiki 2026.11.8\n"
 "Report-Msgid-Bugs-To: xa@mes3.dev\n"
-"POT-Creation-Date: 2026-11-18 03:10+0000\n"
+"POT-Creation-Date: 2026-11-19 06:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,9 +44,6 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
-msgid "Copy the snippet"
-msgstr ""
-
 msgid "Nothing printed yet"
 msgstr ""
 
@@ -74,6 +71,9 @@ msgstr ""
 
 #, python-format
 msgid "%d %B %Y"
+msgstr ""
+
+msgid "Copy the snippet"
 msgstr ""
 
 msgid "Page not found"
@@ -150,9 +150,6 @@ msgstr ""
 msgid "Copy failed"
 msgstr ""
 
-msgid "Copy"
-msgstr ""
-
 msgid "Show more"
 msgstr ""
 
@@ -212,6 +209,9 @@ msgid "%(num)s min read"
 msgid_plural "%(num)s mins read"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "Copy"
+msgstr ""
 
 msgid "Show"
 msgstr ""

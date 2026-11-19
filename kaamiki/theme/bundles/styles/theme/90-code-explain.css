@@ -32,7 +32,7 @@
 }
 
 .km-code-explain__frame:has(:focus-visible) .km-code-explain__corner,
-.km-code-explain__corner:has(.success) {
+.km-code-explain__corner:has([data-km-copied]) {
     opacity: 1;
 }
 
@@ -49,13 +49,12 @@
 }
 
 .km-code-explain__copy {
-    align-items: center;
     border-radius: var(--km-radius-round);
     color: hsl(var(--km-colour-button-dark-fg));
-    display: inline-flex;
+    display: inline-grid;
     flex: 0 0 auto;
     height: 1.75rem;
-    justify-content: center;
+    place-items: center;
     margin-inline-start: auto;
     opacity: 0;
     position: relative;
@@ -80,7 +79,7 @@
         }
     }
 
-    &:is(:focus-visible, .success) {
+    &:is(:focus-visible, [data-km-copied]) {
         opacity: 1;
     }
 
@@ -90,21 +89,12 @@
         }
     }
 
-    &:active:not(.success) {
+    &:active:not([data-km-copied]) {
         opacity: 0.7;
     }
 
-    &.km-code-explain__copy--fading {
-        opacity: 0;
-    }
-
-    &.success .km-code-explain__clipboard {
-        display: none;
-    }
-
-    &.success .km-code-explain__done {
-        display: inline-block;
-        color: hsl(var(--km-colour-green));
+    & .km-copy__icon {
+        grid-area: 1 / 1;
     }
 }
 
@@ -115,15 +105,6 @@
 .km-code-explain__copy:focus-visible {
     outline: 2px solid hsl(var(--km-colour-focus));
     outline-offset: -2px;
-}
-
-.km-code-explain__copy > i {
-    --fa-width: auto;
-    line-height: 1;
-}
-
-.km-code-explain__copy > .km-code-explain__done {
-    display: none;
 }
 
 .km-code-explain__stage {

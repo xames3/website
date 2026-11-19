@@ -38,7 +38,7 @@
         initHeaderNavDropdowns,
         initAccordions,
         initHighlightedLines,
-        initCopyButtonNames,
+        initCodeCopy,
         initScrollable,
         initScrollFades,
         initBreadcrumbs,

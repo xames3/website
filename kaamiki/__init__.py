@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 18 November 2026
+Last updated on: 19 November 2026
 
 The entry point of Kaamiki. Sphinx adds the stylesheets by priority, so
 `font.css` loads first, and `theme.css` loads last and has priority.
@@ -50,7 +50,6 @@ __version__: str = "2026.11.8"
 conf = CONF
 static_dir = p.join(p.abspath(p.dirname(__file__)), "theme", "static")
 locale_dir = p.join(p.abspath(p.dirname(__file__)), "locale")
-supported_extensions: Sequence[str] = ("sphinx_copybutton",)
 stylesheets: Sequence[tuple[str, int]] = (
     ("styles/font.css", 400),
     ("styles/code.css", 600),
@@ -268,8 +267,6 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     """
     checks.install_reporter()
     pair(app)
-    for extension in supported_extensions:
-        app.setup_extension(extension)
     app.add_html_theme(NAME, TEMPLATES)
     app.add_message_catalog("sphinx", locale_dir)
     register(app)

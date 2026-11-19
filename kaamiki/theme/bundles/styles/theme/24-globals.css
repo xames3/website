@@ -68,7 +68,6 @@ i[class*="fa-"] {
 }
 
 .km-sr-only,
-button.copybtn svg,
 .admonition:is(
     .note, .seealso, .tip, .hint, .important, .danger, .error, .warning,
     .caution, .attention
@@ -84,8 +83,7 @@ button.copybtn svg,
     border: 0;
 }
 
-.km-sr-only,
-button.copybtn svg {
+.km-sr-only {
     margin: -1px;
 }
 

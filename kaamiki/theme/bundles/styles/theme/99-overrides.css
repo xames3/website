@@ -16,7 +16,8 @@
 }
 
 @media (scripting: none) {
-    .km-page__more {
+    .km-page__more,
+    .km-copy--code {
         display: none;
     }
 }
@@ -194,7 +195,7 @@
         margin-inline-end: calc((1.75rem - var(--km-space-11)) / 2);
     }
 
-    button.copybtn {
+    .km-copy--code {
         width: var(--km-space-11);
         height: var(--km-space-11);
         margin: calc((1.75rem - var(--km-space-11)) / 2);

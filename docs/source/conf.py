@@ -4,7 +4,7 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 15 November 2026
+Last updated on: 19 November 2026
 
 The Sphinx configuration for my website. Sphinx is a documentation
 generator; I use it as a teaching and learning platform instead.
@@ -104,10 +104,6 @@ intersphinx_mapping: dict[str, tuple[str, tuple[str | None, str]]] = {
     name: (url, (None, f"../.cache/intersphinx/{name}.inv"))
     for name, url in inventories.items()
 }
-
-copybutton_exclude: str = ".linenos, .gp, .go"
-copybutton_line_continuation_character: str = "\\"
-copybutton_selector: str = "div > div.highlight > pre"
 
 linkcheck_ignore: list[str] = [
     r"https?://localhost(:\d+)?(/|$)",

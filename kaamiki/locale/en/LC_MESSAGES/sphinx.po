@@ -45,9 +45,6 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
-msgid "Copy the snippet"
-msgstr ""
-
 msgid "Nothing printed yet"
 msgstr ""
 
@@ -75,6 +72,9 @@ msgstr ""
 
 #, python-format
 msgid "%d %B %Y"
+msgstr ""
+
+msgid "Copy the snippet"
 msgstr ""
 
 msgid "Page not found"
@@ -151,9 +151,6 @@ msgstr ""
 msgid "Copy failed"
 msgstr ""
 
-msgid "Copy"
-msgstr ""
-
 msgid "Show more"
 msgstr ""
 
@@ -213,6 +210,9 @@ msgid "%(num)s min read"
 msgid_plural "%(num)s mins read"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "Copy"
+msgstr ""
 
 msgid "Show"
 msgstr ""

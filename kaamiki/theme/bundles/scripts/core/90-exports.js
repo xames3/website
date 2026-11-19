@@ -27,6 +27,7 @@
         rafThrottle,
         say,
         settleHash,
+        showCopied,
         stopGlide,
     };
 })();
