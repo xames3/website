@@ -47,10 +47,10 @@ with open("prolog.rst", encoding="utf-8") as f:
 def names(data: str) -> str:
     """Read the names in a data file, split by `|` for a role.
 
-    :param data: The name of the file in `_static/data`.
+    :param data: The name of the file in `assets/data`.
     :return: The names.
     """
-    with open(f"_static/data/{data}.json", encoding="utf-8") as f:
+    with open(f"assets/data/{data}.json", encoding="utf-8") as f:
         return "|".join(each["name"] for each in json.load(f))
 
 

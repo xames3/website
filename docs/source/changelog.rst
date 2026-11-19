@@ -47,7 +47,11 @@
         - ``release``, which writes an entry like this one, with its date and
           a link to the story behind it. |new|
         - ``:roll:``, a role that rolls a word into the next one while it's on
-          screen. |new|
+          screen, at its own pace with ``:interval:``, ``:duration:`` and
+          ``:stagger:``. |new|
+        - ``:typewrite:``, a role that types its words one key at a time,
+          slips now and then and deletes them again. A reader without scripts
+          gets them as a list. |new|
         - A picture that's shown smaller than it is opens when you press it,
           flying out from where it sits and back to where it is when it's
           closed. ``kaamiki.conf.media.enlarge`` turns it off for a site,
@@ -98,11 +102,17 @@
           675px and sit in the middle of it. Only ``code-explain`` and
           ``code-version`` are wider.
         - The site's search leaves out the byline.
+        - The copy buttons on code blocks are Kaamiki's own and show their
+          tick the same way as a snippet's.
+        - A reader without JavaScript gets the icons and a phone's menu, and
+          no buttons that need a script.
 
     Removed
         - The dependency on ``sphinx-design``, whose ``dropdown``, ``grid``,
           ``card`` and ``tab-set`` are replaced by ``accordion``,
           ``columns``, ``block`` and ``tabs``.
+        - The dependency on ``sphinx-copybutton``, whose buttons Kaamiki now
+          draws itself.
 
 .. release:: Previews, folds and a 404 of its own
     :version: v2026.9.10

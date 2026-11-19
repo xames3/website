@@ -699,8 +699,8 @@ the build at the ``role`` directive, naming the option.
           - ``:interval:``, in seconds, and ``:duration:`` and ``:stagger:``,
             like ``700ms``.
         * - ``typewrite``
-          - ``:interval:``, in seconds, and ``:key:``, ``:delete:`` and
-            ``:rest:``, like ``120ms``.
+          - ``:interval:`` and ``:rest:``, in seconds, and ``:key:`` and
+            ``:delete:``, like ``120ms``.
         * - ``stylise``
           - ``:style:``, the CSS, so the text is only the words.
         * - ``email``

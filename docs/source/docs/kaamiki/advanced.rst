@@ -144,16 +144,27 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
           - The stacking order of the header, dropdowns and the rest.
         * - ``--km-show-more-``
           - How tall a folded page is, how it fades and where its button docks.
-        * - ``--km-roll-``, ``--km-sweep-``, ``--km-ticker-``,
-            ``--km-tooltip-``
+        * - ``--km-roll-``, ``--km-sweep-``, ``--km-typewrite-``,
+            ``--km-ticker-``, ``--km-tooltip-``, ``--km-copy-``
           - How long the roll role holds a word (4000ms, the roll itself takes
             ``--km-motion-state`` and each letter starts
             ``--km-motion-stagger`` after the one before), how long the sweep
             role rests between phrases (``--km-sweep-hold``, 5500ms), how long
             a sweep takes (``--km-motion-sweep``) and the colours of its
-            light (``--km-sweep-colours``), how long a ticker counts
-            (``--km-motion-ticker``, 2000ms over the site's speed) and how
-            long a tooltip stays (1800ms).
+            light (``--km-sweep-colours``). How long the typewrite role takes
+            for a key and a deleted letter (``--km-motion-typewrite-key``,
+            120ms, and ``--km-motion-typewrite-delete``, 80ms, over the site's
+            speed), how long a typed word stays (``--km-typewrite-hold``,
+            2000ms), the wait after it's deleted (``--km-typewrite-rest``,
+            1000ms) and the cursor's blink (``--km-typewrite-blink``,
+            1060ms). How long a ticker counts (``--km-motion-ticker``, 2000ms
+            over the site's speed), how long a tooltip stays (1800ms) and how
+            long a copy button shows its tick (``--km-copy-hold``, 1800ms).
+        * - ``--km-wave-``
+          - The waves behind a byline without a backdrop: how wide a tile is
+            (``--km-wave-a``, ``--km-wave-b`` and ``--km-wave-c``) and how
+            many tiles a strip runs before it starts again
+            (``--km-wave-tiles``, 120, an hour).
         * - ``--km-motion-ambient``
           - How long a loop that never ends takes for a round (1600ms over the
             site's speed).

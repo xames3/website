@@ -212,7 +212,7 @@ An icon, where you want it.
 
     .. column::
 
-        .. button:: /_static/data/currently-teaching.json
+        .. button:: /_static/combos/poster.jpg
             :fa-icon: download
             :download:
 
@@ -220,7 +220,7 @@ An icon, where you want it.
 
         .. code-block:: rst
 
-            .. button:: /_static/data/currently-teaching.json
+            .. button:: /_static/combos/poster.jpg
                 :fa-icon: download
                 :download:
 
