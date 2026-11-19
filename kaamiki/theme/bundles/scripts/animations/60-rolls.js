@@ -39,7 +39,7 @@
 
     function rollFace(kind, text, letter, left) {
         const face = document.createElement('span');
-        face.className = `km-swap__face km-swap__face--${kind}`;
+        face.className = `km-roll__face km-roll__face--${kind}`;
         face.textContent = text;
         face.style.left = `${letter.x - left}px`;
         return face;
@@ -68,15 +68,15 @@
         );
     }
 
-    async function swapWord(field, current, next) {
+    async function rollWord(field, current, next) {
         const was = measureRoll(field, current);
         const now = measureRoll(field, next);
         if (was.wrapped || now.wrapped || !(was.width || now.width)) return;
         const stage = document.createElement('span');
-        stage.className = 'km-swap__stage';
+        stage.className = 'km-roll__stage';
         stage.setAttribute('aria-hidden', 'true');
         const ghost = document.createElement('span');
-        ghost.className = 'km-swap__ghost';
+        ghost.className = 'km-roll__ghost';
         ghost.textContent = current;
         stage.append(ghost);
         const spoken = document.createElement('span');
@@ -87,7 +87,7 @@
         stage.style.marginRight = '1px';
         const held = ghost.getBoundingClientRect().width;
         stage.style.marginRight = '';
-        stage.style.setProperty('--km-swap-edge', `${edge}px`);
+        stage.style.setProperty('--km-roll-edge', `${edge}px`);
         const settle = engine.ms('state', field);
         const count = Math.max(was.letters.length, now.letters.length);
         const together = was.whole || now.whole;
@@ -117,11 +117,11 @@
                 ...both.map((letter) => letter.x + letter.width),
             );
             const slot = document.createElement('span');
-            slot.className = 'km-swap__slot';
+            slot.className = 'km-roll__slot';
             slot.style.left = `${left}px`;
             slot.style.width = `${right - left}px`;
             const cube = document.createElement('span');
-            cube.className = 'km-swap__cube';
+            cube.className = 'km-roll__cube';
             const timing = {
                 duration: settle,
                 delay: i * step,
@@ -156,12 +156,12 @@
             ));
         }
         stage.prepend(slots);
-        const front = stage.querySelector('.km-swap__face--front');
+        const front = stage.querySelector('.km-roll__face--front');
         const reference = document.createRange();
         reference.selectNodeContents(front);
         const drift = was.origin - reference.getBoundingClientRect().left;
         if (Math.abs(drift) > 0.001) {
-            stage.style.setProperty('--km-swap-drift', `${drift}px`);
+            stage.style.setProperty('--km-roll-drift', `${drift}px`);
         }
         const travel = Math.min(
             settle * ROLL_GLIDE_SHARE,
@@ -257,11 +257,11 @@
         field.textContent = next;
     }
 
-    function buildSwap(field) {
+    function buildTurns(field) {
         const words = field.dataset.kmWords.split('|');
         const sweeping = field.classList.contains('km-sweep');
-        const swap = sweeping ? sweepPhrase : swapWord;
-        const hold = sweeping ? TIMING.sweepHold : TIMING.swapHold;
+        const change = sweeping ? sweepPhrase : rollWord;
+        const hold = sweeping ? TIMING.sweepHold : TIMING.rollHold;
         let index = 0;
         let busy = false;
         let timer;
@@ -272,7 +272,7 @@
             const current = words[index];
             index = (index + 1) % words.length;
             try {
-                await swap(field, current, words[index]);
+                await change(field, current, words[index]);
             } catch {
                 field.textContent = words[index];
             }
@@ -292,12 +292,12 @@
         }).observe(field.parentElement);
     }
 
-    function initSwaps() {
+    function initTurns() {
         if (prefersReducedMotion()) return;
-        document.querySelectorAll('.km-swap[data-km-words]').forEach(
+        document.querySelectorAll('[data-km-words]').forEach(
             (field) => {
                 if (!field.closest('a') && !prefersStill(field)) {
-                    buildSwap(field);
+                    buildTurns(field);
                 }
             },
         );

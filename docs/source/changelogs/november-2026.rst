@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 02 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :orphan:
 :km-page-title: Kaamiki stops borrowing now!
@@ -18,7 +18,7 @@
 .. _changelogs-november-2026:
 
 ===============================================================================
-Kaamiki stops :swap:`borrowing|copying|depending|patching` now!
+Kaamiki stops :roll:`borrowing|copying|depending|patching` now!
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -126,18 +126,18 @@ the way they did:
 .. _words-can-change-now:
 
 -------------------------------------------------------------------------------
-Words can :swap:`change|move|swap|settle` now.
+Words can :roll:`change|move|roll|settle` now.
 -------------------------------------------------------------------------------
 
 I wanted the titles on my own pages to say what I'm doing, and what I'm doing
-changes. The new ``:swap:`` role swaps one word for the next while it's on
+changes. The new ``:roll:`` role rolls one word into the next while it's on
 screen, like the one in this page's title. Every letter of the old word rolls
 into the letter of the new one, from the left, the way the greeting on the home
 page does:
 
 .. code-block:: rst
 
-    Rebuilding NumPy to :swap:`understand|re-learn|appreciate` it.
+    Rebuilding NumPy to :roll:`understand|re-learn|appreciate` it.
 
 Only what's in the page's content moves. The first word is what search, a
 reader without scripting and every copy of a title get, so the navbar, the
@@ -151,7 +151,7 @@ I f*cking :fa-icon:solid:`heart km-tone--red` this role in particular!
 Titles can :sweep:`sweep|shine|glide|change` now.
 -------------------------------------------------------------------------------
 
-``:swap:`` changes one word at a time. I wanted a whole title to change too, so
+``:roll:`` changes one word at a time. I wanted a whole title to change too, so
 there's a second role, ``:sweep:``, where a band of light crosses the text and
 the old words fade out behind it while the new ones come in through it. It
 takes a whole title or just a word, so it works in a heading and in a sentence:
@@ -161,7 +161,7 @@ takes a whole title or just a word, so it works in a heading and in a sentence:
     :sweep:`Docs that teach|Code you can read and run`
     Docs you can :sweep:`read|search|share` with anyone.
 
-It follows the same rules as ``:swap:``: the first phrase is what search, a
+It follows the same rules as ``:roll:``: the first phrase is what search, a
 reader without scripting and every copy of a title get, and a reader who asks
 for less motion sees nothing move. The light's colours are one CSS token, so
 yours can be as quiet as you like.
@@ -340,7 +340,7 @@ snapping. An accordion gets ready before the click, when a pointer comes near
 it or the page is quiet, so opening a heavy one doesn't stall, and it comes to
 rest while it's still moving a pixel or two a frame, so it never crawls
 through its last pixels. The ticker's reels are moved by the browser, which
-keeps the last digit from struggling as it stops, and ``:swap:`` rolls a word
+keeps the last digit from struggling as it stops, and ``:roll:`` rolls a word
 into the next one a letter at a time, the way the greeting on the home page
 does, while the box around it glides to its new width.
 
@@ -368,7 +368,7 @@ title sits a little lower in it.
 
 A directive that moves can take its own speed with ``:speed:`` or play nothing
 with ``:no-motion:``. ``2`` is twice as quick as the site, ``0.5`` half as
-quick, and a ``:no-motion:`` accordion opens at once, with a ``:swap:`` or a
+quick, and a ``:no-motion:`` accordion opens at once, with a ``:roll:`` or a
 ``:ticker:`` in it standing still. ``accordion``, ``tabs``, ``carousel``,
 ``byline``, ``repository`` and ``release`` take both, and ``code-explain`` and
 ``code-version`` take ``:no-motion:``.

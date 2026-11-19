@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Videos, everywhere
 :km-page-description: Every option of the video directive on and off, with a
@@ -273,12 +273,12 @@ With roles.
         :caption: A caption :ticker:`2025?short`.
 
 .. video:: _static/combos/sample.webm
-    :caption: A caption :swap:`this|that|the other`.
+    :caption: A caption :roll:`this|that|the other`.
 
 .. code-block:: rst
 
     .. video:: _static/combos/sample.webm
-        :caption: A caption :swap:`this|that|the other`.
+        :caption: A caption :roll:`this|that|the other`.
 
 .. video:: _static/combos/sample.webm
     :caption: A caption :kbd:mac:`Cmd-K`.

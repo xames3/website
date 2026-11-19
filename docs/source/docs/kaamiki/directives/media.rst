@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Video, YouTube and thumbnails
 :km-page-description: Put your own video, a YouTube player or a card that links
@@ -159,7 +159,7 @@ thumbnail
 
 A card for a video that links to it on YouTube. Unlike the player, it embeds
 nothing. The whole card is the link, so its title, channel and caption can't
-hold one. They can't hold ``:swap:`` either, which the script doesn't run
+hold one. They can't hold ``:roll:`` either, which the script doesn't run
 inside a link. ``:greyscale:`` draws the picture in grey until it's hovered:
 
 .. columns:: 2

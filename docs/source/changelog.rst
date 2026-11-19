@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 02 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Changelog
 :km-page-description: Every Kaamiki release, newest first.
@@ -46,7 +46,7 @@
           Kaamiki's own. |new|
         - ``release``, which writes an entry like this one, with its date and
           a link to the story behind it. |new|
-        - ``:swap:``, a role that swaps a word for the next one while it's on
+        - ``:roll:``, a role that rolls a word into the next one while it's on
           screen. |new|
         - A picture that's shown smaller than it is opens when you press it,
           flying out from where it sits and back to where it is when it's
@@ -88,7 +88,7 @@
         - A YouTube player shows the video's picture with a play button and
           loads on a click, from ``youtube-nocookie.com``.
         - A directive in the wrong place stops the build, and so does a link
-          inside a link or ``:swap:`` inside one. Options and settings
+          inside a link or ``:roll:`` inside one. Options and settings
           outside their bounds stop it too, naming the line.
         - The header's menus and a phone's menu list the branch you're in, so
           a site of hundreds of pages builds quickly and its pages stay light.

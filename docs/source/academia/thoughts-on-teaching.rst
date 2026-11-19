@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Thoughts on teaching
 :km-page-description: Lessons I didn't plan on teaching, but I re-learnt them
@@ -124,7 +124,7 @@ effectively from both my successes and failures.
 .. _a-year-shaped-by-people:
 
 -------------------------------------------------------------------------------
-A year shaped by :swap:`students|mentors|friends|people`.
+A year shaped by :roll:`students|mentors|friends|people`.
 -------------------------------------------------------------------------------
 
 Again, looking back, I'm seeing my lectures and classrooms in a much different

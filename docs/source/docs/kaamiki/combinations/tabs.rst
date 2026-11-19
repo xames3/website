@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Tabs, everywhere
 :km-page-description: Every option of the tabs and tab directives on and off,
@@ -528,7 +528,7 @@ The option and the role together.
 With roles.
 -------------------------------------------------------------------------------
 
-Roles work in the titles and in the content, but ``email`` and ``swap`` are
+Roles work in the titles and in the content, but ``email`` and ``roll`` are
 left out of the titles: a link would fight the click that switches the tab and
 a moving word would move the row of titles. They work in the content:
 
@@ -602,11 +602,11 @@ a moving word would move the row of titles. They work in the content:
 
     .. tab:: Title
 
-        Content :swap:`this|that|the other`
+        Content :roll:`this|that|the other`
 
     .. tab:: Plain
 
-        Content :swap:`this|that|the other`
+        Content :roll:`this|that|the other`
 
 .. code-block:: rst
 
@@ -614,11 +614,11 @@ a moving word would move the row of titles. They work in the content:
 
         .. tab:: Title
 
-            Content :swap:`this|that|the other`
+            Content :roll:`this|that|the other`
 
         .. tab:: Plain
 
-            Content :swap:`this|that|the other`
+            Content :roll:`this|that|the other`
 
 .. tabs::
 
@@ -1281,7 +1281,7 @@ What a title can't hold.
 -------------------------------------------------------------------------------
 
 A title is what you click to show the tab, so a link in it stops the build, and
-so does ``:swap:``, which would move the row of titles. A tab's
+so does ``:roll:``, which would move the row of titles. A tab's
 ``:icon-position:`` needs its ``:fa-icon:``. The message is written under the
 source:
 
@@ -1304,14 +1304,14 @@ An email in a title
 
     tab: expected a title without a link, got one
 
-A swapping word in a title
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+A rolling word in a title
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: rst
 
     .. tabs::
 
-        .. tab:: :swap:`this|that`
+        .. tab:: :roll:`this|that`
 
             One.
 
@@ -1321,7 +1321,7 @@ A swapping word in a title
 
 .. code-block:: text
 
-    tab: expected a title that stays put, got :swap:, which moves the tabs
+    tab: expected a title that stays put, got :roll:, which moves the tabs
 
 An icon position without an icon
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

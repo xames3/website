@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Releases, everywhere
 :km-page-description: Every option of the release directive on and off, with
@@ -571,23 +571,23 @@ With roles.
         Added
             - A note :ticker:`2025?short`
 
-.. release:: A title :swap:`this|that|the other`
+.. release:: A title :roll:`this|that|the other`
     :version: demo-release-22
 
-    A summary :swap:`this|that|the other`.
+    A summary :roll:`this|that|the other`.
 
     Added
-        - A note :swap:`this|that|the other`
+        - A note :roll:`this|that|the other`
 
 .. code-block:: rst
 
-    .. release:: A title :swap:`this|that|the other`
+    .. release:: A title :roll:`this|that|the other`
         :version: demo-release-22
 
-        A summary :swap:`this|that|the other`.
+        A summary :roll:`this|that|the other`.
 
         Added
-            - A note :swap:`this|that|the other`
+            - A note :roll:`this|that|the other`
 
 .. release:: A title :kbd:mac:`Cmd-K`
     :version: demo-release-23

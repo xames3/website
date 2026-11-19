@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 28 October 2026
-.. Last updated on: 18 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Advanced Kaamiki
 :km-page-description: What a Sphinx author who wants more control needs to
@@ -144,9 +144,9 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
           - The stacking order of the header, dropdowns and the rest.
         * - ``--km-show-more-``
           - How tall a folded page is, how it fades and where its button docks.
-        * - ``--km-swap-``, ``--km-sweep-``, ``--km-ticker-``,
+        * - ``--km-roll-``, ``--km-sweep-``, ``--km-ticker-``,
             ``--km-tooltip-``
-          - How long the swap role holds a word (4000ms, the roll itself takes
+          - How long the roll role holds a word (4000ms, the roll itself takes
             ``--km-motion-state`` and each letter starts
             ``--km-motion-stagger`` after the one before), how long the sweep
             role rests between phrases (``--km-sweep-hold``, 5500ms), how long

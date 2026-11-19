@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Buttons, everywhere
 :km-page-description: Every option of the button directive on and off, with
@@ -634,7 +634,7 @@ With roles.
 -------------------------------------------------------------------------------
 
 Every role that doesn't make a link or move works in a label. ``email``
-doesn't, since a button is a link and a link can't hold a link, and ``swap``
+doesn't, since a button is a link and a link can't hold a link, and ``roll``
 doesn't either, since the script doesn't run inside a link:
 
 .. columns:: 2
@@ -966,7 +966,7 @@ No link and no blocks in a label.
 -------------------------------------------------------------------------------
 
 A button is a link already, so a link in its label stops the build, and so do
-swapping words, which the script doesn't run inside a link, and anything but
+rolling words, which the script doesn't run inside a link, and anything but
 one paragraph. The message is written under the source:
 
 An email in the label
@@ -982,18 +982,18 @@ An email in the label
 
     button: expected a label without a link, got one
 
-Swapping words in the label
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Rolling words in the label
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: rst
 
     .. button:: https://github.com/xames3
 
-        Label :swap:`this|that|the other`
+        Label :roll:`this|that|the other`
 
 .. code-block:: text
 
-    button: expected a label that stays put, got :swap:, which the script
+    button: expected a label that stays put, got :roll:, which the script
     doesn't run inside a link
 
 A list in the label

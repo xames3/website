@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 01 March 2025
-.. Last updated on: 06 November 2026
+.. Last updated on: 19 November 2026
 
 :km-related-header: Keep reading.
 :km-related-docs: /academia/thoughts-on-teaching,
@@ -1259,7 +1259,7 @@ the best teaching and learning experience.
 I intend to work on this project in small steps whenever I get time. However,
 the larger work is already done. I re-learnt the essentials by making them.
 
-.. |rnumpy| replace:: :swap:`understand|appreciate|rediscover|internalise`
+.. |rnumpy| replace:: :roll:`understand|appreciate|rediscover|internalise`
 
 .. _NumPy: https://numpy.org
 .. _Generalised Matrix Multiplication (GEMM): https://docs.nvidia.com/

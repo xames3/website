@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Bylines, option by option
 :km-page-description: Every option of the byline directive, with icons and
@@ -207,12 +207,12 @@ A byline's text is the author's handle, so icons and roles go around it, in the
 paragraphs beside it:
 
 The author, :fa-icon:regular:`user` @xames3, writes
-:swap:`slowly|clearly|often`.
+:roll:`slowly|clearly|often`.
 
 .. code-block:: rst
 
     The author, :fa-icon:regular:`user` @xames3, writes
-    :swap:`slowly|clearly|often`.
+    :roll:`slowly|clearly|often`.
 
 A byline and a line of roles under it.
 

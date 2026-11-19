@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: code-version, option by option
 :km-page-description: Every option of the code-version directive on and off,
@@ -1052,7 +1052,7 @@ Roles in the notes.
         .. lines:: 2-3
 
             An :underline:`empty` list is zero now, press
-            :kbd:mac:`Cmd-K` and :swap:`read|write|run`.
+            :kbd:mac:`Cmd-K` and :roll:`read|write|run`.
 
 .. code-block:: rst
 
@@ -1090,7 +1090,7 @@ Roles in the notes.
             .. lines:: 2-3
 
                 An :underline:`empty` list is zero now, press
-                :kbd:mac:`Cmd-K` and :swap:`read|write|run`.
+                :kbd:mac:`Cmd-K` and :roll:`read|write|run`.
 
 .. _combos-code-version-where-it-cant-go:
 

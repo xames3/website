@@ -35,7 +35,7 @@
         titleSkip: () => getDurationMs('--km-title-skip'),
         tooltipHold: () => getDurationMs('--km-tooltip-hold'),
         showMoreHold: () => getDurationMs('--km-show-more-hold'),
-        swapHold: () => getDurationMs('--km-swap-hold'),
+        rollHold: () => getDurationMs('--km-roll-hold'),
         sweepHold: () => getDurationMs('--km-sweep-hold'),
     };
 

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 November 2026
-.. Last updated on: 18 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: How Kaamiki moves
 :km-page-description: Every animation in Kaamiki, shown working in one
@@ -332,17 +332,17 @@ the next one by itself, a letter at a time from the left, the way the greeting
 on the home page does, and the numbers in it count up when they scroll into
 view:
 
-Everything here is meant to :swap:`settle|glide|ease|land` softly, on
+Everything here is meant to :roll:`settle|glide|ease|land` softly, on
 :ticker:`8` paces and :ticker:`4` curves.
 
 .. code-block:: rst
 
-    Everything here is meant to :swap:`settle|glide|ease|land` softly, on
+    Everything here is meant to :roll:`settle|glide|ease|land` softly, on
     :ticker:`8` paces and :ticker:`4` curves.
 
 The rest of the sentence glides to wherever the new word leaves it, and a word
 of another length sends the extra letters in from or out to nothing, as in
-:swap:`go|going|forgotten`. The :ref:`swap role <kaamiki-roles-swap>` says what
+:roll:`go|going|forgotten`. The :ref:`roll role <kaamiki-roles-roll>` says what
 it takes and what it leaves alone.
 
 A number can be written short, so :ticker:`12400?short` reads in thousands.
@@ -561,7 +561,7 @@ Open the three accordions below and compare how long each takes:
 
 ``:no-motion:`` goes the other way: the directive plays nothing, and what's in
 it shows and changes at once, the way it does for a reader who asks for less
-motion. That reaches the roles inside it too, so a ``:swap:`` or a ``:ticker:``
+motion. That reaches the roles inside it too, so a ``:roll:`` or a ``:ticker:``
 in it stands still. Open this one:
 
 .. accordion:: Not moving at all

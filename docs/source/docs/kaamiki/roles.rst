@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 18 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Kaamiki roles
 :km-page-description: The inline roles Kaamiki adds for links, motion, colour,
@@ -25,11 +25,11 @@ A role is written ``:name:`text```. Kaamiki adds nine, and this one sentence
 uses most of them: a :sharpie:`highlight`, a :underline:`pencil line`, a
 :ticker:`2025?short` count, the :kbd:mac:`Cmd-K` shortcut, an
 :fa-icon:solid:`heart km-tone--red` icon and a word that
-:swap:`changes|moves|swaps` while you read.
+:roll:`changes|moves|rolls` while you read.
 
 Where a title is shown for something else, in the navbar, the sidebar, the
 breadcrumbs, a table of contents or a link, ``sharpie``, ``underline``,
-``ticker`` and ``stylise`` are plain text and ``swap`` and ``sweep`` show
+``ticker`` and ``stylise`` are plain text and ``roll`` and ``sweep`` show
 their first word.
 An icon stays and a key loses its keycap. A link written with ``:doc:`` or
 ``:ref:`` is the exception: it shows the title's words and leaves an icon out.
@@ -95,10 +95,10 @@ In ``email``, ``sharpie``, ``underline`` and ``stylise`` the value is the last
 ``x < 5``, ``n<10`` and ``List<int>`` are plain text that can be marked. An
 empty ``<>`` or ``<?>``, and a ``<`` that's never closed, stop the build.
 
-.. _kaamiki-roles-swap:
+.. _kaamiki-roles-roll:
 
 -------------------------------------------------------------------------------
-swap
+roll
 -------------------------------------------------------------------------------
 
 The text lists the words, split by ``|``. The first is what the page, its
@@ -110,11 +110,11 @@ greeting on the home page does, and the rest of the sentence glides to where it
 sits next. A reader whose system asks for less motion gets the first word and
 nothing moves:
 
-Rebuilding NumPy to :swap:`understand|learn|rebuild` it.
+Rebuilding NumPy to :roll:`understand|learn|rebuild` it.
 
 .. code-block:: rst
 
-    Rebuilding NumPy to :swap:`understand|learn|rebuild` it.
+    Rebuilding NumPy to :roll:`understand|learn|rebuild` it.
 
 A longer or a shorter word lets the extra letters roll in from or out to
 nothing, and the words after it glide along on a spring. Press the accordion
@@ -122,8 +122,8 @@ and wait for the words:
 
 .. accordion:: Words of different lengths
 
-    A word that grows and shrinks, :swap:`go|going|forgotten`, while a phrase
-    changes length too, :swap:`two words|a longer phrase|one`.
+    A word that grows and shrinks, :roll:`go|going|forgotten`, while a phrase
+    changes length too, :roll:`two words|a longer phrase|one`.
 
 A letter is a whole mark, so an accent, an emoji and a flag each roll in one
 piece. A script whose letters join or reorder, such as Arabic or Devanagari,
@@ -147,7 +147,7 @@ text.
 sweep
 -------------------------------------------------------------------------------
 
-It reads like ``swap``, but a band of light crosses the text: the old text
+It reads like ``roll``, but a band of light crosses the text: the old text
 fades out behind it and the new text comes in through it. Each phrase is a
 whole title or only a word, split by ``|``. The first is what the page, its
 search and a reader without scripts get. In the page the rest take its place
@@ -650,5 +650,5 @@ the build at the ``role`` directive, naming the option.
           - ``:style:``, the CSS, so the text is only the words.
         * - ``email``
           - ``:subject:``, for every address the role writes.
-        * - ``swap``, ``sweep``, ``fa-icon``, ``kbd``
+        * - ``roll``, ``sweep``, ``fa-icon``, ``kbd``
           - Nothing besides ``:class:``. Their text is all there is to say.

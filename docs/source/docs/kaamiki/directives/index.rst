@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 12 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Kaamiki directives
 :km-page-description: The directives Kaamiki adds to reStructuredText, shown
@@ -286,7 +286,7 @@ A link doesn't hold a link. A button's label, a thumbnail's title, channel and
 caption, a byline's name, an accordion's preheader, title and subheader, a
 tab's title and the preheader, title, subheader and footer of a block that
 links are a link or sit in one. ``:email:``, a hyperlink, ``:ref:`` or
-``:doc:`` in one stops the build, and so does ``:swap:`` in a tab's title,
+``:doc:`` in one stops the build, and so does ``:roll:`` in a tab's title,
 which would move the row of titles, and in a button's label or a thumbnail's
 title, channel or caption, which the script doesn't run inside a link.
 
@@ -357,7 +357,7 @@ that moves can take its own, or none, with two options:
         ``2``, ``3`` or ``4``, and anything else stops the build with the list.
     * - ``:no-motion:``
       - Plays nothing in the directive: every transition and animation in it
-        ends as it starts, a ``:swap:`` or a ``:sweep:`` keeps its first
+        ends as it starts, a ``:roll:`` or a ``:sweep:`` keeps its first
         phrase, a ``:ticker:`` shows its number and a ``byline`` keeps a still
         background.
 

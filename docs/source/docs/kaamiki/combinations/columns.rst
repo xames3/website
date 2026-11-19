@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Columns, everywhere
 :km-page-description: Every option of the columns and column directives on and
@@ -1006,11 +1006,11 @@ With roles.
 
     .. column::
 
-        Column :swap:`this|that|the other`
+        Column :roll:`this|that|the other`
 
     .. column::
 
-        Another :swap:`this|that|the other`
+        Another :roll:`this|that|the other`
 
 .. code-block:: rst
 
@@ -1018,11 +1018,11 @@ With roles.
 
         .. column::
 
-            Column :swap:`this|that|the other`
+            Column :roll:`this|that|the other`
 
         .. column::
 
-            Another :swap:`this|that|the other`
+            Another :roll:`this|that|the other`
 
 .. columns:: 2
 

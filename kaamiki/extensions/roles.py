@@ -4,7 +4,7 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 18 November 2026
+Last updated on: 19 November 2026
 
 The custom inline roles of Kaamiki.
 """
@@ -92,7 +92,7 @@ UNITS: t.Final[tuple[tuple[int, str], ...]] = (
     (10**6, "m"),
     (10**3, "k"),
 )
-SWAP_LENGTH: t.Final[int] = 45
+ROLL_LENGTH: t.Final[int] = 45
 SWEEP_LENGTH: t.Final[int] = 120
 STYLE_CLASSES: t.Final[dict[str, str]] = {
     "brands": "fa-brands",
@@ -290,7 +290,7 @@ class Ink(nodes.inline):
     """Text with a style, a sharpie or a pencil underline."""
 
 
-class Swapper(Ink):
+class Turning(Ink):
     """The first of the words that show one after another."""
 
 
@@ -300,18 +300,18 @@ def steady(
     part: str,
     why: str,
 ) -> None:
-    """Refuse `:swap:` and `:sweep:` in a text that must not move.
+    """Refuse `:roll:` and `:sweep:` in a text that must not move.
 
     :param directive: The directive that has the text.
     :param found: The parsed text or its nodes.
     :param part: What the text is, as `a title`.
     :param why: Why it cannot move, for the message.
-    :raises rst.DirectiveError: When the text has swapping words.
+    :raises rst.DirectiveError: When the text has turning words.
     """
     for each in [found] if isinstance(found, nodes.Node) else found:
-        moving = next(each.findall(Swapper), None)
+        moving = next(each.findall(Turning), None)
         if moving is not None:
-            role = "sweep" if "km-sweep" in moving["classes"] else "swap"
+            role = "sweep" if "km-sweep" in moving["classes"] else "roll"
             raise directive.error(
                 f"{directive.name}: expected {part} that stays put, got"
                 f" :{role}:, {why}"
@@ -333,11 +333,11 @@ def visit(self: HTMLTranslator, node: Ink) -> None:
 def _moves(node: Ink) -> bool:
     """Say whether inked text keeps its style here, or is plain.
 
-    :param node: The inked text or the swapping words.
+    :param node: The inked text or the turning words.
     :return: `True` for text in the page itself. The text is plain in a
         link (a toctree, a `:ref:` or a `:doc:`) and in a title that
         shows alone, as in the breadcrumbs, the tab of the page and the
-        previous and next pages. There, swapping words show only the
+        previous and next pages. There, turning words show only the
         first word.
     """
     parent = node.parent
@@ -352,24 +352,24 @@ def _moves(node: Ink) -> bool:
     return True
 
 
-@html.opens(Swapper)
-def visit_swapper(self: HTMLTranslator, node: Swapper) -> None:
-    """Open the span for the swapping words, if they swap here.
+@html.opens(Turning)
+def visit_turning(self: HTMLTranslator, node: Turning) -> None:
+    """Open the span for the turning words, if they turn here.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The swapping words.
+    :param node: The turning words.
     """
     if _moves(node):
         attributes: dict[str, t.Any] = {"data-km-words": node["words"]}
         self.body.append(self.starttag(node, "span", "", **attributes))
 
 
-@html.closes(Swapper)
-def depart_swapper(self: HTMLTranslator, node: Swapper) -> None:
+@html.closes(Turning)
+def depart_turning(self: HTMLTranslator, node: Turning) -> None:
     """Close the span, if one is open.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The swapping words.
+    :param node: The turning words.
     """
     if _moves(node):
         self.body.append("</span>")
@@ -849,7 +849,7 @@ class Ticker(KaamikiRole):
 
 
 class Turns(KaamikiRole, abstract=True):
-    """The base of `swap` and `sweep`, whose parts take turns."""
+    """The base of `roll` and `sweep`, whose parts take turns."""
 
     noun: t.ClassVar[str]
     limit: t.ClassVar[int]
@@ -882,11 +882,11 @@ class Turns(KaamikiRole, abstract=True):
             "words": "|".join(words),
             "support_smartquotes": False,
         }
-        return [Swapper(self.rawtext, words[0], **attributes)], []
+        return [Turning(self.rawtext, words[0], **attributes)], []
 
 
-class Swap(Turns):
-    """The `swap` role, which shows its words one after another.
+class Roll(Turns):
+    """The `roll` role, which shows its words one after another.
 
     Text::
 
@@ -903,9 +903,9 @@ class Swap(Turns):
         - `class`: More classes for the words.
     """
 
-    base_classes = ("km-swap",)
+    base_classes = ("km-roll",)
     noun = "words"
-    limit = SWAP_LENGTH
+    limit = ROLL_LENGTH
 
 
 class Sweep(Turns):
@@ -914,7 +914,7 @@ class Sweep(Turns):
     Text::
 
         The phrases, with `|` between them, each a full title or a word
-        with a maximum of 120 code points. It is as `swap`, but a light
+        with a maximum of 120 code points. It is as `roll`, but a light
         moves across the text, and the old phrase fades out behind it
         as the new one comes in. The page, its search and a reader
         without scripts get the first phrase. In the navbar, the
@@ -926,7 +926,7 @@ class Sweep(Turns):
         - `class`: More classes for the phrases.
     """
 
-    base_classes = ("km-swap", "km-sweep")
+    base_classes = ("km-sweep",)
     noun = "phrases"
     limit = SWEEP_LENGTH
 
