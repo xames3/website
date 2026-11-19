@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 18 November 2026
+Last updated on: 19 November 2026
 
 The settings of Kaamiki: their schema, their checks, and how a site
 sets them on `kaamiki.conf` or with a `-D`. `WORDS_PER_MINUTE` is 238,
@@ -81,6 +81,8 @@ BOUNDS: t.Final[dict[str, tuple[float, float]]] = {
     "margin": (0, 8),
     "motion_speed": (0.25, 4),
     "pace": (24, 240),
+    "roll_duration": (0.1, 2),
+    "roll_stagger": (0, 0.5),
     "show_more_after": (3, 8),
     "show_previous_next_cards_count": (1, 7),
     "start": (1, 10800),

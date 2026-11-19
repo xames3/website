@@ -14,6 +14,7 @@ each year.
 https://reproducible-builds.org/specs/source-date-epoch/
 """
 
+import json
 import os
 import typing as t
 from datetime import UTC
@@ -41,6 +42,18 @@ extensions: list[str] = [
 
 with open("prolog.rst", encoding="utf-8") as f:
     rst_prolog: str = f.read()
+
+with open("_static/data/greetings.json", encoding="utf-8") as f:
+    greetings: str = "|".join(each["name"] for each in json.load(f))
+
+rst_epilog: str = f"""
+.. role:: greeting(roll)
+    :interval: 2.8
+    :duration: 700ms
+    :stagger: 45ms
+
+.. |greeting| replace:: :greeting:`{greetings}`
+"""
 
 nitpicky: bool = True
 smartquotes: bool = False

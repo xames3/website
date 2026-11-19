@@ -68,6 +68,12 @@
         );
     }
 
+    function ownMs(field, name, token) {
+        return name in field.dataset
+            ? Number(field.dataset[name]) / engine.speedOf(field)
+            : token;
+    }
+
     async function rollWord(field, current, next) {
         const was = measureRoll(field, current);
         const now = measureRoll(field, next);
@@ -88,12 +94,12 @@
         const held = ghost.getBoundingClientRect().width;
         stage.style.marginRight = '';
         stage.style.setProperty('--km-roll-edge', `${edge}px`);
-        const settle = engine.ms('state', field);
+        const settle = ownMs(field, 'kmDuration', engine.ms('state', field));
         const count = Math.max(was.letters.length, now.letters.length);
         const together = was.whole || now.whole;
         const step = count > 1 && !together
             ? Math.min(
-                engine.ms('stagger', field),
+                ownMs(field, 'kmStagger', engine.ms('stagger', field)),
                 (settle * ROLL_SPREAD_SHARE) / (count - 1),
             )
             : 0;
@@ -261,7 +267,9 @@
         const words = field.dataset.kmWords.split('|');
         const sweeping = field.classList.contains('km-sweep');
         const change = sweeping ? sweepPhrase : rollWord;
-        const hold = sweeping ? TIMING.sweepHold : TIMING.rollHold;
+        const hold = sweeping
+            ? TIMING.sweepHold
+            : () => ownMs(field, 'kmInterval', TIMING.rollHold());
         let index = 0;
         let busy = false;
         let timer;

@@ -360,7 +360,10 @@ def visit_turning(self: HTMLTranslator, node: Turning) -> None:
     :param node: The turning words.
     """
     if _moves(node):
-        attributes: dict[str, t.Any] = {"data-km-words": node["words"]}
+        attributes: dict[str, t.Any] = {
+            "data-km-words": node["words"],
+            **node.get("timing", {}),
+        }
         self.body.append(self.starttag(node, "span", "", **attributes))
 
 
@@ -773,13 +776,13 @@ class Underline(KaamikiRole):
         ], []
 
 
-def _duration(argument: str | None) -> float:
-    """Read how long a ticker counts, in seconds.
+def _duration(argument: str | None, bounds: str = "ticker_duration") -> float:
+    """Read a duration, in seconds.
 
     :param argument: The duration as written, as `1s` or `500ms`.
+    :param bounds: The key of its range in `BOUNDS`.
     :return: The seconds.
-    :raises ValueError: When it is not a duration, or not in the range
-        of a ticker.
+    :raises ValueError: When it is not a duration, or not in its range.
     """
     written = (argument or "").strip()
     found = DURATION.fullmatch(written)
@@ -788,7 +791,7 @@ def _duration(argument: str | None) -> float:
             f"expected a duration like 1s or 500ms, got {written!r}"
         )
     seconds = float(found[1]) / (1000 if found[2] == "ms" else 1)
-    low, high = BOUNDS["ticker_duration"]
+    low, high = BOUNDS[bounds]
     if not low <= seconds <= high:
         raise ValueError(
             f"expected a duration from {low:g}s to {high:g}s, got {seconds:g}s"
@@ -854,6 +857,11 @@ class Turns(KaamikiRole, abstract=True):
     noun: t.ClassVar[str]
     limit: t.ClassVar[int]
 
+    @property
+    def timing(self) -> dict[str, int]:
+        """The times that the role sets, in ms, as data attributes."""
+        return {}
+
     def run(self) -> Reply:
         """Read the parts, split by `|`.
 
@@ -880,6 +888,7 @@ class Turns(KaamikiRole, abstract=True):
         attributes = {
             "classes": self.classes,
             "words": "|".join(words),
+            "timing": self.timing,
             "support_smartquotes": False,
         }
         return [Turning(self.rawtext, words[0], **attributes)], []
@@ -900,12 +909,35 @@ class Roll(Turns):
 
     Options::
 
+        - `interval`: The seconds that each word stays, from 2 to 15.
+          The default is the `--km-roll-hold` token.
+        - `duration`: How long each letter rolls, in `s` or `ms`, from
+          0.1s to 2s. The default is the `--km-motion-state` token.
+        - `stagger`: The wait between two letters, in `s` or `ms`, from
+          0s to 0.5s. The default is the `--km-motion-stagger` token.
         - `class`: More classes for the words.
     """
 
     base_classes = ("km-roll",)
     noun = "words"
     limit = ROLL_LENGTH
+    interval = Option(checks.number(*BOUNDS["interval"]))
+    duration = Option(functools.partial(_duration, bounds="roll_duration"))
+    stagger = Option(functools.partial(_duration, bounds="roll_stagger"))
+
+    @property
+    def timing(self) -> dict[str, int]:
+        """The times that the role sets, in ms, as data attributes."""
+        given = {
+            "interval": self.interval,
+            "duration": self.duration,
+            "stagger": self.stagger,
+        }
+        return {
+            f"data-km-{name}": round(seconds * 1000)
+            for name, seconds in given.items()
+            if seconds is not None
+        }
 
 
 class Sweep(Turns):

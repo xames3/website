@@ -148,6 +148,22 @@
     }
 }
 
+.am-greeting {
+    margin-block: var(--km-space-8);
+    font-size: var(--km-font-size-up-4);
+    font-weight: var(--km-weight-h2);
+    --km-tracking: var(--km-tracking-h2);
+    line-height: 1.25;
+    min-height: 1.25em;
+    color: hsl(var(--km-colour-text-baseline));
+}
+
+@media (width >= 640px) {
+    .am-greeting {
+        font-size: var(--km-font-size-up-5);
+    }
+}
+
 .am-greetings__text {
     font-size: var(--km-font-size-up-4);
     font-weight: var(--km-weight-h2);

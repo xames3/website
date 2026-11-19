@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February 2025
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Akshay Mestry
 :km-page-description: Stories from what I build, explainers and notes from
@@ -32,12 +32,9 @@ Akshay Mestry
         https://i.imgur.com/weM4qDW.jpg,
         https://i.imgur.com/aIQD5Bx.jpeg
 
-.. embed:: ./assets/html/greetings.html
-    :source: /_static/data/greetings.json
-    :interval: 2800
-    :duration: 700
-    :stagger: 45
-    :js: styles/site.js
+.. rst-class:: am-greeting
+
+    |greeting|
 
 I'm Akshay, an educator, engineer, avid cook and currently an Assistant
 Professor at `National Louis University`_. Before getting into academia, I

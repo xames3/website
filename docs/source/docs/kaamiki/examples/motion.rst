@@ -374,15 +374,12 @@ line from the :doc:`home page </index>`:
 
     If you want to master something, teach it.
 
-The two embeds below came from the home page too. A greeting changes by itself
-and a line types and deletes as if someone were writing it:
+The greeting and the line below came from the home page too. A greeting rolls
+by itself and a line types and deletes as if someone were writing it:
 
-.. embed:: /assets/html/greetings.html
-    :source: /_static/data/greetings.json
-    :interval: 2800
-    :duration: 700
-    :stagger: 45
-    :js: styles/site.js
+.. rst-class:: am-greeting
+
+    |greeting|
 
 So far, I've taught...
 

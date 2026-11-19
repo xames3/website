@@ -133,6 +133,29 @@ site's speed, and ``:speed:`` and ``:no-motion:`` on a directive around the
 role change it, as :ref:`the tour of the motion
 <kaamiki-example-motion-words-and-numbers-that-move>` shows.
 
+A role of your own sets its own pace with :ref:`presets
+<kaamiki-roles-custom>`. ``:interval:`` is the seconds each word stays, from 2
+to 15. ``:duration:`` is how long a letter rolls, from 0.1s to 2s, and
+``:stagger:`` is the wait between two letters, from 0s to 0.5s, each in ``s``
+or ``ms``. A roll without them takes the site's tokens. The greeting on the
+home page rolls like this:
+
+.. role:: greet(roll)
+    :interval: 2.8
+    :duration: 700ms
+    :stagger: 45ms
+
+:greet:`Hello.|Ciao.|Hola.`
+
+.. code-block:: rst
+
+    .. role:: greet(roll)
+        :interval: 2.8
+        :duration: 700ms
+        :stagger: 45ms
+
+    :greet:`Hello.|Ciao.|Hola.`
+
 A word can be up to 45 characters long, counted as code points, so an accent
 written as its own mark counts too. It can't hold a ``|``, and ``\|`` stops
 the build as well. The role can't go in a tab's title, a button's label or a
@@ -646,9 +669,12 @@ the build at the ``role`` directive, naming the option.
             the text.
         * - ``ticker``
           - ``:short:``, a flag, and ``:duration:``, like ``1s`` or ``500ms``.
+        * - ``roll``
+          - ``:interval:``, in seconds, and ``:duration:`` and ``:stagger:``,
+            like ``700ms``.
         * - ``stylise``
           - ``:style:``, the CSS, so the text is only the words.
         * - ``email``
           - ``:subject:``, for every address the role writes.
-        * - ``roll``, ``sweep``, ``fa-icon``, ``kbd``
+        * - ``sweep``, ``fa-icon``, ``kbd``
           - Nothing besides ``:class:``. Their text is all there is to say.
