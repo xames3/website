@@ -51,52 +51,6 @@
         }));
     }
 
-    // Safari leaves the strips out for a frame each time a CSS loop starts
-    // again, so the script moves them, from one clock, while they're seen.
-    function driftWaves(overlay) {
-        const waves = [...overlay.querySelectorAll('.km-byline__wave')];
-        const loop = BYLINE_WAVE_LOOP_MS / engine.speedOf(overlay);
-        const start = document.timeline.currentTime;
-        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-        let travel = [];
-        let frame = 0;
-        let seen = false;
-        const measure = () => {
-            travel = waves.map((wave) => {
-                const style = getComputedStyle(wave);
-                return parseFloat(style.backgroundSize)
-                    * parseFloat(style.getPropertyValue('--km-wave-way'));
-            });
-        };
-        const step = (now) => {
-            const share = ((now - start) % loop) / loop;
-            waves.forEach((wave, index) => {
-                const x = share * travel[index];
-                wave.style.transform = `translate3d(${x}px, 0, 0)`;
-            });
-            frame = requestAnimationFrame(step);
-        };
-        const run = () => {
-            cancelAnimationFrame(frame);
-            if (reduced.matches) {
-                waves.forEach((wave) => wave.style.removeProperty('transform'));
-            } else if (seen) {
-                frame = requestAnimationFrame(step);
-            }
-        };
-        measure();
-        reduced.addEventListener('change', run);
-        window.addEventListener(
-            'resize',
-            rafThrottle(measure),
-            { passive: true },
-        );
-        new IntersectionObserver((entries) => {
-            seen = entries.at(-1).isIntersecting;
-            run();
-        }).observe(overlay);
-    }
-
     function cycleBackdrop(overlay, urls, byline) {
         const every = (Number(byline.getAttribute('data-km-interval'))
             || BYLINE_BG_INTERVAL_MS) / engine.speedOf(byline);
@@ -145,7 +99,6 @@
         main.style.isolation = 'isolate';
         const overlay = createBackdrop(backdrop, urls, byline);
         main.appendChild(overlay);
-        if (!backdrop && !prefersStill(byline)) driftWaves(overlay);
 
         // The layout, not the reveal that still moves the title, sets the
         // height, so the picture doesn't jump when the reveal ends.

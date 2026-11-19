@@ -4,7 +4,7 @@ Animations Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 17 October 2026
-Last updated on: 19 November 2026
+Last updated on: 18 November 2026
 */
 
 (() => {
@@ -47,7 +47,6 @@ Last updated on: 19 November 2026
     const BYLINE_BG_INTERVAL_MS = 7000;
     const BYLINE_BG_HIDDEN = '0.001';
     const BYLINE_BG_GROW_REM = 3;
-    const BYLINE_WAVE_LOOP_MS = 30000;
     const TICKER_CELLS = 11;
     const TICKER_BLUR_PX = 2;
     const SWEEP_OUT_END = 0.7;
