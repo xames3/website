@@ -41,10 +41,11 @@ youtube
 The argument is a YouTube link. Watch links, ``youtu.be`` links, embed, shorts
 and live links all work, and so does a bare 11-character video id. Anything
 else stops the build. The page shows the video's picture with a solid play
-button and loads the player when it's clicked, and the player comes from
-``youtube-nocookie.com``. Both are on by default, through
-``kaamiki.conf.youtube.click_to_load`` and ``kaamiki.conf.youtube.privacy``,
-and ``:auto-load:`` and ``:no-privacy:`` turn them off for one player:
+button and loads the player when it's clicked, through
+``kaamiki.conf.youtube.click_to_load``, which ``:auto-load:`` turns off for
+one player. The player comes from ``youtube.com``, so it plays on the first
+press everywhere. ``kaamiki.conf.youtube.privacy`` or ``:privacy:`` switch to
+``youtube-nocookie.com``, which Safari plays only after a second press:
 
 .. youtube:: https://www.youtube.com/watch?v=kCc8FmEb1nY
     :caption: A caption under the player.
@@ -113,12 +114,13 @@ The rest sits in the table at the bottom of this section.
           - Seconds to stop playing at, from 1 to 10800 and after
             ``:start:``.
         * - ``:no-privacy:``
-          - Embeds from ``youtube.com``, where ``kaamiki.conf.youtube.privacy``
-            is on, which is the default.
+          - Embeds from ``youtube.com``, for a site that turned
+            ``kaamiki.conf.youtube.privacy`` on. It stops the build where
+            that's off already, which is the default.
         * - ``:privacy:``
-          - Embeds from ``youtube-nocookie.com``, for a site that turned
-            ``kaamiki.conf.youtube.privacy`` off. It stops the build where
-            that's on already.
+          - Embeds from ``youtube-nocookie.com``, which Safari plays only after
+            a second press. It stops the build where
+            ``kaamiki.conf.youtube.privacy`` is on already.
         * - ``:hide-controls:``
           - Hides the player's controls. Without ``:autoplay:`` there'd be no
             way to play it, so that stops the build.

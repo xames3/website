@@ -1312,9 +1312,10 @@ Embeds and videos.
           - ``"defer"``
           - How those scripts load: ``defer``, ``async`` or ``normal``.
         * - ``kaamiki.conf.youtube.privacy``
-          - ``True``
-          - Uses YouTube's no-cookie player for every video. ``:no-privacy:``
-            turns it off for one player.
+          - ``False``
+          - Uses YouTube's no-cookie player for every video, which Safari plays
+            only after a second press. ``:no-privacy:`` turns it off for one
+            player.
         * - ``kaamiki.conf.youtube.click_to_load``
           - ``True``
           - Shows the video's picture with a play button for every video and

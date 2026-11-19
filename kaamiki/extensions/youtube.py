@@ -4,7 +4,7 @@ YouTube Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 16 November 2026
+Last updated on: 19 November 2026
 
 A `youtube` directive that embeds a video in the page::
 
@@ -13,10 +13,11 @@ A `youtube` directive that embeds a video in the page::
        :caption: What it's about.
 
 The argument is the link of a YouTube video, or only its id. The
-player loads when a reader clicks it, and it comes from
-`youtube-nocookie.com`, unless `kaamiki.conf.youtube.click_to_load`
-and `kaamiki.conf.youtube.privacy` of the site are off. Until then, it
-shows the picture of the video. The link checker gets that picture, so
+player loads when a reader clicks it, unless
+`kaamiki.conf.youtube.click_to_load` of the site is off, and comes
+from `youtube.com`, or from `youtube-nocookie.com` with
+`kaamiki.conf.youtube.privacy` on. Until then, it shows the picture
+of the video. The link checker gets that picture, so
 `linkcheck` fails on the picture of a video that is deleted or
 private.
 
@@ -83,8 +84,8 @@ class Youtube(KaamikiDirective):
         - `end`: The second to stop at, 1 to 10800, after `start`.
         - `privacy`: Embed from `youtube-nocookie.com`. The picture
           of a click-to-load player stays the picture of the video.
-          It is on by default, so use it only on a site with
-          `kaamiki.conf.youtube.privacy` off.
+          Safari plays it only after a second press. It is off by
+          default.
         - `no-privacy`: Embed from `youtube.com` when
           `kaamiki.conf.youtube.privacy` of the site is on.
         - `hide-controls`: Do not show the controls of the player.

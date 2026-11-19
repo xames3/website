@@ -808,7 +808,7 @@ class Youtube(Settings):
         reread=True,
     )
     click_to_load = Value(True, boolean, reread=True)
-    privacy = Value(True, boolean, reread=True)
+    privacy = Value(False, boolean, reread=True)
     referrer_policy = Value(
         "strict-origin-when-cross-origin", checks.word(*REFERRERS), reread=True
     )

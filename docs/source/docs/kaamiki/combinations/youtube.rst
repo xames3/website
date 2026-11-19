@@ -136,16 +136,16 @@ loads on a click.
     .. youtube:: https://youtu.be/kCc8FmEb1nY
         :player-language: pt-BR
 
-``:no-privacy:``, which embeds from ``youtube.com`` and not
-``youtube-nocookie.com``.
+``:privacy:``, which embeds from ``youtube-nocookie.com`` and not
+``youtube.com``.
 
 .. youtube:: https://youtu.be/kCc8FmEb1nY
-    :no-privacy:
+    :privacy:
 
 .. code-block:: rst
 
     .. youtube:: https://youtu.be/kCc8FmEb1nY
-        :no-privacy:
+        :privacy:
 
 ``:loop:``
 

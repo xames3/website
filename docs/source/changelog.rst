@@ -90,7 +90,8 @@
         - A page shows as soon as its fonts are ready and never waits more than
           two seconds.
         - A YouTube player shows the video's picture with a play button and
-          loads on a click, from ``youtube-nocookie.com``.
+          loads and plays on one press. ``kaamiki.conf.youtube.privacy`` or
+          ``:privacy:`` embed it from ``youtube-nocookie.com``.
         - A directive in the wrong place stops the build, and so does a link
           inside a link or ``:roll:`` inside one. Options and settings
           outside their bounds stop it too, naming the line.
