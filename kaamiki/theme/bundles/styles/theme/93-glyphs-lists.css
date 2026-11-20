@@ -26,9 +26,9 @@
 .km-byline__source,
 .km-byline__profile,
 .km-header__logo {
-    transition: color var(--km-duration-hover) var(--km-ease-swift),
-        background-color var(--km-duration-hover) var(--km-ease-swift),
-        opacity var(--km-duration-hover) var(--km-ease-swift);
+    transition: color var(--km-motion-press) var(--km-ease-smooth),
+        background-color var(--km-motion-press) var(--km-ease-smooth),
+        opacity var(--km-motion-fade) var(--km-ease-smooth);
 }
 
 @media (hover: hover) {

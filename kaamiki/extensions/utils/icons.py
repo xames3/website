@@ -4,7 +4,7 @@ Font Awesome Icons
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 16 November 2026
+Last updated on: 19 November 2026
 
 Each icon that Kaamiki draws, as a Pro icon and its Free replacement.
 A site with a Font Awesome kit gets the Pro icons, in its
@@ -16,6 +16,9 @@ which knows which of the two the site has. The names that Font Awesome
 Free 7.3.1 draws, the version that Kaamiki loads, are at the end of
 the file. They are copied, so the build does not install or read the
 package. Copy them again when `FA_FREE` points at a different release.
+`NAV_ARROW` is the `chevron-down` of Font Awesome Free 7.3.1 (CC BY
+4.0) as SVG, so the arrow of a header dropdown shows from the first
+frame of a page.
 """
 
 from __future__ import annotations
@@ -34,6 +37,13 @@ if t.TYPE_CHECKING:
     from sphinx.config import Config
 
 DEFAULT_STYLE: t.Final[str] = "regular"
+NAV_ARROW: t.Final[str] = (
+    '<svg class="km-header__arrow" viewBox="0 0 448 512"'
+    ' aria-hidden="true"><path fill="currentColor" d="M201.4 406.6c12.5'
+    " 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5"
+    "-45.3 0L224 338.7 54.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0"
+    ' 45.3l192 192z"/></svg>'
+)
 KIT_VARIABLE: t.Final[str] = "KAAMIKI_FA_KIT"
 REGULAR_FIRST: t.Final[frozenset[str]] = frozenset(
     {"light", "regular", "thin"}
@@ -310,6 +320,13 @@ class Icons:
     kit: str | None = None
     style: str = DEFAULT_STYLE
 
+    @property
+    def stylesheet(self) -> str | None:
+        """The CSS of the kit, which draws icons without a script."""
+        if not (self.kit and self.kit.endswith(".js")):
+            return None
+        return self.kit.removesuffix(".js") + ".css"
+
     @classmethod
     def of(cls, config: Config) -> Icons:
         """Read the icons of a site from its settings and its shell.
@@ -465,6 +482,18 @@ class Icons:
             key: self.custom(chosen[key]) if key in chosen else self.role(key)
             for key in ROLE_ICONS
         }
+
+    def arrow(self, chosen: Mapping[str, str | Mapping[str, str]]) -> str:
+        """Write the arrow of a header dropdown.
+
+        :param chosen: The icons that the site set in
+            `kaamiki.conf.icons.names`.
+        :return: `NAV_ARROW`, or the `nav_arrow` that the site set.
+        """
+        if "nav_arrow" not in chosen:
+            return NAV_ARROW
+        classes = self.custom(chosen["nav_arrow"])
+        return f'<i class="{classes} km-header__arrow" aria-hidden="true"></i>'
 
     def role(self, key: str) -> str:
         """Write one icon of the parts of Kaamiki.

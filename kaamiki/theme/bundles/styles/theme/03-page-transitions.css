@@ -11,8 +11,8 @@ the transition: it's the page itself, kept hidden by `km-document--loading`
 until the old content has left. A dropdown that's open leaves with the old
 content, on top of it, as it does when it closes.
 The script in the head marks the page being left (`km-document--leaving`) so
-its content can be pictured, and the page arrived at (`data-km-nav`, which says
-which way the reader went) so the header and the footer stay as they are. The
+its content can be pictured. A page reached from the history
+(`data-km-arrival="history"`) skips the transition and shows as it is. The
 `@view-transition` rule is only written when the site asks for it
 (`kaamiki.conf.motion.page_transitions`).
 */
@@ -36,21 +36,13 @@ which way the reader went) so the header and the footer stay as they are. The
 
 @keyframes km-nav-drift {
     to {
-        transform: translateY(
-            calc(var(--km-motion-rise-small) * var(--km-nav-dir) * -1)
-        );
+        transform: translateY(calc(var(--km-motion-rise-small) * -1));
     }
 }
 
 @media (prefers-reduced-motion: no-preference) {
     :root {
-        --km-nav-dir: 1;
         --km-nav-out: calc(var(--km-motion-fade) * 0.6);
-        --km-nav-hold: calc(var(--km-motion-enter) * 1.5);
-    }
-
-    :root[data-km-nav="back"] {
-        --km-nav-dir: -1;
     }
 
     .km-document--leaving .km-layout__content {
@@ -76,7 +68,7 @@ which way the reader went) so the header and the footer stay as they are. The
 
     :root:not(.km-document--revealing)::view-transition-old(root) {
         z-index: 1;
-        animation: km-nav-chrome-out var(--km-nav-hold) steps(1, end) both;
+        animation: km-nav-chrome-out var(--km-nav-out) steps(1, end) both;
     }
 
     /* A change of colours: the old page stays on top and a hole with a soft
@@ -157,15 +149,15 @@ which way the reader went) so the header and the footer stay as they are. The
 
     ::view-transition-old(km-content) {
         animation:
-            km-nav-fade var(--km-nav-out) linear both,
-            km-nav-drift var(--km-nav-out) ease-in both;
+            km-nav-fade var(--km-nav-out) var(--km-ease-smooth) both,
+            km-nav-drift var(--km-nav-out) var(--km-ease-smooth) both;
         mix-blend-mode: normal;
     }
 
     ::view-transition-old(km-dropdown) {
         animation:
-            km-nav-fade var(--km-nav-out) var(--km-ease-standard) both,
-            km-nav-sink var(--km-nav-out) var(--km-ease-swift) both;
+            km-nav-fade var(--km-nav-out) var(--km-ease-smooth) both,
+            km-nav-sink var(--km-nav-out) var(--km-ease-smooth) both;
         mix-blend-mode: normal;
     }
 }

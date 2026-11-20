@@ -17,7 +17,6 @@
 
         let expanded = false;
         let whole = false;
-        let gliding = 0;
 
         const tail = () => (
             button.getBoundingClientRect().height + showMoreDock()
@@ -48,13 +47,8 @@
             return full;
         };
 
-        const moving = () => content.getAnimations().some((animation) => (
-            animation.transitionProperty === 'max-height'
-        ));
-
         const judge = (first = false) => {
-            if (gliding || page.classList.contains('km-page--clamping')
-                || moving()) return;
+            if (page.classList.contains('km-page--clamping')) return;
             shell.hidden = false;
             const { top, room } = fit();
             const full = page.classList.contains('km-page--clamped')
@@ -74,6 +68,23 @@
         };
 
         const refit = rafThrottle(() => judge());
+
+        // While the page enters, a change of its size is judged once, after
+        // the entrance, since each judgement lays out the whole page.
+        let deferred = false;
+        const refitCalm = () => {
+            if (!root.classList.contains('km-document--loading')
+                && !document.querySelector(`.${REVEAL_WAITING}`)) {
+                refit();
+                return;
+            }
+            if (deferred) return;
+            deferred = true;
+            engine.calm(() => {
+                deferred = false;
+                refit();
+            });
+        };
 
         const motion = foldMotion(
             page,
@@ -99,16 +110,20 @@
         const toggle = (next, animate = true) => {
             if (next === expanded || whole) return;
             expanded = next;
-            attempt(() => history.replaceState(
-                { ...history.state, kmExpanded: next },
-                '',
-            ));
+            attempt(() => {
+                history.replaceState(
+                    { ...history.state, kmExpanded: next },
+                    '',
+                );
+                history.scrollRestoration = next ? 'manual' : 'auto';
+            });
             button.setAttribute('aria-expanded', next ? 'true' : 'false');
-            if (label) {
+            const relabel = () => {
+                if (!label || current !== turn) return;
                 label.textContent = next
                     ? button.dataset.kmLabelLess
                     : button.dataset.kmLabelMore;
-            }
+            };
             if (next) stir();
             else rest();
 
@@ -120,6 +135,7 @@
                 page.classList.remove('km-page--clamped');
                 if (!animate || prefersReducedMotion()) {
                     motion.settle(true);
+                    relabel();
                     return;
                 }
                 const roomPx = viewportHeight()
@@ -128,7 +144,7 @@
                     true,
                     start,
                     Math.min(full, Math.max(start, roomPx, viewportHeight())),
-                );
+                ).then(relabel);
                 return;
             }
             const clampValue = page.style
@@ -137,21 +153,54 @@
             if (!animate || prefersReducedMotion()) {
                 keepInView(content, collapsed, tail());
                 motion.settle(false);
+                relabel();
                 return;
             }
-            gliding += 1;
-            keepInView(content, collapsed, tail()).then(() => {
-                gliding -= 1;
-                if (current !== turn) return;
-                const shown = viewportHeight()
-                    - content.getBoundingClientRect().top;
-                motion.resize(
-                    false,
-                    Math.min(start, Math.max(collapsed, shown)),
-                    collapsed,
-                );
-            });
+            motion.close(collapsed, shell).then(relabel);
         };
+
+        const blocks = () => content.querySelectorAll(PLACE_BLOCKS);
+
+        const mark = () => {
+            const all = Array.from(blocks());
+            const index = all.findIndex((block) => {
+                const box = block.getBoundingClientRect();
+                return box.bottom > 0 && box.height > 0;
+            });
+            if (index < 0) return null;
+            const box = all[index].getBoundingClientRect();
+            return { index, share: -box.top / box.height };
+        };
+
+        const keep = (place) => {
+            const block = blocks()[place?.index];
+            if (!block) return;
+            const box = block.getBoundingClientRect();
+            window.scrollBy({
+                top: box.top + place.share * box.height,
+                behavior: 'instant',
+            });
+            let height = 0;
+            let still = 0;
+            holdPlace(block, () => {
+                const now = content.getBoundingClientRect().height;
+                if (now !== height) {
+                    height = now;
+                    still = performance.now();
+                }
+                return document.readyState === 'complete'
+                    && performance.now() - still > PLACE_SETTLE_MS;
+            }, place.share);
+        };
+
+        const save = () => {
+            if (!expanded) return;
+            attempt(() => history.replaceState(
+                { ...history.state, kmPlace: mark() },
+                '',
+            ));
+        };
+        let saving = 0;
 
         const holds = (href) => {
             if (!href.startsWith('#') || href.length < 2) return false;
@@ -201,13 +250,20 @@
         });
 
         window.addEventListener('resize', refit, { passive: true });
-        window.addEventListener('load', refit, { once: true });
-        new ResizeObserver(refit).observe(document.body);
-        document.fonts.ready.then(refit);
-        document.fonts.addEventListener?.('loadingdone', refit);
+        window.addEventListener('load', refitCalm, { once: true });
+        new ResizeObserver(refitCalm).observe(document.body);
+        document.fonts.ready.then(refitCalm);
+        document.fonts.addEventListener?.('loadingdone', refitCalm);
+
+        onScroll(() => {
+            window.clearTimeout(saving);
+            saving = window.setTimeout(save, PLACE_SAVE_MS);
+        });
+        window.addEventListener('pagehide', save);
 
         if (holds(location.hash)
             || history.state?.kmExpanded) toggle(true, false);
+        if (expanded) keep(history.state?.kmPlace);
         root.classList.add('km-document--fold-ready');
     }
 

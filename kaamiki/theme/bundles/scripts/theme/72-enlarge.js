@@ -271,7 +271,7 @@
             view.fading = true;
             dialog.shell.classList.add('km-enlarge--still');
             view.move?.cancel();
-            pace(view.fade, 'var(--km-ease-standard)');
+            pace(view.fade, 'var(--km-ease-smooth)');
             clearTimeout(view.timer);
             view.timer = setTimeout(done, view.fade + ENLARGE_FADE_SLACK_MS);
         };
@@ -423,8 +423,7 @@
             const { shell, picture, image, caption, close } = dialog;
             const still = prefersStill(source);
             const fade = still
-                ? ENLARGE_STILL_FADE_MS / engine.speed()
-                    / engine.speedOf(source)
+                ? engine.paced(ENLARGE_STILL_FADE_MS, source)
                 : engine.ms('fade', source);
             const rect = visibleRect(source);
             const figure = source.closest('.km-figure--greyscale');

@@ -4,7 +4,7 @@ Animations Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 17 October 2026
-Last updated on: 16 November 2026
+Last updated on: 19 November 2026
 */
 
 (() => {
@@ -31,14 +31,15 @@ Last updated on: 16 November 2026
         rafThrottle,
         say,
         settleHash,
-        springProgress,
     } = window.Kaamiki;
     const root = document.documentElement;
 
     const CLAMP_SLACK_PX = 48;
-    const CLAMP_SETTLE_MS = 60;
     const CLAMP_MIN_PX = 320;
     const CLAMP_MIN_SCREEN_PX = 480;
+    const PLACE_BLOCKS = 'section > :not(section)';
+    const PLACE_SETTLE_MS = 500;
+    const PLACE_SAVE_MS = 150;
     const HIGHLIGHT_WAIT_MS = 2000;
     const HIDDEN_PARTS = '.km-tabs__panel:not(.km-tabs__panel--current), '
         + 'details.km-accordion:not([open])';
@@ -46,6 +47,9 @@ Last updated on: 16 November 2026
     const BYLINE_BG_INTERVAL_MS = 7000;
     const BYLINE_BG_HIDDEN = '0.001';
     const BYLINE_BG_GROW_REM = 3;
+    const TYPEWRITE_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+    const TYPEWRITE_SLIP = 0.03;
+    const TYPEWRITE_SOLID_MS = 350;
     const TICKER_CELLS = 11;
     const TICKER_BLUR_PX = 2;
     const SWEEP_OUT_END = 0.7;

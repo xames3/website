@@ -237,7 +237,7 @@
                 signLine(line, 'removed');
             });
             run.coming.forEach((line) => signLine(line, 'added'));
-            const swap = TIMING.codeSwap();
+            const swap = engine.ms('swap');
             const scheduleSwap = (delay, then) => (
                 run.timers.push(window.setTimeout(then, delay))
             );
@@ -833,32 +833,6 @@
             render();
         }
 
-        let copiedTimer = 0;
-        let copiedButton = null;
-        const scheduleCopy = (wait, then) => {
-            copiedTimer = window.setTimeout(then, wait);
-        };
-        const copied = (button, done) => {
-            announce(say(done ? 'copied' : 'failed'));
-            window.clearTimeout(copiedTimer);
-            copiedButton?.classList.remove(
-                'km-code-explain__copy--fading',
-                'success',
-            );
-            copiedButton = button;
-            button.classList.toggle('success', done);
-            if (!done) return;
-            scheduleCopy(TIMING.tooltipHold(), () => {
-                button.classList.add('km-code-explain__copy--fading');
-                scheduleCopy(TIMING.fast(), () => {
-                    button.classList.remove('success');
-                    scheduleCopy(TIMING.fast() * 2, () => (
-                        button.classList.remove('km-code-explain__copy--fading')
-                    ));
-                });
-            });
-        };
-
         stage.addEventListener('scroll', rafThrottle(edge), { passive: true });
 
         host.addEventListener('click', (event) => {
@@ -869,7 +843,8 @@
                 const source = versions
                     ? { ...payload, code: versions[version] }
                     : payload;
-                copyText(sourceOf(source)).then((done) => copied(button, done));
+                copyText(sourceOf(source))
+                    .then((done) => showCopied(button, done));
             }
         });
 

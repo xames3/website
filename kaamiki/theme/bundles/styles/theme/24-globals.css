@@ -68,7 +68,6 @@ i[class*="fa-"] {
 }
 
 .km-sr-only,
-button.copybtn svg,
 .admonition:is(
     .note, .seealso, .tip, .hint, .important, .danger, .error, .warning,
     .caution, .attention
@@ -84,8 +83,32 @@ button.copybtn svg,
     border: 0;
 }
 
-.km-sr-only,
-button.copybtn svg {
+.km-sr-only {
     margin: -1px;
 }
 
+.km-copy {
+    & .km-copy__icon {
+        --fa-width: auto;
+        line-height: 1;
+        transition:
+            opacity var(--km-motion-fade) var(--km-ease-smooth),
+            scale var(--km-motion-surface) var(--km-ease-smooth);
+    }
+
+    & .km-copy__icon--done {
+        opacity: 0;
+        scale: 0.6;
+        color: hsl(var(--km-colour-green));
+    }
+
+    &[data-km-copied] .km-copy__icon--copy {
+        opacity: 0;
+        scale: 0.6;
+    }
+
+    &[data-km-copied] .km-copy__icon--done {
+        opacity: 1;
+        scale: 1;
+    }
+}

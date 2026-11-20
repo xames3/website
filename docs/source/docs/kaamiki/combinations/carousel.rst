@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 05 November 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Carousels, everywhere
 :km-page-description: Every option of the carousel directive on and off, with
@@ -1554,9 +1554,9 @@ With roles.
 
             Text of item 3.
 
-.. carousel:: Title :swap:`this|that|the other`
-    :preheader: Preheader :swap:`this|that|the other`
-    :subheader: Sub :swap:`this|that|the other`
+.. carousel:: Title :roll:`this|that|the other`
+    :preheader: Preheader :roll:`this|that|the other`
+    :subheader: Sub :roll:`this|that|the other`
 
     .. block:: Item 1
         :size: small
@@ -1575,9 +1575,9 @@ With roles.
 
 .. code-block:: rst
 
-    .. carousel:: Title :swap:`this|that|the other`
-        :preheader: Preheader :swap:`this|that|the other`
-        :subheader: Sub :swap:`this|that|the other`
+    .. carousel:: Title :roll:`this|that|the other`
+        :preheader: Preheader :roll:`this|that|the other`
+        :subheader: Sub :roll:`this|that|the other`
 
         .. block:: Item 1
             :size: small

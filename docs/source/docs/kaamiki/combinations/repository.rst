@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Repositories, everywhere
 :km-page-description: Every option of the repository directive on and off, with
@@ -256,13 +256,13 @@ With roles.
 
 .. repository:: xames3/slowtorch
 
-    A description :swap:`this|that|the other`.
+    A description :roll:`this|that|the other`.
 
 .. code-block:: rst
 
     .. repository:: xames3/slowtorch
 
-        A description :swap:`this|that|the other`.
+        A description :roll:`this|that|the other`.
 
 .. repository:: xames3/slowtorch
 

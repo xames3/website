@@ -4,6 +4,14 @@
         ));
     }
 
+    function arrival() {
+        return root.getAttribute('data-km-arrival');
+    }
+
+    function kept(node) {
+        return arrival() === 'link' && node.matches('.km-header, .km-footer');
+    }
+
     function markTitle() {
         const heading = document.querySelector('#km-content > section > h1');
         if (!heading) return [];
@@ -14,7 +22,7 @@
             ...Array.from(heading.parentElement.children).filter((child) => (
                 child.matches('.km-text--lead, .km-byline')
             )),
-        ].filter(Boolean);
+        ].filter((item) => item && !kept(item));
         items.forEach((item) => item.classList.add(TITLE_ITEM));
         return items;
     }
@@ -42,7 +50,7 @@
     }
 
     function initPageReveal() {
-        if (prefersReducedMotion()) return;
+        if (prefersReducedMotion() || arrival() === 'history') return;
         const title = new Set(markTitle());
         const blocks = [
             document.querySelector('.km-header'),
@@ -54,11 +62,12 @@
             document.querySelector('.km-pagination'),
             document.querySelector('.km-related'),
             document.querySelector('.km-footer'),
-        ].filter((block) => block && !title.has(block));
+        ].filter((block) => block && !title.has(block) && !kept(block));
 
-        const duration = TIMING.revealDuration();
-        let step = TIMING.revealStep();
+        const duration = engine.ms('enter');
+        let step = engine.ms('stagger');
         let titled = false;
+        let hold = 0;
         let waiting = blocks;
         let began = null;
         let busy = 0;
@@ -122,24 +131,13 @@
                 }
                 if (began === null) {
                     began = now;
-                    if (root.hasAttribute('data-km-nav')) {
-                        [
-                            document.querySelector('.km-header'),
-                            document.querySelector('.km-footer'),
-                        ].forEach((kept) => {
-                            kept?.classList.remove(TITLE_ITEM, REVEAL_WAITING);
-                        });
-                        waiting = waiting.filter((block) => (
-                            !block.matches('.km-footer')
-                        ));
-                    }
                     screen = screenHeight();
+                    hold = titleHold();
                     const clip = edges(Math.max(window.innerHeight, screen));
-                    waiting = waiting.filter((block) => {
-                        if (inView(block, clip)) return true;
-                        release(block, false);
-                        return false;
-                    });
+                    const seen = waiting.map((block) => inView(block, clip));
+                    waiting.filter((block, index) => !seen[index])
+                        .forEach((block) => release(block, false));
+                    waiting = waiting.filter((block, index) => seen[index]);
                     step = clamp(
                         (REVEAL_BUDGET_MS / engine.speed() - duration)
                             / Math.max(1, waiting.length - 1),
@@ -148,7 +146,7 @@
                     );
                 }
                 if (!titled) {
-                    if (now - began < titleHold()) {
+                    if (now - began < hold) {
                         requestAnimationFrame(tick);
                         return;
                     }

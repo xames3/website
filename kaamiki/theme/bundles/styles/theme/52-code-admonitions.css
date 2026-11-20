@@ -74,11 +74,11 @@ li .highlight pre {
         position: static;
     }
 
-    &:has(button.copybtn) .code-block-caption {
+    &:has(.km-copy--code) .code-block-caption {
         padding-inline-end: var(--km-space-11);
     }
 
-    & button.copybtn {
+    & .km-copy--code {
         top: calc((2.25rem - 1.75rem) / 2);
         right: 0.5rem;
 
@@ -141,11 +141,15 @@ li .highlight pre {
     }
 }
 
-button.copybtn {
+.km-copy--code {
+    position: absolute;
+    display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
     border: none;
-    background-color: transparent !important;
+    outline: none;
+    background-color: transparent;
     color: hsl(var(--km-colour-button-dark-fg));
     opacity: 0;
     top: 0.5em;
@@ -153,65 +157,42 @@ button.copybtn {
     width: 1.75rem;
     height: 1.75rem;
     border-radius: var(--km-radius-round);
-    transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+    user-select: none;
+    transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
 
     & .km-copy__icon {
-        --fa-width: auto;
         position: absolute;
         top: 50%;
         left: 50%;
         translate: -50% -50%;
         font-size: var(--km-font-size-down-1);
-        line-height: 1;
-        transition:
-            opacity var(--km-duration-fast) var(--km-ease-standard),
-            scale var(--km-duration-fast) var(--km-ease-swift);
-    }
-
-    & .km-copy__icon--done {
-        opacity: 0;
-        scale: 0.6;
-        color: hsl(var(--km-colour-green));
-    }
-
-    &[data-km-copied] .km-copy__icon--copy {
-        opacity: 0;
-        scale: 0.6;
-    }
-
-    &[data-km-copied] .km-copy__icon--done {
-        opacity: 1;
-        scale: 1;
-    }
-
-    &::after {
-        content: none;
     }
 }
 
 @media (hover: hover) {
-    div.highlight:hover button.copybtn,
-    .literal-block-wrapper:hover button.copybtn {
+    div.highlight:hover .km-copy--code,
+    .literal-block-wrapper:hover .km-copy--code {
         opacity: 0.5;
     }
 
-    :is(div.highlight, .literal-block-wrapper) button.copybtn:hover {
+    :is(div.highlight, .literal-block-wrapper) .km-copy--code:hover {
         opacity: 1;
     }
 }
 
 @media (hover: none) {
-    button.copybtn {
+    .km-copy--code {
         opacity: 0.5;
     }
 }
 
 :is(div.highlight, .literal-block-wrapper)
-    button.copybtn:is(:focus-visible, .success) {
+    .km-copy--code:is(:focus-visible, [data-km-copied]) {
     opacity: 1;
 }
 
-:is(div.highlight, .literal-block-wrapper) button.copybtn:active:not(.success) {
+:is(div.highlight, .literal-block-wrapper)
+    .km-copy--code:active:not([data-km-copied]) {
     opacity: 0.7;
 }
 

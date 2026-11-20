@@ -164,7 +164,7 @@
         }
     }
 
-    .literal-block-wrapper button.copybtn {
+    .literal-block-wrapper .km-copy--code {
         right: 0.35rem;
     }
 

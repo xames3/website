@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Kaamiki roles
 :km-page-description: The inline roles Kaamiki adds for links, motion, colour,
@@ -21,16 +21,16 @@
 
     Small marks inside a sentence.
 
-A role is written ``:name:`text```. Kaamiki adds nine, and this one sentence
+A role is written ``:name:`text```. Kaamiki adds ten, and this one sentence
 uses most of them: a :sharpie:`highlight`, a :underline:`pencil line`, a
 :ticker:`2025?short` count, the :kbd:mac:`Cmd-K` shortcut, an
 :fa-icon:solid:`heart km-tone--red` icon and a word that
-:swap:`changes|moves|swaps` while you read.
+:roll:`changes|moves|rolls` while you read.
 
 Where a title is shown for something else, in the navbar, the sidebar, the
 breadcrumbs, a table of contents or a link, ``sharpie``, ``underline``,
-``ticker`` and ``stylise`` are plain text and ``swap`` and ``sweep`` show
-their first word.
+``ticker`` and ``stylise`` are plain text, ``roll`` and ``sweep`` show their
+first word and ``typewrite`` its whole list.
 An icon stays and a key loses its keycap. A link written with ``:doc:`` or
 ``:ref:`` is the exception: it shows the title's words and leaves an icon out.
 
@@ -95,10 +95,10 @@ In ``email``, ``sharpie``, ``underline`` and ``stylise`` the value is the last
 ``x < 5``, ``n<10`` and ``List<int>`` are plain text that can be marked. An
 empty ``<>`` or ``<?>``, and a ``<`` that's never closed, stop the build.
 
-.. _kaamiki-roles-swap:
+.. _kaamiki-roles-roll:
 
 -------------------------------------------------------------------------------
-swap
+roll
 -------------------------------------------------------------------------------
 
 The text lists the words, split by ``|``. The first is what the page, its
@@ -110,11 +110,11 @@ greeting on the home page does, and the rest of the sentence glides to where it
 sits next. A reader whose system asks for less motion gets the first word and
 nothing moves:
 
-Rebuilding NumPy to :swap:`understand|learn|rebuild` it.
+Rebuilding NumPy to :roll:`understand|learn|rebuild` it.
 
 .. code-block:: rst
 
-    Rebuilding NumPy to :swap:`understand|learn|rebuild` it.
+    Rebuilding NumPy to :roll:`understand|learn|rebuild` it.
 
 A longer or a shorter word lets the extra letters roll in from or out to
 nothing, and the words after it glide along on a spring. Press the accordion
@@ -122,8 +122,8 @@ and wait for the words:
 
 .. accordion:: Words of different lengths
 
-    A word that grows and shrinks, :swap:`go|going|forgotten`, while a phrase
-    changes length too, :swap:`two words|a longer phrase|one`.
+    A word that grows and shrinks, :roll:`go|going|forgotten`, while a phrase
+    changes length too, :roll:`two words|a longer phrase|one`.
 
 A letter is a whole mark, so an accent, an emoji and a flag each roll in one
 piece. A script whose letters join or reorder, such as Arabic or Devanagari,
@@ -133,6 +133,29 @@ site's speed, and ``:speed:`` and ``:no-motion:`` on a directive around the
 role change it, as :ref:`the tour of the motion
 <kaamiki-example-motion-words-and-numbers-that-move>` shows.
 
+A role of your own sets its own pace with :ref:`presets
+<kaamiki-roles-custom>`. ``:interval:`` is the seconds each word stays, from 2
+to 15. ``:duration:`` is how long a letter rolls, from 0.1s to 2s, and
+``:stagger:`` is the wait between two letters, from 0s to 0.5s, each in ``s``
+or ``ms``. A roll without them takes the site's tokens. The greeting on the
+home page rolls like this:
+
+.. role:: greet(roll)
+    :interval: 2.8
+    :duration: 700ms
+    :stagger: 45ms
+
+:greet:`Hello.|Ciao.|Hola.`
+
+.. code-block:: rst
+
+    .. role:: greet(roll)
+        :interval: 2.8
+        :duration: 700ms
+        :stagger: 45ms
+
+    :greet:`Hello.|Ciao.|Hola.`
+
 A word can be up to 45 characters long, counted as code points, so an accent
 written as its own mark counts too. It can't hold a ``|``, and ``\|`` stops
 the build as well. The role can't go in a tab's title, a button's label or a
@@ -141,13 +164,39 @@ title is shown for something else, in the navbar, the sidebar, the
 breadcrumbs, a table of contents or a link, the first word stays as plain
 text.
 
+.. _kaamiki-roles-typewrite:
+
+-------------------------------------------------------------------------------
+typewrite
+-------------------------------------------------------------------------------
+
+The text lists the words, split by ``|``. The page, its search and a reader
+without scripts or with less motion get all of them as a list, as in "a, b and
+c". In the page, each word is typed one key at a time behind a blinking cursor,
+with a slip now and then that's put right. It's held, deleted and followed by
+the next, while the words are on screen:
+
+So far, I've taught :typewrite:`Programming|Cloud Computing|Data Analysis`.
+
+.. code-block:: rst
+
+    So far, I've taught :typewrite:`Programming|Cloud Computing|Data Analysis`.
+
+A key takes 120ms and a deleted letter 80ms, at the site's speed. A typed word
+stays for 2s, and the next one starts 1s after it's deleted. A role of your own
+changes them with ``:key:``, ``:delete:``, ``:interval:`` and ``:rest:``, as
+:ref:`the presets <kaamiki-roles-custom>` show. A word can be up to 45
+characters long and can't hold a ``|``. The role can't go in a tab's title, a
+button's label or a thumbnail's title, channel or caption, and the build stops
+there.
+
 .. _kaamiki-roles-sweep:
 
 -------------------------------------------------------------------------------
 sweep
 -------------------------------------------------------------------------------
 
-It reads like ``swap``, but a band of light crosses the text: the old text
+It reads like ``roll``, but a band of light crosses the text: the old text
 fades out behind it and the new text comes in through it. Each phrase is a
 whole title or only a word, split by ``|``. The first is what the page, its
 search and a reader without scripts get. In the page the rest take its place
@@ -184,7 +233,7 @@ the sidebar, the breadcrumbs, a table of contents or a link, the first phrase
 stays as plain text.
 
 The light's colours are ``--km-sweep-colours`` and the times are
-``--km-sweep-hold`` and ``--km-sweep-duration``, as :ref:`the advanced page
+``--km-sweep-hold`` and ``--km-motion-sweep``, as :ref:`the advanced page
 <kaamiki-advanced-tokens>` shows.
 
 .. _kaamiki-roles-sharpie:
@@ -342,9 +391,9 @@ number, then ``short`` and ``duration`` after a ``?``, both optional and in
 either order. ``short`` writes the number with a ``k``, ``m`` or ``b``, and a
 number below a thousand shows as it is. It takes no value, so ``?short=no``
 stops the build. The duration is in ``s`` or ``ms``, from 0.1s to 5s. A ticker
-that isn't given one counts for as long as the site's speed says, 2s at a
-``kaamiki.conf.motion.speed`` of ``1`` and 3.2s at the default of ``0.625``,
-and one that is keeps it as written:
+that isn't given one counts for as long as the site's speed says, 2s at
+the default ``kaamiki.conf.motion.speed`` of ``1``, and one that is keeps it
+as written:
 
 .. columns:: 2
     :gap: medium
@@ -646,9 +695,15 @@ the build at the ``role`` directive, naming the option.
             the text.
         * - ``ticker``
           - ``:short:``, a flag, and ``:duration:``, like ``1s`` or ``500ms``.
+        * - ``roll``
+          - ``:interval:``, in seconds, and ``:duration:`` and ``:stagger:``,
+            like ``700ms``.
+        * - ``typewrite``
+          - ``:interval:`` and ``:rest:``, in seconds, and ``:key:`` and
+            ``:delete:``, like ``120ms``.
         * - ``stylise``
           - ``:style:``, the CSS, so the text is only the words.
         * - ``email``
           - ``:subject:``, for every address the role writes.
-        * - ``swap``, ``sweep``, ``fa-icon``, ``kbd``
+        * - ``sweep``, ``fa-icon``, ``kbd``
           - Nothing besides ``:class:``. Their text is all there is to say.

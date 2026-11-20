@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Embeds, everywhere
 :km-page-description: Every option of the embed directive on and off, from
@@ -454,7 +454,7 @@ After the embed, :ticker:`2025?short`.
 
     After the embed, :ticker:`2025?short`.
 
-Before the embed, :swap:`this|that|the other`.
+Before the embed, :roll:`this|that|the other`.
 
 .. embed:: iframe
 
@@ -462,11 +462,11 @@ Before the embed, :swap:`this|that|the other`.
         A block of HTML.
     </p>
 
-After the embed, :swap:`this|that|the other`.
+After the embed, :roll:`this|that|the other`.
 
 .. code-block:: rst
 
-    Before the embed, :swap:`this|that|the other`.
+    Before the embed, :roll:`this|that|the other`.
 
     .. embed:: iframe
 
@@ -474,4 +474,4 @@ After the embed, :swap:`this|that|the other`.
             A block of HTML.
         </p>
 
-    After the embed, :swap:`this|that|the other`.
+    After the embed, :roll:`this|that|the other`.

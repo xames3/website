@@ -4,7 +4,7 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 15 November 2026
+Last updated on: 19 November 2026
 
 The Sphinx configuration for my website. Sphinx is a documentation
 generator; I use it as a teaching and learning platform instead.
@@ -14,6 +14,7 @@ each year.
 https://reproducible-builds.org/specs/source-date-epoch/
 """
 
+import json
 import os
 import typing as t
 from datetime import UTC
@@ -41,6 +42,30 @@ extensions: list[str] = [
 
 with open("prolog.rst", encoding="utf-8") as f:
     rst_prolog: str = f.read()
+
+
+def names(data: str) -> str:
+    """Read the names in a data file, split by `|` for a role.
+
+    :param data: The name of the file in `assets/data`.
+    :return: The names.
+    """
+    with open(f"assets/data/{data}.json", encoding="utf-8") as f:
+        return "|".join(each["name"] for each in json.load(f))
+
+
+rst_epilog: str = f"""
+.. role:: greeting(roll)
+    :interval: 2.8
+    :duration: 700ms
+    :stagger: 45ms
+
+.. role:: teaching(typewrite)
+
+.. |greeting| replace:: :greeting:`{names("greetings")}`
+
+.. |teaching| replace:: :teaching:`{names("currently-teaching")}`
+"""
 
 nitpicky: bool = True
 smartquotes: bool = False
@@ -104,10 +129,6 @@ intersphinx_mapping: dict[str, tuple[str, tuple[str | None, str]]] = {
     name: (url, (None, f"../.cache/intersphinx/{name}.inv"))
     for name, url in inventories.items()
 }
-
-copybutton_exclude: str = ".linenos, .gp, .go"
-copybutton_line_continuation_character: str = "\\"
-copybutton_selector: str = "div > div.highlight > pre"
 
 linkcheck_ignore: list[str] = [
     r"https?://localhost(:\d+)?(/|$)",

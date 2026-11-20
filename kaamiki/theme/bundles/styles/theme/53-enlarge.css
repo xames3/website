@@ -11,7 +11,7 @@
     .km-figure__clip:has(.km-image--rested:focus-visible)
 ) {
     outline-color: transparent;
-    transition: outline-color var(--km-duration-slow) var(--km-ease-standard);
+    transition: outline-color var(--km-motion-enter) var(--km-ease-smooth);
 }
 
 .km-image--held {
@@ -52,7 +52,7 @@
         transparent
     );
     opacity: 0;
-    transition: opacity var(--km-enlarge-fade) var(--km-ease-standard);
+    transition: opacity var(--km-enlarge-fade) var(--km-ease-smooth);
 }
 
 .km-enlarge--settled .km-enlarge__backdrop {
@@ -75,7 +75,7 @@
     max-width: none;
     margin: 0;
     border-radius: 0;
-    transition: opacity var(--km-enlarge-fade) var(--km-ease-standard);
+    transition: opacity var(--km-enlarge-fade) var(--km-ease-smooth);
     -webkit-user-drag: none;
 }
 
@@ -95,7 +95,7 @@
     font-size: var(--km-font-size-down-1);
     text-align: center;
     opacity: 0;
-    transition: opacity var(--km-enlarge-fade) var(--km-ease-standard);
+    transition: opacity var(--km-enlarge-fade) var(--km-ease-smooth);
     cursor: default;
     user-select: text;
     -webkit-user-select: text;
@@ -118,8 +118,8 @@
     font-size: var(--km-font-size-down-1);
     opacity: 0;
     transition:
-        opacity var(--km-enlarge-fade) var(--km-ease-standard),
-        background-color var(--km-duration-hover) var(--km-ease-swift);
+        opacity var(--km-enlarge-fade) var(--km-ease-smooth),
+        background-color var(--km-motion-press) var(--km-ease-smooth);
     cursor: pointer;
 
     @media (hover: hover) {
@@ -141,7 +141,7 @@
 
 .km-enlarge--still .km-enlarge__picture {
     opacity: 0;
-    transition: opacity var(--km-enlarge-fade) var(--km-ease-standard);
+    transition: opacity var(--km-enlarge-fade) var(--km-ease-smooth);
 }
 
 .km-enlarge--still.km-enlarge--shown .km-enlarge__picture {

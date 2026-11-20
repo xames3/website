@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Thumbnails, everywhere
 :km-page-description: Every option of the thumbnail directive on and off, with
@@ -259,7 +259,7 @@ With roles.
 -------------------------------------------------------------------------------
 
 Every role that doesn't make a link or move works in a card. ``email`` doesn't,
-since a thumbnail is a link and a link can't hold a link, and ``swap``
+since a thumbnail is a link and a link can't hold a link, and ``roll``
 doesn't either, since the script doesn't run inside a link:
 
 .. columns:: 2
@@ -479,7 +479,7 @@ No link in a card.
 -------------------------------------------------------------------------------
 
 The whole card is a link, so a link in its title, channel or caption stops the
-build, and so do swapping words, which the script doesn't run inside a link.
+build, and so do rolling words, which the script doesn't run inside a link.
 The message is written under the source:
 
 An email in the title
@@ -506,15 +506,15 @@ An email in the caption
 
     thumbnail: expected a caption without a link, got one
 
-Swapping words in the title
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Rolling words in the title
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: rst
 
     .. thumbnail:: https://youtu.be/kCc8FmEb1nY
-        :title: A title :swap:`this|that|the other`
+        :title: A title :roll:`this|that|the other`
 
 .. code-block:: text
 
-    thumbnail: expected a title that stays put, got :swap:, which the script
+    thumbnail: expected a title that stays put, got :roll:, which the script
     doesn't run inside a link

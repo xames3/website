@@ -36,27 +36,70 @@
     }
 
     function foldMotion(host, content, clamped, clamping, settled) {
-        let timer = 0;
+        let run = null;
+        let follow = 0;
+        const stop = () => {
+            cancelAnimationFrame(follow);
+            run?.cancel();
+            run = null;
+        };
         const settle = (next) => {
-            window.clearTimeout(timer);
+            stop();
             host.classList.remove(clamping);
             settled(!next);
             content.style.maxHeight = '';
         };
-        const resize = (next, from, to) => {
+        const resize = (next, from, to, frame) => {
+            stop();
             host.classList.toggle(clamped, !next);
             host.classList.add(clamping);
-            content.style.maxHeight = `${from}px`;
-            void content.offsetHeight;
-            content.style.maxHeight = `${to}px`;
-            window.clearTimeout(timer);
-            timer = window.setTimeout(
-                () => settle(next),
-                TIMING.clamp() + CLAMP_SETTLE_MS,
-            );
+            const mine = engine.length(content, 'maxHeight', from, to, {
+                role: 'content',
+                onDone: () => {
+                    if (run !== mine) return;
+                    frame?.();
+                    settle(next);
+                },
+            });
+            run = mine;
+            const tick = () => {
+                if (run !== mine) return;
+                frame();
+                follow = requestAnimationFrame(tick);
+            };
+            if (frame) follow = requestAnimationFrame(tick);
+            return mine.finished;
         };
-        const stop = () => window.clearTimeout(timer);
-        return { settle, resize, stop };
+        // The text folds up under `shell` while the page scrolls with its
+        // edge, so the button stays where it is on the screen. The text
+        // below the button is cut first, where nothing of it shows.
+        const close = (to, shell) => {
+            const box = content.getBoundingClientRect();
+            const held = shell.getBoundingClientRect().top;
+            const edge = Math.min(held, box.bottom);
+            const top = window.scrollY + box.top;
+            const from = Math.min(box.height, Math.max(to, edge - box.top));
+            if (from - to < 1) {
+                stop();
+                host.classList.add(clamped);
+                settle(false);
+                return Promise.resolve();
+            }
+            return resize(false, from, to, () => {
+                window.scrollTo({
+                    top: Math.max(
+                        0,
+                        top + content.getBoundingClientRect().height - edge,
+                    ),
+                    behavior: 'instant',
+                });
+                const drift = shell.getBoundingClientRect().top - held;
+                if (Math.abs(drift) >= 0.5) {
+                    window.scrollBy({ top: drift, behavior: 'instant' });
+                }
+            });
+        };
+        return { settle, resize, close, stop };
     }
 
     const idleStirs = new Set();

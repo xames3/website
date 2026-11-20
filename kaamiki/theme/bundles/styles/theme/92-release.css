@@ -57,12 +57,12 @@
 
     &:has(> .km-page-reveal-item--shown:first-child)::before {
         transform-origin: top;
-        animation: km-rail-draw var(--km-reveal-duration) var(--km-ease-title);
+        animation: km-rail-draw var(--km-motion-enter) var(--km-ease-smooth);
     }
 
     &:has(> .km-page-reveal-item--shown:first-child)::after {
         animation:
-            km-reveal-in var(--km-reveal-duration) var(--km-ease-title);
+            km-reveal-in var(--km-motion-enter) var(--km-ease-smooth);
     }
 }
 

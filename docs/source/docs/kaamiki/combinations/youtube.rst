@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: YouTube players, everywhere
 :km-page-description: Every option of the youtube directive on and off, with
@@ -136,16 +136,16 @@ loads on a click.
     .. youtube:: https://youtu.be/kCc8FmEb1nY
         :player-language: pt-BR
 
-``:no-privacy:``, which embeds from ``youtube.com`` and not
-``youtube-nocookie.com``.
+``:privacy:``, which embeds from ``youtube-nocookie.com`` and not
+``youtube.com``.
 
 .. youtube:: https://youtu.be/kCc8FmEb1nY
-    :no-privacy:
+    :privacy:
 
 .. code-block:: rst
 
     .. youtube:: https://youtu.be/kCc8FmEb1nY
-        :no-privacy:
+        :privacy:
 
 ``:loop:``
 
@@ -351,12 +351,12 @@ With roles.
         :caption: A caption :ticker:`2025?short`.
 
 .. youtube:: https://youtu.be/kCc8FmEb1nY
-    :caption: A caption :swap:`this|that|the other`.
+    :caption: A caption :roll:`this|that|the other`.
 
 .. code-block:: rst
 
     .. youtube:: https://youtu.be/kCc8FmEb1nY
-        :caption: A caption :swap:`this|that|the other`.
+        :caption: A caption :roll:`this|that|the other`.
 
 .. youtube:: https://youtu.be/kCc8FmEb1nY
     :caption: A caption :kbd:mac:`Cmd-K`.

@@ -39,7 +39,7 @@
 
     function rollFace(kind, text, letter, left) {
         const face = document.createElement('span');
-        face.className = `km-swap__face km-swap__face--${kind}`;
+        face.className = `km-roll__face km-roll__face--${kind}`;
         face.textContent = text;
         face.style.left = `${letter.x - left}px`;
         return face;
@@ -68,15 +68,21 @@
         );
     }
 
-    async function swapWord(field, current, next) {
+    function ownMs(field, name, token) {
+        return name in field.dataset
+            ? engine.paced(Number(field.dataset[name]), field)
+            : token;
+    }
+
+    async function rollWord(field, current, next) {
         const was = measureRoll(field, current);
         const now = measureRoll(field, next);
         if (was.wrapped || now.wrapped || !(was.width || now.width)) return;
         const stage = document.createElement('span');
-        stage.className = 'km-swap__stage';
+        stage.className = 'km-roll__stage';
         stage.setAttribute('aria-hidden', 'true');
         const ghost = document.createElement('span');
-        ghost.className = 'km-swap__ghost';
+        ghost.className = 'km-roll__ghost';
         ghost.textContent = current;
         stage.append(ghost);
         const spoken = document.createElement('span');
@@ -87,20 +93,20 @@
         stage.style.marginRight = '1px';
         const held = ghost.getBoundingClientRect().width;
         stage.style.marginRight = '';
-        stage.style.setProperty('--km-swap-edge', `${edge}px`);
-        const settle = engine.ms('state', field);
+        stage.style.setProperty('--km-roll-edge', `${edge}px`);
+        const settle = ownMs(field, 'kmDuration', engine.ms('state', field));
         const count = Math.max(was.letters.length, now.letters.length);
         const together = was.whole || now.whole;
         const step = count > 1 && !together
             ? Math.min(
-                engine.ms('stagger', field),
+                ownMs(field, 'kmStagger', engine.ms('stagger', field)),
                 (settle * ROLL_SPREAD_SHARE) / (count - 1),
             )
             : 0;
         const reach = ROLL_OVERLAP_EM * parseFloat(
             getComputedStyle(field).fontSize,
         );
-        const easing = getCssVar('--km-ease-standard') || 'ease-in-out';
+        const easing = getCssVar('--km-ease-smooth');
         const turn = (angle) => (
             `translateZ(${-edge / 2}px) rotateX(${angle}deg)`
         );
@@ -117,11 +123,11 @@
                 ...both.map((letter) => letter.x + letter.width),
             );
             const slot = document.createElement('span');
-            slot.className = 'km-swap__slot';
+            slot.className = 'km-roll__slot';
             slot.style.left = `${left}px`;
             slot.style.width = `${right - left}px`;
             const cube = document.createElement('span');
-            cube.className = 'km-swap__cube';
+            cube.className = 'km-roll__cube';
             const timing = {
                 duration: settle,
                 delay: i * step,
@@ -156,12 +162,12 @@
             ));
         }
         stage.prepend(slots);
-        const front = stage.querySelector('.km-swap__face--front');
+        const front = stage.querySelector('.km-roll__face--front');
         const reference = document.createRange();
         reference.selectNodeContents(front);
         const drift = was.origin - reference.getBoundingClientRect().left;
         if (Math.abs(drift) > 0.001) {
-            stage.style.setProperty('--km-swap-drift', `${drift}px`);
+            stage.style.setProperty('--km-roll-drift', `${drift}px`);
         }
         const travel = Math.min(
             settle * ROLL_GLIDE_SHARE,
@@ -210,8 +216,12 @@
         word.style.width = `${to.width}px`;
         stage.style.width = `${from.width}px`;
         stage.style.height = `${from.height}px`;
-        const duration = TIMING.sweepDuration();
-        const sweep = { duration, easing: 'linear', fill: 'both' };
+        const duration = engine.ms('sweep', field);
+        const sweep = {
+            duration,
+            easing: engine.ease(duration),
+            fill: 'both',
+        };
         const gone = { backgroundPosition: '0% 0' };
         const here = { backgroundPosition: '100% 0' };
         const animations = [
@@ -257,13 +267,16 @@
         field.textContent = next;
     }
 
-    function buildSwap(field) {
+    function buildTurns(field) {
         const words = field.dataset.kmWords.split('|');
         const sweeping = field.classList.contains('km-sweep');
-        const swap = sweeping ? sweepPhrase : swapWord;
-        const hold = sweeping ? TIMING.sweepHold : TIMING.swapHold;
+        const change = sweeping ? sweepPhrase : rollWord;
+        const hold = sweeping
+            ? TIMING.sweepHold
+            : () => ownMs(field, 'kmInterval', TIMING.rollHold());
         let index = 0;
         let busy = false;
+        let stopped = false;
         let timer;
         let round = 0;
         const advance = async () => {
@@ -272,34 +285,229 @@
             const current = words[index];
             index = (index + 1) % words.length;
             try {
-                await swap(field, current, words[index]);
+                await change(field, current, words[index]);
             } catch {
                 field.textContent = words[index];
             }
+            if (stopped) field.textContent = words[0];
             busy = false;
         };
         const turn = async (mine) => {
             await advance();
             if (mine === round) timer = setTimeout(() => turn(mine), hold());
         };
-        new IntersectionObserver((entries) => {
+        const seen = new IntersectionObserver((entries) => {
             clearTimeout(timer);
             round += 1;
             if (entries[entries.length - 1].isIntersecting) {
                 const mine = round;
                 timer = setTimeout(() => turn(mine), hold());
             }
-        }).observe(field.parentElement);
+        });
+        seen.observe(field.parentElement);
+        return () => {
+            stopped = true;
+            seen.disconnect();
+            clearTimeout(timer);
+            round += 1;
+            field.textContent = words[0];
+        };
     }
 
-    function initSwaps() {
-        if (prefersReducedMotion()) return;
-        document.querySelectorAll('.km-swap[data-km-words]').forEach(
-            (field) => {
-                if (!field.closest('a') && !prefersStill(field)) {
-                    buildSwap(field);
+    function typeNoise() {
+        return (Math.random() + Math.random() + Math.random() - 1.5) / 0.5;
+    }
+
+    function typeSlip(char) {
+        const lower = char.toLowerCase();
+        const near = [];
+        TYPEWRITE_ROWS.forEach((row, y) => {
+            const x = row.indexOf(lower);
+            if (x === -1) return;
+            near.push(row.charAt(x - 1), row.charAt(x + 1));
+            [y - 1, y + 1].forEach((other) => {
+                if (TYPEWRITE_ROWS[other]) {
+                    near.push(TYPEWRITE_ROWS[other].charAt(x));
                 }
-            },
+            });
+        });
+        const keys = near.filter(Boolean);
+        if (!keys.length) return '';
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        return char === lower ? key : key.toUpperCase();
+    }
+
+    function typeGap(previous, key, drift) {
+        let wait = key * drift * Math.exp(typeNoise() * 0.3);
+        if (previous === ' ') {
+            wait += key * (0.3 + Math.random() * 0.7);
+        } else if (previous === ',' || previous === '-') {
+            wait += key * (0.8 + Math.random() * 1.2);
+        }
+        if (Math.random() < 0.05) wait += key * (2 + Math.random() * 3);
+        return Math.round(wait);
+    }
+
+    function typeSteps(word, key, back) {
+        const steps = [];
+        let shown = '';
+        let drift = 1;
+        let careful = false;
+        const put = (text, wait) => {
+            steps.push({ text, wait });
+            shown = text;
+        };
+        while (shown !== word) {
+            const at = shown.length;
+            const char = word.charAt(at);
+            const wrong = at > 0 && !careful && Math.random() < TYPEWRITE_SLIP
+                ? typeSlip(char)
+                : '';
+            drift = clamp(drift + (Math.random() - 0.5) * 0.2, 0.8, 1.25);
+            careful = false;
+            if (!wrong) {
+                put(shown + char, typeGap(word.charAt(at - 1), key, drift));
+                continue;
+            }
+            const run = Math.min(
+                word.length - at - 1,
+                Math.floor(Math.random() * 3),
+            );
+            put(shown + wrong, typeGap(word.charAt(at - 1), key, drift));
+            for (let i = 1; i <= run; i += 1) {
+                put(
+                    shown + word.charAt(at + i),
+                    typeGap(word.charAt(at + i - 1), key, drift),
+                );
+            }
+            for (let j = 0; j <= run; j += 1) {
+                put(
+                    shown.slice(0, -1),
+                    j
+                        ? Math.round(back * (0.8 + Math.random() * 0.4))
+                        : Math.round(key * (2 + Math.random() * 2)),
+                );
+            }
+            careful = true;
+        }
+        return steps;
+    }
+
+    function deleteSteps(word, back) {
+        const steps = [];
+        for (let i = word.length - 1; i >= 0; i -= 1) {
+            const held = word.length - 1 - i;
+            const wait = held === 0
+                ? back * 1.5
+                : held === 1 ? back * 4 : back * (0.85 + Math.random() * 0.3);
+            steps.push({ text: word.slice(0, i), wait: Math.round(wait) });
+        }
+        return steps;
+    }
+
+    function buildTypewrite(field) {
+        const words = field.dataset.kmWords.split('|');
+        const still = field.textContent;
+        const spoken = document.createElement('span');
+        spoken.className = 'km-sr-only';
+        spoken.textContent = still;
+        const typed = document.createElement('span');
+        typed.setAttribute('aria-hidden', 'true');
+        const cursor = document.createElement('span');
+        cursor.className = 'km-typewrite__cursor';
+        cursor.setAttribute('aria-hidden', 'true');
+        field.replaceChildren(spoken, typed, cursor);
+        const key = () => ownMs(
+            field,
+            'kmKey',
+            engine.ms('typewrite-key', field),
         );
+        const back = () => ownMs(
+            field,
+            'kmDelete',
+            engine.ms('typewrite-delete', field),
+        );
+        let index = 0;
+        let timer = 0;
+        let solid = 0;
+        let round = 0;
+        const show = (text) => {
+            typed.textContent = text;
+            cursor.classList.add('km-typewrite__cursor--typing');
+            clearTimeout(solid);
+            solid = setTimeout(
+                () => cursor.classList.remove('km-typewrite__cursor--typing'),
+                TYPEWRITE_SOLID_MS,
+            );
+        };
+        const play = (steps, lead, mine, done) => {
+            let at = 0;
+            const step = () => {
+                if (mine !== round) return;
+                show(steps[at].text);
+                at += 1;
+                if (at < steps.length) timer = setTimeout(step, steps[at].wait);
+                else done();
+            };
+            timer = setTimeout(step, lead + steps[0].wait);
+        };
+        const cycle = (mine) => {
+            if (document.hidden) {
+                const later = ownMs(field, 'kmRest', TIMING.typewriteRest());
+                timer = setTimeout(() => cycle(mine), later);
+                return;
+            }
+            const word = words[index];
+            index = (index + 1) % words.length;
+            play(
+                typeSteps(word, key(), back()),
+                ownMs(field, 'kmRest', TIMING.typewriteRest()),
+                mine,
+                () => play(
+                    deleteSteps(word, back()),
+                    ownMs(field, 'kmInterval', TIMING.typewriteHold()),
+                    mine,
+                    () => cycle(mine),
+                ),
+            );
+        };
+        const seen = new IntersectionObserver((entries) => {
+            clearTimeout(timer);
+            round += 1;
+            const shown = entries[entries.length - 1].isIntersecting;
+            cursor.classList.toggle('km-typewrite__cursor--still', !shown);
+            if (shown) {
+                typed.textContent = '';
+                cycle(round);
+            }
+        });
+        seen.observe(field.parentElement);
+        return () => {
+            seen.disconnect();
+            clearTimeout(timer);
+            clearTimeout(solid);
+            round += 1;
+            field.textContent = still;
+        };
+    }
+
+    function initTurns() {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let stops = [];
+        const start = () => {
+            stops = [...document.querySelectorAll('[data-km-words]')]
+                .filter((field) => !field.closest('a') && !prefersStill(field))
+                .map((field) => (
+                    field.classList.contains('km-typewrite')
+                        ? buildTypewrite(field)
+                        : buildTurns(field)
+                ));
+        };
+        reduced.addEventListener('change', () => {
+            stops.forEach((stop) => stop());
+            stops = [];
+            if (!reduced.matches) start();
+        });
+        if (!reduced.matches) start();
     }
 

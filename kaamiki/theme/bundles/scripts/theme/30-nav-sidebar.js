@@ -36,23 +36,14 @@
             .filter((element) => (
                 element.tabIndex >= 0 && element.getClientRects().length
             ));
-        const enter = (frames = 0) => {
-            if (!open) return;
-            if (getComputedStyle(sidebar).visibility !== 'visible'
-                && frames < 30) {
-                requestAnimationFrame(() => enter(frames + 1));
-                return;
-            }
-            stops()[0]?.focus({ preventScroll: true });
-        };
         const show = (next, restore = true, keyed = false) => {
             const inside = sidebar.contains(document.activeElement);
             open = next;
             document.body.classList.toggle('km-body--locked', next);
             sidebar.classList.toggle('km-sidebar--visible', next);
             toggle.setAttribute('aria-expanded', String(next));
-            if (backdrop) backdrop.hidden = !next;
-            if (next && keyed) requestAnimationFrame(() => enter());
+            backdrop?.classList.toggle('km-sidebar__backdrop--visible', next);
+            if (next && keyed) stops()[0]?.focus({ preventScroll: true });
             else if (!next && restore && inside) {
                 toggle.focus({ preventScroll: true });
             }
@@ -109,13 +100,17 @@
         // by where it would come to rest, not where it is: a quick flick
         // shuts it from a short way, a slow drag has to go far.
         let drag = null;
+        const dragging = (on) => {
+            sidebar.classList.toggle('km-sidebar--dragging', on);
+            backdrop?.classList.toggle('km-sidebar__backdrop--dragging', on);
+        };
         const finishDrag = (close, from, width) => {
             const target = close ? width : 0;
             const duration = Math.max(
                 120,
                 engine.ms('surface') * (Math.abs(target - from) / width),
             );
-            const easing = 'cubic-bezier(0.22, 1, 0.36, 1)';
+            const easing = engine.ease(duration);
             sidebar.style.visibility = 'visible';
             const frames = (key, a, b) => [
                 { [key]: key === 'transform' ? `translateX(${a}px)` : a },
@@ -129,17 +124,20 @@
                 frames('opacity', 1 - Math.min(1, from / width), close ? 0 : 1),
                 { duration, easing, fill: 'forwards' },
             );
+            const layers = [sidebar, backdrop].filter(Boolean);
             move.finished.then(() => {
-                sidebar.style.transition = 'none';
+                layers.forEach((layer) => {
+                    layer.style.transition = 'none';
+                });
                 if (close) show(false);
                 sidebar.style.visibility = '';
-                sidebar.classList.remove('km-sidebar--dragging');
+                dragging(false);
                 if (backdrop) backdrop.style.opacity = '';
                 move.cancel();
                 fade?.cancel();
-                requestAnimationFrame(() => {
-                    sidebar.style.transition = '';
-                });
+                requestAnimationFrame(() => layers.forEach((layer) => {
+                    layer.style.transition = '';
+                }));
             }).catch(() => {});
         };
         sidebar.addEventListener('pointerdown', (event) => {
@@ -170,7 +168,7 @@
                     || across < Math.abs(down) * 1.2) return;
                 drag.live = true;
                 sidebar.setPointerCapture(event.pointerId);
-                sidebar.classList.add('km-sidebar--dragging');
+                dragging(true);
             }
             drag.offset = Math.max(0, across - DRAWER_DRAG_START_PX);
             sidebar.style.transform = `translateX(${drag.offset}px)`;

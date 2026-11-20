@@ -4,7 +4,7 @@ Custom Roles
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 15 November 2026
+Last updated on: 19 November 2026
 
 The custom inline roles of Kaamiki.
 """
@@ -25,6 +25,7 @@ import docutils.parsers.rst as rst
 from docutils.parsers.rst.directives import misc
 from docutils.utils import unescape
 from sphinx.domains import Domain
+from sphinx.locale import _
 from sphinx.roles import Keyboard
 from sphinx.util.docutils import SphinxRole
 
@@ -92,7 +93,8 @@ UNITS: t.Final[tuple[tuple[int, str], ...]] = (
     (10**6, "m"),
     (10**3, "k"),
 )
-SWAP_LENGTH: t.Final[int] = 45
+ROLL_LENGTH: t.Final[int] = 45
+TYPEWRITE_LENGTH: t.Final[int] = 45
 SWEEP_LENGTH: t.Final[int] = 120
 STYLE_CLASSES: t.Final[dict[str, str]] = {
     "brands": "fa-brands",
@@ -290,7 +292,7 @@ class Ink(nodes.inline):
     """Text with a style, a sharpie or a pencil underline."""
 
 
-class Swapper(Ink):
+class Turning(Ink):
     """The first of the words that show one after another."""
 
 
@@ -300,21 +302,20 @@ def steady(
     part: str,
     why: str,
 ) -> None:
-    """Refuse `:swap:` and `:sweep:` in a text that must not move.
+    """Refuse `:roll:` and `:sweep:` in a text that must not move.
 
     :param directive: The directive that has the text.
     :param found: The parsed text or its nodes.
     :param part: What the text is, as `a title`.
     :param why: Why it cannot move, for the message.
-    :raises rst.DirectiveError: When the text has swapping words.
+    :raises rst.DirectiveError: When the text has turning words.
     """
     for each in [found] if isinstance(found, nodes.Node) else found:
-        moving = next(each.findall(Swapper), None)
+        moving = next(each.findall(Turning), None)
         if moving is not None:
-            role = "sweep" if "km-sweep" in moving["classes"] else "swap"
             raise directive.error(
                 f"{directive.name}: expected {part} that stays put, got"
-                f" :{role}:, {why}"
+                f" :{moving['role']}:, {why}"
             )
 
 
@@ -333,11 +334,11 @@ def visit(self: HTMLTranslator, node: Ink) -> None:
 def _moves(node: Ink) -> bool:
     """Say whether inked text keeps its style here, or is plain.
 
-    :param node: The inked text or the swapping words.
+    :param node: The inked text or the turning words.
     :return: `True` for text in the page itself. The text is plain in a
         link (a toctree, a `:ref:` or a `:doc:`) and in a title that
         shows alone, as in the breadcrumbs, the tab of the page and the
-        previous and next pages. There, swapping words show only the
+        previous and next pages. There, turning words show only the
         first word.
     """
     parent = node.parent
@@ -352,24 +353,27 @@ def _moves(node: Ink) -> bool:
     return True
 
 
-@html.opens(Swapper)
-def visit_swapper(self: HTMLTranslator, node: Swapper) -> None:
-    """Open the span for the swapping words, if they swap here.
+@html.opens(Turning)
+def visit_turning(self: HTMLTranslator, node: Turning) -> None:
+    """Open the span for the turning words, if they turn here.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The swapping words.
+    :param node: The turning words.
     """
     if _moves(node):
-        attributes: dict[str, t.Any] = {"data-km-words": node["words"]}
+        attributes: dict[str, t.Any] = {
+            "data-km-words": node["words"],
+            **node.get("timing", {}),
+        }
         self.body.append(self.starttag(node, "span", "", **attributes))
 
 
-@html.closes(Swapper)
-def depart_swapper(self: HTMLTranslator, node: Swapper) -> None:
+@html.closes(Turning)
+def depart_turning(self: HTMLTranslator, node: Turning) -> None:
     """Close the span, if one is open.
 
     :param self: The HTML translator, whose body this appends to.
-    :param node: The swapping words.
+    :param node: The turning words.
     """
     if _moves(node):
         self.body.append("</span>")
@@ -759,7 +763,12 @@ class Underline(KaamikiRole):
                 f"expected some text and width or wobble, got"
                 f" {', '.join(given) or self.said!r}"
             )
-        seed = f"{self.env.docname}:{self.lineno}:{self.rawtext}"
+        seen = t.cast(
+            "dict[str, int]",
+            self.env.temp_data.setdefault("km_underlines", {}),
+        )
+        seen[self.rawtext] = seen.get(self.rawtext, 0) + 1
+        seed = f"{self.env.docname}:{self.rawtext}:{seen[self.rawtext]}"
         ltr, rtl = (
             quote(_, safe="/:=,.' <>-")
             for _ in _underline_svg(colour, seed, width, wobble)
@@ -773,13 +782,13 @@ class Underline(KaamikiRole):
         ], []
 
 
-def _duration(argument: str | None) -> float:
-    """Read how long a ticker counts, in seconds.
+def _duration(argument: str | None, bounds: str = "ticker_duration") -> float:
+    """Read a duration, in seconds.
 
     :param argument: The duration as written, as `1s` or `500ms`.
+    :param bounds: The key of its range in `BOUNDS`.
     :return: The seconds.
-    :raises ValueError: When it is not a duration, or not in the range
-        of a ticker.
+    :raises ValueError: When it is not a duration, or not in its range.
     """
     written = (argument or "").strip()
     found = DURATION.fullmatch(written)
@@ -788,7 +797,7 @@ def _duration(argument: str | None) -> float:
             f"expected a duration like 1s or 500ms, got {written!r}"
         )
     seconds = float(found[1]) / (1000 if found[2] == "ms" else 1)
-    low, high = BOUNDS["ticker_duration"]
+    low, high = BOUNDS[bounds]
     if not low <= seconds <= high:
         raise ValueError(
             f"expected a duration from {low:g}s to {high:g}s, got {seconds:g}s"
@@ -839,7 +848,7 @@ class Ticker(KaamikiRole):
             self.fail(f"expected short or duration, got {', '.join(given)}")
         label = _short(count) if short else str(count)
         style = (
-            f"--km-ticker-duration: {round(seconds * 1000)}ms;"
+            f"--km-motion-ticker: {round(seconds * 1000)}ms;"
             if seconds is not None
             else ""
         )
@@ -849,10 +858,23 @@ class Ticker(KaamikiRole):
 
 
 class Turns(KaamikiRole, abstract=True):
-    """The base of `swap` and `sweep`, whose parts take turns."""
+    """The base of `roll` and `sweep`, whose parts take turns."""
 
     noun: t.ClassVar[str]
     limit: t.ClassVar[int]
+
+    @property
+    def timing(self) -> dict[str, int]:
+        """The times that the role sets, in ms, as data attributes."""
+        return {}
+
+    def shown(self, words: list[str]) -> str:
+        """Say what the page, its search and a still reader get.
+
+        :param words: The parts, in their sequence.
+        :return: The first part.
+        """
+        return words[0]
 
     def run(self) -> Reply:
         """Read the parts, split by `|`.
@@ -880,13 +902,15 @@ class Turns(KaamikiRole, abstract=True):
         attributes = {
             "classes": self.classes,
             "words": "|".join(words),
+            "timing": self.timing,
+            "role": self.role,
             "support_smartquotes": False,
         }
-        return [Swapper(self.rawtext, words[0], **attributes)], []
+        return [Turning(self.rawtext, self.shown(words), **attributes)], []
 
 
-class Swap(Turns):
-    """The `swap` role, which shows its words one after another.
+class Roll(Turns):
+    """The `roll` role, which shows its words one after another.
 
     Text::
 
@@ -900,12 +924,98 @@ class Swap(Turns):
 
     Options::
 
+        - `interval`: The seconds that each word stays, from 2 to 15.
+          The default is the `--km-roll-hold` token.
+        - `duration`: How long each letter rolls, in `s` or `ms`, from
+          0.1s to 2s. The default is the `--km-motion-state` token.
+        - `stagger`: The wait between two letters, in `s` or `ms`, from
+          0s to 0.5s. The default is the `--km-motion-stagger` token.
         - `class`: More classes for the words.
     """
 
-    base_classes = ("km-swap",)
+    base_classes = ("km-roll",)
     noun = "words"
-    limit = SWAP_LENGTH
+    limit = ROLL_LENGTH
+    interval = Option(checks.number(*BOUNDS["interval"]))
+    duration = Option(functools.partial(_duration, bounds="roll_duration"))
+    stagger = Option(functools.partial(_duration, bounds="roll_stagger"))
+
+    @property
+    def timing(self) -> dict[str, int]:
+        """The times that the role sets, in ms, as data attributes."""
+        given = {
+            "interval": self.interval,
+            "duration": self.duration,
+            "stagger": self.stagger,
+        }
+        return {
+            f"data-km-{name}": round(seconds * 1000)
+            for name, seconds in given.items()
+            if seconds is not None
+        }
+
+
+class Typewrite(Turns):
+    """The `typewrite` role, which types its words and deletes them.
+
+    Text::
+
+        The words, with `|` between them, each with a maximum of 45
+        code points. The page, its search and a reader without scripts
+        or with less motion get all of them as a list, as in `a, b and
+        c`. On screen, each word is typed one key at a time, with a
+        slip now and then that is put right, held, deleted and
+        followed by the next, behind a blinking cursor. In the navbar,
+        the sidebar, the breadcrumbs, a toctree or a link, the list
+        stays as text. The words keep their quotes.
+
+    Options::
+
+        - `key`: How long one key takes, in `s` or `ms`, from 0.02s to
+          0.5s. The default is the `--km-motion-typewrite-key` token.
+        - `delete`: How long one letter takes to delete, in `s` or
+          `ms`, from 0.02s to 0.5s. The default is the
+          `--km-motion-typewrite-delete` token.
+        - `interval`: The seconds that a typed word stays, from 2 to
+          15. The default is the `--km-typewrite-hold` token.
+        - `rest`: The seconds of the wait after a word is deleted, from
+          0.2 to 5. The default is the `--km-typewrite-rest` token.
+        - `class`: More classes for the words.
+    """
+
+    base_classes = ("km-typewrite",)
+    noun = "words"
+    limit = TYPEWRITE_LENGTH
+    key = Option(functools.partial(_duration, bounds="typewrite_key"))
+    delete = Option(functools.partial(_duration, bounds="typewrite_delete"))
+    interval = Option(checks.number(*BOUNDS["interval"]))
+    rest = Option(checks.number(*BOUNDS["typewrite_rest"]))
+
+    @property
+    def timing(self) -> dict[str, int]:
+        """The times that the role sets, in ms, as data attributes."""
+        given = {
+            "key": self.key,
+            "delete": self.delete,
+            "interval": self.interval,
+            "rest": self.rest,
+        }
+        return {
+            f"data-km-{name}": round(seconds * 1000)
+            for name, seconds in given.items()
+            if seconds is not None
+        }
+
+    def shown(self, words: list[str]) -> str:
+        """Say what the page, its search and a still reader get.
+
+        :param words: The words, in their sequence.
+        :return: All of them as a list, as in `a, b and c`.
+        """
+        return str(_("%(rest)s and %(last)s")) % {
+            "rest": ", ".join(words[:-1]),
+            "last": words[-1],
+        }
 
 
 class Sweep(Turns):
@@ -914,7 +1024,7 @@ class Sweep(Turns):
     Text::
 
         The phrases, with `|` between them, each a full title or a word
-        with a maximum of 120 code points. It is as `swap`, but a light
+        with a maximum of 120 code points. It is as `roll`, but a light
         moves across the text, and the old phrase fades out behind it
         as the new one comes in. The page, its search and a reader
         without scripts get the first phrase. In the navbar, the
@@ -926,7 +1036,7 @@ class Sweep(Turns):
         - `class`: More classes for the phrases.
     """
 
-    base_classes = ("km-swap", "km-sweep")
+    base_classes = ("km-sweep",)
     noun = "phrases"
     limit = SWEEP_LENGTH
 

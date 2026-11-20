@@ -4,7 +4,7 @@ Kaamiki Sphinx Theme
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 16 November 2026
+Last updated on: 19 November 2026
 
 The entry point of Kaamiki. Sphinx adds the stylesheets by priority, so
 `font.css` loads first, and `theme.css` loads last and has priority.
@@ -35,6 +35,7 @@ from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils import html
 from kaamiki.extensions.utils import on
 from kaamiki.extensions.utils import pair
+from kaamiki.extensions.utils import parts
 from kaamiki.extensions.utils import phrase
 from kaamiki.extensions.utils import register
 from kaamiki.extensions.utils.build import writes_pages
@@ -48,9 +49,7 @@ if t.TYPE_CHECKING:
 __version__: str = "2026.11.8"
 conf = CONF
 static_dir = p.join(p.abspath(p.dirname(__file__)), "theme", "static")
-bundles_dir = p.join(p.abspath(p.dirname(__file__)), "theme", "bundles")
 locale_dir = p.join(p.abspath(p.dirname(__file__)), "locale")
-supported_extensions: Sequence[str] = ("sphinx_copybutton",)
 stylesheets: Sequence[tuple[str, int]] = (
     ("styles/font.css", 400),
     ("styles/code.css", 600),
@@ -130,44 +129,17 @@ def join_parts(app: Sphinx) -> None:
         fingerprint of a stylesheet or a script from the file in
         `_static` while it writes the first page, so the joined file
         must be there then. It is written as a static folder, which
-        Sphinx copies first. The name of a part is its place, so
-        `10-reset.css` comes before `20-base.css`. The folder is in the
-        temporary folder of the system. Its name cannot be guessed, and
-        only the build can write in it, so no other build or user can
-        change what is copied. Sphinx copies the permissions of a
-        folder onto `_static`, so the folder is opened for reading.
+        Sphinx copies first. The folder is in the temporary folder of
+        the system. Its name cannot be guessed, and only the build can
+        write in it, so no other build or user can change what is
+        copied. Sphinx copies the permissions of a folder onto
+        `_static`, so the folder is opened for reading.
     :raises KaamikiError: For a bundle without parts, a part that is
         not UTF-8 text, or a folder that Kaamiki cannot write to.
     """
     if not writes_pages(app):
         return
-    texts: dict[str, str] = {}
-    for bundle in bundles:
-        stem, suffix = p.splitext(bundle)
-        folder = p.join(bundles_dir, stem)
-        names = sorted(
-            _
-            for _ in (os.listdir(folder) if p.isdir(folder) else ())
-            if _.endswith(suffix) and not _.startswith(".")
-        )
-        if not names:
-            checks.fail(
-                f"expected the parts of {bundle!r} in {folder!r}, got none,"
-                " so the install is incomplete",
-                "bundles",
-            )
-        texts[bundle] = ""
-        for name in names:
-            try:
-                with open(
-                    p.join(folder, name), encoding="utf-8-sig", newline=""
-                ) as f:
-                    texts[bundle] += f.read()
-            except (OSError, UnicodeDecodeError) as error:
-                checks.fail(
-                    f"expected {name!r} to be UTF-8 text, got {error}",
-                    "bundles",
-                )
+    texts = {bundle: "".join(parts(bundle).values()) for bundle in bundles}
     joined = ""
     try:
         joined = tempfile.mkdtemp(prefix="kaamiki-")
@@ -295,8 +267,6 @@ def setup(app: Sphinx) -> dict[str, str | bool | int]:
     """
     checks.install_reporter()
     pair(app)
-    for extension in supported_extensions:
-        app.setup_extension(extension)
     app.add_html_theme(NAME, TEMPLATES)
     app.add_message_catalog("sphinx", locale_dir)
     register(app)

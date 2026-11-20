@@ -4,7 +4,7 @@ Theme Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 15 October 2026
-Last updated on: 17 November 2026
+Last updated on: 19 November 2026
 */
 
 (() => {
@@ -33,6 +33,7 @@ Last updated on: 17 November 2026
         rafThrottle,
         say,
         settleHash,
+        showCopied,
     } = window.Kaamiki;
     const root = document.documentElement;
 
@@ -45,10 +46,9 @@ Last updated on: 17 November 2026
     const REVEAL_FEATHER_MIN_PX = 280;
     const REVEAL_FEATHER_MAX_PX = 900;
     const REVEAL_STRETCH = 2.2;
-    const REVEAL_EASING = 'cubic-bezier(0.3, 0.25, 0.2, 1)';
-    const COPY_HOLD_POLL_MS = 50;
+    const REVEAL_HIDDEN_SHARE = 0.035;
     const YOUTUBE_PLAY_WAIT_MS = 1000;
-    const COPY_HOLD_POLLS = 60;
+    const CODE_LEFT_OUT = '.linenos, .gp, .go';
     const PREFETCH_HOVER_MS = 65;
     const PREFETCH_QUIET_MS = 2500;
     const DRAWER_DRAG_START_PX = 10;
@@ -81,9 +81,8 @@ Last updated on: 17 November 2026
     const DROPDOWN_AIM_WINDOW_MS = 120;
     const DROPDOWN_AIM_STEP_MS = 60;
     const DROPDOWN_AIM_MS = 450;
-    const DROPDOWN_WRAPPED_CLOSE_DELAY_MS = 700;
+    const DROPDOWN_PIN_MS = 300;
     const DROPDOWN_EDGE_PX = 8;
-    const DROPDOWN_ROWS = 3;
     const SIDEBAR_WIDE_PX = 768;
     const NAV_WIDE_PX = 960;
     const NAV_WRAPPED = 'km-document--nav-wrapped';

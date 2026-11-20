@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 November 2026
-.. Last updated on: 17 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: How Kaamiki moves
 :km-page-description: Every animation in Kaamiki, shown working in one
@@ -41,7 +41,7 @@ press, drag, hover or scroll, and the table under :ref:`Folding things away
 
 Two things change how everything below feels. The first is the speed. Every
 animation takes its time from one number, ``kaamiki.conf.motion.speed``, and
-the default, ``0.625``, is calm. The second is your device: a reader who asks
+the default is ``1``. The second is your device: a reader who asks
 for less motion gets the calmer version. Both are on the :ref:`settings page
 <kaamiki-settings-motion>`.
 
@@ -63,8 +63,7 @@ top of it:
     Reload this page
 
 Behind the byline the pictures take turns and the waves drift. It's the one
-motion that never stops, so it pauses on a screen that can't keep up and for a
-reader who asks for less motion.
+motion that never stops, so it pauses for a reader who asks for less motion.
 
 .. _kaamiki-example-motion-a-long-page-folded:
 
@@ -101,8 +100,8 @@ page gets it ready as your pointer comes near.
 .. accordion:: What's the dial?
 
     It's ``kaamiki.conf.motion.speed``, one number from ``0.25`` to ``4`` that
-    sets the speed of every animation in the theme. ``1`` is 60% quicker
-    than the default of ``0.625`` and ``2`` is twice as quick as ``1``.
+    sets the speed of every animation in the theme. ``1`` is the default
+    and ``2`` is twice as quick.
 
 .. accordion:: Every animation on this page
 
@@ -333,21 +332,21 @@ the next one by itself, a letter at a time from the left, the way the greeting
 on the home page does, and the numbers in it count up when they scroll into
 view:
 
-Everything here is meant to :swap:`settle|glide|ease|land` softly, on
+Everything here is meant to :roll:`settle|glide|ease|land` softly, on
 :ticker:`8` paces and :ticker:`4` curves.
 
 .. code-block:: rst
 
-    Everything here is meant to :swap:`settle|glide|ease|land` softly, on
+    Everything here is meant to :roll:`settle|glide|ease|land` softly, on
     :ticker:`8` paces and :ticker:`4` curves.
 
 The rest of the sentence glides to wherever the new word leaves it, and a word
 of another length sends the extra letters in from or out to nothing, as in
-:swap:`go|going|forgotten`. The :ref:`swap role <kaamiki-roles-swap>` says what
+:roll:`go|going|forgotten`. The :ref:`roll role <kaamiki-roles-roll>` says what
 it takes and what it leaves alone.
 
 A number can be written short, so :ticker:`12400?short` reads in thousands.
-Left alone it counts for as long as the site's speed says, 3.2 seconds, and it
+Left alone it counts for as long as the site's speed says, 2 seconds, and it
 can take its own time, as :ticker:`1900?duration=1s` does.
 
 ``:sweep:`` changes a whole phrase instead of a word. A band of light crosses
@@ -375,26 +374,18 @@ line from the :doc:`home page </index>`:
 
     If you want to master something, teach it.
 
-The two embeds below came from the home page too. A greeting changes by itself
-and a line types and deletes as if someone were writing it:
+The greeting and the line below came from the home page too. A greeting rolls
+by itself and a line types and deletes as if someone were writing it:
 
-.. embed:: /assets/html/greetings.html
-    :source: /_static/data/greetings.json
-    :interval: 2800
-    :duration: 700
-    :stagger: 45
-    :js: styles/site.js
+.. rst-class:: am-greeting
+
+    |greeting|
 
 So far, I've taught...
 
-.. embed:: /assets/html/currently-teaching.html
-    :source: /_static/data/currently-teaching.json
-    :prefix-text:
-    :typing-speed: 120
-    :deleting-speed: 80
-    :pause-after-typing: 2000
-    :pause-after-deleting: 1000
-    :js: styles/site.js
+.. rst-class:: am-teaching
+
+    |teaching|
 
 .. _kaamiki-example-motion-cards-buttons-and-links:
 
@@ -562,14 +553,14 @@ Open the three accordions below and compare how long each takes:
 
 ``:no-motion:`` goes the other way: the directive plays nothing, and what's in
 it shows and changes at once, the way it does for a reader who asks for less
-motion. That reaches the roles inside it too, so a ``:swap:`` or a ``:ticker:``
+motion. That reaches the roles inside it too, so a ``:roll:`` or a ``:ticker:``
 in it stands still. Open this one:
 
 .. accordion:: Not moving at all
     :no-motion:
 
     ``:no-motion:``, and this opened at once. A :ticker:`2025` that's counted
-    for 3.2 seconds elsewhere shows its number here from the first frame.
+    for 2 seconds elsewhere shows its number here from the first frame.
 
 .. code-block:: rst
 
@@ -728,7 +719,7 @@ the defaults of the motion settings:
 
 .. code-block:: python
 
-    kaamiki.conf.motion.speed = 0.625
+    kaamiki.conf.motion.speed = 1
     kaamiki.conf.motion.prefetch = True
     kaamiki.conf.motion.page_transitions = False
 

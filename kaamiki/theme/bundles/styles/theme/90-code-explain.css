@@ -27,12 +27,12 @@
     inset-inline-end: 0.5rem;
     opacity: 0;
     position: absolute;
-    transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+    transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
     z-index: 3;
 }
 
 .km-code-explain__frame:has(:focus-visible) .km-code-explain__corner,
-.km-code-explain__corner:has(.success) {
+.km-code-explain__corner:has([data-km-copied]) {
     opacity: 1;
 }
 
@@ -49,17 +49,16 @@
 }
 
 .km-code-explain__copy {
-    align-items: center;
     border-radius: var(--km-radius-round);
     color: hsl(var(--km-colour-button-dark-fg));
-    display: inline-flex;
+    display: inline-grid;
     flex: 0 0 auto;
     height: 1.75rem;
-    justify-content: center;
+    place-items: center;
     margin-inline-start: auto;
     opacity: 0;
     position: relative;
-    transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+    transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
     width: 1.75rem;
 
     .km-code-explain__corner > &,
@@ -80,7 +79,7 @@
         }
     }
 
-    &:is(:focus-visible, .success) {
+    &:is(:focus-visible, [data-km-copied]) {
         opacity: 1;
     }
 
@@ -90,21 +89,12 @@
         }
     }
 
-    &:active:not(.success) {
+    &:active:not([data-km-copied]) {
         opacity: 0.7;
     }
 
-    &.km-code-explain__copy--fading {
-        opacity: 0;
-    }
-
-    &.success .km-code-explain__clipboard {
-        display: none;
-    }
-
-    &.success .km-code-explain__done {
-        display: inline-block;
-        color: hsl(var(--km-colour-green));
+    & .km-copy__icon {
+        grid-area: 1 / 1;
     }
 }
 
@@ -115,15 +105,6 @@
 .km-code-explain__copy:focus-visible {
     outline: 2px solid hsl(var(--km-colour-focus));
     outline-offset: -2px;
-}
-
-.km-code-explain__copy > i {
-    --fa-width: auto;
-    line-height: 1;
-}
-
-.km-code-explain__copy > .km-code-explain__done {
-    display: none;
 }
 
 .km-code-explain__stage {
@@ -198,7 +179,7 @@
 }
 
 .km-code-explain[data-km-mode] .km-code-explain__code {
-    transition: translate var(--km-code-explain-swap) var(--km-spring-smooth);
+    transition: translate var(--km-motion-swap) var(--km-ease-smooth);
     translate: 0 calc(var(--km-code-explain-shift, 0px) * -1);
 }
 
@@ -216,12 +197,12 @@
     display: block;
     padding-inline: var(--km-code-explain-pad);
     position: relative;
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
 }
 
 .km-code-explain__source {
     display: inline-block;
-    transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+    transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
 }
 
 .km-code-explain__code--linenos .km-code-explain__line {
@@ -266,8 +247,8 @@
 }
 
 .km-code-explain__line[data-km-current]::after {
-    animation: km-code-explain-sweep var(--km-duration-hover)
-        var(--km-ease-swift);
+    animation: km-code-explain-sweep var(--km-motion-state)
+        var(--km-ease-smooth);
     background: hsl(var(--km-colour-code-marker));
     content: "";
     inset-block: 0;
@@ -303,7 +284,7 @@
 }
 
 .km-code-explain__value {
-    transition: color var(--km-duration-hover) var(--km-ease-swift);
+    transition: color var(--km-motion-press) var(--km-ease-smooth);
 }
 
 .km-code-explain__variable[data-km-fresh] .km-code-explain__value {
@@ -371,7 +352,7 @@
     max-height: calc(8 * 1.5em + 1rem);
     overflow: auto;
     padding: var(--km-space-2) var(--km-code-explain-pad);
-    transition: height var(--km-code-explain-swap) var(--km-spring-smooth);
+    transition: height var(--km-motion-swap) var(--km-ease-smooth);
     white-space: pre-wrap;
 }
 
@@ -454,7 +435,7 @@
 .km-code-explain[data-km-mode="stage"] .km-code-explain__note {
     margin-block: 0 var(--km-code-explain-gap);
     opacity: var(--km-code-explain-dim);
-    transition: opacity var(--km-code-explain-swap) var(--km-ease-standard);
+    transition: opacity var(--km-motion-swap) var(--km-ease-smooth);
 }
 
 .km-code-explain[data-km-mode="stage"]
@@ -515,8 +496,8 @@
 .km-code-version .km-code-explain__line {
     --km-code-version-tint: transparent;
     box-shadow: inset 0 0 0 100vmax var(--km-code-version-tint);
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift),
-        box-shadow var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth),
+        box-shadow var(--km-motion-press) var(--km-ease-smooth);
 }
 
 .km-code-version
@@ -538,13 +519,13 @@
 }
 
 .km-code-version .km-code-explain__line[data-km-settling] {
-    transition-duration: var(--km-code-explain-swap);
+    transition-duration: var(--km-motion-swap);
 }
 
 .km-code-version .km-code-explain__line[data-km-diff]::after,
 .km-code-version .km-code-explain__line[data-km-settling]::after {
-    animation: km-code-explain-sweep var(--km-duration-hover)
-        var(--km-ease-swift);
+    animation: km-code-explain-sweep var(--km-motion-state)
+        var(--km-ease-smooth);
     content: "";
     inset-block: 0;
     inset-inline-start: 0;
@@ -565,12 +546,12 @@
     .km-code-explain__line[data-km-settling]:not([data-km-current])::after {
     background: hsl(var(--km-colour-green));
     opacity: 0;
-    transition: opacity var(--km-code-explain-swap) var(--km-ease-standard);
+    transition: opacity var(--km-motion-swap) var(--km-ease-smooth);
 }
 
 .km-code-version .km-code-explain__line[data-km-current]::after {
-    transition: background-color var(--km-code-explain-swap)
-        var(--km-ease-standard);
+    transition: background-color var(--km-motion-swap)
+        var(--km-ease-smooth);
 }
 
 .km-code-version__sign {
@@ -580,7 +561,7 @@
     margin-inline-start: -1.25ch;
     position: sticky;
     text-align: center;
-    transition: opacity var(--km-code-explain-swap) var(--km-ease-standard);
+    transition: opacity var(--km-motion-swap) var(--km-ease-smooth);
     user-select: none;
     width: 1.25ch;
     z-index: 2;
@@ -607,8 +588,8 @@
 .km-code-version .km-code-explain__output {
     box-shadow: inset 0 0 transparent,
         inset 0 0 0 100vmax transparent;
-    transition: box-shadow var(--km-code-explain-swap) var(--km-ease-standard),
-        height var(--km-code-explain-swap) var(--km-spring-smooth);
+    transition: box-shadow var(--km-motion-swap) var(--km-ease-smooth),
+        height var(--km-motion-swap) var(--km-ease-smooth);
 }
 
 .km-code-version .km-code-explain__output[data-km-verdict="broke"] {

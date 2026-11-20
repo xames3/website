@@ -69,7 +69,7 @@
         width: auto;
         line-height: 1;
         transform: rotateZ(0deg);
-        transition: transform var(--km-duration-hover) var(--km-ease-swift);
+        transition: transform var(--km-motion-surface) var(--km-ease-smooth);
     }
 }
 
@@ -112,9 +112,8 @@
     overflow: hidden;
 }
 
-/* The tabs keep the pace they had before everything was slowed down. */
 .km-tabs {
-    --km-tabs-time: calc(var(--km-duration-hover) * 0.625);
+    --km-tabs-time: var(--km-motion-surface);
     position: relative;
     display: flex;
     flex-wrap: wrap;
@@ -195,8 +194,8 @@
         color: hsl(var(--km-colour-nav-fg));
         font-weight: var(--km-weight-button);
         transition:
-            background-color var(--km-tabs-time) var(--km-ease-swift),
-            color var(--km-tabs-time) var(--km-ease-swift);
+            background-color var(--km-tabs-time) var(--km-ease-smooth),
+            color var(--km-tabs-time) var(--km-ease-smooth);
     }
 
     @media (hover: hover) {
@@ -223,8 +222,8 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+.km-tabs__label {
 @media (prefers-reduced-motion: no-preference) {
     .km-tabs__bar.km-tabs__bar--sliding::before {
         transition:
-            translate var(--km-tabs-time) cubic-bezier(0.32, 0.72, 0, 1),
-            width var(--km-tabs-time) cubic-bezier(0.32, 0.72, 0, 1);
+            translate var(--km-tabs-time) var(--km-ease-smooth),
+            width var(--km-tabs-time) var(--km-ease-smooth);
     }
 }
 
@@ -278,7 +277,7 @@ html[data-km-keyboard] .km-tabs__bar>input:focus+.km-tabs__label {
 .km-tabs>.km-tabs__panel.km-tabs__panel--current {
     display: block;
     animation:
-        km-tab-in var(--km-tabs-time) cubic-bezier(0.32, 0.72, 0, 1);
+        km-tab-in var(--km-tabs-time) var(--km-ease-smooth);
 }
 
 @keyframes km-tab-in {

@@ -11,7 +11,7 @@
             if (!transient) return;
             tooltipTimers.set(link, window.setTimeout(
                 () => link.removeAttribute('data-tooltip'),
-                TIMING.normal(),
+                engine.ms('enter'),
             ));
         }, TIMING.tooltipHold()));
     }
@@ -103,75 +103,20 @@
         });
     }
 
-    function dressCopyButton(button) {
-        if ('kmDressed' in button.dataset) return;
-        button.dataset.kmDressed = '';
-        const put = () => {
-            if (button.querySelector('.km-copy__icon')) return;
-            button.append(...[
-                makeIcon('copy', 'km-copy__icon', 'km-copy__icon--copy'),
-                makeIcon('copied', 'km-copy__icon', 'km-copy__icon--done'),
-            ].filter(Boolean));
-        };
-        put();
-        let release = 0;
-        const block = button.closest('div.highlight, .literal-block-wrapper')
-            || button;
-        const using = () => block.matches(':hover')
-            || block.matches(':focus-within')
-            || !window.matchMedia('(hover: hover)').matches;
-        const follow = () => {
-            window.clearTimeout(release);
-            if (button.querySelector('.icon-tabler-check')) {
-                button.setAttribute('data-km-copied', '');
-                return;
-            }
-            if (!button.hasAttribute('data-km-copied')) return;
-            let polls = 0;
-            const wait = () => {
-                polls += 1;
-                if (using() || polls > COPY_HOLD_POLLS
-                    || Number(getComputedStyle(button).opacity) <= 0.01) {
-                    button.removeAttribute('data-km-copied');
-                    return;
-                }
-                release = window.setTimeout(wait, COPY_HOLD_POLL_MS);
-            };
-            wait();
-        };
-        new MutationObserver(() => {
-            put();
-            follow();
-        }).observe(button, { childList: true });
+    function codeText(pre) {
+        const clone = pre.cloneNode(true);
+        clone.querySelectorAll(CODE_LEFT_OUT).forEach((part) => part.remove());
+        const text = clone.innerText.replace(/\n$/, '');
+        return text || pre.innerText.replace(/\n$/, '');
     }
 
-    function initCopyButtonNames() {
-        const cells = document.querySelectorAll('div.highlight > pre').length;
-        if (!cells) return;
-        const name = () => {
-            const buttons = document.querySelectorAll('button.copybtn');
-            buttons.forEach((button) => {
-                dressCopyButton(button);
-                if (button.hasAttribute('aria-label')) return;
-                const title = button.querySelector('svg title')
-                    ?.textContent.trim();
-                button.setAttribute(
-                    'aria-label',
-                    title || button.dataset.tooltip || say('copy'),
-                );
-            });
-            return buttons.length >= cells;
-        };
-        if (name()) return;
-        const watch = new MutationObserver(() => {
-            if (name()) watch.disconnect();
+    function initCodeCopy() {
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest?.('.km-copy--code');
+            if (!button) return;
+            copyText(codeText(button.previousElementSibling))
+                .then((copied) => showCopied(button, copied));
         });
-        watch.observe(document.body, { childList: true, subtree: true });
-        window.addEventListener(
-            'load',
-            () => setTimeout(() => watch.disconnect(), 5000),
-            { once: true },
-        );
     }
 
     function initHighlightedLines() {

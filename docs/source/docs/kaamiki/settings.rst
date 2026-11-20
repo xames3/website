@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -994,13 +994,12 @@ A directive that moves can take a speed of its own, or play nothing, with
           - Default
           - What it does
         * - ``kaamiki.conf.motion.speed``
-          - ``0.625``
-          - How quick every animation is. The default is calm: every animation
-            takes 60% longer than it does at ``1``. ``2`` is twice as quick as
-            ``1`` and ``0.5`` is slower than the default. It takes a number
-            from ``0.25`` to ``4``, and anything else stops the build. A
-            ``:ticker:`` that isn't given a time counts for 2 seconds over it,
-            3.2 by default. It's *site-wide*.
+          - ``1``
+          - How quick every animation is. ``2`` is twice as quick as the
+            default and ``0.5`` is half as quick. It takes a number from
+            ``0.25`` to ``4``, and anything else stops the build. A
+            ``:ticker:`` that isn't given a time counts for 2 seconds over
+            it. It's *site-wide*.
         * - ``kaamiki.conf.motion.page_transitions``
           - ``False``
           - Following a link to another page of the site hands over from one
@@ -1081,12 +1080,12 @@ If your versions look like ``1.4.0`` they don't match, so give the release a
 Icons.
 -------------------------------------------------------------------------------
 
-Kaamiki draws its icons with `Font Awesome`_ and works with the Free set out
-of the box. Add a Pro kit and every icon switches to its Pro version. If Font
-Awesome doesn't load, because it's blocked, you're offline or a kit refuses the
-address, the icons stay empty and show when Font Awesome loads. A kit only
-answers the addresses on its allow-list in your Font Awesome account, so a
-preview from another address gets no kit.
+Kaamiki draws its icons with `Font Awesome`_, Free out of the box. A Pro kit
+switches every icon to its Pro version, as CSS for a reader without JavaScript.
+If Font Awesome doesn't load, because it's blocked, you're offline or a kit
+refuses the address, the icons stay empty and show when Font Awesome loads. A
+kit only answers the addresses on its allow-list in your Font Awesome account,
+so a preview from another address gets no kit.
 
 .. accordion:: Every setting here
 
@@ -1239,7 +1238,9 @@ With a kit, the "With a kit" column follows ``kaamiki.conf.icons.style``.
 ``release_notes`` may be left empty with ``""``, so no icon appears. The other
 names always need an icon. ``nav_arrow``, ``release_notes``,
 ``repository_forks``, ``repository_mark`` and ``repository_stars`` are drawn in
-one style, whatever ``kaamiki.conf.icons.style`` says.
+one style, whatever ``kaamiki.conf.icons.style`` says. Unless the site sets
+``nav_arrow``, its arrow is written in the page as SVG, so it shows from the
+first frame without the kit.
 
 Write the icon in whichever way suits you. ``video``, ``fa-video`` and
 ``fa-solid fa-video`` all mean the same thing, and a bare name gets
@@ -1311,9 +1312,10 @@ Embeds and videos.
           - ``"defer"``
           - How those scripts load: ``defer``, ``async`` or ``normal``.
         * - ``kaamiki.conf.youtube.privacy``
-          - ``True``
-          - Uses YouTube's no-cookie player for every video. ``:no-privacy:``
-            turns it off for one player.
+          - ``False``
+          - Uses YouTube's no-cookie player for every video, which Safari plays
+            only after a second press. ``:no-privacy:`` turns it off for one
+            player.
         * - ``kaamiki.conf.youtube.click_to_load``
           - ``True``
           - Shows the video's picture with a play button for every video and

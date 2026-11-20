@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 02 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Changelog
 :km-page-description: Every Kaamiki release, newest first.
@@ -46,8 +46,12 @@
           Kaamiki's own. |new|
         - ``release``, which writes an entry like this one, with its date and
           a link to the story behind it. |new|
-        - ``:swap:``, a role that swaps a word for the next one while it's on
-          screen. |new|
+        - ``:roll:``, a role that rolls a word into the next one while it's on
+          screen, at its own pace with ``:interval:``, ``:duration:`` and
+          ``:stagger:``. |new|
+        - ``:typewrite:``, a role that types its words one key at a time,
+          slips now and then and deletes them again. A reader without scripts
+          gets them as a list. |new|
         - A picture that's shown smaller than it is opens when you press it,
           flying out from where it sits and back to where it is when it's
           closed. ``kaamiki.conf.media.enlarge`` turns it off for a site,
@@ -86,9 +90,10 @@
         - A page shows as soon as its fonts are ready and never waits more than
           two seconds.
         - A YouTube player shows the video's picture with a play button and
-          loads on a click, from ``youtube-nocookie.com``.
+          loads and plays on one press. ``kaamiki.conf.youtube.privacy`` or
+          ``:privacy:`` embed it from ``youtube-nocookie.com``.
         - A directive in the wrong place stops the build, and so does a link
-          inside a link or ``:swap:`` inside one. Options and settings
+          inside a link or ``:roll:`` inside one. Options and settings
           outside their bounds stop it too, naming the line.
         - The header's menus and a phone's menu list the branch you're in, so
           a site of hundreds of pages builds quickly and its pages stay light.
@@ -98,11 +103,17 @@
           675px and sit in the middle of it. Only ``code-explain`` and
           ``code-version`` are wider.
         - The site's search leaves out the byline.
+        - The copy buttons on code blocks are Kaamiki's own and show their
+          tick the same way as a snippet's.
+        - A reader without JavaScript gets the icons and a phone's menu, and
+          no buttons that need a script.
 
     Removed
         - The dependency on ``sphinx-design``, whose ``dropdown``, ``grid``,
           ``card`` and ``tab-set`` are replaced by ``accordion``,
           ``columns``, ``block`` and ``tabs``.
+        - The dependency on ``sphinx-copybutton``, whose buttons Kaamiki now
+          draws itself.
 
 .. release:: Previews, folds and a 404 of its own
     :version: v2026.9.10

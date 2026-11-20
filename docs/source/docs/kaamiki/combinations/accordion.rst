@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Accordions, everywhere
 :km-page-description: Every option of the accordion directive on and off, with
@@ -864,19 +864,19 @@ accordion and a link in it would do two things.
 
     .. column::
 
-        .. accordion:: Title :swap:`this|that|the other`
-            :subheader: Sub :swap:`this|that|the other`
+        .. accordion:: Title :roll:`this|that|the other`
+            :subheader: Sub :roll:`this|that|the other`
             :open:
 
-            Content :swap:`this|that|the other`.
+            Content :roll:`this|that|the other`.
 
         .. code-block:: rst
 
-            .. accordion:: Title :swap:`this|that|the other`
-                :subheader: Sub :swap:`this|that|the other`
+            .. accordion:: Title :roll:`this|that|the other`
+                :subheader: Sub :roll:`this|that|the other`
                 :open:
 
-                Content :swap:`this|that|the other`.
+                Content :roll:`this|that|the other`.
 
     .. column::
 
@@ -1377,7 +1377,7 @@ roles line:
                             total = sum(range(3))
 
                         Press :kbd:mac:`Cmd-K` to
-                        :swap:`read|write|run`.
+                        :roll:`read|write|run`.
 
             .. tab:: Other
 
@@ -1425,7 +1425,7 @@ roles line:
                                 total = sum(range(3))
 
                             Press :kbd:mac:`Cmd-K` to
-                            :swap:`read|write|run`.
+                            :roll:`read|write|run`.
 
                 .. tab:: Other
 

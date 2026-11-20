@@ -22,7 +22,7 @@
     border-radius: var(--km-radius-normal);
     background-color: hsl(var(--km-colour-code-bg));
     overflow-wrap: anywhere;
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
 
     & a:not(.km-block__link) {
         position: relative;
@@ -245,7 +245,7 @@
     }
 }
 
-.km-pagination__link[aria-disabled="true"] {
+.km-carousel__step[aria-disabled="true"] {
     opacity: 0.35;
     pointer-events: none;
 }

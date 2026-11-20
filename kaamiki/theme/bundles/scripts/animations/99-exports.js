@@ -14,7 +14,7 @@
         initSearchHighlights,
         initRepositoryWidgets,
         initTickers,
-        initSwaps,
+        initTurns,
         initInkReveal,
         initTranscripts,
         initPageReveal,

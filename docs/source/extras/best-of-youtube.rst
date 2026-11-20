@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 05 September 2025
-.. Last updated on: 02 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Best of YouTube
 :km-page-description: A curated list of my favourite YouTube videos that I've
@@ -227,8 +227,6 @@ talks, education, concepts of computer science and more.
                 .. thumbnail:: https://www.youtube.com/watch?v=p4Sn6UcFTOU
 
                 .. thumbnail:: https://www.youtube.com/watch?v=OJqUWvmf4gg
-
-                .. thumbnail:: https://www.youtube.com/watch?v=hoDLj0IzZMU
 
                 .. thumbnail:: https://www.youtube.com/watch?v=pEfrdAtAmqk
 
@@ -480,10 +478,6 @@ plain weird and cringe.
 
                 .. thumbnail:: https://www.youtube.com/watch?v=ShIHGQ89RXI
 
-                .. thumbnail:: https://www.youtube.com/watch?v=w1HwxoPynn4
-
-                .. thumbnail:: https://www.youtube.com/watch?v=9AxI-kdwlfg
-
                 .. thumbnail:: https://www.youtube.com/watch?v=JlyQZQt5RHk
 
                 .. thumbnail:: https://www.youtube.com/watch?v=EL4UdaLTVWc
@@ -494,13 +488,9 @@ plain weird and cringe.
 
                 .. thumbnail:: https://www.youtube.com/watch?v=tLZmQsY7UCE
 
-                .. thumbnail:: https://www.youtube.com/watch?v=_E9VYge1VFQ
-
                 .. thumbnail:: https://www.youtube.com/watch?v=T8dVdye559E
 
                 .. thumbnail:: https://www.youtube.com/watch?v=--M4I6o8fLo
-
-                .. thumbnail:: https://www.youtube.com/watch?v=5oNQZM3JVTE
 
                 .. thumbnail:: https://www.youtube.com/watch?v=0stEzx7LRLo
 
@@ -542,13 +532,9 @@ plain weird and cringe.
 
             .. carousel::
 
-                .. thumbnail:: https://www.youtube.com/watch?v=Avp4Mt3iCDU
-
                 .. thumbnail:: https://www.youtube.com/watch?v=RglUQ_Bv34w
 
                 .. thumbnail:: https://www.youtube.com/watch?v=DYhzv0bOsPo
-
-                .. thumbnail:: https://www.youtube.com/watch?v=NaASnkteL0U
 
                 .. thumbnail:: https://www.youtube.com/watch?v=MkAFeuX0r1k
 
@@ -566,12 +552,6 @@ plain weird and cringe.
 
                 .. thumbnail:: https://www.youtube.com/watch?v=6QUw1LOgHuk
 
-                .. thumbnail:: https://www.youtube.com/watch?v=tbyI6cz7wDU
-
-                .. thumbnail:: https://www.youtube.com/watch?v=bZ_Qfcc0jmY
-
-                .. thumbnail:: https://www.youtube.com/watch?v=YvTtsf4vMVg
-
                 .. thumbnail:: https://www.youtube.com/watch?v=zcF-d3vvhrQ
 
                 .. thumbnail:: https://www.youtube.com/watch?v=Ai4LK6Q-OzI
@@ -579,8 +559,6 @@ plain weird and cringe.
                 .. thumbnail:: https://www.youtube.com/watch?v=Hy4x3iZrN1g
 
                 .. thumbnail:: https://www.youtube.com/watch?v=NTWsUMDSqcg
-
-                .. thumbnail:: https://www.youtube.com/watch?v=eoqd3FQMI8Q
 
                 .. thumbnail:: https://www.youtube.com/watch?v=HawdQRiqw38
 
@@ -650,8 +628,6 @@ the algorithm decides to throw at me.
 
         .. thumbnail:: https://www.youtube.com/watch?v=37pwbUp8t1I
 
-        .. thumbnail:: https://www.youtube.com/watch?v=az7NXnrVl2s
-
         .. thumbnail:: https://www.youtube.com/watch?v=l93JOUJZEoA
 
         .. thumbnail:: https://www.youtube.com/watch?v=d4xzmMuJTWs
@@ -659,10 +635,6 @@ the algorithm decides to throw at me.
         .. thumbnail:: https://www.youtube.com/watch?v=PPdGhZHT7JU
 
         .. thumbnail:: https://www.youtube.com/watch?v=OCLf1xhdiWQ
-
-        .. thumbnail:: https://www.youtube.com/watch?v=ZdRdUF4qoJE
-
-        .. thumbnail:: https://www.youtube.com/watch?v=3oYAAM3J-9I
 
         .. thumbnail:: https://www.youtube.com/watch?v=_xgn0niHD-E
 

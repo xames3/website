@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: The button directive
 :km-page-description: Turn a link into a button with a colour, an icon and
@@ -212,7 +212,7 @@ An icon, where you want it.
 
     .. column::
 
-        .. button:: /_static/data/currently-teaching.json
+        .. button:: /_static/combos/poster.jpg
             :fa-icon: download
             :download:
 
@@ -220,7 +220,7 @@ An icon, where you want it.
 
         .. code-block:: rst
 
-            .. button:: /_static/data/currently-teaching.json
+            .. button:: /_static/combos/poster.jpg
                 :fa-icon: download
                 :download:
 
@@ -326,5 +326,5 @@ Anywhere a paragraph goes.
 A button works inside a :doc:`block <block>`, a :doc:`column <columns>`, a
 :doc:`tab <tabs>` or an :doc:`accordion <accordion>`, which is how the buttons
 in :doc:`block's examples <block>` are placed. Its label can't hold a link,
-since a button is one already. It can't hold ``:swap:`` either, which the
+since a button is one already. It can't hold ``:roll:`` either, which the
 script doesn't run inside a link.

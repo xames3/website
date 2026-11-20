@@ -58,7 +58,8 @@
             color-mix(in srgb, var(--km-sharpie-colour), transparent 60%) 96%,
             transparent 98%);
     animation:
-        km-sharpie-fill var(--km-duration-normal) ease-out forwards paused;
+        km-sharpie-fill var(--km-motion-enter) var(--km-ease-smooth) forwards
+            paused;
 }
 
 @keyframes km-pencil-draw {
@@ -84,7 +85,8 @@
     background-position: bottom left, bottom right;
     background-size: 0% 0.55em, 0% 0.55em;
     animation:
-        km-pencil-draw var(--km-duration-normal) ease-out forwards paused;
+        km-pencil-draw var(--km-motion-enter) var(--km-ease-smooth) forwards
+            paused;
 }
 
 .km-sharpie.km-sharpie--visible,
@@ -113,7 +115,7 @@
         background: hsl(var(--km-colour-tooltip-bg));
         color: hsl(var(--km-colour-text-baseline));
         border-radius: calc(var(--km-radius-normal) / 4);
-        transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+        transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
     }
 
     &.km-tooltip--visible::after {
@@ -139,8 +141,8 @@
     cursor: pointer;
     user-select: none;
     transition:
-        background-color var(--km-duration-hover) var(--km-ease-swift),
-        border-color var(--km-duration-hover) var(--km-ease-swift);
+        background-color var(--km-motion-press) var(--km-ease-smooth),
+        border-color var(--km-motion-press) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {
@@ -215,8 +217,9 @@
 }
 
 .km-button--scheme-chevron,
-.km-pagination__link {
-    --km-chevron-time: calc(var(--km-duration-clamp) * 0.625);
+.km-pagination__link,
+.km-carousel__step {
+    --km-chevron-time: var(--km-motion-surface);
 
     & .km-chevron {
         display: inline-block;
@@ -230,14 +233,14 @@
 
     & .km-chevron__arrow {
         transform: translateX(-2px);
-        transition: transform var(--km-chevron-time) var(--km-spring-smooth);
+        transition: transform var(--km-chevron-time) var(--km-ease-smooth);
     }
 
     & .km-chevron__shaft {
         stroke-dasharray: 1 2;
         stroke-dashoffset: 1;
         transition:
-            stroke-dashoffset var(--km-chevron-time) var(--km-spring-smooth);
+            stroke-dashoffset var(--km-chevron-time) var(--km-ease-smooth);
     }
 
     &:focus {

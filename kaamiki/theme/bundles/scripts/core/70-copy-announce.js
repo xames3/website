@@ -40,6 +40,19 @@
         }, TIMING.tooltipHold());
     }
 
+    const copiedTimers = new WeakMap();
+
+    function showCopied(button, copied) {
+        announce(say(copied ? 'copied' : 'failed'));
+        window.clearTimeout(copiedTimers.get(button));
+        button.toggleAttribute('data-km-copied', copied);
+        if (!copied) return;
+        copiedTimers.set(button, window.setTimeout(
+            () => button.removeAttribute('data-km-copied'),
+            TIMING.copyHold(),
+        ));
+    }
+
     function clamp(value, low, high) {
         return Math.max(low, Math.min(high, value));
     }

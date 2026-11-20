@@ -4,7 +4,7 @@ Theme Settings
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 16 November 2026
+Last updated on: 19 November 2026
 
 The settings of Kaamiki: their schema, their checks, and how a site
 sets them on `kaamiki.conf` or with a `-D`. `WORDS_PER_MINUTE` is 238,
@@ -81,12 +81,17 @@ BOUNDS: t.Final[dict[str, tuple[float, float]]] = {
     "margin": (0, 8),
     "motion_speed": (0.25, 4),
     "pace": (24, 240),
+    "roll_duration": (0.1, 2),
+    "roll_stagger": (0, 0.5),
     "show_more_after": (3, 8),
     "show_previous_next_cards_count": (1, 7),
     "start": (1, 10800),
     "ticker": (0, 999_999_999),
     "ticker_duration": (0.1, 5),
     "toctree_maxdepth": (0, 4),
+    "typewrite_delete": (0.02, 0.5),
+    "typewrite_key": (0.02, 0.5),
+    "typewrite_rest": (0.2, 5),
     "underline_width": (0.5, 4),
     "underline_wobble": (0, 2),
     "code_explain_budget": (1, 100),
@@ -103,6 +108,7 @@ SHOW_MORE_AFTER: t.Final[int] = 5
 RELATED_PAGES: t.Final[int] = 5
 DESCRIPTION_LENGTH: t.Final[int] = 200
 HEADER_LEAD_LENGTH: t.Final[int] = 90
+DROPDOWN_ROWS: t.Final[int] = 3
 HEADER_SUBHEADER_FIELD: t.Final[str] = "km-header-subheader"
 HEADER_NO_SUBHEADER_FIELD: t.Final[str] = "km-header-no-subheader"
 PROJECT: t.Final[dict[str, str]] = {
@@ -762,7 +768,7 @@ class Motion(Settings):
 
     page_transitions = Value(False, boolean)
     prefetch = Value(True, boolean)
-    speed = Value(0.625, number=float)
+    speed = Value(1.0, number=float)
 
 
 class Toctree(Settings):
@@ -802,7 +808,7 @@ class Youtube(Settings):
         reread=True,
     )
     click_to_load = Value(True, boolean, reread=True)
-    privacy = Value(True, boolean, reread=True)
+    privacy = Value(False, boolean, reread=True)
     referrer_policy = Value(
         "strict-origin-when-cross-origin", checks.word(*REFERRERS), reread=True
     )

@@ -103,8 +103,8 @@
                 const close = heard.animate(
                     [{ width: `${from}px` }, { width: `${to}px` }],
                     {
-                        duration: TIMING.fast(),
-                        easing: getCssVar('--km-spring-smooth'),
+                        duration: engine.ms('fade'),
+                        easing: getCssVar('--km-ease-smooth'),
                         fill: 'forwards',
                     },
                 );

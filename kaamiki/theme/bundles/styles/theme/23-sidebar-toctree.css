@@ -15,8 +15,8 @@
     grid-auto-rows: max-content;
     line-height: 1.25rem;
     overflow: hidden;
-    transition-duration: var(--km-duration-fast);
-    transition-timing-function: var(--km-spring-smooth)
+    transition-duration: var(--km-motion-surface);
+    transition-timing-function: var(--km-ease-smooth)
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -40,7 +40,7 @@
     display: flex;
     color: hsl(var(--km-colour-nav-fg));
     padding: var(--km-space-1);
-    transition: color var(--km-duration-hover) var(--km-ease-swift);
+    transition: color var(--km-motion-press) var(--km-ease-smooth);
     width: 100%
 }
 
@@ -138,7 +138,7 @@
 .highlight-link {
     background-color: hsl(var(--km-colour-button-dark-bg));
     color: hsl(var(--km-colour-button-dark-fg));
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
     border-radius: var(--km-radius-round);
     font-size: var(--km-font-size-down-1);
     font-weight: var(--km-weight-button);

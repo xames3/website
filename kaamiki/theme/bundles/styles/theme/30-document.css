@@ -49,7 +49,7 @@
     opacity: 0;
 }
 
-.km-document--loading:not([data-km-nav]) :is(.km-header, .km-footer) {
+.km-document--loading:not([data-km-arrival]) :is(.km-header, .km-footer) {
     opacity: 0;
 }
 
@@ -60,7 +60,7 @@
 
     html:not(.km-document--loading) .km-title-item {
         animation:
-            km-title-in var(--km-duration-slow) var(--km-ease-title)
+            km-title-in var(--km-motion-enter) var(--km-ease-smooth)
                 calc(var(--km-title-step)
                     * (var(--km-title-index, 0) - var(--km-title-lead, 0))
                     - var(--km-title-skip, 0ms))
@@ -71,23 +71,17 @@
        frame. With no header to bring in, the first thing the page has to show
        starts at once instead of after the header's turn, and the rest follow
        it as they would have. */
-    :root[data-km-nav] {
+    :root[data-km-arrival="link"] {
         --km-title-lead: 3;
-        --km-title-skip: calc(var(--km-duration-slow) * 0.35);
+        --km-title-skip: calc(var(--km-motion-enter) * 0.35);
     }
 
-    :root[data-km-nav]:has(.km-byline.km-title-item) {
+    :root[data-km-arrival="link"]:has(.km-byline.km-title-item) {
         --km-title-lead: 2;
     }
 
-    :root[data-km-nav]:has(.km-breadcrumbs.km-title-item) {
+    :root[data-km-arrival="link"]:has(.km-breadcrumbs.km-title-item) {
         --km-title-lead: 0;
-    }
-
-    :root[data-km-nav]
-        :is(.km-header, .km-footer):is(.km-title-item, .km-page-reveal-item) {
-        animation: none;
-        opacity: 1;
     }
 
     .km-header.km-title-item,
@@ -109,7 +103,7 @@
 
     .km-page-reveal-item--shown {
         animation:
-            km-reveal-in var(--km-reveal-duration) var(--km-ease-title);
+            km-reveal-in var(--km-motion-enter) var(--km-ease-smooth);
     }
 
     .km-footer {
@@ -133,8 +127,8 @@
     transform: translateX(-100%);
     opacity: 0;
     transition:
-        transform var(--km-duration-fast) var(--km-spring-smooth),
-        opacity var(--km-duration-fast) var(--km-ease-standard);
+        transform var(--km-motion-surface) var(--km-ease-smooth),
+        opacity var(--km-motion-fade) var(--km-ease-smooth);
 
     &:focus {
         transform: translateX(0);
@@ -190,11 +184,6 @@
         padding-bottom: 1px;
     }
 
-    .km-page--clamping>.km-page__fold>.km-page__content {
-        transition: max-height var(--km-duration-clamp) var(--km-spring-smooth);
-    }
-
-
     .km-page__more {
         position: sticky;
         bottom: var(--km-show-more-dock);
@@ -203,7 +192,7 @@
         justify-content: center;
         margin-top: var(--km-space-8);
         pointer-events: none;
-        transition: opacity var(--km-duration-fast) var(--km-ease-standard);
+        transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
     }
 
     .km-page--clamped>.km-page__fold>.km-page__more,
@@ -228,7 +217,7 @@
                 hsl(var(--km-colour-surface-baseline)) var(--km-show-more-fade)
             );
         opacity: 0;
-        transition: opacity var(--km-duration-clamp) var(--km-spring-smooth);
+        transition: opacity var(--km-motion-content) var(--km-ease-smooth);
     }
 
     .km-page--clamped>.km-page__fold>.km-page__more::before,
@@ -250,6 +239,10 @@
         display: none;
     }
 
+    .km-accordion__fold {
+        display: flow-root;
+    }
+
     .km-accordion--clamped>.km-accordion__body>.km-accordion__fold {
         max-height: var(--km-accordion-clamp);
     }
@@ -260,22 +253,18 @@
         overflow-y: clip;
     }
 
-    .km-accordion--clamping>.km-accordion__body>.km-accordion__fold {
-        transition: max-height var(--km-duration-clamp) var(--km-spring-smooth);
-    }
-
-
     .km-accordion__more {
         display: none;
     }
 
     .km-accordion--long>.km-accordion__body>.km-accordion__more {
-        position: relative;
-        z-index: 1;
+        position: sticky;
+        bottom: var(--km-show-more-dock);
+        z-index: 5;
         display: flex;
         justify-content: center;
         pointer-events: none;
-        transition: opacity var(--km-duration-hover) var(--km-ease-standard);
+        transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
     }
 
     .km-accordion--clamped>.km-accordion__body>.km-accordion__more,
@@ -284,18 +273,10 @@
         padding-top: var(--km-show-more-fade);
     }
 
-    .km-accordion--long:not(.km-accordion--clamped) > .km-accordion__body
-        > .km-accordion__more,
-    .km-accordion--clamping>.km-accordion__body>.km-accordion__more {
-        position: sticky;
-        bottom: var(--km-show-more-dock);
-        z-index: 5;
-    }
-
     .km-page__more--idle,
     .km-accordion__more--idle {
         opacity: 0;
-        transition: opacity var(--km-duration-slow) var(--km-ease-standard);
+        transition: opacity var(--km-motion-enter) var(--km-ease-smooth);
 
         & :is(.km-page__more-button, .km-accordion__more-button) {
             pointer-events: none;
@@ -316,7 +297,7 @@
         pointer-events: auto;
         touch-action: manipulation;
         transition:
-            background-color var(--km-duration-hover) var(--km-ease-swift);
+            background-color var(--km-motion-press) var(--km-ease-smooth);
 
         @media (hover: hover) {
             &:hover {
@@ -332,7 +313,7 @@
     .km-page__more-icon,
     .km-accordion__more-icon {
         font-size: var(--km-font-size-down-3);
-        transition: transform var(--km-duration-hover) var(--km-spring-snappy);
+        transition: transform var(--km-motion-surface) var(--km-ease-smooth);
     }
 
     .km-page__more-button[aria-expanded="true"] .km-page__more-icon,

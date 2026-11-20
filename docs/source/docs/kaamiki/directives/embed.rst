@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: The embed directive
 :km-page-description: Put a block of your own HTML on a page, with
@@ -64,8 +64,8 @@ in the file's name stops the build:
 
 .. code-block:: rst
 
-        .. embed:: ./assets/html/contributed.html
-        :source: /_static/data/contributed.json
+    .. embed:: ./assets/html/logos.html
+        :source: /_static/data/logos.json
         :speed: slow
         :direction: left
         :css: embed.css
@@ -73,10 +73,10 @@ in the file's name stops the build:
 
 ``:css:`` and ``:js:`` name files under ``html_static_path``, comma-separated.
 They load, in that order, on the pages that use the directive and nowhere else.
-This website's home page does this for its scrolling list of places I've
-contributed at, a file with a ``{{ source }}``, a ``{{ speed }}`` and a
-``{{ direction }}`` placeholder for the data source, the speed and the
-direction.
+Each other option fills the placeholder of the same name in the file, so this
+file has a ``{{ source }}``, a ``{{ speed }}`` and a ``{{ direction }}`` for
+the data source, the speed and the direction of, for example, a scrolling row
+of logos.
 
 .. _kaamiki-result-and-source-in-tabs:
 

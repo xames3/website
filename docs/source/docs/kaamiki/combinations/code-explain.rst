@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: code-explain, option by option
 :km-page-description: Every option of the code-explain directive on and off, in
@@ -932,7 +932,7 @@ Roles in the notes.
     .. lines:: 2-3
 
         Add each :underline:`number` in
-        :swap:`turn|order|sequence`, press :kbd:mac:`Cmd-K`.
+        :roll:`turn|order|sequence`, press :kbd:mac:`Cmd-K`.
 
 .. code-block:: rst
 
@@ -953,7 +953,7 @@ Roles in the notes.
         .. lines:: 2-3
 
             Add each :underline:`number` in
-            :swap:`turn|order|sequence`, press :kbd:mac:`Cmd-K`.
+            :roll:`turn|order|sequence`, press :kbd:mac:`Cmd-K`.
 
 .. _combos-code-explain-where-it-cant-go:
 

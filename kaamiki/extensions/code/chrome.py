@@ -4,7 +4,7 @@ Walkthrough Chrome
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 15 November 2026
+Last updated on: 19 November 2026
 
 The markup around a walkthrough.
 """
@@ -21,8 +21,6 @@ from pygments.util import ClassNotFound
 from sphinx.locale import _
 
 if t.TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from docutils import nodes
     from pygments.lexer import Lexer
     from sphinx.writers.html import HTMLTranslator
@@ -262,27 +260,6 @@ def notes_pane(
         f' style="--km-code-explain-gutter: {digits}ch">'
         + "".join(rows)
         + "</pre></div>"
-    )
-
-
-def controls(icons: Mapping[str, str]) -> str:
-    """Write the controls at the end of the caption of a walkthrough.
-
-    :param icons: The named icons of the site.
-    :return: The markup. Without a caption, it goes in the top corner
-        of the snippet. The button holds its two icons, and the
-        stylesheet shows the icon for its state.
-    """
-    marks = "".join(
-        f'<i class="{icons[key]} km-code-explain__{name}"'
-        ' aria-hidden="true"></i>'
-        for key, name in (("copy", "clipboard"), ("copied", "done"))
-        if icons[key]
-    )
-    return (
-        '<button type="button" class="km-code-explain__copy" data-km-copy'
-        f' aria-label="{html.escape(str(_("Copy the snippet")))}">'
-        f"{marks}</button>"
     )
 
 

@@ -82,14 +82,6 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-
-    &>p.caption {
-        display: none;
-    }
-}
-
-html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
-    display: none;
 }
 
 .km-header__nav-tree>ul {
@@ -109,8 +101,8 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
         --km-tracking: var(--km-tracking-small);
         color: hsl(var(--km-colour-nav-fg));
         transition:
-            background-color var(--km-duration-hover) var(--km-ease-swift),
-            color var(--km-duration-hover) var(--km-ease-swift);
+            background-color var(--km-motion-press) var(--km-ease-smooth),
+            color var(--km-motion-press) var(--km-ease-smooth);
 
         &.current {
             background-color: hsl(var(--km-colour-button-dark-bg));
@@ -150,6 +142,11 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
         display: inline-flex;
         align-items: center;
         border-radius: var(--km-radius-round);
+        appearance: none;
+        font-weight: inherit;
+        text-align: inherit;
+        user-select: none;
+        -webkit-user-select: none;
 
         &:focus-visible {
             outline-offset: -2px;
@@ -166,8 +163,8 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
         --km-tracking: var(--km-tracking-small);
         color: hsl(var(--km-colour-nav-fg));
         transition:
-            background-color var(--km-duration-hover) var(--km-ease-swift),
-            color var(--km-duration-hover) var(--km-ease-swift);
+            background-color var(--km-motion-press) var(--km-ease-smooth),
+            color var(--km-motion-press) var(--km-ease-smooth);
     }
 
     &>a {
@@ -175,10 +172,12 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
     }
 
     & .km-header__arrow {
-        --fa-width: auto;
+        --fa-width: calc(447em / 512);
+        width: var(--fa-width);
+        height: 1em;
         line-height: 1;
         font-size: 0.5rem;
-        transition: transform var(--km-duration-hover) var(--km-spring-snappy);
+        transition: transform var(--km-motion-surface) var(--km-ease-smooth);
     }
 
     &.km-header__nav-group--open .caption-text,
@@ -198,16 +197,18 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
     }
 
     &>ul {
-        display: none;
+        display: grid;
+        visibility: hidden;
         opacity: 0;
         transform: translateY(var(--km-motion-rise-small));
         transition:
-            opacity calc(var(--km-duration-hover) * 0.6)
-                var(--km-ease-standard),
-            transform calc(var(--km-duration-hover) * 0.6) var(--km-ease-swift),
-            display calc(var(--km-duration-hover) * 0.6) allow-discrete;
+            opacity calc(var(--km-motion-fade) * 0.6)
+                var(--km-ease-smooth),
+            transform calc(var(--km-motion-surface) * 0.6)
+                var(--km-ease-smooth),
+            visibility calc(var(--km-motion-surface) * 0.6);
         position: absolute;
-        top: calc(100% + 1rem + var(--km-dropdown-drop, 0px));
+        top: calc(100% + 1rem);
         margin-left: var(--km-dropdown-shift, 0px);
         z-index: var(--km-layer-dropdown);
         width: max-content;
@@ -283,18 +284,13 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
     }
 
     &.km-header__nav-group--open>ul {
-        display: grid;
+        visibility: visible;
         opacity: 1;
         transform: none;
         transition:
-            opacity var(--km-duration-hover) var(--km-ease-standard),
-            transform var(--km-duration-hover) var(--km-ease-swift),
-            display var(--km-duration-hover) allow-discrete;
-
-        @starting-style {
-            opacity: 0;
-            transform: translateY(var(--km-motion-rise-small));
-        }
+            opacity var(--km-motion-fade) var(--km-ease-smooth),
+            transform var(--km-motion-surface) var(--km-ease-smooth),
+            visibility var(--km-motion-surface);
     }
 
 }
@@ -319,7 +315,7 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
     height: 2rem;
     width: 2rem;
     border-radius: var(--km-radius-round);
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {
@@ -344,6 +340,23 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
     z-index: var(--km-layer-backdrop);
     background-color: var(--km-colour-backdrop);
     backdrop-filter: blur(var(--km-backdrop-blur));
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity var(--km-motion-surface) var(--km-ease-smooth),
+        visibility var(--km-motion-surface);
+}
+
+.km-sidebar__backdrop--visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-duration: var(--km-motion-surface), 0s;
+}
+
+.km-sidebar__backdrop--dragging {
+    transition: none;
 }
 
 .km-sidebar {
@@ -365,19 +378,20 @@ html.km-document--scripted .km-header__nav-tree>ul:not(.km-header__nav-links) {
     visibility: hidden;
     transform: translateX(100%);
     transition:
-        transform var(--km-duration-drawer) var(--km-spring-smooth),
-        visibility var(--km-duration-drawer);
+        transform var(--km-motion-surface) var(--km-ease-smooth),
+        visibility var(--km-motion-surface);
     touch-action: pan-y;
-}
-
-.km-sidebar--dragging {
-    transition: none;
 }
 
 .km-sidebar--visible,
 html:not(.km-document--scripted) .km-sidebar:target {
     visibility: visible;
     transform: translateX(0);
+    transition-duration: var(--km-motion-surface), 0s;
+}
+
+.km-sidebar--dragging {
+    transition: none;
 }
 
 .km-document:not(.km-document--scripted) button.km-header__menu-toggle {
@@ -518,7 +532,7 @@ html:not(.km-document--scripted) .km-sidebar:target {
 
 .km-sidebar__mobile-item {
     color: hsl(var(--km-colour-nav-fg));
-    transition: color var(--km-duration-hover) var(--km-ease-swift);
+    transition: color var(--km-motion-press) var(--km-ease-smooth);
 
     &>i {
         margin-right: calc(var(--km-glyph-gap) - 0.25em);
@@ -570,7 +584,11 @@ html:not(.km-document--scripted) .km-sidebar:target {
     padding-right: var(--km-space-2);
     border-radius: var(--km-radius-round);
     color: hsl(var(--km-colour-button-dark-fg));
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
+
+    & > i {
+        transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
+    }
 
     @media (hover: hover) {
         &:hover {
@@ -581,6 +599,10 @@ html:not(.km-document--scripted) .km-sidebar:target {
     &:active {
         background-color: hsl(var(--km-colour-button-dark-bg-hover));
     }
+}
+
+:root:not(.km-document--icons-loaded) .km-search__submit > i {
+    opacity: 0;
 }
 
 .km-header__search {
@@ -602,9 +624,9 @@ html:not(.km-document--scripted) .km-sidebar:target {
         background-color: transparent;
         overflow: hidden;
         transition:
-            width var(--km-duration-hover) var(--km-spring-smooth),
-            background-color calc(var(--km-duration-hover) * 1.5) ease-in-out
-                calc(var(--km-duration-hover) * 0.8);
+            width var(--km-motion-surface) var(--km-ease-smooth),
+            background-color var(--km-motion-press) var(--km-ease-smooth)
+                calc(var(--km-motion-surface) - var(--km-motion-press) / 2);
     }
 
     & .km-search__label {
@@ -621,7 +643,7 @@ html:not(.km-document--scripted) .km-sidebar:target {
         background-color: transparent;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0s;
+        transition: opacity var(--km-motion-fade) var(--km-ease-smooth);
     }
 
     & .km-search__submit {
@@ -635,14 +657,16 @@ html:not(.km-document--scripted) .km-sidebar:target {
     & .km-search:is(.km-search--open, :focus-within) {
         width: 10rem;
         background-color: hsl(var(--km-colour-search-bg));
-        transition: width var(--km-duration-hover) var(--km-spring-smooth);
+        transition:
+            width var(--km-motion-surface) var(--km-ease-smooth),
+            background-color var(--km-motion-press) var(--km-ease-smooth);
     }
 
     & .km-search:is(.km-search--open, :focus-within) .km-search__input {
         opacity: 1;
         pointer-events: auto;
-        transition: opacity var(--km-duration-hover) var(--km-ease-swift)
-            calc(var(--km-duration-hover) / 2);
+        transition: opacity var(--km-motion-fade) var(--km-ease-smooth)
+            calc(var(--km-motion-surface) / 2);
     }
 
     & .km-search:is(.km-search--open, :focus-within) .km-search__submit {
@@ -657,13 +681,15 @@ html:not(.km-document--scripted) .km-sidebar:target {
         & .km-search:hover {
             width: 10rem;
             background-color: hsl(var(--km-colour-search-bg));
-            transition: width var(--km-duration-hover) var(--km-spring-smooth);
+            transition:
+                width var(--km-motion-surface) var(--km-ease-smooth),
+                background-color var(--km-motion-press) var(--km-ease-smooth);
         }
 
         & .km-search:hover .km-search__input {
             opacity: 1;
-            transition: opacity var(--km-duration-hover) var(--km-ease-swift)
-            calc(var(--km-duration-hover) / 2);
+            transition: opacity var(--km-motion-fade) var(--km-ease-smooth)
+            calc(var(--km-motion-surface) / 2);
         }
 
         & .km-search:hover .km-search__submit {

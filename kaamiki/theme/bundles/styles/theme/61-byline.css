@@ -175,7 +175,7 @@
     clip-path: inset(0);
     opacity: 0.3;
     filter: grayscale(1);
-    transition: opacity var(--km-duration-slow) var(--km-ease-standard);
+    transition: opacity var(--km-motion-enter) var(--km-ease-smooth);
     --km-byline-feather: radial-gradient(
         ellipse closest-side at 50% 50%,
         hsl(var(--km-colour-surface-baseline)) 0%,
@@ -201,7 +201,7 @@
     background-position: center;
     background-repeat: no-repeat;
     animation:
-        km-byline-bg-zoom calc(8 * var(--km-duration-slow)) ease-in-out
+        km-byline-bg-zoom calc(8 * var(--km-motion-enter)) var(--km-ease-smooth)
             infinite alternate;
 }
 
@@ -221,7 +221,13 @@
     animation-fill-mode: forwards;
 }
 
+/*
+Safari leaves the strips out for a frame each time their loop starts again,
+so each strip is many tiles wide and runs for an hour, and the script starts
+it again only while it's off the screen.
+*/
 .km-byline__bg--waves {
+    --km-wave-tiles: 120;
     --km-wave-a: 75rem;
     --km-wave-b: 112.5rem;
     --km-wave-c: 56.25rem;
@@ -232,22 +238,25 @@
 }
 
 .km-byline__wave {
+    --km-wave-run: calc(var(--km-wave-size) * var(--km-wave-tiles, 1));
     position: absolute;
     left: 0;
-    width: calc(100% + var(--km-wave-size));
+    width: calc(100% + var(--km-wave-run));
     height: calc(var(--km-wave-size) * var(--km-wave-ratio));
     background-repeat: repeat-x;
     background-size: var(--km-wave-size) 100%;
     filter: var(--km-byline-wave-filter);
     will-change: transform;
-    animation: km-wave-right calc(30s / var(--km-speed, 1)) linear infinite;
+    animation: km-wave-right
+        calc(30s * var(--km-wave-tiles, 1) / var(--km-speed, 1))
+        linear infinite;
 }
 
 .km-byline__wave--a {
     --km-wave-size: var(--km-wave-a);
     --km-wave-ratio: 0.5;
     top: 0;
-    left: calc(var(--km-wave-a) * -1);
+    left: calc(var(--km-wave-run) * -1);
     background-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='1200'%20height='600'%20viewBox='0%200%201200%20600'><defs><linearGradient%20id='g'%20gradientUnits='userSpaceOnUse'%20x1='0'%20y1='152'%20x2='0'%20y2='600'><stop%20offset='0'%20stop-color='white'%20stop-opacity='0.36'/><stop%20offset='0.5'%20stop-color='white'%20stop-opacity='0.120'/><stop%20offset='1'%20stop-color='white'%20stop-opacity='0'/></linearGradient><filter%20id='b'%20x='-10%25'%20y='-30%25'%20width='120%25'%20height='160%25'><feGaussianBlur%20stdDeviation='14'/></filter></defs><path%20d='M-1200%20270%20C%20-1050%20180,%20-750%20180,%20-600%20270%20S%20-150%20360,%200%20270%20C%20150%20180,%20450%20180,%20600%20270%20S%201050%20360,%201200%20270%20C%201350%20180,%201650%20180,%201800%20270%20S%202250%20360,%202400%20270%20V1000%20H-1200%20Z'%20fill='url(%23g)'%20filter='url(%23b)'/></svg>");
 }
 
@@ -263,19 +272,19 @@
     --km-wave-size: var(--km-wave-c);
     --km-wave-ratio: 0.625;
     top: calc(var(--km-space-24) * 1.75);
-    left: calc(var(--km-wave-c) * -1);
+    left: calc(var(--km-wave-run) * -1);
     background-image: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20width='900'%20height='562.5'%20viewBox='0%200%20900%20562.5'><defs><linearGradient%20id='g'%20gradientUnits='userSpaceOnUse'%20x1='0'%20y1='174.125'%20x2='0'%20y2='562.5'><stop%20offset='0'%20stop-color='white'%20stop-opacity='0.16'/><stop%20offset='0.5'%20stop-color='white'%20stop-opacity='0.053'/><stop%20offset='1'%20stop-color='white'%20stop-opacity='0'/></linearGradient><filter%20id='b'%20x='-10%25'%20y='-30%25'%20width='120%25'%20height='160%25'><feGaussianBlur%20stdDeviation='12'/></filter></defs><path%20d='M-900%20253.125%20C%20-787.5%20198.125,%20-562.5%20198.125,%20-450%20253.125%20S%20-112.5%20308.125,%200%20253.125%20C%20112.5%20198.125,%20337.5%20198.125,%20450%20253.125%20S%20787.5%20308.125,%20900%20253.125%20C%201012.5%20198.125,%201237.5%20198.125,%201350%20253.125%20S%201687.5%20308.125,%201800%20253.125%20V962.5%20H-900%20Z'%20fill='url(%23g)'%20filter='url(%23b)'/></svg>");
 }
 
 @keyframes km-wave-right {
     to {
-        transform: translate3d(var(--km-wave-size), 0, 0);
+        transform: translate3d(var(--km-wave-run), 0, 0);
     }
 }
 
 @keyframes km-wave-left {
     to {
-        transform: translate3d(calc(var(--km-wave-size) * -1), 0, 0);
+        transform: translate3d(calc(var(--km-wave-run) * -1), 0, 0);
     }
 }
 
@@ -287,7 +296,8 @@
     }
 }
 
-.km-pagination__link {
+.km-pagination__link,
+.km-carousel__step {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -296,7 +306,7 @@
     border-radius: 50%;
     background-color: hsl(var(--km-colour-button-dark-bg));
     color: hsl(var(--km-colour-button-dark-fg));
-    transition: background-color var(--km-duration-hover) var(--km-ease-swift);
+    transition: background-color var(--km-motion-press) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {
@@ -315,7 +325,7 @@
         vertical-align: baseline;
     }
 
-    &.km-pagination__link--prev .km-chevron {
+    &:is(.km-pagination__link--prev, .km-carousel__step--prev) .km-chevron {
         transform: scaleX(-1);
     }
 }

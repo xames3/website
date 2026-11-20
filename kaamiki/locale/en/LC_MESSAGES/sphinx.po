@@ -42,10 +42,11 @@ msgstr ""
 msgid "View release"
 msgstr ""
 
-msgid "Code"
+#, python-format
+msgid "%(rest)s and %(last)s"
 msgstr ""
 
-msgid "Copy the snippet"
+msgid "Code"
 msgstr ""
 
 msgid "Nothing printed yet"
@@ -89,6 +90,9 @@ msgid "Search results"
 msgstr ""
 
 msgid "Search every page on this site."
+msgstr ""
+
+msgid "Copy the snippet"
 msgstr ""
 
 msgid "Copy link"
@@ -151,9 +155,6 @@ msgstr ""
 msgid "Copy failed"
 msgstr ""
 
-msgid "Copy"
-msgstr ""
-
 msgid "Show more"
 msgstr ""
 
@@ -213,6 +214,9 @@ msgid "%(num)s min read"
 msgid_plural "%(num)s mins read"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "Copy"
+msgstr ""
 
 msgid "Show"
 msgstr ""

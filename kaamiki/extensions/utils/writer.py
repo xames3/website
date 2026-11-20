@@ -4,7 +4,7 @@ HTML Writer
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 September 2026
-Last updated on: 16 November 2026
+Last updated on: 19 November 2026
 
 What Kaamiki changes in the HTML that Sphinx writes, while it writes
 it.
@@ -34,6 +34,8 @@ from kaamiki.extensions.utils.settings import values
 from kaamiki.extensions.utils.text import levelled
 
 if t.TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sphinx.application import Sphinx
     from sphinx.writers.html5 import HTML5Translator
 
@@ -62,6 +64,27 @@ BACKREF: t.Final[re.Pattern[str]] = re.compile(
     r'</a><a class="headerlink" href="([^"]*)" title="([^"]*)">(.*)',
     re.DOTALL,
 )
+
+
+def copy_button(roles: Mapping[str, str], *classes: str) -> str:
+    """Write the button that copies a code block or a snippet.
+
+    :param roles: The named icons of the site.
+    :param classes: The classes to put next to `km-copy`.
+    :return: The markup. The button holds its two icons, and the
+        stylesheet shows the icon for its state.
+    """
+    marks = "".join(
+        f'<i class="{roles[key]} km-copy__icon km-copy__icon--{state}"'
+        ' aria-hidden="true"></i>'
+        for key, state in (("copy", "copy"), ("copied", "done"))
+        if roles[key]
+    )
+    label = html.escape(str(_("Copy the snippet")))
+    return (
+        f'<button type="button" class="{" ".join(("km-copy", *classes))}"'
+        f' data-km-copy aria-label="{label}">{marks}</button>'
+    )
 
 
 class translator(base):
@@ -384,6 +407,26 @@ class translator(base):
         """
         self.body.append("</div>\n")
         self.in_sidebar = False
+
+    @t.override
+    def visit_literal_block(self, node: nodes.literal_block) -> None:
+        """Write a code block, with the button that copies it.
+
+        :param node: The code block.
+        :raises nodes.SkipNode: When Sphinx wrote the whole block. A
+            site that loads `sphinx_copybutton` gets its buttons and
+            none from Kaamiki.
+        """
+        try:
+            super().visit_literal_block(node)
+        except nodes.SkipNode:
+            if "sphinx_copybutton" not in self.config.extensions:
+                code, end, rest = self.body[-1].rpartition("</pre></div>")
+                if end:
+                    roles = Kaamiki.of(self.builder).icons.roles
+                    button = copy_button(roles, "km-copy--code")
+                    self.body[-1] = f"{code}</pre>{button}</div>{rest}"
+            raise
 
     @t.override
     def visit_caption(self, node: nodes.caption) -> None:

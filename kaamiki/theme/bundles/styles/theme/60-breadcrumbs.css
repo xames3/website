@@ -75,7 +75,7 @@
     min-height: 24px;
     border-radius: var(--km-radius-round);
     color: hsl(var(--km-colour-nav-fg));
-    transition: color var(--km-duration-hover) var(--km-ease-swift);
+    transition: color var(--km-motion-press) var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {

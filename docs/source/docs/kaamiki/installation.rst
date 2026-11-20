@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 19 November 2026
 
 :km-related-header: Where next?
 :km-related-docs: /docs/kaamiki/page-fields, /docs/kaamiki/settings
@@ -34,8 +34,8 @@ What you need.
 
 You need Python 3.14 or newer and Sphinx 9.1 or newer, below Sphinx 11. Kaamiki
 uses newer syntax, so older versions of Python can't import it. Docutils,
-Jinja2, MarkupSafe, Babel, Pygments, Beautiful Soup, lightningcss and
-`sphinx-copybutton`_ come along with the install.
+Jinja2, MarkupSafe, Babel, Pygments, Beautiful Soup and lightningcss come
+along with the install.
 
 .. _kaamiki-install:
 
@@ -218,5 +218,3 @@ Where to go next.
         :doc: settings
 
         Everything you can change from ``conf.py``.
-
-.. _sphinx-copybutton: https://sphinx-copybutton.readthedocs.io/en/latest/

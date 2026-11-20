@@ -20,8 +20,8 @@
     background-size: 0 1px, 100% 1px;
     background-position: 100% 100%, 0 100%;
     transition:
-        background-size calc(var(--km-duration-hover) * 0.6)
-            var(--km-spring-smooth);
+        background-size calc(var(--km-motion-surface) * 0.6)
+            var(--km-ease-smooth);
 
     @media (hover: hover) {
         &:hover {

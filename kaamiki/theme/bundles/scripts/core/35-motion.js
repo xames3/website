@@ -17,14 +17,10 @@
         '--km-motion-rise',
         '--km-motion-rise-small',
     ];
-    const MOTION_SLOW_FRAME_MS = 34;
-    const MOTION_SLOW_SHARE = 0.25;
-    const MOTION_GUARD_RUNS = 2;
     const MOTION_STEADY = 1e-3;
     const MOTION_PX_STEADY = 0.5;
     const MOTION_CALM_POLL_MS = 400;
     const motionOriginal = new Map();
-    const motionGuard = { slow: 0 };
 
     // A spring as a function of how far through it is (0 to 1), for motion a
     // script drives itself: 0 at the start and 1 at the end, exactly.
@@ -40,11 +36,29 @@
 
     // The same as an easing for the Web Animations API, or a plain one
     // where `linear()` isn't known.
-    function motionEasing(settleMs, zeta = 1) {
+    function motionEasing(settleMs, zeta = 1, until = 1) {
         if (!CSS.supports('animation-timing-function', 'linear(0, 1)')) {
-            return 'cubic-bezier(0.22, 1, 0.36, 1)';
+            return getCssVar('--km-ease-smooth');
         }
-        return springEasing(makeSpring(Math.max(1, settleMs), zeta));
+        return springEasing(
+            makeSpring(Math.max(1, settleMs), zeta),
+            0,
+            0,
+            SPRING_POINTS,
+            until,
+        );
+    }
+
+    function motionWhen(settleMs, progress, zeta = 1) {
+        const curve = motionCurve(settleMs, zeta);
+        let low = 0;
+        let high = 1;
+        for (let i = 0; i < 40; i += 1) {
+            const middle = (low + high) / 2;
+            if (curve(middle) < progress) low = middle;
+            else high = middle;
+        }
+        return high;
     }
 
     // The speed a directive asked for (`:speed: 2` is 2) and 1 for one that
@@ -68,43 +82,14 @@
         return parseFloat(getCssVar('--km-motion-speed')) || 1;
     }
 
+    // A time a reader or a directive wrote in the page, over the site's
+    // speed and the directive's own, as the tokens are.
+    function pacedMs(ms, scope) {
+        return ms / motionSpeed() / scopeSpeed(scope);
+    }
+
     function resetMotion() {
         durationCache.clear();
-    }
-
-    function quietMotion() {
-        root.setAttribute('data-km-motion', 'quiet');
-        attempt(() => window.sessionStorage.setItem('km-motion', 'quiet'));
-    }
-
-    function isQuiet() {
-        return root.getAttribute('data-km-motion') === 'quiet';
-    }
-
-    // A screen found slow stays quiet for the rest of the visit.
-    if (attempt(() => window.sessionStorage.getItem('km-motion')) === 'quiet') {
-        root.setAttribute('data-km-motion', 'quiet');
-    }
-
-    // A screen that can't keep up gets quieter motion, not a stuttering one.
-    function watchFrames(animation) {
-        let last = performance.now();
-        let slow = 0;
-        let count = 0;
-        const frame = (now) => {
-            count += 1;
-            if (now - last > MOTION_SLOW_FRAME_MS) slow += 1;
-            last = now;
-            if (animation.playState === 'running') {
-                requestAnimationFrame(frame);
-                return;
-            }
-            if (count > 6 && slow / count > MOTION_SLOW_SHARE) {
-                motionGuard.slow += 1;
-                if (motionGuard.slow >= MOTION_GUARD_RUNS) quietMotion();
-            }
-        };
-        requestAnimationFrame(frame);
     }
 
     function motionKeyframes(frames, side) {
@@ -133,7 +118,6 @@
             [motionKeyframes(frames, 0), motionKeyframes(frames, 1)],
             { duration: spring.settleMs, easing, fill: 'both' },
         );
-        if (!prefersReducedMotion()) watchFrames(animation);
         const state = (time) => {
             const here = springAt(spring, time, 1, -speed);
             return { value: 1 - here.left, rate: -here.speed };
@@ -336,10 +320,8 @@
 
     const motion = {
         ms: motionMs,
-        speedOf: scopeSpeed,
+        paced: pacedMs,
         speed: motionSpeed,
-        quiet: isQuiet,
-        watch: watchFrames,
         animate: animateMotion,
         length: animateLength,
         intent: onIntent,
@@ -349,6 +331,7 @@
         easing: springEasing,
         curve: motionCurve,
         ease: motionEasing,
+        when: motionWhen,
         lab: motionLab,
     };
 

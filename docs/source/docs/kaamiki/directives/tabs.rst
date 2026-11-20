@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 23 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: The tabs directive
 :km-page-description: Show one block of content at a time under a strip of
@@ -49,7 +49,7 @@ with, a set needs at least two and the build stops with fewer. A set holds
             ``uv add kaamiki-sphinx-theme``
 
 A title is read like a paragraph, so it can hold markup, but not a link, since
-it's what you click to show the tab, and not ``:swap:``, which would move
+it's what you click to show the tab, and not ``:roll:``, which would move
 the row of titles. A screen reader announces them as tabs, and the arrow keys,
 Home and End move between them. Without JavaScript the tabs still switch,
 because underneath each one is a radio button.

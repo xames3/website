@@ -4,7 +4,7 @@ Input Checks
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 23 October 2026
-Last updated on: 16 November 2026
+Last updated on: 19 November 2026
 
 Kaamiki takes a correct value or stops the build. It does not change,
 guess or ignore a value. A check in this file reads each option, role,
@@ -899,8 +899,9 @@ def restate(why: str) -> str:
     """
     for pattern, form in COUNTS:
         if found := pattern.fullmatch(why):
-            noun = "argument" if found[1] == "1" else "arguments"
-            return form.format(*found.groups(), noun=noun)
+            parts = found.groups()
+            noun = "argument" if parts[:1] == ("1",) else "arguments"
+            return form.format(*parts, noun=noun)
     return why[:1].lower() + why[1:]
 
 

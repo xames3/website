@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 19 November 2026
 
 :km-page-title: Blocks, everywhere
 :km-page-description: Every option of the block directive on and off, with
@@ -605,21 +605,21 @@ With roles.
 
         Body :ticker:`2025?short`
 
-.. block:: Title :swap:`this|that|the other`
-    :preheader: Preheader :swap:`this|that|the other`
-    :footer: Footer :swap:`this|that|the other`
-    :subheader: Sub :swap:`this|that|the other`
+.. block:: Title :roll:`this|that|the other`
+    :preheader: Preheader :roll:`this|that|the other`
+    :footer: Footer :roll:`this|that|the other`
+    :subheader: Sub :roll:`this|that|the other`
 
-    Body :swap:`this|that|the other`
+    Body :roll:`this|that|the other`
 
 .. code-block:: rst
 
-    .. block:: Title :swap:`this|that|the other`
-        :preheader: Preheader :swap:`this|that|the other`
-        :footer: Footer :swap:`this|that|the other`
-        :subheader: Sub :swap:`this|that|the other`
+    .. block:: Title :roll:`this|that|the other`
+        :preheader: Preheader :roll:`this|that|the other`
+        :footer: Footer :roll:`this|that|the other`
+        :subheader: Sub :roll:`this|that|the other`
 
-        Body :swap:`this|that|the other`
+        Body :roll:`this|that|the other`
 
 .. block:: Title :kbd:mac:`Cmd-K`
     :preheader: Preheader :kbd:mac:`Cmd-K`
