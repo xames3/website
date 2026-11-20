@@ -67,6 +67,7 @@
         const duration = engine.ms('enter');
         let step = engine.ms('stagger');
         let titled = false;
+        let hold = 0;
         let waiting = blocks;
         let began = null;
         let busy = 0;
@@ -131,6 +132,7 @@
                 if (began === null) {
                     began = now;
                     screen = screenHeight();
+                    hold = titleHold();
                     const clip = edges(Math.max(window.innerHeight, screen));
                     const seen = waiting.map((block) => inView(block, clip));
                     waiting.filter((block, index) => !seen[index])
@@ -144,7 +146,7 @@
                     );
                 }
                 if (!titled) {
-                    if (now - began < titleHold()) {
+                    if (now - began < hold) {
                         requestAnimationFrame(tick);
                         return;
                     }

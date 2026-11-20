@@ -69,6 +69,23 @@
 
         const refit = rafThrottle(() => judge());
 
+        // While the page enters, a change of its size is judged once, after
+        // the entrance, since each judgement lays out the whole page.
+        let deferred = false;
+        const refitCalm = () => {
+            if (!root.classList.contains('km-document--loading')
+                && !document.querySelector(`.${REVEAL_WAITING}`)) {
+                refit();
+                return;
+            }
+            if (deferred) return;
+            deferred = true;
+            engine.calm(() => {
+                deferred = false;
+                refit();
+            });
+        };
+
         const motion = foldMotion(
             page,
             content,
@@ -233,10 +250,10 @@
         });
 
         window.addEventListener('resize', refit, { passive: true });
-        window.addEventListener('load', refit, { once: true });
-        new ResizeObserver(refit).observe(document.body);
-        document.fonts.ready.then(refit);
-        document.fonts.addEventListener?.('loadingdone', refit);
+        window.addEventListener('load', refitCalm, { once: true });
+        new ResizeObserver(refitCalm).observe(document.body);
+        document.fonts.ready.then(refitCalm);
+        document.fonts.addEventListener?.('loadingdone', refitCalm);
 
         onScroll(() => {
             window.clearTimeout(saving);
