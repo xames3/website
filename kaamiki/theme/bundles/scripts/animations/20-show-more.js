@@ -69,8 +69,6 @@
 
         const refit = rafThrottle(() => judge());
 
-        // While the page enters, a change of its size is judged once, after
-        // the entrance, since each judgement lays out the whole page.
         let deferred = false;
         const refitCalm = () => {
             if (!root.classList.contains('km-document--loading')
