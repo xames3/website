@@ -50,6 +50,7 @@ from kaamiki.extensions.utils.banner import SHADES
 from kaamiki.extensions.utils.banner import Banner
 from kaamiki.extensions.utils.banner import banners
 from kaamiki.extensions.utils.banner import source
+from kaamiki.extensions.utils.banner import title_style
 from kaamiki.extensions.utils.context import first_glyph
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import ALIGNMENTS
@@ -281,5 +282,7 @@ def html_page_context(
         builder = t.cast("StandaloneHTMLBuilder", app.builder)
         title = builder.render_partial(app.env.titles[pagename])
         glyph = first_glyph(title.get("title", ""))
-        drawn = held.titled(glyph).linked(context["pathto"])
+        drawn = held.titled(glyph, title_style(app.config)).linked(
+            context["pathto"]
+        )
         found["page.banner"] = drawn._asdict()

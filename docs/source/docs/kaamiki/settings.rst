@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -1114,6 +1114,13 @@ so a preview from another address gets no kit.
         * - ``kaamiki.conf.icons.names``
           - ``{}``
           - Swaps one of Kaamiki's own icons for another.
+        * - ``kaamiki.conf.byline.icon_style``
+          - ``"light"``
+          - The style of the title's icon on a byline's banner and on the
+            cards that link to the page. Takes ``solid``, ``regular``,
+            ``light`` or ``thin``. It needs a kit: without one, the icon keeps
+            the title's style. A brand stays a brand, and a byline's own
+            ``:fa-icon:`` is drawn as written.
 
 Without a kit, Kaamiki keeps to what Font Awesome Free has. Free draws far
 fewer icons in the ``regular`` style than Pro does, so every icon is looked up

@@ -4,7 +4,7 @@ Akshay Mestry Configuration
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 19 November 2026
+Last updated on: 22 November 2026
 
 The Sphinx configuration for my website. Sphinx is a documentation
 generator; I use it as a teaching and learning platform instead.
@@ -87,6 +87,7 @@ kaamiki.conf.icons.update(
 )
 kaamiki.conf.icons.style = "regular"
 kaamiki.conf.icons.kit = "https://kit.fontawesome.com/8bcdaaff4d.js"
+kaamiki.conf.byline.icon_style = "light"
 kaamiki.conf.site.favicons = {
     "manifest": "favicons/site.webmanifest",
     "ico": "favicons/favicon.ico",

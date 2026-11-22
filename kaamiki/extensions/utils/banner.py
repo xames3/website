@@ -21,12 +21,15 @@ from sphinx.util.osutil import copyfile
 
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.hooks import on
+from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import stored
+from kaamiki.extensions.utils.settings import values
 
 if t.TYPE_CHECKING:
     from collections.abc import Callable
 
     from sphinx.application import Sphinx
+    from sphinx.config import Config
     from sphinx.environment import BuildEnvironment
 
 SHADES: t.Final[tuple[str, ...]] = (
@@ -57,10 +60,12 @@ class Banner(t.NamedTuple):
         """Whether the picture is a file of the source of the site."""
         return bool(self.picture) and "://" not in self.picture
 
-    def titled(self, glyph: str) -> Banner:
+    def titled(self, glyph: str, style: str | None = None) -> Banner:
         """Use the icon of the title when the byline gives none.
 
         :param glyph: The classes of the first icon of the title.
+        :param style: The style to draw it in, as `light`, or `None`
+            to keep its own. A brand keeps its own.
         :return: The banner with an icon, or the same banner.
         """
         if self.icon or not glyph:
@@ -70,6 +75,12 @@ class Banner(t.NamedTuple):
             for each in glyph.split()
             if each != "km-glyph" and not checks.MODIFIERS.fullmatch(each)
         ]
+        if style and "fa-brands" not in icon:
+            families = [_ for _ in icon if _ in checks.FAMILIES]
+            rest = [
+                _ for _ in icon if _ not in checks.FAMILIES | checks.STYLES
+            ]
+            icon = [*families, f"fa-{style}", *rest]
         return self._replace(icon=" ".join(icon))
 
     def linked(self, pathto: Callable[..., str]) -> Banner:
@@ -106,6 +117,19 @@ def source(env: BuildEnvironment, written: str) -> str:
     return relative.replace(p.sep, "/")
 
 
+def title_style(config: Config) -> str | None:
+    """Find the style of the icons that banners take from titles.
+
+    :param config: The Sphinx configuration.
+    :return: `kaamiki.conf.byline.icon_style` with a kit, or `None`
+        without one, since Font Awesome Free has no light or thin
+        icons and the title keeps its own.
+    """
+    if not Icons.of(config).kit:
+        return None
+    return str(values(config).byline.icon_style)
+
+
 def banners(env: BuildEnvironment) -> dict[str, Banner]:
     """Hold the banner of each page that has a byline.
 
@@ -122,9 +146,11 @@ def banner(env: BuildEnvironment, docname: str, glyph: str = "") -> Banner:
     :param docname: The page.
     :param glyph: The classes of the first icon of its title.
     :return: The banner of its byline, else a banner in `SHADE`. The
-        icon of the title fills a banner without an icon.
+        icon of the title, in `title_style`, fills a banner without an
+        icon.
     """
-    return banners(env).get(docname, Banner()).titled(glyph)
+    found = banners(env).get(docname, Banner())
+    return found.titled(glyph, title_style(env.config))
 
 
 @on("build-finished")

@@ -91,9 +91,11 @@ the page shows it too. Without options it's a blue gradient with the first icon
 of the page's title in the middle, over faint rings and guides that fade out
 towards the edges. A title without an icon gets a banner without one.
 
-``:shade:`` picks its colour and ``:fa-icon:`` its icon. The icon is written
-and checked as a :doc:`button's <button>` is, so a site with a kit gets Pro
-icons and one without gets Free:
+``:shade:`` picks its colour and ``:fa-icon:`` its icon. The title's icon is
+drawn in ``kaamiki.conf.byline.icon_style``, ``light`` unless you change it,
+when the site has a kit. ``:fa-icon:`` is drawn as written, and it's checked as
+a :doc:`button's <button>` is, so a site with a kit gets Pro icons and one
+without gets Free:
 
 .. code-block:: rst
 

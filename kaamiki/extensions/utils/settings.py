@@ -821,6 +821,14 @@ class Accordion(Settings):
     marker_position = Value("after", choices=("before", "after"), reread=True)
 
 
+class Byline(Settings):
+    """The `kaamiki.conf.byline` settings."""
+
+    icon_style = Value(
+        "light", choices=("solid", "regular", "light", "thin"), reread=True
+    )
+
+
 class Button(Settings):
     """The `kaamiki.conf.button` settings."""
 
@@ -954,6 +962,7 @@ class Root(Settings, name=""):
     code_explain: CodeExplain
     youtube: Youtube
     accordion: Accordion
+    byline: Byline
     button: Button
     tab: Tab
     embed: Embed
