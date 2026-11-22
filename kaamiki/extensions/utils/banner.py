@@ -45,6 +45,7 @@ SHADES: t.Final[tuple[str, ...]] = (
 )
 SHADE: t.Final[str] = "blue"
 FOLDER: t.Final[str] = "_images/km-banners"
+SWAP: t.Final[str] = "fa-swap-opacity"
 
 
 class Banner(t.NamedTuple):
@@ -74,7 +75,8 @@ class Banner(t.NamedTuple):
         icon = [
             each
             for each in glyph.split()
-            if each != "km-glyph" and not checks.MODIFIERS.fullmatch(each)
+            if each == SWAP
+            or (each != "km-glyph" and not checks.MODIFIERS.fullmatch(each))
         ]
         if style and "fa-brands" not in icon:
             families = [_ for _ in icon if _ in checks.FAMILIES]

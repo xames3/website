@@ -89,7 +89,7 @@
     place-items: center;
     color: var(--km-banner-ink);
     font-size: 27cqw;
-    line-height: 1;
+    line-height: 1.5;
 
     &::before,
     &::after {

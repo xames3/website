@@ -100,6 +100,9 @@ in two layers, the second one faded:
 
     kaamiki.conf.byline.icon_style = "duotone regular"
 
+Add ``fa-swap-opacity`` to a duotone icon, in ``:fa-icon:`` or in the title's
+role, to show its second layer and fade its first.
+
 ``:fa-icon:`` is drawn as written, and it's checked as a :doc:`button's
 <button>` is, so a site with a kit gets Pro icons and one without gets Free:
 

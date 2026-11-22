@@ -155,7 +155,8 @@ FAMILIES: t.Final[frozenset[str]] = frozenset(FAMILY_NAMES)
 MODIFIERS: t.Final[re.Pattern[str]] = re.compile(
     r"fa-(?:fw|spin|pulse|beat|fade|beat-fade|bounce|shake|spin-pulse"
     r"|spin-reverse|flip-horizontal|flip-vertical|flip-both"
-    r"|rotate-(?:90|180|270)|2xs|xs|sm|lg|xl|2xl|[1-9]x|10x)"
+    r"|rotate-(?:90|180|270)|2xs|xs|sm|lg|xl|2xl|[1-9]x|10x"
+    r"|swap-opacity)"
     r"|km-tone--(?:red|yellow|blue|green)"
 )
 ICON_NAME: t.Final[re.Pattern[str]] = re.compile(
@@ -618,8 +619,8 @@ def icon(argument: str | None) -> str:
         and a name, `far fa-plus`, with a family of `FAMILY_STYLES`
         before the style, `fa-sharp fa-solid fa-plus` or
         `fa-jelly fa-plus`. A family takes only its own styles. After a
-        style or a family, sizes
-        and animations can follow, as `fa-lg` and `fa-spin`, and the
+        style or a family, sizes and animations can follow, as `fa-lg`
+        and `fa-spin`, `fa-swap-opacity` for a duotone icon, and the
         Kaamiki tones `km-tone--red`, `km-tone--yellow`,
         `km-tone--blue` and `km-tone--green`. The maximum is
         `ICON_WORDS` words.

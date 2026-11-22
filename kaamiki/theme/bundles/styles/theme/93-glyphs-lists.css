@@ -71,3 +71,11 @@
 :where(.fa-duotone, .fa-sharp-duotone)::after {
     opacity: var(--fa-secondary-opacity, 0.4);
 }
+
+:where(.fa-swap-opacity:is(.fa-duotone, .fa-sharp-duotone))::before {
+    opacity: var(--fa-secondary-opacity, 0.4);
+}
+
+:where(.fa-swap-opacity:is(.fa-duotone, .fa-sharp-duotone))::after {
+    opacity: var(--fa-primary-opacity, 1);
+}
