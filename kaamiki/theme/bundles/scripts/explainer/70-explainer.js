@@ -61,6 +61,7 @@
             release,
             recenter,
             fillAll,
+            color,
         };
         let snaps = [];
         const holds = new Map();
@@ -543,7 +544,10 @@
             batch.forEach(({ view, blockIndex }, n) => {
                 const upto = owned[blockIndex][owned[blockIndex].length - 1];
                 const step = steps[upto];
-                if (versions) showVersion(view, drafts[step.version]);
+                if (versions) {
+                    showVersion(view, drafts[step.version]);
+                    view.version = step.version;
+                }
                 markLines(view, step);
                 annotateLines(view, step, payload.comment, opened);
                 if (view.out) {
@@ -662,6 +666,21 @@
                 watcher.observe(hold);
             });
             if (window.matchMedia('print').matches) fillAll();
+        }
+
+        let colored = false;
+
+        function color() {
+            if (colored) return;
+            colored = true;
+            land();
+            const { tokens } = payload;
+            drafts.forEach((rows, n) => colorRows(rows, tokens[n]));
+            colorRows(Array.from(code.children), tokens[version]);
+            snaps.forEach((view) => colorRows(
+                Array.from(view.code.children),
+                tokens[view.version ?? 0],
+            ));
         }
 
         function fillAll() {

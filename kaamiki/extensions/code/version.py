@@ -4,7 +4,7 @@ Code Version Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 28 September 2026
-Last updated on: 16 November 2026
+Last updated on: 21 November 2026
 
 A `code-version` directive that walks a reader through the versions of
 a piece of code, until its current version::
@@ -55,6 +55,7 @@ from kaamiki.extensions.code import explain
 from kaamiki.extensions.code.chrome import known
 from kaamiki.extensions.code.chrome import label
 from kaamiki.extensions.code.chrome import notes_pane
+from kaamiki.extensions.code.chrome import tokens
 from kaamiki.extensions.code.grammar import StrayError
 from kaamiki.extensions.code.grammar import linerange
 from kaamiki.extensions.code.grammar import split
@@ -136,15 +137,16 @@ class CodeVersion(explain.CodeWalk, name="code-version"):
             *moving(self.options, timed=False),
         ]
         attributes["position"] = self.code_position
+        lines = [tokens(code, language) for code in codes]
         attributes["payload"] = {
             "steps": self.steps(drafts, start, base),
             "pace": base,
             "code": codes[0],
             "codes": codes,
+            "tokens": lines,
         }
         attributes["pane"] = notes_pane(
-            codes[0],
-            language,
+            lines[0],
             start,
             set(),
             linenos="linenos" in self.options,
@@ -362,8 +364,7 @@ def visit_draft(self: HTMLTranslator, element: Draft) -> None:
     )
     self.body.append(
         notes_pane(
-            code.astext(),
-            code["language"],
+            tokens(code.astext(), code["language"]),
             code["highlight_args"]["linenostart"],
             set(),
             linenos=code["linenos"],

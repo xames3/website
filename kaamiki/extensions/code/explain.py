@@ -4,7 +4,7 @@ Code Explain Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 19 November 2026
+Last updated on: 21 November 2026
 
 A `code-explain` directive that walks a reader through a snippet, one
 line at a time, with the values that it held at each line::
@@ -89,6 +89,7 @@ from kaamiki.extensions.code.chrome import label
 from kaamiki.extensions.code.chrome import lexer_for
 from kaamiki.extensions.code.chrome import notes_pane
 from kaamiki.extensions.code.chrome import output
+from kaamiki.extensions.code.chrome import tokens
 from kaamiki.extensions.code.chrome import visit_explanation
 from kaamiki.extensions.code.grammar import OptionError
 from kaamiki.extensions.code.grammar import StrayError
@@ -361,17 +362,18 @@ class CodeExplain(CodeWalk, name="code-explain"):
             *moving(self.options, timed=False),
         ]
         attributes["position"] = self.code_position
+        lines = tokens(code, language)
         attributes["payload"] = {
             "steps": [compact(_) for _ in steps],
             "pace": self.options.get("pace", pace(language)),
             "code": code,
             "comment": self.marker(language, steps),
+            "tokens": [lines],
         }
         if traced and setup:
             attributes["payload"]["setup"] = setup
         attributes["pane"] = notes_pane(
-            code,
-            language,
+            lines,
             start,
             self.emphasis(start, total),
             linenos="linenos" in self.options,

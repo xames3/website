@@ -88,6 +88,22 @@
         line.prepend(sign);
     }
 
+    function colorRows(rows, lines) {
+        rows.forEach((row) => {
+            const runs = lines[Number(row.dataset.kmLine) - 1];
+            if (!runs?.length) return;
+            row.querySelector('.km-code-explain__source').replaceChildren(
+                ...runs.map((run) => {
+                    if (typeof run === 'string') return run;
+                    const token = document.createElement('span');
+                    token.className = run[0];
+                    token.textContent = run[1];
+                    return token;
+                }),
+            );
+        });
+    }
+
     function showVersion(view, rows) {
         view.marked = [];
         view.filled = [];

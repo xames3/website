@@ -20,7 +20,10 @@
             const due = entries
                 .filter((entry) => entry.isIntersecting)
                 .map((entry) => hosts.get(entry.target))
-                .filter((explainer) => stale.delete(explainer));
+                .filter((explainer) => {
+                    explainer.color();
+                    return stale.delete(explainer);
+                });
             if (due.length) measureSome(due);
         }, { rootMargin: '100% 0px' });
         codeExplains.forEach((explainer) => near.observe(explainer.host));
@@ -36,7 +39,10 @@
             requestAnimationFrame(() => requestAnimationFrame(restage));
         });
         window.addEventListener('beforeprint', () => {
-            codeExplains.forEach((explainer) => explainer.fillAll());
+            codeExplains.forEach((explainer) => {
+                explainer.color();
+                explainer.fillAll();
+            });
         });
 
         let width = window.innerWidth;
