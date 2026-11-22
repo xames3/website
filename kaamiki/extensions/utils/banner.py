@@ -65,7 +65,8 @@ class Banner(t.NamedTuple):
 
         :param glyph: The classes of the first icon of the title.
         :param style: The style to draw it in, as `light`, or `None`
-            to keep its own. A brand keeps its own.
+            to keep its own. `duotone` is the duotone solid icon. A
+            brand keeps its own.
         :return: The banner with an icon, or the same banner.
         """
         if self.icon or not glyph:
@@ -80,6 +81,8 @@ class Banner(t.NamedTuple):
             rest = [
                 _ for _ in icon if _ not in checks.FAMILIES | checks.STYLES
             ]
+            if style == "duotone":
+                families, style = ["fa-duotone"], "solid"
             icon = [*families, f"fa-{style}", *rest]
         return self._replace(icon=" ".join(icon))
 

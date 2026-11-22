@@ -825,7 +825,9 @@ class Byline(Settings):
     """The `kaamiki.conf.byline` settings."""
 
     icon_style = Value(
-        "light", choices=("solid", "regular", "light", "thin"), reread=True
+        "regular",
+        choices=("solid", "regular", "light", "thin", "duotone"),
+        reread=True,
     )
 
 

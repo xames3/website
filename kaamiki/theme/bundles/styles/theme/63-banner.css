@@ -5,18 +5,22 @@
     --km-banner-ink: color-mix(
         in oklch,
         hsl(var(--km-banner-shade)),
-        hsl(var(--km-colour-white)) 62%
+        hsl(var(--km-colour-white)) 92%
     );
     --km-banner-line: color-mix(
         in oklch,
-        var(--km-banner-ink) 55%,
+        color-mix(
+            in oklch,
+            hsl(var(--km-banner-shade)),
+            hsl(var(--km-colour-white)) 62%
+        ) 55%,
         transparent
     );
     --km-banner-fade: radial-gradient(
-        ellipse 58% 80% at 50% 50%,
-        hsl(var(--km-colour-black)) 30%,
-        hsl(var(--km-colour-black) / 0.45) 65%,
-        transparent
+        ellipse 75% 100% at 50% 50%,
+        hsl(var(--km-colour-black)) 40%,
+        hsl(var(--km-colour-black) / 0.6) 75%,
+        hsl(var(--km-colour-black) / 0.25)
     );
     position: relative;
     aspect-ratio: 16 / 9;
@@ -86,11 +90,14 @@
     color: var(--km-banner-ink);
     font-size: 27cqw;
     line-height: 1;
-    opacity: 0.92;
 
     &::before,
     &::after {
         grid-area: 1 / 1;
+    }
+
+    &::after {
+        opacity: var(--fa-secondary-opacity, 0.4);
     }
 }
 
