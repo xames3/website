@@ -1,8 +1,3 @@
-    // Motion that has to be stopped, reversed or handed on in the middle. A
-    // motion that only plays should stay in the stylesheet; this is for the
-    // ones a reader can interrupt. It animates only what the browser can do
-    // off the main thread (transform, opacity) and takes its pace from the
-    // `--km-motion-*` tokens, so the speed dial and reduced motion reach it.
     const MOTION_TOKENS = [
         '--km-motion-speed',
         '--km-motion-press',
@@ -22,8 +17,6 @@
     const MOTION_CALM_POLL_MS = 400;
     const motionOriginal = new Map();
 
-    // A spring as a function of how far through it is (0 to 1), for motion a
-    // script drives itself: 0 at the start and 1 at the end, exactly.
     function motionCurve(settleMs, zeta = 1) {
         const spring = makeSpring(Math.max(1, settleMs), zeta);
         const settled = springProgressAt(spring, spring.settleMs);
@@ -34,8 +27,6 @@
         };
     }
 
-    // The same as an easing for the Web Animations API, or a plain one
-    // where `linear()` isn't known.
     function motionEasing(settleMs, zeta = 1, until = 1) {
         if (!CSS.supports('animation-timing-function', 'linear(0, 1)')) {
             return getCssVar('--km-ease-smooth');
@@ -61,9 +52,6 @@
         return high;
     }
 
-    // The speed a directive asked for (`:speed: 2` is 2) and 1 for one that
-    // didn't. Every time in the theme is its own over the site's speed, so
-    // what a directive of its own speed takes is that over its speed.
     function scopeSpeed(scope) {
         const timed = scope?.closest?.('[class*="km-speed--"]');
         if (!timed) return 1;
@@ -76,14 +64,10 @@
         return getDurationMs(`--km-motion-${name}`) / scopeSpeed(scope);
     }
 
-    // The dial itself (1 is calm, 2 is twice as quick), for the few things
-    // that budget a whole run of motion rather than one.
     function motionSpeed() {
         return parseFloat(getCssVar('--km-motion-speed')) || 1;
     }
 
-    // A time a reader or a directive wrote in the page, over the site's
-    // speed and the directive's own, as the tokens are.
     function pacedMs(ms, scope) {
         return ms / motionSpeed() / scopeSpeed(scope);
     }
@@ -110,8 +94,6 @@
         ]));
     }
 
-    // Start a spring between the pairs in `frames`, closing at `speed`
-    // (fractions of the whole way per ms) from the first.
     function startMotion(element, frames, spring, speed, options) {
         const easing = springEasing(spring, 0, speed);
         const animation = element.animate(
@@ -131,8 +113,6 @@
                 clamp(animation.currentTime ?? 0, 0, spring.settleMs),
             ),
             cancel: () => animation.cancel(),
-            // Go back to where it started, from wherever it has got to and
-            // at the speed it's going, so it brakes and turns and doesn't snap.
             reverse: (more = {}) => {
                 const now = motion.value();
                 const here = currentValues(element, frames);
@@ -151,7 +131,6 @@
                     { ...options, ...more },
                 );
             },
-            // Head for somewhere else from where it is, at no speed.
             retarget: (next, more = {}) => {
                 const here = currentValues(element, next);
                 const aimed = Object.fromEntries(Object.entries(next).map(
@@ -178,11 +157,6 @@
         return motion;
     }
 
-    // A length in px that eases from one value to another and, sent
-    // somewhere else on the way, carries the speed it had into the new
-    // spring. It's how a fold goes from opening to closing without a jolt.
-    // `options.rate` is a speed (px per ms, towards `to`) to start at, for a
-    // motion that takes over from one that was stopped to measure.
     function animateLength(element, property, from, to, options = {}) {
         const settle = prefersReducedMotion()
             ? 1
@@ -218,9 +192,6 @@
         return run(from, to, options.rate ?? 0, options);
     }
 
-    // `frames` is `{ transform: ['translateY(0.75rem)', 'none'], opacity:
-    // [0, 1] }`; `role` names a pace (`content`, `surface`...) and `zeta` how
-    // bouncy: 1 is none, below 1 overshoots a little.
     function animateMotion(element, frames, options = {}) {
         const settle = prefersReducedMotion()
             ? 1
@@ -229,9 +200,6 @@
         return startMotion(element, frames, spring, 0, options);
     }
 
-    // Run `task` the first time a reader shows they're about to use `element`:
-    // a pointer over it, focus in it or a finger down on it. It's how the
-    // heavy work for a click is done before the click.
     function onIntent(element, task) {
         let done = false;
         const events = ['pointerenter', 'focusin', 'touchstart'];
@@ -259,8 +227,6 @@
         return window.setTimeout(task, 1);
     }
 
-    // The same, once the page has stopped entering, so work done ahead of
-    // a reader's click never lands on the page's own entrance.
     function whenCalm(task, timeout = 1500) {
         const wait = () => {
             if (document.querySelector(`.${REVEAL_WAITING}`)) {
@@ -272,15 +238,10 @@
         wait();
     }
 
-    // What a tuning panel needs, so one can be built without reading the
-    // rest: the tokens, a way to change one live, to slow everything down,
-    // to replay what's on the page and to freeze it.
     const motionLab = {
         tokens: () => [...MOTION_TOKENS],
         get: (name) => getCssVar(name),
         set: (name, value) => {
-            // A site may have set the token itself (the speed is written
-            // on `<html>` when a build sets it), so keep that to go back to.
             if (!motionOriginal.has(name)) {
                 motionOriginal.set(name, root.style.getPropertyValue(name));
             }

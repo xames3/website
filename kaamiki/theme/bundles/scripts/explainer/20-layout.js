@@ -73,6 +73,7 @@
     function measureSome(list) {
         const now = list.filter((explainer) => {
             if (nearScreen(explainer)) {
+                explainer.color();
                 stale.delete(explainer);
                 return true;
             }

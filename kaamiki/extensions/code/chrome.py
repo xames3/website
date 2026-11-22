@@ -4,7 +4,7 @@ Walkthrough Chrome
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 12 September 2026
-Last updated on: 19 November 2026
+Last updated on: 21 November 2026
 
 The markup around a walkthrough.
 """
@@ -14,15 +14,15 @@ from __future__ import annotations
 import html
 import typing as t
 
-from pygments import highlight as pygmentise
-from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name
+from pygments.token import STANDARD_TYPES
 from pygments.util import ClassNotFound
 from sphinx.locale import _
 
 if t.TYPE_CHECKING:
     from docutils import nodes
     from pygments.lexer import Lexer
+    from pygments.token import _TokenType
     from sphinx.writers.html import HTMLTranslator
 
 COMMENTS: t.Final[tuple[tuple[str, str, frozenset[str]], ...]] = (
@@ -204,34 +204,86 @@ def comment(language: str) -> dict[str, str] | None:
     return None
 
 
-def highlight(code: str, language: str) -> list[str]:
-    """Highlight a snippet, one line at a time.
+type Run = str | list[str]
+
+
+def token_class(kind: _TokenType) -> str:
+    """Name the Pygments classes of a token, as its HTML writes them.
+
+    :param kind: The type of the token.
+    :return: The classes, or an empty string for plain text.
+    """
+    chain = [kind]
+    while chain[-1] not in STANDARD_TYPES and chain[-1].parent is not None:
+        chain.append(chain[-1].parent)
+    root = STANDARD_TYPES.get(chain[-1], "")
+    names: list[str] = []
+    suffix = ""
+    for each in reversed(chain[:-1]):
+        names.append(root + suffix)
+        suffix += f"-{each[-1]}"
+    names.append(root + suffix)
+    return " ".join(names)
+
+
+def tokens(code: str, language: str) -> list[list[Run]]:
+    """Split a snippet into coloured runs, one list for each line.
 
     :param code: The snippet.
     :param language: The language of the snippet.
-    :return: One string of markup for each line.
+    :return: For each line, its runs. A run is a string for plain
+        text, or the Pygments classes and the text.
     """
-    formatter = HtmlFormatter(nowrap=True)
-    body: str = pygmentise(code, lexer_for(language), formatter)
-    lines: list[str] = body.split("\n")
-    if lines and not lines[-1].strip():
+    lines: list[list[Run]] = [[]]
+    for kind, value in lexer_for(language).get_tokens(code):
+        name = token_class(kind)
+        for index, part in enumerate(value.split("\n")):
+            if index:
+                lines.append([])
+            if part:
+                join(lines[-1], name, part)
+    end = lines[-1]
+    if all(isinstance(run, str) for run in end) and not text(end).strip():
         lines.pop()
     return lines
 
 
+def join(line: list[Run], name: str, part: str) -> None:
+    """Add text to a line, in the last run when its class is the same.
+
+    :param line: The runs of the line.
+    :param name: The Pygments classes of the text.
+    :param part: The text.
+    """
+    last = line[-1] if line else None
+    if not name and isinstance(last, str):
+        line[-1] = last + part
+    elif name and isinstance(last, list) and last[0] == name:
+        last[1] += part
+    else:
+        line.append([name, part] if name else part)
+
+
+def text(line: list[Run]) -> str:
+    """Join the runs of a line into its plain text.
+
+    :param line: The runs of the line.
+    :return: The text of the line.
+    """
+    return "".join(run if isinstance(run, str) else run[1] for run in line)
+
+
 def notes_pane(
-    code: str,
-    language: str,
+    lines: list[list[Run]],
     start: int,
     emphasis: set[int],
     *,
     linenos: bool,
     digits: int = 0,
 ) -> str:
-    """Write the highlighted snippet that a walkthrough steps through.
+    """Write the snippet that a walkthrough steps through, as text.
 
-    :param code: The snippet.
-    :param language: The language of the snippet.
+    :param lines: The runs of each line, from `tokens`.
     :param start: The number of the first line.
     :param emphasis: The lines to mark, with the numbers that the
         reader sees.
@@ -241,13 +293,14 @@ def notes_pane(
     :return: The markup of the pane.
     """
     rows: list[str] = []
-    for offset, line in enumerate(highlight(code, language)):
+    for offset, line in enumerate(lines):
+        source = html.escape(text(line), quote=False) or "&nbsp;"
         number = start + offset
         mark = " data-km-emphasis" if number in emphasis else ""
         rows.append(
             f'<span class="km-code-explain__line" data-km-line="{offset + 1}"'
             f' data-km-number="{number}"{mark}>'
-            f'<span class="km-code-explain__source">{line or "&nbsp;"}</span>'
+            f'<span class="km-code-explain__source">{source}</span>'
             '<span class="km-code-explain__annotation"'
             " data-km-annotation></span>\n</span>"
         )

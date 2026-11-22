@@ -148,9 +148,6 @@
     }
 }
 
-/* The same keyframes under another name: a picture that comes in later
-   starts its zoom again, which a change of class can do and a change of
-   the picture can't. */
 @keyframes km-byline-bg-zoom-again {
     from {
         transform: scale(1);
@@ -221,11 +218,6 @@
     animation-fill-mode: forwards;
 }
 
-/*
-Safari leaves the strips out for a frame each time their loop starts again,
-so each strip is many tiles wide and runs for an hour, and the script starts
-it again only while it's off the screen.
-*/
 .km-byline__bg--waves {
     --km-wave-tiles: 120;
     --km-wave-a: 75rem;
