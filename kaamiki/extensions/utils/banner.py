@@ -13,7 +13,11 @@ related pages show it.
 
 from __future__ import annotations
 
+import os
+import os.path as p
 import typing as t
+
+from sphinx.util.osutil import copyfile
 
 from kaamiki.extensions.utils import checks
 from kaamiki.extensions.utils.hooks import on
@@ -37,6 +41,7 @@ SHADES: t.Final[tuple[str, ...]] = (
     "graphite",
 )
 SHADE: t.Final[str] = "blue"
+FOLDER: t.Final[str] = "_images/km-banners"
 
 
 class Banner(t.NamedTuple):
@@ -46,6 +51,11 @@ class Banner(t.NamedTuple):
     icon: str = ""
     picture: str = ""
     hidden: bool = False
+
+    @property
+    def local(self) -> bool:
+        """Whether the picture is a file of the source of the site."""
+        return bool(self.picture) and "://" not in self.picture
 
     def titled(self, glyph: str) -> Banner:
         """Use the icon of the title when the byline gives none.
@@ -68,9 +78,32 @@ class Banner(t.NamedTuple):
         :param pathto: The `pathto` of the context of the page.
         :return: The banner, with a path from the page to the picture.
         """
-        if not self.picture:
+        if not self.local:
             return self
-        return self._replace(picture=pathto(self.picture.lstrip("/"), 1))
+        return self._replace(picture=pathto(f"{FOLDER}/{self.picture}", 1))
+
+
+def source(env: BuildEnvironment, written: str) -> str:
+    """Find the file of a picture in the source of the site.
+
+    :param env: The build environment, on the page that names it.
+    :param written: The path, relative to the page, or to the source
+        directory when it starts with a `/`.
+    :return: The path from the source directory, with `/` between
+        folders.
+    :raises ValueError: For a file outside the source directory, or a
+        file that is not there.
+    """
+    relative, path = env.relfn2path(written, env.docname)
+    root = p.realpath(env.srcdir)
+    if p.commonpath([p.realpath(path), root]) != root:
+        raise ValueError(
+            f"expected a file inside the source directory, got {written!r}"
+        )
+    if not p.isfile(path):
+        raise ValueError(f"expected a file that is there, got {written!r}")
+    env.note_dependency(relative)
+    return relative.replace(p.sep, "/")
 
 
 def banners(env: BuildEnvironment) -> dict[str, Banner]:
@@ -92,6 +125,22 @@ def banner(env: BuildEnvironment, docname: str, glyph: str = "") -> Banner:
         icon of the title fills a banner without an icon.
     """
     return banners(env).get(docname, Banner()).titled(glyph)
+
+
+@on("build-finished")
+def copy_banners(app: Sphinx, exception: Exception | None) -> None:
+    """Copy the picture files of the banners into the build.
+
+    :param app: The Sphinx application instance.
+    :param exception: The error that stopped the build, or `None`.
+    """
+    if exception or app.builder.format != "html":
+        return
+    for found in banners(app.env).values():
+        if found.local:
+            target = p.join(app.outdir, FOLDER, found.picture)
+            os.makedirs(p.dirname(target), exist_ok=True)
+            copyfile(p.join(app.srcdir, found.picture), target)
 
 
 @on("env-purge-doc")

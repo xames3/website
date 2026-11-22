@@ -105,14 +105,15 @@ The shades are ``blue``, ``indigo``, ``purple``, ``red``, ``orange``,
 ``yellow``, ``green``, ``teal`` and ``graphite``. Pages in one part of the site
 can share a shade, and any page can pick its own.
 
-``:banner:`` shows a picture of yours in place of the gradient. Paths that
-aren't full addresses count from the top of your site, so ``_static/cover.png``
-is the same picture from every page:
+``:banner:`` shows a picture of yours in place of the gradient. It's a full
+address or a file in your docs, which counts from the page, or from the source
+folder when it starts with ``/``. Kaamiki copies the file into the build, and a
+file that's missing or outside the source folder stops the build:
 
 .. code-block:: rst
 
     .. byline:: @xames3
-        :banner: _static/cover.png
+        :banner: /images/cover.png
 
 ``:hide-banner:`` leaves the banner off the page, and its cards still show it.
 ``:shade:`` or ``:fa-icon:`` with ``:banner:``, and any of the three with
@@ -183,9 +184,11 @@ Every option.
             to 20. It needs an avatar, from ``:avatar:`` or
             ``kaamiki.conf.site.project``.
         * - ``:banner:``
-          - The address of a picture to show above the title in place of the
-            gradient, a ``.jpg``, ``.jpeg``, ``.png``, ``.webp``, ``.avif``,
-            ``.gif`` or ``.svg``. A path counts from the top of the site.
+          - A picture to show above the title in place of the gradient, a
+            ``.jpg``, ``.jpeg``, ``.png``, ``.webp``, ``.avif``, ``.gif`` or
+            ``.svg``. It's a full address or a file in your docs, which counts
+            from the page, or from the source folder when it starts with
+            ``/``.
         * - ``:shade:``
           - The colour of the gradient: ``blue``, ``indigo``, ``purple``,
             ``red``, ``orange``, ``yellow``, ``green``, ``teal`` or

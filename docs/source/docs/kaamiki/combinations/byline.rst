@@ -84,7 +84,8 @@ The options, one at a time.
     * - ``:fa-icon:``
       - The icon in the banner. The title's icon without it, else none.
     * - ``:banner:``
-      - A picture of yours in place of the gradient.
+      - A picture of yours in place of the gradient, an address or a file in
+        your docs.
     * - ``:hide-banner:``
       - Leaves the banner off the page.
     * - ``:class:``

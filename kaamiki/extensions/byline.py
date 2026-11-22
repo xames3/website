@@ -49,6 +49,7 @@ from kaamiki.extensions.utils.banner import SHADE
 from kaamiki.extensions.utils.banner import SHADES
 from kaamiki.extensions.utils.banner import Banner
 from kaamiki.extensions.utils.banner import banners
+from kaamiki.extensions.utils.banner import source
 from kaamiki.extensions.utils.context import first_glyph
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import ALIGNMENTS
@@ -104,8 +105,10 @@ class Byline(KaamikiDirective, motion=True):
           A path starts at the top of the site, as for `avatar`.
         - `avatar-size`: The width and height of the picture in
           pixels, from 16 to 64. The default is 20.
-        - `banner`: The URL of a picture above the title. Without
-          it, the banner is a gradient in `shade` with the icon.
+        - `banner`: A picture above the title: a URL, or a file
+          relative to the page, or to the source directory when it
+          starts with a `/`. Without it, the banner is a gradient in
+          `shade` with the icon.
         - `shade`: The colour of the gradient, one of `blue`,
           `indigo`, `purple`, `red`, `orange`, `yellow`, `green`,
           `teal` or `graphite`. The default is `blue`.
@@ -199,8 +202,14 @@ class Byline(KaamikiDirective, motion=True):
             icon = Icons.of(self.config).custom(self.fa_icon)
         except ValueError as error:
             self.fail(f":fa-icon: {error}")
+        picture = self.banner or ""
+        if picture and "://" not in picture:
+            try:
+                picture = source(self.env, picture)
+            except ValueError as error:
+                self.fail(f":banner: {error}")
         banners(self.env)[self.env.docname] = Banner(
-            self.shade, icon, self.banner or "", self.hide_banner
+            self.shade, icon, picture, self.hide_banner
         )
         node = self.locate(self.Node("", words, **options))
         self.add_name(node)
