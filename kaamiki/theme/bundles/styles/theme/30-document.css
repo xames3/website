@@ -222,6 +222,10 @@
         transition: opacity var(--km-motion-content) var(--km-ease-smooth);
     }
 
+    .km-page__more::before {
+        bottom: calc(-1 * var(--km-show-more-dock));
+    }
+
     .km-page--clamped>.km-page__fold>.km-page__more::before,
     .km-accordion--clamped>.km-accordion__body>.km-accordion__more::before {
         opacity: 1;
