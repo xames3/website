@@ -19,8 +19,6 @@
         transparent
     );
     position: relative;
-    display: grid;
-    place-items: center;
     aspect-ratio: 16 / 9;
     overflow: hidden;
     container-type: inline-size;
@@ -85,7 +83,11 @@
 }
 
 .km-banner__icon {
-    position: relative;
+    --fa-width: auto;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
     color: var(--km-banner-ink);
     font-size: 27cqw;
     line-height: 1;
