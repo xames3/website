@@ -81,7 +81,7 @@
     opacity: 0.75;
 }
 
-.km-banner__icon {
+.km-banner > .km-banner__icon {
     --fa-width: auto;
     position: absolute;
     inset: 0;
@@ -94,10 +94,6 @@
     &::before,
     &::after {
         grid-area: 1 / 1;
-    }
-
-    &::after {
-        opacity: var(--fa-secondary-opacity, 0.4);
     }
 }
 

@@ -1109,8 +1109,12 @@ so a preview from another address gets no kit.
         * - ``kaamiki.conf.icons.style``
           - ``"regular"``
           - The style of every icon that doesn't name one. Takes ``solid``,
-            ``regular``, ``light`` or ``thin``, and the last two need a kit,
-            from ``kaamiki.conf.icons.kit`` or ``KAAMIKI_FA_KIT``.
+            ``regular``, ``light`` or ``thin``, or one of them after
+            ``duotone``, as ``"duotone regular"``, for icons in two layers
+            with the second one faded. ``duotone`` alone is ``duotone
+            solid``. Light, thin and duotone need a kit, from
+            ``kaamiki.conf.icons.kit`` or ``KAAMIKI_FA_KIT``, and a kit that
+            includes them.
         * - ``kaamiki.conf.icons.names``
           - ``{}``
           - Swaps one of Kaamiki's own icons for another.

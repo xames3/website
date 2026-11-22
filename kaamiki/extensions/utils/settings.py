@@ -721,7 +721,7 @@ class Icons(Settings):
 
     style = Value(
         icons.DEFAULT_STYLE,
-        choices=("solid", "regular", "light", "thin"),
+        choices=icons.SITE_STYLES,
         key="fa_style",
         reread=True,
     )
@@ -825,19 +825,7 @@ class Byline(Settings):
     """The `kaamiki.conf.byline` settings."""
 
     icon_style = Value(
-        "regular",
-        choices=(
-            "solid",
-            "regular",
-            "light",
-            "thin",
-            "duotone",
-            "duotone solid",
-            "duotone regular",
-            "duotone light",
-            "duotone thin",
-        ),
-        reread=True,
+        icons.DEFAULT_STYLE, choices=icons.SITE_STYLES, reread=True
     )
 
 

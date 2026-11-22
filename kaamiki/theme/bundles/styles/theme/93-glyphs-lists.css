@@ -60,3 +60,14 @@
     opacity: 0.6;
 }
 
+:where(.fa-duotone, .fa-sharp-duotone) {
+    position: relative;
+}
+
+:where(.fa-duotone, .fa-sharp-duotone)::before {
+    position: absolute;
+}
+
+:where(.fa-duotone, .fa-sharp-duotone)::after {
+    opacity: var(--fa-secondary-opacity, 0.4);
+}
