@@ -3,8 +3,8 @@
 .. Last updated on: 22 November 2026
 
 :km-page-title: The byline directive
-:km-page-description: Show who wrote a page, how long it takes to read and a
-    button that copies its link.
+:km-page-description: Show who wrote a page, how long it takes to read, a
+    button that copies its link and a banner above its title.
 :km-page-type: article
 :km-header-subheader: Who wrote it, and how long it takes
 :km-feedback-title: Is a byline missing something?
@@ -69,6 +69,8 @@ The directive also tells the rest of the page about itself:
 - The name becomes the page's author, which is written into the ``author`` tag
   and, for an ``article``, into the link preview. A ``.. Author:`` comment at
   the top of the file wins when it names someone.
+- Its banner goes above the page's title and on every card that links to the
+  page.
 - The reading time counts the prose on the page, using
   ``kaamiki.conf.site.words_per_minute``, and a set of tabs counts as its
   longest tab. It's never shown as less than one minute.
@@ -77,6 +79,44 @@ The directive also tells the rest of the page about itself:
   says how it ends. It reads "Show" for an ``.rst`` page, "View as Markdown"
   for an ``.md`` one and "View source" for anything else. With
   ``html_copy_source`` or ``html_show_sourcelink`` off there's no link.
+
+.. _kaamiki-byline-banner:
+
+-------------------------------------------------------------------------------
+A banner above the title.
+-------------------------------------------------------------------------------
+
+The byline puts a banner above the page's title, and every card that links to
+the page shows it too. Without options it's a blue gradient with the first icon
+of the page's title in the middle, over a faint ring and grid. A title without
+an icon gets a banner without one.
+
+``:shade:`` picks its colour and ``:fa-icon:`` its icon. The icon is written
+and checked as a :doc:`button's <button>` is, so a site with a kit gets Pro
+icons and one without gets Free:
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :shade: orange
+        :fa-icon: fa-regular fa-compass
+
+The shades are ``blue``, ``indigo``, ``purple``, ``red``, ``orange``,
+``yellow``, ``green``, ``teal`` and ``graphite``. Pages in one part of the site
+can share a shade, and any page can pick its own.
+
+``:banner:`` shows a picture of yours in place of the gradient. Paths that
+aren't full addresses count from the top of your site, so ``_static/cover.png``
+is the same picture from every page:
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :banner: _static/cover.png
+
+``:hide-banner:`` leaves the banner off the page, and its cards still show it.
+``:shade:`` or ``:fa-icon:`` with ``:banner:``, and any of the three with
+``:hide-banner:``, stop the build.
 
 .. _kaamiki-byline-languages:
 
@@ -142,6 +182,20 @@ Every option.
           - The picture's width and height in pixels, from 16 to 64. Defaults
             to 20. It needs an avatar, from ``:avatar:`` or
             ``kaamiki.conf.site.project``.
+        * - ``:banner:``
+          - The address of a picture to show above the title in place of the
+            gradient, a ``.jpg``, ``.jpeg``, ``.png``, ``.webp``, ``.avif``,
+            ``.gif`` or ``.svg``. A path counts from the top of the site.
+        * - ``:shade:``
+          - The colour of the gradient: ``blue``, ``indigo``, ``purple``,
+            ``red``, ``orange``, ``yellow``, ``green``, ``teal`` or
+            ``graphite``. Defaults to ``blue``.
+        * - ``:fa-icon:``
+          - The icon in the gradient, written and checked as on a
+            :doc:`button <button>`. Defaults to the first icon of the title,
+            else none.
+        * - ``:hide-banner:``
+          - Leaves the banner off the page, which shows it without it.
         * - ``:align:``
           - Where the byline sits: ``left``, ``center`` or ``right``. Only
             ``left`` puts the author, the reading time, the language (when

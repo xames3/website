@@ -342,11 +342,10 @@ is unless you turn it off (see :ref:`settings <kaamiki-settings-pages>`). A
 page at the end of the site gets the ones before it. A site with fewer pages
 shows the ones it has. The front page is never one of these cards. Three cards
 show at once on a wide screen and one and a bit on a phone, and the arrows
-scroll the rest. Each card is the page's picture in greyscale (its
-``:km-page-image:``, else an empty frame), then the part of the site it's in,
-the day it was created and its title, which keeps to two lines and is written
-as the header's menus write it: an icon stays and every other role is plain
-text:
+scroll the rest. Each card is the page's :ref:`banner
+<kaamiki-byline-banner>`, then the part of the site it's in, the day it was
+created and its title, which keeps to two lines and is written as the header's
+menus write it: an icon stays and every other role is plain text:
 
 .. code-block:: rst
 

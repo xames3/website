@@ -79,6 +79,14 @@ The options, one at a time.
         it, the site's ``language``.
     * - All three ``:hide-*:``
       - Leaves only the name and the picture.
+    * - ``:shade:``
+      - The colour of the banner above the title. Blue without it.
+    * - ``:fa-icon:``
+      - The icon in the banner. The title's icon without it, else none.
+    * - ``:banner:``
+      - A picture of yours in place of the gradient.
+    * - ``:hide-banner:``
+      - Leaves the banner off the page.
     * - ``:class:``
       - Extra classes.
 
@@ -168,6 +176,34 @@ All three ``:hide-*:``
         :hide-reading-time:
         :hide-copy-url:
         :hide-source:
+
+``:shade:``
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :shade: green
+
+``:fa-icon:``
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :fa-icon: fa-regular fa-compass
+
+``:banner:``
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :banner: https://i.imgur.com/RLsdjyG.jpeg
+
+``:hide-banner:``
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :hide-banner:
 
 ``:class:``
 

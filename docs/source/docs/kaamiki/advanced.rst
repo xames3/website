@@ -87,8 +87,10 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
         * - Starts with
           - What it sets
         * - ``--km-colour-``
-          - The palette: greys, the four hues and what each part of the page
-            uses, like ``--km-colour-link``, ``--km-colour-code-bg`` and the
+          - The palette: greys, the hues (``--km-colour-blue``, ``-indigo``,
+            ``-purple``, ``-red``, ``-orange``, ``-yellow``, ``-green``,
+            ``-teal`` and ``-graphite``) and what each part of the page uses,
+            like ``--km-colour-link``, ``--km-colour-code-bg`` and the
             ``--km-colour-button-*`` states. The focus ring is
             ``--km-colour-focus`` and the quiet text of bylines, captions and
             the footer is ``--km-colour-meta``, two greys that keep their
@@ -109,6 +111,12 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             ``--km-space-0-5`` is an eighth. Every margin, padding and gap of
             the theme is one of them, so a change to a step changes the rhythm
             of the whole site and scales with the reader's text size.
+        * - ``--km-banner-``
+          - The banner above a title: the space above and below it
+            (``--km-banner-gap``, ``4rem`` and ``2rem`` on a phone) and the
+            three hues of its gradient (``--km-banner-shade``,
+            ``--km-banner-before`` and ``--km-banner-after``), which each
+            ``km-banner--*`` shade sets.
         * - ``--km-backdrop-``
           - The blur and tint behind the phone's menu.
         * - ``--km-radius-``
@@ -465,8 +473,7 @@ Breadcrumbs
     nearest of them, and the name of the page itself shortens last.
 
 Motion
-    A reader who asked for less gets a still background and no animated
-    reveal.
+    A reader who asked for less gets no animated reveal.
 
 Large sites
     Sphinx draws the whole toctree on every page, so a site of thousands of

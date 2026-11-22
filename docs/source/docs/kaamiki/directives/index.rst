@@ -358,8 +358,8 @@ that moves can take its own, or none, with two options:
     * - ``:no-motion:``
       - Plays nothing in the directive: every transition and animation in it
         ends as it starts, a ``:roll:`` or a ``:sweep:`` keeps its first
-        phrase, a ``:ticker:`` shows its number and a ``byline`` keeps a still
-        background.
+        phrase and a ``:ticker:`` shows its number, as a ``byline``'s reading
+        time does.
 
 ``accordion``, ``tabs``, ``carousel``, ``byline``, ``repository`` and
 ``release`` take both. ``code-explain`` and ``code-version`` take
