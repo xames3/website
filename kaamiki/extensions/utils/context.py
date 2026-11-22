@@ -34,6 +34,8 @@ from sphinx.util import docname_join
 from sphinx.util import logging
 
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils.banner import banner
+from kaamiki.extensions.utils.banner import banners
 from kaamiki.extensions.utils.build import is_noindex
 from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.checks import fail
@@ -1064,8 +1066,9 @@ def related(
         holds the `header` of the section (`:km-related-header:`, or
         "More to read." in the language of the site) and a card for
         each page, with its `link`, `title`, `section`, `date` and
-        `image`. The image is `:km-page-image:`, else an empty
-        string. The date is the `created` date of the page, or
+        `banner`. The banner is the banner of the byline of the page,
+        else a banner in the default shade with the icon of its
+        title. The date is the `created` date of the page, or
         empty. A page with `:km-related-skip-page:` is not a card and
         gets none. A page with cards does not show the previous and
         next buttons.
@@ -1098,12 +1101,10 @@ def related(
                 str(env.doc2path(pagename)),
             )
         other = env.metadata.get(docname, {})
-        title = other.get("km-page-title") or builder.render_partial(
-            env.titles[docname]
-        ).get("title", "")
-        image = other.get("km-page-image") or ""
-        if image:
-            image = context["pathto"](image.lstrip("/"), 1)
+        rendered = builder.render_partial(env.titles[docname])
+        title = other.get("km-page-title") or rendered.get("title", "")
+        glyph = first_glyph(rendered.get("title", ""))
+        drawn = banner(env, docname, glyph).linked(context["pathto"])
         iso = day(other.get("created", ""))
         cards.append(
             {
@@ -1114,7 +1115,7 @@ def related(
                 "date": dated(datetime.fromisoformat(iso), app.config)
                 if iso
                 else "",
-                "image": image,
+                "banner": drawn._asdict(),
             }
         )
     if cards:
@@ -1187,7 +1188,7 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
                 name,
                 env.titles[name].astext() if name in env.titles else None,
                 env.metadata.get(name, {}).get("km-page-title"),
-                env.metadata.get(name, {}).get("km-page-image"),
+                banners(env).get(name),
                 env.metadata.get(name, {}).get("created"),
                 section_of(app, name),
             )

@@ -6,9 +6,10 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 November 2026
 Last updated on: 22 November 2026
 #}
-{%- macro km_banner(km_found, km_lazy=false) -%}
+{%- macro km_banner(km_found, km_mix="", km_lazy=false) -%}
+    {%- set km_also = " " ~ km_mix if km_mix else "" -%}
     {%- if km_found.picture %}
-        <div class="km-banner km-banner--picture"
+        <div class="km-banner km-banner--picture{{ km_also }}"
              aria-hidden="true">
             <img class="km-banner__picture"
                  src="{{ km_found.picture|e }}"
@@ -19,7 +20,7 @@ Last updated on: 22 November 2026
                  decoding="async" />
         </div>
     {%- else %}
-        <div class="km-banner km-banner--{{ km_found.shade }}"
+        <div class="km-banner km-banner--{{ km_found.shade }}{{ km_also }}"
              aria-hidden="true">
             <svg class="km-banner__grid"
                  viewBox="0 0 1600 900"

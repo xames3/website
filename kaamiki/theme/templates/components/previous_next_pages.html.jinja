@@ -6,6 +6,7 @@ Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
 Last updated on: 22 November 2026
 #}
+{%- from "components/banner.html.jinja" import km_banner -%}
 {%- from "components/chevron.html.jinja" import km_chevron_icon -%}
 {%- macro km_related_section(km_related) -%}
     {%- set km_head = km_related.header -%}
@@ -23,16 +24,7 @@ Last updated on: 22 November 2026
             {%- for km_card in km_related.cards %}
                 <a class="km-related__card"
                    href="{{ km_card.link|e }}">
-                    <span class="km-related__image">
-                        {%- if km_card.image %}
-                            <img src="{{ km_card.image|e }}"
-                                 alt=""
-                                 width="1280"
-                                 height="720"
-                                 loading="lazy"
-                                 decoding="async" />
-                        {%- endif %}
-                    </span>
+                    {{ km_banner(km_card.banner, "km-related__banner", true) }}
                     <span class="km-related__meta">
                         {%- if km_card.section %}<span>{{ km_card.section|e }}</span>{%- endif %}
                         {%- if km_card.section and km_card.date %}

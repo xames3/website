@@ -171,23 +171,8 @@
     text-decoration: none;
 }
 
-.km-related__image {
-    position: relative;
-    display: block;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
+.km-related__banner {
     border-radius: var(--km-radius-tiny);
-    background-color: hsl(var(--km-colour-surface-baseline));
-    border: 1px solid hsl(var(--km-colour-border));
-
-    & img {
-        display: block;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        object-fit: cover;
-        filter: grayscale(100%);
-    }
 }
 
 .km-related__meta {
