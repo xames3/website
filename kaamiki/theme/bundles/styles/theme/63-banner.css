@@ -24,11 +24,6 @@
     container-type: inline-size;
     border-radius: var(--km-radius-normal);
     background:
-        radial-gradient(
-            closest-side,
-            hsl(var(--km-colour-black) / 0.24),
-            transparent
-        ),
         linear-gradient(
             135deg,
             color-mix(
@@ -92,6 +87,11 @@
     font-size: 27cqw;
     line-height: 1;
     opacity: 0.92;
+
+    &::before,
+    &::after {
+        grid-area: 1 / 1;
+    }
 }
 
 .km-banner--picture {
