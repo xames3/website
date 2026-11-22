@@ -190,28 +190,6 @@
     }
 }
 
-.km-related__waves {
-    --km-wave-a: 20rem;
-    --km-wave-b: 30rem;
-    --km-wave-c: 15rem;
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    opacity: 0.75;
-
-    & .km-byline__wave {
-        animation: none;
-    }
-
-    & .km-byline__wave--b {
-        top: var(--km-space-3);
-    }
-
-    & .km-byline__wave--c {
-        top: var(--km-space-6);
-    }
-}
-
 .km-related__meta {
     display: flex;
     flex-wrap: wrap;

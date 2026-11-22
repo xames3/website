@@ -1,9 +1,8 @@
 /*
 Light mode. The values of every colour token that has another value in light,
-and the filter that turns the byline's white waves dark, once for
-`data-km-mode="light"` and once for `system` on a device that is light. Dark
-has no block: it is what the tokens say, and only the colour scheme is set for
-a reader who picked it. Keep the two blocks the same.
+once for `data-km-mode="light"` and once for `system` on a device that is
+light. Dark has no block: it is what the tokens say, and only the colour scheme
+is set for a reader who picked it. Keep the two blocks the same.
 */
 :root[data-km-mode="dark"] {
     color-scheme: dark;
@@ -25,7 +24,6 @@ a reader who picked it. Keep the two blocks the same.
     --km-colour-text-down-4: 0 0% 40%;
     --km-colour-focus: 0 0% 92%;
     --km-colour-highlight: 211.25 97.96% 90%;
-    --km-byline-wave-filter: invert(1);
     --km-colour-list-ring: 0 0% 80%;
     --km-colour-diff-added-bg: 142 71% 45% / 0.2;
     --km-colour-diff-added-fg: 142 80% 17%;
@@ -78,7 +76,6 @@ a reader who picked it. Keep the two blocks the same.
         --km-colour-text-down-4: 0 0% 40%;
         --km-colour-focus: 0 0% 92%;
         --km-colour-highlight: 211.25 97.96% 90%;
-        --km-byline-wave-filter: invert(1);
         --km-colour-list-ring: 0 0% 80%;
         --km-colour-diff-added-bg: 142 71% 45% / 0.2;
         --km-colour-diff-added-fg: 142 80% 17%;

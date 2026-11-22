@@ -4,7 +4,7 @@ Byline Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 15 November 2026
+Last updated on: 22 November 2026
 
 A `byline` directive that draws the byline below the title of a page::
 
@@ -53,31 +53,6 @@ if t.TYPE_CHECKING:
     from sphinx.writers.html import HTMLTranslator
 
 template: t.Final[str] = "directives/byline.html.jinja"
-BACKDROPS: t.Final[int] = 8
-
-
-def backdrops(argument: str | None) -> str:
-    """Check the pictures to fade through, one address each.
-
-    :param argument: The addresses as written, with a comma between
-        each.
-    :return: The addresses, with a space between each.
-    :raises ValueError: For a value that is not an address, an address
-        two times, or more than `BACKDROPS` addresses.
-    """
-    found = [_.strip() for _ in (argument or "").split(",")]
-    if not all(found) or len(found) > BACKDROPS:
-        raise ValueError(
-            f"expected one to {BACKDROPS} addresses split by commas, got"
-            f" {argument!r}"
-        )
-    for each in found:
-        checks.picture(each)
-    if len(set(found)) != len(found):
-        raise ValueError(
-            f"expected addresses that are all different, got {argument!r}"
-        )
-    return " ".join(found)
 
 
 def source_url(self: HTMLTranslator) -> str:
@@ -118,15 +93,9 @@ class Byline(KaamikiDirective, motion=True):
 
         - `avatar`: The URL of the picture of the author.
         - `target`: The link of the name, as a profile or a mailto.
-          A path starts at the top of the site, as for `avatar` and
-          `backdrop`.
-        - `backdrop`: One or more image URLs, with a comma between
-          each. They fade one into the next behind the title.
+          A path starts at the top of the site, as for `avatar`.
         - `avatar-size`: The width and height of the picture in
           pixels, from 16 to 64. The default is 20.
-        - `interval`: The seconds that each backdrop shows, from 2
-          to 15. It needs two or more `backdrop` pictures. The
-          default is 7.
         - `align`: Where the byline is, `left`, `center` or
           `right`. Only `left` puts the author, the reading time,
           the language and the copy button in one row. On a phone,
@@ -152,9 +121,7 @@ class Byline(KaamikiDirective, motion=True):
     final_argument_whitespace = True
     avatar = Option(checks.link)
     target = Option(checks.link)
-    backdrop = Option(backdrops, default="")
     avatar_size = Option(checks.integer(*map(int, BOUNDS["avatar_size"])))
-    interval = Option(checks.number(*BOUNDS["interval"]))
     align = Option(checks.word(*ALIGNMENTS), default="left")
     hide_reading_time = Option(rst.directives.flag)
     hide_copy_url = Option(rst.directives.flag)
@@ -169,8 +136,6 @@ class Byline(KaamikiDirective, motion=True):
         if self.env.temp_data.get("km_byline"):
             self.fail("expected once on a page, got it twice")
         self.env.temp_data["km_byline"] = True
-        if self.interval is not None and len(self.backdrop.split()) < 2:
-            self.fail(":interval: needs two or more :backdrop: pictures")
         project = values(self.config).site.project
         if self.avatar_size is not None and not (
             self.avatar or project.get("avatar")
@@ -184,8 +149,7 @@ class Byline(KaamikiDirective, motion=True):
             checker, and what the parser reported. `visit` adds the
             rest from `kaamiki.conf.site.project`. The name also
             becomes the author of the page, if its `.. Author:` comment
-            names none. The first backdrop is a fallback for the social
-            image of the page.
+            names none.
         """
         written = self.arguments.pop().strip()
         options = self.options
@@ -203,8 +167,6 @@ class Byline(KaamikiDirective, motion=True):
         worded(self, words, "a name")
         metadata = self.env.metadata.setdefault(self.env.docname, {})
         metadata.setdefault("author", words.astext().strip() or written)
-        if pictures := self.backdrop.split():
-            metadata.setdefault("km-page-backdrop", pictures[0])
         node = self.locate(self.Node("", words, **options))
         self.add_name(node)
         return [node, *trail(self, options), *messages]
@@ -239,13 +201,6 @@ def visit(self: HTMLTranslator, node: Byline.Node) -> None:
     )
     avatar = attributes.get("avatar") or project["avatar"]
     attributes["avatar"] = relative_to_page(self, avatar)
-    backdrop = attributes.get("backdrop", "").split()
-    pictures = [relative_to_page(self, _) for _ in backdrop]
-    attributes["data"] = {"data-km-backdrop": " ".join(pictures) or None}
-    if pictures and "interval" in attributes:
-        attributes["data"]["data-km-interval"] = round(
-            attributes["interval"] * 1000
-        )
     self.body.append(render(template, optional=optional(node), **attributes))
     raise nodes.SkipNode
 

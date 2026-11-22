@@ -36,19 +36,6 @@
         return Math.max(0, hold - TIMING.titleSkip());
     }
 
-    function afterLoading(callback) {
-        if (!root.classList.contains('km-document--loading')) {
-            callback();
-            return;
-        }
-        const watcher = new MutationObserver(() => {
-            if (root.classList.contains('km-document--loading')) return;
-            watcher.disconnect();
-            callback();
-        });
-        watcher.observe(root, { attributes: true, attributeFilter: ['class'] });
-    }
-
     function initPageReveal() {
         if (prefersReducedMotion() || arrival() === 'history') return;
         const title = new Set(markTitle());

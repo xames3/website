@@ -8,7 +8,6 @@
         initInkReveal,
         initTranscripts,
         initPageReveal,
-        initBylineBackground,
     } = window.Kaamiki;
     Object.freeze(window.Kaamiki);
     for (const init of [
@@ -22,7 +21,6 @@
         initScrollTop,
         initTabSets,
         initCarousels,
-        initRelatedPictures,
         initShowMore,
         initHeaderSearch,
         initAnchorScrolling,
@@ -54,7 +52,6 @@
         initInkReveal,
         initTranscripts,
         initPageReveal,
-        initBylineBackground,
         initSearchHighlights,
     ]) {
         try {

@@ -4,7 +4,7 @@ Social Metadata
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 15 November 2026
+Last updated on: 22 November 2026
 
 The handler that finds the Open Graph and Twitter values of a page.
 """
@@ -89,8 +89,7 @@ def social_metadata(
         the lead, the words of a generated page, the `description` of
         the site, and the first paragraph. Only the title arrives as
         HTML, so only it loses its tags. The image is
-        `:km-page-image:`, then `:km-page-backdrop:` (from the first
-        `:backdrop:` of a `byline`), then the `image` of the site. A
+        `:km-page-image:`, then the `image` of the site. A
         relative image path becomes absolute, because link previews
         ignore relative paths.
     :param pagename: The page that is written.
@@ -117,11 +116,7 @@ def social_metadata(
         or options.get("description", "")
         or summarise(doctree, limit)
     )
-    image = (
-        meta.get("km-page-image")
-        or meta.get("km-page-backdrop")
-        or options.get("image", "")
-    )
+    image = meta.get("km-page-image") or options.get("image", "")
     alt = meta.get("km-page-image-alt") or (
         options.get("image_alt", "") if image == options.get("image") else ""
     )

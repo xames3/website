@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Bylines, option by option
 :km-page-description: Every option of the byline directive, with icons and
@@ -79,11 +79,6 @@ The options, one at a time.
         it, the site's ``language``.
     * - All three ``:hide-*:``
       - Leaves only the name and the picture.
-    * - ``:backdrop:``
-      - One to eight pictures that fade through behind the title.
-    * - ``:backdrop:`` and ``:interval:``
-      - Two pictures, each for 4 seconds. ``:interval:`` needs two or
-        more.
     * - ``:class:``
       - Extra classes.
 
@@ -173,22 +168,6 @@ All three ``:hide-*:``
         :hide-reading-time:
         :hide-copy-url:
         :hide-source:
-
-``:backdrop:``
-
-.. code-block:: rst
-
-    .. byline:: @xames3
-        :backdrop: https://i.imgur.com/RLsdjyG.jpeg
-
-``:backdrop:`` and ``:interval:``
-
-.. code-block:: rst
-
-    .. byline:: @xames3
-        :backdrop: https://i.imgur.com/RLsdjyG.jpeg,
-            https://i.imgur.com/BPxkNzC.jpeg
-        :interval: 4
 
 ``:class:``
 

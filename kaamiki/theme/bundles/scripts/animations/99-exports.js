@@ -18,6 +18,5 @@
         initInkReveal,
         initTranscripts,
         initPageReveal,
-        initBylineBackground,
     });
 })();

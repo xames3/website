@@ -393,15 +393,11 @@ sidebar is the navigation from 768px and the header holds no list.
         animation: none;
     }
 
-    .km-byline__bg,
-    .km-byline__bg::before,
-    .km-byline__wave,
     .km-sharpie,
     .km-pencil {
         animation: none;
     }
 
-    .km-byline__bg,
     .km-page__more::before,
     .km-accordion__more::before {
         transition: none;

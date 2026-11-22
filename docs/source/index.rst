@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 22 February 2025
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Akshay Mestry
 :km-page-description: Stories from what I build, explainers and notes from
@@ -26,11 +26,6 @@ Akshay Mestry
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
-    :backdrop: https://i.imgur.com/JOBRcgT.jpg,
-        https://i.imgur.com/hUhxigb.jpeg,
-        https://i.imgur.com/gcGHqxi.jpg,
-        https://i.imgur.com/weM4qDW.jpg,
-        https://i.imgur.com/aIQD5Bx.jpeg
 
 .. rst-class:: am-greeting
 

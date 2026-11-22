@@ -276,30 +276,3 @@
         });
     }
 
-    function initRelatedPictures() {
-        const waves = () => {
-            const holder = document.createElement('span');
-            holder.className = 'km-related__waves';
-            holder.setAttribute('aria-hidden', 'true');
-            ['a', 'b', 'c'].forEach((wave) => {
-                const layer = document.createElement('span');
-                layer.className = `km-byline__wave km-byline__wave--${wave}`;
-                holder.append(layer);
-            });
-            return holder;
-        };
-        const swap = (image) => image.replaceWith(waves());
-        document.querySelectorAll('.km-related__image > img').forEach(
-            (image) => {
-                if (image.complete && image.naturalWidth === 0
-                    && image.currentSrc) {
-                    swap(image);
-                } else {
-                    image.addEventListener('error', () => swap(image), {
-                        once: true,
-                    });
-                }
-            },
-        );
-    }
-

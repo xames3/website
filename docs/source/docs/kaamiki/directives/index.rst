@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Kaamiki directives
 :km-page-description: The directives Kaamiki adds to reStructuredText, shown
@@ -219,7 +219,7 @@ it stops the build. That's the right word and the right case, a number inside
 the range, an address, an icon, a colour or a class written the way it takes.
 A misspelt option, a value that isn't one, a number that's valid but absurd
 (``:gap: 9999rem``), an empty body and options that don't go together
-(``:interval:`` without a second ``:backdrop:``, ``:end:`` before
+(``:icon-position:`` without ``:fa-icon:``, ``:end:`` before
 ``:start:``) are all errors. Nothing is clamped, corrected or guessed.
 
 The message is Kaamiki's own. It names the file and the line and says what it

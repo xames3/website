@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 19 November 2026
+Last updated on: 22 November 2026
 
 The utilities that fill the context of a page for the templates. The
 templates read one read-only value, `kaamiki`, with the paths of
@@ -317,7 +317,6 @@ FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
     "km-feedback-type": checks.word("mail", "link"),
     "km-feedback-url": checks.link,
     "km-header-subheader": functools.partial(checks.text, maximum=120),
-    "km-page-backdrop": checks.picture,
     "km-page-card": checks.word(*CARDS),
     "km-page-description": functools.partial(checks.text, maximum=300),
     "km-page-image": checks.link,
@@ -1055,9 +1054,8 @@ def related(
         holds the `header` of the section (`:km-related-header:`, or
         "More to read." in the language of the site) and a card for
         each page, with its `link`, `title`, `section`, `date` and
-        `image`. The image is `:km-page-image:`, then
-        `:km-page-backdrop:`, else an empty string, which the template
-        draws as waves. The date is the `created` date of the page, or
+        `image`. The image is `:km-page-image:`, else an empty
+        string. The date is the `created` date of the page, or
         empty. A page with `:km-related-skip-page:` is not a card and
         gets none. A page with cards does not show the previous and
         next buttons.
@@ -1093,9 +1091,7 @@ def related(
         title = other.get("km-page-title") or builder.render_partial(
             env.titles[docname]
         ).get("title", "")
-        image = (
-            other.get("km-page-image") or other.get("km-page-backdrop") or ""
-        )
+        image = other.get("km-page-image") or ""
         if image:
             image = context["pathto"](image.lstrip("/"), 1)
         iso = day(other.get("created", ""))
@@ -1182,7 +1178,6 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
                 env.titles[name].astext() if name in env.titles else None,
                 env.metadata.get(name, {}).get("km-page-title"),
                 env.metadata.get(name, {}).get("km-page-image"),
-                env.metadata.get(name, {}).get("km-page-backdrop"),
                 env.metadata.get(name, {}).get("created"),
                 section_of(app, name),
             )

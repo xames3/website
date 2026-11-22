@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 16 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: The byline directive
 :km-page-description: Show who wrote a page, how long it takes to read and a
@@ -69,8 +69,6 @@ The directive also tells the rest of the page about itself:
 - The name becomes the page's author, which is written into the ``author`` tag
   and, for an ``article``, into the link preview. A ``.. Author:`` comment at
   the top of the file wins when it names someone.
-- The first ``:backdrop:`` becomes the page's preview picture, unless the
-  page sets ``:km-page-image:``.
 - The reading time counts the prose on the page, using
   ``kaamiki.conf.site.words_per_minute``, and a set of tabs counts as its
   longest tab. It's never shown as less than one minute.
@@ -102,29 +100,6 @@ A page can say its own with the page field ``:km-page-language:``, like
 Without ``:show-language:`` the byline says nothing about it. With it, the
 byline leaves the language out when it would make the row wrap, on a narrow
 phone or beside a long name, and shows it again once there's room.
-
-.. _kaamiki-byline-backdrops:
-
--------------------------------------------------------------------------------
-Pictures that fade behind the title.
--------------------------------------------------------------------------------
-
-Give ``:backdrop:`` several pictures and they fade into each other behind the
-page's title, the way a home page can. ``:interval:`` is how many
-seconds each stays:
-
-.. code-block:: rst
-
-    .. byline:: @xames3
-        :backdrop: https://example.com/one.jpg,
-            https://example.com/two.jpg
-        :interval: 10
-
-Paths that aren't full addresses count from the top of your site, so
-``_static/cover.png`` is the same picture from every page.
-
-A page without a ``:backdrop:`` gets a faint glow in the same place, so the
-room above its title never looks empty.
 
 .. _kaamiki-hide-what-you-dont-need:
 
@@ -160,21 +135,13 @@ Every option.
             in your ``kaamiki.conf.site.project`` setting.
         * - ``:target:``
           - Where the name links to, a profile or a ``mailto:`` link. A path
-            counts from the top of the site, like ``:avatar:`` and
-            ``:backdrop:``. Falls back to ``source`` in
+            counts from the top of the site, like ``:avatar:``. Falls back to
+            ``source`` in
             ``kaamiki.conf.site.project``.
         * - ``:avatar-size:``
           - The picture's width and height in pixels, from 16 to 64. Defaults
             to 20. It needs an avatar, from ``:avatar:`` or
             ``kaamiki.conf.site.project``.
-        * - ``:backdrop:``
-          - One to eight picture addresses, all different and each a
-            ``.jpg``, ``.jpeg``, ``.png``, ``.webp``, ``.avif``, ``.gif`` or
-            ``.svg``,
-            separated by commas, that fade through behind the title.
-        * - ``:interval:``
-          - How many seconds each backdrop stays, from 2 to 15. Defaults to
-            7. It needs two or more backdrops, since one never changes.
         * - ``:align:``
           - Where the byline sits: ``left``, ``center`` or ``right``. Only
             ``left`` puts the author, the reading time, the language (when
