@@ -64,9 +64,9 @@ class Banner(t.NamedTuple):
         """Use the icon of the title when the byline gives none.
 
         :param glyph: The classes of the first icon of the title.
-        :param style: The style to draw it in, as `light`, or `None`
-            to keep its own. `duotone` is the duotone solid icon. A
-            brand keeps its own.
+        :param style: The style to draw it in, as `light` or
+            `duotone regular`, or `None` to keep its own. `duotone`
+            alone is `duotone solid`. A brand keeps its own.
         :return: The banner with an icon, or the same banner.
         """
         if self.icon or not glyph:
@@ -81,9 +81,12 @@ class Banner(t.NamedTuple):
             rest = [
                 _ for _ in icon if _ not in checks.FAMILIES | checks.STYLES
             ]
-            if style == "duotone":
-                families, style = ["fa-duotone"], "solid"
-            icon = [*families, f"fa-{style}", *rest]
+            family, _, weight = style.rpartition(" ")
+            if weight == "duotone":
+                family, weight = weight, "solid"
+            if family:
+                families = [f"fa-{family}"]
+            icon = [*families, f"fa-{weight}", *rest]
         return self._replace(icon=" ".join(icon))
 
     def linked(self, pathto: Callable[..., str]) -> Banner:

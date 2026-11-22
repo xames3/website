@@ -1118,9 +1118,10 @@ so a preview from another address gets no kit.
           - ``"regular"``
           - The style of the title's icon on a byline's banner and on the
             cards that link to the page. Takes ``solid``, ``regular``,
-            ``light``, ``thin`` or ``duotone``, the duotone solid icon with its
-            second layer faded. It needs a kit: without one, the icon keeps
-            the title's style. A brand stays a brand, and a byline's own
+            ``light`` or ``thin``, or one of them after ``duotone``, as
+            ``"duotone regular"``, for a duotone icon with its second layer
+            faded. ``duotone`` alone is ``duotone solid``. It needs a kit:
+            without one, the icon keeps the title's style. A brand stays a brand, and a byline's own
             ``:fa-icon:`` is drawn as written.
 
 Without a kit, Kaamiki keeps to what Font Awesome Free has. Free draws far

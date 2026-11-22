@@ -93,10 +93,15 @@ towards the edges. A title without an icon gets a banner without one.
 
 ``:shade:`` picks its colour and ``:fa-icon:`` its icon. The title's icon is
 drawn in ``kaamiki.conf.byline.icon_style``, ``regular`` unless you change it,
-when the site has a kit. ``duotone`` draws it in two layers, the second one
-faded. ``:fa-icon:`` is drawn as written, and it's checked as
-a :doc:`button's <button>` is, so a site with a kit gets Pro icons and one
-without gets Free:
+when the site has a kit. A duotone style, as ``"duotone regular"``, draws it
+in two layers, the second one faded:
+
+.. code-block:: python
+
+    kaamiki.conf.byline.icon_style = "duotone regular"
+
+``:fa-icon:`` is drawn as written, and it's checked as a :doc:`button's
+<button>` is, so a site with a kit gets Pro icons and one without gets Free:
 
 .. code-block:: rst
 

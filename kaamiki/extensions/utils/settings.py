@@ -826,7 +826,17 @@ class Byline(Settings):
 
     icon_style = Value(
         "regular",
-        choices=("solid", "regular", "light", "thin", "duotone"),
+        choices=(
+            "solid",
+            "regular",
+            "light",
+            "thin",
+            "duotone",
+            "duotone solid",
+            "duotone regular",
+            "duotone light",
+            "duotone thin",
+        ),
         reread=True,
     )
 
