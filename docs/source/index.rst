@@ -26,6 +26,7 @@ Akshay Mestry
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
+    :banner: kaamiki-3200x1800.png
 
 .. rst-class:: am-greeting
 
