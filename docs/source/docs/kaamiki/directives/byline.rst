@@ -88,8 +88,8 @@ A banner above the title.
 
 The byline puts a banner above the page's title, and every card that links to
 the page shows it too. Without options it's a blue gradient with the first icon
-of the page's title in the middle, over a faint ring and grid. A title without
-an icon gets a banner without one.
+of the page's title in the middle, over faint rings and guides that fade out
+towards the edges. A title without an icon gets a banner without one.
 
 ``:shade:`` picks its colour and ``:fa-icon:`` its icon. The icon is written
 and checked as a :doc:`button's <button>` is, so a site with a kit gets Pro

@@ -9,7 +9,13 @@
     );
     --km-banner-line: color-mix(
         in oklch,
-        var(--km-banner-ink) 26%,
+        var(--km-banner-ink) 55%,
+        transparent
+    );
+    --km-banner-fade: radial-gradient(
+        ellipse 58% 80% at 50% 50%,
+        hsl(var(--km-colour-black)) 30%,
+        hsl(var(--km-colour-black) / 0.45) 65%,
         transparent
     );
     position: relative;
@@ -46,21 +52,6 @@
                 hsl(var(--km-colour-black)) 18%
             )
         );
-
-    &::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(
-            circle,
-            var(--km-banner-line) 1px,
-            transparent 1.5px
-        );
-        background-position: center;
-        background-size: 4cqw 4cqw;
-        mask-image: radial-gradient(closest-side, black, transparent);
-        -webkit-mask-image: radial-gradient(closest-side, black, transparent);
-    }
 }
 
 .km-page > .km-banner {
@@ -80,26 +71,29 @@
     stroke: var(--km-banner-line);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
+    mask-image: var(--km-banner-fade);
+    -webkit-mask-image: var(--km-banner-fade);
 
     & * {
         vector-effect: non-scaling-stroke;
     }
 }
 
+.km-banner__dashes {
+    stroke-dasharray: 5 7;
+    opacity: 0.75;
+}
+
 .km-banner__icon {
     position: relative;
     color: var(--km-banner-ink);
-    font-size: 22cqw;
+    font-size: 27cqw;
     line-height: 1;
     opacity: 0.92;
 }
 
 .km-banner--picture {
     background: hsl(var(--km-colour-surface-up-2));
-
-    &::before {
-        display: none;
-    }
 }
 
 .km-banner__picture {
