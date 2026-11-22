@@ -86,12 +86,9 @@
     }
 
     .km-header.km-title-item,
+    .km-banner.km-title-item,
     .km-breadcrumbs.km-title-item {
         --km-title-index: 0;
-    }
-
-    .km-banner.km-title-item {
-        --km-title-index: 1;
     }
 
     .km-byline.km-title-item {

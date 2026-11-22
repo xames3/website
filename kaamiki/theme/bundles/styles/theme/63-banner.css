@@ -64,11 +64,11 @@
 }
 
 .km-page > .km-banner {
-    margin-block: var(--km-banner-gap);
+    margin-top: calc(var(--km-space-8) + var(--km-space-0-5));
 }
 
 .km-banner + .km-breadcrumbs {
-    margin-top: 0;
+    margin-top: var(--km-space-6);
 }
 
 .km-banner__grid {

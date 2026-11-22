@@ -1,6 +1,5 @@
 @media (width < 768px) {
     :root {
-        --km-banner-gap: var(--km-space-8);
         --km-weight-lead: 414;
         --km-tracking-h2: -0.03em;
     }

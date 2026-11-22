@@ -112,11 +112,9 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             the theme is one of them, so a change to a step changes the rhythm
             of the whole site and scales with the reader's text size.
         * - ``--km-banner-``
-          - The banner above a title: the space above and below it
-            (``--km-banner-gap``, ``4rem`` and ``2rem`` on a phone) and the
-            three hues of its gradient (``--km-banner-shade``,
-            ``--km-banner-before`` and ``--km-banner-after``), which each
-            ``km-banner--*`` shade sets.
+          - The three hues of the gradient of the banner above a title
+            (``--km-banner-shade``, ``--km-banner-before`` and
+            ``--km-banner-after``), which each ``km-banner--*`` shade sets.
         * - ``--km-backdrop-``
           - The blur and tint behind the phone's menu.
         * - ``--km-radius-``

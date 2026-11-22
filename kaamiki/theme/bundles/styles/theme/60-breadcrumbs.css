@@ -9,7 +9,7 @@
     min-width: 0;
     max-width: 100%;
     gap: var(--km-space-2);
-    margin: var(--km-banner-gap) 0 var(--km-space-4);
+    margin: var(--km-space-12) 0 var(--km-space-4);
     font-size: var(--km-font-size-down-2);
     --km-tracking: var(--km-tracking-small);
     color: hsl(var(--km-colour-nav-fg));
