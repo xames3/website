@@ -12,6 +12,7 @@ A `byline` directive that draws the byline below the title of a page::
        :avatar: https://example.com/avatar.png
        :target: https://github.com/xames3
        :avatar-size: 24
+       :shade: orange
 
 Put it on the page itself, one time. An `only` is part of the page. A
 container and the content of a different directive are not.
@@ -44,12 +45,19 @@ from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
 from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
+from kaamiki.extensions.utils.banner import SHADE
+from kaamiki.extensions.utils.banner import SHADES
+from kaamiki.extensions.utils.banner import Banner
+from kaamiki.extensions.utils.banner import banners
+from kaamiki.extensions.utils.context import first_glyph
+from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import ALIGNMENTS
 from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import NAME
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
+    from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.writers.html import HTMLTranslator
 
 template: t.Final[str] = "directives/byline.html.jinja"
@@ -96,6 +104,15 @@ class Byline(KaamikiDirective, motion=True):
           A path starts at the top of the site, as for `avatar`.
         - `avatar-size`: The width and height of the picture in
           pixels, from 16 to 64. The default is 20.
+        - `banner`: The URL of a picture above the title. Without
+          it, the banner is a gradient in `shade` with the icon.
+        - `shade`: The colour of the gradient, one of `blue`,
+          `indigo`, `purple`, `red`, `orange`, `yellow`, `green`,
+          `teal` or `graphite`. The default is `blue`.
+        - `fa-icon`: A Font Awesome icon for the gradient, as on a
+          button. The default is the first icon of the title, else
+          no icon.
+        - `hide-banner`: Do not show the banner.
         - `align`: Where the byline is, `left`, `center` or
           `right`. Only `left` puts the author, the reading time,
           the language and the copy button in one row. On a phone,
@@ -122,6 +139,10 @@ class Byline(KaamikiDirective, motion=True):
     avatar = Option(checks.link)
     target = Option(checks.link)
     avatar_size = Option(checks.integer(*map(int, BOUNDS["avatar_size"])))
+    banner = Option(checks.picture)
+    shade = Option(checks.word(*SHADES), default=SHADE)
+    fa_icon = Option(checks.icon)
+    hide_banner = Option(rst.directives.flag)
     align = Option(checks.word(*ALIGNMENTS), default="left")
     hide_reading_time = Option(rst.directives.flag)
     hide_copy_url = Option(rst.directives.flag)
@@ -141,6 +162,13 @@ class Byline(KaamikiDirective, motion=True):
             self.avatar or project.get("avatar")
         ):
             self.fail(":avatar-size: needs an avatar")
+        given = [
+            _ for _ in ("banner", "shade", "fa-icon") if _ in self.options
+        ]
+        if self.hide_banner and given:
+            self.fail(f":{given[0]}: not allowed with :hide-banner:")
+        if self.banner and len(given) > 1:
+            self.fail(f":{given[1]}: not allowed with :banner:")
 
     def build(self) -> list[nodes.Node]:
         """Keep the values on the node, and name the author.
@@ -149,7 +177,7 @@ class Byline(KaamikiDirective, motion=True):
             checker, and what the parser reported. `visit` adds the
             rest from `kaamiki.conf.site.project`. The name also
             becomes the author of the page, if its `.. Author:` comment
-            names none.
+            names none. The banner is kept for the page.
         """
         written = self.arguments.pop().strip()
         options = self.options
@@ -167,6 +195,13 @@ class Byline(KaamikiDirective, motion=True):
         worded(self, words, "a name")
         metadata = self.env.metadata.setdefault(self.env.docname, {})
         metadata.setdefault("author", words.astext().strip() or written)
+        try:
+            icon = Icons.of(self.config).custom(self.fa_icon)
+        except ValueError as error:
+            self.fail(f":fa-icon: {error}")
+        banners(self.env)[self.env.docname] = Banner(
+            self.shade, icon, self.banner or "", self.hide_banner
+        )
         node = self.locate(self.Node("", words, **options))
         self.add_name(node)
         return [node, *trail(self, options), *messages]
@@ -213,20 +248,29 @@ def html_page_context(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Name the author of the page for the `<head>`.
+    """Name the author of the page and find its banner.
 
     :param app: The Sphinx application instance. The `.. Author:`
         comment or the byline comes first, then the author of the
-        project.
+        project. `kaamiki.page.banner` is the banner of the byline,
+        or `None` without a byline or with `:hide-banner:`.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
     :param doctree: The resolved doctree, or `None` for a generated
         page.
     """
-    del app, pagename, templatename, doctree
+    del templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
     found = context[NAME]
     found["page.author"] = meta.get("author") or found.site.project.get(
         "author"
     )
+    held = banners(app.env).get(pagename)
+    found["page.banner"] = None
+    if held and not held.hidden:
+        builder = t.cast("StandaloneHTMLBuilder", app.builder)
+        title = builder.render_partial(app.env.titles[pagename])
+        glyph = first_glyph(title.get("title", ""))
+        drawn = held.titled(glyph).linked(context["pathto"])
+        found["page.banner"] = drawn._asdict()

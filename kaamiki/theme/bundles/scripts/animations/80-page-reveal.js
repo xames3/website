@@ -17,6 +17,7 @@
         if (!heading) return [];
         const items = [
             document.querySelector('.km-header'),
+            document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
             heading,
             ...Array.from(heading.parentElement.children).filter((child) => (
@@ -41,6 +42,7 @@
         const title = new Set(markTitle());
         const blocks = [
             document.querySelector('.km-header'),
+            document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
             ...revealBlocks(document.getElementById('km-content')),
             document.querySelector('.km-feedback-section'),

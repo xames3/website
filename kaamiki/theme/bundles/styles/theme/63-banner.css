@@ -1,0 +1,159 @@
+.km-banner {
+    --km-banner-shade: var(--km-colour-blue);
+    --km-banner-before: var(--km-colour-indigo);
+    --km-banner-after: var(--km-colour-teal);
+    --km-banner-ink: color-mix(
+        in oklch,
+        hsl(var(--km-banner-shade)),
+        hsl(var(--km-colour-white)) 62%
+    );
+    --km-banner-line: color-mix(
+        in oklch,
+        var(--km-banner-ink) 26%,
+        transparent
+    );
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    container-type: inline-size;
+    border-radius: var(--km-radius-normal);
+    background:
+        radial-gradient(
+            closest-side,
+            hsl(var(--km-colour-black) / 0.24),
+            transparent
+        ),
+        linear-gradient(
+            135deg,
+            color-mix(
+                in oklch,
+                color-mix(
+                    in oklch,
+                    hsl(var(--km-banner-shade)),
+                    hsl(var(--km-banner-before)) 35%
+                ),
+                hsl(var(--km-colour-black)) 22%
+            ),
+            color-mix(
+                in oklch,
+                color-mix(
+                    in oklch,
+                    hsl(var(--km-banner-shade)),
+                    hsl(var(--km-banner-after)) 35%
+                ),
+                hsl(var(--km-colour-black)) 18%
+            )
+        );
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(
+            circle,
+            var(--km-banner-line) 1px,
+            transparent 1.5px
+        );
+        background-position: center;
+        background-size: 4cqw 4cqw;
+        mask-image: radial-gradient(closest-side, black, transparent);
+        -webkit-mask-image: radial-gradient(closest-side, black, transparent);
+    }
+}
+
+.km-page > .km-banner {
+    margin-block: var(--km-banner-gap);
+}
+
+.km-banner + .km-breadcrumbs {
+    margin-top: 0;
+}
+
+.km-banner__grid {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: var(--km-banner-line);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+
+    & * {
+        vector-effect: non-scaling-stroke;
+    }
+}
+
+.km-banner__icon {
+    position: relative;
+    color: var(--km-banner-ink);
+    font-size: 22cqw;
+    line-height: 1;
+    opacity: 0.92;
+}
+
+.km-banner--picture {
+    background: hsl(var(--km-colour-surface-up-2));
+
+    &::before {
+        display: none;
+    }
+}
+
+.km-banner__picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    object-fit: cover;
+}
+
+.km-banner--indigo {
+    --km-banner-shade: var(--km-colour-indigo);
+    --km-banner-before: var(--km-colour-purple);
+    --km-banner-after: var(--km-colour-blue);
+}
+
+.km-banner--purple {
+    --km-banner-shade: var(--km-colour-purple);
+    --km-banner-before: var(--km-colour-red);
+    --km-banner-after: var(--km-colour-indigo);
+}
+
+.km-banner--red {
+    --km-banner-shade: var(--km-colour-red);
+    --km-banner-before: var(--km-colour-orange);
+    --km-banner-after: var(--km-colour-purple);
+}
+
+.km-banner--orange {
+    --km-banner-shade: var(--km-colour-orange);
+    --km-banner-before: var(--km-colour-yellow);
+    --km-banner-after: var(--km-colour-red);
+}
+
+.km-banner--yellow {
+    --km-banner-shade: var(--km-colour-yellow);
+    --km-banner-before: var(--km-colour-green);
+    --km-banner-after: var(--km-colour-orange);
+}
+
+.km-banner--green {
+    --km-banner-shade: var(--km-colour-green);
+    --km-banner-before: var(--km-colour-teal);
+    --km-banner-after: var(--km-colour-yellow);
+}
+
+.km-banner--teal {
+    --km-banner-shade: var(--km-colour-teal);
+    --km-banner-before: var(--km-colour-blue);
+    --km-banner-after: var(--km-colour-green);
+}
+
+.km-banner--graphite {
+    --km-banner-shade: var(--km-colour-graphite);
+    --km-banner-before: var(--km-colour-graphite);
+    --km-banner-after: var(--km-colour-graphite);
+}

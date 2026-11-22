@@ -51,7 +51,7 @@ if t.TYPE_CHECKING:
 OPTION: t.Final[re.Pattern[str]] = re.compile(
     r"^\s*- `([\w-]+)`:", re.MULTILINE
 )
-LINKCHECK_OPTIONS: t.Final[tuple[str, ...]] = ("avatar", "target")
+LINKCHECK_OPTIONS: t.Final[tuple[str, ...]] = ("avatar", "banner", "target")
 LINKS: t.Final[tuple[type[nodes.Node], ...]] = (
     nodes.reference,
     nodes.footnote_reference,

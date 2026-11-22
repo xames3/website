@@ -39,7 +39,8 @@
     }
 }
 
-.km-document--loading :is(.km-breadcrumbs,
+.km-document--loading :is(.km-banner,
+    .km-breadcrumbs,
     .km-page__content,
     .km-feedback-section,
     .km-page__updated,
@@ -87,6 +88,10 @@
     .km-header.km-title-item,
     .km-breadcrumbs.km-title-item {
         --km-title-index: 0;
+    }
+
+    .km-banner.km-title-item {
+        --km-title-index: 1;
     }
 
     .km-byline.km-title-item {

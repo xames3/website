@@ -1,0 +1,36 @@
+{#
+Banner Template
+===============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 22 November 2026
+Last updated on: 22 November 2026
+#}
+{%- macro km_banner(km_found, km_lazy=false) -%}
+    {%- if km_found.picture %}
+        <div class="km-banner km-banner--picture"
+             aria-hidden="true">
+            <img class="km-banner__picture"
+                 src="{{ km_found.picture|e }}"
+                 alt=""
+                 width="1600"
+                 height="900"
+                 {% if km_lazy %}loading="lazy"{% endif %}
+                 decoding="async" />
+        </div>
+    {%- else %}
+        <div class="km-banner km-banner--{{ km_found.shade }}"
+             aria-hidden="true">
+            <svg class="km-banner__grid"
+                 viewBox="0 0 1600 900"
+                 preserveAspectRatio="xMidYMid slice"
+                 focusable="false">
+                <circle cx="800" cy="450" r="250" />
+                <path d="M0 450H1600M800 0V900" />
+            </svg>
+            {%- if km_found.icon %}
+                <span class="km-banner__icon {{ km_found.icon|e }}"></span>
+            {%- endif %}
+        </div>
+    {%- endif %}
+{%- endmacro -%}

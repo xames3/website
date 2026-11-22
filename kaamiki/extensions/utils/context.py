@@ -1036,6 +1036,16 @@ def title_parts(title: str) -> list[dict[str, str]]:
     return parts
 
 
+def first_glyph(title: str) -> str:
+    """Find the first icon of the rendered title of a page.
+
+    :param title: The title as the builder rendered it.
+    :return: The classes of the icon, or an empty string.
+    """
+    found = GLYPH.search(title)
+    return found.group(1) if found else ""
+
+
 @on("html-page-context")
 def related(
     app: Sphinx,
