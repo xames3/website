@@ -119,6 +119,14 @@
             )
         ).join('\n');
         document.head.append(sheet);
+        const fly = () => {
+            if (root.hasAttribute('data-km-morph')) {
+                root.setAttribute('data-km-morph', 'fly');
+            }
+        };
+        change.ready.then(() => requestAnimationFrame(
+            () => requestAnimationFrame(fly)
+        )).catch(() => {});
         change.finished.catch(() => {}).then(() => {
             named(to, false);
             Object.keys(tokens).forEach((token) => {
