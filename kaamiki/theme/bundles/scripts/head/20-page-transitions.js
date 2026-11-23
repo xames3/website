@@ -21,6 +21,7 @@
     }
 
     const MORPH = 'km-morph';
+    const LIFT_MS = 400;
     const PARTS = {
         banner: ['.km-related__banner', '.km-page > .km-banner'],
         title: ['.km-related__title', '#km-content > section > h1'],
@@ -50,6 +51,8 @@
         const text = range.getClientRects()[0] ?? box;
         return {
             size: Number.parseFloat(getComputedStyle(node).fontSize),
+            left: box.left,
+            top: box.top,
             width: box.width,
             x: text.left - box.left,
             y: text.top - box.top,
@@ -76,7 +79,7 @@
     const arrived = performance.getEntriesByType('navigation')[0]
         ?.type === 'navigate' ? take() : null;
     const morph = arrived?.url === location.href ? arrived : null;
-    if (morph) root.setAttribute('data-km-morph', '');
+    if (morph) root.setAttribute('data-km-morph', 'lift');
 
     function land(change) {
         const to = parts(document, 1);
@@ -91,28 +94,34 @@
             tokens.shrink = shift(morph, end, 1 / grow);
             tokens.from = `${morph.width}px`;
             tokens.to = `${end.width}px`;
+            tokens['title-from'] = `translate(${morph.left}px, `
+                + `${morph.top}px)`;
+            tokens['title-fly'] = 'km-morph-fly-title';
+        }
+        if (to.banner && morph.banner) {
+            const { left, top, width } = morph.banner;
+            const scale = width / to.banner.getBoundingClientRect().width;
+            tokens['banner-from'] = `translate(${left}px, ${top}px) `
+                + `scale(${scale})`;
+            tokens['banner-fly'] = 'km-morph-fly-banner';
         }
         Object.entries(tokens).forEach(([token, value]) => {
             root.style.setProperty(`--km-morph-${token}`, value);
         });
-        change.ready.then(() => document.getAnimations().forEach((flight) => {
-            const pseudo = flight.effect?.pseudoElement ?? '';
-            if (!pseudo.startsWith(`::view-transition-group(${MORPH}`)) return;
-            const [from, to] = flight.effect.getKeyframes();
-            const scale = pseudo.includes('banner')
-                ? Number.parseFloat(from?.width)
-                    / Number.parseFloat(to?.width)
-                : 1;
-            if (!from?.transform || !to?.transform
-                || !Number.isFinite(scale)) return;
-            flight.effect.setKeyframes([
-                {
-                    easing: from.easing,
-                    transform: `${from.transform} scale(${scale})`,
-                },
-                { transform: to.transform },
-            ]);
-        })).catch(() => {});
+        const fly = () => {
+            if (root.hasAttribute('data-km-morph')) {
+                root.setAttribute('data-km-morph', 'fly');
+            }
+        };
+        const settled = () => requestAnimationFrame(
+            () => requestAnimationFrame(fly)
+        );
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', settled, {
+                once: true,
+            });
+        } else settled();
+        window.setTimeout(fly, LIFT_MS);
         change.finished.catch(() => {}).then(() => {
             named(to, false);
             Object.keys(tokens).forEach((token) => {
@@ -163,7 +172,13 @@
         if (card && card.href === event.activation?.entry?.url) {
             const from = parts(card, 0);
             named(from, true);
-            save({ url: card.href, ...letters(from.title) });
+            const { left, top, width } = from.banner
+                .getBoundingClientRect();
+            save({
+                url: card.href,
+                banner: { left, top, width },
+                ...letters(from.title),
+            });
         }
         Array.from(menus()).find((menu) => (
             getComputedStyle(menu).visibility !== 'hidden'

@@ -52,6 +52,18 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-fly-banner {
+    from {
+        transform: var(--km-morph-banner-from);
+    }
+}
+
+@keyframes km-morph-fly-title {
+    from {
+        transform: var(--km-morph-title-from);
+    }
+}
+
 @keyframes km-morph-show {
     from {
         opacity: 0;
@@ -91,6 +103,23 @@ its content can be pictured. A page reached from the history
         transform-origin: 0 0;
         animation-duration: var(--km-motion-morph);
         animation-timing-function: var(--km-ease-smooth);
+    }
+
+    ::view-transition-group(km-morph-banner) {
+        animation-name: var(--km-morph-banner-fly, none);
+    }
+
+    ::view-transition-group(km-morph-title) {
+        animation-name: var(--km-morph-title-fly, none);
+    }
+
+    :root[data-km-morph="lift"]::view-transition-group(km-morph-banner),
+    :root[data-km-morph="lift"]::view-transition-group(km-morph-title),
+    :root[data-km-morph="lift"]::view-transition-old(km-morph-banner),
+    :root[data-km-morph="lift"]::view-transition-new(km-morph-banner),
+    :root[data-km-morph="lift"]::view-transition-old(km-morph-title),
+    :root[data-km-morph="lift"]::view-transition-new(km-morph-title) {
+        animation-play-state: paused;
     }
 
     ::view-transition-image-pair(km-morph-banner) {
