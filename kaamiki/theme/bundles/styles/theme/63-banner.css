@@ -61,6 +61,7 @@
 
 .km-banner__grid {
     position: absolute;
+    display: none;
     inset: 0;
     width: 100%;
     height: 100%;
