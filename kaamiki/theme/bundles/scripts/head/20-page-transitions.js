@@ -101,8 +101,8 @@
         if (to.banner && morph.banner) {
             const { left, top, width } = morph.banner;
             const scale = width / to.banner.getBoundingClientRect().width;
-            tokens['banner-from'] = `translate(${left}px, ${top}px) `
-                + `scale(${scale})`;
+            tokens['banner-from'] = `translate(${left}px, ${top}px)`;
+            tokens['banner-scale'] = `${scale}`;
             tokens['banner-fly'] = 'km-morph-fly-banner';
         }
         Object.entries(tokens).forEach(([token, value]) => {

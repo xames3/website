@@ -67,6 +67,13 @@ its content can be pictured. A page reached from the history
 @keyframes km-morph-rise {
     from {
         scale: 1;
+        translate: 0 0;
+    }
+}
+
+@keyframes km-morph-size {
+    from {
+        transform: scale(var(--km-morph-banner-scale));
     }
 }
 
@@ -114,15 +121,31 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-image-pair(km-morph-banner),
     ::view-transition-image-pair(km-morph-title) {
-        transition: scale var(--km-motion-morph) var(--km-ease-smooth);
+        --km-morph-lean: calc(-1.5% * var(--km-morph-banner-scale, 1));
+        --km-morph-lift: calc(var(--km-motion-press) * 0.75);
+        --km-morph-lead: calc(var(--km-motion-morph) * 0.8);
+        transform-origin: 0 0;
+        transition:
+            scale var(--km-motion-morph) var(--km-ease-smooth),
+            translate var(--km-motion-morph) var(--km-ease-smooth);
+    }
+
+    ::view-transition-image-pair(km-morph-banner) {
+        isolation: isolate;
+    }
+
+    ::view-transition-image-pair(km-morph-title) {
+        --km-morph-lean: -1.5%;
     }
 
     :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-banner),
     :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-title) {
         scale: 1.03;
-        animation: km-morph-rise calc(var(--km-motion-press) * 0.75)
-            var(--km-ease-smooth) both;
+        translate: var(--km-morph-lean) var(--km-morph-lean);
+        animation: km-morph-rise var(--km-morph-lift) var(--km-ease-smooth)
+            both;
     }
+
 
     ::view-transition-group(km-morph-banner),
     ::view-transition-group(km-morph-title) {
@@ -148,23 +171,28 @@ its content can be pictured. A page reached from the history
         animation-play-state: paused;
     }
 
-    ::view-transition-image-pair(km-morph-banner) {
-        isolation: isolate;
-    }
-
     ::view-transition-old(km-morph-banner),
     ::view-transition-new(km-morph-banner) {
         mix-blend-mode: plus-lighter;
     }
 
+    ::view-transition-old(km-morph-banner),
+    ::view-transition-new(km-morph-banner) {
+        transform-origin: 0 0;
+    }
+
     ::view-transition-old(km-morph-banner) {
-        animation: km-nav-fade calc(var(--km-motion-morph) * 0.3)
-            var(--km-ease-smooth) both;
+        animation:
+            km-nav-fade calc(var(--km-motion-morph) * 0.3)
+                var(--km-ease-smooth) both,
+            km-morph-size var(--km-morph-lead) var(--km-ease-smooth) both;
     }
 
     ::view-transition-new(km-morph-banner) {
-        animation: km-morph-show calc(var(--km-motion-morph) * 0.3)
-            var(--km-ease-smooth) both;
+        animation:
+            km-morph-show calc(var(--km-motion-morph) * 0.3)
+                var(--km-ease-smooth) both,
+            km-morph-size var(--km-morph-lead) var(--km-ease-smooth) both;
     }
 
     ::view-transition-old(km-morph-banner):only-child {
@@ -183,7 +211,8 @@ its content can be pictured. A page reached from the history
     ::view-transition-old(km-morph-title) {
         inline-size: var(--km-morph-from);
         animation:
-            km-morph-grow var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-grow calc(var(--km-motion-morph) * 0.8)
+                var(--km-ease-smooth) both,
             km-nav-fade calc(var(--km-motion-morph) * 0.25)
                 var(--km-ease-smooth) both;
     }
@@ -191,7 +220,8 @@ its content can be pictured. A page reached from the history
     ::view-transition-new(km-morph-title) {
         inline-size: var(--km-morph-to);
         animation:
-            km-morph-shrink var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-shrink calc(var(--km-motion-morph) * 0.8)
+                var(--km-ease-smooth) both,
             km-morph-show calc(var(--km-motion-morph) * 0.3)
                 var(--km-ease-smooth) both;
     }
