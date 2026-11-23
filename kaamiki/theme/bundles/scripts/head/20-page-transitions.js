@@ -139,15 +139,18 @@
             || kaamiki.prefersStill(card)) return;
         picked = card;
         const track = card.parentElement;
+        const view = track.clientWidth;
         const left = card.offsetLeft - track.scrollLeft;
-        if (left >= -1
-            && left + card.offsetWidth <= track.clientWidth + 1) return;
+        const right = left + card.offsetWidth;
+        if (left >= -1 && right <= view + 1) return;
         event.preventDefault();
-        const go = () => location.assign(card.href);
-        kaamiki.glideAcross(track, Math.min(
-            card.offsetLeft,
-            track.scrollWidth - track.clientWidth
-        )).then(go, go);
+        const go = () => {
+            track.style.scrollSnapType = 'none';
+            location.assign(card.href);
+        };
+        kaamiki.glideAcross(track, left < 0
+            ? card.offsetLeft
+            : card.offsetLeft + card.offsetWidth - view).then(go, go);
     });
 
     // The old page names its content and an open dropdown so
@@ -213,6 +216,7 @@
         document.querySelectorAll('.km-related__card').forEach((card) => {
             named(parts(card, 0), false);
             card.classList.remove('km-related__card--picked');
+            card.parentElement.style.removeProperty('scroll-snap-type');
         });
         root.removeAttribute('data-km-morph');
     });

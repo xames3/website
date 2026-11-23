@@ -78,6 +78,7 @@
                 event.preventDefault();
             });
             track.addEventListener('focusin', (event) => {
+                if (!event.target.matches(':focus-visible')) return;
                 const item = items().find(
                     (each) => each.contains(event.target),
                 );
