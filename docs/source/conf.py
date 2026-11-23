@@ -87,6 +87,7 @@ kaamiki.conf.icons.update(
 )
 kaamiki.conf.byline.icon_style = "duotone"
 kaamiki.conf.icons.kit = "https://kit.fontawesome.com/8bcdaaff4d.js"
+kaamiki.conf.byline.icon_style = "light"
 kaamiki.conf.site.favicons = {
     "manifest": "favicons/site.webmanifest",
     "ico": "favicons/favicon.ico",
