@@ -40,9 +40,81 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-grow {
+    to {
+        transform: var(--km-morph-grow);
+    }
+}
+
+@keyframes km-morph-shrink {
+    from {
+        transform: var(--km-morph-shrink);
+    }
+}
+
+@keyframes km-morph-show {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes km-morph-vanish {
+    to {
+        transform: scale(0);
+    }
+}
+
 @media (prefers-reduced-motion: no-preference) {
     :root {
         --km-nav-out: calc(var(--km-motion-fade) * 0.6);
+    }
+
+    :root[data-km-morph].km-document--loading .km-page__content {
+        opacity: 1;
+        visibility: hidden;
+    }
+
+    :root[data-km-morph] :is(.km-page > .km-banner,
+        #km-content > section > h1) {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    ::view-transition-group(km-morph-banner),
+    ::view-transition-group(km-morph-title),
+    ::view-transition-old(km-morph-banner),
+    ::view-transition-new(km-morph-banner) {
+        animation-duration: var(--km-motion-swap);
+        animation-timing-function: var(--km-ease-smooth);
+    }
+
+    ::view-transition-old(km-morph-banner):only-child {
+        animation:
+            km-nav-fade var(--km-motion-swap) var(--km-ease-smooth) both,
+            km-morph-vanish var(--km-motion-swap) var(--km-ease-smooth) both;
+    }
+
+    ::view-transition-old(km-morph-title),
+    ::view-transition-new(km-morph-title) {
+        block-size: auto;
+        transform-origin: 0 0;
+        mix-blend-mode: normal;
+    }
+
+    ::view-transition-old(km-morph-title) {
+        inline-size: var(--km-morph-from);
+        animation:
+            km-morph-grow var(--km-motion-swap) var(--km-ease-smooth) both,
+            km-nav-fade calc(var(--km-motion-swap) * 0.4)
+                var(--km-ease-smooth) both;
+    }
+
+    ::view-transition-new(km-morph-title) {
+        inline-size: var(--km-morph-to);
+        animation:
+            km-morph-shrink var(--km-motion-swap) var(--km-ease-smooth) both,
+            km-morph-show calc(var(--km-motion-swap) * 0.5)
+                var(--km-ease-smooth) calc(var(--km-motion-swap) * 0.15) both;
     }
 
     .km-document--leaving .km-layout__content {
