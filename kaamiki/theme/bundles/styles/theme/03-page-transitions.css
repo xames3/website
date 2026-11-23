@@ -40,30 +40,6 @@ its content can be pictured. A page reached from the history
     }
 }
 
-@keyframes km-morph-grow {
-    to {
-        transform: var(--km-morph-grow);
-    }
-}
-
-@keyframes km-morph-shrink {
-    from {
-        transform: var(--km-morph-shrink);
-    }
-}
-
-@keyframes km-morph-fly-banner {
-    from {
-        transform: var(--km-morph-banner-from);
-    }
-}
-
-@keyframes km-morph-fly-title {
-    from {
-        transform: var(--km-morph-title-from);
-    }
-}
-
 @keyframes km-morph-rise {
     from {
         scale: 1;

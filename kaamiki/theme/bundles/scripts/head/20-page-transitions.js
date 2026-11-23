@@ -84,30 +84,42 @@
     function land(change) {
         const to = parts(document, 1);
         const tokens = {};
+        const frames = {};
         named(to, true);
         if (to.title) {
             const end = letters(to.title);
             const grow = end.size / morph.size;
             const shift = (a, b, scale) => `translate(${a.x - b.x * scale}px, `
                 + `${a.y - b.y * scale}px) scale(${scale})`;
-            tokens.grow = shift(end, morph, grow);
-            tokens.shrink = shift(morph, end, 1 / grow);
+            frames['km-morph-grow'] = ['to', shift(end, morph, grow)];
+            frames['km-morph-shrink'] = ['from', shift(morph, end, 1 / grow)];
+            frames['km-morph-fly-title'] = [
+                'from',
+                `translate(${morph.left}px, ${morph.top}px)`,
+            ];
             tokens.from = `${morph.width}px`;
             tokens.to = `${end.width}px`;
-            tokens['title-from'] = `translate(${morph.left}px, `
-                + `${morph.top}px)`;
             tokens['title-fly'] = 'km-morph-fly-title';
         }
         if (to.banner && morph.banner) {
             const { left, top, width } = morph.banner;
             const scale = width / to.banner.getBoundingClientRect().width;
-            tokens['banner-from'] = `translate(${left}px, ${top}px) `
-                + `scale(${scale})`;
+            frames['km-morph-fly-banner'] = [
+                'from',
+                `translate(${left}px, ${top}px) scale(${scale})`,
+            ];
             tokens['banner-fly'] = 'km-morph-fly-banner';
         }
         Object.entries(tokens).forEach(([token, value]) => {
             root.style.setProperty(`--km-morph-${token}`, value);
         });
+        const sheet = document.createElement('style');
+        sheet.textContent = Object.entries(frames).map(
+            ([name, [edge, move]]) => (
+                `@keyframes ${name} { ${edge} { transform: ${move}; } }`
+            )
+        ).join('\n');
+        document.head.append(sheet);
         const fly = () => {
             if (root.hasAttribute('data-km-morph')) {
                 root.setAttribute('data-km-morph', 'fly');
@@ -125,6 +137,7 @@
             Object.keys(tokens).forEach((token) => {
                 root.style.removeProperty(`--km-morph-${token}`);
             });
+            sheet.remove();
             root.removeAttribute('data-km-morph');
         });
     }
