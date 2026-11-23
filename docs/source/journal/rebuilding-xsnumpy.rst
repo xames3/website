@@ -21,7 +21,7 @@
 .. _journal-rebuilding-xsnumpy:
 
 ======================================================================
-:fa-icon:regular:`screwdriver-wrench` Rebuilding NumPy to |rnumpy| it.
+:fa-icon:duotone:`screwdriver-wrench` Rebuilding NumPy to |rnumpy| it.
 ======================================================================
 
 .. rst-class:: km-text-lead

@@ -14,7 +14,7 @@
 .. _kaamiki-settings:
 
 ===============================================================================
-:fa-icon:regular:`sliders` Settings
+:fa-icon:duotone:`sliders` Settings
 ===============================================================================
 
 .. rst-class:: km-text-lead

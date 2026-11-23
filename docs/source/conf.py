@@ -85,7 +85,7 @@ kaamiki.conf.icons.update(
         "search": "fa-regular fa-magnifying-glass",
     }
 )
-kaamiki.conf.icons.style = "regular"
+kaamiki.conf.byline.icon_style = "duotone"
 kaamiki.conf.icons.kit = "https://kit.fontawesome.com/8bcdaaff4d.js"
 kaamiki.conf.byline.icon_style = "light"
 kaamiki.conf.site.favicons = {

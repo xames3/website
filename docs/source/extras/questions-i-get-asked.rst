@@ -13,12 +13,13 @@
 .. _extras-questions-i-get-asked:
 
 ===============================================================================
-:fa-icon:regular:`comments` Questions I get asked
+:fa-icon:duotone:`comments` Questions I get asked
 ===============================================================================
 
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
+    :shade: green
 
 .. seealso::
 

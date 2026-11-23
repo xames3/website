@@ -16,7 +16,7 @@
 .. _extras-guiding-stars:
 
 ===============================================================================
-:fa-icon:regular:`sparkles` Guiding stars
+:fa-icon:duotone:`sparkles` Guiding stars
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -26,6 +26,7 @@
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
+    :shade: yellow
 
 In everyone's life, there are always points where you pause and look back. You
 not only reflect on your achievements and/or mistakes, but also the people
