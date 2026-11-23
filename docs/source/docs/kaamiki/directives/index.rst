@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Kaamiki directives
 :km-page-description: The directives Kaamiki adds to reStructuredText, shown

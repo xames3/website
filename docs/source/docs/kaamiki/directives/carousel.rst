@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 05 November 2026
-.. Last updated on: 12 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The carousel directive
 :km-page-description: Lay blocks, buttons, pictures, repositories and
@@ -21,6 +21,11 @@
 .. rst-class:: km-text-lead
 
     A row of cards to swipe through.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: orange
 
 Each directive under a ``carousel`` is one item in a row. Two items show in
 full and a quarter of the third peeks in from the side, unless ``:cards:``

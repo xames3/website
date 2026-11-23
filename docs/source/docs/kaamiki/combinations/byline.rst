@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Bylines, option by option
 :km-page-description: Every option of the byline directive, with icons and
@@ -33,6 +33,7 @@ live and the rest of the combinations are written out with what each changes.
     :target: https://github.com/xames3
     :avatar-size: 32
     :align: center
+    :shade: purple
 
 The byline above is live. It was written with ``:avatar-size: 32`` and
 ``:align: center``, which are the two options that change what you see most.

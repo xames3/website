@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 28 October 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Advanced Kaamiki
 :km-page-description: What a Sphinx author who wants more control needs to
@@ -21,6 +21,11 @@
 .. rst-class:: km-text-lead
 
     For when the settings aren't enough.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: graphite
 
 This page is for people who already know how Sphinx finds a theme, loads a
 stylesheet and looks up a template. Everything here is something you can lean

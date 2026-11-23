@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The button directive
 :km-page-description: Turn a link into a button with a colour, an icon and
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     A link that looks like a button.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: indigo
 
 The argument is where it goes and the text under it is the label, one
 paragraph of text. A list, a second paragraph or a directive in it stops the

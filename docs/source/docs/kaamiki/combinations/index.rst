@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 12 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Combinations
 :km-page-description: Every Kaamiki directive written with every option on and
@@ -23,6 +23,11 @@
 
     Every directive, in every combination.
 
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: purple
+
 The icons page showed every place an icon can go. These pages do the same for
 every directive: each option on and off, icons and roles in it and every other
 directive inside it and around it, with the markup written out under every
@@ -44,7 +49,7 @@ One page for each directive.
 .. block:: Tabs
     :size: medium
     :doc: tabs
-    :preheader: :fa-icon:regular:`table-columns` Content that switches.
+    :preheader: :fa-icon:regular:`folders` Content that switches.
 
     Every way to use it.
 

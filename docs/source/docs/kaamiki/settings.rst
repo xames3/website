@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     Every setting, in one place.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: graphite
 
 Kaamiki's settings live on one object, ``kaamiki.conf``, in groups such as
 ``icons``, ``show`` and ``youtube``. Each one is written as the group and then

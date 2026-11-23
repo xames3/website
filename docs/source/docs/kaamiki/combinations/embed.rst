@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Embeds, everywhere
 :km-page-description: Every option of the embed directive on and off, from
@@ -23,6 +23,11 @@
 .. rst-class:: km-text-lead
 
     Your own HTML, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: graphite
 
 An embed puts a block of your own HTML on a page, with placeholders that
 options fill. This page writes it with every option on and off, from content

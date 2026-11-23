@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The embed directive
 :km-page-description: Put a block of your own HTML on a page, with
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     Your own HTML, for the things reStructuredText can't say.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: graphite
 
 An iframe, a small widget or a styled box. The argument is ``iframe``, in
 lower case, and the HTML goes below as the content. Any option you give fills

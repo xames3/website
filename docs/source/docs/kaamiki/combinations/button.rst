@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Buttons, everywhere
 :km-page-description: Every option of the button directive on and off, with
@@ -23,6 +23,11 @@
 .. rst-class:: km-text-lead
 
     A link as a button, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: indigo
 
 A button turns a link into a pill with a colour and, if you want one, an icon.
 This page writes it with every option on and off, with every colour, icon style

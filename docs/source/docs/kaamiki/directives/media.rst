@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Video, YouTube and thumbnails
 :km-page-description: Put your own video, a YouTube player or a card that links
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     Three ways to put a video on a page.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: red
 
 ``video`` plays a file you host, ``youtube`` embeds YouTube's player and
 ``thumbnail`` shows a card that links to a YouTube video without loading

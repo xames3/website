@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 23 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The columns directive
 :km-page-description: Set pieces of content side by side in one to six
@@ -14,12 +14,17 @@
 .. _kaamiki-columns:
 
 ===============================================================================
-:fa-icon:regular:`object-group` columns
+:fa-icon:regular:`table-columns` columns
 ===============================================================================
 
 .. rst-class:: km-text-lead
 
     Content side by side, stacked on a phone.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: green
 
 ``columns`` sets ``column`` directives next to each other. Its argument is how
 many columns there are, from 1 to 6, and each ``column`` holds whatever you

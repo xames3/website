@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-related-header: Where next?
 :km-related-docs: /docs/kaamiki/page-fields, /docs/kaamiki/settings
@@ -26,6 +26,7 @@
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3/website
+    :shade: green
 
 This page takes you from an empty Sphinx project to a built page that uses
 Kaamiki.
