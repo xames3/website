@@ -1,4 +1,5 @@
     window.Kaamiki = {
+        ...window.Kaamiki,
         codeExplains: [],
         FOCUSABLE,
         Moment,

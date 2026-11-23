@@ -23,29 +23,6 @@
         );
         if (!button) return;
 
-        const paint = (mode) => {
-            const { head } = document;
-            head.querySelectorAll('meta[name="theme-color"]')
-                .forEach((node) => node.remove());
-            const add = (content, media) => {
-                const node = document.createElement('meta');
-                node.name = 'theme-color';
-                node.content = content;
-                if (media) node.media = media;
-                head.append(node);
-            };
-            if (mode === 'system') {
-                add('#ffffff', '(prefers-color-scheme: light)');
-                add('#000000', '(prefers-color-scheme: dark)');
-            } else {
-                add(mode === 'light' ? '#ffffff' : '#000000');
-            }
-            const scheme = head.querySelector('meta[name="color-scheme"]');
-            if (scheme) {
-                scheme.content = mode === 'system' ? 'light dark' : mode;
-            }
-        };
-
         const show = (mode) => {
             icons.forEach((icon) => {
                 icon.hidden = icon.dataset.kmColourMode !== mode;
@@ -62,7 +39,7 @@
             const held = !root.classList.contains('km-document--recolouring');
             if (held) root.classList.add('km-document--recolouring');
             root.setAttribute('data-km-mode', mode);
-            paint(mode);
+            paintColourMode(mode);
             show(mode);
             document.dispatchEvent(new Event('km:colourmode'));
             if (held) {
@@ -162,7 +139,6 @@
                 document.dispatchEvent(new Event('km:colourmode'));
             });
 
-        paint(colourMode());
         show(colourMode());
     }
 
