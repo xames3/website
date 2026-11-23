@@ -4,19 +4,19 @@ Animations Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 17 October 2026
-Last updated on: 21 November 2026
+Last updated on: 23 November 2026
 */
 
 (() => {
     'use strict';
 
     const {
-        REVEAL_SHOWN,
-        REVEAL_WAITING,
+        Moment,
         TIMING,
         attempt,
         clamp,
         decodeId,
+        entrance,
         fetchJson,
         getCssVar,
         glideTo,
@@ -31,6 +31,7 @@ Last updated on: 21 November 2026
         rafThrottle,
         say,
         settleHash,
+        whenRoot,
     } = window.Kaamiki;
     const root = document.documentElement;
 
@@ -77,8 +78,48 @@ Last updated on: 21 November 2026
         : null;
     const REVEAL_BUDGET_MS = 1600;
     const REVEAL_MIN_STEP_MS = 30;
-    const TITLE_ITEM = 'km-title-item';
-    const TITLE_STEPS = 5;
+    const ENTRANCE_AHEAD_MS = 1e9;
+    const ENTRANCE_CAP_MS = 2000;
+    const ENTRANCE_GATE = [
+        'km-document--loading',
+        'km-document--no-transitions',
+    ];
+    const TITLE_HEADING = '#km-content > section > h1';
+    const TITLE_ORDER = [
+        '.km-header, .km-page > .km-banner',
+        '.km-breadcrumbs',
+        'h1',
+        '.km-text--lead',
+        '.km-byline',
+    ];
+    const ENTRANCE_FRAMES = {
+        title: [{
+            opacity: 0,
+            filter: 'blur(var(--km-title-blur))',
+            transform:
+                'translateY(min(var(--km-title-rise), var(--km-title-reach)))',
+        }, {
+            opacity: 1,
+            filter: 'blur(0)',
+            transform: 'translateY(0)',
+        }],
+        block: [{
+            opacity: 0,
+            filter: 'blur(var(--km-reveal-blur))',
+            transform: 'translateY(var(--km-reveal-rise))',
+        }, {
+            opacity: 1,
+            filter: 'blur(0)',
+            transform: 'translateY(0)',
+        }],
+        rail: [{
+            transform: 'scaleY(0)',
+            transformOrigin: 'top',
+        }, {
+            transform: 'scaleY(1)',
+            transformOrigin: 'top',
+        }],
+    };
     const SPEECH_WORD_MS = 170;
     const SPEECH_CHAR_MS = 14;
     const SPEECH_COMMA_MS = 260;

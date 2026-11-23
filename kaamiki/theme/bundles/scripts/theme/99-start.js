@@ -62,7 +62,7 @@
         initTurns,
         initInkReveal,
         initTranscripts,
-        initPageReveal,
         initSearchHighlights,
     ]));
+    start([initPageReveal]);
 })();

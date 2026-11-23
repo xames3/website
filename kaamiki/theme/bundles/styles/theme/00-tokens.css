@@ -90,6 +90,7 @@
     --km-show-more-fade: min(11rem, 25svh);
     --km-show-more-dock: 2rem;
     --km-title-step: calc(100ms / var(--km-motion-speed));
+    --km-title-skip: calc(var(--km-motion-enter) * 0.35);
     --km-title-blur: 10px;
     --km-title-rise: 20%;
     --km-title-reach: 2rem;

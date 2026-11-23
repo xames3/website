@@ -14,26 +14,40 @@
         });
     }
 
-    function loading() {
-        return root.classList.contains('km-document--loading');
+    class Moment {
+        constructor() {
+            this.passed = false;
+            this.reached = new Promise((resolve) => {
+                this.pass = () => {
+                    this.passed = true;
+                    resolve();
+                };
+            });
+        }
+
+        then(fn) {
+            return this.reached.then(fn);
+        }
     }
 
+    const entrance = {
+        started: new Moment(),
+        done: new Moment(),
+        blocks: new Map(),
+    };
+
     function afterLanding(fn) {
-        whenRoot(['class', 'data-km-morph'], () => (
-            loading() && root.hasAttribute('data-km-morph')
+        whenRoot(['data-km-morph'], () => (
+            root.hasAttribute('data-km-morph')
         ), fn);
     }
 
     function afterReveal(node, fn) {
-        if (loading()) {
-            whenRoot(['class'], loading, () => afterReveal(node, fn));
-            return;
+        let block = node;
+        while (block && !entrance.blocks.has(block)) {
+            block = block.parentElement;
         }
-        const block = node.closest(`.${REVEAL_WAITING}:not(.${REVEAL_SHOWN})`);
-        if (block) {
-            block.addEventListener('km:reveal', () => fn(node), { once: true });
-        }
-        else fn(node);
+        (entrance.blocks.get(block) ?? entrance.started).then(() => fn(node));
     }
 
     function onVisible(nodes, onEnter, options = { rootMargin: '200px' }) {

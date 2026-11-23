@@ -4,7 +4,7 @@ Core Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 17 October 2026
-Last updated on: 21 November 2026
+Last updated on: 23 November 2026
 
 The four scripts share one `window.Kaamiki` and load in this order:
 core, animations, theme, explainer. Each takes what it needs from the
@@ -28,8 +28,6 @@ pages with a code-explain or code-version, and it starts itself. The
     const GLIDE_MAX_MS = 1100;
     const FOCUSABLE = 'a[href], button, input, select, textarea, summary, '
         + 'iframe, [tabindex]';
-    const REVEAL_WAITING = 'km-page-reveal-item';
-    const REVEAL_SHOWN = 'km-page-reveal-item--shown';
     const root = document.documentElement;
     const STRINGS = JSON.parse(root.dataset.kmStrings);
     const MARKS = JSON.parse(root.dataset.kmIcons);

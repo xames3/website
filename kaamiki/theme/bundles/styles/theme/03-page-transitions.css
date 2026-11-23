@@ -7,8 +7,8 @@ reader's going. Nothing of the new content shows until it's gone, and then the
 new page plays its own entrance, the one a page plays when it loads, from its
 first frame. The header, the sidebar and the footer don't animate at all,
 they're the same on both pages, and the new page's content isn't pictured by
-the transition: it's the page itself, kept hidden by `km-document--loading`
-until the old content has left. A dropdown that's open leaves with the old
+the transition: it's the page itself, kept hidden by its entrance until the
+old content has left. A dropdown that's open leaves with the old
 content, on top of it, as it does when it closes.
 The script in the head marks the page being left (`km-document--leaving`) so
 its content can be pictured. A page reached from the history

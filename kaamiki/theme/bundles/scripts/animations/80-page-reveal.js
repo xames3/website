@@ -12,16 +12,15 @@
 
     function kept(node) {
         if (morphed && node.matches(
-            '.km-page > .km-banner, .km-breadcrumbs, '
-                + '#km-content > section > h1',
+            `.km-page > .km-banner, .km-breadcrumbs, ${TITLE_HEADING}`,
         )) return true;
         return arrival() === 'link' && node.matches('.km-header, .km-footer');
     }
 
-    function markTitle() {
-        const heading = document.querySelector('#km-content > section > h1');
+    function titleParts() {
+        const heading = document.querySelector(TITLE_HEADING);
         if (!heading) return [];
-        const items = [
+        return [
             document.querySelector('.km-header'),
             document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
@@ -29,24 +28,15 @@
             ...Array.from(heading.parentElement.children).filter((child) => (
                 child.matches('.km-text--lead, .km-byline')
             )),
-        ].filter((item) => item && !kept(item));
-        items.forEach((item) => item.classList.add(TITLE_ITEM));
-        return items;
+        ].filter((part) => part && !kept(part));
     }
 
-    function titleHold() {
-        if (!document.querySelector(`.${TITLE_ITEM}`)) return 0;
-        const lead = Number.parseFloat(
-            getComputedStyle(root).getPropertyValue('--km-title-lead'),
-        ) || 0;
-        const hold = TIMING.titleStep() * (TITLE_STEPS - lead);
-        return Math.max(0, hold - TIMING.titleSkip());
+    function titleStep(part) {
+        return TITLE_ORDER.findIndex((selector) => part.matches(selector));
     }
 
-    function initPageReveal() {
-        if (prefersReducedMotion() || arrival() === 'history') return;
-        const title = new Set(markTitle());
-        const blocks = [
+    function bodyBlocks(title) {
+        return [
             document.querySelector('.km-header'),
             document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
@@ -57,117 +47,181 @@
             document.querySelector('.km-pagination'),
             document.querySelector('.km-related'),
             document.querySelector('.km-footer'),
-        ].filter((block) => block && !title.has(block) && !kept(block));
-
-        const duration = engine.ms('enter');
-        let step = engine.ms('stagger');
-        let titled = false;
-        let hold = 0;
-        let waiting = blocks;
-        let began = null;
-        let busy = 0;
-        let ends = 0;
-        let screen = 0;
-        let done = false;
-
-        const release = (block, animate) => {
-            if (animate) block.classList.add(REVEAL_SHOWN);
-            else block.classList.remove(REVEAL_WAITING);
-            block.dispatchEvent(new Event('km:reveal'));
-        };
-
-        const finish = () => {
-            if (done) return;
-            done = true;
-            waiting.forEach((block) => release(block, false));
-            waiting = [];
-            blocks.forEach((block) => (
-                block.classList.remove(REVEAL_WAITING, REVEAL_SHOWN)
-            ));
-        };
-
-        const play = (block, now) => {
-            busy = now + step;
-            ends = Math.max(ends, now + duration);
-            release(block, true);
-        };
-
-        const edges = (fold) => {
-            const known = new Map();
-            const clip = (node) => {
-                if (!node || node === document.body) return [0, fold];
-                if (!known.has(node)) {
-                    let [top, bottom] = clip(node.parentElement);
-                    if (getComputedStyle(node).overflowY !== 'visible') {
-                        const box = node.getBoundingClientRect();
-                        top = Math.max(top, box.top);
-                        bottom = Math.min(bottom, box.bottom);
-                    }
-                    known.set(node, [top, bottom]);
-                }
-                return known.get(node);
-            };
-            return clip;
-        };
-
-        const inView = (block, clip) => {
-            const box = block.getBoundingClientRect();
-            const [top, bottom] = clip(block.parentElement);
-            return (box.width > 0 || box.height > 0)
-                && box.bottom >= top && box.top < bottom;
-        };
-
-        const tick = (now) => {
-            if (done) return;
-            try {
-                if (root.classList.contains('km-document--loading')) {
-                    requestAnimationFrame(tick);
-                    return;
-                }
-                if (began === null) {
-                    began = now;
-                    screen = screenHeight();
-                    hold = titleHold();
-                    const clip = edges(Math.max(window.innerHeight, screen));
-                    const seen = waiting.map((block) => inView(block, clip));
-                    waiting.filter((block, index) => !seen[index])
-                        .forEach((block) => release(block, false));
-                    waiting = waiting.filter((block, index) => seen[index]);
-                    step = clamp(
-                        (REVEAL_BUDGET_MS / engine.speed() - duration)
-                            / Math.max(1, waiting.length - 1),
-                        REVEAL_MIN_STEP_MS,
-                        step,
-                    );
-                }
-                if (!titled) {
-                    if (now - began < hold) {
-                        requestAnimationFrame(tick);
-                        return;
-                    }
-                    titled = true;
-                }
-                const fold = Math.max(window.innerHeight, screen);
-                const clip = edges(fold);
-                const ready = waiting.filter((block) => inView(block, clip));
-                if (ready.length && now >= busy) {
-                    const block = ready[0];
-                    const waitingIndex = waiting.indexOf(block);
-                    waiting.slice(0, waitingIndex)
-                        .forEach((passed) => release(passed, false));
-                    waiting = waiting.slice(waitingIndex + 1);
-                    play(block, now);
-                } else if (!ready.length && now >= Math.max(busy, ends)) {
-                    finish();
-                    return;
-                }
-                requestAnimationFrame(tick);
-            } catch (error) {
-                finish();
-                console.error(error);
-            }
-        };
-        blocks.forEach((block) => block.classList.add(REVEAL_WAITING));
-        requestAnimationFrame(tick);
+        ].filter((block) => block && !title.includes(block) && !kept(block));
     }
 
+    function rails(block) {
+        const release = block.parentElement;
+        if (!release?.matches('.km-release')
+            || release.firstElementChild !== block) return [];
+        return [
+            [release, ENTRANCE_FRAMES.rail, '::before'],
+            [release, ENTRANCE_FRAMES.block, '::after'],
+        ];
+    }
+
+    function edges(fold) {
+        const known = new Map();
+        const clip = (node) => {
+            if (!node || node === document.body) return [0, fold];
+            if (!known.has(node)) {
+                let [top, bottom] = clip(node.parentElement);
+                if (getComputedStyle(node).overflowY !== 'visible') {
+                    const box = node.getBoundingClientRect();
+                    top = Math.max(top, box.top);
+                    bottom = Math.min(bottom, box.bottom);
+                }
+                known.set(node, [top, bottom]);
+            }
+            return known.get(node);
+        };
+        return clip;
+    }
+
+    function inView(block, clip) {
+        const box = block.getBoundingClientRect();
+        const rise = new DOMMatrixReadOnly(getComputedStyle(block).transform).f;
+        const [top, bottom] = clip(block.parentElement);
+        return (box.width > 0 || box.height > 0)
+            && box.bottom - rise >= top && box.top - rise < bottom;
+    }
+
+    function held() {
+        return root.hasAttribute('data-km-handing');
+    }
+
+    function whenReady(fn) {
+        const fonts = arrival() ? Promise.resolve() : document.fonts.ready;
+        const cap = new Promise((resolve) => window.setTimeout(
+            resolve,
+            Math.max(0, ENTRANCE_CAP_MS - performance.now()),
+        ));
+        requestAnimationFrame(() => Promise.race([fonts, cap]).then(() => (
+            whenRoot(['data-km-handing'], held, () => (
+                requestAnimationFrame(fn)
+            ))
+        )));
+    }
+
+    function stage(all) {
+        const easing = getCssVar('--km-ease-smooth');
+        const ahead = (document.timeline.currentTime ?? 0) + ENTRANCE_AHEAD_MS;
+        const enter = (node, frames, pseudoElement) => {
+            const animation = node.animate(frames, {
+                duration: prefersStill(node) ? 0 : engine.ms('enter', node),
+                easing,
+                fill: 'backwards',
+                pseudoElement,
+            });
+            animation.startTime = ahead;
+            all.push(animation);
+            return animation;
+        };
+        const title = titleParts();
+        const linked = arrival() === 'link';
+        const lead = linked && title.length
+            ? Math.min(...title.map(titleStep))
+            : 0;
+        const skip = linked ? TIMING.titleSkip() : 0;
+        const step = TIMING.titleStep();
+        title.forEach((part) => enter(part, ENTRANCE_FRAMES.title)
+            .effect.updateTiming({
+                delay: step * (titleStep(part) - lead) - skip,
+            }));
+        const blocks = new Map(bodyBlocks(title).map((block) => [block, [
+            enter(block, ENTRANCE_FRAMES.block),
+            ...rails(block).map((rail) => enter(...rail)),
+        ]]));
+        for (const block of blocks.keys()) {
+            entrance.blocks.set(block, new Moment());
+        }
+        return {
+            all,
+            blocks,
+            fold: Math.max(window.innerHeight, screenHeight()),
+            hold: title.length
+                ? Math.max(0, step * (TITLE_ORDER.length - lead) - skip)
+                : 0,
+        };
+    }
+
+    function play({ all, blocks, fold, hold }) {
+        const clip = edges(fold);
+        const shown = Array.from(blocks.keys())
+            .filter((block) => inView(block, clip));
+        const now = document.timeline.currentTime;
+        blocks.forEach((parts, block) => {
+            if (shown.includes(block)) return;
+            parts.forEach((animation) => animation.cancel());
+            entrance.blocks.get(block).pass();
+        });
+        const step = clamp(
+            (REVEAL_BUDGET_MS / engine.speed() - engine.ms('enter'))
+                / Math.max(1, shown.length - 1),
+            REVEAL_MIN_STEP_MS,
+            engine.ms('stagger'),
+        );
+        shown.forEach((block, index) => {
+            const delay = hold + index * step;
+            blocks.get(block).forEach((animation) => (
+                animation.effect.updateTiming({ delay })
+            ));
+            window.setTimeout(() => entrance.blocks.get(block).pass(), delay);
+        });
+        const live = all.filter((animation) => animation.playState !== 'idle');
+        live.forEach((animation) => {
+            animation.startTime = now;
+        });
+        return live;
+    }
+
+    function settle(animations) {
+        entrance.started.pass();
+        Promise.allSettled(animations.map((animation) => animation.finished))
+            .then(() => entrance.done.pass());
+    }
+
+    function abandon(animations, error) {
+        animations.forEach((animation) => animation.cancel());
+        entrance.blocks.forEach((moment) => moment.pass());
+        settle([]);
+        console.error(error);
+    }
+
+    function enterPage() {
+        if (!root.classList.contains(ENTRANCE_GATE[0])) {
+            settle([]);
+            return;
+        }
+        const all = [];
+        let staged = null;
+        try {
+            if (!prefersReducedMotion() && arrival() !== 'history') {
+                staged = stage(all);
+            }
+        } catch (error) {
+            abandon(all, error);
+        } finally {
+            root.classList.remove(...ENTRANCE_GATE);
+        }
+        if (!staged) {
+            if (!all.length) settle([]);
+            return;
+        }
+        whenReady(() => {
+            try {
+                settle(play(staged));
+            } catch (error) {
+                abandon(all, error);
+            }
+        });
+    }
+
+    function initPageReveal() {
+        if (document.readyState !== 'loading') enterPage();
+        else {
+            document.addEventListener('DOMContentLoaded', enterPage, {
+                once: true,
+            });
+        }
+    }

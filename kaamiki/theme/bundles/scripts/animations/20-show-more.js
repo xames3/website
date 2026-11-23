@@ -78,8 +78,7 @@
 
         let deferred = false;
         const refitCalm = () => {
-            if (!root.classList.contains('km-document--loading')
-                && !document.querySelector(`.${REVEAL_WAITING}`)) {
+            if (entrance.done.passed) {
                 refit();
                 return;
             }
