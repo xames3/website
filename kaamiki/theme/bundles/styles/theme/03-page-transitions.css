@@ -80,18 +80,41 @@ its content can be pictured. A page reached from the history
         visibility: visible;
     }
 
+    :root[data-km-morph]:not(.km-document--revealing)
+        ::view-transition-old(root) {
+        animation: km-nav-fade var(--km-motion-content) var(--km-ease-smooth)
+            both;
+    }
+
     ::view-transition-group(km-morph-banner),
-    ::view-transition-group(km-morph-title),
+    ::view-transition-group(km-morph-title) {
+        animation-duration: var(--km-motion-morph);
+        animation-timing-function: var(--km-ease-smooth);
+    }
+
+    ::view-transition-image-pair(km-morph-banner) {
+        isolation: isolate;
+    }
+
     ::view-transition-old(km-morph-banner),
     ::view-transition-new(km-morph-banner) {
-        animation-duration: var(--km-motion-swap);
-        animation-timing-function: var(--km-ease-smooth);
+        mix-blend-mode: plus-lighter;
+    }
+
+    ::view-transition-old(km-morph-banner) {
+        animation: km-nav-fade calc(var(--km-motion-morph) * 0.3)
+            var(--km-ease-smooth) both;
+    }
+
+    ::view-transition-new(km-morph-banner) {
+        animation: km-morph-show calc(var(--km-motion-morph) * 0.3)
+            var(--km-ease-smooth) both;
     }
 
     ::view-transition-old(km-morph-banner):only-child {
         animation:
-            km-nav-fade var(--km-motion-swap) var(--km-ease-smooth) both,
-            km-morph-vanish var(--km-motion-swap) var(--km-ease-smooth) both;
+            km-nav-fade var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-vanish var(--km-motion-morph) var(--km-ease-smooth) both;
     }
 
     ::view-transition-old(km-morph-title),
@@ -104,17 +127,17 @@ its content can be pictured. A page reached from the history
     ::view-transition-old(km-morph-title) {
         inline-size: var(--km-morph-from);
         animation:
-            km-morph-grow var(--km-motion-swap) var(--km-ease-smooth) both,
-            km-nav-fade calc(var(--km-motion-swap) * 0.4)
+            km-morph-grow var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-nav-fade calc(var(--km-motion-morph) * 0.25)
                 var(--km-ease-smooth) both;
     }
 
     ::view-transition-new(km-morph-title) {
         inline-size: var(--km-morph-to);
         animation:
-            km-morph-shrink var(--km-motion-swap) var(--km-ease-smooth) both,
-            km-morph-show calc(var(--km-motion-swap) * 0.5)
-                var(--km-ease-smooth) calc(var(--km-motion-swap) * 0.15) both;
+            km-morph-shrink var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-show calc(var(--km-motion-morph) * 0.3)
+                var(--km-ease-smooth) both;
     }
 
     .km-document--leaving .km-layout__content {

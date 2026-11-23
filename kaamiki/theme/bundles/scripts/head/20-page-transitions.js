@@ -95,9 +95,17 @@
         Object.entries(tokens).forEach(([token, value]) => {
             root.style.setProperty(`--km-morph-${token}`, value);
         });
-        change.ready.then(() => document.getAnimations().find((move) => (
-            move.effect?.pseudoElement === '::view-transition-old(km-content)'
-        ))?.finished ?? change.finished).catch(() => {}).then(release);
+        change.ready.then(() => {
+            const flight = document.getAnimations().find((move) => (
+                move.effect?.pseudoElement?.includes(MORPH)
+            ));
+            const timing = flight?.effect.getComputedTiming();
+            if (!timing) return change.finished;
+            return new Promise((done) => window.setTimeout(
+                done,
+                timing.duration * 0.6 - timing.localTime
+            ));
+        }).catch(() => {}).then(release);
         change.finished.catch(() => {}).then(() => {
             named(to, false);
             Object.keys(tokens).forEach((token) => {
