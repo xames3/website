@@ -4,7 +4,6 @@
         FOCUSABLE,
         Moment,
         TIMING,
-        afterLanding,
         anchorTargetY,
         announce,
         attempt,

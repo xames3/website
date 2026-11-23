@@ -36,13 +36,6 @@
         blocks: new Map(),
     };
 
-    const landed = window.Kaamiki?.landed;
-
-    function afterLanding(fn) {
-        if (landed) landed.then(fn);
-        else fn();
-    }
-
     function afterReveal(node, fn) {
         let block = node;
         while (block && !entrance.blocks.has(block)) {

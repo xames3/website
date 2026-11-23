@@ -4,13 +4,8 @@
     let revealed = false;
     let timer = 0;
     let teardown = null;
-    let land = null;
-    const landed = new Promise((resolve) => {
-        land = resolve;
-    });
 
     function release() {
-        land();
         revealed = true;
         window.clearTimeout(timer);
         root.removeAttribute('data-km-handing');
@@ -92,10 +87,7 @@
     const arrived = performance.getEntriesByType('navigation')[0]
         ?.type === 'navigate' ? take() : null;
     const morph = arrived?.url === location.href ? arrived : null;
-    if (morph) {
-        root.setAttribute('data-km-morph', 'arrive');
-        window.Kaamiki = { ...window.Kaamiki, landed };
-    }
+    if (morph) root.setAttribute('data-km-morph', 'arrive');
 
     function arrive(change) {
         const to = parts(document, 1);
