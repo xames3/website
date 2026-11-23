@@ -106,7 +106,10 @@
             if (!from?.transform || !to?.transform
                 || !Number.isFinite(scale)) return;
             flight.effect.setKeyframes([
-                { transform: `${from.transform} scale(${scale})` },
+                {
+                    easing: from.easing,
+                    transform: `${from.transform} scale(${scale})`,
+                },
                 { transform: to.transform },
             ]);
         })).catch(() => {});
