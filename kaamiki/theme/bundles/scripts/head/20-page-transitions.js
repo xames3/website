@@ -23,6 +23,8 @@
     // The old page names its content and an open dropdown so
     // they can be pictured as they were, and gives the names
     // up if it's shown again from the back and forward cache.
+    // With the sidebar open, nothing is named and the old page
+    // stays whole, sidebar on top, until the new one takes over.
     const menus = () => document.querySelectorAll(
         '.km-header__nav-group > ul'
     );
@@ -32,6 +34,7 @@
             event.viewTransition.skipTransition();
             return;
         }
+        if (document.querySelector('.km-sidebar--visible')) return;
         Array.from(menus()).find((menu) => (
             getComputedStyle(menu).visibility !== 'hidden'
         ))?.style.setProperty(
