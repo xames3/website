@@ -119,7 +119,7 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-image-pair(km-morph-banner),
     ::view-transition-image-pair(km-morph-title) {
-        transition: scale var(--km-motion-morph) var(--km-ease-smooth);
+        transition: scale var(--km-motion-morph) var(--km-ease-morph);
     }
 
     :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-banner),
@@ -133,7 +133,7 @@ its content can be pictured. A page reached from the history
     ::view-transition-group(km-morph-title) {
         transform-origin: 0 0;
         animation-duration: var(--km-motion-morph);
-        animation-timing-function: var(--km-ease-smooth);
+        animation-timing-function: var(--km-ease-morph);
     }
 
     ::view-transition-group(km-morph-banner) {
@@ -188,7 +188,7 @@ its content can be pictured. A page reached from the history
     ::view-transition-old(km-morph-title) {
         inline-size: var(--km-morph-from);
         animation:
-            km-morph-grow var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-grow var(--km-motion-morph) var(--km-ease-morph) both,
             km-nav-fade calc(var(--km-motion-morph) * 0.25)
                 var(--km-ease-smooth) both;
     }
@@ -196,7 +196,7 @@ its content can be pictured. A page reached from the history
     ::view-transition-new(km-morph-title) {
         inline-size: var(--km-morph-to);
         animation:
-            km-morph-shrink var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-shrink var(--km-motion-morph) var(--km-ease-morph) both,
             km-morph-show calc(var(--km-motion-morph) * 0.3)
                 var(--km-ease-smooth) both;
     }
