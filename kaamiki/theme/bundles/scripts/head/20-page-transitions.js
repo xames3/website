@@ -21,6 +21,13 @@
     }
 
     const MORPH = 'km-morph';
+    const HOLD_MS = 600;
+    const STEADY_MS = 20;
+    const STEADY_FRAMES = 3;
+    let started = false;
+    document.addEventListener('DOMContentLoaded', () => {
+        started = true;
+    }, { once: true });
     const PARTS = {
         banner: ['.km-related__banner', '.km-page > .km-banner'],
         title: ['.km-related__title', '#km-content > section > h1'],
@@ -124,9 +131,18 @@
                 root.setAttribute('data-km-morph', 'fly');
             }
         };
-        change.ready.then(() => requestAnimationFrame(
-            () => requestAnimationFrame(fly)
-        )).catch(() => {});
+        let last = 0;
+        let steady = 0;
+        const watch = (now) => {
+            if (root.getAttribute('data-km-morph') !== 'arrive') return;
+            steady = last && now - last < STEADY_MS ? steady + 1 : 0;
+            last = now;
+            if (started && steady >= STEADY_FRAMES) fly();
+            else requestAnimationFrame(watch);
+        };
+        change.ready.then(() => requestAnimationFrame(watch))
+            .catch(() => {});
+        window.setTimeout(fly, HOLD_MS);
         change.finished.catch(() => {}).then(() => {
             named(to, false);
             Object.keys(tokens).forEach((token) => {
