@@ -13,6 +13,7 @@ Last updated on: 19 November 2026
     const {
         FOCUSABLE,
         TIMING,
+        afterLanding,
         anchorTargetY,
         announce,
         attempt,

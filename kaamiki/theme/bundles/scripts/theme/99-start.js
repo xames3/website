@@ -10,13 +10,24 @@
         initPageReveal,
     } = window.Kaamiki;
     Object.freeze(window.Kaamiki);
-    for (const init of [
+    const start = (inits) => {
+        for (const init of inits) {
+            try {
+                init();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
+    start([
         initHeaderHeight,
         initHeaderLine,
         initKeyboardModality,
         initColourModes,
         initLogoInvert,
         initNavFit,
+    ]);
+    afterLanding(() => start([
         initSidebar,
         initScrollTop,
         initTabSets,
@@ -53,11 +64,5 @@
         initTranscripts,
         initPageReveal,
         initSearchHighlights,
-    ]) {
-        try {
-            init();
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    ]));
 })();

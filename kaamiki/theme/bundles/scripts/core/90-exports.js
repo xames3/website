@@ -4,6 +4,7 @@
         REVEAL_SHOWN,
         REVEAL_WAITING,
         TIMING,
+        afterLanding,
         anchorTargetY,
         announce,
         attempt,

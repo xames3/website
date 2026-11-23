@@ -11,6 +11,7 @@ Last updated on: 21 November 2026
     'use strict';
 
     const {
+        afterLanding,
         clamp,
         copyText,
         headerHeight,

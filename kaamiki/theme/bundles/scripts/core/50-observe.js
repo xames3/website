@@ -1,14 +1,32 @@
+    function whenRoot(attributes, busy, fn) {
+        if (!busy()) {
+            fn();
+            return;
+        }
+        const freed = new MutationObserver(() => {
+            if (busy()) return;
+            freed.disconnect();
+            fn();
+        });
+        freed.observe(root, {
+            attributes: true,
+            attributeFilter: attributes,
+        });
+    }
+
+    function loading() {
+        return root.classList.contains('km-document--loading');
+    }
+
+    function afterLanding(fn) {
+        whenRoot(['class', 'data-km-morph'], () => (
+            loading() && root.hasAttribute('data-km-morph')
+        ), fn);
+    }
+
     function afterReveal(node, fn) {
-        if (root.classList.contains('km-document--loading')) {
-            const shown = new MutationObserver(() => {
-                if (root.classList.contains('km-document--loading')) return;
-                shown.disconnect();
-                afterReveal(node, fn);
-            });
-            shown.observe(root, {
-                attributes: true,
-                attributeFilter: ['class'],
-            });
+        if (loading()) {
+            whenRoot(['class'], loading, () => afterReveal(node, fn));
             return;
         }
         const block = node.closest(`.${REVEAL_WAITING}:not(.${REVEAL_SHOWN})`);
