@@ -145,11 +145,10 @@
         };
     }
 
-    function play({ all, blocks, fold, hold }) {
+    function place({ all, blocks, fold, hold }) {
         const clip = edges(fold);
         const shown = Array.from(blocks.keys())
             .filter((block) => inView(block, clip));
-        const now = document.timeline.currentTime;
         blocks.forEach((parts, block) => {
             if (shown.includes(block)) return;
             parts.forEach((animation) => animation.cancel());
@@ -161,17 +160,27 @@
             REVEAL_MIN_STEP_MS,
             engine.ms('stagger'),
         );
-        shown.forEach((block, index) => {
-            const delay = hold + index * step;
-            blocks.get(block).forEach((animation) => (
-                animation.effect.updateTiming({ delay })
-            ));
-            window.setTimeout(() => entrance.blocks.get(block).pass(), delay);
-        });
-        const live = all.filter((animation) => animation.playState !== 'idle');
+        const delays = new Map(shown.map((block, index) => (
+            [block, hold + index * step]
+        )));
+        delays.forEach((delay, block) => blocks.get(block).forEach(
+            (animation) => animation.effect.updateTiming({ delay }),
+        ));
+        return {
+            live: all.filter((animation) => animation.playState !== 'idle'),
+            delays,
+        };
+    }
+
+    function play({ live, delays }) {
+        const now = document.timeline.currentTime;
         live.forEach((animation) => {
             animation.startTime = now;
         });
+        delays.forEach((delay, block) => window.setTimeout(
+            () => entrance.blocks.get(block).pass(),
+            delay,
+        ));
         return live;
     }
 
@@ -208,17 +217,23 @@
             if (!all.length) settle([]);
             return;
         }
-        whenReady(() => {
+        const guarded = (fn) => () => {
             try {
-                settle(play(staged));
+                fn();
             } catch (error) {
                 abandon(all, error);
             }
-        });
+        };
+        whenReady(guarded(() => {
+            const placed = place(staged);
+            requestAnimationFrame(guarded(() => settle(play(placed))));
+        }));
     }
 
     function initPageReveal() {
-        if (document.readyState !== 'loading') enterPage();
+        const entry = performance.getEntriesByType('navigation')[0];
+        if (entry ? entry.domContentLoadedEventStart > 0
+            : document.readyState === 'complete') enterPage();
         else {
             document.addEventListener('DOMContentLoaded', enterPage, {
                 once: true,

@@ -1,8 +1,6 @@
-    afterLanding(() => {
-        try {
-            initCodeExplains();
-        } catch (error) {
-            console.error(error);
-        }
-    });
+    try {
+        initCodeExplains();
+    } catch (error) {
+        console.error(error);
+    }
 })();
