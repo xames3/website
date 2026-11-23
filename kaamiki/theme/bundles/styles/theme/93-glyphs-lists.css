@@ -68,14 +68,17 @@
     position: absolute;
 }
 
-:where(.fa-duotone, .fa-sharp-duotone)::after {
-    opacity: var(--fa-secondary-opacity, 0.4);
-}
+[class*="fa-"]:is(.fa-duotone, .fa-sharp-duotone) {
+    --km-duotone-fade: color-mix(in srgb, currentColor 40%, transparent);
+    --fa-primary-opacity: 1;
+    --fa-secondary-opacity: 1;
 
-:where(.fa-swap-opacity:is(.fa-duotone, .fa-sharp-duotone))::before {
-    opacity: var(--fa-secondary-opacity, 0.4);
-}
+    &::after,
+    &.fa-swap-opacity::before {
+        color: var(--km-duotone-fade);
+    }
 
-:where(.fa-swap-opacity:is(.fa-duotone, .fa-sharp-duotone))::after {
-    opacity: var(--fa-primary-opacity, 1);
+    &.fa-swap-opacity::after {
+        color: inherit;
+    }
 }
