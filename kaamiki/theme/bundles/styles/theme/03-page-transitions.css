@@ -120,7 +120,7 @@ its content can be pictured. A page reached from the history
     :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-banner),
     :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-title) {
         scale: 1.03;
-        animation: km-morph-rise var(--km-motion-surface)
+        animation: km-morph-rise calc(var(--km-motion-press) * 0.75)
             var(--km-ease-smooth) both;
     }
 

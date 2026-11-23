@@ -21,7 +21,7 @@
     }
 
     const MORPH = 'km-morph';
-    const LIFT_MS = 400;
+    const LIFT_MS = 200;
     const PARTS = {
         banner: ['.km-related__banner', '.km-page > .km-banner'],
         title: ['.km-related__title', '#km-content > section > h1'],
@@ -113,9 +113,7 @@
                 root.setAttribute('data-km-morph', 'fly');
             }
         };
-        const settled = () => requestAnimationFrame(
-            () => requestAnimationFrame(fly)
-        );
+        const settled = () => requestAnimationFrame(fly);
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', settled, {
                 once: true,
