@@ -148,18 +148,18 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-old(km-morph-title) {
         inline-size: var(--km-morph-from);
-        animation:
-            km-morph-grow var(--km-motion-morph) var(--km-ease-morph) both,
-            km-nav-fade calc(var(--km-motion-morph) * 0.25)
-                var(--km-ease-smooth) both;
+        animation: none;
     }
 
     ::view-transition-new(km-morph-title) {
         inline-size: var(--km-morph-to);
-        animation:
-            km-morph-shrink var(--km-motion-morph) var(--km-ease-morph) both,
-            km-morph-show calc(var(--km-motion-morph) * 0.3)
-                var(--km-ease-smooth) both;
+        animation: km-morph-shrink var(--km-motion-morph) var(--km-ease-morph)
+            both;
+    }
+
+    :root[data-km-morph="arrive"]::view-transition-new(km-morph-title),
+    :root[data-km-morph="fly"]::view-transition-old(km-morph-title) {
+        opacity: 0;
     }
 
     .km-document--leaving .km-layout__content {

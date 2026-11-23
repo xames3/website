@@ -97,7 +97,6 @@
             const grow = end.size / morph.size;
             const shift = (a, b, scale) => `translate(${a.x - b.x * scale}px, `
                 + `${a.y - b.y * scale}px) scale(${scale})`;
-            frames['km-morph-grow'] = ['to', shift(end, morph, grow)];
             frames['km-morph-shrink'] = ['from', shift(morph, end, 1 / grow)];
             frames['km-morph-fly-title'] = [
                 'from',
