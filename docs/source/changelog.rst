@@ -13,7 +13,7 @@
 .. _changelog:
 
 ===============================================================================
-:fa-icon:`list-ul` Changelog
+:fa-icon:duotone:`tags` Changelog
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -23,6 +23,7 @@
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
+    :shade: graphite
 
 .. release:: Kaamiki stops borrowing now!
     :version: v2026.11.8

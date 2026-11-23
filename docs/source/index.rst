@@ -16,7 +16,7 @@
 .. _index:
 
 ===============================================================================
-Akshay Mestry
+:fa-icon:`badge-check` Akshay Mestry
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -26,7 +26,6 @@ Akshay Mestry
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
-    :banner: kaamiki-3200x1800.png
 
 .. rst-class:: am-greeting
 

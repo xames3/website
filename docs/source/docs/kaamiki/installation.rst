@@ -23,6 +23,10 @@
 
     From pip install to your first build.
 
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3/website
+
 This page takes you from an empty Sphinx project to a built page that uses
 Kaamiki.
 

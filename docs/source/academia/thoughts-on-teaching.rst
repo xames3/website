@@ -12,12 +12,11 @@
     teaching, please share.
 :km-feedback-button: Do tell
 :km-feedback-split:
-:km-related-docs: /changelog
 
 .. _academia-thoughts-on-teaching:
 
 ===============================================================================
-:fa-icon:`seedling` Thoughts on teaching
+:fa-icon:duotone:`person-chalkboard` Thoughts on teaching
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -27,6 +26,7 @@
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
+    :shade: purple
 
 In April of :ticker:`2025`, I walked into the 4024 classroom on our Chicago
 campus at NLU. I wasn't sure what kind of teacher I'd be, but I knew I wanted

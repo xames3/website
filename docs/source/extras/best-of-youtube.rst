@@ -18,12 +18,14 @@
 .. _extras-best-of-youtube:
 
 ===============================================================================
-:fa-icon:regular:`tv` Best of YouTube
+:fa-icon:duotone:`tv` Best of YouTube
 ===============================================================================
 
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
+    :fa-icon: fa-brands fa-youtube
+    :shade: red
 
 Recently, out of nowhere, I was looking at my phone's screen time stats and I
 realised that I spend shitload of my time on YouTube. I got into tech in 2017.
