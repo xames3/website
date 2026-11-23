@@ -99,13 +99,6 @@ its content can be pictured. A page reached from the history
             both;
     }
 
-    :root[data-km-morph="arrive"]::view-transition-group(*),
-    :root[data-km-morph="arrive"]::view-transition-image-pair(*),
-    :root[data-km-morph="arrive"]::view-transition-old(*),
-    :root[data-km-morph="arrive"]::view-transition-new(*) {
-        animation-play-state: paused;
-    }
-
     ::view-transition-group(km-morph-banner),
     ::view-transition-group(km-morph-title) {
         transform-origin: 0 0;
@@ -290,5 +283,13 @@ its content can be pictured. A page reached from the history
             km-nav-fade var(--km-motion-content) var(--km-ease-smooth) both,
             km-morph-recede var(--km-motion-content) var(--km-ease-smooth)
                 both;
+    }
+
+    :root[data-km-morph="arrive"]::view-transition-group(*),
+    :root[data-km-morph="arrive"]::view-transition-image-pair(*),
+    :root[data-km-morph="arrive"]::view-transition-old(*),
+    :root[data-km-morph="arrive"]::view-transition-old(root),
+    :root[data-km-morph="arrive"]::view-transition-new(*) {
+        animation-play-state: paused;
     }
 }
