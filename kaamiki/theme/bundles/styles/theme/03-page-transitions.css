@@ -88,6 +88,7 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-group(km-morph-banner),
     ::view-transition-group(km-morph-title) {
+        transform-origin: 0 0;
         animation-duration: var(--km-motion-morph);
         animation-timing-function: var(--km-ease-smooth);
     }

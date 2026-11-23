@@ -95,17 +95,21 @@
         Object.entries(tokens).forEach(([token, value]) => {
             root.style.setProperty(`--km-morph-${token}`, value);
         });
-        change.ready.then(() => {
-            const flight = document.getAnimations().find((move) => (
-                move.effect?.pseudoElement?.includes(MORPH)
-            ));
-            const timing = flight?.effect.getComputedTiming();
-            if (!timing) return change.finished;
-            return new Promise((done) => window.setTimeout(
-                done,
-                timing.duration * 0.6 - timing.localTime
-            ));
-        }).catch(() => {}).then(release);
+        change.ready.then(() => document.getAnimations().forEach((flight) => {
+            const pseudo = flight.effect?.pseudoElement ?? '';
+            if (!pseudo.startsWith(`::view-transition-group(${MORPH}`)) return;
+            const [from, to] = flight.effect.getKeyframes();
+            const scale = pseudo.includes('banner')
+                ? Number.parseFloat(from?.width)
+                    / Number.parseFloat(to?.width)
+                : 1;
+            if (!from?.transform || !to?.transform
+                || !Number.isFinite(scale)) return;
+            flight.effect.setKeyframes([
+                { transform: `${from.transform} scale(${scale})` },
+                { transform: to.transform },
+            ]);
+        })).catch(() => {});
         change.finished.catch(() => {}).then(() => {
             named(to, false);
             Object.keys(tokens).forEach((token) => {

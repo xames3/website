@@ -1,4 +1,16 @@
     function afterReveal(node, fn) {
+        if (root.classList.contains('km-document--loading')) {
+            const shown = new MutationObserver(() => {
+                if (root.classList.contains('km-document--loading')) return;
+                shown.disconnect();
+                afterReveal(node, fn);
+            });
+            shown.observe(root, {
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+            return;
+        }
         const block = node.closest(`.${REVEAL_WAITING}:not(.${REVEAL_SHOWN})`);
         if (block) {
             block.addEventListener('km:reveal', () => fn(node), { once: true });
