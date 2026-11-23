@@ -64,6 +64,18 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-rise {
+    from {
+        scale: 1;
+    }
+}
+
+@keyframes km-morph-recede {
+    to {
+        scale: 0.96;
+    }
+}
+
 @keyframes km-morph-show {
     from {
         opacity: 0;
@@ -92,10 +104,24 @@ its content can be pictured. A page reached from the history
         visibility: visible;
     }
 
-    :root[data-km-morph]:not(.km-document--revealing)
-        ::view-transition-old(root) {
-        animation: km-nav-fade var(--km-motion-content) var(--km-ease-smooth)
-            both;
+    :root[data-km-morph] .km-header {
+        view-transition-name: km-morph-header;
+    }
+
+    :root[data-km-morph="leave"] .km-layout__content {
+        view-transition-name: none;
+    }
+
+    ::view-transition-image-pair(km-morph-banner),
+    ::view-transition-image-pair(km-morph-title) {
+        transition: scale var(--km-motion-morph) var(--km-ease-smooth);
+    }
+
+    :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-banner),
+    :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-title) {
+        scale: 1.03;
+        animation: km-morph-rise var(--km-motion-surface)
+            var(--km-ease-smooth) both;
     }
 
     ::view-transition-group(km-morph-banner),
@@ -284,5 +310,12 @@ its content can be pictured. A page reached from the history
             km-nav-fade var(--km-nav-out) var(--km-ease-smooth) both,
             km-nav-sink var(--km-nav-out) var(--km-ease-smooth) both;
         mix-blend-mode: normal;
+    }
+
+    :root[data-km-morph]::view-transition-old(root) {
+        animation:
+            km-nav-fade var(--km-motion-content) var(--km-ease-smooth) both,
+            km-morph-recede var(--km-motion-content) var(--km-ease-smooth)
+                both;
     }
 }

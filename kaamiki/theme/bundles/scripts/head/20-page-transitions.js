@@ -172,6 +172,7 @@
         if (card && card.href === event.activation?.entry?.url) {
             const from = parts(card, 0);
             named(from, true);
+            root.setAttribute('data-km-morph', 'leave');
             const { left, top, width } = from.banner
                 .getBoundingClientRect();
             save({
@@ -213,6 +214,7 @@
         document.querySelectorAll('.km-related__card').forEach((card) => {
             named(parts(card, 0), false);
         });
+        root.removeAttribute('data-km-morph');
     });
 
     // Fires with the first frame, after deferred scripts
