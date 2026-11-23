@@ -15,7 +15,7 @@
 .. _kaamiki-advanced:
 
 ===============================================================================
-:fa-icon:regular:`gear` Advanced
+:fa-icon:duotone:`gear` Advanced
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -239,8 +239,8 @@ does what it says in a build of its own.
           - In ``page.html``: above and below a page's content, and the
             feedback box.
         * - ``km_social``, ``km_thirdparty``, ``km_icons``
-          - In the ``<head>``: the link-preview tags, the Font Awesome kit's
-            script and its stylesheet.
+          - In the ``<head>``: the link-preview tags, the Font Awesome
+            connection hint and its stylesheet.
         * - ``km_button``, ``km_byline``, ``km_carousel_arrows``,
             ``km_release``, ``km_repository``, ``km_video``, ``km_youtube``,
             ``km_youtube_thumbnail``
@@ -415,17 +415,19 @@ Content Security Policy
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 If your host sends a Content Security Policy, a few things need allowing. Every
-page has one inline script, which sets the theme up before the page paints. It
-has no nonce, because a static page can't carry a new one for each response, so
-allow it by its hash or with ``'unsafe-inline'`` in ``script-src``, and the
-browser names the hash in the console. Directives and roles write inline
-``style`` attributes for button colours, tickers, the logo size and the
-underline role, so ``style-src`` needs ``'unsafe-inline'`` or
+page has a few inline scripts in its head, which set the theme up before the
+page paints. They have no nonce, because a static page can't carry a new one
+for each response, so allow them by their hashes or with ``'unsafe-inline'`` in
+``script-src``, and the browser names each hash in the console. Directives and
+roles write inline ``style`` attributes for button colours, tickers, the logo
+size and the underline role, so ``style-src`` needs ``'unsafe-inline'`` or
 ``style-src-attr``. The default Font Awesome stylesheet comes from
 ``ka-f.fontawesome.com``, pinned to a release and carrying a subresource
-integrity hash. A kit's script from ``kit.fontawesome.com`` loads ``async``
-without one. Allow ``ka-f.fontawesome.com`` for the stylesheet and the fonts,
-and ``kit.fontawesome.com`` as well when you use a kit.
+integrity hash. A kit's stylesheet from ``kit.fontawesome.com`` has none, and
+it imports the kit's CSS and fonts from ``ka-p.fontawesome.com``. Allow
+``ka-f.fontawesome.com`` for the stylesheet and the fonts, or
+``kit.fontawesome.com`` and ``ka-p.fontawesome.com`` in ``style-src`` and
+``font-src`` when you use a kit.
 
 .. _kaamiki-everything-else:
 

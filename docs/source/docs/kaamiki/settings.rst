@@ -1086,7 +1086,8 @@ Icons.
 -------------------------------------------------------------------------------
 
 Kaamiki draws its icons with `Font Awesome`_, Free out of the box. A Pro kit
-switches every icon to its Pro version, as CSS for a reader without JavaScript.
+switches every icon to its Pro version, as a stylesheet in the head of each
+page, so no script draws them.
 If Font Awesome doesn't load, because it's blocked, you're offline or a kit
 refuses the address, the icons stay empty and show when Font Awesome loads. A
 kit only answers the addresses on its allow-list in your Font Awesome account,
@@ -1103,9 +1104,10 @@ so a preview from another address gets no kit.
           - What it does
         * - ``kaamiki.conf.icons.kit``
           - ``None``
-          - The address of your kit script, like
-            ``https://kit.fontawesome.com/abc123.js``, and only that form. With
-            a kit you get the Pro icons, and ``kaamiki.conf.icons.style``
+          - The address of your kit, like
+            ``https://kit.fontawesome.com/abc123.js``, and only that form. Each
+            page links the kit's stylesheet, the same address with ``.css``.
+            With a kit you get the Pro icons, and ``kaamiki.conf.icons.style``
             decides how they are drawn. Without one, every icon is a Free one.
             When this is empty, Kaamiki reads the address from the
             ``KAAMIKI_FA_KIT`` environment variable, so a build server can

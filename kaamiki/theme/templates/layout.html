@@ -340,9 +340,9 @@ Last updated on: 23 November 2026
                 <link rel="preconnect"
                       href="{{ kaamiki.icons.kit.split('/')[:3] |join('/') }}"
                       crossorigin />
-                <script src="{{ kaamiki.icons.kit }}"
-                        crossorigin="anonymous"
-                        async></script>
+                <link rel="stylesheet"
+                      href="{{ kaamiki.icons.kit_css }}"
+                      crossorigin="anonymous" />
             {%- elif kaamiki.fa_free.css %}
                 <link rel="preconnect"
                       href="{{ kaamiki.fa_free.css.split('/')[:3] |join('/') }}"
@@ -369,13 +369,6 @@ Last updated on: 23 November 2026
                   href="{{ pathto('_static/' + name, 1) |e }}" />
         {%- endfor %}
         {%- block km_icons %}
-            {%- if kaamiki.icons.kit_css %}
-                <noscript>
-                    <link rel="stylesheet"
-                          href="{{ kaamiki.icons.kit_css }}"
-                          crossorigin="anonymous" />
-                </noscript>
-            {%- endif %}
             {%- if kaamiki.fa_free.css and not kaamiki.icons.kit %}
                 {%- set km_sri = kaamiki.fa_free.integrity or none %}
                 <link rel="stylesheet"
