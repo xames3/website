@@ -12,7 +12,8 @@
 
     function kept(node) {
         if (morphed && node.matches(
-            '.km-page > .km-banner, #km-content > section > h1',
+            '.km-page > .km-banner, .km-breadcrumbs, '
+                + '#km-content > section > h1',
         )) return true;
         return arrival() === 'link' && node.matches('.km-header, .km-footer');
     }

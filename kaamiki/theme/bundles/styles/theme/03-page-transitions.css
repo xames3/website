@@ -75,6 +75,7 @@ its content can be pictured. A page reached from the history
     }
 
     :root[data-km-morph] :is(.km-page > .km-banner,
+        .km-breadcrumbs:not(.km-breadcrumbs--empty),
         #km-content > section > h1) {
         opacity: 1;
         visibility: visible;
@@ -116,6 +117,16 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-image-pair(km-morph-banner) {
         isolation: isolate;
+    }
+
+    :root[data-km-morph]::view-transition-group(root),
+    ::view-transition-group(km-morph-crumbs) {
+        z-index: -1;
+    }
+
+    ::view-transition-new(km-morph-crumbs) {
+        animation: km-title-in var(--km-motion-morph) var(--km-ease-smooth)
+            both;
     }
 
     ::view-transition-old(km-morph-banner),

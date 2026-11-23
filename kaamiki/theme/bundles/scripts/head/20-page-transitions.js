@@ -30,6 +30,7 @@
     }, { once: true });
     const PARTS = {
         banner: ['.km-related__banner', '.km-page > .km-banner'],
+        crumbs: [null, '.km-breadcrumbs:not(.km-breadcrumbs--empty)'],
         title: ['.km-related__title', '#km-content > section > h1'],
     };
     let picked = null;
@@ -77,7 +78,7 @@
         return Object.fromEntries(Object.entries(PARTS).map(
             ([part, selectors]) => [
                 part,
-                scope.querySelector(selectors[side]),
+                selectors[side] && scope.querySelector(selectors[side]),
             ]
         ));
     }

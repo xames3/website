@@ -17,7 +17,7 @@
 .. _kaamiki-example-motion:
 
 ===============================================================================
-:fa-icon:regular:`wand-magic-sparkles` How Kaamiki moves
+:fa-icon:duotone:`wand-magic-sparkles` How Kaamiki moves
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -48,10 +48,10 @@ for less motion gets the calmer version. Both are on the :ref:`settings page
 Arriving on a page.
 -------------------------------------------------------------------------------
 
-When a page loads it comes in once and in order: the byline, the title, the
-lead and then each section below it. Nothing animates again as you scroll, so
-the page never moves under you while you read. Reload this one and watch the
-top of it:
+When a page loads it comes in once and in order: the banner, the breadcrumbs,
+the title, the lead, the byline and then each section below it. Nothing
+animates again as you scroll, so the page never moves under you while you
+read. Reload this one and watch the top of it:
 
 .. button::
     :doc: /docs/kaamiki/examples/motion

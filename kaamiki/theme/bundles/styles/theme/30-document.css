@@ -73,33 +73,44 @@
        starts at once instead of after the header's turn, and the rest follow
        it as they would have. */
     :root[data-km-arrival="link"] {
-        --km-title-lead: 3;
+        --km-title-lead: 4;
         --km-title-skip: calc(var(--km-motion-enter) * 0.35);
     }
 
-    :root[data-km-arrival="link"]:has(.km-byline.km-title-item) {
+    :root[data-km-arrival="link"]:has(:where(.km-text--lead).km-title-item) {
+        --km-title-lead: 3;
+    }
+
+    :root[data-km-arrival="link"]:has(:where(h1).km-title-item) {
         --km-title-lead: 2;
     }
 
-    :root[data-km-arrival="link"]:has(.km-breadcrumbs.km-title-item) {
+    :root[data-km-arrival="link"]:has(:where(.km-breadcrumbs).km-title-item) {
+        --km-title-lead: 1;
+    }
+
+    :root[data-km-arrival="link"]:has(:where(.km-banner).km-title-item) {
         --km-title-lead: 0;
     }
 
     .km-header.km-title-item,
-    .km-banner.km-title-item,
-    .km-breadcrumbs.km-title-item {
+    .km-banner.km-title-item {
         --km-title-index: 0;
     }
 
-    .km-byline.km-title-item {
-        --km-title-index: 2;
+    .km-breadcrumbs.km-title-item {
+        --km-title-index: 1;
     }
 
     h1.km-title-item {
-        --km-title-index: 3;
+        --km-title-index: 2;
     }
 
     .km-text--lead.km-title-item {
+        --km-title-index: 3;
+    }
+
+    .km-byline.km-title-item {
         --km-title-index: 4;
     }
 

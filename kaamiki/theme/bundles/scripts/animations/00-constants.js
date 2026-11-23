@@ -78,7 +78,7 @@ Last updated on: 21 November 2026
     const REVEAL_BUDGET_MS = 1600;
     const REVEAL_MIN_STEP_MS = 30;
     const TITLE_ITEM = 'km-title-item';
-    const TITLE_STEPS = 4;
+    const TITLE_STEPS = 5;
     const SPEECH_WORD_MS = 170;
     const SPEECH_CHAR_MS = 14;
     const SPEECH_COMMA_MS = 260;
