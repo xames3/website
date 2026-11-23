@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -1109,11 +1109,24 @@ so a preview from another address gets no kit.
         * - ``kaamiki.conf.icons.style``
           - ``"regular"``
           - The style of every icon that doesn't name one. Takes ``solid``,
-            ``regular``, ``light`` or ``thin``, and the last two need a kit,
-            from ``kaamiki.conf.icons.kit`` or ``KAAMIKI_FA_KIT``.
+            ``regular``, ``light`` or ``thin``, or one of them after
+            ``duotone``, as ``"duotone regular"``, for icons in two layers
+            with the second one faded. ``duotone`` alone is ``duotone
+            solid``. Light, thin and duotone need a kit, from
+            ``kaamiki.conf.icons.kit`` or ``KAAMIKI_FA_KIT``, and a kit that
+            includes them.
         * - ``kaamiki.conf.icons.names``
           - ``{}``
           - Swaps one of Kaamiki's own icons for another.
+        * - ``kaamiki.conf.byline.icon_style``
+          - ``"regular"``
+          - The style of the title's icon on a byline's banner and on the
+            cards that link to the page. Takes ``solid``, ``regular``,
+            ``light`` or ``thin``, or one of them after ``duotone``, as
+            ``"duotone regular"``, for a duotone icon with its second layer
+            faded. ``duotone`` alone is ``duotone solid``. It needs a kit:
+            without one, the icon keeps the title's style. A brand stays a brand, and a byline's own
+            ``:fa-icon:`` is drawn as written.
 
 Without a kit, Kaamiki keeps to what Font Awesome Free has. Free draws far
 fewer icons in the ``regular`` style than Pro does, so every icon is looked up

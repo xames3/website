@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Bylines, option by option
 :km-page-description: Every option of the byline directive, with icons and
@@ -79,11 +79,15 @@ The options, one at a time.
         it, the site's ``language``.
     * - All three ``:hide-*:``
       - Leaves only the name and the picture.
-    * - ``:backdrop:``
-      - One to eight pictures that fade through behind the title.
-    * - ``:backdrop:`` and ``:interval:``
-      - Two pictures, each for 4 seconds. ``:interval:`` needs two or
-        more.
+    * - ``:shade:``
+      - The colour of the banner above the title. Blue without it.
+    * - ``:fa-icon:``
+      - The icon in the banner. The title's icon without it, else none.
+    * - ``:banner:``
+      - A picture of yours in place of the gradient, an address or a file in
+        your docs.
+    * - ``:hide-banner:``
+      - Leaves the banner off the page.
     * - ``:class:``
       - Extra classes.
 
@@ -174,21 +178,33 @@ All three ``:hide-*:``
         :hide-copy-url:
         :hide-source:
 
-``:backdrop:``
+``:shade:``
 
 .. code-block:: rst
 
     .. byline:: @xames3
-        :backdrop: https://i.imgur.com/RLsdjyG.jpeg
+        :shade: green
 
-``:backdrop:`` and ``:interval:``
+``:fa-icon:``
 
 .. code-block:: rst
 
     .. byline:: @xames3
-        :backdrop: https://i.imgur.com/RLsdjyG.jpeg,
-            https://i.imgur.com/BPxkNzC.jpeg
-        :interval: 4
+        :fa-icon: fa-regular fa-compass
+
+``:banner:``
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :banner: https://i.imgur.com/RLsdjyG.jpeg
+
+``:hide-banner:``
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :hide-banner:
 
 ``:class:``
 

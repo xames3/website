@@ -24,8 +24,11 @@
     --km-colour-orange: 22 100% 52%;
     --km-colour-red: 357.87 68.98% 57%;
     --km-colour-yellow: 38.9 100% 57.06%;
+    --km-colour-indigo: 241 74% 63%;
+    --km-colour-purple: 280 85% 65%;
+    --km-colour-teal: 189 72% 56%;
+    --km-colour-graphite: 240 2% 57%;
     --km-colour-highlight: 211.25 97.96% 19.22%;
-    --km-byline-wave-filter: none;
     --km-colour-header-bg:
         color-mix(
             in srgb,

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 15 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Kaamiki page fields
 :km-page-description: The fields you can put at the top of a page to change its
@@ -173,16 +173,9 @@ overrides the same key in the ``kaamiki.conf.site.open_graph`` setting.
             site's ``description`` and last the page's first paragraph.
         * - ``:km-page-image:``
           - The preview picture, as a path or a full address. Defaults to the
-            first ``:backdrop:`` of the page's ``byline`` directive, then to
-            the site's ``image``.
+            site's ``image``.
         * - ``:km-page-image-alt:``
           - Alt text for that picture.
-        * - ``:km-page-backdrop:``
-          - The picture the page's cards use when it has no
-            ``:km-page-image:``. A ``byline`` directive's first ``:backdrop:``
-            sets it for you. It's a path on the site or an ``http`` or
-            ``https`` address ending in ``.jpg``, ``.jpeg``, ``.png``,
-            ``.webp``, ``.avif``, ``.gif`` or ``.svg``.
 
         * - ``:km-page-type:``
           - An Open Graph type: ``website``, ``article``, ``book``,
@@ -349,11 +342,10 @@ is unless you turn it off (see :ref:`settings <kaamiki-settings-pages>`). A
 page at the end of the site gets the ones before it. A site with fewer pages
 shows the ones it has. The front page is never one of these cards. Three cards
 show at once on a wide screen and one and a bit on a phone, and the arrows
-scroll the rest. Each card is the page's picture in greyscale (its
-``:km-page-image:``, then its ``:km-page-backdrop:``, else the byline's waves,
-held still), then the part of the site it's in, the day it was created and its
-title, which keeps to two lines and is written as the header's menus write it:
-an icon stays and every other role is plain text:
+scroll the rest. Each card is the page's :ref:`banner
+<kaamiki-byline-banner>`, then the part of the site it's in, the day it was
+created and its title, which keeps to two lines and is written as the header's
+menus write it: an icon stays and every other role is plain text:
 
 .. code-block:: rst
 

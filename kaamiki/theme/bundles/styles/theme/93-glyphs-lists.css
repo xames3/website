@@ -60,3 +60,25 @@
     opacity: 0.6;
 }
 
+:where(.fa-duotone, .fa-sharp-duotone) {
+    position: relative;
+}
+
+:where(.fa-duotone, .fa-sharp-duotone)::before {
+    position: absolute;
+}
+
+[class*="fa-"]:is(.fa-duotone, .fa-sharp-duotone) {
+    --km-duotone-fade: color-mix(in srgb, currentColor 40%, transparent);
+    --fa-primary-opacity: 1;
+    --fa-secondary-opacity: 1;
+
+    &::after,
+    &.fa-swap-opacity::before {
+        color: var(--km-duotone-fade);
+    }
+
+    &.fa-swap-opacity::after {
+        color: inherit;
+    }
+}

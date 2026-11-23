@@ -44,9 +44,6 @@ Last updated on: 21 November 2026
     const HIDDEN_PARTS = '.km-tabs__panel:not(.km-tabs__panel--current), '
         + 'details.km-accordion:not([open])';
     const CLAMP_ACCORDION_MIN_PX = 80;
-    const BYLINE_BG_INTERVAL_MS = 7000;
-    const BYLINE_BG_HIDDEN = '0.001';
-    const BYLINE_BG_GROW_REM = 3;
     const TYPEWRITE_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
     const TYPEWRITE_SLIP = 0.03;
     const TYPEWRITE_SOLID_MS = 350;

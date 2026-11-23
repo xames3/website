@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 24 February 2025
-.. Last updated on: 12 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Guiding stars
 :km-page-description: Expressing gratitude to the people who shaped my path in
@@ -26,8 +26,6 @@
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
-    :backdrop: https://i.imgur.com/aIQD5Bx.jpeg,
-        https://i.imgur.com/CRsFJlJ.jpg
 
 In everyone's life, there are always points where you pause and look back. You
 not only reflect on your achievements and/or mistakes, but also the people

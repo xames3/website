@@ -4,7 +4,7 @@ Directive Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 16 November 2026
+Last updated on: 22 November 2026
 
 The helpers that the directives of Kaamiki are built from. `NATIVE`
 holds the two options of the directives of docutils, `class` and
@@ -51,7 +51,7 @@ if t.TYPE_CHECKING:
 OPTION: t.Final[re.Pattern[str]] = re.compile(
     r"^\s*- `([\w-]+)`:", re.MULTILINE
 )
-LINKCHECK_OPTIONS: t.Final[tuple[str, ...]] = ("avatar", "backdrop", "target")
+LINKCHECK_OPTIONS: t.Final[tuple[str, ...]] = ("avatar", "banner", "target")
 LINKS: t.Final[tuple[type[nodes.Node], ...]] = (
     nodes.reference,
     nodes.footnote_reference,

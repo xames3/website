@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 November 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: How Kaamiki moves
 :km-page-description: Every animation in Kaamiki, shown working in one
@@ -28,10 +28,6 @@ How Kaamiki moves
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
-    :backdrop: https://i.imgur.com/JOBRcgT.jpg,
-        https://i.imgur.com/hUhxigb.jpeg,
-        https://i.imgur.com/gcGHqxi.jpg,
-        https://i.imgur.com/weM4qDW.jpg
 
 This page is a tour of how Kaamiki moves. Nothing on it is a demo in a box:
 each animation turns up where you'd really use it, inside a paragraph, a list
@@ -61,9 +57,6 @@ top of it:
     :fa-icon: fa-solid fa-rotate-right
 
     Reload this page
-
-Behind the byline the pictures take turns and the waves drift. It's the one
-motion that never stops, so it pauses for a reader who asks for less motion.
 
 .. _kaamiki-example-motion-a-long-page-folded:
 
@@ -115,9 +108,6 @@ page gets it ready as your pointer comes near.
         * - A page coming in
           - The top of any page
           - Reload the page.
-        * - The pictures and waves
-          - Behind the byline
-          - Wait a few seconds.
         * - *Show more* and *Show less*
           - The fold of this page
           - Press either one.

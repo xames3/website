@@ -17,6 +17,7 @@
         if (!heading) return [];
         const items = [
             document.querySelector('.km-header'),
+            document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
             heading,
             ...Array.from(heading.parentElement.children).filter((child) => (
@@ -36,24 +37,12 @@
         return Math.max(0, hold - TIMING.titleSkip());
     }
 
-    function afterLoading(callback) {
-        if (!root.classList.contains('km-document--loading')) {
-            callback();
-            return;
-        }
-        const watcher = new MutationObserver(() => {
-            if (root.classList.contains('km-document--loading')) return;
-            watcher.disconnect();
-            callback();
-        });
-        watcher.observe(root, { attributes: true, attributeFilter: ['class'] });
-    }
-
     function initPageReveal() {
         if (prefersReducedMotion() || arrival() === 'history') return;
         const title = new Set(markTitle());
         const blocks = [
             document.querySelector('.km-header'),
+            document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
             ...revealBlocks(document.getElementById('km-content')),
             document.querySelector('.km-feedback-section'),

@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 19 November 2026
+Last updated on: 22 November 2026
 
 The utilities that fill the context of a page for the templates. The
 templates read one read-only value, `kaamiki`, with the paths of
@@ -34,6 +34,8 @@ from sphinx.util import docname_join
 from sphinx.util import logging
 
 from kaamiki.extensions.utils import checks
+from kaamiki.extensions.utils.banner import banner
+from kaamiki.extensions.utils.banner import banners
 from kaamiki.extensions.utils.build import is_noindex
 from kaamiki.extensions.utils.build import writes_pages
 from kaamiki.extensions.utils.checks import fail
@@ -317,7 +319,6 @@ FIELDS: t.Final[dict[str, Callable[[str], t.Any]]] = {
     "km-feedback-type": checks.word("mail", "link"),
     "km-feedback-url": checks.link,
     "km-header-subheader": functools.partial(checks.text, maximum=120),
-    "km-page-backdrop": checks.picture,
     "km-page-card": checks.word(*CARDS),
     "km-page-description": functools.partial(checks.text, maximum=300),
     "km-page-image": checks.link,
@@ -1037,6 +1038,16 @@ def title_parts(title: str) -> list[dict[str, str]]:
     return parts
 
 
+def first_glyph(title: str) -> str:
+    """Find the first icon of the rendered title of a page.
+
+    :param title: The title as the builder rendered it.
+    :return: The classes of the icon, or an empty string.
+    """
+    found = GLYPH.search(title)
+    return found.group(1) if found else ""
+
+
 @on("html-page-context")
 def related(
     app: Sphinx,
@@ -1055,9 +1066,9 @@ def related(
         holds the `header` of the section (`:km-related-header:`, or
         "More to read." in the language of the site) and a card for
         each page, with its `link`, `title`, `section`, `date` and
-        `image`. The image is `:km-page-image:`, then
-        `:km-page-backdrop:`, else an empty string, which the template
-        draws as waves. The date is the `created` date of the page, or
+        `banner`. The banner is the banner of the byline of the page,
+        else a banner in the default shade with the icon of its
+        title. The date is the `created` date of the page, or
         empty. A page with `:km-related-skip-page:` is not a card and
         gets none. A page with cards does not show the previous and
         next buttons.
@@ -1090,14 +1101,10 @@ def related(
                 str(env.doc2path(pagename)),
             )
         other = env.metadata.get(docname, {})
-        title = other.get("km-page-title") or builder.render_partial(
-            env.titles[docname]
-        ).get("title", "")
-        image = (
-            other.get("km-page-image") or other.get("km-page-backdrop") or ""
-        )
-        if image:
-            image = context["pathto"](image.lstrip("/"), 1)
+        rendered = builder.render_partial(env.titles[docname])
+        title = other.get("km-page-title") or rendered.get("title", "")
+        glyph = first_glyph(rendered.get("title", ""))
+        drawn = banner(env, docname, glyph).linked(context["pathto"])
         iso = day(other.get("created", ""))
         cards.append(
             {
@@ -1108,7 +1115,7 @@ def related(
                 "date": dated(datetime.fromisoformat(iso), app.config)
                 if iso
                 else "",
-                "image": image,
+                "banner": drawn._asdict(),
             }
         )
     if cards:
@@ -1181,8 +1188,7 @@ def retitled(app: Sphinx, env: BuildEnvironment) -> list[str]:
                 name,
                 env.titles[name].astext() if name in env.titles else None,
                 env.metadata.get(name, {}).get("km-page-title"),
-                env.metadata.get(name, {}).get("km-page-image"),
-                env.metadata.get(name, {}).get("km-page-backdrop"),
+                banners(env).get(name),
                 env.metadata.get(name, {}).get("created"),
                 section_of(app, name),
             )

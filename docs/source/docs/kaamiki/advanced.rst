@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 28 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Advanced Kaamiki
 :km-page-description: What a Sphinx author who wants more control needs to
@@ -87,8 +87,10 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
         * - Starts with
           - What it sets
         * - ``--km-colour-``
-          - The palette: greys, the four hues and what each part of the page
-            uses, like ``--km-colour-link``, ``--km-colour-code-bg`` and the
+          - The palette: greys, the hues (``--km-colour-blue``, ``-indigo``,
+            ``-purple``, ``-red``, ``-orange``, ``-yellow``, ``-green``,
+            ``-teal`` and ``-graphite``) and what each part of the page uses,
+            like ``--km-colour-link``, ``--km-colour-code-bg`` and the
             ``--km-colour-button-*`` states. The focus ring is
             ``--km-colour-focus`` and the quiet text of bylines, captions and
             the footer is ``--km-colour-meta``, two greys that keep their
@@ -109,6 +111,10 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             ``--km-space-0-5`` is an eighth. Every margin, padding and gap of
             the theme is one of them, so a change to a step changes the rhythm
             of the whole site and scales with the reader's text size.
+        * - ``--km-banner-``
+          - The three hues of the gradient of the banner above a title
+            (``--km-banner-shade``, ``--km-banner-before`` and
+            ``--km-banner-after``), which each ``km-banner--*`` shade sets.
         * - ``--km-backdrop-``
           - The blur and tint behind the phone's menu.
         * - ``--km-radius-``
@@ -160,11 +166,6 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             1060ms). How long a ticker counts (``--km-motion-ticker``, 2000ms
             over the site's speed), how long a tooltip stays (1800ms) and how
             long a copy button shows its tick (``--km-copy-hold``, 1800ms).
-        * - ``--km-wave-``
-          - The waves behind a byline without a backdrop: how wide a tile is
-            (``--km-wave-a``, ``--km-wave-b`` and ``--km-wave-c``) and how
-            many tiles a strip runs before it starts again
-            (``--km-wave-tiles``, 120, an hour).
         * - ``--km-motion-ambient``
           - How long a loop that never ends takes for a round (1600ms over the
             site's speed).
@@ -470,8 +471,7 @@ Breadcrumbs
     nearest of them, and the name of the page itself shortens last.
 
 Motion
-    A reader who asked for less gets a still background and no animated
-    reveal.
+    A reader who asked for less gets no animated reveal.
 
 Large sites
     Sphinx draws the whole toctree on every page, so a site of thousands of

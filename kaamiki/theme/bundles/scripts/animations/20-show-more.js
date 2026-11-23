@@ -22,11 +22,18 @@
             button.getBoundingClientRect().height + showMoreDock()
         );
 
+        const banner = page.querySelector(':scope > .km-banner');
+        const lead = () => (banner
+            ? banner.nextElementSibling.getBoundingClientRect().top
+                - banner.getBoundingClientRect().top
+            : 0);
+
         const fit = () => {
             const top = window.scrollY + content.getBoundingClientRect().top;
-            const room = Math.round(
-                Math.max(CLAMP_MIN_PX, stableHeight() - top - tail()),
-            );
+            const room = Math.round(Math.max(
+                CLAMP_MIN_PX,
+                stableHeight() - (top - lead()) - tail(),
+            ));
             page.style.setProperty('--km-show-more-clamp', `${room}px`);
             return { top, room };
         };

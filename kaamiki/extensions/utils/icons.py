@@ -37,6 +37,12 @@ if t.TYPE_CHECKING:
     from sphinx.config import Config
 
 DEFAULT_STYLE: t.Final[str] = "regular"
+WEIGHTS: t.Final[tuple[str, ...]] = ("solid", "regular", "light", "thin")
+SITE_STYLES: t.Final[tuple[str, ...]] = (
+    *WEIGHTS,
+    "duotone",
+    *(f"duotone {weight}" for weight in WEIGHTS),
+)
 NAV_ARROW: t.Final[str] = (
     '<svg class="km-header__arrow" viewBox="0 0 448 512"'
     ' aria-hidden="true"><path fill="currentColor" d="M201.4 406.6c12.5'
@@ -354,6 +360,9 @@ class Icons:
         """
         families, style, name, extras = split(spec)
         style = style or self.default(families, name)
+        if style and style.startswith("duotone") and not families:
+            families = ["fa-duotone"]
+            style = style.partition(" ")[2] or "solid"
         if self.kit:
             head = [*families, *([f"fa-{style}"] if style else [])]
             return " ".join([*head, f"fa-{name}", *extras])

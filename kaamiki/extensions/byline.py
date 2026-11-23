@@ -4,7 +4,7 @@ Byline Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 15 November 2026
+Last updated on: 22 November 2026
 
 A `byline` directive that draws the byline below the title of a page::
 
@@ -12,6 +12,7 @@ A `byline` directive that draws the byline below the title of a page::
        :avatar: https://example.com/avatar.png
        :target: https://github.com/xames3
        :avatar-size: 24
+       :shade: orange
 
 Put it on the page itself, one time. An `only` is part of the page. A
 container and the content of a different directive are not.
@@ -44,40 +45,24 @@ from kaamiki.extensions.utils import trail
 from kaamiki.extensions.utils import unlinked
 from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
+from kaamiki.extensions.utils.banner import SHADE
+from kaamiki.extensions.utils.banner import SHADES
+from kaamiki.extensions.utils.banner import Banner
+from kaamiki.extensions.utils.banner import banners
+from kaamiki.extensions.utils.banner import source
+from kaamiki.extensions.utils.banner import title_style
+from kaamiki.extensions.utils.context import first_glyph
+from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import ALIGNMENTS
 from kaamiki.extensions.utils.settings import BOUNDS
 from kaamiki.extensions.utils.settings import NAME
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
+    from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.writers.html import HTMLTranslator
 
 template: t.Final[str] = "directives/byline.html.jinja"
-BACKDROPS: t.Final[int] = 8
-
-
-def backdrops(argument: str | None) -> str:
-    """Check the pictures to fade through, one address each.
-
-    :param argument: The addresses as written, with a comma between
-        each.
-    :return: The addresses, with a space between each.
-    :raises ValueError: For a value that is not an address, an address
-        two times, or more than `BACKDROPS` addresses.
-    """
-    found = [_.strip() for _ in (argument or "").split(",")]
-    if not all(found) or len(found) > BACKDROPS:
-        raise ValueError(
-            f"expected one to {BACKDROPS} addresses split by commas, got"
-            f" {argument!r}"
-        )
-    for each in found:
-        checks.picture(each)
-    if len(set(found)) != len(found):
-        raise ValueError(
-            f"expected addresses that are all different, got {argument!r}"
-        )
-    return " ".join(found)
 
 
 def source_url(self: HTMLTranslator) -> str:
@@ -118,15 +103,20 @@ class Byline(KaamikiDirective, motion=True):
 
         - `avatar`: The URL of the picture of the author.
         - `target`: The link of the name, as a profile or a mailto.
-          A path starts at the top of the site, as for `avatar` and
-          `backdrop`.
-        - `backdrop`: One or more image URLs, with a comma between
-          each. They fade one into the next behind the title.
+          A path starts at the top of the site, as for `avatar`.
         - `avatar-size`: The width and height of the picture in
           pixels, from 16 to 64. The default is 20.
-        - `interval`: The seconds that each backdrop shows, from 2
-          to 15. It needs two or more `backdrop` pictures. The
-          default is 7.
+        - `banner`: A picture above the title: a URL, or a file
+          relative to the page, or to the source directory when it
+          starts with a `/`. Without it, the banner is a gradient in
+          `shade` with the icon.
+        - `shade`: The colour of the gradient, one of `blue`,
+          `indigo`, `purple`, `red`, `orange`, `yellow`, `green`,
+          `teal` or `graphite`. The default is `blue`.
+        - `fa-icon`: A Font Awesome icon for the gradient, as on a
+          button. The default is the first icon of the title, else
+          no icon.
+        - `hide-banner`: Do not show the banner.
         - `align`: Where the byline is, `left`, `center` or
           `right`. Only `left` puts the author, the reading time,
           the language and the copy button in one row. On a phone,
@@ -152,9 +142,11 @@ class Byline(KaamikiDirective, motion=True):
     final_argument_whitespace = True
     avatar = Option(checks.link)
     target = Option(checks.link)
-    backdrop = Option(backdrops, default="")
     avatar_size = Option(checks.integer(*map(int, BOUNDS["avatar_size"])))
-    interval = Option(checks.number(*BOUNDS["interval"]))
+    banner = Option(checks.picture)
+    shade = Option(checks.word(*SHADES), default=SHADE)
+    fa_icon = Option(checks.icon)
+    hide_banner = Option(rst.directives.flag)
     align = Option(checks.word(*ALIGNMENTS), default="left")
     hide_reading_time = Option(rst.directives.flag)
     hide_copy_url = Option(rst.directives.flag)
@@ -169,13 +161,18 @@ class Byline(KaamikiDirective, motion=True):
         if self.env.temp_data.get("km_byline"):
             self.fail("expected once on a page, got it twice")
         self.env.temp_data["km_byline"] = True
-        if self.interval is not None and len(self.backdrop.split()) < 2:
-            self.fail(":interval: needs two or more :backdrop: pictures")
         project = values(self.config).site.project
         if self.avatar_size is not None and not (
             self.avatar or project.get("avatar")
         ):
             self.fail(":avatar-size: needs an avatar")
+        given = [
+            _ for _ in ("banner", "shade", "fa-icon") if _ in self.options
+        ]
+        if self.hide_banner and given:
+            self.fail(f":{given[0]}: not allowed with :hide-banner:")
+        if self.banner and len(given) > 1:
+            self.fail(f":{given[1]}: not allowed with :banner:")
 
     def build(self) -> list[nodes.Node]:
         """Keep the values on the node, and name the author.
@@ -184,8 +181,7 @@ class Byline(KaamikiDirective, motion=True):
             checker, and what the parser reported. `visit` adds the
             rest from `kaamiki.conf.site.project`. The name also
             becomes the author of the page, if its `.. Author:` comment
-            names none. The first backdrop is a fallback for the social
-            image of the page.
+            names none. The banner is kept for the page.
         """
         written = self.arguments.pop().strip()
         options = self.options
@@ -203,8 +199,19 @@ class Byline(KaamikiDirective, motion=True):
         worded(self, words, "a name")
         metadata = self.env.metadata.setdefault(self.env.docname, {})
         metadata.setdefault("author", words.astext().strip() or written)
-        if pictures := self.backdrop.split():
-            metadata.setdefault("km-page-backdrop", pictures[0])
+        try:
+            icon = Icons.of(self.config).custom(self.fa_icon)
+        except ValueError as error:
+            self.fail(f":fa-icon: {error}")
+        picture = self.banner or ""
+        if picture and "://" not in picture:
+            try:
+                picture = source(self.env, picture)
+            except ValueError as error:
+                self.fail(f":banner: {error}")
+        banners(self.env)[self.env.docname] = Banner(
+            self.shade, icon, picture, self.hide_banner
+        )
         node = self.locate(self.Node("", words, **options))
         self.add_name(node)
         return [node, *trail(self, options), *messages]
@@ -239,13 +246,6 @@ def visit(self: HTMLTranslator, node: Byline.Node) -> None:
     )
     avatar = attributes.get("avatar") or project["avatar"]
     attributes["avatar"] = relative_to_page(self, avatar)
-    backdrop = attributes.get("backdrop", "").split()
-    pictures = [relative_to_page(self, _) for _ in backdrop]
-    attributes["data"] = {"data-km-backdrop": " ".join(pictures) or None}
-    if pictures and "interval" in attributes:
-        attributes["data"]["data-km-interval"] = round(
-            attributes["interval"] * 1000
-        )
     self.body.append(render(template, optional=optional(node), **attributes))
     raise nodes.SkipNode
 
@@ -258,20 +258,31 @@ def html_page_context(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Name the author of the page for the `<head>`.
+    """Name the author of the page and find its banner.
 
     :param app: The Sphinx application instance. The `.. Author:`
         comment or the byline comes first, then the author of the
-        project.
+        project. `kaamiki.page.banner` is the banner of the byline,
+        or `None` without a byline or with `:hide-banner:`.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
     :param doctree: The resolved doctree, or `None` for a generated
         page.
     """
-    del app, pagename, templatename, doctree
+    del templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
     found = context[NAME]
     found["page.author"] = meta.get("author") or found.site.project.get(
         "author"
     )
+    held = banners(app.env).get(pagename)
+    found["page.banner"] = None
+    if held and not held.hidden:
+        builder = t.cast("StandaloneHTMLBuilder", app.builder)
+        title = builder.render_partial(app.env.titles[pagename])
+        glyph = first_glyph(title.get("title", ""))
+        drawn = held.titled(glyph, title_style(app.config)).linked(
+            context["pathto"]
+        )
+        found["page.banner"] = drawn._asdict()

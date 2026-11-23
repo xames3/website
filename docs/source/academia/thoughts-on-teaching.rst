@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 22 November 2026
 
 :km-page-title: Thoughts on teaching
 :km-page-description: Lessons I didn't plan on teaching, but I re-learnt them
@@ -27,7 +27,6 @@
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
-    :backdrop: https://i.imgur.com/83ZcICa.jpg
 
 In April of :ticker:`2025`, I walked into the 4024 classroom on our Chicago
 campus at NLU. I wasn't sure what kind of teacher I'd be, but I knew I wanted

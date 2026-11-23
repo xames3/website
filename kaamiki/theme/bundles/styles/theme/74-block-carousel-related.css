@@ -171,45 +171,8 @@
     text-decoration: none;
 }
 
-.km-related__image {
-    position: relative;
-    display: block;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
+.km-related__banner {
     border-radius: var(--km-radius-tiny);
-    background-color: hsl(var(--km-colour-surface-baseline));
-    border: 1px solid hsl(var(--km-colour-border));
-
-    & img {
-        display: block;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        object-fit: cover;
-        filter: grayscale(100%);
-    }
-}
-
-.km-related__waves {
-    --km-wave-a: 20rem;
-    --km-wave-b: 30rem;
-    --km-wave-c: 15rem;
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    opacity: 0.75;
-
-    & .km-byline__wave {
-        animation: none;
-    }
-
-    & .km-byline__wave--b {
-        top: var(--km-space-3);
-    }
-
-    & .km-byline__wave--c {
-        top: var(--km-space-6);
-    }
 }
 
 .km-related__meta {
