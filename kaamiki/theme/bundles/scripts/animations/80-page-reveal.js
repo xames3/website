@@ -9,6 +9,9 @@
     }
 
     function kept(node) {
+        if (root.hasAttribute('data-km-morph') && node.matches(
+            '.km-page > .km-banner, #km-content > section > h1',
+        )) return true;
         return arrival() === 'link' && node.matches('.km-header, .km-footer');
     }
 
