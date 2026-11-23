@@ -58,6 +58,12 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-rise {
+    from {
+        transform: translateY(min(var(--km-title-rise), var(--km-title-reach)));
+    }
+}
+
 @keyframes km-morph-vanish {
     to {
         transform: scale(0);
@@ -125,8 +131,9 @@ its content can be pictured. A page reached from the history
     }
 
     ::view-transition-new(km-morph-crumbs) {
-        animation: km-title-in var(--km-motion-morph) var(--km-ease-smooth)
-            both;
+        animation:
+            km-morph-show var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-rise var(--km-motion-morph) var(--km-ease-smooth) both;
     }
 
     ::view-transition-old(km-morph-banner),
