@@ -101,8 +101,8 @@
         if (to.banner && morph.banner) {
             const { left, top, width } = morph.banner;
             const scale = width / to.banner.getBoundingClientRect().width;
-            tokens['banner-from'] = `translate(${left}px, ${top}px)`;
-            tokens['banner-scale'] = `${scale}`;
+            tokens['banner-from'] = `translate(${left}px, ${top}px) `
+                + `scale(${scale})`;
             tokens['banner-fly'] = 'km-morph-fly-banner';
         }
         Object.entries(tokens).forEach(([token, value]) => {
@@ -169,6 +169,7 @@
         picked = null;
         if (card && card.href === event.activation?.entry?.url) {
             const from = parts(card, 0);
+            card.classList.add('km-related__card--picked');
             named(from, true);
             root.setAttribute('data-km-morph', 'leave');
             const { left, top, width } = from.banner
@@ -211,6 +212,7 @@
         });
         document.querySelectorAll('.km-related__card').forEach((card) => {
             named(parts(card, 0), false);
+            card.classList.remove('km-related__card--picked');
         });
         root.removeAttribute('data-km-morph');
     });
