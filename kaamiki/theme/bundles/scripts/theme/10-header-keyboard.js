@@ -32,7 +32,8 @@
                 root.setAttribute('data-km-keyboard', '');
             }
         }, true);
-        document.addEventListener(
+        onPage(
+            document,
             'pointerdown',
             () => root.removeAttribute('data-km-keyboard'),
             true,

@@ -28,6 +28,7 @@ Last updated on: 23 November 2026
         layoutTop,
         makeIcon,
         motion: engine,
+        onPage,
         onVisible,
         paintColourMode,
         prefersReducedMotion,
