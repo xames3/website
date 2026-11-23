@@ -3,8 +3,14 @@
     const classes = root.classList;
     let revealed = false;
     let timer = 0;
+    let teardown = null;
+    let land = null;
+    const landed = new Promise((resolve) => {
+        land = resolve;
+    });
 
     function release() {
+        land();
         revealed = true;
         window.clearTimeout(timer);
         root.removeAttribute('data-km-handing');
@@ -86,9 +92,12 @@
     const arrived = performance.getEntriesByType('navigation')[0]
         ?.type === 'navigate' ? take() : null;
     const morph = arrived?.url === location.href ? arrived : null;
-    if (morph) root.setAttribute('data-km-morph', 'arrive');
+    if (morph) {
+        root.setAttribute('data-km-morph', 'arrive');
+        window.Kaamiki = { ...window.Kaamiki, landed };
+    }
 
-    function land(change) {
+    function arrive(change) {
         const to = parts(document, 1);
         const tokens = {};
         const frames = {};
@@ -143,14 +152,18 @@
         change.ready.then(() => requestAnimationFrame(watch))
             .catch(() => {});
         window.setTimeout(fly, HOLD_MS);
-        change.finished.catch(() => {}).then(() => {
+        teardown = () => {
+            teardown = null;
             named(to, false);
             Object.keys(tokens).forEach((token) => {
                 root.style.removeProperty(`--km-morph-${token}`);
             });
             sheet.remove();
             root.removeAttribute('data-km-morph');
-        });
+        };
+        change.finished.catch(() => {})
+            .then(() => window.Kaamiki?.entrance?.done)
+            .then(() => teardown?.());
     }
 
     document.addEventListener('click', (event) => {
@@ -191,6 +204,7 @@
             event.viewTransition.skipTransition();
             return;
         }
+        teardown?.();
         if (document.querySelector('.km-sidebar--visible')) return;
         const card = picked;
         picked = null;
@@ -264,7 +278,7 @@
         }
         revealed = true;
         hold();
-        if (morph) land(change);
+        if (morph) arrive(change);
         change.finished.catch(() => {}).then(release);
     });
 })();

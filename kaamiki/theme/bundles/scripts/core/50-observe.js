@@ -36,10 +36,11 @@
         blocks: new Map(),
     };
 
+    const landed = window.Kaamiki?.landed;
+
     function afterLanding(fn) {
-        whenRoot(['data-km-morph'], () => (
-            root.hasAttribute('data-km-morph')
-        ), fn);
+        if (landed) landed.then(fn);
+        else fn();
     }
 
     function afterReveal(node, fn) {

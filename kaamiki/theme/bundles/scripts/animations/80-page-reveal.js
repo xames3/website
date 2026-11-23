@@ -97,9 +97,7 @@
             Math.max(0, ENTRANCE_CAP_MS - performance.now()),
         ));
         requestAnimationFrame(() => Promise.race([fonts, cap]).then(() => (
-            whenRoot(['data-km-handing'], held, () => (
-                requestAnimationFrame(fn)
-            ))
+            whenRoot(['data-km-handing'], held, fn)
         )));
     }
 
