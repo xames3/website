@@ -21,7 +21,6 @@
     }
 
     const MORPH = 'km-morph';
-    const LIFT_MS = 200;
     const PARTS = {
         banner: ['.km-related__banner', '.km-page > .km-banner'],
         title: ['.km-related__title', '#km-content > section > h1'],
@@ -79,7 +78,7 @@
     const arrived = performance.getEntriesByType('navigation')[0]
         ?.type === 'navigate' ? take() : null;
     const morph = arrived?.url === location.href ? arrived : null;
-    if (morph) root.setAttribute('data-km-morph', 'lift');
+    if (morph) root.setAttribute('data-km-morph', 'arrive');
 
     function land(change) {
         const to = parts(document, 1);
@@ -120,18 +119,6 @@
             )
         ).join('\n');
         document.head.append(sheet);
-        const fly = () => {
-            if (root.hasAttribute('data-km-morph')) {
-                root.setAttribute('data-km-morph', 'fly');
-            }
-        };
-        const settled = () => requestAnimationFrame(fly);
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', settled, {
-                once: true,
-            });
-        } else settled();
-        window.setTimeout(fly, LIFT_MS);
         change.finished.catch(() => {}).then(() => {
             named(to, false);
             Object.keys(tokens).forEach((token) => {

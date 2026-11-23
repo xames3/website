@@ -40,9 +40,9 @@ its content can be pictured. A page reached from the history
     }
 }
 
-@keyframes km-morph-rise {
-    from {
-        scale: 1;
+@keyframes km-morph-lift {
+    25% {
+        scale: 1.03;
     }
 }
 
@@ -95,14 +95,8 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-image-pair(km-morph-banner),
     ::view-transition-image-pair(km-morph-title) {
-        transition: scale var(--km-motion-morph) var(--km-ease-morph);
-    }
-
-    :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-banner),
-    :root[data-km-morph="lift"]::view-transition-image-pair(km-morph-title) {
-        scale: 1.03;
-        animation: km-morph-rise calc(var(--km-motion-press) * 0.75)
-            var(--km-ease-smooth) both;
+        animation: km-morph-lift var(--km-motion-morph) var(--km-ease-smooth)
+            both;
     }
 
     ::view-transition-group(km-morph-banner),
@@ -118,15 +112,6 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-group(km-morph-title) {
         animation-name: var(--km-morph-title-fly, none);
-    }
-
-    :root[data-km-morph="lift"]::view-transition-group(km-morph-banner),
-    :root[data-km-morph="lift"]::view-transition-group(km-morph-title),
-    :root[data-km-morph="lift"]::view-transition-old(km-morph-banner),
-    :root[data-km-morph="lift"]::view-transition-new(km-morph-banner),
-    :root[data-km-morph="lift"]::view-transition-old(km-morph-title),
-    :root[data-km-morph="lift"]::view-transition-new(km-morph-title) {
-        animation-play-state: paused;
     }
 
     ::view-transition-image-pair(km-morph-banner) {
