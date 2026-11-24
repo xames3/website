@@ -120,7 +120,7 @@
         const lead = linked && title.length
             ? Math.min(...title.map(titleStep))
             : 0;
-        const skip = linked ? TIMING.titleSkip() : 0;
+        const skip = linked && !morphed ? TIMING.titleSkip() : 0;
         const step = TIMING.titleStep();
         title.forEach((part) => enter(part, ENTRANCE_FRAMES.title)
             .effect.updateTiming({

@@ -148,13 +148,14 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             ``kaamiki.conf.motion.page_transitions`` on. ``--km-nav-out`` is
             how long the old content takes to leave (0.6 of
             ``--km-motion-fade``), the old page's header, sidebar and footer
-            stay until it has gone, and ``--km-title-skip`` how
-            far into its fade the new page's first thing starts (0.35 of
+            stay until it has gone, and ``--km-title-skip`` how far into its
+            fade the new page's first thing starts (0.35 of
             ``--km-motion-enter``), so there's something to see as the old
-            content goes. ``data-km-arrival`` on the root says how the reader
-            came: ``link`` from another page of the site keeps the header and
-            the footer still, and ``history`` (Back or Forward) shows the page
-            as it is.
+            content goes. A related card that flies into the page skips
+            nothing, because its title lands first. ``data-km-arrival`` on the
+            root says how the reader came: ``link`` from another page of the
+            site keeps the header and the footer still, and ``history`` (Back
+            or Forward) shows the page as it is.
         * - ``--km-code-``
           - The padding, line height and caption bar of code blocks.
         * - ``--km-layer-``
