@@ -251,9 +251,9 @@
         root.removeAttribute('data-km-morph');
     });
 
-    // Fires with the first frame, after deferred scripts
-    // have run, and has a transition when the reader came
-    // from another page of the site.
+    // Fires before the first frame, often before deferred
+    // scripts have run, and has a transition when the reader
+    // came from another page of the site.
     window.addEventListener('pagereveal', (event) => {
         const change = event.viewTransition;
         // A page shown again from the back and forward
