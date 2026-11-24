@@ -87,7 +87,7 @@ package = [
     "build[uv]==1.6.1",
     "check-wheel-contents==0.6.3",
     "twine==7.0.0",
-    "uv==0.13.7",
+    "uv==0.13.8",
     "validate-pyproject==0.27",
 ]
 
