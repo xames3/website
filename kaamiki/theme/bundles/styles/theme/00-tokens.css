@@ -89,6 +89,7 @@
     --km-show-more-clamp: max(20rem, calc(100dvh - 18rem));
     --km-show-more-fade: min(11rem, 25svh);
     --km-show-more-dock: 2rem;
+    --km-banner-room: 15.5rem;
     --km-title-step: calc(100ms / var(--km-motion-speed));
     --km-title-skip: calc(var(--km-motion-enter) * 0.35);
     --km-title-blur: 10px;
