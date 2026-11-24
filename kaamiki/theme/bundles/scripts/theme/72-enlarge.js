@@ -682,12 +682,12 @@
         engine.calm(() => {
             dialog ||= build();
         });
-        document.addEventListener('pointerdown', (event) => {
+        onPage(document, 'pointerdown', (event) => {
             if (dialog?.shell.contains(event.target)) press(event);
         });
-        document.addEventListener('pointermove', pull);
-        document.addEventListener('pointerup', release);
-        document.addEventListener('pointercancel', release);
+        onPage(document, 'pointermove', pull);
+        onPage(document, 'pointerup', release);
+        onPage(document, 'pointercancel', release);
         document.addEventListener('click', (event) => {
             if (!view || !dialog?.shell.contains(event.target)) return;
             if (view.moved) {

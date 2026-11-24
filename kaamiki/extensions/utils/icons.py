@@ -4,7 +4,7 @@ Font Awesome Icons
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 27 October 2026
-Last updated on: 19 November 2026
+Last updated on: 23 November 2026
 
 Each icon that Kaamiki draws, as a Pro icon and its Free replacement.
 A site with a Font Awesome kit gets the Pro icons, in its
@@ -328,7 +328,7 @@ class Icons:
 
     @property
     def stylesheet(self) -> str | None:
-        """The CSS of the kit, which draws icons without a script."""
+        """The CSS of the kit, which the head of each page links."""
         if not (self.kit and self.kit.endswith(".js")):
             return None
         return self.kit.removesuffix(".js") + ".css"

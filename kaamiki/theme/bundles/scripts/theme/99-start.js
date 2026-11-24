@@ -10,7 +10,16 @@
         initPageReveal,
     } = window.Kaamiki;
     Object.freeze(window.Kaamiki);
-    for (const init of [
+    const start = (inits) => {
+        for (const init of inits) {
+            try {
+                init();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
+    start([
         initHeaderHeight,
         initHeaderLine,
         initKeyboardModality,
@@ -37,7 +46,6 @@
         initAccordions,
         initHighlightedLines,
         initCodeCopy,
-        initScrollable,
         initScrollFades,
         initBreadcrumbs,
         initBylineFit,
@@ -51,13 +59,8 @@
         initTurns,
         initInkReveal,
         initTranscripts,
-        initPageReveal,
         initSearchHighlights,
-    ]) {
-        try {
-            init();
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    ]);
+    engine.calm(() => start([initScrollable]));
+    start([initPageReveal]);
 })();

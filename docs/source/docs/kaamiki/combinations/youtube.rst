@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: YouTube players, everywhere
 :km-page-description: Every option of the youtube directive on and off, with
@@ -22,6 +22,11 @@
 .. rst-class:: km-text-lead
 
     A YouTube player, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: red
 
 A youtube embeds a video's player. This page writes it with every option on and
 off, with every shape, with icons and roles and inside every container, so the

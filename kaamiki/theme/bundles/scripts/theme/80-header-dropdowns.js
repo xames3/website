@@ -3,6 +3,7 @@
         if (!nav) return;
 
         let current = null;
+        let leave = null;
         let timer = 0;
         const trail = [];
         const track = (event) => {
@@ -60,7 +61,7 @@
             current.trigger.setAttribute('aria-expanded', 'false');
             current = null;
             document.removeEventListener('mousemove', track);
-            document.removeEventListener('pointerdown', outside);
+            leave?.();
             trail.length = 0;
         };
         const show = (menu, hover = false) => {
@@ -73,9 +74,7 @@
             current = menu;
             hovered = hover ? performance.now() : 0;
             document.addEventListener('mousemove', track, { passive: true });
-            document.addEventListener('pointerdown', outside, {
-                passive: true,
-            });
+            leave = onPage(document, 'pointerdown', outside);
         };
         const toggle = (menu) => {
             if (current !== menu) show(menu);

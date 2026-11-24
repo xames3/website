@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Kaamiki
 :km-page-description: A dark Sphinx theme and a set of extensions for teaching
@@ -16,7 +16,7 @@
 .. _kaamiki-docs:
 
 ===============================================================================
-:fa-icon:regular:`badge-check` Kaamiki
+:fa-icon:duotone:`swatchbook` Kaamiki
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -27,6 +27,7 @@
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3/website
+    :shade: indigo
 
 Kaamiki is a dark Sphinx theme and a set of extensions for teaching with code.
 It can step a reader through a snippet while the code runs beside it, show the

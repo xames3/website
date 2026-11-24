@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 12 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Classes
 :km-page-description: The classes Kaamiki gives you for text, colour, icons and
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     Small style switches for your own pages.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: purple
 
 Kaamiki names every class the BEM way: ``km-block``, ``km-block__element`` and
 ``km-block--modifier``. Most are Kaamiki's own and you never write them. The

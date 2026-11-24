@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Icons, everywhere
 :km-page-description: Every place a Font Awesome icon can go on this website,
@@ -21,6 +21,11 @@
 .. rst-class:: km-text-lead
 
     Every place an icon can go, written out and shown working.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: purple
 
 An icon can sit in a sentence, a heading, an admonition, a button, a tab, a
 code caption and in the furniture of the page itself. Each section below

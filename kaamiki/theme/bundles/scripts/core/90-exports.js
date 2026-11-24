@@ -1,8 +1,8 @@
     window.Kaamiki = {
+        ...window.Kaamiki,
         codeExplains: [],
         FOCUSABLE,
-        REVEAL_SHOWN,
-        REVEAL_WAITING,
+        Moment,
         TIMING,
         anchorTargetY,
         announce,
@@ -10,6 +10,7 @@
         clamp,
         copyText,
         decodeId,
+        entrance,
         fetchJson,
         getCssVar,
         glideAcross,
@@ -29,5 +30,6 @@
         settleHash,
         showCopied,
         stopGlide,
+        whenRoot,
     };
 })();

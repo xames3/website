@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 01 March 2025
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-related-header: Keep reading.
 :km-related-docs: /academia/thoughts-on-teaching,
@@ -32,6 +32,7 @@
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
+    :shade: orange
 
 I'm a wee bit fuzzy on the exact timelines, but it all started around
 mid-November of 2024. I was still at the uni and in my second-to-last quarter.

@@ -1,9 +1,47 @@
-    function afterReveal(node, fn) {
-        const block = node.closest(`.${REVEAL_WAITING}:not(.${REVEAL_SHOWN})`);
-        if (block) {
-            block.addEventListener('km:reveal', () => fn(node), { once: true });
+    function whenRoot(attributes, busy, fn) {
+        if (!busy()) {
+            fn();
+            return;
         }
-        else fn(node);
+        const freed = new MutationObserver(() => {
+            if (busy()) return;
+            freed.disconnect();
+            fn();
+        });
+        freed.observe(root, {
+            attributes: true,
+            attributeFilter: attributes,
+        });
+    }
+
+    class Moment {
+        constructor() {
+            this.passed = false;
+            this.reached = new Promise((resolve) => {
+                this.pass = () => {
+                    this.passed = true;
+                    resolve();
+                };
+            });
+        }
+
+        then(fn) {
+            return this.reached.then(fn);
+        }
+    }
+
+    const entrance = {
+        started: new Moment(),
+        done: new Moment(),
+        blocks: new Map(),
+    };
+
+    function afterReveal(node, fn) {
+        let block = node;
+        while (block && !entrance.blocks.has(block)) {
+            block = block.parentElement;
+        }
+        (entrance.blocks.get(block) ?? entrance.started).then(() => fn(node));
     }
 
     function onVisible(nodes, onEnter, options = { rootMargin: '200px' }) {

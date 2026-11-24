@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Kaamiki settings
 :km-page-description: Every setting Kaamiki reads, grouped by what you want to
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     Every setting, in one place.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: graphite
 
 Kaamiki's settings live on one object, ``kaamiki.conf``, in groups such as
 ``icons``, ``show`` and ``youtube``. Each one is written as the group and then
@@ -1081,7 +1086,8 @@ Icons.
 -------------------------------------------------------------------------------
 
 Kaamiki draws its icons with `Font Awesome`_, Free out of the box. A Pro kit
-switches every icon to its Pro version, as CSS for a reader without JavaScript.
+switches every icon to its Pro version, as a stylesheet in the head of each
+page, so no script draws them.
 If Font Awesome doesn't load, because it's blocked, you're offline or a kit
 refuses the address, the icons stay empty and show when Font Awesome loads. A
 kit only answers the addresses on its allow-list in your Font Awesome account,
@@ -1098,9 +1104,10 @@ so a preview from another address gets no kit.
           - What it does
         * - ``kaamiki.conf.icons.kit``
           - ``None``
-          - The address of your kit script, like
-            ``https://kit.fontawesome.com/abc123.js``, and only that form. With
-            a kit you get the Pro icons, and ``kaamiki.conf.icons.style``
+          - The address of your kit, like
+            ``https://kit.fontawesome.com/abc123.js``, and only that form. Each
+            page links the kit's stylesheet, the same address with ``.css``.
+            With a kit you get the Pro icons, and ``kaamiki.conf.icons.style``
             decides how they are drawn. Without one, every icon is a Free one.
             When this is empty, Kaamiki reads the address from the
             ``KAAMIKI_FA_KIT`` environment variable, so a build server can

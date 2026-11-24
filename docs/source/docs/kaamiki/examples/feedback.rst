@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Changing the feedback box
 :km-page-description: A page that sets its own feedback text, button and
@@ -17,8 +17,13 @@
 .. _kaamiki-example-feedback:
 
 ===============================================================================
-Changing the feedback box
+:fa-icon:regular:`message-pen` Changing the feedback box
 ===============================================================================
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: yellow
 
 Scroll to the end of this page. The feedback box there doesn't use Kaamiki's
 words, it uses these fields from the top of this page's source:

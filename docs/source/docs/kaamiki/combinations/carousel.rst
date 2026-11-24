@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 05 November 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Carousels, everywhere
 :km-page-description: Every option of the carousel directive on and off, with
@@ -22,6 +22,11 @@
 .. rst-class:: km-text-lead
 
     Cards in a row, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: orange
 
 A carousel lays blocks, buttons, pictures, repositories and thumbnails out in a
 row a reader swipes through. This page writes it with every option on and off,

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The release directive
 :km-page-description: Write one entry of a changelog with its version, its date
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     One entry of a changelog.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: green
 
 The argument is the title, ``:version:`` is the version and the notes under it
 are a definition list with each term naming a group. Stack as many as you like

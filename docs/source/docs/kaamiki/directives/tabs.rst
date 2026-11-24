@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 23 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The tabs directive
 :km-page-description: Show one block of content at a time under a strip of
@@ -14,12 +14,16 @@
 .. _kaamiki-tabs:
 
 ===============================================================================
-:fa-icon:regular:`table-columns` tabs
+:fa-icon:regular:`folders` tabs
 ===============================================================================
 
 .. rst-class:: km-text-lead
 
     One block of content at a time, under a row of titles.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
 
 ``tabs`` holds ``tab`` directives and shows one of them. Each tab's argument is
 its title and everything under it is its content. The first tab shows to start

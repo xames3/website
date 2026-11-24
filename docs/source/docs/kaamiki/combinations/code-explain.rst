@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: code-explain, option by option
 :km-page-description: Every option of the code-explain directive on and off, in
@@ -23,6 +23,11 @@
 .. rst-class:: km-text-lead
 
     Code stepped through, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: yellow
 
 A code-explain steps a reader through a snippet a line at a time, with the
 values each line left behind. This page writes it with every option on and off,

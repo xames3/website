@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Repositories, everywhere
 :km-page-description: Every option of the repository directive on and off, with
@@ -22,6 +22,11 @@
 .. rst-class:: km-text-lead
 
     A GitHub project, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: graphite
 
 A repository shows a GitHub project as a card with its stars and forks, counted
 when the page loads. This page writes it with every option on and off, with a

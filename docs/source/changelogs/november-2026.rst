@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 02 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :orphan:
 :km-page-title: Kaamiki stops borrowing now!
@@ -18,7 +18,7 @@
 .. _changelogs-november-2026:
 
 ===============================================================================
-Kaamiki stops :roll:`borrowing|copying|depending|patching` now!
+:fa-icon:regular:`link-slash` Kaamiki stops |rborrow| now!
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -29,6 +29,7 @@ Kaamiki stops :roll:`borrowing|copying|depending|patching` now!
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
+    :shade: green
 
 This release started as a tidy-up and ended up touching nearly every file in
 the theme. Most of it's the sort of change you only notice when it's missing,
@@ -466,6 +467,7 @@ scrolled sideways.
 
 .. URLs used and referenced above:
 
+.. |rborrow| replace:: :roll:`borrowing|copying|depending|patching`
 .. |sd| replace:: ``sphinx-design``
 .. _sd: https://sphinx-design.readthedocs.io/en/latest/
 

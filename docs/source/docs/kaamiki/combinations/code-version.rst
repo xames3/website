@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: code-version, option by option
 :km-page-description: Every option of the code-version directive on and off,
@@ -22,6 +22,11 @@
 .. rst-class:: km-text-lead
 
     Code changing, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: teal
 
 A code-version shows the versions a piece of code went through, one after the
 other, turning each into the next as you scroll. This page writes it with every

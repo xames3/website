@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 November 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: How Kaamiki moves
 :km-page-description: Every animation in Kaamiki, shown working in one
@@ -17,7 +17,7 @@
 .. _kaamiki-example-motion:
 
 ===============================================================================
-How Kaamiki moves
+:fa-icon:duotone:`wand-magic-sparkles` How Kaamiki moves
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -28,6 +28,7 @@ How Kaamiki moves
 .. byline:: @xames3
     :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
     :target: https://github.com/xames3
+    :shade: teal
 
 This page is a tour of how Kaamiki moves. Nothing on it is a demo in a box:
 each animation turns up where you'd really use it, inside a paragraph, a list
@@ -47,10 +48,10 @@ for less motion gets the calmer version. Both are on the :ref:`settings page
 Arriving on a page.
 -------------------------------------------------------------------------------
 
-When a page loads it comes in once and in order: the byline, the title, the
-lead and then each section below it. Nothing animates again as you scroll, so
-the page never moves under you while you read. Reload this one and watch the
-top of it:
+When a page loads it comes in once and in order: the banner, the breadcrumbs,
+the title, the lead, the byline and then each section below it. Nothing
+animates again as you scroll, so the page never moves under you while you
+read. Reload this one and watch the top of it:
 
 .. button::
     :doc: /docs/kaamiki/examples/motion

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 23 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The block directive
 :km-page-description: Frame a title and some content as a card that can link to
@@ -20,6 +20,10 @@
 .. rst-class:: km-text-lead
 
     A card with a title and some content.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
 
 The argument is the title and everything under it is the content. The title is
 read like a paragraph, so it can hold markup, and the content is read as

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 23 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The accordion directive
 :km-page-description: Fold a block of content away under a title that opens on
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     Content that folds away under a title.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: teal
 
 The argument is the title and everything under it is the content. The title is
 read like a paragraph, so it can hold markup, and the content is read as

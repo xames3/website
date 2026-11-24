@@ -7,8 +7,8 @@ reader's going. Nothing of the new content shows until it's gone, and then the
 new page plays its own entrance, the one a page plays when it loads, from its
 first frame. The header, the sidebar and the footer don't animate at all,
 they're the same on both pages, and the new page's content isn't pictured by
-the transition: it's the page itself, kept hidden by `km-document--loading`
-until the old content has left. A dropdown that's open leaves with the old
+the transition: it's the page itself, kept hidden by its entrance until the
+old content has left. A dropdown that's open leaves with the old
 content, on top of it, as it does when it closes.
 The script in the head marks the page being left (`km-document--leaving`) so
 its content can be pictured. A page reached from the history
@@ -40,9 +40,150 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-lift {
+    25% {
+        scale: 1.03;
+    }
+}
+
+@keyframes km-morph-recede {
+    to {
+        scale: 0.96;
+    }
+}
+
+@keyframes km-morph-show {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes km-morph-rise {
+    from {
+        transform: translateY(min(var(--km-title-rise), var(--km-title-reach)));
+    }
+}
+
+@keyframes km-morph-vanish {
+    to {
+        transform: scale(0);
+    }
+}
+
 @media (prefers-reduced-motion: no-preference) {
     :root {
         --km-nav-out: calc(var(--km-motion-fade) * 0.6);
+    }
+
+    :root[data-km-morph].km-document--loading .km-page__content {
+        opacity: 1;
+        visibility: hidden;
+    }
+
+    :root[data-km-morph] :is(.km-page > .km-banner,
+        .km-breadcrumbs:not(.km-breadcrumbs--empty),
+        #km-content > section > h1) {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .km-related__card--picked .km-related__title {
+        font-weight: var(--km-weight-h1);
+        --km-tracking: var(--km-tracking-h1);
+    }
+
+    .km-related__card--picked .km-related__meta {
+        view-transition-name: km-morph-meta;
+    }
+
+    :root[data-km-morph] .km-header {
+        view-transition-name: km-morph-header;
+    }
+
+    :root[data-km-morph="leave"] .km-layout__content {
+        view-transition-name: none;
+    }
+
+    ::view-transition-image-pair(km-morph-banner),
+    ::view-transition-image-pair(km-morph-title) {
+        animation: km-morph-lift var(--km-motion-morph) var(--km-ease-smooth)
+            both;
+    }
+
+    ::view-transition-group(km-morph-banner),
+    ::view-transition-group(km-morph-title) {
+        transform-origin: 0 0;
+        animation-duration: var(--km-motion-morph);
+        animation-timing-function: var(--km-ease-morph);
+    }
+
+    ::view-transition-group(km-morph-banner) {
+        animation-name: var(--km-morph-banner-fly, none);
+    }
+
+    ::view-transition-group(km-morph-title) {
+        animation-name: var(--km-morph-title-fly, none);
+    }
+
+    ::view-transition-image-pair(km-morph-banner) {
+        isolation: isolate;
+    }
+
+    :root[data-km-morph]::view-transition-group(root),
+    ::view-transition-group(km-morph-crumbs),
+    ::view-transition-group(km-morph-meta) {
+        z-index: -1;
+    }
+
+    ::view-transition-new(km-morph-crumbs) {
+        animation:
+            km-morph-show var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-rise var(--km-motion-morph) var(--km-ease-smooth) both;
+    }
+
+    ::view-transition-old(km-morph-banner),
+    ::view-transition-new(km-morph-banner) {
+        mix-blend-mode: plus-lighter;
+    }
+
+    ::view-transition-old(km-morph-banner),
+    ::view-transition-old(km-morph-meta) {
+        animation: km-nav-fade calc(var(--km-motion-morph) * 0.3)
+            var(--km-ease-smooth) both;
+    }
+
+    ::view-transition-new(km-morph-banner) {
+        animation: km-morph-show calc(var(--km-motion-morph) * 0.3)
+            var(--km-ease-smooth) both;
+    }
+
+    ::view-transition-old(km-morph-banner):only-child {
+        animation:
+            km-nav-fade var(--km-motion-morph) var(--km-ease-smooth) both,
+            km-morph-vanish var(--km-motion-morph) var(--km-ease-smooth) both;
+    }
+
+    ::view-transition-old(km-morph-title),
+    ::view-transition-new(km-morph-title) {
+        block-size: auto;
+        transform-origin: 0 0;
+        mix-blend-mode: normal;
+    }
+
+    ::view-transition-old(km-morph-title) {
+        inline-size: var(--km-morph-from);
+        animation: none;
+    }
+
+    ::view-transition-new(km-morph-title) {
+        inline-size: var(--km-morph-to);
+        animation: km-morph-shrink var(--km-motion-morph) var(--km-ease-morph)
+            both;
+    }
+
+    :root[data-km-morph="arrive"]::view-transition-new(km-morph-title),
+    :root[data-km-morph="fly"]::view-transition-old(km-morph-title) {
+        opacity: 0;
     }
 
     .km-document--leaving .km-layout__content {
@@ -159,5 +300,20 @@ its content can be pictured. A page reached from the history
             km-nav-fade var(--km-nav-out) var(--km-ease-smooth) both,
             km-nav-sink var(--km-nav-out) var(--km-ease-smooth) both;
         mix-blend-mode: normal;
+    }
+
+    :root[data-km-morph]::view-transition-old(root) {
+        animation:
+            km-nav-fade var(--km-motion-content) var(--km-ease-smooth) both,
+            km-morph-recede var(--km-motion-content) var(--km-ease-smooth)
+                both;
+    }
+
+    :root[data-km-morph="arrive"]::view-transition-group(*),
+    :root[data-km-morph="arrive"]::view-transition-image-pair(*),
+    :root[data-km-morph="arrive"]::view-transition-old(*),
+    :root[data-km-morph="arrive"]::view-transition-old(root),
+    :root[data-km-morph="arrive"]::view-transition-new(*) {
+        animation-play-state: paused;
     }
 }

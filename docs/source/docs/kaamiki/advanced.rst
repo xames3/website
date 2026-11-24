@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 28 October 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Advanced Kaamiki
 :km-page-description: What a Sphinx author who wants more control needs to
@@ -15,12 +15,17 @@
 .. _kaamiki-advanced:
 
 ===============================================================================
-:fa-icon:regular:`gear` Advanced
+:fa-icon:duotone:`gear` Advanced
 ===============================================================================
 
 .. rst-class:: km-text-lead
 
     For when the settings aren't enough.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: graphite
 
 This page is for people who already know how Sphinx finds a theme, loads a
 stylesheet and looks up a template. Everything here is something you can lean
@@ -55,6 +60,12 @@ owns starts with ``km-``, ``--km-`` or ``km_``, and a page's own fields are
 ``:km-page-*:``. So nothing of Kaamiki's can collide with Sphinx's, your
 extensions' or yours, and a rule written against ``km-`` is a rule about
 Kaamiki.
+
+Kaamiki's reset gives every element ``box-sizing: border-box``, a border of no
+width and the theme's letter-spacing. A ``::before`` or ``::after`` gets them
+only on an element with a ``km-`` or ``fa-`` class or on an item of a
+``km-list``, because a reset on every pseudo-element makes each restyle slower
+in Safari. Give your own pseudo-elements these values where they need them.
 
 The custom properties are the easy way to change how it looks. They're all
 declared on ``:root``, so a stylesheet you load afterwards wins at the same
@@ -137,13 +148,14 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             ``kaamiki.conf.motion.page_transitions`` on. ``--km-nav-out`` is
             how long the old content takes to leave (0.6 of
             ``--km-motion-fade``), the old page's header, sidebar and footer
-            stay until it has gone, and ``--km-title-skip`` how
-            far into its fade the new page's first thing starts (0.35 of
+            stay until it has gone, and ``--km-title-skip`` how far into its
+            fade the new page's first thing starts (0.35 of
             ``--km-motion-enter``), so there's something to see as the old
-            content goes. ``data-km-arrival`` on the root says how the reader
-            came: ``link`` from another page of the site keeps the header and
-            the footer still, and ``history`` (Back or Forward) shows the page
-            as it is.
+            content goes. A related card that flies into the page skips
+            nothing, because its title lands first. ``data-km-arrival`` on the
+            root says how the reader came: ``link`` from another page of the
+            site keeps the header and the footer still, and ``history`` (Back
+            or Forward) shows the page as it is.
         * - ``--km-code-``
           - The padding, line height and caption bar of code blocks.
         * - ``--km-layer-``
@@ -234,8 +246,8 @@ does what it says in a build of its own.
           - In ``page.html``: above and below a page's content, and the
             feedback box.
         * - ``km_social``, ``km_thirdparty``, ``km_icons``
-          - In the ``<head>``: the link-preview tags, the Font Awesome kit's
-            script and its stylesheet.
+          - In the ``<head>``: the link-preview tags, the Font Awesome
+            connection hint and its stylesheet.
         * - ``km_button``, ``km_byline``, ``km_carousel_arrows``,
             ``km_release``, ``km_repository``, ``km_video``, ``km_youtube``,
             ``km_youtube_thumbnail``
@@ -410,17 +422,19 @@ Content Security Policy
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 If your host sends a Content Security Policy, a few things need allowing. Every
-page has one inline script, which sets the theme up before the page paints. It
-has no nonce, because a static page can't carry a new one for each response, so
-allow it by its hash or with ``'unsafe-inline'`` in ``script-src``, and the
-browser names the hash in the console. Directives and roles write inline
-``style`` attributes for button colours, tickers, the logo size and the
-underline role, so ``style-src`` needs ``'unsafe-inline'`` or
+page has a few inline scripts in its head, which set the theme up before the
+page paints. They have no nonce, because a static page can't carry a new one
+for each response, so allow them by their hashes or with ``'unsafe-inline'`` in
+``script-src``, and the browser names each hash in the console. Directives and
+roles write inline ``style`` attributes for button colours, tickers, the logo
+size and the underline role, so ``style-src`` needs ``'unsafe-inline'`` or
 ``style-src-attr``. The default Font Awesome stylesheet comes from
 ``ka-f.fontawesome.com``, pinned to a release and carrying a subresource
-integrity hash. A kit's script from ``kit.fontawesome.com`` loads ``async``
-without one. Allow ``ka-f.fontawesome.com`` for the stylesheet and the fonts,
-and ``kit.fontawesome.com`` as well when you use a kit.
+integrity hash. A kit's stylesheet from ``kit.fontawesome.com`` has none, and
+it imports the kit's CSS and fonts from ``ka-p.fontawesome.com``. Allow
+``ka-f.fontawesome.com`` for the stylesheet and the fonts, or
+``kit.fontawesome.com`` and ``ka-p.fontawesome.com`` in ``style-src`` and
+``font-src`` when you use a kit.
 
 .. _kaamiki-everything-else:
 

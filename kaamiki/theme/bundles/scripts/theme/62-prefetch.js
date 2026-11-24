@@ -41,12 +41,10 @@
                 event.type === 'pointerover' ? PREFETCH_HOVER_MS : 0,
             );
         };
-        document.addEventListener('pointerover', reach, { passive: true });
+        onPage(document, 'pointerover', reach);
         document.addEventListener('focusin', reach, { passive: true });
-        document.addEventListener('touchstart', reach, { passive: true });
-        document.addEventListener('pointerout', () => {
-            window.clearTimeout(waiting);
-        }, { passive: true });
+        onPage(document, 'touchstart', reach);
+        onPage(document, 'pointerout', () => window.clearTimeout(waiting));
         engine.calm(() => {
             document.querySelectorAll(
                 'link[rel="next"], link[rel="prev"], '

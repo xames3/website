@@ -3,6 +3,7 @@
     const classes = root.classList;
     let revealed = false;
     let timer = 0;
+    let teardown = null;
 
     function release() {
         revealed = true;
@@ -20,6 +21,167 @@
         hold();
     }
 
+    const MORPH = 'km-morph';
+    const HOLD_MS = 600;
+    const STEADY_MS = 20;
+    const STEADY_FRAMES = 3;
+    let started = false;
+    document.addEventListener('DOMContentLoaded', () => {
+        started = true;
+    }, { once: true });
+    const PARTS = {
+        banner: ['.km-related__banner', '.km-page > .km-banner'],
+        crumbs: [null, '.km-breadcrumbs:not(.km-breadcrumbs--empty)'],
+        title: ['.km-related__title', '#km-content > section > h1'],
+    };
+    let picked = null;
+
+    function save(value) {
+        try {
+            sessionStorage.setItem(MORPH, JSON.stringify(value));
+        } catch {}
+    }
+
+    function take() {
+        try {
+            const found = JSON.parse(sessionStorage.getItem(MORPH));
+            sessionStorage.removeItem(MORPH);
+            return found;
+        } catch {
+            return null;
+        }
+    }
+
+    function letters(node) {
+        const box = node.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const text = range.getClientRects()[0] ?? box;
+        return {
+            size: Number.parseFloat(getComputedStyle(node).fontSize),
+            left: box.left,
+            top: box.top,
+            width: box.width,
+            x: text.left - box.left,
+            y: text.top - box.top,
+        };
+    }
+
+    function named(nodes, on) {
+        Object.entries(nodes).forEach(([part, node]) => {
+            if (!node) return;
+            if (on) node.style.viewTransitionName = `${MORPH}-${part}`;
+            else node.style.removeProperty('view-transition-name');
+        });
+    }
+
+    function parts(scope, side) {
+        return Object.fromEntries(Object.entries(PARTS).map(
+            ([part, selectors]) => [
+                part,
+                selectors[side] && scope.querySelector(selectors[side]),
+            ]
+        ));
+    }
+
+    const arrived = performance.getEntriesByType('navigation')[0]
+        ?.type === 'navigate' ? take() : null;
+    const morph = arrived?.url === location.href ? arrived : null;
+    if (morph) root.setAttribute('data-km-morph', 'arrive');
+
+    function arrive(change) {
+        const to = parts(document, 1);
+        const tokens = {};
+        const frames = {};
+        named(to, true);
+        if (to.title) {
+            const end = letters(to.title);
+            const grow = end.size / morph.size;
+            const shift = (a, b, scale) => `translate(${a.x - b.x * scale}px, `
+                + `${a.y - b.y * scale}px) scale(${scale})`;
+            frames['km-morph-shrink'] = ['from', shift(morph, end, 1 / grow)];
+            frames['km-morph-fly-title'] = [
+                'from',
+                `translate(${morph.left}px, ${morph.top}px)`,
+            ];
+            tokens.from = `${morph.width}px`;
+            tokens.to = `${end.width}px`;
+            tokens['title-fly'] = 'km-morph-fly-title';
+        }
+        if (to.banner && morph.banner) {
+            const { left, top, width } = morph.banner;
+            const scale = width / to.banner.getBoundingClientRect().width;
+            frames['km-morph-fly-banner'] = [
+                'from',
+                `translate(${left}px, ${top}px) scale(${scale})`,
+            ];
+            tokens['banner-fly'] = 'km-morph-fly-banner';
+        }
+        Object.entries(tokens).forEach(([token, value]) => {
+            root.style.setProperty(`--km-morph-${token}`, value);
+        });
+        const sheet = document.createElement('style');
+        sheet.textContent = Object.entries(frames).map(
+            ([name, [edge, move]]) => (
+                `@keyframes ${name} { ${edge} { transform: ${move}; } }`
+            )
+        ).join('\n');
+        document.head.append(sheet);
+        const fly = () => {
+            if (root.hasAttribute('data-km-morph')) {
+                root.setAttribute('data-km-morph', 'fly');
+            }
+        };
+        let last = 0;
+        let steady = 0;
+        const watch = (now) => {
+            if (root.getAttribute('data-km-morph') !== 'arrive') return;
+            steady = last && now - last < STEADY_MS ? steady + 1 : 0;
+            last = now;
+            if (started && steady >= STEADY_FRAMES) fly();
+            else requestAnimationFrame(watch);
+        };
+        change.ready.then(() => requestAnimationFrame(watch))
+            .catch(() => {});
+        window.setTimeout(fly, HOLD_MS);
+        teardown = () => {
+            teardown = null;
+            named(to, false);
+            Object.keys(tokens).forEach((token) => {
+                root.style.removeProperty(`--km-morph-${token}`);
+            });
+            sheet.remove();
+            root.removeAttribute('data-km-morph');
+        };
+        change.finished.catch(() => {})
+            .then(() => window.Kaamiki?.entrance?.done)
+            .then(() => teardown?.());
+    }
+
+    document.addEventListener('click', (event) => {
+        const kaamiki = window.Kaamiki;
+        const card = event.target.closest?.('.km-related__card');
+        picked = null;
+        if (!card || !kaamiki || event.defaultPrevented
+            || !('PageRevealEvent' in window)
+            || kaamiki.isModifiedClick(event)
+            || kaamiki.prefersStill(card)) return;
+        picked = card;
+        const track = card.parentElement;
+        const view = track.clientWidth;
+        const left = card.offsetLeft - track.scrollLeft;
+        const right = left + card.offsetWidth;
+        if (left >= -1 && right <= view + 1) return;
+        event.preventDefault();
+        const go = () => {
+            track.style.scrollSnapType = 'none';
+            location.assign(card.href);
+        };
+        kaamiki.glideAcross(track, left < 0
+            ? card.offsetLeft
+            : card.offsetLeft + card.offsetWidth - view).then(go, go);
+    });
+
     // The old page names its content and an open dropdown so
     // they can be pictured as they were, and gives the names
     // up if it's shown again from the back and forward cache.
@@ -34,7 +196,23 @@
             event.viewTransition.skipTransition();
             return;
         }
+        teardown?.();
         if (document.querySelector('.km-sidebar--visible')) return;
+        const card = picked;
+        picked = null;
+        if (card && card.href === event.activation?.entry?.url) {
+            const from = parts(card, 0);
+            card.classList.add('km-related__card--picked');
+            named(from, true);
+            root.setAttribute('data-km-morph', 'leave');
+            const { left, top, width } = from.banner
+                .getBoundingClientRect();
+            save({
+                url: card.href,
+                banner: { left, top, width },
+                ...letters(from.title),
+            });
+        }
         Array.from(menus()).find((menu) => (
             getComputedStyle(menu).visibility !== 'hidden'
         ))?.style.setProperty(
@@ -65,11 +243,17 @@
         menus().forEach((menu) => {
             menu.style.removeProperty('view-transition-name');
         });
+        document.querySelectorAll('.km-related__card').forEach((card) => {
+            named(parts(card, 0), false);
+            card.classList.remove('km-related__card--picked');
+            card.parentElement.style.removeProperty('scroll-snap-type');
+        });
+        root.removeAttribute('data-km-morph');
     });
 
-    // Fires with the first frame, after deferred scripts
-    // have run, and has a transition when the reader came
-    // from another page of the site.
+    // Fires before the first frame, often before deferred
+    // scripts have run, and has a transition when the reader
+    // came from another page of the site.
     window.addEventListener('pagereveal', (event) => {
         const change = event.viewTransition;
         // A page shown again from the back and forward
@@ -80,9 +264,13 @@
             'data-km-arrival'
         ) === 'history';
         if (history && change) change.skipTransition();
-        if (history || !change) return release();
+        if (history || !change) {
+            root.removeAttribute('data-km-morph');
+            return release();
+        }
         revealed = true;
         hold();
+        if (morph) arrive(change);
         change.finished.catch(() => {}).then(release);
     });
 })();

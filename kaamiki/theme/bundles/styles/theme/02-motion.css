@@ -20,6 +20,7 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
     --km-motion-stagger: calc(60ms / var(--km-motion-speed));
     --km-motion-ambient: calc(1600ms / var(--km-motion-speed));
     --km-motion-swap: calc(600ms / var(--km-motion-speed));
+    --km-motion-morph: calc(520ms / var(--km-motion-speed));
     --km-motion-sweep: calc(1900ms / var(--km-motion-speed));
     --km-motion-ticker: calc(2000ms / var(--km-motion-speed));
     --km-motion-typewrite-key: calc(120ms / var(--km-motion-speed));
@@ -27,6 +28,7 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
     --km-motion-rise: 0.75rem;
     --km-motion-rise-small: 0.375rem;
     --km-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    --km-ease-morph: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @supports (transition-timing-function: linear(0, 1)) {
@@ -38,6 +40,13 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
             0.8522, 0.8682, 0.8827, 0.8958, 0.9077, 0.9184, 0.928, 0.9367,
             0.9445, 0.9515, 0.9578, 0.9635, 0.9685, 0.9731, 0.9771, 0.9807,
             0.984, 0.9869, 0.9895, 0.9918, 0.9938, 0.9956, 0.9973, 0.9987, 1);
+        --km-ease-morph:
+            linear(0, 0.0216, 0.0768, 0.1533, 0.2416, 0.3347, 0.4272, 0.5156,
+            0.5975, 0.6715, 0.7369, 0.7936, 0.8419, 0.8823, 0.9154, 0.9422,
+            0.9633, 0.9797, 0.992, 1.001, 1.0073, 1.0114, 1.0138, 1.015, 1.0151,
+            1.0147, 1.0137, 1.0125, 1.0111, 1.0097, 1.0083, 1.007, 1.0058,
+            1.0047, 1.0037, 1.0029, 1.0022, 1.0016, 1.0012, 1.0008, 1.0005,
+            1.0003, 1.0001, 1, 0.9999, 0.9998, 0.9998, 0.9998, 1);
     }
 }
 
@@ -52,6 +61,7 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
         --km-motion-page: 0.01ms;
         --km-motion-stagger: 0.01ms;
         --km-motion-swap: 0.01ms;
+        --km-motion-morph: 0.01ms;
     }
 }
 

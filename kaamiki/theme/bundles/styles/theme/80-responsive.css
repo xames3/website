@@ -373,23 +373,6 @@ sidebar is the navigation from 768px and the header holds no list.
 
 @media (prefers-reduced-motion: reduce) {
 
-    .km-document--loading :is(.km-header,
-        .km-banner,
-        .km-breadcrumbs,
-        .km-page__content,
-        .km-feedback-section,
-        .km-page__updated,
-        .km-page__more-button,
-        .km-pagination,
-        .km-related,
-        .km-footer) {
-        opacity: 1;
-    }
-
-    .km-page-reveal-item--shown {
-        animation: none;
-    }
-
     .km-sharpie,
     .km-pencil {
         animation: none;

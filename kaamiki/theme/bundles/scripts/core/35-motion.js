@@ -14,7 +14,6 @@
     ];
     const MOTION_STEADY = 1e-3;
     const MOTION_PX_STEADY = 0.5;
-    const MOTION_CALM_POLL_MS = 400;
     const motionOriginal = new Map();
 
     function motionCurve(settleMs, zeta = 1) {
@@ -228,14 +227,7 @@
     }
 
     function whenCalm(task, timeout = 1500) {
-        const wait = () => {
-            if (document.querySelector(`.${REVEAL_WAITING}`)) {
-                window.setTimeout(wait, MOTION_CALM_POLL_MS);
-                return;
-            }
-            whenIdle(task, timeout);
-        };
-        wait();
+        entrance.done.then(() => whenIdle(task, timeout));
     }
 
     const motionLab = {

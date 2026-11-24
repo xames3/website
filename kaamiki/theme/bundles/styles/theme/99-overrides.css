@@ -238,6 +238,11 @@
         padding-top: var(--km-space-4);
     }
 
+    .km-page > .km-banner {
+        width: min(100%, calc((100svh - var(--km-banner-room)) * 16 / 9));
+        margin-top: 0;
+    }
+
     .km-page {
         padding-top: var(--km-space-4);
     }

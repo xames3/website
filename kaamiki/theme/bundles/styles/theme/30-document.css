@@ -11,101 +11,20 @@
     transition: none !important;
 }
 
-@keyframes km-title-in {
-    from {
-        opacity: 0;
-        filter: blur(var(--km-title-blur));
-        transform: translateY(min(var(--km-title-rise), var(--km-title-reach)));
-    }
-
-    to {
-        opacity: 1;
-        filter: blur(0);
-        transform: translateY(0);
-    }
-}
-
-@keyframes km-reveal-in {
-    from {
-        opacity: 0;
-        filter: blur(var(--km-reveal-blur));
-        transform: translateY(var(--km-reveal-rise));
-    }
-
-    to {
-        opacity: 1;
-        filter: blur(0);
-        transform: translateY(0);
-    }
-}
-
-.km-document--loading :is(.km-banner,
-    .km-breadcrumbs,
-    .km-page__content,
-    .km-feedback-section,
-    .km-page__updated,
-    .km-page__more-button,
-    .km-pagination,
-    .km-related) {
-    opacity: 0;
-}
-
-.km-document--loading:not([data-km-arrival]) :is(.km-header, .km-footer) {
-    opacity: 0;
-}
-
 @media screen and (prefers-reduced-motion: no-preference) {
-    .km-page-reveal-item:not(.km-page-reveal-item--shown) {
+    .km-document--loading :is(.km-banner,
+        .km-breadcrumbs,
+        .km-page__content,
+        .km-feedback-section,
+        .km-page__updated,
+        .km-page__more-button,
+        .km-pagination,
+        .km-related) {
         opacity: 0;
     }
 
-    html:not(.km-document--loading) .km-title-item {
-        animation:
-            km-title-in var(--km-motion-enter) var(--km-ease-smooth)
-                calc(var(--km-title-step)
-                    * (var(--km-title-index, 0) - var(--km-title-lead, 0))
-                    - var(--km-title-skip, 0ms))
-                backwards;
-    }
-
-    /* A page that's been handed over to plays its entrance from its first
-       frame. With no header to bring in, the first thing the page has to show
-       starts at once instead of after the header's turn, and the rest follow
-       it as they would have. */
-    :root[data-km-arrival="link"] {
-        --km-title-lead: 3;
-        --km-title-skip: calc(var(--km-motion-enter) * 0.35);
-    }
-
-    :root[data-km-arrival="link"]:has(.km-byline.km-title-item) {
-        --km-title-lead: 2;
-    }
-
-    :root[data-km-arrival="link"]:has(.km-breadcrumbs.km-title-item) {
-        --km-title-lead: 0;
-    }
-
-    .km-header.km-title-item,
-    .km-banner.km-title-item,
-    .km-breadcrumbs.km-title-item {
-        --km-title-index: 0;
-    }
-
-    .km-byline.km-title-item {
-        --km-title-index: 2;
-    }
-
-    h1.km-title-item {
-        --km-title-index: 3;
-    }
-
-    .km-text--lead.km-title-item {
-        --km-title-index: 4;
-    }
-
-    .km-page-reveal-item--shown {
-        animation:
-            km-reveal-in var(--km-motion-enter) var(--km-ease-smooth);
+    .km-document--loading:not([data-km-arrival]) :is(.km-header, .km-footer) {
+        opacity: 0;
     }
 
     .km-footer {

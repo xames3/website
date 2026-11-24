@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Columns, everywhere
 :km-page-description: Every option of the columns and column directives on and
@@ -22,6 +22,11 @@
 .. rst-class:: km-text-lead
 
     Content side by side, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: green
 
 Columns put content side by side and stack it on a phone. This page writes them
 with every option on and off, with icons and roles, with every other Kaamiki

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: The repository directive
 :km-page-description: Show a GitHub project as a card with its star and fork
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     A GitHub project as a card.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: graphite
 
 The argument is the project as ``owner/name`` and whatever you write under it
 goes below the name. The text is optional, one paragraph, and it can use roles

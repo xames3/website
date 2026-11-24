@@ -22,7 +22,7 @@
         };
         const taken = (event, deltaY) => event.target.closest?.('.km-header')
             || scrollsInside(event.target, deltaY);
-        window.addEventListener('wheel', (event) => {
+        onPage(window, 'wheel', (event) => {
             if (event.ctrlKey
                 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
             hand(HAND_WINDOW_MS);
@@ -31,7 +31,7 @@
                 ? 16
                 : event.deltaMode === 2 ? window.innerHeight : 1;
             held.nudge(event.deltaY * unit, true);
-        }, { passive: true });
+        });
         window.addEventListener('keydown', (event) => {
             if (event.altKey || event.ctrlKey || event.metaKey) return;
             if (event.target.closest?.(
@@ -50,23 +50,19 @@
             }
         });
         let touchY = 0;
-        window.addEventListener('touchstart', (event) => {
+        onPage(window, 'touchstart', (event) => {
             touchY = event.touches[0].clientY;
             hand(HAND_WINDOW_MS);
-        }, { passive: true });
-        window.addEventListener('touchmove', (event) => {
+        });
+        onPage(window, 'touchmove', (event) => {
             hand(HAND_WINDOW_MS);
             const y = event.touches[0].clientY;
             const delta = touchY - y;
             touchY = y;
             if (held && !taken(event, delta)) held.nudge(delta);
-        }, { passive: true });
+        });
         ['touchend', 'touchcancel'].forEach((name) => {
-            window.addEventListener(
-                name,
-                () => hand(TOUCH_GLIDE_MS),
-                { passive: true },
-            );
+            onPage(window, name, () => hand(TOUCH_GLIDE_MS));
         });
     }
 

@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Tabs, everywhere
 :km-page-description: Every option of the tabs and tab directives on and off,
@@ -11,17 +11,21 @@
 :km-feedback-title: Did I miss a way to combine them?
 :km-feedback-description: Tell me what you tried with tabs that didn't work.
 :km-feedback-button: Tell me
-:km-feedback-icon: fa-table-columns
+:km-feedback-icon: fa-folders
 
 .. _combos-tabs:
 
 ===============================================================================
-:fa-icon:regular:`table-columns` Tabs, everywhere
+:fa-icon:regular:`folders` Tabs, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead
 
     Content that switches, in every combination.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
 
 Tabs show one panel at a time. This page writes them with every option on and
 off, with icons and roles in their titles, with every other Kaamiki directive

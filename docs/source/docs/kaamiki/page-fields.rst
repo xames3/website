@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Kaamiki page fields
 :km-page-description: The fields you can put at the top of a page to change its
@@ -22,6 +22,11 @@
 .. rst-class:: km-text-lead
 
     Lines at the top of a page that change how Kaamiki treats that page alone.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: teal
 
 Page fields are ordinary reStructuredText fields, so there's nothing to install
 or switch on. Write them before the title:

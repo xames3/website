@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 11 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: code-explain and code-version
 :km-page-description: Step a reader through a snippet line by line, with the
@@ -21,6 +21,11 @@
 .. rst-class:: km-text-lead
 
     Watch the code run, and watch it change.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: yellow
 
 A ``code-explain`` steps a reader through a snippet, line by line, while the
 notes beside it scroll past. For Python it runs the snippet at build time, once

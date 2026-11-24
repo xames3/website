@@ -4,7 +4,7 @@ Explainer Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 17 October 2026
-Last updated on: 21 November 2026
+Last updated on: 23 November 2026
 */
 
 (() => {
@@ -14,6 +14,7 @@ Last updated on: 21 November 2026
         clamp,
         copyText,
         headerHeight,
+        onPage,
         onScroll,
         prefersReducedMotion,
         prefersStill,

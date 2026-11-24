@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 08 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Setting a link preview
 :km-page-description: A page with its own link preview.
@@ -14,8 +14,12 @@
 .. _kaamiki-example-link-preview:
 
 ===============================================================================
-Setting a link preview
+:fa-icon:regular:`link` Setting a link preview
 ===============================================================================
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
 
 This page sets its preview from the top of its source:
 

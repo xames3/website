@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 19 November 2026
+.. Last updated on: 23 November 2026
 
 :km-page-title: Kaamiki roles
 :km-page-description: The inline roles Kaamiki adds for links, motion, colour,
@@ -20,6 +20,11 @@
 .. rst-class:: km-text-lead
 
     Small marks inside a sentence.
+
+.. byline:: @xames3
+    :avatar: https://avatars.githubusercontent.com/u/90549089?v=4
+    :target: https://github.com/xames3
+    :shade: orange
 
 A role is written ``:name:`text```. Kaamiki adds ten, and this one sentence
 uses most of them: a :sharpie:`highlight`, a :underline:`pencil line`, a
