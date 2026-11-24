@@ -72,7 +72,7 @@ ruff = ["ruff==0.17.4"]
 typecheck = [
     "mypy==2.4.1",
     "types-docutils==0.23.0.20261107",
-    "types-Pygments==2.21.0.20260819",
+    "types-Pygments==2.21.0.20261115",
     "babel",
     "beautifulsoup4",
     "docutils",
