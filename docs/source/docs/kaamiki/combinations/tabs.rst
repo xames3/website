@@ -16,7 +16,7 @@
 .. _combos-tabs:
 
 ===============================================================================
-:fa-icon:regular:`folders` Tabs, everywhere
+:fa-icon:duotone:`folders` Tabs, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

@@ -13,7 +13,7 @@
 .. _changelog:
 
 ===============================================================================
-:fa-icon:duotone:`tags` Changelog
+:fa-icon:duotone:`tags fa-swap-opacity` Changelog
 ===============================================================================
 
 .. rst-class:: km-text-lead

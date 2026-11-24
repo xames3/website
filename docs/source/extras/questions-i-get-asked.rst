@@ -13,7 +13,7 @@
 .. _extras-questions-i-get-asked:
 
 ===============================================================================
-:fa-icon:duotone:`comments` Questions I get asked
+:fa-icon:duotone:`comments fa-swap-opacity` Questions I get asked
 ===============================================================================
 
 .. byline:: @xames3

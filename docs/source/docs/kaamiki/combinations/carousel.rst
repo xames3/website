@@ -16,7 +16,7 @@
 .. _combos-carousel:
 
 ===============================================================================
-:fa-icon:regular:`rectangle-history` Carousels, everywhere
+:fa-icon:duotone:`rectangle-history` Carousels, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

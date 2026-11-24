@@ -15,7 +15,7 @@
 .. _kaamiki-carousel:
 
 ===============================================================================
-:fa-icon:regular:`rectangle-history` carousel
+:fa-icon:duotone:`rectangle-history` carousel
 ===============================================================================
 
 .. rst-class:: km-text-lead

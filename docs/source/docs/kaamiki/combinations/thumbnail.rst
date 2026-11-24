@@ -16,7 +16,7 @@
 .. _combos-thumbnail:
 
 ===============================================================================
-:fa-icon:regular:`image` Thumbnails, everywhere
+:fa-icon:duotone:`image` Thumbnails, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

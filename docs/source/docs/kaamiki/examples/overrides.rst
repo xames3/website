@@ -17,7 +17,7 @@
 .. _kaamiki-example-overrides:
 
 ===============================================================================
-:fa-icon:regular:`toggle-on` Overriding settings from a page
+:fa-icon:duotone:`toggle-on` Overriding settings from a page
 ===============================================================================
 
 .. byline:: @xames3

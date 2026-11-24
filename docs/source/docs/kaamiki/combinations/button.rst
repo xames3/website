@@ -17,7 +17,7 @@
 .. _combos-button:
 
 ===============================================================================
-:fa-icon:regular:`arrow-pointer` Buttons, everywhere
+:fa-icon:duotone:`arrow-pointer` Buttons, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

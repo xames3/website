@@ -16,7 +16,7 @@
 .. _combos-release:
 
 ===============================================================================
-:fa-icon:regular:`tag` Releases, everywhere
+:fa-icon:duotone:`tag` Releases, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

@@ -15,7 +15,7 @@
 .. _kaamiki-example-icons:
 
 ===============================================================================
-:fa-icon:regular:`icons` Icons, everywhere
+:fa-icon:duotone:`icons` Icons, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -275,14 +275,14 @@ paragraphs of their own:
     * - ``Two after :fa-icon:regular:`star` :fa-icon:regular:`heart```
       - Two after :fa-icon:regular:`star` :fa-icon:regular:`heart`
 
-:fa-icon:regular:`star` This paragraph starts with an icon and carries on long
+:fa-icon:duotone:`star` This paragraph starts with an icon and carries on long
 enough to wrap onto a second line, so the icon stays with the first one.
 
 This paragraph ends with an icon :fa-icon:regular:`star`
 
 This paragraph has an icon :fa-icon:regular:`star` in the middle, another
-:fa-icon:regular:`heart` a little further along and a third
-:fa-icon:regular:`bell` near the end, with the text wrapping around all of
+:fa-icon:duotone:`heart` a little further along and a third
+:fa-icon:duotone:`bell` near the end, with the text wrapping around all of
 them as it would in any sentence.
 
 .. _kaamiki-icons-in-text:
@@ -317,7 +317,7 @@ Lists
 Definitions, quotes and lines
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:fa-icon:regular:`star` A term with an icon before it
+:fa-icon:duotone:`star` A term with an icon before it
     Its definition, with an :fa-icon:regular:`heart` icon in the middle.
 
 A term with an icon after it :fa-icon:regular:`star`
@@ -375,7 +375,7 @@ exception: its icon is the one the navigation shows, which the :ref:`page
 itself <kaamiki-icons-in-the-page>` explains. Every heading below is a real
 one:
 
-:fa-icon:regular:`star` A heading with an icon first
+:fa-icon:duotone:`star` A heading with an icon first
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Text under it.

@@ -18,7 +18,7 @@
 .. _changelogs-november-2026:
 
 ===============================================================================
-:fa-icon:regular:`link-slash` Kaamiki stops |rborrow| now!
+:fa-icon:duotone:`link-slash` Kaamiki stops |rborrow| now!
 ===============================================================================
 
 .. rst-class:: km-text-lead

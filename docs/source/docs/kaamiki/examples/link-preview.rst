@@ -14,7 +14,7 @@
 .. _kaamiki-example-link-preview:
 
 ===============================================================================
-:fa-icon:regular:`link` Setting a link preview
+:fa-icon:duotone:`link` Setting a link preview
 ===============================================================================
 
 .. byline:: @xames3

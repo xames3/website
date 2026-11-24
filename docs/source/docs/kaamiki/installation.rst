@@ -16,7 +16,7 @@
 .. _kaamiki-installation:
 
 ===============================================================================
-:fa-icon:regular:`download` Installing Kaamiki
+:fa-icon:duotone:`download` Installing Kaamiki
 ===============================================================================
 
 .. rst-class:: km-text-lead

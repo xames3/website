@@ -14,7 +14,7 @@
 .. _kaamiki-roles:
 
 ===============================================================================
-:fa-icon:regular:`pen-to-square` Roles
+:fa-icon:duotone:`pen-to-square` Roles
 ===============================================================================
 
 .. rst-class:: km-text-lead

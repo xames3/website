@@ -14,7 +14,7 @@
 .. _kaamiki-accordion:
 
 ===============================================================================
-:fa-icon:regular:`square-plus` accordion
+:fa-icon:duotone:`square-plus` accordion
 ===============================================================================
 
 .. rst-class:: km-text-lead

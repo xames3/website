@@ -17,7 +17,7 @@
 .. _kaamiki-example-feedback:
 
 ===============================================================================
-:fa-icon:regular:`message-pen` Changing the feedback box
+:fa-icon:duotone:`message-pen` Changing the feedback box
 ===============================================================================
 
 .. byline:: @xames3

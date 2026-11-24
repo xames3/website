@@ -14,7 +14,7 @@
 .. _kaamiki-button:
 
 ===============================================================================
-:fa-icon:regular:`arrow-pointer` button
+:fa-icon:duotone:`arrow-pointer` button
 ===============================================================================
 
 .. rst-class:: km-text-lead

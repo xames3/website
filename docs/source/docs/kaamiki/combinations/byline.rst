@@ -16,7 +16,7 @@
 .. _combos-byline:
 
 ===============================================================================
-:fa-icon:regular:`user` Bylines, option by option
+:fa-icon:duotone:`user` Bylines, option by option
 ===============================================================================
 
 .. rst-class:: km-text-lead

@@ -16,7 +16,7 @@
 .. _combos-index:
 
 ===============================================================================
-:fa-icon:regular:`shapes` Combinations
+:fa-icon:duotone:`shapes` Combinations
 ===============================================================================
 
 .. rst-class:: km-text-lead
