@@ -3,7 +3,7 @@
 .. Last updated on: 23 November 2026
 
 :km-related-header: Keep reading.
-:km-related-docs: /academia/thoughts-on-teaching,
+:km-related-docs: /academia/year-one-of-teaching,
     /extras/guiding-stars, /docs/kaamiki/index
 :km-page-title: Rebuilding NumPy to understand it.
 :km-page-description: Journey of building a lightweight, pure-python

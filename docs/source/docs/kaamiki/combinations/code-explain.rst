@@ -17,7 +17,7 @@
 .. _combos-code-explain:
 
 ===============================================================================
-:fa-icon:regular:`list-check` code-explain, option by option
+:fa-icon:duotone:`list-check` code-explain, option by option
 ===============================================================================
 
 .. rst-class:: km-text-lead

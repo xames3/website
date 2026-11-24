@@ -15,7 +15,7 @@
 .. _combos-block:
 
 ===============================================================================
-:fa-icon:regular:`rectangle-list` Blocks, everywhere
+:fa-icon:duotone:`rectangle-list` Blocks, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

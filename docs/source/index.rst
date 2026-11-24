@@ -160,7 +160,7 @@ can read the long versions in future blogs.
     :hidden:
     :titlesonly:
 
-    academia/thoughts-on-teaching
+    academia/year-one-of-teaching
 
 .. toctree::
     :caption: Journal
@@ -180,6 +180,8 @@ can read the long versions in future blogs.
     :maxdepth: 1
 
     docs/kaamiki/index
+    docs/slowtorch/index
+    docs/xsnumpy/index
 
 .. toctree::
     :caption: Extras

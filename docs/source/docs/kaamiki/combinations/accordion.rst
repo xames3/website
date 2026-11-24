@@ -16,7 +16,7 @@
 .. _combos-accordion:
 
 ===============================================================================
-:fa-icon:regular:`square-plus` Accordions, everywhere
+:fa-icon:duotone:`square-plus` Accordions, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

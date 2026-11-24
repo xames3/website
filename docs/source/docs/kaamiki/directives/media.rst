@@ -14,7 +14,7 @@
 .. _kaamiki-media:
 
 ===============================================================================
-:fa-icon:regular:`film` video, youtube and thumbnail
+:fa-icon:duotone:`film` video, youtube and thumbnail
 ===============================================================================
 
 .. rst-class:: km-text-lead

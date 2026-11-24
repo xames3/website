@@ -16,7 +16,7 @@
 .. _combos-columns:
 
 ===============================================================================
-:fa-icon:regular:`table-columns` Columns, everywhere
+:fa-icon:duotone:`table-columns` Columns, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

@@ -16,7 +16,7 @@
 .. _combos-video:
 
 ===============================================================================
-:fa-icon:regular:`film` Videos, everywhere
+:fa-icon:duotone:`film` Videos, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead

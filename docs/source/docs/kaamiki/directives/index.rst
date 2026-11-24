@@ -14,7 +14,7 @@
 .. _kaamiki-directives:
 
 ===============================================================================
-:fa-icon:regular:`cubes` Directives
+:fa-icon:duotone:`cubes` Directives
 ===============================================================================
 
 .. rst-class:: km-text-lead

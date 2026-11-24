@@ -18,7 +18,7 @@
 .. _extras-best-of-youtube:
 
 ===============================================================================
-:fa-icon:duotone:`tv` Best of YouTube
+:fa-icon:duotone:`tv fa-swap-opacity` Best of YouTube
 ===============================================================================
 
 .. byline:: @xames3

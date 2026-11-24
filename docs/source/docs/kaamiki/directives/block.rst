@@ -14,7 +14,7 @@
 .. _kaamiki-block:
 
 ===============================================================================
-:fa-icon:regular:`rectangle-list` block
+:fa-icon:duotone:`rectangle-list` block
 ===============================================================================
 
 .. rst-class:: km-text-lead

@@ -16,7 +16,7 @@
 .. _combos-code-version:
 
 ===============================================================================
-:fa-icon:regular:`code-compare` code-version, option by option
+:fa-icon:duotone:`code-compare` code-version, option by option
 ===============================================================================
 
 .. rst-class:: km-text-lead

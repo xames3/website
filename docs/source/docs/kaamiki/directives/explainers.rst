@@ -15,7 +15,7 @@
 .. _kaamiki-explainers:
 
 ===============================================================================
-:fa-icon:regular:`list-check` code-explain and code-version
+:fa-icon:duotone:`list-check` code-explain and code-version
 ===============================================================================
 
 .. rst-class:: km-text-lead

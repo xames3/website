@@ -2,21 +2,21 @@
 .. Created on: 07 April 2026
 .. Last updated on: 22 November 2026
 
-:km-page-title: Thoughts on teaching
+:km-page-title: Year one of teaching
 :km-page-description: Lessons I didn't plan on teaching, but I re-learnt them
     along the way.
 :km-page-type: article
 :km-page-image: https://i.imgur.com/83ZcICa.jpg
-:km-feedback-title: These were my thoughts on teaching.
+:km-feedback-title: These were my thoughts on teaching in my first year.
 :km-feedback-description: If you have any new ideas or suggestions about
     teaching, please share.
 :km-feedback-button: Do tell
 :km-feedback-split:
 
-.. _academia-thoughts-on-teaching:
+.. _academia-year-one-of-teaching:
 
 ===============================================================================
-:fa-icon:duotone:`person-chalkboard` Thoughts on teaching
+:fa-icon:duotone:`calendar-users` Year one of teaching
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -26,7 +26,7 @@
 .. byline:: @xames3
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
-    :shade: purple
+    :shade: teal
 
 In April of :ticker:`2025`, I walked into the 4024 classroom on our Chicago
 campus at NLU. I wasn't sure what kind of teacher I'd be, but I knew I wanted

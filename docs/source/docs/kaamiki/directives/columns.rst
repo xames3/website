@@ -14,7 +14,7 @@
 .. _kaamiki-columns:
 
 ===============================================================================
-:fa-icon:regular:`table-columns` columns
+:fa-icon:duotone:`table-columns` columns
 ===============================================================================
 
 .. rst-class:: km-text-lead

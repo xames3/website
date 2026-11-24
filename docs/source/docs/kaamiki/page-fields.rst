@@ -16,7 +16,7 @@
 .. _kaamiki-page-fields:
 
 ===============================================================================
-:fa-icon:regular:`file-lines` Page fields
+:fa-icon:`file-lines fa-swap-opacity` Page fields
 ===============================================================================
 
 .. rst-class:: km-text-lead

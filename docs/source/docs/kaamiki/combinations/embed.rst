@@ -17,7 +17,7 @@
 .. _combos-embed:
 
 ===============================================================================
-:fa-icon:regular:`code` Embeds, everywhere
+:fa-icon:duotone:`code` Embeds, everywhere
 ===============================================================================
 
 .. rst-class:: km-text-lead
