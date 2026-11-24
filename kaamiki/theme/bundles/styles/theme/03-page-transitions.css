@@ -92,6 +92,10 @@ its content can be pictured. A page reached from the history
         --km-tracking: var(--km-tracking-h1);
     }
 
+    .km-related__card--picked .km-related__meta {
+        view-transition-name: km-morph-meta;
+    }
+
     :root[data-km-morph] .km-header {
         view-transition-name: km-morph-header;
     }
@@ -126,7 +130,8 @@ its content can be pictured. A page reached from the history
     }
 
     :root[data-km-morph]::view-transition-group(root),
-    ::view-transition-group(km-morph-crumbs) {
+    ::view-transition-group(km-morph-crumbs),
+    ::view-transition-group(km-morph-meta) {
         z-index: -1;
     }
 
@@ -141,7 +146,8 @@ its content can be pictured. A page reached from the history
         mix-blend-mode: plus-lighter;
     }
 
-    ::view-transition-old(km-morph-banner) {
+    ::view-transition-old(km-morph-banner),
+    ::view-transition-old(km-morph-meta) {
         animation: km-nav-fade calc(var(--km-motion-morph) * 0.3)
             var(--km-ease-smooth) both;
     }
