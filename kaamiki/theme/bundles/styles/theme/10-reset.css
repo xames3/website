@@ -1,7 +1,7 @@
 @layer km-reset {
     *,
-    :after,
-    :before {
+    :where([class*="km-"], [class*="fa-"], .km-list li)::after,
+    :where([class*="km-"], [class*="fa-"], .km-list li)::before {
         border: 0 solid hsl(var(--km-colour-border));
         box-sizing: border-box;
     }

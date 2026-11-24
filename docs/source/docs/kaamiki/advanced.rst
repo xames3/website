@@ -61,6 +61,12 @@ owns starts with ``km-``, ``--km-`` or ``km_``, and a page's own fields are
 extensions' or yours, and a rule written against ``km-`` is a rule about
 Kaamiki.
 
+Kaamiki's reset gives every element ``box-sizing: border-box``, a border of no
+width and the theme's letter-spacing. A ``::before`` or ``::after`` gets them
+only on an element with a ``km-`` or ``fa-`` class or on an item of a
+``km-list``, because a reset on every pseudo-element makes each restyle slower
+in Safari. Give your own pseudo-elements these values where they need them.
+
 The custom properties are the easy way to change how it looks. They're all
 declared on ``:root``, so a stylesheet you load afterwards wins at the same
 specificity. ``html_css_files`` loads yours after Kaamiki's:

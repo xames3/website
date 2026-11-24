@@ -5,8 +5,8 @@
 }
 
 *,
-*::before,
-*::after {
+:where([class*="km-"], [class*="fa-"], .km-list li)::before,
+:where([class*="km-"], [class*="fa-"], .km-list li)::after {
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
@@ -38,8 +38,8 @@ html {
 }
 
 *,
-*::before,
-*::after {
+:where([class*="km-"], [class*="fa-"], .km-list li)::before,
+:where([class*="km-"], [class*="fa-"], .km-list li)::after {
     letter-spacing: var(--km-tracking, normal);
 }
 
