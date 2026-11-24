@@ -16,8 +16,6 @@
 .. _academia-year-one-of-teaching:
 
 ===============================================================================
-:fa-icon:duotone:`calendar-users` Year one of teaching
-===============================================================================
 
 .. rst-class:: km-text-lead
 

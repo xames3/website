@@ -68,11 +68,11 @@ kaamiki = "kaamiki"
 [dependency-groups]
 dev = [{ include-group = "sphinxlint" }, "tox>=4.65.4"]
 sphinxlint = ["sphinx-lint==1.0.2"]
-ruff = ["ruff==0.17.4"]
+ruff = ["ruff==0.17.5"]
 typecheck = [
     "mypy==2.4.1",
     "types-docutils==0.23.0.20261107",
-    "types-Pygments==2.21.0.20260819",
+    "types-Pygments==2.21.0.20261115",
     "babel",
     "beautifulsoup4",
     "docutils",
@@ -81,13 +81,13 @@ typecheck = [
     "pygments",
     "sphinx",
 ]
-djlint = ["djlint==1.49.10"]
+djlint = ["djlint==1.50.4"]
 translations = ["babel==2.18.0", "jinja2==3.1.6"]
 package = [
     "build[uv]==1.6.1",
     "check-wheel-contents==0.6.3",
     "twine==7.0.0",
-    "uv==0.13.7",
+    "uv==0.13.8",
     "validate-pyproject==0.27",
 ]
 
