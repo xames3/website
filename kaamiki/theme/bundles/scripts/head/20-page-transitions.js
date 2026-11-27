@@ -31,7 +31,6 @@
     }, { once: true });
     const PARTS = {
         banner: ['.km-related__banner', null],
-        crumbs: [null, '.km-breadcrumbs:not(.km-breadcrumbs--empty)'],
         stamp: ['.km-related__meta', '.km-page__stamp'],
         title: ['.km-related__title', '#km-content > section > h1'],
     };

@@ -104,6 +104,14 @@ Last updated on: 27 November 2026
             filter: 'blur(0)',
             transform: 'translateY(0)',
         }],
+        rise: [{
+            opacity: 0,
+            transform:
+                'translateY(min(var(--km-title-rise), var(--km-title-reach)))',
+        }, {
+            opacity: 1,
+            transform: 'translateY(0)',
+        }],
         block: [{
             opacity: 0,
             filter: 'blur(var(--km-reveal-blur))',

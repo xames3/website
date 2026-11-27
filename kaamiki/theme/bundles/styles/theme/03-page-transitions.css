@@ -52,18 +52,6 @@ its content can be pictured. A page reached from the history
     }
 }
 
-@keyframes km-morph-show {
-    from {
-        opacity: 0;
-    }
-}
-
-@keyframes km-morph-rise {
-    from {
-        transform: translateY(min(var(--km-title-rise), var(--km-title-reach)));
-    }
-}
-
 @media (prefers-reduced-motion: no-preference) {
     :root {
         --km-nav-out: calc(var(--km-motion-fade) * 0.6);
@@ -74,9 +62,7 @@ its content can be pictured. A page reached from the history
         visibility: hidden;
     }
 
-    :root[data-km-morph] :is(.km-breadcrumbs:not(.km-breadcrumbs--empty),
-        .km-page__stamp,
-        #km-content > section > h1) {
+    :root[data-km-morph] :is(.km-page__stamp, #km-content > section > h1) {
         opacity: 1;
         visibility: visible;
     }
@@ -120,16 +106,8 @@ its content can be pictured. A page reached from the history
         animation-name: var(--km-morph-title-fly, none);
     }
 
-    :root[data-km-morph]::view-transition-group(root),
-    ::view-transition-group(km-morph-crumbs) {
+    :root[data-km-morph]::view-transition-group(root) {
         z-index: -1;
-    }
-
-    ::view-transition-new(km-morph-crumbs) {
-        animation:
-            km-morph-show var(--km-motion-morph) var(--km-ease-smooth) both,
-            km-morph-rise var(--km-motion-morph) var(--km-ease-smooth) both;
-        animation-delay: calc(var(--km-motion-morph) * 0.5);
     }
 
     ::view-transition-old(km-morph-banner) {
