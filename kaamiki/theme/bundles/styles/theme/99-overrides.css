@@ -239,7 +239,7 @@
     }
 
     .km-page > .km-banner {
-        width: min(100%, calc((100svh - var(--km-banner-room)) * 16 / 9));
+        width: min(100%, calc((100svh - var(--km-banner-room)) * 1200 / 630));
         margin-top: 0;
     }
 

@@ -1,0 +1,55 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1200 630"
+    preserveAspectRatio="none">
+    <filter id="a" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="28"/>
+    </filter>
+    <filter id="b" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="70"/>
+    </filter>
+    <filter id="c" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="130"/>
+    </filter>
+    <filter
+        id="s"
+        x="0"
+        y="0"
+        width="1"
+        height="1"
+        color-interpolation-filters="sRGB">
+        <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.85"
+            numOctaves="2"
+            seed="4"
+            stitchTiles="stitch"/>
+        <feColorMatrix
+            values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1"
+            result="n"/>
+        <feComposite
+            in="SourceGraphic"
+            in2="n"
+            operator="arithmetic"
+            k2="1"
+            k3="0.22"
+            k4="-0.11"/>
+        <feColorMatrix type="luminanceToAlpha"/>
+    </filter>
+    <g filter="url(#s)">
+        <rect width="1200" height="630"/>
+        <path
+            fill="none"
+            stroke="#fff"
+            stroke-width="170"
+            stroke-linecap="round"
+            filter="url(#b)"
+            d="M-80 470C250 720 850 660 1040 420C1180 230 960 60 780 210C660
+                310 790 450 920 360"/>
+        <path
+            fill="#fff"
+            fill-opacity=".3"
+            filter="url(#c)"
+            d="M-100 730H600C400 600 100 520 -100 520Z"/>
+    </g>
+</svg>
