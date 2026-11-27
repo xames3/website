@@ -4,10 +4,10 @@ Page Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 22 November 2026
+Last updated on: 27 November 2026
 #}
 {%- extends "layout.html" -%}
-{%- from "components/banner.html.jinja" import km_banner -%}
+{%- from "components/stamp.html.jinja" import km_stamp -%}
 {%- macro km_button() -%}
     <a href="{{ kaamiki.site.feedback.url|e }}"
        class="km-feedback-section__button">
@@ -30,11 +30,11 @@ Last updated on: 22 November 2026
     {%- set km_clamp = " km-page--clamped" if kaamiki.show.more|tobool else "" %}
     <div class="km-page{{ km_clamp }}">
         {%- block km_body_before %}{%- endblock km_body_before %}
-        {%- if kaamiki.page.banner %}
-            {{ km_banner(kaamiki.page.banner) }}
-        {%- endif %}
         {%- if kaamiki.show.breadcrumbs|tobool %}
             {%- include "components/breadcrumbs.html.jinja" %}
+        {%- endif %}
+        {%- if kaamiki.page.stamp and kaamiki.page.stamp.date %}
+            {{ km_stamp(kaamiki.page.stamp, "km-page__stamp", "p") }}
         {%- endif %}
         <div class="km-page__fold">
             <main id="km-content"

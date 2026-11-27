@@ -4,7 +4,7 @@ Context Utilities
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 08 October 2026
-Last updated on: 22 November 2026
+Last updated on: 27 November 2026
 
 The utilities that fill the context of a page for the templates. The
 templates read one read-only value, `kaamiki`, with the paths of
@@ -1006,6 +1006,22 @@ def section_of(app: Sphinx, docname: str) -> str:
     return ""
 
 
+def stamp(app: Sphinx, docname: str) -> dict[str, str]:
+    """Find the part of the site and the creation date of a page.
+
+    :param app: The Sphinx application instance.
+    :param docname: The page.
+    :return: The `section` from `section_of` and the `date` from the
+        `created` header comment, in the language of the site. Each
+        one is an empty string when the page has none.
+    """
+    iso = day(app.env.metadata.get(docname, {}).get("created", ""))
+    return {
+        "section": section_of(app, docname),
+        "date": dated(datetime.fromisoformat(iso), app.config) if iso else "",
+    }
+
+
 GLYPH: t.Final[re.Pattern[str]] = re.compile(
     r'<span aria-hidden="true" class="([^"]*km-glyph[^"]*)"></span>'
 )
@@ -1071,7 +1087,8 @@ def related(
         title. The date is the `created` date of the page, or
         empty. A page with `:km-related-skip-page:` is not a card and
         gets none. A page with cards does not show the previous and
-        next buttons.
+        next buttons. `kaamiki.page.stamp` is the `stamp` of the
+        page.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
@@ -1082,6 +1099,9 @@ def related(
     builder = t.cast("StandaloneHTMLBuilder", app.builder)
     env = app.env
     context[NAME]["page.related"] = None
+    context[NAME]["page.stamp"] = (
+        stamp(app, pagename) if pagename in env.metadata else {}
+    )
     if skipped(env, pagename):
         return
     meta: dict[str, str] = context.get("meta") or {}
@@ -1105,16 +1125,12 @@ def related(
         title = other.get("km-page-title") or rendered.get("title", "")
         glyph = first_glyph(rendered.get("title", ""))
         drawn = banner(env, docname, glyph).linked(context["pathto"])
-        iso = day(other.get("created", ""))
         cards.append(
             {
                 "link": builder.get_relative_uri(pagename, docname),
                 "title": plain(title),
                 "parts": title_parts(title),
-                "section": section_of(app, docname),
-                "date": dated(datetime.fromisoformat(iso), app.config)
-                if iso
-                else "",
+                **stamp(app, docname),
                 "banner": drawn._asdict(),
             }
         )

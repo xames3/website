@@ -4,10 +4,11 @@ Previous and Next Pages Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 22 November 2026
+Last updated on: 27 November 2026
 #}
 {%- from "components/banner.html.jinja" import km_banner -%}
 {%- from "components/chevron.html.jinja" import km_chevron_icon -%}
+{%- from "components/stamp.html.jinja" import km_stamp -%}
 {%- macro km_related_section(km_related) -%}
     {%- set km_head = km_related.header -%}
     {%- set km_classes = ["km-related", "km-carousel", "km-carousel--titled" if km_head] -%}
@@ -25,14 +26,7 @@ Last updated on: 22 November 2026
                 <a class="km-related__card"
                    href="{{ km_card.link|e }}">
                     {{ km_banner(km_card.banner, "km-related__banner", true) }}
-                    <span class="km-related__meta">
-                        {%- if km_card.section %}<span>{{ km_card.section|e }}</span>{%- endif %}
-                        {%- if km_card.section and km_card.date %}
-                            <span class="km-byline__separator"
-                                  aria-hidden="true"></span>
-                        {%- endif %}
-                        {%- if km_card.date %}<span>{{ km_card.date|e }}</span>{%- endif %}
-                    </span>
+                    {{ km_stamp(km_card, "km-related__meta") }}
                     <span class="km-related__title">
                         {%- for km_part in km_card.parts -%}
                             {%- if km_part.glyph -%}

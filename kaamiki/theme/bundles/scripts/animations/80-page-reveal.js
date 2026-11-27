@@ -12,7 +12,7 @@
 
     function kept(node) {
         if (morphed && node.matches(
-            `.km-page > .km-banner, .km-breadcrumbs, ${TITLE_HEADING}`,
+            `.km-breadcrumbs, .km-page__stamp, ${TITLE_HEADING}`,
         )) return true;
         return arrival() === 'link' && node.matches('.km-header, .km-footer');
     }
@@ -22,8 +22,8 @@
         if (!heading) return [];
         return [
             document.querySelector('.km-header'),
-            document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
+            document.querySelector('.km-page__stamp'),
             heading,
             ...Array.from(heading.parentElement.children).filter((child) => (
                 child.matches('.km-text--lead, .km-byline')
@@ -38,8 +38,8 @@
     function bodyBlocks(title) {
         return [
             document.querySelector('.km-header'),
-            document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
+            document.querySelector('.km-page__stamp'),
             ...revealBlocks(document.getElementById('km-content')),
             document.querySelector('.km-feedback-section'),
             document.querySelector('.km-page__updated'),

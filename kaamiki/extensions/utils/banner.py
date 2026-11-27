@@ -7,8 +7,8 @@ Created on: 22 November 2026
 Last updated on: 27 November 2026
 
 The banner of a page: a picture, or a swirl in a shade with the icon
-of the page. The byline sets it above the title, and the cards of the
-related pages show it.
+of the page. The byline sets it, and the cards of the related pages
+show it.
 """
 
 from __future__ import annotations
@@ -56,7 +56,6 @@ class Banner(t.NamedTuple):
     shade: str = SHADE
     icon: str = ""
     picture: str = ""
-    hidden: bool = False
     swirl: str = SWIRLS[0]
 
     @property

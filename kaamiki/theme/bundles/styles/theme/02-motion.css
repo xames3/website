@@ -20,7 +20,7 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
     --km-motion-stagger: calc(60ms / var(--km-motion-speed));
     --km-motion-ambient: calc(1600ms / var(--km-motion-speed));
     --km-motion-swap: calc(600ms / var(--km-motion-speed));
-    --km-motion-morph: calc(520ms / var(--km-motion-speed));
+    --km-motion-morph: calc(720ms / var(--km-motion-speed));
     --km-motion-sweep: calc(1900ms / var(--km-motion-speed));
     --km-motion-ticker: calc(2000ms / var(--km-motion-speed));
     --km-motion-typewrite-key: calc(120ms / var(--km-motion-speed));

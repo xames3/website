@@ -30,8 +30,9 @@
         started = true;
     }, { once: true });
     const PARTS = {
-        banner: ['.km-related__banner', '.km-page > .km-banner'],
+        banner: ['.km-related__banner', null],
         crumbs: [null, '.km-breadcrumbs:not(.km-breadcrumbs--empty)'],
+        stamp: ['.km-related__meta', '.km-page__stamp'],
         title: ['.km-related__title', '#km-content > section > h1'],
     };
     let picked = null;
@@ -67,6 +68,11 @@
         };
     }
 
+    function corner(node) {
+        const { left, top } = node.getBoundingClientRect();
+        return { left, top };
+    }
+
     function named(nodes, on) {
         Object.entries(nodes).forEach(([part, node]) => {
             if (!node) return;
@@ -99,22 +105,27 @@
             const grow = end.size / morph.size;
             const shift = (a, b, scale) => `translate(${a.x - b.x * scale}px, `
                 + `${a.y - b.y * scale}px) scale(${scale})`;
-            frames['km-morph-shrink'] = ['from', shift(morph, end, 1 / grow)];
-            frames['km-morph-fly-title'] = [
-                'from',
-                `translate(${morph.left}px, ${morph.top}px)`,
-            ];
+            frames['km-morph-shrink'] = `from { transform: ${
+                shift(morph, end, 1 / grow)} }`;
+            frames['km-morph-fly-title'] = `from { transform: translate(${
+                morph.left}px, ${morph.top}px) }`;
             tokens.from = `${morph.width}px`;
             tokens.to = `${end.width}px`;
             tokens['title-fly'] = 'km-morph-fly-title';
         }
-        if (to.banner && morph.banner) {
-            const { left, top, width } = morph.banner;
-            const scale = width / to.banner.getBoundingClientRect().width;
-            frames['km-morph-fly-banner'] = [
-                'from',
-                `translate(${left}px, ${top}px) scale(${scale})`,
-            ];
+        if (to.stamp && morph.stamp) {
+            const { left, top } = morph.stamp;
+            frames['km-morph-fly-stamp'] = `from { transform: translate(${
+                left}px, ${top}px) }`;
+            tokens['stamp-fly'] = 'km-morph-fly-stamp';
+        }
+        const target = to.stamp ?? to.title;
+        if (target && morph.banner) {
+            const { left, top } = morph.banner;
+            const end = corner(target);
+            frames['km-morph-fly-banner'] = `from { transform: translate(${
+                left}px, ${top}px) } to { transform: translate(${end.left}px, ${
+                end.top}px) scale(0) }`;
             tokens['banner-fly'] = 'km-morph-fly-banner';
         }
         Object.entries(tokens).forEach(([token, value]) => {
@@ -122,9 +133,7 @@
         });
         const sheet = document.createElement('style');
         sheet.textContent = Object.entries(frames).map(
-            ([name, [edge, move]]) => (
-                `@keyframes ${name} { ${edge} { transform: ${move}; } }`
-            )
+            ([name, steps]) => `@keyframes ${name} { ${steps} }`
         ).join('\n');
         document.head.append(sheet);
         const fly = () => {
@@ -205,11 +214,10 @@
             card.classList.add('km-related__card--picked');
             named(from, true);
             root.setAttribute('data-km-morph', 'leave');
-            const { left, top, width } = from.banner
-                .getBoundingClientRect();
             save({
                 url: card.href,
-                banner: { left, top, width },
+                banner: corner(from.banner),
+                stamp: from.stamp && corner(from.stamp),
                 ...letters(from.title),
             });
         }

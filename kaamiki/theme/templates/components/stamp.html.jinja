@@ -1,0 +1,18 @@
+{#
+Stamp Template
+==============
+
+Author: Akshay Mestry <xa@mes3.dev>
+Created on: 27 November 2026
+Last updated on: 27 November 2026
+#}
+{%- macro km_stamp(km_found, km_class, km_tag="span") -%}
+    <{{ km_tag }} class="{{ km_class }}">
+        {%- if km_found.section %}<span>{{ km_found.section|e }}</span>{%- endif %}
+        {%- if km_found.section and km_found.date %}
+            <span class="km-byline__separator"
+                  aria-hidden="true"></span>
+        {%- endif %}
+        {%- if km_found.date %}<span>{{ km_found.date|e }}</span>{%- endif %}
+    </{{ km_tag }}>
+{%- endmacro -%}

@@ -228,22 +228,4 @@
     .km-page {
         --km-show-more-fade: 12svh;
     }
-
-    .km-breadcrumbs {
-        margin-top: var(--km-space-12);
-    }
-
-    .km-layout__content {
-        margin-top: var(--km-space-4);
-        padding-top: var(--km-space-4);
-    }
-
-    .km-page > .km-banner {
-        width: min(100%, calc((100svh - var(--km-banner-room)) * 1200 / 630));
-        margin-top: 0;
-    }
-
-    .km-page {
-        padding-top: var(--km-space-4);
-    }
 }
