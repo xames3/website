@@ -49,6 +49,7 @@
         let dialog = null;
         let view = null;
         let pending = 0;
+        const sealed = [];
 
         const captionOf = (image) => (
             image.closest('figure')?.querySelector('figcaption')
@@ -283,17 +284,35 @@
             dialog.shell.classList.toggle('km-enlarge--settled', still);
         };
 
+        const seal = () => {
+            if (view?.state !== 'open') return;
+            Array.from(document.body.children).forEach((node) => {
+                if (node === dialog.shell || node.inert) return;
+                node.inert = true;
+                sealed.push(node);
+            });
+        };
+        const unseal = () => {
+            if (view) return;
+            sealed.splice(0).forEach((node) => {
+                node.inert = false;
+            });
+        };
+
         function settled() {
             if (!view || view.state === 'closing') return;
             view.state = 'open';
             dialog.backdrop.style.removeProperty('backdrop-filter');
             dialog.picture.style.removeProperty('filter');
             calm(true);
+            clearTimeout(view.seal);
+            view.seal = setTimeout(() => engine.calm(seal), view.fade);
         }
 
         function finish() {
             if (!view) return;
-            const { source, trigger, inert, pushed } = view;
+            const { source, trigger, pushed } = view;
+            clearTimeout(view.seal);
             clearTimeout(view.timer);
             view.move?.cancel();
             const { shell, picture, image, caption, backdrop } = dialog;
@@ -305,9 +324,6 @@
             picture.querySelector('.km-enlarge__placeholder')?.remove();
             image.removeAttribute('src');
             source.classList.remove(HELD);
-            inert.forEach((node) => {
-                node.inert = false;
-            });
             window.removeEventListener('keydown', keys, true);
             window.removeEventListener('resize', refit);
             view = null;
@@ -315,12 +331,16 @@
                 pending += 1;
                 history.back();
             }
-            if (trigger.isConnected) {
-                trigger.focus({ preventScroll: true });
-                if (root.hasAttribute('data-km-keyboard')) rest(trigger);
-                else trigger.blur();
-            }
-            refresh();
+            engine.calm(() => {
+                if (view) return;
+                unseal();
+                if (trigger.isConnected) {
+                    trigger.focus({ preventScroll: true });
+                    if (root.hasAttribute('data-km-keyboard')) rest(trigger);
+                    else trigger.blur();
+                }
+                refresh();
+            });
         }
 
         // Going away: back to the page's picture if it's in sight, a fade
@@ -453,11 +473,11 @@
                 pushed: false,
                 moved: false,
                 fading: still,
-                inert: [],
                 drag: null,
                 move: null,
                 first: null,
                 timer: 0,
+                seal: 0,
             };
             shell.style.setProperty('--km-enlarge-fade', `${fade}ms`);
             shell.hidden = false;
@@ -485,14 +505,6 @@
                 pace(settle, engine.ease(settle));
             }
 
-            requestAnimationFrame(() => requestAnimationFrame(() => {
-                if (view?.source !== source) return;
-                Array.from(document.body.children).forEach((node) => {
-                    if (node === shell || node.inert) return;
-                    node.inert = true;
-                    view.inert.push(node);
-                });
-            }));
             source.classList.add(HELD);
             source.closest('figure')?.classList.remove('km-figure--revealed');
             window.addEventListener('keydown', keys, true);
