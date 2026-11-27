@@ -154,6 +154,8 @@
     --km-colour-list-ring: 0 0% 29%;
     --km-font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
     --km-font-mono: "Geist Mono", ui-monospace, monospace;
+    --km-font-system: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --km-font-quote: serif;
     --km-font-size-down-3: 0.75rem;
     --km-font-size-down-2: 0.85rem;
     --km-font-size-down-1: 0.95rem;
@@ -185,7 +187,6 @@
     --km-layer-sidebar: 1100;
     --km-layer-dropdown: 2000;
     --km-layer-enlarge: 3000;
-    --km-font-keys: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 .km-logo--invert {

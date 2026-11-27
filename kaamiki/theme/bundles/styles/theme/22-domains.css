@@ -20,7 +20,7 @@ em.property {
 }
 
 .option-list kbd {
-    font-family: var(--km-font-keys);
+    font-family: var(--km-font-system);
     font-weight: 700;
     line-height: 1;
     vertical-align: middle

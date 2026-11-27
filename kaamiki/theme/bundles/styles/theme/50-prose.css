@@ -394,7 +394,7 @@ blockquote {
     text-align: center;
     line-height: 1.75rem;
     font-size: var(--km-font-size-up-3);
-    font-family: -apple-system-body;
+    font-family: var(--km-font-quote);
     font-style: italic;
 
     & p.attribution {
