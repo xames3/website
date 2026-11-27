@@ -42,11 +42,13 @@
         const spot = document.elementFromPoint(window.innerWidth / 2, line);
         const anchor = spot?.closest('[data-km-code-explain]') || spot;
         const box = anchor?.getBoundingClientRect();
-        const share = box?.height ? (line - box.top) / box.height : 0;
+        const whole = anchor?.matches('[data-km-code-explain]');
+        const share = whole && box.height ? (line - box.top) / box.height : 0;
+        const mark = whole ? line : box?.top;
         list.forEach((explainer) => explainer.measure());
         if (!anchor || list.includes(held)) return;
         const after = anchor.getBoundingClientRect();
-        const drift = after.top + share * after.height - line;
+        const drift = after.top + share * after.height - mark;
         if (Math.abs(drift) > 0.5) {
             window.scrollBy({ top: drift, behavior: 'instant' });
         }
