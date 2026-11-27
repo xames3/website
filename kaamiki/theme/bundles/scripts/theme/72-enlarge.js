@@ -150,6 +150,9 @@
             close.type = 'button';
             close.setAttribute('aria-label', say('close'));
             close.append(makeIcon('close') ?? 'x');
+            shell.addEventListener('wheel', (event) => {
+                if (!event.ctrlKey) event.preventDefault();
+            }, { passive: false });
             document.body.append(shell);
             return { shell, backdrop, picture, image, caption, close };
         };
@@ -302,8 +305,6 @@
             picture.querySelector('.km-enlarge__placeholder')?.remove();
             image.removeAttribute('src');
             source.classList.remove(HELD);
-            root.classList.remove('km-document--enlarged');
-            root.style.removeProperty('--km-scrollbar');
             inert.forEach((node) => {
                 node.inert = false;
             });
@@ -386,6 +387,10 @@
             else if (event.key === 'Tab') {
                 event.preventDefault();
                 dialog.close.focus({ preventScroll: true });
+            }
+            else if (ENLARGE_SCROLL_KEYS.has(event.key)
+                && !(event.key === ' ' && event.target.closest?.('button'))) {
+                event.preventDefault();
             }
         }
 
@@ -480,11 +485,6 @@
                 pace(settle, engine.ease(settle));
             }
 
-            root.style.setProperty(
-                '--km-scrollbar',
-                `${window.innerWidth - root.clientWidth}px`,
-            );
-            root.classList.add('km-document--enlarged');
             requestAnimationFrame(() => requestAnimationFrame(() => {
                 if (view?.source !== source) return;
                 Array.from(document.body.children).forEach((node) => {

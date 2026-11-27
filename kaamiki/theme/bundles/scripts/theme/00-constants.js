@@ -4,7 +4,7 @@ Theme Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 15 October 2026
-Last updated on: 23 November 2026
+Last updated on: 27 November 2026
 */
 
 (() => {
@@ -78,6 +78,10 @@ Last updated on: 23 November 2026
     const ENLARGE_SETTLE_RATIO = 1.4;
     const ENLARGE_GREY = 'grayscale(1)';
     const ENLARGE_RING_HOLD_MS = 1500;
+    const ENLARGE_SCROLL_KEYS = new Set([
+        'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp',
+        'PageDown', 'Home', 'End', ' ',
+    ]);
     const DROPDOWN_CLOSE_DELAY_MS = 140;
     const DROPDOWN_SWITCH_DELAY_MS = 90;
     const DROPDOWN_AIM_WINDOW_MS = 120;
