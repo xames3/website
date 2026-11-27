@@ -1,0 +1,53 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1200 630"
+    preserveAspectRatio="none">
+    <filter id="a" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="28"/>
+    </filter>
+    <filter id="b" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="70"/>
+    </filter>
+    <filter id="c" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="130"/>
+    </filter>
+    <filter
+        id="s"
+        x="0"
+        y="0"
+        width="1"
+        height="1"
+        color-interpolation-filters="sRGB">
+        <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.85"
+            numOctaves="2"
+            seed="2"
+            stitchTiles="stitch"/>
+        <feColorMatrix
+            values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1"
+            result="n"/>
+        <feComposite
+            in="SourceGraphic"
+            in2="n"
+            operator="arithmetic"
+            k2="1"
+            k3="0.22"
+            k4="-0.11"/>
+        <feColorMatrix type="luminanceToAlpha"/>
+    </filter>
+    <g filter="url(#s)">
+        <rect x="-100" y="-100" width="1400" height="830" fill="#fff"/>
+        <path
+            fill="#000"
+            filter="url(#b)"
+            d="M-100 200C40 470 300 600 620 580C900 560 1080 430 1060 290C1045
+                180 930 140 830 200C960 110 1180 170 1200 320C1230 520 950 720
+                560 730C220 740 20 600 -100 470Z"/>
+        <path
+            fill="#000"
+            fill-opacity=".5"
+            filter="url(#c)"
+            d="M700 -100H1300V150C1100 120 900 40 700 -100Z"/>
+    </g>
+</svg>

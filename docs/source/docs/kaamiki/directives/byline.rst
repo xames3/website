@@ -1,10 +1,10 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 23 November 2026
+.. Last updated on: 27 November 2026
 
 :km-page-title: The byline directive
 :km-page-description: Show who wrote a page, how long it takes to read, a
-    button that copies its link and a banner above its title.
+    button that copies its link and a swirl banner above its title.
 :km-page-type: article
 :km-header-subheader: Who wrote it, and how long it takes
 :km-feedback-title: Is a byline missing something?
@@ -88,14 +88,14 @@ A banner above the title.
 -------------------------------------------------------------------------------
 
 The byline puts a banner above the page's title, and every card that links to
-the page shows it too. Without options it's a blue gradient with the first icon
-of the page's title in the middle, over faint rings and guides that fade out
-towards the edges. A title without an icon gets a banner without one.
+the page shows it too. Without options it's a blue swirl on a dark blue field,
+with the first icon of the page's title in the middle. A title without an icon
+gets a banner without one.
 
-``:shade:`` picks its colour and ``:fa-icon:`` its icon. The title's icon is
-drawn in ``kaamiki.conf.byline.icon_style``, ``regular`` unless you change it,
-when the site has a kit. A duotone style, as ``"duotone regular"``, draws it
-in two layers, the second one faded:
+``:shade:`` picks its colour, ``:swirl:`` its shape and ``:fa-icon:`` its icon.
+The title's icon is drawn in ``kaamiki.conf.byline.icon_style``, ``regular``
+unless you change it, when the site has a kit. A duotone style, as
+``"duotone regular"``, draws it in two layers, the second one faded:
 
 .. code-block:: python
 
@@ -117,7 +117,16 @@ The shades are ``blue``, ``indigo``, ``purple``, ``red``, ``orange``,
 ``yellow``, ``green``, ``teal`` and ``graphite``. Pages in one part of the site
 can share a shade, and any page can pick its own.
 
-``:banner:`` shows a picture of yours in place of the gradient. It's a full
+There are five swirls, ``1`` to ``5``. Without ``:swirl:``, the name of the
+page picks one, so a page keeps its swirl from one build to the next:
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :shade: teal
+        :swirl: 3
+
+``:banner:`` shows a picture of yours in place of the swirl. It's a full
 address or a file in your docs, which counts from the page, or from the source
 folder when it starts with ``/``. Kaamiki copies the file into the build, and a
 file that's missing or outside the source folder stops the build:
@@ -128,8 +137,8 @@ file that's missing or outside the source folder stops the build:
         :banner: /images/cover.png
 
 ``:hide-banner:`` leaves the banner off the page, and its cards still show it.
-``:shade:`` or ``:fa-icon:`` with ``:banner:``, and any of the three with
-``:hide-banner:``, stop the build.
+``:shade:``, ``:swirl:`` or ``:fa-icon:`` with ``:banner:``, and any of the
+four with ``:hide-banner:``, stop the build.
 
 .. _kaamiki-byline-languages:
 
@@ -196,17 +205,20 @@ Every option.
             to 20. It needs an avatar, from ``:avatar:`` or
             ``kaamiki.conf.site.project``.
         * - ``:banner:``
-          - A picture to show above the title in place of the gradient, a
+          - A picture to show above the title in place of the swirl, a
             ``.jpg``, ``.jpeg``, ``.png``, ``.webp``, ``.avif``, ``.gif`` or
             ``.svg``. It's a full address or a file in your docs, which counts
             from the page, or from the source folder when it starts with
             ``/``.
         * - ``:shade:``
-          - The colour of the gradient: ``blue``, ``indigo``, ``purple``,
+          - The colour of the swirl: ``blue``, ``indigo``, ``purple``,
             ``red``, ``orange``, ``yellow``, ``green``, ``teal`` or
             ``graphite``. Defaults to ``blue``.
+        * - ``:swirl:``
+          - The shape of the swirl, from ``1`` to ``5``. Defaults to one that
+            the name of the page picks, the same in each build.
         * - ``:fa-icon:``
-          - The icon in the gradient, written and checked as on a
+          - The icon in the swirl, written and checked as on a
             :doc:`button <button>`. Defaults to the first icon of the title,
             else none.
         * - ``:hide-banner:``

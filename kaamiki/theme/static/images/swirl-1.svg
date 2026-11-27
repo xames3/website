@@ -1,0 +1,91 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1200 630"
+    preserveAspectRatio="none">
+    <filter
+        id="a"
+        filterUnits="userSpaceOnUse"
+        x="-400"
+        y="-400"
+        width="2000"
+        height="1430">
+        <feGaussianBlur stdDeviation="28"/>
+    </filter>
+    <filter
+        id="b"
+        filterUnits="userSpaceOnUse"
+        x="-400"
+        y="-400"
+        width="2000"
+        height="1430">
+        <feGaussianBlur stdDeviation="70"/>
+    </filter>
+    <filter
+        id="c"
+        filterUnits="userSpaceOnUse"
+        x="-400"
+        y="-400"
+        width="2000"
+        height="1430">
+        <feGaussianBlur stdDeviation="130"/>
+    </filter>
+    <filter
+        id="s"
+        x="0"
+        y="0"
+        width="1"
+        height="1"
+        color-interpolation-filters="sRGB">
+        <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.85"
+            numOctaves="2"
+            seed="4"
+            stitchTiles="stitch"/>
+        <feColorMatrix
+            values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1"
+            result="n"/>
+        <feComposite
+            in="SourceGraphic"
+            in2="n"
+            operator="arithmetic"
+            k2="1"
+            k3="0.22"
+            k4="-0.11"/>
+        <feColorMatrix type="luminanceToAlpha"/>
+    </filter>
+    <g filter="url(#s)">
+        <rect width="1200" height="630"/>
+        <ellipse
+            cx="600"
+            cy="315"
+            rx="430"
+            ry="190"
+            fill="none"
+            stroke="#fff"
+            stroke-width="120"
+            filter="url(#b)"
+            transform="rotate(-12 600 315)"/>
+        <ellipse
+            cx="600"
+            cy="315"
+            rx="430"
+            ry="190"
+            fill="none"
+            stroke="#fff"
+            stroke-opacity=".5"
+            stroke-width="18"
+            filter="url(#a)"
+            transform="rotate(-12 600 315)"/>
+        <path
+            fill="#000"
+            fill-opacity=".85"
+            filter="url(#c)"
+            d="M760 -100H1300V330C1100 260 900 120 760 -100Z"/>
+        <path
+            fill="#fff"
+            fill-opacity=".35"
+            filter="url(#c)"
+            d="M-100 730V420C100 520 300 600 500 730Z"/>
+    </g>
+</svg>
