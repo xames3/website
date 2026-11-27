@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 11 November 2026
-.. Last updated on: 23 November 2026
+.. Last updated on: 27 November 2026
 
 :km-page-title: How Kaamiki moves
 :km-page-description: Every animation in Kaamiki, shown working in one
@@ -48,8 +48,9 @@ for less motion gets the calmer version. Both are on the :ref:`settings page
 Arriving on a page.
 -------------------------------------------------------------------------------
 
-When a page loads it comes in once and in order: the banner, the breadcrumbs,
-the title, the lead, the byline and then each section below it. Nothing
+When a page loads it comes in once and in order: the breadcrumbs, the part of
+the site and the day it was created, the title, the lead, the byline and then
+each section below it. Nothing
 animates again as you scroll, so the page never moves under you while you
 read. Reload this one and watch the top of it:
 

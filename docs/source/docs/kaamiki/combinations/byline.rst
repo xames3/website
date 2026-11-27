@@ -81,7 +81,7 @@ The options, one at a time.
     * - All three ``:hide-*:``
       - Leaves only the name and the picture.
     * - ``:shade:``
-      - The colour of the banner above the title. Blue without it.
+      - The colour of the banner on the cards. Blue without it.
     * - ``:swirl:``
       - The shape of the swirl, ``1`` to ``5``. Without it, the name of the
         page picks one.
@@ -90,8 +90,6 @@ The options, one at a time.
     * - ``:banner:``
       - A picture of yours in place of the swirl, an address or a file in
         your docs.
-    * - ``:hide-banner:``
-      - Leaves the banner off the page.
     * - ``:class:``
       - Extra classes.
 
@@ -209,13 +207,6 @@ All three ``:hide-*:``
 
     .. byline:: @xames3
         :banner: https://i.imgur.com/RLsdjyG.jpeg
-
-``:hide-banner:``
-
-.. code-block:: rst
-
-    .. byline:: @xames3
-        :hide-banner:
 
 ``:class:``
 

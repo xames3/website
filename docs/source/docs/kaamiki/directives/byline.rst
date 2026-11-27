@@ -4,7 +4,7 @@
 
 :km-page-title: The byline directive
 :km-page-description: Show who wrote a page, how long it takes to read, a
-    button that copies its link and a swirl banner above its title.
+    button that copies its link and the banner of its cards.
 :km-page-type: article
 :km-header-subheader: Who wrote it, and how long it takes
 :km-feedback-title: Is a byline missing something?
@@ -70,8 +70,7 @@ The directive also tells the rest of the page about itself:
 - The name becomes the page's author, which is written into the ``author`` tag
   and, for an ``article``, into the link preview. A ``.. Author:`` comment at
   the top of the file wins when it names someone.
-- Its banner goes above the page's title and on every card that links to the
-  page.
+- Its banner goes on every card that links to the page.
 - The reading time counts the prose on the page, using
   ``kaamiki.conf.site.words_per_minute``, and a set of tabs counts as its
   longest tab. It's never shown as less than one minute.
@@ -84,11 +83,11 @@ The directive also tells the rest of the page about itself:
 .. _kaamiki-byline-banner:
 
 -------------------------------------------------------------------------------
-A banner above the title.
+A banner for its cards.
 -------------------------------------------------------------------------------
 
-The byline puts a banner above the page's title, and every card that links to
-the page shows it too. Without options it's a blue swirl on a dark blue field,
+The byline gives the page a banner, and every card that links to the page
+shows it. Without options it's a blue swirl on a dark blue field,
 with the first icon of the page's title in the middle. A title without an icon
 gets a banner without one.
 
@@ -136,9 +135,7 @@ file that's missing or outside the source folder stops the build:
     .. byline:: @xames3
         :banner: /images/cover.png
 
-``:hide-banner:`` leaves the banner off the page, and its cards still show it.
-``:shade:``, ``:swirl:`` or ``:fa-icon:`` with ``:banner:``, and any of the
-four with ``:hide-banner:``, stop the build.
+``:shade:``, ``:swirl:`` or ``:fa-icon:`` with ``:banner:`` stop the build.
 
 .. _kaamiki-byline-languages:
 
@@ -205,7 +202,7 @@ Every option.
             to 20. It needs an avatar, from ``:avatar:`` or
             ``kaamiki.conf.site.project``.
         * - ``:banner:``
-          - A picture to show above the title in place of the swirl, a
+          - A picture to show on the cards in place of the swirl, a
             ``.jpg``, ``.jpeg``, ``.png``, ``.webp``, ``.avif``, ``.gif`` or
             ``.svg``. It's a full address or a file in your docs, which counts
             from the page, or from the source folder when it starts with
@@ -221,8 +218,6 @@ Every option.
           - The icon in the swirl, written and checked as on a
             :doc:`button <button>`. Defaults to the first icon of the title,
             else none.
-        * - ``:hide-banner:``
-          - Leaves the banner off the page, which shows it without it.
         * - ``:align:``
           - Where the byline sits: ``left``, ``center`` or ``right``. Only
             ``left`` puts the author, the reading time, the language (when
