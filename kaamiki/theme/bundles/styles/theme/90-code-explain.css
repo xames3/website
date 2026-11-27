@@ -32,7 +32,7 @@
 }
 
 .km-code-explain__frame:has(:focus-visible) .km-code-explain__corner,
-.km-code-explain__corner:has([data-km-copied]) {
+.km-code-explain__corner:has(> .km-code-explain__copy[data-km-copied]) {
     opacity: 1;
 }
 
