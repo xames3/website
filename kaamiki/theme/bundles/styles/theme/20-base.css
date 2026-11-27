@@ -12,14 +12,15 @@
 }
 
 .km-page__content :where(hr) {
-    margin-bottom: var(--km-space-4);
-    margin-top: 1rem
+    border: 1px solid hsl(var(--km-colour-border) / 0.5);
+    margin-bottom: var(--km-space-8);
+    margin-top: var(--km-space-8)
 }
 
 @media (width >= 768px) {
     .km-page__content :where(hr) {
-        margin-bottom: var(--km-space-6);
-        margin-top: 1.5rem
+        margin-bottom: var(--km-space-12);
+        margin-top: var(--km-space-12);
     }
 }
 
