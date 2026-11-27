@@ -93,7 +93,7 @@
 }
 
 .km-page__content .km-columns .km-columns__column
-    > :has(+ :is([class*="highlight-"], .literal-block-wrapper)) {
+    > :has(+ .notranslate > .highlight, + .literal-block-wrapper) {
     margin-bottom: 0;
 }
 
