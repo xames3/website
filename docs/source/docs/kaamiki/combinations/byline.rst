@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 30 October 2026
-.. Last updated on: 23 November 2026
+.. Last updated on: 27 November 2026
 
 :km-page-title: Bylines, option by option
 :km-page-description: Every option of the byline directive, with icons and
@@ -82,10 +82,13 @@ The options, one at a time.
       - Leaves only the name and the picture.
     * - ``:shade:``
       - The colour of the banner above the title. Blue without it.
+    * - ``:swirl:``
+      - The shape of the swirl, ``1`` to ``5``. Without it, the name of the
+        page picks one.
     * - ``:fa-icon:``
       - The icon in the banner. The title's icon without it, else none.
     * - ``:banner:``
-      - A picture of yours in place of the gradient, an address or a file in
+      - A picture of yours in place of the swirl, an address or a file in
         your docs.
     * - ``:hide-banner:``
       - Leaves the banner off the page.
@@ -185,6 +188,13 @@ All three ``:hide-*:``
 
     .. byline:: @xames3
         :shade: green
+
+``:swirl:``
+
+.. code-block:: rst
+
+    .. byline:: @xames3
+        :swirl: 4
 
 ``:fa-icon:``
 

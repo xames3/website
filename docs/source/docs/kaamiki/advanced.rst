@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 28 October 2026
-.. Last updated on: 23 November 2026
+.. Last updated on: 27 November 2026
 
 :km-page-title: Advanced Kaamiki
 :km-page-description: What a Sphinx author who wants more control needs to
@@ -123,9 +123,9 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             the theme is one of them, so a change to a step changes the rhythm
             of the whole site and scales with the reader's text size.
         * - ``--km-banner-``
-          - The three hues of the gradient of the banner above a title
-            (``--km-banner-shade``, ``--km-banner-before`` and
-            ``--km-banner-after``), which each ``km-banner--*`` shade sets.
+          - The banner above a title: ``--km-banner-shade``, the hue that
+            each ``km-banner--*`` shade sets, and ``--km-banner-swirl``, the
+            mask that each ``km-banner--swirl-*`` sets.
         * - ``--km-backdrop-``
           - The blur and tint behind the phone's menu.
         * - ``--km-radius-``
