@@ -40,6 +40,12 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-lift {
+    25% {
+        scale: 1.03;
+    }
+}
+
 @keyframes km-morph-recede {
     to {
         scale: 0.96;
@@ -72,6 +78,12 @@ its content can be pictured. A page reached from the history
 
     :root[data-km-morph="leave"] .km-layout__content {
         view-transition-name: none;
+    }
+
+    ::view-transition-image-pair(km-morph-banner),
+    ::view-transition-image-pair(km-morph-title) {
+        animation: km-morph-lift var(--km-motion-morph) var(--km-ease-lift)
+            both;
     }
 
     ::view-transition-group(km-morph-banner),
