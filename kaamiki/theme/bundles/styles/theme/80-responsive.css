@@ -221,7 +221,7 @@
         padding-right: 0;
     }
 
-    :where(html:not(:has(.km-layout--nav-in-header))) :is(
+    :where(.km-body:not(.km-body--nav-in-header)) :is(
         .km-header__menu-toggle,
         .km-sidebar__close,
         .km-sidebar__brand,
@@ -287,7 +287,7 @@ sidebar is the navigation from 768px and the header holds no list.
             }
         }
 
-        &:has(.km-layout--nav-in-header) :is(
+        & .km-body--nav-in-header :is(
             .km-header__menu-toggle,
             .km-sidebar__close,
             .km-sidebar__brand,
@@ -340,7 +340,7 @@ sidebar is the navigation from 768px and the header holds no list.
             }
         }
 
-        &:has(.km-layout--nav-in-header) :is(
+        & .km-body--nav-in-header :is(
             .km-header__menu-toggle,
             .km-sidebar__close,
             .km-sidebar__brand,

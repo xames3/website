@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 07 April 2026
-.. Last updated on: 22 November 2026
+.. Last updated on: 24 November 2026
 
 :km-page-title: Year one of teaching
 :km-page-description: Lessons I didn't plan on teaching, but I re-learnt them
@@ -15,6 +15,8 @@
 
 .. _academia-year-one-of-teaching:
 
+===============================================================================
+:fa-icon:duotone:`calendar-users` Year one of teaching
 ===============================================================================
 
 .. rst-class:: km-text-lead
@@ -121,7 +123,7 @@ effectively from both my successes and failures.
 .. _a-year-shaped-by-people:
 
 -------------------------------------------------------------------------------
-A year shaped by :roll:`students|mentors|friends|people`.
+A year shaped by :roll:`students.|mentors.|friends.|people.`
 -------------------------------------------------------------------------------
 
 Again, looking back, I'm seeing my lectures and classrooms in a much different

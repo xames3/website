@@ -289,20 +289,21 @@
     }
 }
 
-.km-block__title+p,
-.km-block__subheader+p {
+.km-block__title+p {
     margin-top: var(--km-space-2);
 }
 
 .km-block__body:has(> .km-block__subheader) {
     display: flex;
     flex-direction: column;
+}
 
-    & > .km-block__subheader:not(:has(+ .km-repository)) {
+.km-block__body > .km-block__subheader {
+    &:not(:has(+ .km-repository)) {
         margin-bottom: var(--km-space-6);
     }
 
-    & > .km-block__subheader + * {
+    & + * {
         margin-top: auto;
     }
 }

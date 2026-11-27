@@ -390,10 +390,12 @@
 blockquote {
     margin-bottom: var(--km-space-6);
     margin-top: var(--km-space-6);
-    font-style: normal;
     padding: var(--km-space-20) var(--km-space-12);
-    line-height: 1.5rem;
     text-align: center;
+    line-height: 1.75rem;
+    font-size: var(--km-font-size-up-3);
+    font-family: -apple-system-body;
+    font-style: italic;
 
     & p.attribution {
         text-align: right;
@@ -404,7 +406,6 @@ blockquote {
 
         & em {
             font-weight: 400;
-            font-style: normal;
             color: hsl(var(--km-colour-secondary));
         }
     }

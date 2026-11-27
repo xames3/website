@@ -4,7 +4,7 @@ Base Layout Template
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 21 February 2025
-Last updated on: 23 November 2026
+Last updated on: 27 November 2026
 #}
 {%- from "components/helpers.html.jinja" import km_glyph, km_tab with context %}
 {%- from "components/logo.html.jinja" import km_logo, km_title with context -%}
@@ -176,6 +176,7 @@ Last updated on: 23 November 2026
 {%- set km_top = kaamiki.toctree.in_header|tobool -%}
 {%- set km_icons = kaamiki.site.header_buttons|tobool -%}
 {%- set km_nested = " km-layout--nav-in-header" if km_top else "" -%}
+{%- set km_body = " km-body--nav-in-header" if km_top else "" -%}
 {%- set km_pages = "components/previous_next_pages.html.jinja" -%}
 {%- set km_lang_attr = (language or "en")|replace("_", "-") -%}
 {%- set km_image = kaamiki.site.open_graph and kaamiki.site.open_graph.image -%}
@@ -430,7 +431,7 @@ Last updated on: 23 November 2026
         {%- block extrahead %}
         {%- endblock extrahead %}
     </head>
-    <body class="km-body">
+    <body class="km-body{{ km_body }}">
         {%- if km_menu %}
             <div class="km-sidebar__backdrop"></div>
         {%- endif %}

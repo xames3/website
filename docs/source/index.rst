@@ -27,10 +27,6 @@
     :avatar: https://i.imgur.com/hUhxigb.jpeg
     :target: https://github.com/xames3
 
-.. rst-class:: am-greeting
-
-    |greeting|
-
 I'm Akshay, an educator, engineer, avid cook and currently an Assistant
 Professor at `National Louis University`_. Before getting into academia, I
 worked at consulting firms, corporate product companies and startups. This
@@ -89,7 +85,7 @@ actually work under the hood.
     .. column::
         :span: 2
 
-        .. rubric:: Not on social media, but let's connect
+        .. rubric:: Let's chat.
 
     .. column::
         :span: auto
@@ -161,6 +157,7 @@ can read the long versions in future blogs.
     :titlesonly:
 
     academia/year-one-of-teaching
+    academia/outcome
 
 .. toctree::
     :caption: Journal
