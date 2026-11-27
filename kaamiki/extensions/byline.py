@@ -4,7 +4,7 @@ Byline Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 22 November 2026
+Last updated on: 27 November 2026
 
 A `byline` directive that draws the byline below the title of a page::
 
@@ -13,6 +13,7 @@ A `byline` directive that draws the byline below the title of a page::
        :target: https://github.com/xames3
        :avatar-size: 24
        :shade: orange
+       :swirl: 3
 
 Put it on the page itself, one time. An `only` is part of the page. A
 container and the content of a different directive are not.
@@ -47,9 +48,11 @@ from kaamiki.extensions.utils import values
 from kaamiki.extensions.utils import worded
 from kaamiki.extensions.utils.banner import SHADE
 from kaamiki.extensions.utils.banner import SHADES
+from kaamiki.extensions.utils.banner import SWIRLS
 from kaamiki.extensions.utils.banner import Banner
 from kaamiki.extensions.utils.banner import banners
 from kaamiki.extensions.utils.banner import source
+from kaamiki.extensions.utils.banner import swirl
 from kaamiki.extensions.utils.banner import title_style
 from kaamiki.extensions.utils.context import first_glyph
 from kaamiki.extensions.utils.icons import Icons
@@ -108,11 +111,14 @@ class Byline(KaamikiDirective, motion=True):
           pixels, from 16 to 64. The default is 20.
         - `banner`: A picture above the title: a URL, or a file
           relative to the page, or to the source directory when it
-          starts with a `/`. Without it, the banner is a gradient in
+          starts with a `/`. Without it, the banner is a swirl in
           `shade` with the icon.
         - `shade`: The colour of the gradient, one of `blue`,
           `indigo`, `purple`, `red`, `orange`, `yellow`, `green`,
           `teal` or `graphite`. The default is `blue`.
+        - `swirl`: The shape of the swirl, from `1` to `5`. The
+          default comes from the name of the page, the same in each
+          build.
         - `fa-icon`: A Font Awesome icon for the gradient, as on a
           button. The default is the first icon of the title, else
           no icon.
@@ -145,6 +151,7 @@ class Byline(KaamikiDirective, motion=True):
     avatar_size = Option(checks.integer(*map(int, BOUNDS["avatar_size"])))
     banner = Option(checks.picture)
     shade = Option(checks.word(*SHADES), default=SHADE)
+    swirl = Option(checks.word(*SWIRLS))
     fa_icon = Option(checks.icon)
     hide_banner = Option(rst.directives.flag)
     align = Option(checks.word(*ALIGNMENTS), default="left")
@@ -167,7 +174,9 @@ class Byline(KaamikiDirective, motion=True):
         ):
             self.fail(":avatar-size: needs an avatar")
         given = [
-            _ for _ in ("banner", "shade", "fa-icon") if _ in self.options
+            _
+            for _ in ("banner", "shade", "swirl", "fa-icon")
+            if _ in self.options
         ]
         if self.hide_banner and given:
             self.fail(f":{given[0]}: not allowed with :hide-banner:")
@@ -209,8 +218,13 @@ class Byline(KaamikiDirective, motion=True):
                 picture = source(self.env, picture)
             except ValueError as error:
                 self.fail(f":banner: {error}")
-        banners(self.env)[self.env.docname] = Banner(
-            self.shade, icon, picture, self.hide_banner
+        docname = self.env.docname
+        banners(self.env)[docname] = Banner(
+            self.shade,
+            icon,
+            picture,
+            self.hide_banner,
+            self.swirl or swirl(docname),
         )
         node = self.locate(self.Node("", words, **options))
         self.add_name(node)

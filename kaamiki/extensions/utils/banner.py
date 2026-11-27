@@ -4,9 +4,9 @@ Banner
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 November 2026
-Last updated on: 22 November 2026
+Last updated on: 27 November 2026
 
-The banner of a page: a picture, or a gradient in a shade with the icon
+The banner of a page: a picture, or a swirl in a shade with the icon
 of the page. The byline sets it above the title, and the cards of the
 related pages show it.
 """
@@ -16,6 +16,7 @@ from __future__ import annotations
 import os
 import os.path as p
 import typing as t
+import zlib
 
 from sphinx.util.osutil import copyfile
 
@@ -44,6 +45,7 @@ SHADES: t.Final[tuple[str, ...]] = (
     "graphite",
 )
 SHADE: t.Final[str] = "blue"
+SWIRLS: t.Final[tuple[str, ...]] = ("1", "2", "3", "4", "5")
 FOLDER: t.Final[str] = "_images/km-banners"
 SWAP: t.Final[str] = "fa-swap-opacity"
 
@@ -55,6 +57,7 @@ class Banner(t.NamedTuple):
     icon: str = ""
     picture: str = ""
     hidden: bool = False
+    swirl: str = SWIRLS[0]
 
     @property
     def local(self) -> bool:
@@ -100,6 +103,15 @@ class Banner(t.NamedTuple):
         if not self.local:
             return self
         return self._replace(picture=pathto(f"{FOLDER}/{self.picture}", 1))
+
+
+def swirl(docname: str) -> str:
+    """Find the swirl of a page that names none.
+
+    :param docname: The page.
+    :return: One of `SWIRLS`, the same for the page in each build.
+    """
+    return SWIRLS[zlib.crc32(docname.encode()) % len(SWIRLS)]
 
 
 def source(env: BuildEnvironment, written: str) -> str:
@@ -153,11 +165,11 @@ def banner(env: BuildEnvironment, docname: str, glyph: str = "") -> Banner:
     :param env: The build environment.
     :param docname: The page.
     :param glyph: The classes of the first icon of its title.
-    :return: The banner of its byline, else a banner in `SHADE`. The
-        icon of the title, in `title_style`, fills a banner without an
-        icon.
+    :return: The banner of its byline, else a banner in `SHADE` with
+        the `swirl` of the page. The icon of the title, in
+        `title_style`, fills a banner without an icon.
     """
-    found = banners(env).get(docname, Banner())
+    found = banners(env).get(docname) or Banner(swirl=swirl(docname))
     return found.titled(glyph, title_style(env.config))
 
 
