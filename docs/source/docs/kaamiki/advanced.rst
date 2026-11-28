@@ -123,9 +123,9 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             the theme is one of them, so a change to a step changes the rhythm
             of the whole site and scales with the reader's text size.
         * - ``--km-banner-``
-          - The banner above a title: ``--km-banner-shade``, the hue that
-            each ``km-banner--*`` shade sets, and ``--km-banner-swirl``, the
-            mask that each ``km-banner--swirl-*`` sets.
+          - The banner of a related card: ``--km-banner-shade``, the hue
+            that each ``km-banner--*`` shade sets, and ``--km-banner-swirl``,
+            the mask that each ``km-banner--swirl-*`` sets.
         * - ``--km-backdrop-``
           - The blur and tint behind the phone's menu.
         * - ``--km-radius-``
@@ -152,10 +152,13 @@ with other values. ``color-scheme`` follows ``kaamiki.conf.mode``, so it's
             fade the new page's first thing starts (0.35 of
             ``--km-motion-enter``), so there's something to see as the old
             content goes. A related card that flies into the page skips
-            nothing, because its title lands first. ``data-km-arrival`` on the
-            root says how the reader came: ``link`` from another page of the
-            site keeps the header and the footer still, and ``history`` (Back
-            or Forward) shows the page as it is.
+            nothing: its title grows into the page's title, the part of the
+            site and the date fly with it, its banner shrinks and fades to
+            its top-left corner, and the breadcrumbs rise in as they land.
+            ``data-km-arrival`` on the root says how the reader came:
+            ``link`` from another page of the site keeps the header and the
+            footer still, and ``history`` (Back or Forward) shows the page as
+            it is.
         * - ``--km-code-``
           - The padding, line height and caption bar of code blocks.
         * - ``--km-layer-``

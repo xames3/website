@@ -53,8 +53,6 @@ from kaamiki.extensions.utils.banner import Banner
 from kaamiki.extensions.utils.banner import banners
 from kaamiki.extensions.utils.banner import source
 from kaamiki.extensions.utils.banner import swirl
-from kaamiki.extensions.utils.banner import title_style
-from kaamiki.extensions.utils.context import first_glyph
 from kaamiki.extensions.utils.icons import Icons
 from kaamiki.extensions.utils.settings import ALIGNMENTS
 from kaamiki.extensions.utils.settings import BOUNDS
@@ -62,7 +60,6 @@ from kaamiki.extensions.utils.settings import NAME
 
 if t.TYPE_CHECKING:
     from sphinx.application import Sphinx
-    from sphinx.builders.html import StandaloneHTMLBuilder
     from sphinx.writers.html import HTMLTranslator
 
 template: t.Final[str] = "directives/byline.html.jinja"
@@ -109,20 +106,19 @@ class Byline(KaamikiDirective, motion=True):
           A path starts at the top of the site, as for `avatar`.
         - `avatar-size`: The width and height of the picture in
           pixels, from 16 to 64. The default is 20.
-        - `banner`: A picture above the title: a URL, or a file
-          relative to the page, or to the source directory when it
-          starts with a `/`. Without it, the banner is a swirl in
-          `shade` with the icon.
-        - `shade`: The colour of the gradient, one of `blue`,
+        - `banner`: A picture for the cards that link to the page:
+          a URL, or a file relative to the page, or to the source
+          directory when it starts with a `/`. Without it, the
+          banner is a swirl in `shade` with the icon.
+        - `shade`: The colour of the swirl, one of `blue`,
           `indigo`, `purple`, `red`, `orange`, `yellow`, `green`,
           `teal` or `graphite`. The default is `blue`.
         - `swirl`: The shape of the swirl, from `1` to `5`. The
           default comes from the name of the page, the same in each
           build.
-        - `fa-icon`: A Font Awesome icon for the gradient, as on a
+        - `fa-icon`: A Font Awesome icon for the swirl, as on a
           button. The default is the first icon of the title, else
           no icon.
-        - `hide-banner`: Do not show the banner.
         - `align`: Where the byline is, `left`, `center` or
           `right`. Only `left` puts the author, the reading time,
           the language and the copy button in one row. On a phone,
@@ -153,7 +149,6 @@ class Byline(KaamikiDirective, motion=True):
     shade = Option(checks.word(*SHADES), default=SHADE)
     swirl = Option(checks.word(*SWIRLS))
     fa_icon = Option(checks.icon)
-    hide_banner = Option(rst.directives.flag)
     align = Option(checks.word(*ALIGNMENTS), default="left")
     hide_reading_time = Option(rst.directives.flag)
     hide_copy_url = Option(rst.directives.flag)
@@ -178,8 +173,6 @@ class Byline(KaamikiDirective, motion=True):
             for _ in ("banner", "shade", "swirl", "fa-icon")
             if _ in self.options
         ]
-        if self.hide_banner and given:
-            self.fail(f":{given[0]}: not allowed with :hide-banner:")
         if self.banner and len(given) > 1:
             self.fail(f":{given[1]}: not allowed with :banner:")
 
@@ -223,7 +216,6 @@ class Byline(KaamikiDirective, motion=True):
             self.shade,
             icon,
             picture,
-            self.hide_banner,
             self.swirl or swirl(docname),
         )
         node = self.locate(self.Node("", words, **options))
@@ -272,31 +264,20 @@ def html_page_context(
     context: dict[str, t.Any],
     doctree: nodes.document | None,
 ) -> None:
-    """Name the author of the page and find its banner.
+    """Name the author of the page.
 
     :param app: The Sphinx application instance. The `.. Author:`
         comment or the byline comes first, then the author of the
-        project. `kaamiki.page.banner` is the banner of the byline,
-        or `None` without a byline or with `:hide-banner:`.
+        project.
     :param pagename: The page that is written.
     :param templatename: The template that writes it.
     :param context: The context of the page, changed in place.
     :param doctree: The resolved doctree, or `None` for a generated
         page.
     """
-    del templatename, doctree
+    del app, pagename, templatename, doctree
     meta: dict[str, str] = context.get("meta") or {}
     found = context[NAME]
     found["page.author"] = meta.get("author") or found.site.project.get(
         "author"
     )
-    held = banners(app.env).get(pagename)
-    found["page.banner"] = None
-    if held and not held.hidden:
-        builder = t.cast("StandaloneHTMLBuilder", app.builder)
-        title = builder.render_partial(app.env.titles[pagename])
-        glyph = first_glyph(title.get("title", ""))
-        drawn = held.titled(glyph, title_style(app.config)).linked(
-            context["pathto"]
-        )
-        found["page.banner"] = drawn._asdict()

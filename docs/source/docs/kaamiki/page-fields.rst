@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 23 November 2026
+.. Last updated on: 27 November 2026
 
 :km-page-title: Kaamiki page fields
 :km-page-description: The fields you can put at the top of a page to change its
@@ -136,13 +136,14 @@ keeping:
     .. Created on: 19 October 2026
     .. Last updated on: 19 October 2026
 
-They give the page its author and the dates in its link preview and its "Last
-updated" line. Any of them you leave out is filled in for you. A missing date
-comes from git, from the first commit for *created* and the latest for
-*updated*, and then from the day you build. A missing author comes from the
-page's ``byline`` directive and then from your ``kaamiki.conf.site.project``
-setting. Only the comments before the first line of the page count, so a date
-quoted further down is ignored.
+They give the page its author and the dates in its link preview, above its
+title and in its "Last updated" line. Above the title, the day it was created
+follows the part of the site it's in, as on its cards. Any of them you leave
+out is filled in for you. A missing date comes from git, from the first commit
+for *created* and the latest for *updated*, and then from the day you build.
+A missing author comes from the page's ``byline`` directive and then from your
+``kaamiki.conf.site.project`` setting. Only the comments before the first line
+of the page count, so a date quoted further down is ignored.
 
 The dates follow ``kaamiki.conf.site.last_updated_fmt``, then
 ``html_last_updated_fmt``, and without either ``%d %B %Y``, as above. Month and

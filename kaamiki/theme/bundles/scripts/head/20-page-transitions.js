@@ -25,13 +25,16 @@
     const HOLD_MS = 600;
     const STEADY_MS = 20;
     const STEADY_FRAMES = 3;
+    const PEAK_HEIGHT = 1.15;
+    const PEAK_IN_GLIDE = 22 / 38;
+    const HANDOVER = 0.7;
     let started = false;
     document.addEventListener('DOMContentLoaded', () => {
         started = true;
     }, { once: true });
     const PARTS = {
-        banner: ['.km-related__banner', '.km-page > .km-banner'],
-        crumbs: [null, '.km-breadcrumbs:not(.km-breadcrumbs--empty)'],
+        banner: ['.km-related__banner', null],
+        stamp: ['.km-related__meta', '.km-page__stamp'],
         title: ['.km-related__title', '#km-content > section > h1'],
     };
     let picked = null;
@@ -62,9 +65,40 @@
             left: box.left,
             top: box.top,
             width: box.width,
+            height: box.height,
             x: text.left - box.left,
             y: text.top - box.top,
         };
+    }
+
+    function glided(at) {
+        const effect = new KeyframeEffect(null, null, {
+            duration: 1,
+            fill: 'both',
+            easing: getComputedStyle(root)
+                .getPropertyValue('--km-ease-morph-glide').trim(),
+        });
+        new Animation(effect).currentTime = at;
+        return effect.getComputedTiming().progress;
+    }
+
+    function handover() {
+        const bounce = document.getAnimations().find(
+            (animation) => animation.animationName === 'km-morph-bounce'
+        );
+        if (!bounce) return;
+        const { endTime } = bounce.effect.getComputedTiming();
+        const mark = new Animation(
+            new KeyframeEffect(null, null, endTime * HANDOVER),
+        );
+        mark.currentTime = bounce.currentTime ?? 0;
+        mark.play();
+        mark.finished.then(release, () => {});
+    }
+
+    function corner(node) {
+        const { left, top } = node.getBoundingClientRect();
+        return { left, top };
     }
 
     function named(nodes, on) {
@@ -97,24 +131,33 @@
         if (to.title) {
             const end = letters(to.title);
             const grow = end.size / morph.size;
+            const start = 1 / grow;
             const shift = (a, b, scale) => `translate(${a.x - b.x * scale}px, `
                 + `${a.y - b.y * scale}px) scale(${scale})`;
-            frames['km-morph-shrink'] = ['from', shift(morph, end, 1 / grow)];
-            frames['km-morph-fly-title'] = [
-                'from',
-                `translate(${morph.left}px, ${morph.top}px)`,
-            ];
+            frames['km-morph-shrink'] = `from { transform: ${
+                shift(morph, end, start)} }`;
+            frames['km-morph-fly-title'] = `from { transform: translate(${
+                morph.left}px, ${morph.top}px) }`;
             tokens.from = `${morph.width}px`;
             tokens.to = `${end.width}px`;
+            tokens.tall = `${end.height}px`;
+            tokens.peak = `${PEAK_HEIGHT
+                / (start + (1 - start) * glided(PEAK_IN_GLIDE))}`;
             tokens['title-fly'] = 'km-morph-fly-title';
         }
-        if (to.banner && morph.banner) {
-            const { left, top, width } = morph.banner;
-            const scale = width / to.banner.getBoundingClientRect().width;
-            frames['km-morph-fly-banner'] = [
-                'from',
-                `translate(${left}px, ${top}px) scale(${scale})`,
-            ];
+        if (to.stamp && morph.stamp) {
+            const { left, top } = morph.stamp;
+            frames['km-morph-fly-stamp'] = `from { transform: translate(${
+                left}px, ${top}px) }`;
+            tokens['stamp-fly'] = 'km-morph-fly-stamp';
+        }
+        const target = to.stamp ?? to.title;
+        if (target && morph.banner) {
+            const { left, top } = morph.banner;
+            const end = corner(target);
+            frames['km-morph-fly-banner'] = `from { transform: translate(${
+                left}px, ${top}px) } to { transform: translate(${end.left}px, ${
+                end.top}px) scale(0) }`;
             tokens['banner-fly'] = 'km-morph-fly-banner';
         }
         Object.entries(tokens).forEach(([token, value]) => {
@@ -122,15 +165,13 @@
         });
         const sheet = document.createElement('style');
         sheet.textContent = Object.entries(frames).map(
-            ([name, [edge, move]]) => (
-                `@keyframes ${name} { ${edge} { transform: ${move}; } }`
-            )
+            ([name, steps]) => `@keyframes ${name} { ${steps} }`
         ).join('\n');
         document.head.append(sheet);
         const fly = () => {
-            if (root.hasAttribute('data-km-morph')) {
-                root.setAttribute('data-km-morph', 'fly');
-            }
+            if (root.getAttribute('data-km-morph') !== 'arrive') return;
+            root.setAttribute('data-km-morph', 'fly');
+            requestAnimationFrame(handover);
         };
         let last = 0;
         let steady = 0;
@@ -205,11 +246,10 @@
             card.classList.add('km-related__card--picked');
             named(from, true);
             root.setAttribute('data-km-morph', 'leave');
-            const { left, top, width } = from.banner
-                .getBoundingClientRect();
             save({
                 url: card.href,
-                banner: { left, top, width },
+                banner: corner(from.banner),
+                stamp: from.stamp && corner(from.stamp),
                 ...letters(from.title),
             });
         }

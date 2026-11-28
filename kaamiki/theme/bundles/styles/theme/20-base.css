@@ -260,7 +260,7 @@ pre span.linenos {
     border-radius: 0.3rem;
     color: hsl(var(--km-colour-text-baseline));
     display: inline-flex;
-    font-family: var(--km-font-keys);
+    font-family: var(--km-font-system);
     font-size: var(--km-font-size-down-1);
     font-weight: 500;
     height: 2.35rem;

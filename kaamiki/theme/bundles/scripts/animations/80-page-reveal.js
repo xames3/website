@@ -12,7 +12,7 @@
 
     function kept(node) {
         if (morphed && node.matches(
-            `.km-page > .km-banner, .km-breadcrumbs, ${TITLE_HEADING}`,
+            `.km-page__stamp, ${TITLE_HEADING}`,
         )) return true;
         return arrival() === 'link' && node.matches('.km-header, .km-footer');
     }
@@ -22,8 +22,8 @@
         if (!heading) return [];
         return [
             document.querySelector('.km-header'),
-            document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
+            document.querySelector('.km-page__stamp'),
             heading,
             ...Array.from(heading.parentElement.children).filter((child) => (
                 child.matches('.km-text--lead, .km-byline')
@@ -38,8 +38,8 @@
     function bodyBlocks(title) {
         return [
             document.querySelector('.km-header'),
-            document.querySelector('.km-page > .km-banner'),
             document.querySelector('.km-breadcrumbs'),
+            document.querySelector('.km-page__stamp'),
             ...revealBlocks(document.getElementById('km-content')),
             document.querySelector('.km-feedback-section'),
             document.querySelector('.km-page__updated'),
@@ -122,10 +122,14 @@
             : 0;
         const skip = linked && !morphed ? TIMING.titleSkip() : 0;
         const step = TIMING.titleStep();
-        title.forEach((part) => enter(part, ENTRANCE_FRAMES.title)
-            .effect.updateTiming({
-                delay: step * (titleStep(part) - lead) - skip,
-            }));
+        const rank = morphed
+            ? (part) => title.indexOf(part)
+            : (part) => titleStep(part) - lead;
+        const frames = (part) => (morphed && part.matches('.km-breadcrumbs')
+            ? ENTRANCE_FRAMES.rise
+            : ENTRANCE_FRAMES.title);
+        title.forEach((part) => enter(part, frames(part))
+            .effect.updateTiming({ delay: step * rank(part) - skip }));
         const blocks = new Map(bodyBlocks(title).map((block) => [block, [
             enter(block, ENTRANCE_FRAMES.block),
             ...rails(block).map((rail) => enter(...rail)),
@@ -138,7 +142,9 @@
             blocks,
             fold: Math.max(window.innerHeight, screenHeight()),
             hold: title.length
-                ? Math.max(0, step * (TITLE_ORDER.length - lead) - skip)
+                ? Math.max(0, step * (morphed
+                    ? title.length
+                    : TITLE_ORDER.length - lead) - skip)
                 : 0,
         };
     }

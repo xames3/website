@@ -46,27 +46,68 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-bounce {
+    from {
+        scale: 1;
+        animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+    }
+
+    22% {
+        scale: 0.99 var(--km-morph-peak, 1.25);
+    }
+
+    38% {
+        scale: 1.01 0.93;
+    }
+
+    54% {
+        scale: 0.993 1.07;
+    }
+
+    70% {
+        scale: 1.0035 0.965;
+    }
+
+    86% {
+        scale: 0.9985 1.015;
+    }
+
+    to {
+        scale: 1;
+    }
+}
+
+@keyframes km-morph-react {
+    3% {
+        translate: 0;
+        animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+    }
+
+    25% {
+        translate: 0 calc((1 - var(--km-morph-peak, 1)) * 0.8
+            * var(--km-morph-tall, 0px));
+    }
+
+    41% {
+        translate: 0 calc(0.056 * var(--km-morph-tall, 0px));
+    }
+
+    57% {
+        translate: 0 calc(-0.056 * var(--km-morph-tall, 0px));
+    }
+
+    73% {
+        translate: 0 calc(0.028 * var(--km-morph-tall, 0px));
+    }
+
+    89% {
+        translate: 0 calc(-0.012 * var(--km-morph-tall, 0px));
+    }
+}
+
 @keyframes km-morph-recede {
     to {
         scale: 0.96;
-    }
-}
-
-@keyframes km-morph-show {
-    from {
-        opacity: 0;
-    }
-}
-
-@keyframes km-morph-rise {
-    from {
-        transform: translateY(min(var(--km-title-rise), var(--km-title-reach)));
-    }
-}
-
-@keyframes km-morph-vanish {
-    to {
-        transform: scale(0);
     }
 }
 
@@ -80,9 +121,7 @@ its content can be pictured. A page reached from the history
         visibility: hidden;
     }
 
-    :root[data-km-morph] :is(.km-page > .km-banner,
-        .km-breadcrumbs:not(.km-breadcrumbs--empty),
-        #km-content > section > h1) {
+    :root[data-km-morph] :is(.km-page__stamp, #km-content > section > h1) {
         opacity: 1;
         visibility: visible;
     }
@@ -90,10 +129,6 @@ its content can be pictured. A page reached from the history
     .km-related__card--picked .km-related__title {
         font-weight: var(--km-weight-h1);
         --km-tracking: var(--km-tracking-h1);
-    }
-
-    .km-related__card--picked .km-related__meta {
-        view-transition-name: km-morph-meta;
     }
 
     :root[data-km-morph] .km-header {
@@ -104,63 +139,56 @@ its content can be pictured. A page reached from the history
         view-transition-name: none;
     }
 
-    ::view-transition-image-pair(km-morph-banner),
-    ::view-transition-image-pair(km-morph-title) {
-        animation: km-morph-lift var(--km-motion-morph) var(--km-ease-smooth)
+    ::view-transition-image-pair(km-morph-banner) {
+        animation: km-morph-lift var(--km-motion-morph) var(--km-ease-lift)
             both;
     }
 
+    ::view-transition-image-pair(km-morph-title) {
+        transform-origin: 0 100%;
+        animation: km-morph-bounce var(--km-motion-morph)
+            var(--km-ease-morph-turn) both;
+    }
+
     ::view-transition-group(km-morph-banner),
+    ::view-transition-group(km-morph-stamp),
     ::view-transition-group(km-morph-title) {
         transform-origin: 0 0;
-        animation-duration: var(--km-motion-morph);
-        animation-timing-function: var(--km-ease-morph);
+        animation-duration: var(--km-motion-morph-glide);
+        animation-timing-function: var(--km-ease-morph-glide);
     }
 
     ::view-transition-group(km-morph-banner) {
         animation-name: var(--km-morph-banner-fly, none);
     }
 
+    ::view-transition-group(km-morph-stamp) {
+        animation-name: var(--km-morph-stamp-fly, none), km-morph-react;
+        animation-duration: var(--km-motion-morph-glide),
+            var(--km-motion-morph);
+        animation-timing-function: var(--km-ease-morph-glide),
+            var(--km-ease-morph-turn);
+    }
+
     ::view-transition-group(km-morph-title) {
         animation-name: var(--km-morph-title-fly, none);
     }
 
-    ::view-transition-image-pair(km-morph-banner) {
-        isolation: isolate;
-    }
-
-    :root[data-km-morph]::view-transition-group(root),
-    ::view-transition-group(km-morph-crumbs),
-    ::view-transition-group(km-morph-meta) {
+    :root[data-km-morph]::view-transition-group(root) {
         z-index: -1;
     }
 
-    ::view-transition-new(km-morph-crumbs) {
-        animation:
-            km-morph-show var(--km-motion-morph) var(--km-ease-smooth) both,
-            km-morph-rise var(--km-motion-morph) var(--km-ease-smooth) both;
+    ::view-transition-old(km-morph-banner) {
+        animation: km-nav-fade var(--km-motion-morph-glide)
+            var(--km-ease-morph-glide) both;
     }
 
-    ::view-transition-old(km-morph-banner),
-    ::view-transition-new(km-morph-banner) {
-        mix-blend-mode: plus-lighter;
-    }
-
-    ::view-transition-old(km-morph-banner),
-    ::view-transition-old(km-morph-meta) {
-        animation: km-nav-fade calc(var(--km-motion-morph) * 0.3)
-            var(--km-ease-smooth) both;
-    }
-
-    ::view-transition-new(km-morph-banner) {
-        animation: km-morph-show calc(var(--km-motion-morph) * 0.3)
-            var(--km-ease-smooth) both;
-    }
-
-    ::view-transition-old(km-morph-banner):only-child {
-        animation:
-            km-nav-fade var(--km-motion-morph) var(--km-ease-smooth) both,
-            km-morph-vanish var(--km-motion-morph) var(--km-ease-smooth) both;
+    ::view-transition-old(km-morph-stamp),
+    ::view-transition-new(km-morph-stamp) {
+        inline-size: auto;
+        block-size: auto;
+        mix-blend-mode: normal;
+        animation: none;
     }
 
     ::view-transition-old(km-morph-title),
@@ -177,12 +205,14 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-new(km-morph-title) {
         inline-size: var(--km-morph-to);
-        animation: km-morph-shrink var(--km-motion-morph) var(--km-ease-morph)
-            both;
+        animation: km-morph-shrink var(--km-motion-morph-glide)
+            var(--km-ease-morph-glide) both;
     }
 
     :root[data-km-morph="arrive"]::view-transition-new(km-morph-title),
-    :root[data-km-morph="fly"]::view-transition-old(km-morph-title) {
+    :root[data-km-morph="fly"]::view-transition-old(km-morph-title),
+    :root[data-km-morph="arrive"]::view-transition-new(km-morph-stamp),
+    :root[data-km-morph="fly"]::view-transition-old(km-morph-stamp) {
         opacity: 0;
     }
 

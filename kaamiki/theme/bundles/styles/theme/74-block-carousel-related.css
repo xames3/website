@@ -175,7 +175,8 @@
     border-radius: var(--km-radius-tiny);
 }
 
-.km-related__meta {
+.km-related__meta,
+.km-page__stamp {
     display: flex;
     flex-wrap: wrap;
     align-items: center;

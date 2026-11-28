@@ -4,7 +4,7 @@ Animations Script
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 17 October 2026
-Last updated on: 23 November 2026
+Last updated on: 27 November 2026
 */
 
 (() => {
@@ -86,8 +86,9 @@ Last updated on: 23 November 2026
     ];
     const TITLE_HEADING = '#km-content > section > h1';
     const TITLE_ORDER = [
-        '.km-header, .km-page > .km-banner',
+        '.km-header',
         '.km-breadcrumbs',
+        '.km-page__stamp',
         'h1',
         '.km-text--lead',
         '.km-byline',
@@ -101,6 +102,14 @@ Last updated on: 23 November 2026
         }, {
             opacity: 1,
             filter: 'blur(0)',
+            transform: 'translateY(0)',
+        }],
+        rise: [{
+            opacity: 0,
+            transform:
+                'translateY(min(var(--km-title-rise), var(--km-title-reach)))',
+        }, {
+            opacity: 1,
             transform: 'translateY(0)',
         }],
         block: [{

@@ -12,8 +12,8 @@
 }
 
 @media screen and (prefers-reduced-motion: no-preference) {
-    .km-document--loading :is(.km-banner,
-        .km-breadcrumbs,
+    .km-document--loading :is(.km-breadcrumbs,
+        .km-page__stamp,
         .km-page__content,
         .km-feedback-section,
         .km-page__updated,
@@ -71,7 +71,6 @@
 .km-layout__content {
     container-type: inline-size;
     position: relative;
-    margin-top: var(--km-space-12);
 }
 
 .km-page {
