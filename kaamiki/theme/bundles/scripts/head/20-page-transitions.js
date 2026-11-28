@@ -84,7 +84,7 @@
 
     function handover() {
         const bounce = document.getAnimations().find(
-            (animation) => animation.animationName === 'km-morph-bounce'
+            (animation) => animation.animationName === 'km-body-full'
         );
         if (!bounce) return;
         const { endTime } = bounce.effect.getComputedTiming();
@@ -126,6 +126,7 @@
     function arrive(change) {
         const to = parts(document, 1);
         const tokens = {};
+        const body = {};
         const frames = {};
         named(to, true);
         if (to.title) {
@@ -140,8 +141,8 @@
                 morph.left}px, ${morph.top}px) }`;
             tokens.from = `${morph.width}px`;
             tokens.to = `${end.width}px`;
-            tokens.tall = `${end.height}px`;
-            tokens.peak = `${PEAK_HEIGHT
+            body.height = `${end.height}px`;
+            body.peak = `${PEAK_HEIGHT
                 / (start + (1 - start) * glided(PEAK_IN_GLIDE))}`;
             tokens['title-fly'] = 'km-morph-fly-title';
         }
@@ -164,9 +165,16 @@
             root.style.setProperty(`--km-morph-${token}`, value);
         });
         const sheet = document.createElement('style');
-        sheet.textContent = Object.entries(frames).map(
-            ([name, steps]) => `@keyframes ${name} { ${steps} }`
-        ).join('\n');
+        sheet.textContent = [
+            ...Object.entries(frames).map(
+                ([name, steps]) => `@keyframes ${name} { ${steps} }`
+            ),
+            `::view-transition-group(${MORPH}-title), `
+                + `::view-transition-group(${MORPH}-stamp) { ${
+                    Object.entries(body).map(([token, value]) => (
+                        `--km-body-${token}: ${value};`
+                    )).join(' ')} }`,
+        ].join('\n');
         document.head.append(sheet);
         const fly = () => {
             if (root.getAttribute('data-km-morph') !== 'arrive') return;

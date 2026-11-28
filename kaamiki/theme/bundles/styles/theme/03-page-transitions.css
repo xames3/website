@@ -46,65 +46,6 @@ its content can be pictured. A page reached from the history
     }
 }
 
-@keyframes km-morph-bounce {
-    from {
-        scale: 1;
-        animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
-    }
-
-    22% {
-        scale: 0.99 var(--km-morph-peak, 1.25);
-    }
-
-    38% {
-        scale: 1.01 0.93;
-    }
-
-    54% {
-        scale: 0.993 1.07;
-    }
-
-    70% {
-        scale: 1.0035 0.965;
-    }
-
-    86% {
-        scale: 0.9985 1.015;
-    }
-
-    to {
-        scale: 1;
-    }
-}
-
-@keyframes km-morph-react {
-    3% {
-        translate: 0;
-        animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
-    }
-
-    25% {
-        translate: 0 calc((1 - var(--km-morph-peak, 1)) * 0.8
-            * var(--km-morph-tall, 0px));
-    }
-
-    41% {
-        translate: 0 calc(0.056 * var(--km-morph-tall, 0px));
-    }
-
-    57% {
-        translate: 0 calc(-0.056 * var(--km-morph-tall, 0px));
-    }
-
-    73% {
-        translate: 0 calc(0.028 * var(--km-morph-tall, 0px));
-    }
-
-    89% {
-        translate: 0 calc(-0.012 * var(--km-morph-tall, 0px));
-    }
-}
-
 @keyframes km-morph-recede {
     to {
         scale: 0.96;
@@ -146,8 +87,7 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-image-pair(km-morph-title) {
         transform-origin: 0 100%;
-        animation: km-morph-bounce var(--km-motion-morph)
-            var(--km-ease-morph-turn) both;
+        animation: km-body-full var(--km-motion-morph) both;
     }
 
     ::view-transition-group(km-morph-banner),
@@ -163,11 +103,9 @@ its content can be pictured. A page reached from the history
     }
 
     ::view-transition-group(km-morph-stamp) {
-        animation-name: var(--km-morph-stamp-fly, none), km-morph-react;
+        animation-name: var(--km-morph-stamp-fly, none), km-body-react;
         animation-duration: var(--km-motion-morph-glide),
             var(--km-motion-morph);
-        animation-timing-function: var(--km-ease-morph-glide),
-            var(--km-ease-morph-turn);
     }
 
     ::view-transition-group(km-morph-title) {

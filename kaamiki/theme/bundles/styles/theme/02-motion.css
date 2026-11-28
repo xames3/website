@@ -30,7 +30,6 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
     --km-motion-rise-small: 0.375rem;
     --km-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
     --km-ease-morph-glide: cubic-bezier(0.2, 0.8, 0.3, 1);
-    --km-ease-morph-turn: cubic-bezier(0.37, 0, 0.63, 1);
     --km-ease-lift: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -58,6 +57,75 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
         --km-motion-stagger: 0.01ms;
         --km-motion-swap: 0.01ms;
         --km-motion-morph: 0.01ms;
+    }
+}
+
+@keyframes km-body-full {
+    from {
+        scale: 1;
+        animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+    }
+
+    22% {
+        scale: 0.99 var(--km-body-peak, 1.25);
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    38% {
+        scale: 1.01 0.93;
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    54% {
+        scale: 0.993 1.07;
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    70% {
+        scale: 1.0035 0.965;
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    86% {
+        scale: 0.9985 1.015;
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    to {
+        scale: 1;
+    }
+}
+
+@keyframes km-body-react {
+    3% {
+        translate: 0;
+        animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+    }
+
+    25% {
+        translate: 0 calc((1 - var(--km-body-peak, 1.25)) * 0.8
+            * var(--km-body-height, 0px));
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    41% {
+        translate: 0 calc(0.056 * var(--km-body-height, 0px));
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    57% {
+        translate: 0 calc(-0.056 * var(--km-body-height, 0px));
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    73% {
+        translate: 0 calc(0.028 * var(--km-body-height, 0px));
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    }
+
+    89% {
+        translate: 0 calc(-0.012 * var(--km-body-height, 0px));
+        animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
     }
 }
 
