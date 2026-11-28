@@ -25,6 +25,8 @@
     const HOLD_MS = 600;
     const STEADY_MS = 20;
     const STEADY_FRAMES = 3;
+    const PEAK_HEIGHT = 1.15;
+    const PEAK_IN_GLIDE = 22 / 38;
     let started = false;
     document.addEventListener('DOMContentLoaded', () => {
         started = true;
@@ -67,6 +69,17 @@
         };
     }
 
+    function glided(at) {
+        const effect = new KeyframeEffect(null, null, {
+            duration: 1,
+            fill: 'both',
+            easing: getComputedStyle(root)
+                .getPropertyValue('--km-ease-morph-glide').trim(),
+        });
+        new Animation(effect).currentTime = at;
+        return effect.getComputedTiming().progress;
+    }
+
     function corner(node) {
         const { left, top } = node.getBoundingClientRect();
         return { left, top };
@@ -102,14 +115,17 @@
         if (to.title) {
             const end = letters(to.title);
             const grow = end.size / morph.size;
+            const start = 1 / grow;
             const shift = (a, b, scale) => `translate(${a.x - b.x * scale}px, `
                 + `${a.y - b.y * scale}px) scale(${scale})`;
             frames['km-morph-shrink'] = `from { transform: ${
-                shift(morph, end, 1 / grow)} }`;
+                shift(morph, end, start)} }`;
             frames['km-morph-fly-title'] = `from { transform: translate(${
                 morph.left}px, ${morph.top}px) }`;
             tokens.from = `${morph.width}px`;
             tokens.to = `${end.width}px`;
+            tokens.peak = `${PEAK_HEIGHT
+                / (start + (1 - start) * glided(PEAK_IN_GLIDE))}`;
             tokens['title-fly'] = 'km-morph-fly-title';
         }
         if (to.stamp && morph.stamp) {

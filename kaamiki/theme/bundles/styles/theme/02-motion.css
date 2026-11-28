@@ -21,6 +21,7 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
     --km-motion-ambient: calc(1600ms / var(--km-motion-speed));
     --km-motion-swap: calc(600ms / var(--km-motion-speed));
     --km-motion-morph: calc(1200ms / var(--km-motion-speed));
+    --km-motion-morph-glide: calc(var(--km-motion-morph) * 0.38);
     --km-motion-sweep: calc(1900ms / var(--km-motion-speed));
     --km-motion-ticker: calc(2000ms / var(--km-motion-speed));
     --km-motion-typewrite-key: calc(120ms / var(--km-motion-speed));
@@ -28,7 +29,8 @@ make_motion_css.mjs from core/32-spring.js; change the maths there, not here.
     --km-motion-rise: 0.75rem;
     --km-motion-rise-small: 0.375rem;
     --km-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-    --km-ease-morph: cubic-bezier(0.36, 1.04, 0.05, 1.045);
+    --km-ease-morph-glide: cubic-bezier(0.2, 0.8, 0.3, 1);
+    --km-ease-morph-turn: cubic-bezier(0.37, 0, 0.63, 1);
     --km-ease-lift: cubic-bezier(0.22, 1, 0.36, 1);
 }
 

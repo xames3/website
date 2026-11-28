@@ -46,6 +46,37 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-bounce {
+    from {
+        scale: 1;
+        animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+    }
+
+    22% {
+        scale: 0.99 var(--km-morph-peak, 1.25);
+    }
+
+    38% {
+        scale: 1.01 0.93;
+    }
+
+    54% {
+        scale: 0.993 1.07;
+    }
+
+    70% {
+        scale: 1.0035 0.965;
+    }
+
+    86% {
+        scale: 0.9985 1.015;
+    }
+
+    to {
+        scale: 1;
+    }
+}
+
 @keyframes km-morph-recede {
     to {
         scale: 0.96;
@@ -80,18 +111,23 @@ its content can be pictured. A page reached from the history
         view-transition-name: none;
     }
 
-    ::view-transition-image-pair(km-morph-banner),
-    ::view-transition-image-pair(km-morph-title) {
+    ::view-transition-image-pair(km-morph-banner) {
         animation: km-morph-lift var(--km-motion-morph) var(--km-ease-lift)
             both;
+    }
+
+    ::view-transition-image-pair(km-morph-title) {
+        transform-origin: 0 100%;
+        animation: km-morph-bounce var(--km-motion-morph)
+            var(--km-ease-morph-turn) both;
     }
 
     ::view-transition-group(km-morph-banner),
     ::view-transition-group(km-morph-stamp),
     ::view-transition-group(km-morph-title) {
         transform-origin: 0 0;
-        animation-duration: var(--km-motion-morph);
-        animation-timing-function: var(--km-ease-morph);
+        animation-duration: var(--km-motion-morph-glide);
+        animation-timing-function: var(--km-ease-morph-glide);
     }
 
     ::view-transition-group(km-morph-banner) {
@@ -111,8 +147,8 @@ its content can be pictured. A page reached from the history
     }
 
     ::view-transition-old(km-morph-banner) {
-        animation: km-nav-fade var(--km-motion-morph) var(--km-ease-morph)
-            both;
+        animation: km-nav-fade var(--km-motion-morph-glide)
+            var(--km-ease-morph-glide) both;
     }
 
     ::view-transition-old(km-morph-stamp),
@@ -137,8 +173,8 @@ its content can be pictured. A page reached from the history
 
     ::view-transition-new(km-morph-title) {
         inline-size: var(--km-morph-to);
-        animation: km-morph-shrink var(--km-motion-morph) var(--km-ease-morph)
-            both;
+        animation: km-morph-shrink var(--km-motion-morph-glide)
+            var(--km-ease-morph-glide) both;
     }
 
     :root[data-km-morph="arrive"]::view-transition-new(km-morph-title),
