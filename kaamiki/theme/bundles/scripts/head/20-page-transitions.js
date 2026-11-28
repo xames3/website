@@ -64,6 +64,7 @@
             left: box.left,
             top: box.top,
             width: box.width,
+            height: box.height,
             x: text.left - box.left,
             y: text.top - box.top,
         };
@@ -124,6 +125,7 @@
                 morph.left}px, ${morph.top}px) }`;
             tokens.from = `${morph.width}px`;
             tokens.to = `${end.width}px`;
+            tokens.tall = `${end.height}px`;
             tokens.peak = `${PEAK_HEIGHT
                 / (start + (1 - start) * glided(PEAK_IN_GLIDE))}`;
             tokens['title-fly'] = 'km-morph-fly-title';

@@ -77,6 +77,34 @@ its content can be pictured. A page reached from the history
     }
 }
 
+@keyframes km-morph-react {
+    3% {
+        translate: 0;
+        animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+    }
+
+    25% {
+        translate: 0 calc((1 - var(--km-morph-peak, 1)) * 0.8
+            * var(--km-morph-tall, 0px));
+    }
+
+    41% {
+        translate: 0 calc(0.056 * var(--km-morph-tall, 0px));
+    }
+
+    57% {
+        translate: 0 calc(-0.056 * var(--km-morph-tall, 0px));
+    }
+
+    73% {
+        translate: 0 calc(0.028 * var(--km-morph-tall, 0px));
+    }
+
+    89% {
+        translate: 0 calc(-0.012 * var(--km-morph-tall, 0px));
+    }
+}
+
 @keyframes km-morph-recede {
     to {
         scale: 0.96;
@@ -135,7 +163,11 @@ its content can be pictured. A page reached from the history
     }
 
     ::view-transition-group(km-morph-stamp) {
-        animation-name: var(--km-morph-stamp-fly, none);
+        animation-name: var(--km-morph-stamp-fly, none), km-morph-react;
+        animation-duration: var(--km-motion-morph-glide),
+            var(--km-motion-morph);
+        animation-timing-function: var(--km-ease-morph-glide),
+            var(--km-ease-morph-turn);
     }
 
     ::view-transition-group(km-morph-title) {
