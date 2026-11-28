@@ -1,6 +1,6 @@
 .. Author: Akshay Mestry <xa@mes3.dev>
 .. Created on: 19 October 2026
-.. Last updated on: 27 November 2026
+.. Last updated on: 28 November 2026
 
 :km-page-title: The byline directive
 :km-page-description: Show who wrote a page, how long it takes to read, a
@@ -116,14 +116,14 @@ The shades are ``blue``, ``indigo``, ``purple``, ``red``, ``orange``,
 ``yellow``, ``green``, ``teal`` and ``graphite``. Pages in one part of the site
 can share a shade, and any page can pick its own.
 
-There are five swirls, ``1`` to ``5``. Without ``:swirl:``, the name of the
+There are four swirls, ``1`` to ``4``. Without ``:swirl:``, the name of the
 page picks one, so a page keeps its swirl from one build to the next:
 
 .. code-block:: rst
 
     .. byline:: @xames3
         :shade: teal
-        :swirl: 3
+        :swirl: 2
 
 ``:banner:`` shows a picture of yours in place of the swirl. It's a full
 address or a file in your docs, which counts from the page, or from the source
@@ -212,7 +212,7 @@ Every option.
             ``red``, ``orange``, ``yellow``, ``green``, ``teal`` or
             ``graphite``. Defaults to ``blue``.
         * - ``:swirl:``
-          - The shape of the swirl, from ``1`` to ``5``. Defaults to one that
+          - The shape of the swirl, from ``1`` to ``4``. Defaults to one that
             the name of the page picks, the same in each build.
         * - ``:fa-icon:``
           - The icon in the swirl, written and checked as on a

@@ -22,12 +22,11 @@
     }
 
     const MORPH = 'km-morph';
+    const { body } = window.Kaamiki;
     const HOLD_MS = 600;
     const STEADY_MS = 20;
     const STEADY_FRAMES = 3;
-    const PEAK_HEIGHT = 1.15;
     const PEAK_IN_GLIDE = 22 / 38;
-    const HANDOVER = 0.7;
     let started = false;
     document.addEventListener('DOMContentLoaded', () => {
         started = true;
@@ -71,29 +70,11 @@
         };
     }
 
-    function glided(at) {
-        const effect = new KeyframeEffect(null, null, {
-            duration: 1,
-            fill: 'both',
-            easing: getComputedStyle(root)
-                .getPropertyValue('--km-ease-morph-glide').trim(),
-        });
-        new Animation(effect).currentTime = at;
-        return effect.getComputedTiming().progress;
-    }
-
     function handover() {
         const bounce = document.getAnimations().find(
-            (animation) => animation.animationName === 'km-morph-bounce'
+            (animation) => animation.animationName === 'km-body-full'
         );
-        if (!bounce) return;
-        const { endTime } = bounce.effect.getComputedTiming();
-        const mark = new Animation(
-            new KeyframeEffect(null, null, endTime * HANDOVER),
-        );
-        mark.currentTime = bounce.currentTime ?? 0;
-        mark.play();
-        mark.finished.then(release, () => {});
+        if (bounce) body.handover(bounce).then(release, () => {});
     }
 
     function corner(node) {
@@ -126,6 +107,7 @@
     function arrive(change) {
         const to = parts(document, 1);
         const tokens = {};
+        const shape = {};
         const frames = {};
         named(to, true);
         if (to.title) {
@@ -140,9 +122,12 @@
                 morph.left}px, ${morph.top}px) }`;
             tokens.from = `${morph.width}px`;
             tokens.to = `${end.width}px`;
-            tokens.tall = `${end.height}px`;
-            tokens.peak = `${PEAK_HEIGHT
-                / (start + (1 - start) * glided(PEAK_IN_GLIDE))}`;
+            shape.height = `${end.height}px`;
+            shape.peak = `${body.peak(start, body.glided(
+                getComputedStyle(root)
+                    .getPropertyValue('--km-ease-morph-glide').trim(),
+                PEAK_IN_GLIDE,
+            ))}`;
             tokens['title-fly'] = 'km-morph-fly-title';
         }
         if (to.stamp && morph.stamp) {
@@ -164,9 +149,16 @@
             root.style.setProperty(`--km-morph-${token}`, value);
         });
         const sheet = document.createElement('style');
-        sheet.textContent = Object.entries(frames).map(
-            ([name, steps]) => `@keyframes ${name} { ${steps} }`
-        ).join('\n');
+        sheet.textContent = [
+            ...Object.entries(frames).map(
+                ([name, steps]) => `@keyframes ${name} { ${steps} }`
+            ),
+            `::view-transition-group(${MORPH}-title), `
+                + `::view-transition-group(${MORPH}-stamp) { ${
+                    Object.entries(shape).map(([token, value]) => (
+                        `--km-body-${token}: ${value};`
+                    )).join(' ')} }`,
+        ].join('\n');
         document.head.append(sheet);
         const fly = () => {
             if (root.getAttribute('data-km-morph') !== 'arrive') return;

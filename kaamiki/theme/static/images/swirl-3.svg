@@ -2,31 +2,13 @@
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 1200 630"
     preserveAspectRatio="none">
-    <filter
-        id="a"
-        filterUnits="userSpaceOnUse"
-        x="-400"
-        y="-400"
-        width="2000"
-        height="1430">
+    <filter id="a" x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur stdDeviation="28"/>
     </filter>
-    <filter
-        id="b"
-        filterUnits="userSpaceOnUse"
-        x="-400"
-        y="-400"
-        width="2000"
-        height="1430">
+    <filter id="b" x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur stdDeviation="70"/>
     </filter>
-    <filter
-        id="c"
-        filterUnits="userSpaceOnUse"
-        x="-400"
-        y="-400"
-        width="2000"
-        height="1430">
+    <filter id="c" x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur stdDeviation="130"/>
     </filter>
     <filter
@@ -56,38 +38,18 @@
     </filter>
     <g filter="url(#s)">
         <rect width="1200" height="630"/>
-        <ellipse
-            cx="600"
-            cy="860"
-            rx="920"
-            ry="440"
-            fill="#fff"
-            fill-opacity=".85"
-            filter="url(#b)"/>
-        <ellipse
-            cx="600"
-            cy="860"
-            rx="900"
-            ry="430"
+        <path
             fill="none"
             stroke="#fff"
-            stroke-width="22"
-            filter="url(#a)"/>
-        <ellipse
-            cx="600"
-            cy="960"
-            rx="760"
-            ry="420"
-            fill="#000"
-            fill-opacity=".5"
-            filter="url(#c)"/>
-        <ellipse
-            cx="380"
-            cy="420"
-            rx="420"
-            ry="150"
+            stroke-width="170"
+            stroke-linecap="round"
+            filter="url(#b)"
+            d="M-80 470C250 720 850 660 1040 420C1180 230 960 60 780 210C660
+                310 790 450 920 360"/>
+        <path
             fill="#fff"
-            fill-opacity=".25"
-            filter="url(#c)"/>
+            fill-opacity=".3"
+            filter="url(#c)"
+            d="M-100 730H600C400 600 100 520 -100 520Z"/>
     </g>
 </svg>
