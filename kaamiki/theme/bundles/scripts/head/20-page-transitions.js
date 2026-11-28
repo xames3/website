@@ -27,6 +27,7 @@
     const STEADY_FRAMES = 3;
     const PEAK_HEIGHT = 1.15;
     const PEAK_IN_GLIDE = 22 / 38;
+    const HANDOVER = 0.7;
     let started = false;
     document.addEventListener('DOMContentLoaded', () => {
         started = true;
@@ -79,6 +80,20 @@
         });
         new Animation(effect).currentTime = at;
         return effect.getComputedTiming().progress;
+    }
+
+    function handover() {
+        const bounce = document.getAnimations().find(
+            (animation) => animation.animationName === 'km-morph-bounce'
+        );
+        if (!bounce) return;
+        const { endTime } = bounce.effect.getComputedTiming();
+        const mark = new Animation(
+            new KeyframeEffect(null, null, endTime * HANDOVER),
+        );
+        mark.currentTime = bounce.currentTime ?? 0;
+        mark.play();
+        mark.finished.then(release, () => {});
     }
 
     function corner(node) {
@@ -154,9 +169,9 @@
         ).join('\n');
         document.head.append(sheet);
         const fly = () => {
-            if (root.hasAttribute('data-km-morph')) {
-                root.setAttribute('data-km-morph', 'fly');
-            }
+            if (root.getAttribute('data-km-morph') !== 'arrive') return;
+            root.setAttribute('data-km-morph', 'fly');
+            requestAnimationFrame(handover);
         };
         let last = 0;
         let steady = 0;
