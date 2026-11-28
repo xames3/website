@@ -4,7 +4,7 @@ Byline Directive
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 February 2025
-Last updated on: 27 November 2026
+Last updated on: 28 November 2026
 
 A `byline` directive that draws the byline below the title of a page::
 
@@ -13,7 +13,7 @@ A `byline` directive that draws the byline below the title of a page::
        :target: https://github.com/xames3
        :avatar-size: 24
        :shade: orange
-       :swirl: 3
+       :swirl: 2
 
 Put it on the page itself, one time. An `only` is part of the page. A
 container and the content of a different directive are not.
@@ -113,7 +113,7 @@ class Byline(KaamikiDirective, motion=True):
         - `shade`: The colour of the swirl, one of `blue`,
           `indigo`, `purple`, `red`, `orange`, `yellow`, `green`,
           `teal` or `graphite`. The default is `blue`.
-        - `swirl`: The shape of the swirl, from `1` to `5`. The
+        - `swirl`: The shape of the swirl, from `1` to `4`. The
           default comes from the name of the page, the same in each
           build.
         - `fa-icon`: A Font Awesome icon for the swirl, as on a

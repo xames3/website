@@ -4,7 +4,7 @@ Banner
 
 Author: Akshay Mestry <xa@mes3.dev>
 Created on: 22 November 2026
-Last updated on: 27 November 2026
+Last updated on: 28 November 2026
 
 The banner of a page: a picture, or a swirl in a shade with the icon
 of the page. The byline sets it, and the cards of the related pages
@@ -45,7 +45,8 @@ SHADES: t.Final[tuple[str, ...]] = (
     "graphite",
 )
 SHADE: t.Final[str] = "blue"
-SWIRLS: t.Final[tuple[str, ...]] = ("1", "2", "3", "4", "5")
+SWIRLS: t.Final[tuple[str, ...]] = ("1", "2", "3", "4")
+PICKS: t.Final[int] = len(SWIRLS) + 1
 FOLDER: t.Final[str] = "_images/km-banners"
 SWAP: t.Final[str] = "fa-swap-opacity"
 
@@ -110,7 +111,8 @@ def swirl(docname: str) -> str:
     :param docname: The page.
     :return: One of `SWIRLS`, the same for the page in each build.
     """
-    return SWIRLS[zlib.crc32(docname.encode()) % len(SWIRLS)]
+    turn, pick = divmod(zlib.crc32(docname.encode()), PICKS)
+    return SWIRLS[pick - 1 if pick else turn % len(SWIRLS)]
 
 
 def source(env: BuildEnvironment, written: str) -> str:
